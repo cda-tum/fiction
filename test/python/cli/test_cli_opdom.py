@@ -23,7 +23,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.fiction.cli.stores import CellEntry
-from mnt.pyfiction.sidb import lattice_site, sidb_layout
+from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -48,7 +49,10 @@ SMALL_SWEEP = [
 """A four-point grid for bounded integration tests."""
 
 
-def test_opdom_entry_point_csv(resource: Callable[[str], str], tmp_path: Path) -> None:
+@pytest.mark.parametrize("quiet", [False, True])
+def test_opdom_entry_point_csv(
+    resource: Callable[[str], str], tmp_path: Path, capsys: pytest.CaptureFixture[str], *, quiet: bool
+) -> None:
     """The dedicated command writes the same four-point domain as the shell."""
     main = importlib.import_module("mnt.fiction.opdom").main
     csv = tmp_path / "domain.csv"
@@ -62,6 +66,7 @@ def test_opdom_entry_point_csv(resource: Callable[[str], str], tmp_path: Path) -
             str(csv),
             "--log",
             str(log),
+            *(["--quiet"] if quiet else []),
             *SMALL_SWEEP,
         ])
         == 0
@@ -70,6 +75,9 @@ def test_opdom_entry_point_csv(resource: Callable[[str], str], tmp_path: Path) -
     result = json.loads(log.read_text(encoding="utf-8"))[0]["result"]
     assert result["num_evaluated_parameter_combinations"] == 4
     assert result["num_simulator_invocations"] > 0
+    output = capsys.readouterr().out
+    assert "Simulator calls" in output
+    assert ("wrote" in output) is not quiet
 
 
 def test_opdom_explicit_specification_overrides_active_table(xor_gate: Shell, tmp_path: Path) -> None:
@@ -85,6 +93,10 @@ def test_opdom_explicit_specification_overrides_active_table(xor_gate: Shell, tm
     [
         "--threads 0",
         "--timeout-ms -1",
+        "--timeout-ms 18446744073709551616",
+        "--x-min 0",
+        "--expression c",
+        "--show",
         "--bdl-pair-min 2 --bdl-pair-max 1",
         "--sketch --condition tolerate_kinks",
         "--sketch --strategy simulation_only",
@@ -96,21 +108,22 @@ def test_opdom_explicit_specification_overrides_active_table(xor_gate: Shell, tm
 def test_opdom_preflight_rejects_invalid_configuration(xor_gate: Shell, tmp_path: Path, options: str) -> None:
     """Invalid domain parameters and port mismatches create no output."""
     path = tmp_path / "domain.csv"
-    xor_gate.fails(f'opdom "{path}" {options} ' + " ".join(SMALL_SWEEP))
+    xor_gate.fails(f'opdom "{path}" ' + " ".join(SMALL_SWEEP) + f" {options}")
     assert not path.exists()
 
 
-def test_opdom_reports_native_parameters(xor_gate: Shell, tmp_path: Path) -> None:
+@pytest.mark.parametrize("timeout", [10000, 2**32, 2**64 - 1])
+def test_opdom_reports_native_parameters(xor_gate: Shell, tmp_path: Path, timeout: int) -> None:
     """Advanced options reach native parameters and are recorded in the log."""
     xor_gate.ok(
-        f'opdom "{tmp_path / "domain.csv"}" --threads 1 --timeout-ms 10000 '
+        f'opdom "{tmp_path / "domain.csv"}" --threads 1 --timeout-ms {timeout} '
         "--condition reject_kinks --strategy filter_then_simulation --input-encoding absence "
         "--bdl-pair-min 0.7 --bdl-pair-max 1.6 --bdl-wire-distance 2.1 " + " ".join(SMALL_SWEEP)
     )
     result = xor_gate.session.log[-1]["result"]
     assert result["threads"] == 1
     operational = result["operational_parameters"]
-    assert operational["timeout"] == 10000
+    assert operational["timeout"] == timeout
     assert operational["op_condition"] == "REJECT_KINKS"
     assert operational["strategy_to_analyze_operational_status"] == "FILTER_THEN_SIMULATION"
     inputs = operational["input_bdl_iterator_params"]
@@ -118,6 +131,40 @@ def test_opdom_reports_native_parameters(xor_gate: Shell, tmp_path: Path) -> Non
     assert inputs["bdl_wire_params"]["threshold_bdl_interdistance"] == 2.1
     assert inputs["bdl_wire_params"]["bdl_pairs_params"]["minimum_distance"] == 0.7
     assert "Simulator calls" in xor_gate.output
+
+
+@pytest.mark.parametrize("case", ["sketch_canvas", "charged_defect", "missing_ports"])
+def test_layout_prerequisites(xor_gate: Shell, tmp_path: Path, case: str) -> None:
+    """Unsupported layout features fail before producing an output."""
+    layout = xor_gate.session.cell_layouts.current().layout
+    assert isinstance(layout, sidb_layout)
+    if case == "sketch_canvas":
+        for site in layout.dots_with_tag(sidb_dot_tag.LOGIC):
+            layout.assign_sidb(site, sidb_dot_tag.NORMAL)
+        flags, message = "--sketch", "LOGIC dots"
+    elif case == "charged_defect":
+        layout.assign_defect(lattice_site(100, 100, 0), sidb_defect(sidb_defect_type.SI_VACANCY, -1))
+        flags, message = "--engine quicksim", "charged defects"
+    else:
+        layout = sidb_layout()
+        layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+        xor_gate.session.cell_layouts.add(CellEntry(layout))
+        flags, message = "", "BDL input and output ports"
+    path = tmp_path / "domain.csv"
+    assert message in xor_gate.fails(f'opdom "{path}" {flags} ' + " ".join(SMALL_SWEEP))
+    assert not path.exists()
+
+
+def test_too_many_bdl_inputs(shell: Shell, wire_with_canvas: sidb_layout, tmp_path: Path) -> None:
+    """Input counts beyond the native mask width fail before allocating truth tables."""
+    layout = sidb_layout()
+    for offset in range(0, 6400, 100):
+        for site in wire_with_canvas.sidbs():
+            layout.assign_sidb(lattice_site(site.x + offset, site.y, site.z), wire_with_canvas.get_dot_tag(site))
+    shell.session.cell_layouts.add(CellEntry(layout))
+    path = tmp_path / "domain.csv"
+    assert "at most 63" in shell.fails(f'opdom "{path}" --gate id')
+    assert not path.exists()
 
 
 def test_without_plot_extra(resource: Callable[[str], str], tmp_path: Path) -> None:
@@ -225,11 +272,12 @@ def test_installed_console_command(resource: Callable[[str], str], tmp_path: Pat
 
     executable = shutil.which("fiction-opdom", path=sysconfig.get_path("scripts"))
     assert executable is not None
-    help_result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- test executables run without a shell
-        [executable, "--help"], capture_output=True, text=True, check=False
-    )
-    assert help_result.returncode == 0, help_result.stderr
-    assert "--plot" in help_result.stdout
+    for command in ([executable], [sys.executable, "-m", "mnt.fiction.opdom"]):
+        help_result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- test executables run without a shell
+            [*command, "--help"], capture_output=True, text=True, check=False
+        )
+        assert help_result.returncode == 0, help_result.stderr
+        assert "--plot" in help_result.stdout
     csv = tmp_path / "installed.csv"
     result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- test executables run without a shell
         [executable, resource("hex_21_inputsdbp_xor_v1.sqd"), "--gate", "xor", "--csv", str(csv), *SMALL_SWEEP],

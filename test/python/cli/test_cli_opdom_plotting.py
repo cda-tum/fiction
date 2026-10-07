@@ -208,3 +208,43 @@ def test_plot_preflight_errors(xor_gate: Shell, tmp_path: Path, flags: str) -> N
     path = tmp_path / "domain.csv"
     xor_gate.fails(f'opdom "{path}" {flags} --x-min 5.6 --x-max 5.6 --y-min 5 --y-max 5')
     assert not path.exists()
+
+
+@pytest.mark.parametrize("kind", ["directory", "missing_parent", "dangling_link"])
+def test_invalid_plot_destinations(xor_gate: Shell, tmp_path: Path, kind: str) -> None:
+    """Invalid destinations leave the computation's CSV unwritten."""
+    plot = tmp_path / "invalid.png"
+    if kind == "directory":
+        plot.mkdir()
+    elif kind == "missing_parent":
+        plot = tmp_path / "missing" / "invalid.png"
+    else:
+        try:
+            plot.symlink_to(tmp_path / "absent.png")
+        except OSError as error:
+            pytest.skip(f"symbolic links are unavailable: {error}")
+    csv = tmp_path / "domain.csv"
+    xor_gate.fails(f'opdom "{csv}" --plot "{plot}" ')
+    assert not csv.exists()
+
+
+def test_show_and_existing_plot_permissions(
+    domain: operational_domain, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Replacing a plot preserves its mode and opens the viewer only on request."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    path = tmp_path / "domain.png"
+    path.write_bytes(b"old plot")
+    mode = path.stat().st_mode
+    shown: list[Path] = []
+
+    def viewer(saved: Path) -> None:
+        assert saved.read_bytes().startswith(b"\x89PNG")
+        shown.append(saved)
+
+    monkeypatch.setattr(plotting, "open_viewer", viewer)
+    plotting.write_plot(domain, path, options())
+    assert not shown
+    plotting.write_plot(domain, path, options("--show"))
+    assert shown == [path]
+    assert path.stat().st_mode == mode

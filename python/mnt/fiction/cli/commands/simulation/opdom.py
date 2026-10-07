@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -150,7 +151,9 @@ def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
     advanced = parser.add_argument_group("operational analysis")
     advanced.add_argument("--threads", type=positive_int, default=defaults.number_of_threads, help="worker threads")
     advanced.add_argument(
-        "--timeout-ms", type=integer, help="complete computation budget in milliseconds; unlimited by default"
+        "--timeout-ms",
+        type=partial(integer, maximum=2**64 - 1),
+        help="complete computation budget in milliseconds; unlimited by default",
     )
     advanced.add_argument(
         "--condition", choices=["tolerate_kinks", "reject_kinks"], help="kink handling; Sketch requires rejection"
@@ -267,9 +270,6 @@ def domain_parameters(
         msg = "QuickSim requires --base 2"
         raise CommandError(msg)
     if args.timeout_ms is not None:
-        if not 0 <= args.timeout_ms <= 2**64 - 1:
-            msg = "--timeout-ms must be between 0 and 18446744073709551615"
-            raise CommandError(msg)
         if args.engine == "clustercomplete" and args.timeout_ms != 2**64 - 1:
             msg = "ClusterComplete does not support a finite timeout"
             raise CommandError(msg)
