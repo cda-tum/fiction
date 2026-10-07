@@ -43,7 +43,8 @@ namespace fiction::verification
 /**
  * @brief Equivalence classification for logic and layout throughput.
  */
-enum class eq_type : uint8_t
+// NOLINTNEXTLINE(performance-enum-size): The public enum uses int in its C++ interface.
+enum class eq_type
 {
     /**
      * `Spec` and `Impl` differ logically, contain required topology defects, or either layout has DRVs.
