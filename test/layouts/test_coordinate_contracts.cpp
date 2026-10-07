@@ -236,7 +236,8 @@ TEST_CASE("Layouts support only the ground and crossing layers", "[coordinate-co
     };
     check_layers([](const auto& size) { return cartesian_layout{size}; });
     check_layers([](const auto& size) { return gate_level_layout<cartesian_layout>{size}; });
-    for (const auto a : {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
+    for (const auto a :
+         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
     {
         check_layers([a](const auto& size) { return hexagonal_layout{a, size}; });
         check_layers([a](const auto& size) { return shifted_cartesian_layout{a, size}; });

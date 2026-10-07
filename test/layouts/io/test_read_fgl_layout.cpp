@@ -2021,10 +2021,9 @@ TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-lay
 TEST_CASE("FGL rejects more than two layers", "[read-fgl-layout]")
 {
     /** Version and z value of an unsupported layer extent. */
-    const auto xml = GENERATE(
-        std::string{R"(<fgl><layout><size><x>0</x><y>0</y><z>2</z></size>
+    const auto xml = GENERATE(std::string{R"(<fgl><layout><size><x>0</x><y>0</y><z>2</z></size>
           <clocking><name>2DDWave</name></clocking></layout></fgl>)"},
-        std::string{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>3</z></size>
+                              std::string{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>3</z></size>
           <clocking><name>2DDWave</name></clocking></layout></fgl>)"});
     /** Target layout that a rejected read preserves. */
     cart_gate_clk_lyt target{{2, 3, 1}, clocking::twoddwave(), "kept"};
