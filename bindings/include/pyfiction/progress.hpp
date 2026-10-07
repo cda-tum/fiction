@@ -56,7 +56,8 @@ int progress_traverse(PyObject* self, visitproc visit, void* arg)
     Py_VISIT(Py_TYPE(self));
     // Borrowed reference_internal views can retain owner cycles through hidden keep_alive records.
     // Collecting those cycles requires a change to nested property ownership.
-    if (!nanobind::inst_ready(self) || !nanobind::inst_state(self).second)
+    const auto [ready, owns_value] = nanobind::inst_state(self);
+    if (!ready || !owns_value)
     {
         return 0;
     }
@@ -101,7 +102,8 @@ int progress_traverse(PyObject* self, visitproc visit, void* arg)
 template <typename Params>
 int progress_clear(PyObject* self)
 {
-    if (nanobind::inst_ready(self) && nanobind::inst_state(self).second)
+    const auto [ready, owns_value] = nanobind::inst_state(self);
+    if (ready && owns_value)
     {
         auto& params = *nanobind::inst_ptr<Params>(nanobind::handle{self});
         if constexpr (requires { params.on_progress; })
