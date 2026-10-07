@@ -1853,13 +1853,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_volume =
-R"doc(Returns:
-    Volume. @throws std::overflow_error If the volume exceeds
-    `uint64_t`.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_cartesian_layout_west =
 R"doc(Returns the west neighbor when both coordinates lie inside the
 geometry.
@@ -4843,13 +4836,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_volume =
-R"doc(Returns:
-    Volume. @throws std::overflow_error If the volume exceeds
-    `uint64_t`.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_west =
 R"doc(Returns the west neighbor when both coordinates lie inside the
 geometry.
@@ -6351,20 +6337,6 @@ Args:
 
 Returns:
     Name of `a`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_volume_of =
-R"doc(Computes width times height times layers with checked multiplication.
-
-Args:
-    size: Axis sizes.
-
-Returns:
-    Volume.
-
-Raises:
-    std::overflow_error: If the volume exceeds `uint64_t`.
 
 )doc";
 
