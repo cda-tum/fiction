@@ -204,7 +204,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
 
     params, parameters = domain_parameters(session, args)
     spec = gate_specification(session, layout, args, params)
-    validate_outputs(args)
+    validate_outputs(args, log_path=session.log_path)
     domain, stats = compute_domain(layout, spec, args, params)
     write_csv(domain, args)
     for path in args.plot:

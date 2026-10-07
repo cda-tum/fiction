@@ -396,7 +396,15 @@ addopts = [
     "--durations=10",
     "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
 ]
-filterwarnings = [ "error" ]
+# matplotlib 3.10 calls pyparsing's deprecated camelCase APIs.
+filterwarnings = [
+    "error",
+    """\
+    ignore:'.*'( argument is)? deprecated( - use|, use) \
+    '.*':DeprecationWarning:matplotlib\\.(_fontconfig_pattern|_mathtext)$\
+    """,
+    "ignore:'parseAll' argument is deprecated, use 'parse_all':DeprecationWarning:pyparsing\\.util$",
+]
 log_level = "INFO"
 markers = [
     "layouts: layout data structures and layout I/O",

@@ -251,3 +251,27 @@ def test_input_is_not_an_output(resource: Callable[[str], str], tmp_path: Path, 
     path.write_bytes(source)
     assert main([str(path), "--gate", "xor", output_flag, str(path), *SMALL_SWEEP]) != 0
     assert path.read_bytes() == source
+
+
+def test_shell_log_is_not_a_plot(xor_gate: Shell, tmp_path: Path) -> None:
+    """The shell rejects plots that would be replaced by its statistics log."""
+    plot = tmp_path / "domain.html"
+    xor_gate.session.log_path = plot
+    csv = tmp_path / "domain.csv"
+    assert "distinct" in xor_gate.fails(f'opdom "{csv}" --plot "{plot}" ' + " ".join(SMALL_SWEEP))
+    assert not csv.exists()
+    assert not plot.exists()
+
+
+def test_input_hard_link_is_not_a_log(resource: Callable[[str], str], tmp_path: Path) -> None:
+    """A log hard link cannot truncate the input SQD file."""
+    main = importlib.import_module("mnt.fiction.opdom").main
+    path = tmp_path / "input.sqd"
+    source = Path(resource("hex_21_inputsdbp_xor_v1.sqd")).read_bytes()
+    path.write_bytes(source)
+    log = tmp_path / "alias.json"
+    log.hardlink_to(path)
+    csv = tmp_path / "domain.csv"
+    assert main([str(path), "--gate", "xor", "--log", str(log), "--csv", str(csv), *SMALL_SWEEP]) != 0
+    assert path.read_bytes() == source
+    assert not csv.exists()

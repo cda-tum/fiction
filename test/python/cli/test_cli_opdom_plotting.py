@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -59,7 +60,7 @@ def test_static_sample_coordinates_and_axes(domain: operational_domain) -> None:
     plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
     figure = plotting.matplotlib_figure(domain, options())
     axis = figure.axes[0]
-    assert "lambda" in axis.get_xlabel().lower() or "lambda" in axis.get_xlabel()
+    assert "lambda" in axis.get_xlabel().lower()
     assert "epsilon" in axis.get_ylabel().lower()
     assert len(axis.collections) == 2
     legend = axis.get_legend()
@@ -133,6 +134,40 @@ def test_opdom_plot_files(xor_gate: Shell, tmp_path: Path, suffix: str) -> None:
     else:
         assert b"Plotly.newPlot" in data
         assert b"<script src=" not in data
+
+
+def test_entry_points_share_results_and_compute_once(
+    xor_gate: Shell, resource: Callable[[str], str], tmp_path: Path
+) -> None:
+    """CSV and several plots share one computation and agree with the shell."""
+    command = importlib.import_module("mnt.fiction.cli.commands.simulation.opdom")
+    main = importlib.import_module("mnt.fiction.opdom").main
+    sweep = ["--x-min", "5.6", "--x-max", "5.7", "--x-step", "0.1", "--y-min", "5", "--y-max", "5"]
+    shell_csv = tmp_path / "shell.csv"
+    xor_gate.ok(f'opdom "{shell_csv}" ' + " ".join(sweep))
+    csv, png, html = (tmp_path / name for name in ("dedicated.csv", "domain.png", "domain.html"))
+    with patch.object(command, "compute_domain", wraps=command.compute_domain) as compute:
+        assert (
+            main([
+                resource("hex_21_inputsdbp_xor_v1.sqd"),
+                "--gate",
+                "xor",
+                "--csv",
+                str(csv),
+                "--plot",
+                str(png),
+                "--plot",
+                str(html),
+                *sweep,
+            ])
+            == 0
+        )
+        assert compute.call_count == 1
+    assert sorted(csv.read_text(encoding="utf-8").splitlines()) == sorted(
+        shell_csv.read_text(encoding="utf-8").splitlines()
+    )
+    assert png.read_bytes().startswith(b"\x89PNG")
+    assert b"Plotly.newPlot" in html.read_bytes()
 
 
 def test_default_png(resource: Callable[[str], str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

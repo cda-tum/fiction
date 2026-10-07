@@ -90,18 +90,17 @@ def validate_outputs(args: argparse.Namespace, *, log_path: Path | None = None) 
     if args.show and not args.plot:
         msg = "--show requires a --plot output"
         raise CommandError(msg)
-    seen: set[Path] = set()
+    seen: list[Path] = []
     paths = ([args.file] if args.file is not None else []) + args.plot + ([log_path] if log_path is not None else [])
     for path in paths:
         _validate_path(path)
-        resolved = path.resolve()
-        if resolved in seen:
+        if any(_same_destination(path, other) for other in seen):
             msg = "output paths must be distinct"
             raise CommandError(msg)
-        if getattr(args, "input", None) is not None and resolved == args.input.resolve():
+        if getattr(args, "input", None) is not None and _same_destination(path, args.input):
             msg = "an output path would overwrite the input SQD file"
             raise CommandError(msg)
-        seen.add(resolved)
+        seen.append(path)
     for path in args.plot:
         if path.suffix.lower() not in {".png", ".svg", ".pdf", ".html"}:
             msg = "plot outputs require .png, .svg, .pdf, or .html"
@@ -114,6 +113,19 @@ def validate_outputs(args: argparse.Namespace, *, log_path: Path | None = None) 
         except ValueError as error:
             msg = f"invalid plot color: {error}"
             raise CommandError(msg) from error
+
+
+def _same_destination(left: Path, right: Path) -> bool:
+    """Compare paths, including symbolic links and existing hard links.
+
+    Args:
+        left: The first path.
+        right: The second path.
+
+    Returns:
+        Whether the paths name the same destination.
+    """
+    return left.resolve() == right.resolve() or (left.exists() and right.exists() and left.samefile(right))
 
 
 def _validate_path(path: Path) -> None:
@@ -278,7 +290,9 @@ def plotly_figure(domain: operational_domain, args: argparse.Namespace) -> Plotl
     figure.update_layout(
         title=_title(args),
         showlegend=not args.no_legend,
-        template="plotly_white",
+        template="none",
+        paper_bgcolor="white",
+        plot_bgcolor="white",
         width=max(10, round(args.width * 96)),
         height=max(10, round(args.height * 96)),
         **({"scene": axes} if dimensions == DIMENSIONS_3D else axes),
