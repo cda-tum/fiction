@@ -1387,6 +1387,27 @@ class gate_level_layout : public CoordinateLayout
     {
         obstruction_state.clear_obstructed_connections();
     }
+
+    /**
+     * Visits manual coordinate obstructions without implicit occupancy.
+     * @tparam Fn Callable accepting one coordinate.
+     * @param fn Callback for each manual obstruction.
+     */
+    template <typename Fn>
+    void foreach_obstructed_coordinate(Fn&& fn) const
+    {
+        obstruction_state.foreach_obstructed_coordinate(std::forward<Fn>(fn));
+    }
+    /**
+     * Visits manual directed-connection obstructions without implicit physical connections.
+     * @tparam Fn Callable accepting source and target coordinates.
+     * @param fn Callback for each manual obstruction.
+     */
+    template <typename Fn>
+    void foreach_obstructed_connection(Fn&& fn) const
+    {
+        obstruction_state.foreach_obstructed_connection(std::forward<Fn>(fn));
+    }
     /**
      * Checks if the given coordinate is obstructed of some sort.
      *

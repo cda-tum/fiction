@@ -12,7 +12,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import LayoutInputPort, arrangement, cartesian_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import (
+    LayoutInputPort,
+    arrangement,
+    cartesian_gate_layout,
+    coordinate,
+    shifted_cartesian_gate_layout,
+)
 from mnt.pyfiction.layouts.io import (
     fgl_parsing_error,
     read_cartesian_fgl_layout,
@@ -106,3 +112,29 @@ def test_fgl_failure_preserves_file(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="acyclic"):
         write_fgl_layout(layout, str(path))
     assert path.read_text(encoding="utf-8") == "sentinel"
+
+
+def test_fgl_preserves_manual_obstructions(tmp_path: Path) -> None:
+    """Preserve signed manual constraints independently of occupied objects."""
+    layout = cartesian_gate_layout((3, 2, 1), "2DDWave", "manual")
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    layout.create_po(wire, "f", (2, 0))
+    positions = [coordinate(1, 0), coordinate(-1, -2, -3), coordinate(7, 8, 9)]
+    for position in positions:
+        layout.obstruct_coordinate(position)
+    layout.obstruct_connection(positions[1], positions[2])
+    path = tmp_path / "manual.fgl"
+    write_fgl_layout(layout, str(path))
+    restored = read_cartesian_fgl_layout(str(path))
+    assert len(restored.obstructed_coordinates()) == len(positions)
+    for position in positions:
+        assert position in restored.obstructed_coordinates()
+    assert restored.obstructed_connections() == [(positions[1], positions[2])]
+    wire_id = restored.find_object((1, 0))
+    assert wire_id is not None
+    restored.remove(wire_id)
+    assert restored.is_obstructed_coordinate((1, 0))
+    restored.clear_obstructed_coordinates()
+    assert not restored.is_obstructed_coordinate((1, 0))
+    assert restored.is_obstructed_coordinate((2, 0))

@@ -402,3 +402,43 @@ TEST_CASE("FGL keeps sparse metadata in a large multilayer extent", "[write-fgl-
     CHECK(restored.get_clock_number({0, 1, 0}) == layout.get_clock_number({0, 1, 0}));
     CHECK(restored.get_synchronization_element({999999999, 999999999, 2}) == 7);
 }
+
+TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy", "[write-fgl-layout]",
+                   cart_gate_clk_lyt, shifted_cart_gate_clk_lyt, hex_gate_clk_lyt)
+{
+    TestType layout = []
+    {
+        if constexpr (is_cartesian_layout_v<TestType>)
+            return TestType{{3, 2, 1}, clocking::twoddwave()};
+        else
+            return TestType{arrangement::EVEN_ROW, {3, 2, 1}, clocking::twoddwave()};
+    }();
+    const auto input = layout.create_pi("a", {0, 0});
+    const auto wire  = layout.create_buf(input, {1, 0});
+    layout.create_po(wire, "f", {2, 0});
+    layout.obstruct_coordinate({1, 0});
+    layout.obstruct_coordinate({1, 1});
+    layout.obstruct_coordinate({-1, -2, -3});
+    layout.obstruct_coordinate({7, 8, 9});
+    layout.obstruct_connection({0, 0}, {1, 0});
+    layout.obstruct_connection({-1, -2, -3}, {7, 8, 9});
+
+    std::stringstream stream{};
+    write_fgl_layout(layout, stream);
+    auto restored = read_fgl_layout<TestType>(stream);
+    CHECK(restored.is_obstructed_coordinate({1, 1}));
+    CHECK(restored.is_obstructed_coordinate({-1, -2, -3}));
+    CHECK(restored.is_obstructed_coordinate({7, 8, 9}));
+    CHECK(restored.is_obstructed_connection({-1, -2, -3}, {7, 8, 9}));
+    CHECK_FALSE(restored.is_obstructed_connection({7, 8, 9}, {-1, -2, -3}));
+
+    restored.remove(*restored.find_object({1, 0}));
+    CHECK(restored.is_obstructed_coordinate({1, 0}));
+    CHECK(restored.is_obstructed_connection({0, 0}, {1, 0}));
+    restored.clear_obstructed_coordinates();
+    restored.clear_obstructed_connections();
+    CHECK_FALSE(restored.is_obstructed_coordinate({1, 0}));
+    CHECK_FALSE(restored.is_obstructed_coordinate({-1, -2, -3}));
+    CHECK_FALSE(restored.is_obstructed_connection({0, 0}, {1, 0}));
+    CHECK(restored.is_obstructed_coordinate({2, 0}));
+}

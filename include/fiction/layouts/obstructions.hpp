@@ -20,6 +20,7 @@
 
 #include <phmap.h>
 
+#include <functional>
 #include <utility>
 
 namespace fiction::layouts
@@ -110,6 +111,27 @@ class obstructions
                                                 const layout_base::coordinate& tgt) const noexcept
     {
         return obstructed_connections.contains({src, tgt});
+    }
+
+    /**
+     * Visits explicitly obstructed coordinates in unspecified order.
+     * @tparam Fn Callable accepting one coordinate.
+     * @param fn Callback for each manual obstruction.
+     */
+    template <typename Fn>
+    void foreach_obstructed_coordinate(Fn&& fn) const
+    {
+        for (const auto& coordinate : obstructed_coordinates) std::invoke(fn, coordinate);
+    }
+    /**
+     * Visits explicitly obstructed directed connections in unspecified order.
+     * @tparam Fn Callable accepting source and target coordinates.
+     * @param fn Callback for each manual obstruction.
+     */
+    template <typename Fn>
+    void foreach_obstructed_connection(Fn&& fn) const
+    {
+        for (const auto& [source, target] : obstructed_connections) std::invoke(fn, source, target);
     }
 
   private:

@@ -1990,3 +1990,28 @@ TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-lay
     CHECK(layout.height() == 1);
     CHECK(layout.layers() == 3);
 }
+
+TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read-fgl-layout]")
+{
+    const auto invalid = GENERATE(
+        std::string{"<coordinates><coordinate><y>0</y><z>0</z></coordinate></coordinates>"},
+        std::string{"<coordinates><coordinate><x>0</x><y>0</y></coordinate></coordinates>"},
+        std::string{"<coordinates><coordinate><x>2147483648</x><y>0</y><z>0</z></coordinate></coordinates>"},
+        std::string{"<coordinates><coordinate><x>-2147483649</x><y>0</y><z>0</z></coordinate></coordinates>"},
+        std::string{"<coordinates><coordinate><x>-9223372036854775809</x><y>0</y><z>0</z></coordinate></coordinates>"},
+        std::string{"<coordinates><coordinate><x>1junk</x><y>0</y><z>0</z></coordinate></coordinates>"},
+        std::string{"<connections><connection><source><x>0</x><y>0</y><z>0</z></source></connection></connections>"});
+    cart_gate_clk_lyt target{{1, 1, 1}, clocking::twoddwave(), "kept"};
+    const auto        id = target.create_pi("input", {0, 0});
+    target.obstruct_coordinate({-4, -5, -6});
+    target.obstruct_connection({-4, -5, -6}, {7, 8, 9});
+    std::string xml{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>1</z></size>
+<clocking><name>2DDWave</name></clocking><inputs/><outputs/></layout><gates/></fgl>)"};
+    xml.insert(xml.find("</layout>"), "<obstructions>" + invalid + "</obstructions>");
+    std::stringstream malformed{xml};
+    CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
+    CHECK(target.get_layout_name() == "kept");
+    CHECK(target.output(*target.find_object({0, 0})) == id);
+    CHECK(target.is_obstructed_coordinate({-4, -5, -6}));
+    CHECK(target.is_obstructed_connection({-4, -5, -6}, {7, 8, 9}));
+}

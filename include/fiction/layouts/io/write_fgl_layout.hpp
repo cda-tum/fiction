@@ -214,6 +214,19 @@ class write_fgl_layout_impl
         os << "    </inputs>\n    <outputs>\n";
         lyt.foreach_po([this](const auto id) { os << fmt::format("      <id>{}</id>\n", id.index); });
         os << "    </outputs>\n";
+        os << "    <obstructions>\n      <coordinates>\n";
+        lyt.foreach_obstructed_coordinate(
+            [this](const auto& c)
+            { os << fmt::format("        <coordinate><x>{}</x><y>{}</y><z>{}</z></coordinate>\n", c.x, c.y, c.z); });
+        os << "      </coordinates>\n      <connections>\n";
+        lyt.foreach_obstructed_connection(
+            [this](const auto& source, const auto& target)
+            {
+                os << fmt::format("        <connection><source><x>{}</x><y>{}</y><z>{}</z></source>"
+                                  "<target><x>{}</x><y>{}</y><z>{}</z></target></connection>\n",
+                                  source.x, source.y, source.z, target.x, target.y, target.z);
+            });
+        os << "      </connections>\n    </obstructions>\n";
         os << fgl::CLOSE_LAYOUT_METADATA;
         os << fgl::OPEN_GATES;
         utils::progress_reporter progress{on_progress, "writing gates", lyt.size()};
@@ -345,8 +358,8 @@ class write_fgl_layout_impl
  *
  * Version 2 stores width, height, and layer counts, explicit PI/PO order, and indexed source references.
  * The file includes every placed object, including complete dangling cones. Clock overrides and synchronization
- * elements remain sparse. The format supports the standard named clocking schemes and their overrides.
- * Validation finishes before the output stream changes.
+ * elements and manual coordinate and directed-connection obstructions remain sparse. The format supports the standard
+ * named clocking schemes and their overrides. Validation finishes before the output stream changes.
  *
  * This overload uses an output stream to write into.
  *

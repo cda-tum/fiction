@@ -183,6 +183,25 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
              DOC(fiction_layouts_gate_level_layout_clear_obstructed_coordinates))
         .def("clear_obstructed_connections", &GateLyt::clear_obstructed_connections,
              DOC(fiction_layouts_gate_level_layout_clear_obstructed_connections))
+        .def(
+            "obstructed_coordinates",
+            [](const GateLyt& lyt)
+            {
+                std::vector<typename GateLyt::tile> coordinates{};
+                lyt.foreach_obstructed_coordinate([&coordinates](const auto& c) { coordinates.push_back(c); });
+                return coordinates;
+            },
+            "Returns manual coordinate obstructions in unspecified order, without implicit occupancy.")
+        .def(
+            "obstructed_connections",
+            [](const GateLyt& lyt)
+            {
+                std::vector<std::pair<typename GateLyt::tile, typename GateLyt::tile>> connections{};
+                lyt.foreach_obstructed_connection([&connections](const auto& source, const auto& target)
+                                                  { connections.emplace_back(source, target); });
+                return connections;
+            },
+            "Returns manual directed-connection obstructions in unspecified order, without physical connections.")
         .def("is_obstructed_coordinate", &GateLyt::is_obstructed_coordinate, py::arg("c"),
              DOC(fiction_layouts_gate_level_layout_is_obstructed_coordinate))
         .def("is_obstructed_connection", &GateLyt::is_obstructed_connection, py::arg("src"), py::arg("tgt"),

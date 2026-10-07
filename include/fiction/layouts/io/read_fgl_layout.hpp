@@ -303,6 +303,26 @@ class read_fgl_layout_impl
             throw fgl_parsing_error("Error parsing FGL file: no element 'clocking' in 'layout'");
         }
 
+        if (version_two)
+        {
+            if (const auto* manual = layout->FirstChildElement("obstructions"); manual != nullptr)
+            {
+                if (const auto* coordinates = manual->FirstChildElement("coordinates"); coordinates != nullptr)
+                {
+                    for (const auto* coordinate = coordinates->FirstChildElement("coordinate"); coordinate != nullptr;
+                         coordinate             = coordinate->NextSiblingElement("coordinate"))
+                        lyt.obstruct_coordinate(read_position<int64_t>(coordinate));
+                }
+                if (const auto* connections = manual->FirstChildElement("connections"); connections != nullptr)
+                {
+                    for (const auto* connection = connections->FirstChildElement("connection"); connection != nullptr;
+                         connection             = connection->NextSiblingElement("connection"))
+                        lyt.obstruct_connection(read_position<int64_t>(connection->FirstChildElement("source")),
+                                                read_position<int64_t>(connection->FirstChildElement("target")));
+                }
+            }
+        }
+
         if (version_two &&
             (layout->FirstChildElement("inputs") == nullptr || layout->FirstChildElement("outputs") == nullptr))
             throw fgl_parsing_error("Error parsing FGL file: missing interface order");
@@ -526,13 +546,15 @@ class read_fgl_layout_impl
      */
     std::istream& is;
     /**
-     * @brief Read a nonnegative integer without truncation or trailing characters.
+     * @brief Read an integer without truncation or trailing characters.
+     * @tparam Integer Checked integer storage type; unsigned by default.
      * @param parent XML element containing the number.
      * @param name Child element name.
      * @return Parsed integer.
      * @throws fgl_parsing_error If the element is missing or the number is invalid.
      */
-    static uint64_t read_number(const tinyxml2::XMLElement* parent, const char* name)
+    template <typename Integer = uint64_t>
+    static Integer read_number(const tinyxml2::XMLElement* parent, const char* name)
     {
         const auto* child = parent->FirstChildElement(name);
         if (child == nullptr || child->GetText() == nullptr)
@@ -540,10 +562,16 @@ class read_fgl_layout_impl
             throw fgl_parsing_error(
                 fmt::format("Error parsing FGL file: no element '{}' in '{}'", name, parent->Name()));
         }
-        return read_value(child);
+        return read_value<Integer>(child);
     }
-    /** @brief Parse an XML element's integer text. @param child Numeric element. @return Parsed value. */
-    static uint64_t read_value(const tinyxml2::XMLElement* child)
+    /**
+     * @brief Parse an XML element's integer text.
+     * @tparam Integer Checked integer storage type; unsigned by default.
+     * @param child Numeric element.
+     * @return Parsed value.
+     */
+    template <typename Integer = uint64_t>
+    static Integer read_value(const tinyxml2::XMLElement* child)
     {
         if (child->GetText() == nullptr)
             throw fgl_parsing_error("Error parsing FGL file: empty integer");
@@ -556,26 +584,30 @@ class read_fgl_layout_impl
         }
         const auto        trimmed = text.substr(first, last - first + 1);
         const auto* const end     = std::to_address(trimmed.end());
-        uint64_t          value{};
+        Integer           value{};
         const auto        result = std::from_chars(std::to_address(trimmed.begin()), end, value);
         if (result.ec != std::errc{} || result.ptr != end)
         {
-            throw fgl_parsing_error(fmt::format("Error parsing FGL file: invalid nonnegative integer '{}'", text));
+            throw fgl_parsing_error(fmt::format("Error parsing FGL file: invalid integer '{}'", text));
         }
         return value;
     }
     /**
      * @brief Read a position and reject values the layout's coordinate type cannot represent.
+     * @tparam Integer Axis storage type; unsigned for placed objects, signed for manual obstructions.
      * @param element XML element containing x, y, and optionally z.
      * @param with_z Whether the z child is required.
      * @return Losslessly represented coordinate.
      * @throws fgl_parsing_error If an axis is invalid or overflows.
      */
+    template <typename Integer = uint64_t>
     static tile<Lyt> read_position(const tinyxml2::XMLElement* element, const bool with_z = true)
     {
-        const auto x = read_number(element, "x");
-        const auto y = read_number(element, "y");
-        const auto z = with_z ? read_number(element, "z") : 0u;
+        if (element == nullptr)
+            throw fgl_parsing_error("Error parsing FGL file: missing position");
+        const auto x = read_number<Integer>(element, "x");
+        const auto y = read_number<Integer>(element, "y");
+        const auto z = with_z ? read_number<Integer>(element, "z") : Integer{0};
         try
         {
             const tile<Lyt> position{x, y, z};
@@ -636,7 +668,7 @@ class read_fgl_layout_impl
 }  // namespace detail
 
 /**
- * Reads legacy maximum-index extents or version-2 extent counts and declared interface order.
+ * Reads legacy maximum-index extents or version-2 extent counts, declared interface order, and manual obstructions.
  * The target layout changes only after a successful read.
  *
  * May throw an `fgl_parsing_error` if the FGL file is malformed.
@@ -655,7 +687,7 @@ template <typename Lyt>
     return p.run();
 }
 /**
- * Reads legacy maximum-index extents or version-2 extent counts and declared interface order.
+ * Reads legacy maximum-index extents or version-2 extent counts, declared interface order, and manual obstructions.
  * The target layout changes only after a successful read.
  *
  * May throw an `fgl_parsing_error` if the FGL file is malformed.

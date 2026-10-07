@@ -18,6 +18,7 @@ from mnt.pyfiction.layouts import (
     cartesian_gate_layout,
     coordinate,
     hexagonal_gate_layout,
+    obstructions,
     shifted_cartesian_gate_layout,
 )
 from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drv_params, gate_level_drvs
@@ -284,3 +285,44 @@ def test_clone_owns_obstructions_objects_and_connections(make_layout: Callable[[
     assert not clone.is_obstructed_coordinate((1, 0))
     assert layout.source(LayoutInputPort(output.object, 0)) == wire
     assert clone.source(LayoutInputPort(output.object, 0)) is None
+
+
+def test_explicit_obstruction_lists_own_values() -> None:
+    """Enumerate unique manual coordinates and directed connections as owned values."""
+    constraints = obstructions()
+    position = coordinate(-1, 4, 8)
+    target = coordinate(0, 0)
+    constraints.obstruct_coordinate(position)
+    constraints.obstruct_coordinate(position)
+    constraints.obstruct_connection(position, target)
+    constraints.obstruct_connection(position, target)
+    coordinates = constraints.obstructed_coordinates()
+    connections = constraints.obstructed_connections()
+    assert coordinates == [position]
+    assert connections == [(position, target)]
+    constraints.clear_obstructed_coordinates()
+    constraints.clear_obstructed_connections()
+    assert constraints.obstructed_coordinates() == []
+    assert constraints.obstructed_connections() == []
+    assert coordinates == [position]
+    assert connections == [(position, target)]
+
+
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_manual_obstruction_lists_exclude_implicit_occupancy(make_layout: Callable[[], GateLayout]) -> None:
+    """Enumerate persistent manual constraints separately from objects and physical edges."""
+    layout = make_layout()
+    source = layout.create_pi("a", (0, 0))
+    layout.create_po(source, "f", (1, 0))
+    assert layout.obstructed_coordinates() == []
+    assert layout.obstructed_connections() == []
+    layout.obstruct_coordinate((0, 0))
+    layout.obstruct_connection((0, 0), (1, 0))
+    assert layout.obstructed_coordinates() == [coordinate(0, 0)]
+    assert layout.obstructed_connections() == [(coordinate(0, 0), coordinate(1, 0))]
+    layout.clear_obstructed_coordinates()
+    layout.clear_obstructed_connections()
+    assert layout.obstructed_coordinates() == []
+    assert layout.obstructed_connections() == []
+    assert layout.is_obstructed_coordinate((0, 0))
+    assert layout.is_obstructed_connection((0, 0), (1, 0))
