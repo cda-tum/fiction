@@ -248,3 +248,33 @@ def test_show_and_existing_plot_permissions(
     plotting.write_plot(domain, path, options("--show"))
     assert shown == [path]
     assert path.stat().st_mode == mode
+
+
+def _fail_after_partial_write(path: Path) -> None:
+    """Stage a partial output, then fail.
+
+    Args:
+        path: The destination.
+
+    Raises:
+        RuntimeError: Always.
+    """
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    with plotting.atomic_output(path) as temporary:
+        temporary.write_text("partial")
+        msg = "write failed"
+        raise RuntimeError(msg)
+
+
+def test_atomic_output_keeps_destination_on_failure(tmp_path: Path) -> None:
+    """A failed write leaves the existing file untouched and no staging directory behind."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    path = tmp_path / "domain.csv"
+    path.write_text("old")
+    with pytest.raises(RuntimeError):
+        _fail_after_partial_write(path)
+    assert path.read_text() == "old"
+    assert list(tmp_path.iterdir()) == [path]
+    with plotting.atomic_output(path) as temporary:
+        temporary.write_text("new")
+    assert path.read_text() == "new"

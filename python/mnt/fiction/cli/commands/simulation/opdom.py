@@ -54,7 +54,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.session import Session
     from mnt.pyfiction.sidb import sidb_layout
     from mnt.pyfiction.synthesis import dynamic_truth_table
-from mnt.fiction.cli.opdom_plotting import plot_arguments, validate_outputs, write_plot
+from mnt.fiction.cli.opdom_plotting import atomic_output, plot_arguments, validate_outputs, write_plot
 
 from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
 
@@ -339,7 +339,8 @@ def write_csv(domain: operational_domain, args: argparse.Namespace) -> None:
     writing.writing_mode = (
         sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
     )
-    write_operational_domain(domain, str(args.file), writing)
+    with atomic_output(args.file) as temporary:
+        write_operational_domain(domain, str(temporary), writing)
 
 
 def gate_specification(

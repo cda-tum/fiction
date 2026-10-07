@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -22,6 +23,7 @@ from .parsing import positive_float, positive_int
 
 if TYPE_CHECKING:
     import argparse
+    from collections.abc import Generator
 
     from matplotlib.figure import Figure
     from plotly.graph_objects import Figure as PlotlyFigure
@@ -314,19 +316,37 @@ def plotly_figure(domain: operational_domain, args: argparse.Namespace) -> Plotl
     return figure
 
 
-def write_plot(domain: operational_domain, path: Path, args: argparse.Namespace) -> None:
-    """Serialize a plot to a sibling temporary file, then replace the destination.
+@contextmanager
+def atomic_output(path: Path) -> Generator[Path, None, None]:
+    """Stage an output in a sibling temporary file, then replace the destination.
 
-    Existing symbolic links retain their link and receive output through their target.
+    The destination changes only when the body completes. Existing symbolic links retain their link
+    and receive the output through their target.
+
+    Args:
+        path: The destination.
+
+    Yields:
+        The temporary path to write.
+    """
+    destination = path.resolve(strict=True) if path.is_symlink() else path
+    with tempfile.TemporaryDirectory(prefix=".fiction-", dir=destination.parent) as directory:
+        temporary = Path(directory) / destination.name
+        yield temporary  # ruff: ignore[fallible-context-manager] -- a failed body skips the replacement
+        if destination.exists():
+            temporary.chmod(destination.stat().st_mode)
+        temporary.replace(destination)
+
+
+def write_plot(domain: operational_domain, path: Path, args: argparse.Namespace) -> None:
+    """Write a plot atomically.
 
     Args:
         domain: The computed domain.
         path: PNG, SVG, PDF, or HTML destination.
         args: Appearance and viewer options.
     """
-    destination = path.resolve(strict=True) if path.is_symlink() else path
-    with tempfile.TemporaryDirectory(prefix=".fiction-", dir=destination.parent) as directory:
-        temporary = Path(directory) / destination.name
+    with atomic_output(path) as temporary:
         if path.suffix.lower() == ".html":
             plotly_figure(domain, args).write_html(
                 str(temporary), include_plotlyjs=True, full_html=True, auto_open=False
@@ -337,8 +357,5 @@ def write_plot(domain: operational_domain, path: Path, args: argparse.Namespace)
                 figure.savefig(temporary, format=path.suffix[1:].lower(), dpi=args.dpi)
             finally:
                 figure.clear()
-        if destination.exists():
-            temporary.chmod(destination.stat().st_mode)
-        temporary.replace(destination)
     if args.show:
         open_viewer(path)
