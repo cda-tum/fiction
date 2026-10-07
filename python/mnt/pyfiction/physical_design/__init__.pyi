@@ -61,8 +61,8 @@ class exact_params:
             If `upper_bound_area` and (either) `upper_bound_x` or
             `upper_bound_y` are set, the imposed search space restrictions are
             cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x
-            == 4`, all aspect ratios with an x-dimension of more than 4 *and*
-            a total area of more than 20 will be skipped.
+            == 4`, all aspect ratios with a width of more than 4 *and* a total
+            area of more than 20 will be skipped.
         """
 
     @upper_bound_area.setter
@@ -1559,7 +1559,7 @@ def post_layout_optimization(
     Raises:
         std::invalid_argument: If clocking or occupied geometry is
                                invalid.
-        std::overflow_error: If dimensions leave no room for signed
+        std::overflow_error: If the extent leaves no room for signed
                              routing coordinates.
 
     Note:
@@ -1673,7 +1673,7 @@ def wiring_reduction(
     Raises:
         std::invalid_argument: If clocking or occupied geometry is
                                invalid.
-        std::overflow_error: If dimensions leave no room for signed
+        std::overflow_error: If the extent leaves no room for signed
                              routing coordinates.
     """
 

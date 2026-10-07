@@ -315,7 +315,7 @@ TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-co
     SECTION("The geometry supports more than two layers")
     {
         const lyt_t lyt{cartesian_layout{{6, 6, 4}}};
-        CHECK(lyt.dimensions() == layout_base::extent{6, 6, 4});
+        CHECK(lyt.get_extent() == layout_base::extent{6, 6, 4});
     }
     SECTION("Occupied placement leaves objects and connections unchanged")
     {
@@ -406,19 +406,19 @@ TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-regression
         /** @brief Gate layout whose size remains unchanged. */
         const gate_level_layout<geometry> gates{coordinates};
         /** Sizes retained by the source gate layout. */
-        const auto original = coordinates.dimensions();
+        const auto original = coordinates.get_extent();
 
         coordinates.resize({4, 4, 4});
-        CHECK(gates.dimensions() == original);
+        CHECK(gates.get_extent() == original);
         /** Independent geometry value. */
         auto copy = static_cast<const geometry&>(gates);
         copy.resize({5, 5, 5});
-        CHECK(gates.dimensions() == original);
+        CHECK(gates.get_extent() == original);
         /** Independent complete layout clone. */
         auto clone = gates.clone();
         clone.resize({6, 6, 6});
-        CHECK(gates.dimensions() == original);
-        CHECK(clone.dimensions() == layout_base::extent{6, 6, 6});
+        CHECK(gates.get_extent() == original);
+        CHECK(clone.get_extent() == layout_base::extent{6, 6, 6});
     };
 
     check_sizes(cartesian_layout{{4, 4, 2}});

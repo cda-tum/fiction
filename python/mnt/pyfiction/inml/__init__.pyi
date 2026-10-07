@@ -59,18 +59,18 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimensions: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int]) -> None: ...
+    def __init__(self, extent: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int]) -> None: ...
     @overload
     def __init__(
         self,
-        dimensions: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int],
+        extent: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
         tile_size_x: int = 1,
         tile_size_y: int = 1,
     ) -> None:
         """
-        Creates an empty layout of the given dimensions, clocked by the predefined scheme of the given name, with clock zones of the given tile size. Raises ValueError for an unknown scheme or a zero tile size.
+        Creates an empty layout of the given extent, clocked by the predefined scheme of the given name, with clock zones of the given tile size. Raises ValueError for an unknown scheme or a zero tile size.
         """
 
     def get_cell_type(

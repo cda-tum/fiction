@@ -748,8 +748,8 @@ TEST_CASE("Hexagonal empty geometry and signed edge arithmetic", "[hexagonal-lay
     CHECK(empty.is_above({-1, -2, 7}, {-1, -2, 8}));
     auto copy = empty;
     copy.resize({3, 4, 7});
-    CHECK(empty.dimensions() == layout_base::extent{});
-    CHECK(copy.dimensions() == layout_base::extent{3, 4, 7});
+    CHECK(empty.get_extent() == layout_base::extent{});
+    CHECK(copy.get_extent() == layout_base::extent{3, 4, 7});
     for (const auto x : {-2147483648ll, -3ll, -2ll, -1ll, 0ll, 2147483647ll})
     {
         for (const auto y : {-2147483648ll, -3ll, -2ll, -1ll, 0ll, 2147483647ll})

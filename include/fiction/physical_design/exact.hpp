@@ -103,7 +103,7 @@ struct exact_physical_design_params
      *
      * @note If `upper_bound_area` and (either) `upper_bound_x` or `upper_bound_y` are set, the imposed search space
      * restrictions are cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x == 4`, all aspect ratios with
-     * an x-dimension of more than 4 *and* a total area of more than 20 will be skipped.
+     * a width of more than 4 *and* a total area of more than 20 will be skipped.
      */
     uint16_t upper_bound_area = std::numeric_limits<uint16_t>::max();
     /**
@@ -282,7 +282,7 @@ class exact_impl
      * Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
      */
     utils::progress_reporter progress;
-    /** @brief Serializes the active candidate dimensions of each solver worker. */
+    /** @brief Serializes the active candidate extents of each solver worker. */
     utils::worker_progress_reporter worker_progress;
     /**
      * The utilized clocking scheme.

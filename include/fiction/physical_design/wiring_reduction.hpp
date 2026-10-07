@@ -151,7 +151,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout
 {
   public:
     /**
-     * Constructs a search grid with zero-origin, half-open dimensions.
+     * Constructs a search grid with a zero-origin, half-open extent.
      *
      * @param ar Search-grid extent. Defaults to an empty extent.
      * @param direction The search direction to be used. Defaults to HORIZONTAL if not provided.
@@ -1114,7 +1114,7 @@ class wiring_reduction_impl
  * @param ps Parameters.
  * @param pst Statistics.
  * @throws std::invalid_argument If clocking or occupied geometry is invalid.
- * @throws std::overflow_error If dimensions leave no room for signed routing coordinates.
+ * @throws std::overflow_error If the extent leaves no room for signed routing coordinates.
  */
 template <typename Lyt>
 void wiring_reduction(Lyt& lyt, wiring_reduction_params ps = {}, wiring_reduction_stats* pst = nullptr)
@@ -1130,7 +1130,7 @@ void wiring_reduction(Lyt& lyt, wiring_reduction_params ps = {}, wiring_reductio
         lyt.height() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max() - 1) ||
         lyt.layers() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
     {
-        throw std::overflow_error("Layout dimensions leave no room for signed routing coordinates");
+        throw std::overflow_error("Layout extent leaves no room for signed routing coordinates");
     }
     lyt.foreach_node(
         [&](const auto id)

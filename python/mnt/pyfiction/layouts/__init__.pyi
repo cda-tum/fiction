@@ -166,9 +166,9 @@ class Extent:
         """
 
     @overload
-    def __init__(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None: ...
+    def __init__(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None: ...
     @overload
-    def __init__(self, dimensions: tuple[int, int] | tuple[int, int, int]) -> None: ...
+    def __init__(self, extent: tuple[int, int] | tuple[int, int, int]) -> None: ...
     @property
     def width(self) -> int:
         """Checked width in coordinates."""
@@ -189,7 +189,7 @@ class Extent:
     def layers(self, arg: int, /) -> None: ...
     def __eq__(self, other: Extent | tuple[int, int] | tuple[int, int, int]) -> bool: ...
 
-def area(dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
+def area(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes width times height.
 
@@ -200,7 +200,7 @@ def area(dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
         Area.
     """
 
-def volume(dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
+def volume(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes width times height times layers with checked multiplication.
 
@@ -257,7 +257,7 @@ class cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Creates geometry with half-open, zero-origin bounds. The default
         extent is empty.
@@ -304,8 +304,8 @@ class cartesian_layout:
     def layers(self) -> int:
         """Returns the layers count."""
 
-    def dimensions(self) -> Extent:
-        """Returns the axis sizes."""
+    def get_extent(self) -> Extent:
+        """Returns the layout extent."""
 
     def last_coordinate(self) -> coordinate | None:
         """Returns the last coordinate, or None for empty geometry."""
@@ -322,7 +322,7 @@ class cartesian_layout:
             Width times height.
         """
 
-    def resize(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Changes the geometry's axis sizes.
 
@@ -887,7 +887,7 @@ class shifted_cartesian_layout:
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(self, arrangement: arrangement, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, arrangement: arrangement, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Creates geometry with half-open, zero-origin bounds. The default
         extent is empty.
@@ -943,8 +943,8 @@ class shifted_cartesian_layout:
     def layers(self) -> int:
         """Returns the layers count."""
 
-    def dimensions(self) -> Extent:
-        """Returns the axis sizes."""
+    def get_extent(self) -> Extent:
+        """Returns the layout extent."""
 
     def last_coordinate(self) -> coordinate | None:
         """Returns the last coordinate, or None for empty geometry."""
@@ -961,7 +961,7 @@ class shifted_cartesian_layout:
             Width times height.
         """
 
-    def resize(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Changes the geometry's axis sizes.
 
@@ -1532,7 +1532,7 @@ class hexagonal_layout:
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(self, arrangement: arrangement, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, arrangement: arrangement, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Creates geometry with half-open, zero-origin bounds. The default
         extent is empty.
@@ -1588,8 +1588,8 @@ class hexagonal_layout:
     def layers(self) -> int:
         """Returns the layers count."""
 
-    def dimensions(self) -> Extent:
-        """Returns the axis sizes."""
+    def get_extent(self) -> Extent:
+        """Returns the layout extent."""
 
     def last_coordinate(self) -> coordinate | None:
         """Returns the last coordinate, or None for empty geometry."""
@@ -1606,7 +1606,7 @@ class hexagonal_layout:
             Width times height.
         """
 
-    def resize(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Changes the geometry's axis sizes.
 
@@ -2195,13 +2195,13 @@ class cartesian_gate_layout(cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """Creates an empty layout with the given geometry and name."""
 
     @overload
     def __init__(
         self,
-        dimensions: Extent | tuple[int, int] | tuple[int, int, int],
+        extent: Extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
@@ -3097,14 +3097,14 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(self, arrangement: arrangement, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, arrangement: arrangement, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """Creates an empty layout with shifted rows or columns."""
 
     @overload
     def __init__(
         self,
         arrangement: arrangement,
-        dimensions: Extent | tuple[int, int] | tuple[int, int, int],
+        extent: Extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
@@ -4000,14 +4000,14 @@ class hexagonal_gate_layout(hexagonal_layout):
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(self, arrangement: arrangement, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, arrangement: arrangement, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """Creates an empty layout with shifted rows or columns."""
 
     @overload
     def __init__(
         self,
         arrangement: arrangement,
-        dimensions: Extent | tuple[int, int] | tuple[int, int, int],
+        extent: Extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
@@ -5039,7 +5039,7 @@ def normalize_layout_coordinates(lyt: mnt.pyfiction.inml.inml_layout) -> mnt.pyf
     towards the origin, so that the smallest occupied x- and y-coordinates
     become 0. Cell types, names, and, where the layout has them, cell
     modes move with their cells; layers, the layout name, and the clocking
-    stay unchanged. The dimensions shrink by the shift.
+    stay unchanged. The extent shrinks by the shift.
 
     Args:
         lyt: The layout to normalize.

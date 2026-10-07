@@ -77,7 +77,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     def __init__(self) -> None: ...
     @overload
     def __init__(
-        self, dimensions: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int], layout_name: str = ""
+        self, extent: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int], layout_name: str = ""
     ) -> None:
         """
         Creates an empty layout.

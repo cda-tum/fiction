@@ -271,7 +271,7 @@ class write_qll_layout_impl
     }
 
     /**
-     * @brief Writes format settings and dimensions as maximum indices.
+     * @brief Writes format settings and layout extent as maximum indices.
      */
     void write_header()
     {

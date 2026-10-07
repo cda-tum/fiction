@@ -186,23 +186,23 @@ void bind_clocked_constructors(nanobind::class_<Lyt, py_cartesian_layout>& cls)
     namespace py = nanobind;
 
     cls.def(py::init<>())
-        .def(py::init<const typename Lyt::extent&>(), py::arg("dimensions"))
+        .def(py::init<const typename Lyt::extent&>(), py::arg("extent"))
         .def(
             "__init__",
-            [](Lyt* self, const typename Lyt::extent& dimensions, const std::string& scheme_name,
+            [](Lyt* self, const typename Lyt::extent& extent, const std::string& scheme_name,
                const std::string& layout_name, const uint16_t tile_size_x, const uint16_t tile_size_y)
             {
                 if (const auto scheme = fiction::layouts::clocking::get_scheme(scheme_name); scheme.has_value())
                 {
-                    std::construct_at(self, dimensions, *scheme, layout_name, tile_size_x, tile_size_y);
+                    std::construct_at(self, extent, *scheme, layout_name, tile_size_x, tile_size_y);
                     return;
                 }
 
                 throw std::invalid_argument("Given name does not refer to a supported clocking scheme");
             },
-            py::arg("dimensions"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
+            py::arg("extent"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
             py::arg("tile_size_x") = 1u, py::arg("tile_size_y") = 1u,
-            "Creates an empty layout of the given dimensions, clocked by the predefined scheme of the given name, with "
+            "Creates an empty layout of the given extent, clocked by the predefined scheme of the given name, with "
             "clock zones of the given tile size. Raises ValueError for an unknown scheme or a zero tile size.");
 }
 

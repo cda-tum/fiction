@@ -226,7 +226,7 @@ template <typename Lyt>
 /**
  * Returns a copy of the given cell grid layout whose cells are shifted towards the origin, so that the smallest
  * occupied x- and y-coordinates become 0. Cell types, names, and, where the layout has them, cell modes move with their
- * cells; layers, the layout name, and the clocking stay unchanged. The dimensions shrink by the shift.
+ * cells; layers, the layout name, and the clocking stay unchanged. The extent shrinks by the shift.
  *
  * @tparam Lyt Cell grid layout type, e.g., `qca::layout`, `mol_qca::layout`, or `inml::layout`.
  * @param lyt The layout to normalize.

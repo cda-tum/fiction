@@ -131,35 +131,35 @@ class gate_level_layout : public CoordinateLayout
     using base_type = gate_level_layout;
 
     /** @brief Creates an empty layout with the given geometry and name. */
-    explicit gate_level_layout(const typename CoordinateLayout::extent& dimensions = {}, std::string name = {})
+    explicit gate_level_layout(const typename CoordinateLayout::extent& size = {}, std::string name = {})
         requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::extent&>
-            : CoordinateLayout{dimensions}, layout_name{std::move(name)}
+            : CoordinateLayout{size}, layout_name{std::move(name)}
     {
         initialize_functions();
     }
     /** @brief Creates an empty layout with the given geometry, clocking, and name. */
-    gate_level_layout(const typename CoordinateLayout::extent& dimensions, const clocking::scheme& scheme,
+    gate_level_layout(const typename CoordinateLayout::extent& size, const clocking::scheme& scheme,
                       const std::string& name = {})
         requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::extent&>
-            : gate_level_layout{dimensions, name}
+            : gate_level_layout{size, name}
     {
         replace_clocking_scheme(scheme);
     }
     /** @brief Creates an empty layout with shifted rows or columns. */
-    explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& dimensions = {},
+    explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& size = {},
                                std::string name = {})
         requires std::constructible_from<CoordinateLayout, layouts::arrangement,
                                          const typename CoordinateLayout::extent&>
-            : CoordinateLayout{a, dimensions}, layout_name{std::move(name)}
+            : CoordinateLayout{a, size}, layout_name{std::move(name)}
     {
         initialize_functions();
     }
     /** @brief Creates an empty layout with shifted rows or columns and clocking. */
-    gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& dimensions,
+    gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& size,
                       const clocking::scheme& scheme, const std::string& name = {})
         requires std::constructible_from<CoordinateLayout, layouts::arrangement,
                                          const typename CoordinateLayout::extent&>
-            : gate_level_layout{a, dimensions, name}
+            : gate_level_layout{a, size, name}
     {
         replace_clocking_scheme(scheme);
     }

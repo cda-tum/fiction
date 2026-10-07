@@ -202,7 +202,7 @@ class hexagonal_layout : public layout_base
      * @throws std::invalid_argument If a size exceeds the coordinate domain.
      */
     explicit hexagonal_layout(const layouts::arrangement a, const extent& size = {}) :
-            dimension{checked(size)},
+            layout_extent{checked(size)},
             shift{a}
     {}
     /** @return Independent copy of the geometry. */
@@ -245,32 +245,32 @@ class hexagonal_layout : public layout_base
     /** @return Number of coordinates along x. */
     [[nodiscard]] uint32_t width() const noexcept
     {
-        return dimension.width;
+        return layout_extent.width;
     }
     /** @return Number of coordinates along y. */
     [[nodiscard]] uint32_t height() const noexcept
     {
-        return dimension.height;
+        return layout_extent.height;
     }
     /** @return Number of layers. */
     [[nodiscard]] uint32_t layers() const noexcept
     {
-        return dimension.layers;
+        return layout_extent.layers;
     }
-    /** @return Independent value of the axis sizes. */
-    [[nodiscard]] extent dimensions() const noexcept
+    /** @return Independent value of the layout extent. */
+    [[nodiscard]] extent get_extent() const noexcept
     {
-        return dimension;
+        return layout_extent;
     }
     /** @return Width times height. */
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return area_of(dimension);
+        return area_of(layout_extent);
     }
     /** @return Volume. @throws std::overflow_error If the volume exceeds `uint64_t`. */
     [[nodiscard]] uint64_t volume() const
     {
-        return volume_of(dimension);
+        return volume_of(layout_extent);
     }
     /**
      * Changes the geometry's axis sizes.
@@ -279,7 +279,7 @@ class hexagonal_layout : public layout_base
      */
     void resize(const extent& size)
     {
-        dimension = checked(size);
+        layout_extent = checked(size);
     }
     /** @return Last coordinate in iteration order, or no value for empty geometry. */
     [[nodiscard]] std::optional<coordinate> last_coordinate() const noexcept
@@ -759,8 +759,8 @@ class hexagonal_layout : public layout_base
     [[nodiscard]] auto coordinates(const std::optional<coordinate> start = std::nullopt,
                                    const std::optional<coordinate> stop  = std::nullopt) const
     {
-        const coordinate_iterator first{dimension, start.value_or(coordinate{})};
-        const coordinate_iterator last{dimension, stop};
+        const coordinate_iterator first{layout_extent, start.value_or(coordinate{})};
+        const coordinate_iterator last{layout_extent, stop};
         return std::ranges::subrange{first < last ? first : last, last};
     }
     /**
@@ -781,7 +781,7 @@ class hexagonal_layout : public layout_base
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
-     * iteration order is the same as for the coordinates function but without the z dimension.
+     * iteration order is the same as for the coordinates function but without the z axis.
      *
      * @param start First coordinate to include in the range of all ground coordinates.
      * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
@@ -1083,7 +1083,7 @@ class hexagonal_layout : public layout_base
         return coordinate{nx, ny, nz};
     }
     /** Independent axis sizes. */
-    extent dimension{};
+    extent layout_extent{};
     /** Arrangement of shifted rows or columns. */
     layouts::arrangement shift;
 };

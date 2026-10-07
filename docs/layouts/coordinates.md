@@ -13,7 +13,7 @@ The frame is an `extent{width, height, layers}` with nonnegative counts. It cont
 whose axes lie in `[0, width)`, `[0, height)`, and `[0, layers)`. Two axes describe one layer;
 the default extent is empty. Each count can reach $2^{31}$, so the final included coordinate
 still fits a signed 32-bit axis. `width()`, `height()`, and `layers()` return counts;
-`dimensions()` returns the extent and `last()` returns the optional final coordinate.
+`get_extent()` returns the extent and `last()` returns the optional final coordinate.
 
 Gate-level layouts store object identity separately from placement coordinates. An editing object
 may lie outside the frame; physical design-rule checks validate frame membership.

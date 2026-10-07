@@ -21,7 +21,7 @@ def test_cell_types_carry_clock_phases() -> None:
 
 
 def test_planar_layout() -> None:
-    layout = mol_qca_layout((4, 1, 2), "wire")
+    layout = mol_qca_layout(extent=(4, 1, 2), layout_name="wire")
 
     assert layout.layers() == 1
     assert layout.get_layout_name() == "wire"

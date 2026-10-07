@@ -67,22 +67,22 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
     if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
     {
         cls.def(py::init<>(), DOC(fiction_layouts_gate_level_layout_gate_level_layout))
-            .def(py::init<const fiction::extent<GateLyt>&>(), py::arg("dimensions"),
+            .def(py::init<const fiction::extent<GateLyt>&>(), py::arg("extent"),
                  DOC(fiction_layouts_gate_level_layout_gate_level_layout))
             .def(
                 "__init__",
-                [](py::pointer_and_handle<GateLyt> self, const fiction::extent<GateLyt>& dimension,
+                [](py::pointer_and_handle<GateLyt> self, const fiction::extent<GateLyt>& extent,
                    const std::string& scheme_name, const std::string& layout_name)
                 {
                     if (const auto scheme = fiction::layouts::clocking::get_scheme(scheme_name); scheme.has_value())
                     {
-                        std::construct_at(self.p, dimension, *scheme, layout_name);
+                        std::construct_at(self.p, extent, *scheme, layout_name);
                         return;
                     }
 
                     throw std::invalid_argument("Unknown clocking scheme");
                 },
-                py::arg("dimensions"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
+                py::arg("extent"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
                 fmt::format("{}\n\nRaises:\n    ValueError: The clocking scheme name is unknown.",
                             DOC(fiction_layouts_gate_level_layout_gate_level_layout_2))
                     .c_str());
@@ -92,11 +92,11 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         cls.def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
                 DOC(fiction_layouts_gate_level_layout_gate_level_layout_3))
             .def(py::init<fiction::layouts::arrangement, const fiction::extent<GateLyt>&>(), py::arg("arrangement"),
-                 py::arg("dimensions"), DOC(fiction_layouts_gate_level_layout_gate_level_layout_3))
+                 py::arg("extent"), DOC(fiction_layouts_gate_level_layout_gate_level_layout_3))
             .def(
                 "__init__",
                 [](py::pointer_and_handle<GateLyt> self, const fiction::layouts::arrangement a,
-                   const fiction::extent<GateLyt>& dimension, const std::string& scheme_name,
+                   const fiction::extent<GateLyt>& extent, const std::string& scheme_name,
                    const std::string& layout_name)
                 {
                     // only hexagonal layouts take their arrangement into account for clocking scheme lookup
@@ -104,13 +104,13 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                             scheme_name, fiction::is_hexagonal_layout_v<GateLyt> ? std::optional{a} : std::nullopt);
                         scheme.has_value())
                     {
-                        std::construct_at(self.p, a, dimension, *scheme, layout_name);
+                        std::construct_at(self.p, a, extent, *scheme, layout_name);
                         return;
                     }
 
                     throw std::invalid_argument("Unknown clocking scheme");
                 },
-                py::arg("arrangement"), py::arg("dimensions"), py::arg("clocking_scheme") = "2DDWave",
+                py::arg("arrangement"), py::arg("extent"), py::arg("clocking_scheme") = "2DDWave",
                 py::arg("layout_name") = "",
                 fmt::format("{}\n\nRaises:\n    ValueError: The clocking scheme name is unknown.",
                             DOC(fiction_layouts_gate_level_layout_gate_level_layout_4))

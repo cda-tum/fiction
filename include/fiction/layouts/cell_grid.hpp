@@ -67,7 +67,7 @@ class cell_grid : public cartesian_layout
             layout_name{std::move(name)}
     {}
     /**
-     * Copies a grid, including its dimensions.
+     * Copies a grid, including its extent.
      *
      * @param other Grid to copy.
      */
@@ -79,7 +79,7 @@ class cell_grid : public cartesian_layout
      */
     cell_grid(cell_grid&& other) noexcept = default;
     /**
-     * Copies a grid, including its dimensions.
+     * Copies a grid, including its extent.
      *
      * @param other Grid to copy.
      * @return This grid.
@@ -97,14 +97,14 @@ class cell_grid : public cartesian_layout
      */
     ~cell_grid() = default;
     /**
-     * Compares two grids: same dimensions, name, cell types, and cell names.
+     * Compares two grids: same extent, name, cell types, and cell names.
      *
      * @param other Right-hand side grid.
      * @return `true` iff both grids are identical.
      */
     [[nodiscard]] bool operator==(const cell_grid& other) const noexcept
     {
-        return dimensions() == other.dimensions() && layout_name == other.layout_name &&
+        return get_extent() == other.get_extent() && layout_name == other.layout_name &&
                cell_types == other.cell_types && cell_names == other.cell_names;
     }
     /**

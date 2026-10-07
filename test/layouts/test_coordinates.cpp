@@ -104,7 +104,7 @@ TEST_CASE("Coordinate iteration uses an explicit end", "[coordinates][size-contr
     CHECK(layout.coordinates(std::nullopt, coordinate{2, 0}).end() ==
           layout.coordinates(std::nullopt, coordinate{0, 1}).end());
     CHECK_THROWS_AS(layout.ground_coordinates(coordinate{0, 0, 1}), std::invalid_argument);
-    auto last = iterator{layout.dimensions(), layout.last_coordinate()};
+    auto last = iterator{layout.get_extent(), layout.last_coordinate()};
     REQUIRE(last != iterator{});
     CHECK(*last == coordinate{1, 1, 1});
     ++last;

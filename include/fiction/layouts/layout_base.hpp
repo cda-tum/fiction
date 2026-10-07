@@ -295,13 +295,13 @@ class layout_base
         /**
          * Creates an iterator at a position, or the end when no position is given.
          * Negative axes clamp to zero. An axis beyond its size wraps to zero and advances the next axis once.
-         * @param dimension Half-open bounds.
+         * @param size Half-open bounds.
          * @param start First coordinate, or the end state.
          * @throws std::invalid_argument If a size exceeds the coordinate domain.
          */
-        constexpr explicit coordinate_iterator(const extent&                   dimension,
+        constexpr explicit coordinate_iterator(const extent&                   size,
                                                const std::optional<coordinate> start = std::nullopt) :
-                bound{checked(dimension)},
+                bound{checked(size)},
                 current{start.value_or(coordinate{})},
                 ended{!start.has_value()}
         {
