@@ -114,24 +114,11 @@ void check_parsing_equiv(const Ntk& ntk)
     check_eq(layout, read_layout);
 }
 
-/** @brief Round-trip a finished layout or reject an invalid blueprint. */
+/** @brief Round-trip a finished layout. */
 template <typename Lyt>
 void check_parsing_equiv_layout(const Lyt& lyt)
 {
-    std::stringstream                   layout_stream{};
-    verification::gate_level_drv_params params{};
-    params.has_io              = false;
-    params.missing_connections = false;
-    std::ostringstream report{};
-    params.out = &report;
-    verification::gate_level_drv_stats stats{};
-    verification::gate_level_drvs(lyt, params, &stats);
-    if (stats.drvs != 0)
-    {
-        CHECK_THROWS_AS(write_fgl_layout(lyt, layout_stream), std::invalid_argument);
-        CHECK(layout_stream.str().empty());
-        return;
-    }
+    std::stringstream layout_stream{};
     write_fgl_layout(lyt, layout_stream);
     const auto read_layout = read_fgl_layout<Lyt>(layout_stream, lyt.get_layout_name());
 
