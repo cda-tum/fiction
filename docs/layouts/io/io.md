@@ -4,6 +4,11 @@
 
 Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
+The reader accepts legacy files with maximum-coordinate sizes and version 2 files with size counts.
+Version 2 preserves declared PI/PO order and truth-table input indices. Objects are placed before
+their connections are assigned, so file order does not constrain dependency order. A failed read
+leaves an existing destination layout unchanged.
+
 ::::{tab-set}
 :sync-group: language
 
@@ -55,6 +60,11 @@ Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](h
 ## Technology-independent Gate-level Layouts
 
 Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
+
+The writer emits version 2 and stores every object, including complete dangling logic. The writer
+validates all input slots, cycles, physical connections, clocking, and frame membership before
+writing. Empty layouts are supported. FGL represents supported named clocking schemes with sparse
+clock overrides and synchronization delays. Editing checkpoints are outside this format's scope.
 
 ::::{tab-set}
 :sync-group: language
