@@ -10,7 +10,7 @@
 
 import enum
 from collections.abc import Sequence
-from typing import TypeAlias, overload
+from typing import overload
 
 import mnt.pyfiction.inml
 import mnt.pyfiction.mol_qca
@@ -200,20 +200,6 @@ def area(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
         Area.
     """
 
-def volume(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
-    """
-    Computes width times height times layers with checked multiplication.
-
-    Args:
-        size: Axis sizes.
-
-    Returns:
-        Volume.
-
-    Raises:
-        std::overflow_error: If the volume exceeds `uint64_t`.
-    """
-
 class arrangement(enum.Enum):
     """
     Arrangement of the shifted rows or columns of a shifted Cartesian or
@@ -267,6 +253,7 @@ class cartesian_layout:
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
+            std::out_of_range: If the layer count exceeds two.
         """
 
     def coord(self, x: int, y: int, z: int = 0) -> coordinate:
@@ -313,9 +300,6 @@ class cartesian_layout:
     def contains_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Tests the half-open geometry bounds."""
 
-    def volume(self) -> int:
-        """Returns the checked volume in coordinates."""
-
     def area(self) -> int:
         """
         Returns:
@@ -331,6 +315,8 @@ class cartesian_layout:
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
+            std::out_of_range: If the layer count exceeds two. The dimensions
+                               remain unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -779,14 +765,14 @@ class cartesian_layout:
 
     def is_crossing_layer(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
-        Returns whether the given coordinate is located in a crossing layer
-        where z is not minimal.
+        Returns whether the given coordinate is located in the crossing layer
+        at z = 1.
 
         Args:
             c: Coordinate to check for elevation.
 
         Returns:
-            `true` iff `c` is in a crossing layer.
+            `true` iff `c.z` is 1.
         """
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -858,14 +844,11 @@ class cartesian_layout:
     def __deepcopy__(self, memo: dict) -> cartesian_layout:
         """Returns an independent geometry copy."""
 
-stacked_cartesian_layout: TypeAlias = cartesian_layout
-
 class shifted_cartesian_layout:
     """
     A layout type that utilizes offset coordinates to represent a
-    Cartesian layout with shifted coordinates. In this implementation, odd
-    columns are vertically shifted. Its faces are organized in the following
-    way:
+    Cartesian layout with shifted rows or columns selected by its arrangement.
+    This example uses arrangement.ODD_COLUMN:
 
     .. code-block:: text
 
@@ -898,6 +881,7 @@ class shifted_cartesian_layout:
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
+            std::out_of_range: If the layer count exceeds two.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -952,9 +936,6 @@ class shifted_cartesian_layout:
     def contains_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Tests the half-open geometry bounds."""
 
-    def volume(self) -> int:
-        """Returns the checked volume in coordinates."""
-
     def area(self) -> int:
         """
         Returns:
@@ -970,6 +951,8 @@ class shifted_cartesian_layout:
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
+            std::out_of_range: If the layer count exceeds two. The dimensions
+                               remain unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -1418,14 +1401,14 @@ class shifted_cartesian_layout:
 
     def is_crossing_layer(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
-        Returns whether the given coordinate is located in a crossing layer
-        where z is not minimal.
+        Returns whether the given coordinate is located in the crossing layer
+        at z = 1.
 
         Args:
             c: Coordinate to check for elevation.
 
         Returns:
-            `true` iff `c` is in a crossing layer.
+            `true` iff `c.z` is 1.
         """
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -1500,9 +1483,9 @@ class shifted_cartesian_layout:
 class hexagonal_layout:
     """
     A layout type that utilizes offset coordinates to represent a
-    hexagonal grid. In this implementation, the hexagons are in the pointy-top
-    orientation with even rows horizontally shifted. Its faces are organized
-    in the following way:
+    hexagonal grid. Its arrangement selects shifted rows or columns. Row
+    arrangements use pointy-top hexagons; column arrangements use flat-top
+    hexagons. This example uses arrangement.EVEN_ROW:
 
     .. code-block:: text
 
@@ -1543,6 +1526,7 @@ class hexagonal_layout:
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
+            std::out_of_range: If the layer count exceeds two.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -1597,9 +1581,6 @@ class hexagonal_layout:
     def contains_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Tests the half-open geometry bounds."""
 
-    def volume(self) -> int:
-        """Returns the checked volume in coordinates."""
-
     def area(self) -> int:
         """
         Returns:
@@ -1615,6 +1596,8 @@ class hexagonal_layout:
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.
+            std::out_of_range: If the layer count exceeds two. The dimensions
+                               remain unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -2063,14 +2046,14 @@ class hexagonal_layout:
 
     def is_crossing_layer(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
-        Returns whether the given coordinate is located in a crossing layer
-        where z is not minimal.
+        Returns whether the given coordinate is located in the crossing layer
+        at z = 1.
 
         Args:
             c: Coordinate to check for elevation.
 
         Returns:
-            `true` iff `c` is in a crossing layer.
+            `true` iff `c.z` is 1.
         """
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:

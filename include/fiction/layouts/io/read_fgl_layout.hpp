@@ -231,6 +231,10 @@ class read_fgl_layout_impl
             {
                 lyt.resize(typename Lyt::extent{x + delta, y + delta, z + delta});
             }
+            catch (const std::out_of_range&)
+            {
+                throw fgl_parsing_error("Error parsing FGL file: layout supports at most two layers");
+            }
             catch (const std::invalid_argument&)
             {
                 throw fgl_parsing_error("Error parsing FGL file: extent exceeds the target range");

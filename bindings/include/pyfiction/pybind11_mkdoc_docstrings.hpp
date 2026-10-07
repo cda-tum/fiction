@@ -1282,6 +1282,7 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -1594,14 +1595,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_is_crossing_layer =
-R"doc(Returns whether the given coordinate is located in a crossing layer
-where z is not minimal.
+R"doc(Returns whether the given coordinate is located in the crossing layer
+at z = 1.
 
 Args:
     c: Coordinate to check for elevation.
 
 Returns:
-    `true` iff `c` is in a crossing layer.
+    `true` iff `c.z` is 1.
 
 )doc";
 
@@ -1799,6 +1800,8 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two. The dimensions
+                       remain unchanged.
 
 )doc";
 
@@ -1847,13 +1850,6 @@ Args:
 Returns:
     Projection, or no value if the projection lies outside the
     geometry.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_volume =
-R"doc(Returns:
-    Volume. @throws std::overflow_error If the volume exceeds
-    `uint64_t`.
 
 )doc";
 
@@ -4375,6 +4371,7 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -4491,14 +4488,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_crossing_layer =
-R"doc(Returns whether the given coordinate is located in a crossing layer
-where z is not minimal.
+R"doc(Returns whether the given coordinate is located in the crossing layer
+at z = 1.
 
 Args:
     c: Coordinate to check for elevation.
 
 Returns:
-    `true` iff `c` is in a crossing layer.
+    `true` iff `c.z` is 1.
 
 )doc";
 
@@ -4753,6 +4750,8 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two. The dimensions
+                       remain unchanged.
 
 )doc";
 
@@ -4834,13 +4833,6 @@ Args:
 Returns:
     Offset coordinate representing `cube_coord`, or no value if an
     axis exceeds 32 bits.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_volume =
-R"doc(Returns:
-    Volume. @throws std::overflow_error If the volume exceeds
-    `uint64_t`.
 
 )doc";
 
@@ -5496,6 +5488,7 @@ Returns:
 
 Raises:
     std::invalid_argument: If a size exceeds `INT32_MAX + 1`.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -5584,6 +5577,7 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -6141,6 +6135,7 @@ Args:
 
 Raises:
     std::invalid_argument: If a size exceeds the coordinate domain.
+    std::out_of_range: If the layer count exceeds two.
 
 )doc";
 
@@ -6342,20 +6337,6 @@ Args:
 
 Returns:
     Name of `a`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_volume_of =
-R"doc(Computes width times height times layers with checked multiplication.
-
-Args:
-    size: Axis sizes.
-
-Returns:
-    Volume.
-
-Raises:
-    std::overflow_error: If the volume exceeds `uint64_t`.
 
 )doc";
 

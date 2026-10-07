@@ -53,7 +53,7 @@ def test_read_write(mux21: technology_network, tmp_path: Path) -> None:
     assert equivalence_checking(read_shifted_cartesian_fgl_layout(shifted_file), shifted_layout) == eq_type.STRONG
 
 
-@pytest.mark.parametrize("value", ["2147483649", "-1", "18446744073709551616", "1garbage"])
+@pytest.mark.parametrize("value", ["3", "2147483648", "2147483649", "-1", "18446744073709551616", "1garbage"])
 def test_fgl_rejects_unrepresentable_layers(tmp_path: Path, value: str) -> None:
     """Reject invalid version-2 layer counts."""
     layout = cartesian_gate_layout((2, 1, 1), "2DDWave", "wire")
@@ -62,7 +62,7 @@ def test_fgl_rejects_unrepresentable_layers(tmp_path: Path, value: str) -> None:
     path = tmp_path / "invalid.fgl"
     write_fgl_layout(layout, str(path))
     path.write_text(path.read_text(encoding="utf-8").replace("<z>1</z>", f"<z>{value}</z>", 1), encoding="utf-8")
-    with pytest.raises(fgl_parsing_error, match=r"range|integer"):
+    with pytest.raises(fgl_parsing_error, match=r"range|integer|two layers"):
         read_cartesian_fgl_layout(str(path))
 
 

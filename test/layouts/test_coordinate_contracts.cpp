@@ -198,8 +198,52 @@ TEST_CASE("Layouts check sizes against the signed coordinate domain", "[coordina
 
     hexagonal_layout hex{arrangement::ODD_ROW, {2, 2}};
     CHECK_THROWS_AS(hex.resize({0, -1, 0}), std::invalid_argument);
-    CHECK_NOTHROW((cartesian_layout{layout_base::extent{max_size, max_size, max_size}}));
+    CHECK_NOTHROW((cartesian_layout{layout_base::extent{max_size, max_size, 2}}));
     CHECK_NOTHROW((hexagonal_layout{arrangement::ODD_ROW, {max_size, max_size, 1}}));
+}
+
+TEST_CASE("Layouts support only the ground and crossing layers", "[coordinate-contracts]")
+{
+    /** Checks layer limits for construction, resize, and copies. */
+    const auto check_layers = [](const auto& make_layout)
+    {
+        for (const auto layers : {0u, 1u, 2u})
+        {
+            /** Layout with a supported layer count. */
+            auto lyt = make_layout(layout_base::extent{2, 3, layers});
+            CHECK(lyt.layers() == layers);
+            CHECK(lyt.clone().get_extent() == lyt.get_extent());
+            CHECK_FALSE(lyt.is_crossing_layer({0, 0, -1}));
+            CHECK_FALSE(lyt.is_crossing_layer({0, 0, 0}));
+            CHECK(lyt.is_crossing_layer({0, 0, 1}));
+            CHECK_FALSE(lyt.is_crossing_layer({0, 0, 2}));
+            for (const auto too_many : {3u, uint32_t{1} << 31u})
+            {
+                CHECK_THROWS_AS(make_layout(layout_base::extent{2, 3, too_many}), std::out_of_range);
+                CHECK_THROWS_AS(lyt.resize({4, 5, too_many}), std::out_of_range);
+                CHECK(lyt.get_extent() == layout_base::extent{2, 3, layers});
+            }
+            /** Independent layout copy. */
+            auto duplicate = lyt;
+            CHECK_THROWS_AS(duplicate.resize({4, 5, 3}), std::out_of_range);
+            CHECK(duplicate.get_extent() == lyt.get_extent());
+            CHECK_THROWS_AS(lyt.clone().resize({4, 5, 3}), std::out_of_range);
+            lyt.resize({4, 5, 2});
+            CHECK(lyt.get_extent() == layout_base::extent{4, 5, 2});
+            lyt.resize({0, 0, 0});
+            CHECK(lyt.coordinates().empty());
+        }
+    };
+    check_layers([](const auto& size) { return cartesian_layout{size}; });
+    check_layers([](const auto& size) { return gate_level_layout<cartesian_layout>{size}; });
+    for (const auto a :
+         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
+    {
+        check_layers([a](const auto& size) { return hexagonal_layout{a, size}; });
+        check_layers([a](const auto& size) { return shifted_cartesian_layout{a, size}; });
+        check_layers([a](const auto& size) { return gate_level_layout<hexagonal_layout>{a, size}; });
+        check_layers([a](const auto& size) { return gate_level_layout<shifted_cartesian_layout>{a, size}; });
+    }
 }
 
 TEST_CASE("Direction predicates compare coordinates outside the frame", "[coordinate-contracts]")
@@ -312,10 +356,9 @@ TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-co
     /** Coordinate value used for placement. */
     using tile = coordinate<lyt_t>;
 
-    SECTION("The geometry supports more than two layers")
+    SECTION("The geometry rejects more than two layers")
     {
-        const lyt_t lyt{cartesian_layout{{6, 6, 4}}};
-        CHECK(lyt.get_extent() == layout_base::extent{6, 6, 4});
+        CHECK_THROWS_AS((lyt_t{{6, 6, 3}}), std::out_of_range);
     }
     SECTION("Occupied placement leaves objects and connections unchanged")
     {
@@ -408,17 +451,17 @@ TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-regression
         /** Sizes retained by the source gate layout. */
         const auto original = coordinates.get_extent();
 
-        coordinates.resize({4, 4, 4});
+        coordinates.resize({4, 4, 1});
         CHECK(gates.get_extent() == original);
         /** Independent geometry value. */
         auto copy = static_cast<const geometry&>(gates);
-        copy.resize({5, 5, 5});
+        copy.resize({5, 5, 1});
         CHECK(gates.get_extent() == original);
         /** Independent complete layout clone. */
         auto clone = gates.clone();
-        clone.resize({6, 6, 6});
+        clone.resize({6, 6, 2});
         CHECK(gates.get_extent() == original);
-        CHECK(clone.get_extent() == layout_base::extent{6, 6, 6});
+        CHECK(clone.get_extent() == layout_base::extent{6, 6, 2});
     };
 
     check_sizes(cartesian_layout{{4, 4, 2}});

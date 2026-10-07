@@ -73,7 +73,6 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
         .def("get_extent", &Lyt::get_extent, "Returns the layout extent.")
         .def("last_coordinate", &Lyt::last_coordinate, "Returns the last coordinate, or None for empty geometry.")
         .def("contains_coordinate", &Lyt::contains_coordinate, py::arg("c"), "Tests the half-open geometry bounds.")
-        .def("volume", &Lyt::volume, "Returns the checked volume in coordinates.")
         .def("area", &Lyt::area, DOC(fiction_layouts_hexagonal_layout_area))
         .def("resize", &Lyt::resize, py::arg("extent"), DOC(fiction_layouts_hexagonal_layout_resize))
 
@@ -146,7 +145,7 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
                 std::vector<fiction::coordinate<Lyt>> coords{};
                 if (!start && !stop)
                 {
-                    coords.reserve(lyt.volume());
+                    coords.reserve(lyt.area() * lyt.layers());
                 }
                 lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); }, start, stop);
                 return coords;

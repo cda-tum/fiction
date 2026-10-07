@@ -48,9 +48,8 @@ Cartesian grid. Its faces are organized in the following way:
 /** @brief Documentation for the shifted Cartesian layout class. */
 inline constexpr auto SHIFTED_CARTESIAN_LAYOUT_DOC =
     R"doc(A layout type that utilizes offset coordinates to represent a
-Cartesian layout with shifted coordinates. In this implementation, odd
-columns are vertically shifted. Its faces are organized in the following
-way:
+Cartesian layout with shifted rows or columns selected by its arrangement.
+This example uses arrangement.ODD_COLUMN:
 
 .. code-block:: text
 
@@ -73,9 +72,9 @@ way:
 /** @brief Documentation for the hexagonal layout class. */
 inline constexpr auto HEXAGONAL_LAYOUT_DOC =
     R"doc(A layout type that utilizes offset coordinates to represent a
-hexagonal grid. In this implementation, the hexagons are in the pointy-top
-orientation with even rows horizontally shifted. Its faces are organized
-in the following way:
+hexagonal grid. Its arrangement selects shifted rows or columns. Row
+arrangements use pointy-top hexagons; column arrangements use flat-top
+hexagons. This example uses arrangement.EVEN_ROW:
 
 .. code-block:: text
 

@@ -422,21 +422,21 @@ TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-lay
     CHECK(stream.str() == "kept");
 }
 
-TEST_CASE("FGL keeps sparse metadata in a large multilayer extent", "[write-fgl-layout]")
+TEST_CASE("FGL keeps sparse metadata in a large two-layer extent", "[write-fgl-layout]")
 {
-    cart_gate_clk_lyt layout{{1000000000, 1000000000, 3}, clocking::twoddwave()};
-    layout.assign_clock_number({999999999, 999999999, 2}, 2);
-    layout.assign_synchronization_element({999999999, 999999999, 2}, 7);
+    cart_gate_clk_lyt layout{{1000000000, 1000000000, 2}, clocking::twoddwave()};
+    layout.assign_clock_number({999999999, 999999999, 1}, 2);
+    layout.assign_synchronization_element({999999999, 999999999, 1}, 7);
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     CHECK(stream.str().size() < 2000);
     const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
     CHECK(restored.width() == 1000000000);
     CHECK(restored.height() == 1000000000);
-    CHECK(restored.layers() == 3);
-    CHECK(restored.get_clock_number({999999999, 999999999, 2}) == 2);
+    CHECK(restored.layers() == 2);
+    CHECK(restored.get_clock_number({999999999, 999999999, 1}) == 2);
     CHECK(restored.get_clock_number({0, 1, 0}) == layout.get_clock_number({0, 1, 0}));
-    CHECK(restored.get_synchronization_element({999999999, 999999999, 2}) == 7);
+    CHECK(restored.get_synchronization_element({999999999, 999999999, 1}) == 7);
 }
 
 TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy", "[write-fgl-layout]",
