@@ -235,7 +235,7 @@ class exact_impl
         // NOLINTNEXTLINE(*-prefer-member-initializer)
         ari = aspect_ratio_iterator<typename Lyt::extent>{
             ps.fixed_size ? std::min(static_cast<uint64_t>(ps.upper_bound_area),
-                                     static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y)) :
+                                     static_cast<uint64_t>(ps.upper_bound_x) * ps.upper_bound_y) :
                             static_cast<uint64_t>(lower_bound)};
     }
 
@@ -3199,7 +3199,7 @@ class exact_impl
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
         const auto upper_bound = std::min(static_cast<uint64_t>(ps.upper_bound_area),
-                                          static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y));
+                                          static_cast<uint64_t>(ps.upper_bound_x) * ps.upper_bound_y);
 
         for (; ari <= upper_bound; ++ari)  // <= to prevent overflow
         {
