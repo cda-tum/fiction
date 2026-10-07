@@ -20,7 +20,7 @@ LABEL maintainer="Marcel Walter <marcel.walter@tum.de>" \
 # Configure apt and install the toolchain the wheel build needs
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    ca-certificates cmake ninja-build gcc g++ mold git python3 python3-dev libtbb-dev && \
+    ca-certificates cmake ninja-build gcc g++ mold git python3 python3-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Set up a non-root user for security and create a working directory

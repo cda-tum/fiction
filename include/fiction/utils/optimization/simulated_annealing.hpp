@@ -153,8 +153,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * number of random initial states using a provided random state generator. SA as specified above is then run on all
  * these random initial states where the best result of all generated states is finally returned.
  *
- * @note If compiler support for C++17's execution policies is available, the algorithm is parallelized and/or
- * vectorized using `std::execution::par_unseq`.
+ * Each initial state runs in its own thread.
  *
  * @note The State type must be default constructible.
  *
@@ -213,8 +212,6 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     }
 
     // Find the minimum result
-    // no execution policy: results holds one entry per annealing instance, where the dispatch costs an order of
-    // magnitude more than the scan itself
     return *std::min_element(results.cbegin(), results.cend(),
                              [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }

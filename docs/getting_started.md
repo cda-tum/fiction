@@ -94,14 +94,10 @@ $ cd fiction
 CMake fetches the third-party libraries during configuration. Only `CMake` and a C++20 compiler are required for
 the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
 
-At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (`libtbb-dev` on Ubuntu) is
-needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
-preferred compiler, see the current implementation state of [P0024R2](https://en.cppreference.com/w/cpp/compiler_support/17).
-
-On Ubuntu, all required and optional dependencies can be installed via:
+On Ubuntu, the build dependencies can be installed via:
 
 ```text
-sudo apt-get install build-essential cmake python3 libtbb-dev
+sudo apt-get install build-essential cmake python3 python3-dev
 ```
 
 ### Building the tests
