@@ -776,14 +776,10 @@ enum class new_gate_location : std::uint8_t
 template <typename Lyt>
 struct placement_info
 {
-    /**
-     * The index of the current node being placed.
-     */
-    uint64_t current_node;
-    /**
-     * The index of the current primary output.
-     */
-    uint64_t current_po;
+    /** @brief Index of the current network node being placed. */
+    uint64_t current_node{};
+    /** @brief Index of the current primary output. */
+    uint64_t current_po{};
     /**
      * Mapping of logic-network nodes to their current routed output ports.
      */
@@ -1326,7 +1322,7 @@ class graph_oriented_layout_design_impl
 
         if (skip_tiles != 0)
         {
-            for (int32_t x = static_cast<int32_t>(layout.width() - 1); x >= 0; --x)
+            for (auto x = static_cast<int32_t>(layout.width() - 1); x >= 0; --x)
             {
                 if (!layout.is_empty_tile({x, 0, 0}))
                 {
@@ -1335,7 +1331,7 @@ class graph_oriented_layout_design_impl
                 }
             }
 
-            for (int32_t y = static_cast<int32_t>(layout.height() - 1); y >= 0; --y)
+            for (auto y = static_cast<int32_t>(layout.height() - 1); y >= 0; --y)
             {
                 if (!layout.is_empty_tile({0, y, 0}))
                 {
@@ -1626,7 +1622,7 @@ class graph_oriented_layout_design_impl
         {
             return;
         }
-        if (constant_output_count)
+        if (constant_output_count != 0)
         {
             layout.resize({std::max(layout.width(), uint32_t{2}),
                            static_cast<int64_t>(layout.height()) + constant_output_count, layout.layers()});
