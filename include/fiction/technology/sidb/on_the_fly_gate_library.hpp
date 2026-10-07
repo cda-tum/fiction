@@ -363,29 +363,24 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                 return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
             }
 
-            if (is_supported_gate_type(lyt, n))
+            const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
+
+            if (defect_surface.has_value())
             {
-                const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
+                const auto skeleton_with_defects =
+                    add_defect_to_skeleton(defect_surface.value(), skeleton, params.influence_radius_charged_defects,
+                                           center_cell, absolute_cell);
 
-                if (defect_surface.has_value())
-                {
-                    const auto skeleton_with_defects =
-                        add_defect_to_skeleton(defect_surface.value(), skeleton,
-                                               params.influence_radius_charged_defects, center_cell, absolute_cell);
-
-                    return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                }
-
-                return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
             }
+
+            return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
         }
 
         catch (const std::out_of_range&)
         {
             throw fcn::unsupported_gate_orientation_exception(t, p);
         }
-
-        throw fcn::unsupported_gate_type_exception(t);
     }
 
   private:
