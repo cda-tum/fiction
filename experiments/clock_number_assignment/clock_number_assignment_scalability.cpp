@@ -56,7 +56,7 @@ void remove_clocking(Lyt& lyt) noexcept
 }
 
 /** @brief Run the experiment. @return Process exit status. */
-int main()  // NOLINT
+int main()
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 

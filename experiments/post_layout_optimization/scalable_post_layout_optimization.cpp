@@ -56,7 +56,7 @@ Ntk read_ntk(const std::string& name)
 }
 
 /** @brief Run the experiment. @return Process exit status. */
-int main()  // NOLINT
+int main()
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
 

@@ -58,7 +58,7 @@ using namespace fiction::synthesis;
 using namespace fiction::verification;
 
 /** @brief Run the experiment. @return Process exit status. */
-int main()  // NOLINT
+int main()
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
     using hex_lyt  = hex_gate_clk_lyt;
@@ -112,7 +112,8 @@ int main()  // NOLINT
     // parameters for technology mapping
     const mockturtle::map_params map_params{};
 
-    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});  // NOLINT
+    [[maybe_unused]] const auto read_genlib_result =
+        lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
     assert(read_genlib_result == lorina::return_code::success);
     const mockturtle::tech_library<2> gate_lib{gates};
 
@@ -131,9 +132,8 @@ int main()  // NOLINT
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        const auto read_verilog_result =                                          // NOLINT
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark),  // NOLINT
-                                 mockturtle::verilog_reader(xag));                // NOLINT
+        [[maybe_unused]] const auto read_verilog_result =
+            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
         assert(read_verilog_result == lorina::return_code::success);
 
         // compute depth

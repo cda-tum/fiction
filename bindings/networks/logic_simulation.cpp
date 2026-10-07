@@ -50,7 +50,7 @@ namespace detail
 template <typename NtkOrLyt>
 void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     /**
      * @brief Simulate outputs in declaration order, including repeated labels.

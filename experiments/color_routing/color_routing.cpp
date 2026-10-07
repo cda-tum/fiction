@@ -53,6 +53,7 @@ using color_routing_experiment =
                             uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, double, double, double, double,
                             bool>;
 
+// Shared statistics feed each placement, routing, and equivalence result row.
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 static exact_physical_design_stats      exact_stats{};
 static orthogonal_physical_design_stats ortho_stats{};
@@ -274,7 +275,7 @@ void ortho_mcs()
 }
 
 /** @brief Run the experiment. @return Process exit status. */
-int main()  // NOLINT
+int main()
 {
     smt_sat_complete();
     ortho_sat_complete();
@@ -288,7 +289,7 @@ int main()  // NOLINT
 #include <iostream>
 
 /** @brief Run the experiment. @return Process exit status. */
-int main()  // NOLINT
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
 

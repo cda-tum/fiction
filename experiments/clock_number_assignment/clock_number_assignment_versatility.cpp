@@ -45,7 +45,7 @@ void remove_clocking(Lyt& lyt) noexcept
 }
 
 /** @brief Run the experiment. @return Process exit status. */
-int main()  // NOLINT
+int main()
 {
     // NOTE: you have to download the respective files from MNTBench. Select Fontes18 and Trindade16, all clocking
     // schemes, obtained with NanoPlaceR

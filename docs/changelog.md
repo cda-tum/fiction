@@ -252,6 +252,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     bound symbol of their sections.
 
 - Experiments:
+  - Gate-layout experiments use specific lint suppressions with reasons.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
   - Gate-layout experiments use extent counts and extract logic networks for mockturtle algorithms. The reported dimensions and areas retain their definitions.
   - The Bestagon and hexagonalization experiments compute their unchanged area from the cell-grid extent.

@@ -107,7 +107,7 @@ void print_cell_layout_properties(const qca::layout& cell_lyt)
 
 /** @brief Run layout synthesis and export. @param argc Argument count. @param argv Arguments. @return Process exit
  * status. */
-int main(int argc, char* argv[])  // NOLINT
+int main(int argc, char* argv[])
 {
     // check arguments
     if (argc == 1)
@@ -121,7 +121,8 @@ int main(int argc, char* argv[])  // NOLINT
     /**************************************************************/
 
     // convert input to a file path
-    std::filesystem::path file_path{argv[1]};  // NOLINT: pointer arithmetic is okay here
+    std::filesystem::path file_path{
+        argv[1]};  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic): argc validates argv[1].
 
     // check if file path exists
     if (!std::filesystem::exists(file_path))
@@ -314,7 +315,7 @@ int main(int argc, char* argv[])  // NOLINT
 #include <iostream>
 
 /** @brief Run the experiment. @return Process exit status. */
-int main()  // NOLINT
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code\n";
 
