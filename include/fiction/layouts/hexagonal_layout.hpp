@@ -268,11 +268,6 @@ class hexagonal_layout : public layout_base
     {
         return area_of(layout_extent);
     }
-    /** @return Volume. @throws std::overflow_error If the volume exceeds `uint64_t`. */
-    [[nodiscard]] uint64_t volume() const
-    {
-        return volume_of(layout_extent);
-    }
     /**
      * Changes the geometry's axis sizes.
      * @param size Axis sizes.

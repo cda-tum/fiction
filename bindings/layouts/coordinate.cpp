@@ -159,7 +159,7 @@ void coordinate(nanobind::module_& m)
 }
 
 /**
- * @brief Registers area and volume functions for size extents.
+ * @brief Registers the area function for size extents.
  * @param m Python layouts module.
  */
 void coordinate_utility(nanobind::module_& m)
@@ -167,8 +167,6 @@ void coordinate_utility(nanobind::module_& m)
     namespace py = nanobind;
 
     m.def("area", &fiction::layouts::area_of, py::arg("extent"), extent_doc(DOC(fiction_layouts_area_of)).c_str());
-    m.def("volume", &fiction::layouts::volume_of, py::arg("extent"),
-          extent_doc(DOC(fiction_layouts_volume_of)).c_str());
 }
 
 }  // namespace pyfiction

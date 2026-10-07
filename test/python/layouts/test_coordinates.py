@@ -27,7 +27,6 @@ from mnt.pyfiction.layouts import (
     hexagonal_gate_layout,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
-    volume,
 )
 
 if TYPE_CHECKING:
@@ -214,9 +213,19 @@ def test_layout_layer_limit(make_layout: Callable, a: arrangement, layers: int) 
     assert layout.coordinates() == []
 
 
-def test_stacked_layout_is_not_exported() -> None:
-    """The layouts module exports Cartesian layouts without a stacked alias."""
+def test_removed_layout_apis_are_not_exported() -> None:
+    """The layouts module omits stacked layouts and volume APIs."""
     assert not hasattr(layouts, "stacked_cartesian_layout")
+    assert not hasattr(layouts, "volume")
+    for layout_type in (
+        cartesian_layout,
+        cartesian_gate_layout,
+        hexagonal_layout,
+        hexagonal_gate_layout,
+        shifted_cartesian_layout,
+        shifted_cartesian_gate_layout,
+    ):
+        assert not hasattr(layout_type, "volume")
 
 
 def test_layouts_reject_negative_extents():
