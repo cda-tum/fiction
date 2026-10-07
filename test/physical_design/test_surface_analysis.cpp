@@ -99,8 +99,9 @@ TEST_CASE("Dummy gate library traits", "[sidb-surface-analysis]")
 
 TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 {
-    static const cart_gate_clk_lyt gate_lyt{{3, 2}};  // 4 x 3 tiles of size 3 x 3 cells each
-    static const layout            cell_lyt{};        // makes for 12 x 9 cells
+    /** @brief Four-by-three grid of three-by-three-cell gate tiles. */
+    static const cart_gate_clk_lyt gate_lyt{cart_gate_clk_lyt::extent{4, 3, 1}};
+    static const layout            cell_lyt{};  // makes for 12 x 9 cells
 
     static const port_list<port_position> line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
     static const port_list<port_position> y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
@@ -227,8 +228,9 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 
 TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analysis]")
 {
+    /** @brief Single 60-by-46-cell Bestagon gate tile. */
     static const hex_gate_clk_lyt gate_lyt{
-        arrangement::EVEN_COLUMN, aspect_ratio<hex_gate_clk_lyt>{0, 0}};  // 1 x 1 tiles of size 60 x 46 cells each
+        arrangement::EVEN_COLUMN, hex_gate_clk_lyt::extent{1, 1, 1}};  // 1 x 1 tiles of size 60 x 46 cells each
     static const layout cell_lyt{};  // makes for exactly one gate of the Bestagon library
 
     layout defect_layout{cell_lyt};
