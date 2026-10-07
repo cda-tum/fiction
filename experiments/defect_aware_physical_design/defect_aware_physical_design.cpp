@@ -222,7 +222,7 @@ try
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
                        depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
                        gate_level_layout->width(), gate_level_layout->height(),
-                       area_of(gate_level_layout->dimensions()), gate_level_layout->num_gates(),
+                       area_of(gate_level_layout->get_extent()), gate_level_layout->num_gates(),
                        gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
                        mockturtle::to_seconds(exact_stats.time_total), *eq, dot_accurate_layout.num_dots(),
                        layout_area);

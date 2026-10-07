@@ -212,7 +212,7 @@ TEST_CASE("Layouts support only the ground and crossing layers", "[coordinate-co
             /** Layout with a supported layer count. */
             auto lyt = make_layout(layout_base::extent{2, 3, layers});
             CHECK(lyt.layers() == layers);
-            CHECK(lyt.clone().dimensions() == lyt.dimensions());
+            CHECK(lyt.clone().get_extent() == lyt.get_extent());
             CHECK_FALSE(lyt.is_crossing_layer({0, 0, -1}));
             CHECK_FALSE(lyt.is_crossing_layer({0, 0, 0}));
             CHECK(lyt.is_crossing_layer({0, 0, 1}));
@@ -221,15 +221,15 @@ TEST_CASE("Layouts support only the ground and crossing layers", "[coordinate-co
             {
                 CHECK_THROWS_AS(make_layout(layout_base::extent{2, 3, too_many}), std::out_of_range);
                 CHECK_THROWS_AS(lyt.resize({4, 5, too_many}), std::out_of_range);
-                CHECK(lyt.dimensions() == layout_base::extent{2, 3, layers});
+                CHECK(lyt.get_extent() == layout_base::extent{2, 3, layers});
             }
             /** Independent layout copy. */
             auto duplicate = lyt;
             CHECK_THROWS_AS(duplicate.resize({4, 5, 3}), std::out_of_range);
-            CHECK(duplicate.dimensions() == lyt.dimensions());
+            CHECK(duplicate.get_extent() == lyt.get_extent());
             CHECK_THROWS_AS(lyt.clone().resize({4, 5, 3}), std::out_of_range);
             lyt.resize({4, 5, 2});
-            CHECK(lyt.dimensions() == layout_base::extent{4, 5, 2});
+            CHECK(lyt.get_extent() == layout_base::extent{4, 5, 2});
             lyt.resize({0, 0, 0});
             CHECK(lyt.coordinates().empty());
         }
@@ -449,19 +449,19 @@ TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-regression
         /** @brief Gate layout whose size remains unchanged. */
         const gate_level_layout<geometry> gates{coordinates};
         /** Sizes retained by the source gate layout. */
-        const auto original = coordinates.dimensions();
+        const auto original = coordinates.get_extent();
 
         coordinates.resize({4, 4, 1});
-        CHECK(gates.dimensions() == original);
+        CHECK(gates.get_extent() == original);
         /** Independent geometry value. */
         auto copy = static_cast<const geometry&>(gates);
         copy.resize({5, 5, 1});
-        CHECK(gates.dimensions() == original);
+        CHECK(gates.get_extent() == original);
         /** Independent complete layout clone. */
         auto clone = gates.clone();
         clone.resize({6, 6, 2});
-        CHECK(gates.dimensions() == original);
-        CHECK(clone.dimensions() == layout_base::extent{6, 6, 2});
+        CHECK(gates.get_extent() == original);
+        CHECK(clone.get_extent() == layout_base::extent{6, 6, 2});
     };
 
     check_sizes(cartesian_layout{{4, 4, 2}});

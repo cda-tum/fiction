@@ -21,7 +21,7 @@ def test_cell_types_and_modes() -> None:
 
 
 def test_geometry_is_cartesian() -> None:
-    layout = qca_layout((10, 10, 2))
+    layout = qca_layout(extent=(10, 10, 2))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)
@@ -99,6 +99,6 @@ def test_clock_zones_and_synchronization_elements() -> None:
 
 def test_empty_geometry_has_absent_cell_bounds() -> None:
     layout = qca_layout()
-    assert layout.dimensions().width == 0
+    assert layout.get_extent().width == 0
     assert layout.coordinates() == []
     assert layout.bounding_box_2d() == (None, None)

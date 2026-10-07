@@ -16,7 +16,7 @@ still fits a signed 32-bit axis. Layouts accept at most two layers: the ground l
 and the crossing layer at `z = 1`. Construction and resize reject valid extents with larger layer counts with
 `std::out_of_range` in C++ and `IndexError` in Python. A rejected resize preserves the dimensions.
 `width()`, `height()`, and `layers()` return counts;
-`dimensions()` returns the extent and `last()` returns the optional final coordinate.
+`get_extent()` returns the extent and `last_coordinate()` returns the optional final coordinate.
 
 Gate-level layouts store object identity separately from placement coordinates. An editing object
 may lie outside the frame; physical design-rule checks validate frame membership.

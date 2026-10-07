@@ -138,13 +138,13 @@ def test_layout_layer_limit(make_layout: Callable, a: arrangement, layers: int) 
             make_layout((2, 3, too_many), a)
         with pytest.raises(IndexError):
             layout.resize((4, 5, too_many))
-        assert layout.dimensions() == Extent(2, 3, layers)
+        assert layout.get_extent() == Extent(2, 3, layers)
     duplicate = copy.copy(layout)
     with pytest.raises(IndexError):
         duplicate.resize((4, 5, 3))
-    assert duplicate.dimensions() == layout.dimensions()
+    assert duplicate.get_extent() == layout.get_extent()
     layout.resize((4, 5, 2))
-    assert layout.dimensions() == Extent(4, 5, 2)
+    assert layout.get_extent() == Extent(4, 5, 2)
     layout.resize((0, 0, 0))
     assert layout.coordinates() == []
 
@@ -216,9 +216,10 @@ def test_default_geometry_is_empty() -> None:
 
 
 def test_extent_tuple_conversion_and_checked_axes() -> None:
-    size = Extent(2, 3)
+    size = Extent(extent=(2, 3))
+    assert Extent(extent=size) == size
     assert (size.width, size.height, size.layers) == (2, 3, 1)
-    assert cartesian_layout(size).dimensions() == Extent((2, 3, 1))
+    assert cartesian_layout(size).get_extent() == Extent((2, 3, 1))
     assert cartesian_layout((2, 3, 0)).coordinates() == []
     assert cartesian_layout((2**31, 1)).last_coordinate() == coordinate(2**31 - 1, 0, 0)
     with pytest.raises(ValueError, match=r"negative|coordinate domain"):
@@ -229,9 +230,9 @@ def test_extent_tuple_conversion_and_checked_axes() -> None:
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: cartesian_layout((2, 3)), id="cartesian"),
-        pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, (2, 3)), id="hexagonal"),
-        pytest.param(lambda: shifted_cartesian_layout(arrangement.EVEN_ROW, (2, 3)), id="shifted_cartesian"),
+        pytest.param(lambda: cartesian_layout(extent=(2, 3)), id="cartesian"),
+        pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, extent=(2, 3)), id="hexagonal"),
+        pytest.param(lambda: shifted_cartesian_layout(arrangement.EVEN_ROW, extent=(2, 3)), id="shifted_cartesian"),
     ],
 )
 def test_geometry_copies_have_independent_sizes(
@@ -239,11 +240,11 @@ def test_geometry_copies_have_independent_sizes(
 ) -> None:
     layout = make_layout()
     duplicate = copy.copy(layout)
-    duplicate.resize((4, 5))
+    duplicate.resize(extent=(4, 5))
     assert layout.width() == 2
     assert duplicate.width() == 4
     deep = copy.deepcopy(layout)
-    deep.resize((6, 7))
+    deep.resize(extent=(6, 7))
     assert layout.height() == 3
     assert deep.height() == 7
 
@@ -261,11 +262,11 @@ def test_extent_rejects_sizes_outside_the_coordinate_domain(value: int) -> None:
 
 
 def test_sizes_and_coordinates_have_distinct_meanings() -> None:
-    assert area((2, 3)) == 6
+    assert area(extent=(2, 3)) == 6
     with pytest.raises(TypeError):
         cartesian_layout(coordinate(2, 3))  # ty: ignore[invalid-argument-type]  # deliberately a coordinate
     layout = cartesian_layout((2, 3))
-    size = layout.dimensions()
+    size = layout.get_extent()
     size.width = 4
     assert layout.width() == 2
 

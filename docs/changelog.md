@@ -201,7 +201,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - **Breaking:** Gate-level layouts now store placed objects with generation-checked IDs and typed ports. Replace tile-valued signals with object lookup and explicit input connections; copies are independent.
-  - **Breaking:** Layout frames now use width, height, and layer counts. Replace maximum-coordinate dimensions with extents; missing neighbors and empty bounds return optional values.
+  - **Breaking:** Layouts expose their frame through `get_extent()` in C++ and Python; Python constructors, `resize`, `area`, and `volume` use the `extent` keyword.
+  - **Breaking:** Layout frames now use width, height, and layer counts. Replace maximum coordinates with extent counts; missing neighbors and empty bounds return optional values.
   - **Breaking:** Gate-level layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
   - **Breaking:** QCA, molQCA, and iNML have dedicated layout types, `qca::layout`, `mol_qca::layout`, and
     `inml::layout`, which replace `cell_level_layout`. Each carries only what its technology needs, and copies are
@@ -244,6 +245,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
@@ -426,7 +428,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor
     are gone.
 
-  - **Breaking:** `coordinate()` denotes the origin, and coordinates accept the full signed 32-bit range. Layout dimensions
+  - **Breaking:** `coordinate()` denotes the origin, and coordinates accept the full signed 32-bit range. Layout extents
     use `Extent(width, height, layers)` counts. Missing neighbors and empty bounds return `None`; `is_valid()` and coordinate
     sentinels are gone.
 

@@ -59,7 +59,7 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
         .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
              DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
         .def(py::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), py::arg("arrangement"),
-             py::arg("dimensions"), DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
+             py::arg("extent"), DOC(fiction_layouts_hexagonal_layout_hexagonal_layout))
         .def(
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
@@ -70,11 +70,11 @@ void hexagonal_layout(nanobind::module_& m, const char* name)
         .def("width", &Lyt::width, "Returns the width count.")
         .def("height", &Lyt::height, "Returns the height count.")
         .def("layers", &Lyt::layers, "Returns the layers count.")
-        .def("dimensions", &Lyt::dimensions, "Returns the axis sizes.")
+        .def("get_extent", &Lyt::get_extent, "Returns the layout extent.")
         .def("last_coordinate", &Lyt::last_coordinate, "Returns the last coordinate, or None for empty geometry.")
         .def("contains_coordinate", &Lyt::contains_coordinate, py::arg("c"), "Tests the half-open geometry bounds.")
         .def("area", &Lyt::area, DOC(fiction_layouts_hexagonal_layout_area))
-        .def("resize", &Lyt::resize, py::arg("dimensions"), DOC(fiction_layouts_hexagonal_layout_resize))
+        .def("resize", &Lyt::resize, py::arg("extent"), DOC(fiction_layouts_hexagonal_layout_resize))
 
         .def("north", &Lyt::north, py::arg("c"), DOC(fiction_layouts_hexagonal_layout_north))
         .def("north_east", &Lyt::north_east, py::arg("c"), DOC(fiction_layouts_hexagonal_layout_north_east))

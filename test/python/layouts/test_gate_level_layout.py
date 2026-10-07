@@ -36,13 +36,20 @@ GateLayout: TypeAlias = cartesian_gate_layout | shifted_cartesian_gate_layout | 
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"), id="cartesian_gate_layout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "2DDWave", "Layout"),
+            lambda: cartesian_gate_layout(extent=(3, 3, 1), clocking_scheme="2DDWave", layout_name="Layout"),
+            id="cartesian_gate_layout",
+        ),
+        pytest.param(
+            lambda: shifted_cartesian_gate_layout(
+                arrangement.ODD_COLUMN, extent=(3, 3, 1), clocking_scheme="2DDWave", layout_name="Layout"
+            ),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout(
+                arrangement.EVEN_ROW, extent=(3, 3, 1), clocking_scheme="2DDWave", layout_name="Layout"
+            ),
             id="hexagonal_gate_layout",
         ),
     ],

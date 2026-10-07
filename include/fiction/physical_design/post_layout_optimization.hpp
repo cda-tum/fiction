@@ -855,7 +855,7 @@ class post_layout_optimization_impl
  * @param ps Parameters.
  * @param pst Statistics.
  * @throws std::invalid_argument If clocking or occupied geometry is invalid.
- * @throws std::overflow_error If dimensions leave no room for signed routing coordinates.
+ * @throws std::overflow_error If the extent leaves no room for signed routing coordinates.
  */
 template <typename Lyt>
 void post_layout_optimization(Lyt& lyt, post_layout_optimization_params ps = {},
@@ -872,7 +872,7 @@ void post_layout_optimization(Lyt& lyt, post_layout_optimization_params ps = {},
         lyt.height() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max() - 1) ||
         lyt.layers() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
     {
-        throw std::overflow_error("Layout dimensions leave no room for signed routing coordinates");
+        throw std::overflow_error("Layout extent leaves no room for signed routing coordinates");
     }
     lyt.foreach_node(
         [&](const auto id)

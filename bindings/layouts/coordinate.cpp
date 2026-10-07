@@ -86,7 +86,7 @@ void coordinate(nanobind::module_& m)
                     return;
                 }
 
-                throw std::runtime_error("Wrong number of dimensions provided for coordinate");
+                throw std::runtime_error("Wrong number of axes provided for coordinate");
             },
             py::arg("tuple_repr"),
             py::sig("def __init__(self, tuple_repr: tuple[int, int] | tuple[int, int, int]) -> None"))
@@ -130,20 +130,19 @@ void coordinate(nanobind::module_& m)
             { std::construct_at(self.p, width, height, layers); }, py::arg("width"), py::arg("height"),
             py::arg("layers") = 1,
             "Creates checked sizes. Two axes describe one layer. Each size lies between zero and 2147483648.")
-        .def(py::init<const py_extent&>(), py::arg("dimensions"))
+        .def(py::init<const py_extent&>(), py::arg("extent"))
         .def(
             "__init__",
-            [](py::pointer_and_handle<py_extent> self, const py::tuple& dimensions)
+            [](py::pointer_and_handle<py_extent> self, const py::tuple& extent)
             {
-                if (dimensions.size() != 2 && dimensions.size() != 3)
+                if (extent.size() != 2 && extent.size() != 3)
                 {
                     throw std::invalid_argument("An extent requires two or three axis sizes");
                 }
-                std::construct_at(self.p, py::cast<int64_t>(dimensions[0]), py::cast<int64_t>(dimensions[1]),
-                                  dimensions.size() == 3 ? py::cast<int64_t>(dimensions[2]) : 1);
+                std::construct_at(self.p, py::cast<int64_t>(extent[0]), py::cast<int64_t>(extent[1]),
+                                  extent.size() == 3 ? py::cast<int64_t>(extent[2]) : 1);
             },
-            py::arg("dimensions"),
-            py::sig("def __init__(self, dimensions: tuple[int, int] | tuple[int, int, int]) -> None"))
+            py::arg("extent"), py::sig("def __init__(self, extent: tuple[int, int] | tuple[int, int, int]) -> None"))
         .def_prop_rw(
             "width", [](const py_extent& self) { return self.width; }, [](py_extent& self, const int64_t value)
             { self.width = py_extent{value, 0}.width; }, "Checked width in coordinates.")
@@ -166,7 +165,7 @@ void coordinate_utility(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    m.def("area", &fiction::layouts::area_of, py::arg("dimensions"), DOC(fiction_layouts_area_of));
+    m.def("area", &fiction::layouts::area_of, py::arg("extent"), DOC(fiction_layouts_area_of));
 }
 
 }  // namespace pyfiction

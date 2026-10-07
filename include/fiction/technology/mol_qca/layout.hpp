@@ -143,7 +143,7 @@ class layout : public layouts::cell_grid<cell_type>
             cell_grid{extent{size.width, size.height, checked(size).layers == 0 ? 0u : 1u}, std::move(name)}
     {}
     /**
-     * Compares two layouts: same dimensions, cells, and names.
+     * Compares two layouts: same extent, cells, and names.
      *
      * @param other Right-hand side layout.
      * @return `true` iff both layouts are identical.

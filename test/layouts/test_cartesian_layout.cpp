@@ -71,9 +71,9 @@ TEST_CASE("Cartesian sizes and value copies", "[cartesian-layout][size-contract]
     const cartesian_layout original{{5, 4, 2}};
     auto                   copy = original;
     copy.resize({10, 9, 1});
-    CHECK(original.dimensions() == layout_base::extent{5, 4, 2});
-    CHECK(original.clone().dimensions() == original.dimensions());
-    CHECK(copy.dimensions() == layout_base::extent{10, 9, 1});
+    CHECK(original.get_extent() == layout_base::extent{5, 4, 2});
+    CHECK(original.clone().get_extent() == original.get_extent());
+    CHECK(copy.get_extent() == layout_base::extent{10, 9, 1});
     CHECK(original.width() == 5);
     CHECK(original.height() == 4);
     CHECK(original.layers() == 2);

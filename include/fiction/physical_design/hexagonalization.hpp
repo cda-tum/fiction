@@ -409,14 +409,14 @@ class hexagonalization_impl
             layout.height() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()) ||
             layout.layers() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
         {
-            throw std::overflow_error("Hexagonalization dimensions exceed the signed coordinate range");
+            throw std::overflow_error("Hexagonalization extent exceeds the signed coordinate range");
         }
-        // get Cartesian layout dimensions
+        // get Cartesian layout extent
         const auto layout_width  = static_cast<int32_t>(layout.width());
         const auto layout_height = static_cast<int32_t>(layout.height());
         const auto layout_depth  = (static_cast<int32_t>(layout.layers()) - 1);
 
-        // compute hexagonal layout dimensions based on Cartesian dimensions
+        // compute the hexagonal layout extent from the Cartesian extent
         const auto hex_height =
             detail::to_hex<CartLyt, HexLyt>({layout_width - 1, layout_height - 1, 0}, layout_height).y;
         const auto hex_width = detail::to_hex<CartLyt, HexLyt>({layout_width - 1, 0, 0}, layout_height).x;

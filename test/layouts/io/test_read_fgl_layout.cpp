@@ -2030,7 +2030,7 @@ TEST_CASE("FGL rejects more than two layers", "[read-fgl-layout]")
     /** Input with an unsupported layer extent. */
     std::stringstream stream{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, stream), fgl_parsing_error);
-    CHECK(target.dimensions() == layout_base::extent{2, 3, 1});
+    CHECK(target.get_extent() == layout_base::extent{2, 3, 1});
     CHECK(target.get_layout_name() == "kept");
 }
 

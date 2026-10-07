@@ -416,7 +416,7 @@ Raises:
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_components = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_header = R"doc(Writes format settings and dimensions as maximum indices.)doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_header = R"doc(Writes format settings and layout extent as maximum indices.)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_layout = R"doc(Writes occupied cells within the half-open geometry.)doc";
 
@@ -860,7 +860,7 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_co
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_entity = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_header = R"doc(Writes format settings and dimensions as maximum indices.)doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_header = R"doc(Writes format settings and layout extent as maximum indices.)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_layout = R"doc(Writes occupied cells within the half-open geometry.)doc";
 
@@ -1352,14 +1352,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_dimension = R"doc(Independent axis sizes.)doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_dimensions =
-R"doc(Returns:
-    Independent value of the axis sizes.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_cartesian_layout_east =
 R"doc(Returns the east neighbor when both coordinates lie inside the
 geometry.
@@ -1457,10 +1449,16 @@ Raises:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cartesian_layout_get_extent =
+R"doc(Returns:
+    Independent value of the layout extent.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cartesian_layout_ground_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout's ground
 layer between `start` and `stop`. The iteration order is the same as
-for the coordinates function but without the z dimension.
+for the coordinates function but without the z axis.
 
 Args:
     start: First coordinate to include in the range of all ground
@@ -1744,6 +1742,8 @@ R"doc(Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cartesian_layout_layout_extent = R"doc(Independent axis sizes.)doc";
+
 static const char *mkd_doc_fiction_layouts_cartesian_layout_north =
 R"doc(Returns the north neighbor when both coordinates lie inside the
 geometry.
@@ -1934,7 +1934,7 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_cell_grid_2 =
-R"doc(Copies a grid, including its dimensions.
+R"doc(Copies a grid, including its extent.
 
 Args:
     other: Grid to copy.
@@ -2109,7 +2109,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_operator_assign =
-R"doc(Copies a grid, including its dimensions.
+R"doc(Copies a grid, including its extent.
 
 Args:
     other: Grid to copy.
@@ -2131,7 +2131,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_operator_eq =
-R"doc(Compares two grids: same dimensions, name, cell types, and cell names.
+R"doc(Compares two grids: same extent, name, cell types, and cell names.
 
 Args:
     other: Right-hand side grid.
@@ -4196,14 +4196,6 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_y = 
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_z = R"doc(z coordinate.)doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_dimension = R"doc(Independent axis sizes.)doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_dimensions =
-R"doc(Returns:
-    Independent value of the axis sizes.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_east =
 R"doc(Returns the east neighbor when both coordinates lie inside the
 geometry.
@@ -4321,10 +4313,16 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_get_extent =
+R"doc(Returns:
+    Independent value of the layout extent.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_ground_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout's ground
 layer between `start` and `stop`. The iteration order is the same as
-for the coordinates function but without the z dimension.
+for the coordinates function but without the z axis.
 
 Args:
     start: First coordinate to include in the range of all ground
@@ -4682,6 +4680,8 @@ R"doc(Returns:
     Number of layers.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_layout_extent = R"doc(Independent axis sizes.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_north =
 R"doc(Returns the north neighbor when both coordinates lie inside the
@@ -5572,7 +5572,7 @@ given. Negative axes clamp to zero. An axis beyond its size wraps to
 zero and advances the next axis once.
 
 Args:
-    dimension: Half-open bounds.
+    size: Half-open bounds.
     start: First coordinate, or the end state.
 
 Raises:
@@ -5800,7 +5800,7 @@ R"doc(Returns a copy of the given cell grid layout whose cells are shifted
 towards the origin, so that the smallest occupied x- and y-coordinates
 become 0. Cell types, names, and, where the layout has them, cell
 modes move with their cells; layers, the layout name, and the clocking
-stay unchanged. The dimensions shrink by the shift.
+stay unchanged. The extent shrinks by the shift.
 
 Args:
     lyt: The layout to normalize.
@@ -6497,7 +6497,7 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_mol_qca_layout_operator_eq =
-R"doc(Compares two layouts: same dimensions, cells, and names.
+R"doc(Compares two layouts: same extent, cells, and names.
 
 Args:
     other: Right-hand side layout.
@@ -9413,7 +9413,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_worker_progress = R"doc(Serializes the active candidate dimensions of each solver worker.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_worker_progress = R"doc(Serializes the active candidate extents of each solver worker.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_extend_output_position =
 R"doc(Moves an output and inserts a wire at its former coordinate,
@@ -9980,7 +9980,7 @@ Args:
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_print_placement_info =
 R"doc(Outputs placement information, including the current runtime, the
 number of evaluated paths in the search space graphs and the layout
-dimensions.
+extent.
 
 Args:
     lyt: Current layout.
@@ -10843,7 +10843,7 @@ R"doc(Constraints of this wiring-cut search, passed to path searches on this
 layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_wiring_reduction_layout =
-R"doc(Constructs a search grid with zero-origin, half-open dimensions.
+R"doc(Constructs a search grid with a zero-origin, half-open extent.
 
 Args:
     ar: Search-grid extent. Defaults to an empty extent.
@@ -11058,8 +11058,8 @@ Note:
     If `upper_bound_area` and (either) `upper_bound_x` or
     `upper_bound_y` are set, the imposed search space restrictions are
     cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x
-    == 4`, all aspect ratios with an x-dimension of more than 4 *and*
-    a total area of more than 20 will be skipped.)doc";
+    == 4`, all aspect ratios with a width of more than 4 *and* a total
+    area of more than 20 will be skipped.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_x = R"doc(Number of tiles to use as an upper bound in x direction.)doc";
 
@@ -12854,7 +12854,7 @@ Template Args:
 Raises:
     std::invalid_argument: If clocking or occupied geometry is
                            invalid.
-    std::overflow_error: If dimensions leave no room for signed
+    std::overflow_error: If the extent leaves no room for signed
                          routing coordinates.
 
 Note:
@@ -13059,7 +13059,7 @@ Template Args:
 Raises:
     std::invalid_argument: If clocking or occupied geometry is
                            invalid.
-    std::overflow_error: If dimensions leave no room for signed
+    std::overflow_error: If the extent leaves no room for signed
                          routing coordinates.
 
 )doc";
