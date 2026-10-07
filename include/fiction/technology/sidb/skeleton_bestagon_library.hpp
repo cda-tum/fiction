@@ -126,13 +126,6 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
      * @return Incoming and outgoing port directions of the tile.
      * @throws std::invalid_argument if `lyt` shifts columns instead of rows.
      */
-    /**
-     * Routes the physical connector ports of an occupied tile.
-     * @tparam Lyt Gate-level layout type.
-     * @param lyt Layout.
-     * @param t Occupied tile.
-     * @return Physical connector ports.
-     */
     template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
