@@ -19,12 +19,14 @@
 #include "utils/allocation_failure.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <algorithm>
 #include <new>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -99,7 +101,7 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
  * @param lyt Layout. @param t Retained tile.
  */
 template <typename Lyt>
-void check_non_empty_tile(const Lyt& lyt, const tile<Lyt>& t) noexcept
+void check_non_empty_tile(const Lyt& lyt, const tile<Lyt>& t)
 {
     CHECK(!lyt.is_empty_tile(t));
     CHECK(lyt.has_no_incoming_signal(t));
@@ -188,7 +190,15 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     const layout_coordinate_path<cart_gate_clk_lyt> second{{0, 0}, {1, 0}, {4, 2}};
     route_path(layout, second, {gate.object, 1});
     CHECK_FALSE(layout.source({gate.object, 0}));
-    const auto second_wire = *layout.source({gate.object, 1});
+    /** @brief Routed source connected to the second input port. */
+    const auto second_source = layout.source({gate.object, 1});
+    REQUIRE(second_source.has_value());
+    if (!second_source.has_value())
+    {
+        return;
+    }
+    /** @brief Retained identity of the second routed wire. */
+    const auto second_wire = *second_source;
     CHECK(layout.source({second_wire.object, 0}) == a);
     const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {0, 1}, {4, 2}};
     route_path(layout, first, {gate.object, 0});
@@ -230,8 +240,12 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
     const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {1, 0}, {4, 1}};
     route_path(layout, second, {gate.object, 1});
     route_path(layout, first, {gate.object, 0});
-    CHECK(layout.source({layout.source({gate.object, 0})->object, 0}) == a);
-    CHECK(layout.source({layout.source({gate.object, 1})->object, 0}) == b);
+    /** @brief Routed source connected to the first input port. */
+    const auto first_source = layout.source({gate.object, 0});
+    /** @brief Routed source connected to the second input port. */
+    const auto second_source = layout.source({gate.object, 1});
+    CHECK((first_source.has_value() && layout.source({first_source->object, 0}) == a));
+    CHECK((second_source.has_value() && layout.source({second_source->object, 0}) == b));
     CHECK(layout.is_lt(gate.object));
     const auto objectives = extract_routing_objectives(layout);
     CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 1}, 0}) != objectives.end());

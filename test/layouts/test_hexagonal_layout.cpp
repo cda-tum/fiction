@@ -23,13 +23,18 @@
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/traits.hpp>
 
+#include <cstdint>
+#include <limits>
 #include <set>
 #include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
 
-/** Checks the geometry contract for a layout type. */
+/**
+ * @brief Checks the geometry contract for a layout type.
+ * @tparam Lyt Coordinate layout type.
+ */
 template <typename Lyt>
 void check_common_traits()
 {
@@ -94,7 +99,11 @@ TEST_CASE("Deep copy hexagonal layout", "[hexagonal-layout]")
     CHECK(copy.layers() == 1);
 }
 
-/** Checks the geometry contract for a layout type. */
+/**
+ * @brief Checks the geometry contract for a layout type.
+ * @tparam Lyt Coordinate layout type.
+ * @param a Arrangement of the shifted rows or columns.
+ */
 template <typename Lyt>
 void check_identity_conversion(const arrangement a)
 {
@@ -232,11 +241,16 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     }
 }
 
-/** Checks the geometry contract for a layout type. */
+/**
+ * @brief Checks the geometry contract for a layout type.
+ * @tparam Lyt Coordinate layout type.
+ * @param a Arrangement of the shifted rows or columns.
+ */
 template <typename Lyt>
 void check_visited_coordinates(const arrangement a)
 {
-    typename Lyt::extent ar{10, 10, 2};
+    /** @brief Extent whose coordinate iteration is checked. */
+    const typename Lyt::extent ar{10, 10, 2};
 
     Lyt layout{a, ar};
 

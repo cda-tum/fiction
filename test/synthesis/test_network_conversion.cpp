@@ -39,6 +39,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <array>
+#include <string>
 #include <vector>
 
 using namespace fiction;

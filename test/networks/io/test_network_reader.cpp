@@ -102,8 +102,9 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
     const auto& network = *reader.get_networks().front();
     CHECK(network.num_pis() == 3);
     REQUIRE(network.num_pos() == 6);
-    network.foreach_pi([&](const auto pi, const auto index)
-                       { CHECK(network.get_name(network.make_signal(pi)) == std::array{"a", "b", "unused"}[index]); });
+    network.foreach_pi(
+        [&](const auto pi, const auto index)
+        { CHECK(network.get_name(network.make_signal(pi)) == std::array{"a", "b", "unused"}.at(index)); });
     const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
         network, mockturtle::default_simulator<kitty::dynamic_truth_table>{3});
     const std::array functions{"00", "ff", "55", "66", "44", "aa"};
@@ -111,9 +112,9 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
     for (std::size_t index{}; index < functions.size(); ++index)
     {
         kitty::dynamic_truth_table expected{3};
-        kitty::create_from_hex_string(expected, functions[index]);
-        CHECK(actual[index] == expected);
-        CHECK(network.get_output_name(static_cast<uint32_t>(index)) == names[index]);
+        kitty::create_from_hex_string(expected, functions.at(index));
+        CHECK(actual.at(index) == expected);
+        CHECK(network.get_output_name(static_cast<uint32_t>(index)) == names.at(index));
     }
 }
 

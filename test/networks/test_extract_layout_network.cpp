@@ -20,7 +20,6 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
-#include <kitty/operations.hpp>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 

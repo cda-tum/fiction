@@ -185,7 +185,7 @@ TEST_CASE("Equal coordinates hash equally", "[coordinate-contracts]")
 TEST_CASE("Layouts check sizes against the signed coordinate domain", "[coordinate-contracts]")
 {
     /** Largest axis size supported by the coordinate domain. */
-    constexpr uint64_t max_size = uint64_t{1} << 31;
+    constexpr uint64_t max_size = uint64_t{1} << 31u;
     CHECK_THROWS_AS((cartesian_layout{layout_base::extent{-1, 0, 0}}), std::invalid_argument);
     CHECK_THROWS_AS((cartesian_layout{layout_base::extent{0, max_size + 1, 0}}), std::invalid_argument);
     CHECK_THROWS_AS((hexagonal_layout{arrangement::ODD_ROW, {0, -1, 0}}), std::invalid_argument);
@@ -403,7 +403,8 @@ TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-regression
     {
         /** Geometry copied into the gate layout. */
         using geometry = decltype(coordinates);
-        gate_level_layout<geometry> gates{coordinates};
+        /** @brief Gate layout whose size remains unchanged. */
+        const gate_level_layout<geometry> gates{coordinates};
         /** Sizes retained by the source gate layout. */
         const auto original = coordinates.dimensions();
 

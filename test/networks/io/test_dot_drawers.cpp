@@ -28,6 +28,7 @@
 #include <fiction/networks/io/dot_drawers.hpp>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
@@ -1108,8 +1109,11 @@ TEST_CASE("Layout DOT progress retains areas above the unsigned 32-bit range", "
     /** Interrupts rendering after progress starts to avoid enumerating the large frame. */
     struct interrupted_drawer : gate_layout_cartesian_drawer<gate_layout>
     {
-        /** @throws std::runtime_error Stops drawing at the first tile. */
-        std::string tile_label(const gate_layout&, const gate_layout::tile&) const override
+        /**
+         * @brief Stops drawing at the first tile.
+         * @throws std::runtime_error Always interrupts drawing.
+         */
+        [[nodiscard]] std::string tile_label(const gate_layout&, const gate_layout::tile&) const override
         {
             throw std::runtime_error{"drawing interrupted"};
         }

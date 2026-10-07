@@ -276,7 +276,7 @@ TEST_CASE("Clock determination commits complete clocking values", "[determine-cl
     const auto original_scheme = original.get_clocking_scheme();
     for (std::size_t failure{};; ++failure)
     {
-        REQUIRE(failure < allocation_failure_attempt_limit);
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
         auto candidate = original;
         try
         {

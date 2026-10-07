@@ -24,15 +24,19 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/post_layout_optimization.hpp>
+#include <fiction/physical_design/routing_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cstdint>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -257,11 +261,15 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         params.planar_optimization = true;
         post_layout_optimization<gate_layout>(layout, params, &stats);
-        CHECK(!layout.is_inv(*layout.find_object({1, 0})));
+        /** @brief Object at the position whose inverter has been moved. */
+        const auto planar_object = layout.find_object({1, 0});
+        CHECK((planar_object.has_value() && !layout.is_inv(*planar_object)));
 
         params.planar_optimization = false;
         post_layout_optimization<gate_layout>(layout, params, &stats);
-        CHECK(layout.is_inv(*layout.find_object({1, 0})));
+        /** @brief Object at the position whose inverter has been restored. */
+        const auto crossing_object = layout.find_object({1, 0});
+        CHECK((crossing_object.has_value() && layout.is_inv(*crossing_object)));
     }
 }
 

@@ -26,7 +26,6 @@
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -162,12 +161,20 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
         CHECK(lyt.get_layout_name() == "Test");
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(lyt.is_pi_tile({0, 1}));
-        CHECK(lyt.get_name(*lyt.find_object({0, 1})) == "pi0");
+        /** @brief Object whose label is checked at the expected position. */
+        const auto primary_input_0 = lyt.find_object({0, 1});
+        CHECK((primary_input_0.has_value() && lyt.get_name(*primary_input_0) == "pi0"));
         CHECK(lyt.is_pi_tile({1, 0}));
-        CHECK(lyt.get_name(*lyt.find_object({1, 0})) == "pi1");
-        CHECK(lyt.is_and(*lyt.find_object({1, 1})));
+        /** @brief Object whose label is checked at the expected position. */
+        const auto primary_input_1 = lyt.find_object({1, 0});
+        CHECK((primary_input_1.has_value() && lyt.get_name(*primary_input_1) == "pi1"));
+        /** @brief Gate restored at the expected position. */
+        const auto gate = lyt.find_object({1, 1});
+        CHECK((gate.has_value() && lyt.is_and(*gate)));
         CHECK(lyt.is_po_tile({2, 1}));
-        CHECK(lyt.get_name(*lyt.find_object({2, 1})) == "po0");
+        /** @brief Object whose label is checked at the expected position. */
+        const auto primary_output = lyt.find_object({2, 1});
+        CHECK((primary_output.has_value() && lyt.get_name(*primary_output) == "po0"));
     };
 
     using gate_layout = gate_level_layout<cartesian_layout>;
@@ -262,12 +269,20 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
         CHECK(lyt.get_layout_name() == "Test");
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(lyt.is_pi_tile({0, 1}));
-        CHECK(lyt.get_name(*lyt.find_object({0, 1})) == "pi0");
+        /** @brief Object whose label is checked at the expected position. */
+        const auto primary_input_0 = lyt.find_object({0, 1});
+        CHECK((primary_input_0.has_value() && lyt.get_name(*primary_input_0) == "pi0"));
         CHECK(lyt.is_pi_tile({1, 0}));
-        CHECK(lyt.get_name(*lyt.find_object({1, 0})) == "pi1");
-        CHECK(lyt.is_le(*lyt.find_object({1, 1})));
+        /** @brief Object whose label is checked at the expected position. */
+        const auto primary_input_1 = lyt.find_object({1, 0});
+        CHECK((primary_input_1.has_value() && lyt.get_name(*primary_input_1) == "pi1"));
+        /** @brief Gate restored at the expected position. */
+        const auto gate = lyt.find_object({1, 1});
+        CHECK((gate.has_value() && lyt.is_le(*gate)));
         CHECK(lyt.is_po_tile({2, 1}));
-        CHECK(lyt.get_name(*lyt.find_object({2, 1})) == "po0");
+        /** @brief Object whose label is checked at the expected position. */
+        const auto primary_output = lyt.find_object({2, 1});
+        CHECK((primary_output.has_value() && lyt.get_name(*primary_output) == "po0"));
     };
 
     using gate_layout = gate_level_layout<cartesian_layout>;
@@ -1833,8 +1848,12 @@ TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout
     CHECK(restored.get_layout_name() == original.get_layout_name());
     CHECK(restored.num_pis() == 1);
     CHECK(restored.num_pos() == 1);
-    CHECK(restored.get_name(*restored.find_object({0, 0, 0})) == "in<&>");
-    CHECK(restored.get_name(*restored.find_object({1, 0, 0})) == "out<&>");
+    /** @brief Object whose label is checked at the expected position. */
+    const auto restored_input = restored.find_object({0, 0, 0});
+    CHECK((restored_input.has_value() && restored.get_name(*restored_input) == "in<&>"));
+    /** @brief Object whose label is checked at the expected position. */
+    const auto restored_output = restored.find_object({1, 0, 0});
+    CHECK((restored_output.has_value() && restored.get_name(*restored_output) == "out<&>"));
     CHECK(restored.num_se() == 2);
     CHECK(restored.get_synchronization_element({0, 0, 0}) == 2);
     CHECK(restored.get_synchronization_element({1, 0, 0}) == 255);
@@ -1937,8 +1956,16 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
         const auto        restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
         CHECK(restored.get_input_name(0).empty());
         CHECK(restored.get_output_name(0).empty());
-        const auto output = *restored.find_object({1, 0, 0});
-        CHECK(restored.get_tile(restored.source({output, 0})->object) == (cart_gate_clk_lyt::tile{0, 0, 0}));
+        /** @brief Output object restored from the destination-first XML. */
+        const auto output = restored.find_object({1, 0, 0});
+        REQUIRE(output.has_value());
+        if (!output.has_value())
+        {
+            return;
+        }
+        /** @brief Source connected to the restored output. */
+        const auto source = restored.source({*output, 0});
+        CHECK((source.has_value() && restored.get_tile(source->object) == cart_gate_clk_lyt::tile{0, 0, 0}));
     }
     SECTION("Missing input")
     {
@@ -2011,7 +2038,9 @@ TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read
     std::stringstream malformed{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
     CHECK(target.get_layout_name() == "kept");
-    CHECK(target.output(*target.find_object({0, 0})) == id);
+    /** @brief Object retained after the failed read. */
+    const auto retained = target.find_object({0, 0});
+    CHECK((retained.has_value() && target.output(*retained) == id));
     CHECK(target.is_obstructed_coordinate({-4, -5, -6}));
     CHECK(target.is_obstructed_connection({-4, -5, -6}, {7, 8, 9}));
 }
@@ -2055,7 +2084,9 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
     std::stringstream malformed{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
     CHECK(target.get_layout_name() == "kept");
-    CHECK(target.output(*target.find_object({0, 0})) == kept);
+    /** @brief Object retained after the failed read. */
+    const auto retained = target.find_object({0, 0});
+    CHECK((retained.has_value() && target.output(*retained) == kept));
     CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
     std::stringstream rejected{xml};
     CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(rejected), fgl_parsing_error);

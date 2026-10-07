@@ -24,13 +24,19 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/physical_design/wiring_reduction.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+
+#include <algorithm>
+#include <cstdint>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;

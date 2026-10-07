@@ -21,10 +21,12 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/traits.hpp>
 
+#include <cstdint>
 #include <type_traits>
 
 using namespace fiction;
@@ -191,7 +193,7 @@ TEST_CASE("QCA ONE rejects an unoccupied tile", "[qca-one-library]")
 TEST_CASE("QCA ONE vias in a sparse frame", "[qca-one-library]")
 {
     /** Sparse geometry spanning the complete nonnegative x domain. */
-    qca::layout layout{{uint32_t{1} << 31, 8, 2}};
+    qca::layout layout{{uint32_t{1} << 31u, 8, 2}};
     layout.assign_cell_type({4, 1, 1}, cell_type::NORMAL);
     layout.assign_cell_type({4, 2, 1}, cell_type::NORMAL);
     layout.assign_cell_type({4, 3, 1}, cell_type::NORMAL);

@@ -33,6 +33,7 @@
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
+#include <lorina/common.hpp>
 #include <lorina/verilog.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -46,7 +47,9 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <string>
 
 using namespace fiction;
@@ -66,8 +69,9 @@ using namespace fiction::synthesis;
 // J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2024
 // (https://ieeexplore.ieee.org/abstract/document/10628962).
 
-/** @brief Run the published circuit-design experiment. */
+/** @brief Run the published circuit-design experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
+try
 {
     using gate_lyt = hex_gate_clk_lyt;
 
@@ -214,6 +218,13 @@ int main()
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }
 
 #else  // FICTION_Z3_SOLVER

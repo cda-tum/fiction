@@ -31,7 +31,9 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
 #include <string>
 
@@ -55,8 +57,9 @@ Ntk read_ntk(const std::string& name)
     return network;
 }
 
-/** @brief Run the experiment. @return Process exit status. */
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
+try
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
 
@@ -129,4 +132,11 @@ int main()
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

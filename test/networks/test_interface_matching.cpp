@@ -23,6 +23,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 using namespace fiction;
@@ -49,13 +50,16 @@ TEST_CASE("Interface matching uses unique names before positional remainders", "
 
 TEST_CASE("A name duplicated on either side falls back to position", "[interface-matching]")
 {
-    mockturtle::names_view<mockturtle::klut_network> left{}, right{};
-    left.create_pi("a");
-    left.create_pi("b");
-    right.create_pi("b");
-    right.create_pi("b");
-    CHECK(match_interfaces(left, right).inputs == std::vector<uint32_t>{0, 1});
-    CHECK(match_interfaces(right, left).inputs == std::vector<uint32_t>{0, 1});
+    /** @brief Network with unique terminal names. */
+    mockturtle::names_view<mockturtle::klut_network> unique_names{};
+    /** @brief Network whose repeated terminal name falls back to position. */
+    mockturtle::names_view<mockturtle::klut_network> duplicate_names{};
+    unique_names.create_pi("a");
+    unique_names.create_pi("b");
+    duplicate_names.create_pi("b");
+    duplicate_names.create_pi("b");
+    CHECK(match_interfaces(unique_names, duplicate_names).inputs == std::vector<uint32_t>{0, 1});
+    CHECK(match_interfaces(duplicate_names, unique_names).inputs == std::vector<uint32_t>{0, 1});
 }
 
 TEST_CASE("Unnamed interfaces match in declared order and unequal sizes fail", "[interface-matching]")

@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <catch2/catch_test_macros.hpp>
-
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/inml/layout.hpp>
@@ -31,7 +29,6 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/traits.hpp>
 
 namespace blueprints
 {

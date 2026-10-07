@@ -45,7 +45,9 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <cstdlib>     // exit codes
+#include <cstdio>
+#include <cstdlib>  // exit codes
+#include <exception>
 #include <filesystem>  // filesystem access
 #include <iostream>    // output
 #include <string>      // strings
@@ -105,9 +107,10 @@ void print_cell_layout_properties(const qca::layout& cell_lyt)
         << '\n';
 }
 
-/** @brief Run layout synthesis and export. @param argc Argument count. @param argv Arguments. @return Process exit
- * status. */
+/** @brief Run layout synthesis and export. @param argc Argument count. @param argv Arguments. @return EXIT_SUCCESS on
+ * success, EXIT_FAILURE on error. */
 int main(int argc, char* argv[])
+try
 {
     // check arguments
     if (argc == 1)
@@ -121,7 +124,7 @@ int main(int argc, char* argv[])
     /**************************************************************/
 
     // convert input to a file path
-    std::filesystem::path file_path{
+    const std::filesystem::path file_path{
         argv[1]};  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic): argc validates argv[1].
 
     // check if file path exists
@@ -306,6 +309,13 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
 
 #else  // FICTION_Z3_SOLVER
 
@@ -314,7 +324,7 @@ int main(int argc, char* argv[])
 #include <cstdlib>
 #include <iostream>
 
-/** @brief Run the experiment. @return Process exit status. */
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code\n";

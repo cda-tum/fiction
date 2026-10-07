@@ -21,6 +21,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>       // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                    // SMT-based physical design of FCN layouts
@@ -34,7 +35,8 @@
 #include <fiction/types.hpp>                                    // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
-#include <fmt/format.h>                                        // output formatting
+#include <fmt/format.h>  // output formatting
+#include <lorina/common.hpp>
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
 #include <lorina/verilog.hpp>                                  // Verilog file parsing
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
@@ -52,7 +54,9 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -71,8 +75,9 @@ using namespace fiction::verification;
 // NOTE: You can find the surface data in the following repository:
 // https://github.com/cda-tum/sidb-defect-aware-physical-design
 
-/** @brief Run the published circuit-design experiment. */
+/** @brief Run the published circuit-design experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
+try
 {
     using gate_lyt = hex_gate_clk_lyt;
 
@@ -212,7 +217,7 @@ int main()
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
                        depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
                        gate_level_layout->width(), gate_level_layout->height(),
-                       gate_level_layout->width() * gate_level_layout->height(), gate_level_layout->num_gates(),
+                       area_of(gate_level_layout->dimensions()), gate_level_layout->num_gates(),
                        gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
                        mockturtle::to_seconds(exact_stats.time_total), *eq, dot_accurate_layout.num_dots(),
                        layout_area);
@@ -230,6 +235,13 @@ int main()
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }
 
 #else  // FICTION_Z3_SOLVER

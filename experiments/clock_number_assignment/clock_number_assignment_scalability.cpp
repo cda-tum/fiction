@@ -26,6 +26,7 @@
 #include <fiction/verification/equivalence_checking.hpp>     // SAT-based equivalence checking
 
 #include <fmt/format.h>  // output formatting
+#include <lorina/common.hpp>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/mapper.hpp>   // technology mapping
 #include <mockturtle/io/genlib_reader.hpp>    // call-backs for the GENLIB format
@@ -34,7 +35,9 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -47,16 +50,23 @@ using namespace fiction::physical_design;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
+/**
+ * @brief Assigns clock zero to every tile in the declared frame.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout whose clock numbers are cleared.
+ * @throws std::bad_alloc If an override cannot be allocated.
+ */
 template <typename Lyt>
-void remove_clocking(Lyt& lyt) noexcept
+void remove_clocking(Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
-/** @brief Run the experiment. @return Process exit status. */
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
+try
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 
@@ -132,4 +142,16 @@ int main()
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
+catch (...)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed with an unknown exception\n", stderr));
+    return EXIT_FAILURE;
 }

@@ -29,6 +29,7 @@
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/types.hpp>
 
+#include <cstdint>
 #include <optional>
 #include <stdexcept>
 #include <tuple>

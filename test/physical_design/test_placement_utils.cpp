@@ -21,6 +21,7 @@
 #include <fiction/physical_design/placement_utils.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;

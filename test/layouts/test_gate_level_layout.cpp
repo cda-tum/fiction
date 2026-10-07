@@ -20,17 +20,25 @@
 #include "utils/allocation_failure.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 
+#include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <new>
 #include <set>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -101,10 +109,13 @@ TEST_CASE("Connections expose declared ports despite physical violations", "[gat
 
 TEST_CASE("Empty layouts own no implicit constants and require placement", "[gate-layout-editing]")
 {
-    gate_level_layout<cartesian_layout> lyt{};
+    /** @brief Native layout type whose creation API requires placement. */
+    using layout = gate_level_layout<cartesian_layout>;
+    /** @brief Empty layout without implicit constant objects. */
+    const layout lyt{};
     CHECK(lyt.size() == 0);
-    CHECK_FALSE(mockturtle::is_network_type_v<decltype(lyt)>);
-    static_assert(!std::is_invocable_v<decltype(&decltype(lyt)::create_pi), decltype(lyt)&, const std::string&>);
+    CHECK_FALSE(mockturtle::is_network_type_v<layout>);
+    static_assert(!std::is_invocable_v<decltype(&layout::create_pi), layout&, const std::string&>);
     CHECK(lyt.size() == 0);
 }
 
@@ -115,11 +126,15 @@ TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
     source.create_pi("kept", {1, 0});
     source.remove(removed.object);
     auto destination = std::move(source);
+    // The layout contract permits moved-from reuse.
+    // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move,hicpp-invalid-access-moved)
     REQUIRE(source.is_empty());
     const auto reused = source.create_pi("reused", {0, 0});
     CHECK(source.contains(reused.object));
     CHECK(destination.num_pis() == 1);
     source = std::move(destination);
+    // The layout contract permits moved-from reuse.
+    // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move,hicpp-invalid-access-moved)
     REQUIRE(destination.is_empty());
     CHECK(destination.create_pi("new", {2, 0}).object.generation != 0);
     CHECK(source.get_input_name(0) == "kept");
@@ -546,7 +561,9 @@ TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout-ed
     {
         const auto                 gate = (lyt.*create)(a, b, {x++, 1});
         kitty::dynamic_truth_table expected{2};
-        kitty::create_from_words(expected, &literal, &literal + 1);
+        /** @brief The truth-table word supplied to the constructor. */
+        const std::array words{literal};
+        kitty::create_from_words(expected, words.cbegin(), words.cend());
         CHECK(lyt.node_function(gate.object) == expected);
         CHECK(lyt.source({gate.object, 0}) == a);
         CHECK(lyt.source({gate.object, 1}) == b);
@@ -636,19 +653,24 @@ TEST_CASE("Moved-from layouts recover from interrupted cache initialization", "[
     using layout = gate_level_layout<cartesian_layout>;
     for (std::size_t failure = 0;; ++failure)
     {
-        REQUIRE(failure < allocation_failure_attempt_limit);
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
         layout     source{{4, 4}};
         const auto original = source.create_pi("original", {0, 0});
-        layout     destination{std::move(source)};
-        bool       created{};
+        /** @brief Destination that retains the original object after moving the layout. */
+        const layout destination{std::move(source)};
+        bool         created{};
         allocation_budget = failure;
         try
         {
+            // The layout contract permits moved-from reuse.
+            // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move,hicpp-invalid-access-moved)
             source.create_pi("first", {0, 0});
             created = true;
         }
         catch (const std::bad_alloc&)
-        {}
+        {
+            created = false;
+        }
         allocation_budget.reset();
         source.clear_tile({0, 0});
         const auto a    = source.create_pi("a", {0, 0});
@@ -664,4 +686,43 @@ TEST_CASE("Moved-from layouts recover from interrupted cache initialization", "[
             break;
         }
     }
+}
+
+TEST_CASE("Object visitors accept move-only lvalues and temporaries", "[gate-layout-editing]")
+{
+    /** @brief Layout with enough live objects to test early termination. */
+    gate_level_layout<cartesian_layout> lyt{{3, 1, 1}};
+    lyt.create_pi("a", {0, 0});
+    lyt.create_pi("b", {1, 0});
+    lyt.create_pi("c", {2, 0});
+
+    /** @brief Counts visits and stops after two objects. */
+    struct move_only_visitor
+    {
+        /** @brief Owns the call count. */
+        std::unique_ptr<uint32_t> calls;
+        /** @brief Reports calls externally. */
+        uint32_t& observed;
+        /**
+         * @brief Visits as an lvalue and stops after two objects.
+         * @return Whether another object should be visited.
+         */
+        bool operator()(layout_object_id) &
+        {
+            observed = ++*calls;
+            return observed < 2;
+        }
+    };
+
+    /** @brief Visits reported by the lvalue callback. */
+    uint32_t observed{};
+    /** @brief Move-only callback passed as an lvalue. */
+    move_only_visitor visitor{.calls = std::make_unique<uint32_t>(0), .observed = observed};
+    lyt.foreach_node(visitor);
+    CHECK(observed == 2);
+
+    /** @brief Visits reported by the temporary callback. */
+    uint32_t observed_temporary{};
+    lyt.foreach_node(move_only_visitor{.calls = std::make_unique<uint32_t>(0), .observed = observed_temporary});
+    CHECK(observed_temporary == 2);
 }

@@ -19,6 +19,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 

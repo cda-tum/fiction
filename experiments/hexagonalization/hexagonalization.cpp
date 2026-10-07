@@ -30,8 +30,10 @@
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
-#include <fmt/format.h>                                        // output formatting
-#include <lorina/genlib.hpp>                                   // Genlib file parsing
+#include <fmt/format.h>  // output formatting
+#include <lorina/common.hpp>
+#include <lorina/genlib.hpp>  // Genlib file parsing
+#include <lorina/verilog.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
@@ -44,7 +46,9 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -57,8 +61,9 @@ using namespace fiction::sidb;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
-/** @brief Run the experiment. @return Process exit status. */
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
+try
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
     using hex_lyt  = hex_gate_clk_lyt;
@@ -194,4 +199,11 @@ int main()
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

@@ -23,6 +23,7 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -31,10 +32,10 @@
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/traits.hpp>
 
-#include <cstddef>
 #include <cstdint>
+#include <optional>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -66,7 +67,7 @@ static void check_no_explicit_obstructions(const HexLyt& hex_layout)
                             continue;
                         }
                         CHECK(hex_layout.is_obstructed_connection(src, *t) ==
-                              (hex_layout.is_incoming_signal(*t, src) || hex_layout.is_outgoing_signal(src, *t)));
+                              (hex_layout.is_incoming_signal(*t, src) || hex_layout.is_outgoing_signal(src, t)));
                     }
                 });
         });

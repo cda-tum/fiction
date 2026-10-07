@@ -21,6 +21,7 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>           // technology-mapped network type
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
@@ -52,6 +53,7 @@
 #include <cstdint>
 #include <cstdio>  // NOLINT(misc-include-cleaner): provides the stderr macro, which include-cleaner does not attribute
 #include <cstdlib>
+#include <exception>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -66,8 +68,9 @@ using namespace fiction::sidb::io;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
-/** @brief Run the published circuit-design experiment. */
+/** @brief Run the published circuit-design experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
+try
 {
     using gate_lyt = hex_gate_clk_lyt;
 
@@ -203,7 +206,7 @@ int main()
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
                          cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
                          depth_mapped_network.depth(), gate_level_layout->width(), gate_level_layout->height(),
-                         gate_level_layout->width() * gate_level_layout->height(), gate_level_layout->num_gates(),
+                         area_of(gate_level_layout->dimensions()), gate_level_layout->num_gates(),
                          gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
                          mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_dots(),
                          area_stats.area);
@@ -222,6 +225,13 @@ int main()
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }
 
 #else  // FICTION_Z3_SOLVER

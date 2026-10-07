@@ -26,7 +26,9 @@
 #include <mockturtle/utils/stopwatch.hpp>  // time measurements
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
 #include <string>
 
@@ -36,16 +38,23 @@ using namespace fiction::layouts::io;
 using namespace fiction::physical_design;
 using namespace fiction::verification;
 
+/**
+ * @brief Assigns clock zero to every tile in the declared frame.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout whose clock numbers are cleared.
+ * @throws std::bad_alloc If an override cannot be allocated.
+ */
 template <typename Lyt>
-void remove_clocking(Lyt& lyt) noexcept
+void remove_clocking(Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
-/** @brief Run the experiment. @return Process exit status. */
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
+try
 {
     // NOTE: you have to download the respective files from MNTBench. Select Fontes18 and Trindade16, all clocking
     // schemes, obtained with NanoPlaceR
@@ -116,4 +125,16 @@ int main()
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
+catch (...)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed with an unknown exception\n", stderr));
+    return EXIT_FAILURE;
 }

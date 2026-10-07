@@ -30,7 +30,9 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -60,7 +62,8 @@ TEST_CASE("Every signed coordinate is a value", "[coordinates][size-contract]")
     stream << coordinate{-3, 2, 7};
     CHECK(stream.str() == "(-3,2,7)");
     CHECK(fmt::format("{}", coordinate{-3, 2, 7}) == "(-3,2,7)");
-    std::unordered_set<coordinate> positions{{0, 0, 0}, {0, 0, 2}, {-2147483648ll, 0, 0}, {2147483647, 0, 0}};
+    /** @brief Distinct signed positions used to check coordinate hashing. */
+    const std::unordered_set<coordinate> positions{{0, 0, 0}, {0, 0, 2}, {-2147483648ll, 0, 0}, {2147483647, 0, 0}};
     CHECK(positions.size() == 4);
 }
 

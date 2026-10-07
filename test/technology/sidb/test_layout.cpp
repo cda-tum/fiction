@@ -50,7 +50,7 @@ layout check_allocation_failures(const layout& original, const std::function<voi
     require_allocation_failure_support();
     for (std::size_t failure = 0;; ++failure)
     {
-        REQUIRE(failure < allocation_failure_attempt_limit);
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
         auto candidate = original;
         try
         {

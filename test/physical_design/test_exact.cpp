@@ -19,6 +19,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/clocking_scheme.hpp>
+
 #if (FICTION_Z3_SOLVER)
 
 #include "utils/blueprints/network_blueprints.hpp"
@@ -406,7 +408,7 @@ void check_without_gate_library(const Ntk& ntk, const exact_physical_design_para
  * @return Whether every inverter is straight.
  */
 template <typename Lyt>
-bool has_straight_inverters(const Lyt& lyt) noexcept
+bool has_straight_inverters(const Lyt& lyt)
 {
     bool only_straight_inverters = true;
     lyt.foreach_gate(
@@ -524,10 +526,16 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
-            CHECK((!lyt.find_object({2, 2}) || !lyt.is_and(*lyt.find_object({2, 2}))));
-            CHECK((!lyt.find_object({2, 2}) || !lyt.is_wire(*lyt.find_object({2, 2}))));
-            CHECK((!lyt.find_object({1, 2}) || !lyt.is_or(*lyt.find_object({1, 2}))));
-            CHECK((!lyt.find_object({2, 0}) || !lyt.is_wire(*lyt.find_object({2, 0}))));
+            /** @brief Object at the position blacklisted for AND gates and wires. */
+            const auto shared_object = lyt.find_object({2, 2});
+            /** @brief Object at the position blacklisted for OR gates. */
+            const auto or_object = lyt.find_object({1, 2});
+            /** @brief Object at the second position blacklisted for wires. */
+            const auto wire_object = lyt.find_object({2, 0});
+            CHECK((!shared_object.has_value() || !lyt.is_and(*shared_object)));
+            CHECK((!shared_object.has_value() || !lyt.is_wire(*shared_object)));
+            CHECK((!or_object.has_value() || !lyt.is_or(*or_object)));
+            CHECK((!wire_object.has_value() || !lyt.is_wire(*wire_object)));
         }
         SECTION("With port info")
         {
@@ -552,15 +560,17 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
-            CHECK((!lyt.is_and(lyt.find_object({2, 2}).value()) ||
+            /** @brief Object whose type-specific port pattern is blacklisted. */
+            const auto object = lyt.find_object({2, 2});
+            CHECK((!object.has_value() || !lyt.is_and(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
 
-            CHECK((!lyt.is_or(lyt.find_object({2, 2}).value()) ||
+            CHECK((!object.has_value() || !lyt.is_or(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
 
-            CHECK((!lyt.is_wire(lyt.find_object({2, 2}).value()) ||
+            CHECK((!object.has_value() || !lyt.is_wire(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
         }
     }

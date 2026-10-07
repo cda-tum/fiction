@@ -375,10 +375,9 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     clocked_layout.create_po(clocked_fanout, "s", {1, 2});
     clocked_layout.create_po(clocked_fanout, "w", {0, 1});
 
-    const auto clocked_fanout_node = clocked_layout.find_object({1, 1}).value();
-    CHECK(clocked_layout.is_fanout(clocked_fanout_node));
+    CHECK(clocked_layout.is_fanout(clocked_fanout.object));
     CHECK(clocked_layout.outgoing_data_flow({1, 1}).size() == 2u);
-    CHECK(clocked_layout.fanout_size(clocked_fanout_node) == 3u);
+    CHECK(clocked_layout.fanout_size(clocked_fanout.object) == 3u);
     CHECK(sim7_mol_library::set_up_gate(clocked_layout, {1, 1}) == fanout_1_3);
 
     auto       missing_input_layout = gate_layout{gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
@@ -388,9 +387,8 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     missing_input_layout.create_po(missing_input_fanout, "s", {1, 2});
     missing_input_layout.create_po(missing_input_fanout, "w", {0, 1});
 
-    const auto missing_input_fanout_node = missing_input_layout.find_object({1, 1}).value();
-    CHECK(missing_input_layout.is_fanout(missing_input_fanout_node));
-    CHECK(missing_input_layout.fanout_size(missing_input_fanout_node) == 3u);
+    CHECK(missing_input_layout.is_fanout(missing_input_fanout.object));
+    CHECK(missing_input_layout.fanout_size(missing_input_fanout.object) == 3u);
     CHECK_THROWS_AS((sim7_mol_library::set_up_gate(missing_input_layout, {1, 1})), orientation_exception);
 }
 

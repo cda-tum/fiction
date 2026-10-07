@@ -18,12 +18,14 @@
 
 #pragma once
 
-#include <catch2/catch_test_macros.hpp>
-
 #include <cstddef>
 #include <cstdlib>
 #include <new>
 #include <optional>
+
+#if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL > 0
+#include <catch2/catch_test_macros.hpp>
+#endif
 
 /** @brief Allocation-failure control for test executables. */
 namespace fiction::test
@@ -32,7 +34,7 @@ namespace fiction::test
  * @brief Maximum attempts in an exhaustive allocation-failure sweep of a small fixture.
  * Measure allocation counts or raise this ceiling when fixtures grow.
  */
-inline constexpr std::size_t allocation_failure_attempt_limit{1'024};
+inline constexpr std::size_t ALLOCATION_FAILURE_ATTEMPT_LIMIT{1'024};
 /**
  * @brief Skips fault injection when MSVC checked STL allocates iterator proxies in noexcept constructors.
  * Call before enabling the allocation budget. Ordinary test cases run without fault injection.
@@ -44,18 +46,19 @@ inline void require_allocation_failure_support()
 #endif
 }
 /**
- * Number of successful allocations before the test injects a failure; unset disables injection.
+ * @brief Number of successful allocations before the test injects a failure; unset disables injection.
  */
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables): Global new reads this thread-local budget.
-thread_local std::optional<std::size_t> allocation_budget{};
+inline thread_local std::optional<std::size_t> allocation_budget{};
 }  // namespace fiction::test
 /**
- * Allocates memory and injects a failure when the test allocation budget is exhausted.
+ * @brief Allocates memory and injects a failure when the test allocation budget is exhausted.
  *
  * @param size Requested byte count.
  * @return Allocated memory.
  * @throws std::bad_alloc if allocation fails or the test exhausts its budget.
  */
+// NOLINTNEXTLINE(misc-definitions-in-headers): Replacement operators cannot be inline; include once per executable.
 void* operator new(const std::size_t size)
 {
     if (fiction::test::allocation_budget.has_value())
@@ -76,10 +79,11 @@ void* operator new(const std::size_t size)
     throw std::bad_alloc{};
 }
 /**
- * Releases memory allocated by the test's global allocation replacement.
+ * @brief Releases memory allocated by the test's global allocation replacement.
  *
  * @param memory Memory to release.
  */
+// NOLINTNEXTLINE(misc-definitions-in-headers): Replacement operators cannot be inline; include once per executable.
 void operator delete(void* const memory) noexcept
 {
     // Matches malloc in the global new replacement.
@@ -87,10 +91,11 @@ void operator delete(void* const memory) noexcept
     std::free(memory);
 }
 /**
- * Releases a sized allocation through the matching global deallocator.
+ * @brief Releases a sized allocation through the matching global deallocator.
  *
  * @param memory Memory to release.
  */
+// NOLINTNEXTLINE(misc-definitions-in-headers): Replacement operators cannot be inline; include once per executable.
 void operator delete(void* const memory, std::size_t) noexcept
 {
     ::operator delete(memory);

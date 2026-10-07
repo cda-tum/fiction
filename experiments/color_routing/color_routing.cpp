@@ -29,14 +29,17 @@
 #include <fiction/utils/graph/graph_coloring.hpp>
 #include <fiction/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
 
-#include <fmt/format.h>                      // output formatting
+#include <fmt/format.h>  // output formatting
+#include <lorina/common.hpp>
 #include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <string>
 #include <string_view>
 
@@ -274,8 +277,9 @@ void ortho_mcs()
     }
 }
 
-/** @brief Run the experiment. @return Process exit status. */
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
+try
 {
     smt_sat_complete();
     ortho_sat_complete();
@@ -283,12 +287,19 @@ int main()
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
 
 #else  // FICTION_Z3_SOLVER
 
 #include <iostream>
 
-/** @brief Run the experiment. @return Process exit status. */
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;

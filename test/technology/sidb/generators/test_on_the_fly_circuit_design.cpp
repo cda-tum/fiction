@@ -20,9 +20,11 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
@@ -106,7 +108,9 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
     CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
     CHECK(gate_layout.num_pis() == 2);
     CHECK(gate_layout.num_pos() == 1);
-    CHECK(gate_layout.is_and(gate_layout.find_object({1, 1}).value()));
+    /** @brief Gate retained at its original position after the timeout. */
+    const auto retained_gate = gate_layout.find_object({1, 1});
+    CHECK((retained_gate.has_value() && gate_layout.is_and(*retained_gate)));
 }
 
 #if (FICTION_Z3_SOLVER)

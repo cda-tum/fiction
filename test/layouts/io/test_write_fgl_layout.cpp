@@ -32,7 +32,6 @@
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
@@ -43,6 +42,7 @@
 #include <mockturtle/networks/aig.hpp>
 
 #include <array>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <optional>
@@ -58,7 +58,13 @@ using namespace fiction::layouts::io;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 
-/** @brief Compare serialized placement, functions, ports, and interfaces. */
+/**
+ * @brief Compares serialized placement, functions, ports, and interfaces.
+ * @tparam WLyt Written layout type.
+ * @tparam RLyt Restored layout type.
+ * @param wlyt Written layout.
+ * @param rlyt Restored layout.
+ */
 template <typename WLyt, typename RLyt>
 void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
 {
@@ -79,13 +85,23 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
     CHECK(wlyt.height() == rlyt.height());
     CHECK(wlyt.layers() == rlyt.layers());
     CHECK(wlyt.size() == rlyt.size());
-    for (uint32_t i = 0; i < wlyt.num_pis(); ++i) CHECK(wlyt.get_input_name(i) == rlyt.get_input_name(i));
-    for (uint32_t i = 0; i < wlyt.num_pos(); ++i) CHECK(wlyt.get_output_name(i) == rlyt.get_output_name(i));
+    for (uint32_t i = 0; i < wlyt.num_pis(); ++i)
+    {
+        CHECK(wlyt.get_input_name(i) == rlyt.get_input_name(i));
+    }
+    for (uint32_t i = 0; i < wlyt.num_pos(); ++i)
+    {
+        CHECK(wlyt.get_output_name(i) == rlyt.get_output_name(i));
+    }
     wlyt.foreach_node(
         [&](const auto id)
         {
             const auto restored = rlyt.find_object(wlyt.get_tile(id));
             REQUIRE(restored.has_value());
+            if (!restored.has_value())
+            {
+                return;
+            }
             CHECK(wlyt.get_name(id) == rlyt.get_name(*restored));
             CHECK(wlyt.is_pi(id) == rlyt.is_pi(*restored));
             CHECK(wlyt.is_po(id) == rlyt.is_po(*restored));
@@ -94,8 +110,12 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
             CHECK(wlyt.node_function(id) == rlyt.node_function(*restored));
             for (uint32_t i = 0; i < wlyt.input_count(id); ++i)
             {
-                CHECK(wlyt.get_tile(wlyt.source({id, i})->object) ==
-                      rlyt.get_tile(rlyt.source({*restored, i})->object));
+                /** @brief Input connection in the written layout. */
+                const auto written_source = wlyt.source({id, i});
+                /** @brief Corresponding connection in the restored layout. */
+                const auto restored_source = rlyt.source({*restored, i});
+                CHECK((written_source.has_value() && restored_source.has_value() &&
+                       wlyt.get_tile(written_source->object) == rlyt.get_tile(restored_source->object)));
             }
         });
 }
@@ -328,10 +348,22 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     CHECK(restored.size() == layout.size());
     CHECK(restored.get_input_name(0) == "a");
     CHECK(restored.get_input_name(1) == "b");
-    const auto rg = *restored.find_object({1, 1, 0});
-    CHECK(restored.get_tile(restored.source({rg, 0})->object) == layout.get_tile(a.object));
-    CHECK(restored.get_tile(restored.source({rg, 1})->object) == layout.get_tile(b.object));
-    CHECK(restored.node_function(*restored.find_object({0, 0, 0})).num_vars() == 0);
+    /** @brief Restored gate whose input indices must be preserved. */
+    const auto rg = restored.find_object({1, 1, 0});
+    REQUIRE(rg.has_value());
+    if (!rg.has_value())
+    {
+        return;
+    }
+    /** @brief First restored gate input. */
+    const auto first_input = restored.source({*rg, 0});
+    /** @brief Second restored gate input. */
+    const auto second_input = restored.source({*rg, 1});
+    CHECK((first_input.has_value() && restored.get_tile(first_input->object) == layout.get_tile(a.object)));
+    CHECK((second_input.has_value() && restored.get_tile(second_input->object) == layout.get_tile(b.object)));
+    /** @brief Placed zero-input function restored from the file. */
+    const auto constant_object = restored.find_object({0, 0, 0});
+    CHECK((constant_object.has_value() && restored.node_function(*constant_object).num_vars() == 0));
     CHECK(restored.get_output_name(0) == layout.get_name(po.object));
     CHECK(restored.get_output_name(1) == "pass");
     compare_written_and_read_layout(layout, restored);
@@ -413,9 +445,13 @@ TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy
     TestType layout = []
     {
         if constexpr (is_cartesian_layout_v<TestType>)
+        {
             return TestType{{3, 2, 1}, clocking::twoddwave()};
+        }
         else
+        {
             return TestType{arrangement::EVEN_ROW, {3, 2, 1}, clocking::twoddwave()};
+        }
     }();
     const auto input = layout.create_pi("a", {0, 0});
     const auto wire  = layout.create_buf(input, {1, 0});
@@ -436,7 +472,13 @@ TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy
     CHECK(restored.is_obstructed_connection({-1, -2, -3}, {7, 8, 9}));
     CHECK_FALSE(restored.is_obstructed_connection({7, 8, 9}, {-1, -2, -3}));
 
-    restored.remove(*restored.find_object({1, 0}));
+    /** @brief Occupied tile whose manual obstruction must survive object removal. */
+    const auto occupied = restored.find_object({1, 0});
+    REQUIRE(occupied.has_value());
+    if (occupied.has_value())
+    {
+        restored.remove(*occupied);
+    }
     CHECK(restored.is_obstructed_coordinate({1, 0}));
     CHECK(restored.is_obstructed_connection({0, 0}, {1, 0}));
     restored.clear_obstructed_coordinates();

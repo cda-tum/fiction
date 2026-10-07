@@ -26,7 +26,6 @@
 
 #include <cstddef>
 #include <new>
-#include <utility>
 
 using namespace fiction;
 using namespace fiction::test;
@@ -35,7 +34,7 @@ using namespace fiction::layouts;
 namespace
 {
 /**
- * Exercises each allocating update failure before checking a successful update.
+ * @brief Exercises each allocating update failure before checking a successful update.
  * @tparam State Mutable capability value.
  * @tparam Update Mutation callable.
  * @tparam Check Callable checking the unchanged value.
@@ -45,13 +44,13 @@ namespace
  * @return Successfully updated value.
  */
 template <typename State, typename Update, typename Check>
-State check_allocation_failures(const State& original, Update&& update, Check&& unchanged)
+State check_allocation_failures(const State& original, const Update& update, const Check& unchanged)
 {
     require_allocation_failure_support();
     bool failed{};
     for (std::size_t failure = 0;; ++failure)
     {
-        REQUIRE(failure < allocation_failure_attempt_limit);
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
         auto candidate = original;
         try
         {
