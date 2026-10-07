@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     ],
 )
 def test_write_dot_layout_draws_every_topology(tmp_path: Path, layout_type: Callable[..., Any]) -> None:
-    layout = layout_type((2, 2, 1), "2DDWave", "drawn")
+    layout = layout_type((3, 3, 2), "2DDWave", "drawn")
     x1 = layout.create_pi("a", (0, 0))
     x2 = layout.create_pi("b", (1, 0))
     layout.create_po(layout.create_and(x1, x2, (1, 1)), "f", (2, 1))

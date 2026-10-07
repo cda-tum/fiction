@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from mnt.pyfiction.layouts import (
@@ -29,10 +31,17 @@ from mnt.pyfiction.physical_design.path_finding import (
     yen_k_shortest_paths,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from typing import TypeAlias
+
+CoordinateLayout: TypeAlias = cartesian_layout | shifted_cartesian_layout | hexagonal_layout
+GateLayout: TypeAlias = cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout
+
 
 def test_search_constraints_are_local() -> None:
     """Searches combine persistent constraints with independent routing data."""
-    layout = cartesian_gate_layout((2, 2), "2DDWave")
+    layout = cartesian_gate_layout((3, 3), "2DDWave")
     layout.obstruct_coordinate((1, 0))
     blocked = obstructions()
     blocked.obstruct_connection((0, 1), (1, 1))
@@ -47,19 +56,19 @@ def test_search_constraints_are_local() -> None:
         assert blocked.is_obstructed_connection((0, 1), (1, 1))
         assert not blocked.is_obstructed_coordinate((1, 0))
 
-    grid = cartesian_layout((1, 1))
+    grid = cartesian_layout((2, 2))
     blocked.obstruct_coordinate((1, 0))
     assert a_star(grid, (0, 0), (1, 1), obstructions=blocked) == []
 
 
 CLOCKED_LAYOUTS = [
-    pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
+    pytest.param(lambda: cartesian_gate_layout((5, 5), "2DDWave", "Layout"), id="cartesian_gate_layout"),
     pytest.param(
-        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (4, 4), "2DDWave", "Layout"),
+        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (5, 5), "2DDWave", "Layout"),
         id="shifted_cartesian_gate_layout",
     ),
     pytest.param(
-        lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"
+        lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (5, 5), "2DDWave", "Layout"), id="hexagonal_gate_layout"
     ),
 ]
 
@@ -67,18 +76,20 @@ CLOCKED_LAYOUTS = [
 @pytest.mark.parametrize(
     "make_lyt",
     [
-        pytest.param(lambda: cartesian_layout((4, 4)), id="cartesian_layout"),
-        pytest.param(lambda: shifted_cartesian_layout(arrangement.ODD_COLUMN, (4, 4)), id="shifted_cartesian_layout"),
-        pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, (4, 4)), id="hexagonal_layout"),
+        pytest.param(lambda: cartesian_layout((5, 5)), id="cartesian_layout"),
+        pytest.param(lambda: shifted_cartesian_layout(arrangement.ODD_COLUMN, (5, 5)), id="shifted_cartesian_layout"),
+        pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, (5, 5)), id="hexagonal_layout"),
     ],
 )
-def test_non_clocked_path_finding(make_lyt):
+def test_non_clocked_path_finding(make_lyt: Callable[[], CoordinateLayout]) -> None:
+    """Find a zero-length path on unclocked geometry."""
     lyt = make_lyt()
     assert a_star(lyt, coordinate(0, 0), coordinate(0, 0)) == [(0, 0)]
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)
-def test_clocked_path_finding(make_lyt):
+def test_clocked_path_finding(make_lyt: Callable[[], GateLayout]) -> None:
+    """Find forward paths and reject reverse clock flow."""
     lyt = make_lyt()
     assert a_star(lyt, coordinate(0, 0), coordinate(0, 0)) == [(0, 0)]
     assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 1))) == 3
@@ -93,20 +104,21 @@ def test_clocked_path_finding(make_lyt):
     "make_lyt",
     [
         pytest.param(
-            lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+            lambda: cartesian_gate_layout((5, 5), "2DDWave", "Layout"),
             id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (4, 4), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (5, 5), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (5, 5), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],
 )
-def test_path_finding_with_obstructions(make_lyt):
+def test_path_finding_with_obstructions(make_lyt: Callable[[], GateLayout]) -> None:
+    """Route around persistent coordinate obstructions."""
     lyt = make_lyt()
     lyt.obstruct_coordinate(coordinate(1, 0))
     lyt.obstruct_coordinate(coordinate(1, 1))
@@ -133,20 +145,21 @@ def test_path_finding_with_obstructions(make_lyt):
     "make_lyt",
     [
         pytest.param(
-            lambda: cartesian_gate_layout((2, 1, 1), "2DDWave", "Layout"),
+            lambda: cartesian_gate_layout((3, 2, 2), "2DDWave", "Layout"),
             id="cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 1, 1), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 2, 2), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 1, 1), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 2, 2), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],
 )
-def test_path_finding_with_obstructions_and_crossings(make_lyt):
+def test_path_finding_with_obstructions_and_crossings(make_lyt: Callable[[], GateLayout]) -> None:
+    """Respect occupied tiles when crossings are enabled."""
     lyt = make_lyt()
     x1 = lyt.create_pi("x1", (0, 0))
     lyt.obstruct_coordinate((0, 0, 0))
@@ -210,7 +223,8 @@ def test_path_finding_with_obstructions_and_crossings(make_lyt):
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)
-def test_distance(make_lyt):
+def test_distance(make_lyt: Callable[[], GateLayout]) -> None:
+    """Measure clocked shortest paths and unreachable endpoints."""
     lyt = make_lyt()
     assert a_star_distance(lyt, coordinate(0, 0), coordinate(0, 0)) == 0
     assert a_star_distance(lyt, coordinate(0, 0), coordinate(1, 0)) == 1
