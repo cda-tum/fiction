@@ -280,28 +280,27 @@ template <typename Lyt>
     return normalized;
 }
 /**
- * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
- * top left corner and the bottom right corner of the spanned region.
+ * Generates a random coordinate with each axis inside the inclusive region spanned by two coordinates.
  *
- * @tparam CoordinateType The coordinate implementation to be used.
- * @param coordinate1 Top left Coordinate.
- * @param coordinate2 Bottom right Coordinate (coordinate order is not important, automatically swapped if
- * necessary).
- * @return Randomly generated coordinate.
+ * @tparam CoordinateType Coordinate type to generate.
+ * @param coordinate1 One corner of the region.
+ * @param coordinate2 Opposite corner of the region; axes may appear in either order.
+ * @return Random coordinate between the corresponding corner axes.
  */
 template <typename CoordinateType>
-CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coordinate2) noexcept
+CoordinateType random_coordinate(const CoordinateType coordinate1, const CoordinateType coordinate2) noexcept
 {
+    /** Pseudorandom generator seeded from the platform's random device. */
     static std::mt19937_64 generator(std::random_device{}());
-
-    if (coordinate1 > coordinate2)
-    {
-        std::swap(coordinate1, coordinate2);
-    }
-
-    std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
-    std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
-    std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
+    /** Inclusive column distribution. */
+    std::uniform_int_distribution<> dist_x(std::min(coordinate1.x, coordinate2.x),
+                                           std::max(coordinate1.x, coordinate2.x));
+    /** Inclusive row distribution. */
+    std::uniform_int_distribution<> dist_y(std::min(coordinate1.y, coordinate2.y),
+                                           std::max(coordinate1.y, coordinate2.y));
+    /** Inclusive layer distribution. */
+    std::uniform_int_distribution<> dist_z(std::min(coordinate1.z, coordinate2.z),
+                                           std::max(coordinate1.z, coordinate2.z));
 
     return {dist_x(generator), dist_y(generator), dist_z(generator)};
 }

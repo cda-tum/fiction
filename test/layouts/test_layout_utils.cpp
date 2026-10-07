@@ -31,6 +31,7 @@
 
 #include <optional>
 #include <stdexcept>
+#include <tuple>
 
 using namespace fiction;
 using namespace fiction::fcn;
@@ -202,4 +203,28 @@ TEST_CASE("Normalize QCA layout coordinates", "[layout-utils]")
     CHECK(normalized.get_tile_size_x() == 2);
 
     CHECK(lyt.get_cell_type({3, 2}) == qca::cell_type::INPUT);
+}
+
+TEST_CASE("Random coordinates stay inside crossed-axis corners", "[layout-utils]")
+{
+    /** Coordinate type sampled by the public helper. */
+    using coord = layout_base::coordinate;
+    /** Input corners and independently specified minimum and maximum axes. */
+    const auto [first, second, minimum, maximum] =
+        GENERATE(std::tuple{coord{5, 1, 0}, coord{1, 2, 0}, coord{1, 1, 0}, coord{5, 2, 0}},
+                 std::tuple{coord{5, -1, 3}, coord{1, 2, -4}, coord{1, -1, -4}, coord{5, 2, 3}});
+    /** Both argument orders describe the same region. */
+    const auto reverse = GENERATE(false, true);
+
+    for (uint32_t sample = 0; sample < 32; ++sample)
+    {
+        /** Sample from the specified coordinate region. */
+        const auto c = reverse ? random_coordinate<coord>(second, first) : random_coordinate<coord>(first, second);
+        CHECK(c.x >= minimum.x);
+        CHECK(c.x <= maximum.x);
+        CHECK(c.y >= minimum.y);
+        CHECK(c.y <= maximum.y);
+        CHECK(c.z >= minimum.z);
+        CHECK(c.z <= maximum.z);
+    }
 }
