@@ -594,7 +594,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
 
     nodes << fmt::format("node [{}];\n", fmt::join(node_attributes, ", "));
 
-    utils::progress_reporter tiles_progress{std::move(on_progress), "drawing tiles", (lyt.width()) * (lyt.height())};
+    utils::progress_reporter tiles_progress{std::move(on_progress), "drawing tiles", lyt.area()};
     // draw tiles
     lyt.foreach_ground_tile(
         [&lyt, &drawer, &nodes, &tiles_progress](const auto& t)

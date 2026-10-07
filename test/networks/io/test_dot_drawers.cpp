@@ -31,6 +31,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -1098,4 +1099,26 @@ TEST_CASE("Layout DOT labels preserve terminal names", "[dot-drawers]")
     label_stream >> std::quoted(restored_name);
     CHECK_FALSE(label_stream.fail());
     CHECK(restored_name == name);
+}
+
+TEST_CASE("Layout DOT progress retains areas above the unsigned 32-bit range", "[dot-drawers]")
+{
+    /** Gate layout under test. */
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    /** Interrupts rendering after progress starts to avoid enumerating the large frame. */
+    struct interrupted_drawer : gate_layout_cartesian_drawer<gate_layout>
+    {
+        /** @throws std::runtime_error Stops drawing at the first tile. */
+        std::string tile_label(const gate_layout&, const gate_layout::tile&) const override
+        {
+            throw std::runtime_error{"drawing interrupted"};
+        }
+    };
+    const gate_layout layout{{65536, 65536}};
+    std::size_t       total{};
+    std::stringstream stream{};
+    const auto        progress = [&total](std::string_view, std::size_t, const std::size_t count) { total = count; };
+    CHECK_THROWS_AS((write_dot_layout<gate_layout, interrupted_drawer>(layout, stream, {}, progress)),
+                    std::runtime_error);
+    CHECK(total == layout.area());
 }
