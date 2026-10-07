@@ -29,6 +29,11 @@
 namespace fiction::test
 {
 /**
+ * @brief Maximum attempts in an exhaustive allocation-failure sweep of a small fixture.
+ * Measure allocation counts or raise this ceiling when fixtures grow.
+ */
+inline constexpr std::size_t allocation_failure_attempt_limit{1'024};
+/**
  * @brief Skips fault injection when MSVC checked STL allocates iterator proxies in noexcept constructors.
  * Call before enabling the allocation budget. Ordinary test cases run without fault injection.
  */

@@ -51,6 +51,7 @@ State check_allocation_failures(const State& original, Update&& update, Check&& 
     bool failed{};
     for (std::size_t failure = 0;; ++failure)
     {
+        REQUIRE(failure < allocation_failure_attempt_limit);
         auto candidate = original;
         try
         {

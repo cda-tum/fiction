@@ -636,6 +636,7 @@ TEST_CASE("Moved-from layouts recover from interrupted cache initialization", "[
     using layout = gate_level_layout<cartesian_layout>;
     for (std::size_t failure = 0;; ++failure)
     {
+        REQUIRE(failure < allocation_failure_attempt_limit);
         layout     source{{4, 4}};
         const auto original = source.create_pi("original", {0, 0});
         layout     destination{std::move(source)};
