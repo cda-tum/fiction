@@ -265,6 +265,7 @@ TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[d
 
 TEST_CASE("Clock determination commits complete clocking values", "[determine-clocking-ports]")
 {
+    require_allocation_failure_support();
     using layout = gate_level_layout<cartesian_layout>;
     layout     original{{3, 1}, clocking::open()};
     const auto pi   = original.create_pi("a", {0, 0});

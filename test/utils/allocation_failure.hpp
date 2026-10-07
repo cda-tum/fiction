@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <catch2/catch_test_macros.hpp>
+
 #include <cstddef>
 #include <cstdlib>
 #include <new>
@@ -26,6 +28,16 @@
 /** @brief Allocation-failure control for test executables. */
 namespace fiction::test
 {
+/**
+ * @brief Skips fault injection when MSVC checked STL allocates iterator proxies in noexcept constructors.
+ * Call before enabling the allocation budget. Ordinary test cases run without fault injection.
+ */
+inline void require_allocation_failure_support()
+{
+#if defined(_MSC_VER) && _ITERATOR_DEBUG_LEVEL > 0
+    SKIP("MSVC checked STL allocates iterator proxies in noexcept constructors; allocation failure terminates");
+#endif
+}
 /**
  * Number of successful allocations before the test injects a failure; unset disables injection.
  */

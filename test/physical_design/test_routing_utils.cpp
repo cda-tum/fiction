@@ -240,6 +240,7 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
 
 TEST_CASE("Routing paths propagate allocation failure", "[routing-utils]")
 {
+    require_allocation_failure_support();
     layout_coordinate_path<cart_gate_clk_lyt>                  path{};
     path_collection<layout_coordinate_path<cart_gate_clk_lyt>> collection{};
     path_set<layout_coordinate_path<cart_gate_clk_lyt>>        paths{};

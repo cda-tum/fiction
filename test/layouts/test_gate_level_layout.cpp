@@ -632,6 +632,7 @@ TEST_CASE("Sparse clock metadata enumerates assigned zones independently of fram
 
 TEST_CASE("Moved-from layouts recover from interrupted cache initialization", "[gate-layout-editing]")
 {
+    require_allocation_failure_support();
     using layout = gate_level_layout<cartesian_layout>;
     for (std::size_t failure = 0;; ++failure)
     {

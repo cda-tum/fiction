@@ -47,6 +47,7 @@ namespace
 template <typename State, typename Update, typename Check>
 State check_allocation_failures(const State& original, Update&& update, Check&& unchanged)
 {
+    require_allocation_failure_support();
     bool failed{};
     for (std::size_t failure = 0;; ++failure)
     {

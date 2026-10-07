@@ -47,6 +47,7 @@ namespace
  */
 layout check_allocation_failures(const layout& original, const std::function<void(layout&)>& update)
 {
+    require_allocation_failure_support();
     for (std::size_t failure = 0;; ++failure)
     {
         auto candidate = original;
