@@ -36,22 +36,22 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.dimer_displacement_policy
+.. autoclass:: mnt.pyfiction.sidb.simulation.defects.dimer_displacement_policy
    :members:
 
-.. autoclass:: mnt.pyfiction.displacement_analysis_mode
+.. autoclass:: mnt.pyfiction.sidb.simulation.defects.displacement_analysis_mode
    :members:
 
-.. autoclass:: mnt.pyfiction.displacement_robustness_domain_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.defects.displacement_robustness_domain_params
    :members:
 
-.. autoclass:: mnt.pyfiction.displacement_robustness_domain_stats
+.. autoclass:: mnt.pyfiction.sidb.simulation.defects.displacement_robustness_domain_stats
    :members:
 
-.. autoclass:: mnt.pyfiction.displacement_robustness_domain
+.. autoclass:: mnt.pyfiction.sidb.simulation.defects.displacement_robustness_domain
    :members:
 
-.. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain
+.. autofunction:: mnt.pyfiction.sidb.simulation.defects.determine_displacement_robustness_domain
 ```
 
 :::

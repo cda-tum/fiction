@@ -12,9 +12,10 @@ the ones we verify.
 
 | Platform                     | Compilers                                    |
 | ---------------------------- | -------------------------------------------- |
-| Ubuntu 22.04 (x86-64)        | GCC 11                                       |
-| Ubuntu 24.04 (x86-64)        | GCC 13, GCC 14, Clang 18, Clang 19, Clang 20 |
-| Ubuntu 24.04 (ARM64)         | Clang 19, Clang 20                           |
+| Ubuntu 24.04 (x86-64)        | GCC 13, GCC 14, Clang 18                     |
+| Ubuntu 24.04 (ARM64)         | Clang 20                                    |
+| Ubuntu 26.04 (x86-64)        | GCC 15, Clang 20, Clang 22                   |
+| Ubuntu 26.04 (ARM64)         | Clang 22                                    |
 | macOS 15 (ARM64)             | Apple Clang                                  |
 | Windows Server 2025 (x86-64) | MSVC `v143`, `ClangCL`                       |
 
@@ -24,14 +25,34 @@ To help you getting started with _fiction_, pick the interface that best fits yo
 
 | Goal                                   | Recommended Path          | Section                                  |
 | -------------------------------------- | ------------------------- | ---------------------------------------- |
-| Try the tool immediately               | 🐳 Docker CLI image       | {ref}`CLI (Docker) <cli-docker>`         |
-| Full-featured local CLI build          | 💻 Native build           | {ref}`CLI (Source) <cli-source>`         |
+| Try the tool immediately               | 🐍 `pip install`          | {ref}`CLI (pip) <cli-pip>`               |
+| Run the CLI without installing Python  | 🐳 Docker CLI image       | {ref}`CLI (Docker) <cli-docker>`         |
+| Develop the C++ library                | 💻 Native build           | {ref}`Building from source <cli-source>` |
 | Integrate into a C++ project           | 📚 Header-only library    | {ref}`C++ Library <header-only>`         |
 | Script / notebooks / rapid prototyping | 🐍 Python bindings (PyPI) | {ref}`Python Bindings <python-bindings>` |
 
 For a full CLI command list or API reference, see the respective documentation sections.
 
 <span id="cli"></span>
+
+(cli-pip)=
+
+## CLI (pip)
+
+The `fiction` command-line interface is part of the `mnt.pyfiction` Python package:
+
+```console
+$ pip install mnt.pyfiction
+$ fiction
+```
+
+Type `help` at the prompt for the list of commands, or run a flow without entering the shell:
+
+```console
+$ fiction -c "read c17.v; ortho; cell; write c17.qca"
+```
+
+See {ref}`cli` for the full user guide.
 
 (cli-docker)=
 
@@ -57,48 +78,36 @@ Internally, the repository lives at `/app/fiction`.
 
 (cli-source)=
 
-## CLI (Source)
+## Building from source
 
 When you want to add your own algorithms or contribute to the project, you should build _fiction_ from source.
 
 ### Compilation requirements
 
-The repository should always be cloned recursively with all submodules:
+Clone the repository:
 
 ```console
-$ git clone --recursive https://github.com/cda-tum/fiction.git
+$ git clone https://github.com/cda-tum/fiction.git
 $ cd fiction
 ```
 
-Several third-party libraries will be cloned within the `libs` folder. The `cmake` build process will take care of
-them automatically. Should the repository have been cloned before, the commands:
+CMake fetches the third-party libraries during configuration. Only `CMake` and a C++20 compiler are required for
+the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
+
+On Ubuntu, the build dependencies can be installed via:
 
 ```text
-git submodule update --init --recursive
+sudo apt-get install build-essential cmake python3 python3-dev
 ```
 
-will fetch the latest version of all external modules used. Additionally, only `CMake` and a C++20 compiler are
-required for the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
-
-At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (`libtbb-dev` on Ubuntu) is
-needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
-preferred compiler, see the current implementation state of [P0024R2](https://en.cppreference.com/w/cpp/compiler_support/17).
-
-On Ubuntu, all required and optional dependencies can be installed via:
-
-```text
-sudo apt-get install build-essential cmake python3 libreadline-dev libtbb-dev
-```
-
-### Building the CLI
-
-For auto-completion in the CLI, it is recommended but not required to install the `libreadline-dev` package (see above).
+### Building the tests
 
 Configure and build with CMake:
 
 ```console
 $ cmake -S . -B build
 $ cmake --build build --parallel
+$ ctest --test-dir build
 ```
 
 Several options can be toggled during the build. For a more interactive interface, please refer to `ccmake` for a
@@ -116,7 +125,7 @@ yourself. List them with:
 $ cmake --list-presets
 ```
 
-Noteworthy presets include `dev` (a quick Debug build with only the CLI and tests enabled), `dev-full` (the same,
+Noteworthy presets include `dev` (a quick Debug build with only the tests enabled), `dev-full` (the same,
 but with Z3 and ALGLIB also enabled), `dev-asan` (`dev` with sanitizers), `tests-slim`/`tests-full`
 (test-only builds, without/with all optional components, for the fastest edit-compile-test loop), `pyfiction`
 (mirrors the `pyproject.toml` configuration for iterating on the Python bindings directly with CMake), and
@@ -131,23 +140,8 @@ $ cmake --build --preset ci-debug
 $ ctest --preset ci-debug
 ```
 
-Any preset can still be combined with additional `-D` overrides on the command line.
-
-Run the CLI:
-
-```console
-$ build/cli/fiction
-```
-
-Here is an example of running _fiction_ to perform a full physical design flow on a QCA circuit layout that can
-afterward be simulated in QCADesigner:
-
-:::{figure} /_static/fiction_cli_example.gif
-:align: center
-:alt: CLI example
-:::
-
-See {ref}`cli` for a full user guide.
+Any preset can still be combined with additional `-D` overrides on the command line. The `fiction` shell is not
+part of the CMake build; it comes with the Python package, see {ref}`CLI (pip) <cli-pip>`.
 
 (header-only)=
 
@@ -166,10 +160,6 @@ target_link_libraries(fanfiction PRIVATE libfiction)
 :::{note}
 The command `target_link_libraries` must be called after the respective `add_executable` statement that defines
 `fanfiction`.
-
-By default _fiction_'s CLI is enabled and will be built, which can be time-consuming. If you do not need it, you can
-disable it by passing `-DFICTION_CLI=OFF` to your `cmake` call or adding
-`set(FICTION_CLI OFF CACHE BOOL "" FORCE)` **before** `add_subdirectory(fiction/)`.
 :::
 
 An installed _fiction_ package provides `fiction::libfiction`:
@@ -185,8 +175,8 @@ so no extra `CMAKE_PREFIX_PATH` entry is needed for it.
 Then include what you need:
 
 ```c++
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/...>
@@ -210,10 +200,10 @@ Install the library from PyPI:
 $ pip install mnt.pyfiction
 ```
 
-Import it in your script:
+Import what you need from the submodule that mirrors its C++ namespace:
 
 ```python
-from mnt import pyfiction
+from mnt.pyfiction.layouts import cartesian_layout
 ```
 
 The Python synopsis is modeled after the C++ API to make it feel as familiar as possible. However, all available Python
@@ -248,47 +238,49 @@ $ venv\Scripts\activate.bat
 
 ### Bindings Architecture
 
-If you want to add or extend Python bindings, the code under `bindings/mnt/pyfiction/` follows a source-based
-layout, one translation unit per binding, chosen to keep compile time and memory usage manageable as the number of
-bindings grows:
+If you want to add or extend Python bindings, the C++ side lives under `bindings/`, the Python package under
+`python/mnt/`, and the Python tests under `test/python/`. The bindings use one translation unit per binding, which
+keeps compile time and memory usage manageable as the number of bindings grows:
 
 ```text
-bindings/mnt/pyfiction/
-├── CMakeLists.txt
-├── pyfiction.cpp                                  # top-level NB_MODULE entry point
-└── src/pyfiction/
-    ├── physical_design/
-    │   ├── register_physical_design.cpp           # calls exact(m), orthogonal(m), ...
-    │   └── path_finding/
-    │       ├── a_star.cpp                         # defines a_star(nanobind::module_&)
-    │       └── register_path_finding.cpp          # calls a_star(m), distance(m), ...
-    ├── technology/sidb/simulation/engines/
-    │   ├── quickexact.cpp                         # defines quickexact(nanobind::module_&)
-    │   └── register_sidb_simulation_engines.cpp   # calls quickexact(m), quicksim(m), ...
-    └── ...
+bindings/
+├── CMakeLists.txt                                 # one extension module per top-level namespace
+├── include/pyfiction/                             # shared type aliases, docstrings, helpers
+├── physical_design/
+│   ├── register_physical_design.cpp               # NB_MODULE(physical_design, m): exact(m), ...
+│   └── path_finding/
+│       ├── a_star.cpp                             # defines a_star(nanobind::module_&)
+│       └── register_path_finding.cpp              # calls a_star(m), distance(m), ...
+├── sidb/
+│   ├── register_sidb.cpp                          # NB_MODULE(sidb, m): lattice(m), ...
+│   └── simulation/engines/
+│       ├── quickexact.cpp                         # defines quickexact(nanobind::module_&)
+│       └── register_sidb_simulation_engines.cpp   # calls quickexact(m), quicksim(m), ...
+└── ...
+python/mnt/pyfiction/
+├── __init__.py                                    # loads the submodules lazily
+├── physical_design/__init__.pyi, path_finding.pyi # generated stubs
+└── ...
 ```
 
-The tree mirrors `include/fiction/`: a binding sits in the directory of the header it wraps, so
-`a_star.cpp` is under `physical_design/path_finding/` because `a_star.hpp` is. Each leaf `.cpp` file defines
-exactly one binding function named after the file (e.g. `void a_star(nanobind::module_& m)`) that binds a
-single class, function, or closely related group thereof. Each directory that holds binding sources has exactly one
-`register_<path>.cpp`, named after the directory, that forward-declares and calls the binding functions beside it
-and nothing else.
+The Python module tree mirrors the C++ namespaces: `fiction::sidb::simulation::engines::quickexact` is
+`mnt.pyfiction.sidb.simulation.engines.quickexact`. Each top-level namespace (`layouts`, `networks`, `synthesis`,
+`physical_design`, `verification`, `utils`, `qca`, `mol_qca`, `inml`, `sidb`, `fcn`) is its own extension module.
+Each nested namespace is a submodule of it. For example, import the coordinate type with
+`from mnt.pyfiction.layouts import coordinate`. The directories under `bindings/`
+follow the same tree, so a binding sits in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
 
-The registries are flat: `pyfiction.cpp` calls every one of them from its `NB_MODULE` block, and none is nested
-inside another. That order is load-bearing — a type has to be registered before anything names it in a signature or
-a default argument — so the block runs the type-defining directories first, then the readers and writers, then the
-algorithms built on all of them. New source files do not need to be added anywhere manually: `CMakeLists.txt`
-collects them automatically via `file(GLOB_RECURSE FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")`, so
-re-running `cmake` picks up new files on its own — you only need to wire the new function into the directory's
-`register_<path>.cpp` and forward-declare it there.
+Each leaf `.cpp` file defines exactly one binding function named after the file (e.g.
+`void a_star(nanobind::module_& m)`) that binds a single class, function, or closely related group thereof. Each
+directory that holds binding sources has exactly one `register_<path>.cpp`, named after the directory, that
+forward-declares and calls the binding functions beside it. In a top-level directory, that file holds the
+`NB_MODULE` block. The block imports the modules whose types it names in signatures or default arguments, calls the
+binding functions of its directory, and creates each nested submodule with `pyfiction::def_submodule` before calling
+the submodule's registry.
 
-:::{note}
-The Python-facing `mnt.pyfiction` namespace must not change shape when adding new bindings. In particular, do
-not introduce new Python-level submodules (e.g. `mnt.pyfiction.algorithms`) — all registration functions attach
-their bindings to the single top-level module object that is threaded through the call chain, matching the
-existing flat API that user scripts depend on.
-:::
+New source files do not need to be added anywhere manually: `bindings/CMakeLists.txt` collects each module's
+sources with `file(GLOB_RECURSE ...)`. Wire the new function into the directory's `register_<path>.cpp`, then run
+`nox -s stubs` to regenerate the `.pyi` files under `python/mnt/pyfiction/` and commit them.
 
 :::{note}
 The bindings are built with [nanobind](https://github.com/wjakob/nanobind), which (unlike the previous
@@ -333,24 +325,6 @@ Finally, before building _fiction_, pass `-DFICTION_Z3=ON` to the `cmake` call. 
 Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
 `-DZ3_ROOT=<path_to_z3_root>` to set Z3's root directory that is to be searched for the installed solver.
 
-(abc-cmake)=
-
-#### ABC callback
-
-[ABC](https://github.com/berkeley-abc/abc/) by Alan Mishchenko can be used as a callback for logic synthesis and
-optimization from within the _fiction_ CLI. It must be compiled and installed manually and can be enabled by passing
-`-DFICTION_ABC=ON` to the `cmake` call. If ABC is not in your `PATH`, you can specify the path to the folder
-where the `abc` binary is located by passing `-DABC_ROOT=<path_to_abc_root>` to the `cmake` call. On the other
-hand, if you installed ABC in a default location on UNIX-like operating systems (e.g., `/usr/bin/`
-or `/usr/local/bin/`), it should be detected automatically without the need to pass the root directory.
-
-:::{note}
-Be sure to compile ABC in **Release mode** to avoid performance issues during synthesis and optimization!
-This can be achieved by passing `-DCMAKE_BUILD_TYPE=Release` to ABC's `cmake` call.
-:::
-
-For information on usage, see the {ref}`ABC callback <abc-cli>` section in the CLI documentation.
-
 #### ALGLIB-dependent `ClusterComplete` exact SiDB simulation
 
 The {ref}`ClusterComplete <clustercomplete>` exact SiDB simulation algorithm relies on functionality offered by
@@ -367,8 +341,8 @@ automatically linked against `libfiction` and compiled as a stand-alone binary. 
 include the desired header files to get started:
 
 ```c++
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/...>
@@ -414,7 +388,7 @@ The following CMake options are available which have a potential positive impact
 attempts, or performance of the resulting binaries:
 
 - `-DFICTION_ENABLE_IPO=ON`: Enable IPO/LTO to improve performance of resulting binaries on some systems.
-- `-DFICTION_ENABLE_PCH=ON`: Enable precompiled headers (PCH) for the CLI and the test suite to speed up compilation.
+- `-DFICTION_ENABLE_PCH=ON`: Enable precompiled headers (PCH) for the test suite to speed up compilation.
   The `dev` and `tests-slim` presets turn this on. On Windows, add `sloppiness = pch_defines,time_macros` to your
   ccache configuration, or ccache will stop caching the compilations that use the PCH.
 - `-DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON`: Cut debug information down to `-g1` and disable inlining. This is by far

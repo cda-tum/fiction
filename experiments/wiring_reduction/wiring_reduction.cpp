@@ -18,11 +18,9 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/layouts/bounding_box.hpp>                              // bounding box
-#include <fiction/layouts/cartesian_layout.hpp>                          // Cartesian layout
-#include <fiction/layouts/clocked_layout.hpp>                            // clocked layout
-#include <fiction/layouts/gate_level_layout.hpp>                         // gate-level layout
-#include <fiction/layouts/tile_based_layout.hpp>                         // tile-based layout
+#include <fiction/layouts/bounding_box.hpp>      // bounding box
+#include <fiction/layouts/cartesian_layout.hpp>  // Cartesian layout
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>                        // read networks from files
 #include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
 #include <fiction/physical_design/wiring_reduction.hpp>                  // wiring reduction algorithm
@@ -60,7 +58,7 @@ static Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint64_t, size_t, size_t, float, uint64_t, uint64_t, float, uint64_t, uint64_t,
@@ -112,9 +110,11 @@ int main()  // NOLINT
         // calculate bounding box
         const auto bounding_box_before_wiring_reduction = bounding_box_2d(gate_level_layout);
 
-        const auto width_before_wiring_reduction  = bounding_box_before_wiring_reduction.get_x_size() + 1;
-        const auto height_before_wiring_reduction = bounding_box_before_wiring_reduction.get_y_size() + 1;
-        const auto area_before_wiring_reduction   = width_before_wiring_reduction * height_before_wiring_reduction;
+        const auto width_before_wiring_reduction =
+            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_x_size()) + 1;
+        const auto height_before_wiring_reduction =
+            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_y_size()) + 1;
+        const auto area_before_wiring_reduction = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
         wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
@@ -146,9 +146,11 @@ int main()  // NOLINT
         // calculate bounding box
         const auto bounding_box_after_wiring_reduction = bounding_box_2d(gate_level_layout);
 
-        const auto width_after_wiring_reduction  = bounding_box_after_wiring_reduction.get_x_size() + 1;
-        const auto height_after_wiring_reduction = bounding_box_after_wiring_reduction.get_y_size() + 1;
-        const auto area_after_wiring_reduction   = width_after_wiring_reduction * height_after_wiring_reduction;
+        const auto width_after_wiring_reduction =
+            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_x_size()) + 1;
+        const auto height_after_wiring_reduction =
+            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_y_size()) + 1;
+        const auto area_after_wiring_reduction = width_after_wiring_reduction * height_after_wiring_reduction;
 
         const float improv_wires =
             100 * static_cast<float>((num_wires - num_wires_after)) / static_cast<float>(num_wires);

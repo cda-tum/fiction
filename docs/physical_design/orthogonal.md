@@ -32,10 +32,10 @@ to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.orthogonal_params
+.. autoclass:: mnt.pyfiction.physical_design.orthogonal_params
    :members:
 
-.. autofunction:: mnt.pyfiction.orthogonal
+.. autofunction:: mnt.pyfiction.physical_design.orthogonal
 ```
 
 :::

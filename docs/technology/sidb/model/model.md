@@ -20,7 +20,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb_simulation_parameters
+.. autoclass:: mnt.pyfiction.sidb.model.sidb_simulation_parameters
    :members:
 ```
 
@@ -48,7 +48,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.potential_to_distance_conversion
+.. autofunction:: mnt.pyfiction.sidb.model.potential_to_distance_conversion
 ```
 
 :::
@@ -119,23 +119,23 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb_defect_type
+.. autoclass:: mnt.pyfiction.sidb.model.sidb_defect_type
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb_defect
+.. autoclass:: mnt.pyfiction.sidb.model.sidb_defect
    :members:
 
-.. autofunction:: mnt.pyfiction.is_charged_defect_type
+.. autofunction:: mnt.pyfiction.sidb.model.is_charged_defect_type
 
-.. autofunction:: mnt.pyfiction.is_neutral_defect_type
+.. autofunction:: mnt.pyfiction.sidb.model.is_neutral_defect_type
 
-.. autofunction:: mnt.pyfiction.is_positively_charged_defect
+.. autofunction:: mnt.pyfiction.sidb.model.is_positively_charged_defect
 
-.. autofunction:: mnt.pyfiction.is_negatively_charged_defect
+.. autofunction:: mnt.pyfiction.sidb.model.is_negatively_charged_defect
 
-.. autofunction:: mnt.pyfiction.is_neutrally_charged_defect
+.. autofunction:: mnt.pyfiction.sidb.model.is_neutrally_charged_defect
 
-.. autofunction:: mnt.pyfiction.defect_extent
+.. autofunction:: mnt.pyfiction.sidb.model.defect_extent
 ```
 
 :::
@@ -188,16 +188,16 @@ Possible charge states of SiDBs.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb_charge_state
+.. autoclass:: mnt.pyfiction.sidb.model.sidb_charge_state
    :members:
 
-.. autofunction:: mnt.pyfiction.sidb_charge_states_for_base_number
+.. autofunction:: mnt.pyfiction.sidb.model.sidb_charge_states_for_base_number
 
-.. autofunction:: mnt.pyfiction.charge_state_to_sign
+.. autofunction:: mnt.pyfiction.sidb.model.charge_state_to_sign
 
-.. autofunction:: mnt.pyfiction.sign_to_charge_state
+.. autofunction:: mnt.pyfiction.sidb.model.sign_to_charge_state
 
-.. autofunction:: mnt.pyfiction.charge_configuration_to_string
+.. autofunction:: mnt.pyfiction.sidb.model.charge_configuration_to_string
 ```
 
 :::

@@ -1,5 +1,5 @@
 # Prevent CMake from finding a system-installed fmt package to avoid version conflicts.
-# We use the bundled fmt version from alice/mockturtle submodules.
+# cmake/Dependencies.cmake fetches fmt and defines the `fmt` target that mockturtle reuses.
 set(CMAKE_DISABLE_FIND_PACKAGE_fmt TRUE)
 
 # Include Dependencies (FetchContent) configuration
@@ -17,12 +17,12 @@ set(FICTION_SECTION_FLAGS
 # Fetched Dependencies (Managed via FetchContent in Dependencies.cmake)
 ################################################################################
 
-# alice
+# fmt
 target_link_system_libraries(libfiction INTERFACE
-    $<BUILD_INTERFACE:alice>
-    $<INSTALL_INTERFACE:fiction::alice>
+    $<BUILD_INTERFACE:fmt>
+    $<INSTALL_INTERFACE:fiction::fmt>
 )
-install(DIRECTORY ${alice_SOURCE_DIR}/include/ DESTINATION include)
+install(DIRECTORY ${fmt_SOURCE_DIR}/include/ DESTINATION include)
 
 # mockturtle
 # Installs itself, so the same target works in both trees. Its own include
@@ -117,40 +117,13 @@ if (FICTION_Z3)
         message(STATUS "Found Z3 solver version: ${Z3_VERSION_STRING}")
         find_package(Threads REQUIRED)
         target_compile_definitions(libfiction INTERFACE FICTION_Z3_SOLVER)
-        target_include_directories(libfiction SYSTEM INTERFACE ${Z3_CXX_INCLUDE_DIRS})
-        target_link_system_libraries(libfiction INTERFACE ${Z3_LIBRARIES})
+        target_link_libraries(libfiction INTERFACE z3::z3lib)
         if (APPLE)
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
         endif ()
     else ()
         message(SEND_ERROR "Z3 solver could not be detected")
     endif ()
-endif ()
-
-# TBB
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
-    find_package(TBB)
-    if (TBB_FOUND)
-        if (${TBB_VERSION_MAJOR} GREATER_EQUAL 2021 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0.0 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0.0)
-                target_compile_definitions(libfiction INTERFACE _GLIBCXX_USE_TBB_PAR_BACKEND=0)
-                message(STATUS "TBB version ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR} detected. Disabling parallel policies for GCC 9 and 10 due to incompatible interfaces.")
-            else ()
-                message(STATUS "Found TBB version: ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR}")
-                message(STATUS "Parallel STL algorithms are enabled")
-            endif ()
-        else ()
-            message(STATUS "Found TBB version: ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR}")
-            message(STATUS "Parallel STL algorithms are enabled")
-        endif ()
-        target_include_directories(libfiction INTERFACE ${TBB_INCLUDE_DIRS})
-        target_link_system_libraries(libfiction INTERFACE TBB::tbb)
-    else ()
-        message(STATUS "Parallel STL algorithms are disabled. If you want to use them, please install TBB and set the TBB_ROOT_DIR, TBB_INCLUDE_DIR, and TBB_LIBRARY variables accordingly.")
-    endif ()
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    message(STATUS "Parallel STL algorithms are enabled on MSVC by default")
 endif ()
 
 # jemalloc

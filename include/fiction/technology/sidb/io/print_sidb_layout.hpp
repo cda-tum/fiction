@@ -22,7 +22,6 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>

@@ -32,16 +32,16 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.input_bdl_configuration
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration
    :members:
 
-.. autoclass:: mnt.pyfiction.bdl_input_iterator_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_input_iterator_params
    :members:
 
-.. autoclass:: mnt.pyfiction.bdl_input_iterator
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_input_iterator
    :members:
 
-.. autofunction:: mnt.pyfiction.generate_bdl_input_pattern_layouts
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.generate_bdl_input_pattern_layouts
 ```
 
 :::
@@ -212,45 +212,45 @@ flood fill or contour tracing in three dimensions.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.operational_status
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_status
    :members:
 
-.. autoclass:: mnt.pyfiction.operational_condition
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_condition
    :members:
 
-.. autoclass:: mnt.pyfiction.operational_analysis_strategy
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy
    :members:
 
-.. autoclass:: mnt.pyfiction.is_operational_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.is_operational_params
    :members:
 
-.. autofunction:: mnt.pyfiction.is_operational
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.is_operational
 
-.. autofunction:: mnt.pyfiction.operational_input_patterns
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_input_patterns
 
-.. autofunction:: mnt.pyfiction.is_kink_induced_non_operational
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.is_kink_induced_non_operational
 
-.. autofunction:: mnt.pyfiction.kink_induced_non_operational_input_patterns
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.kink_induced_non_operational_input_patterns
 
-.. autoclass:: mnt.pyfiction.sweep_parameter
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.sweep_parameter
    :members:
 
-.. autoclass:: mnt.pyfiction.parameter_point
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.parameter_point
    :members:
 
-.. autoclass:: mnt.pyfiction.operational_domain
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain
    :members:
 
-.. autoclass:: mnt.pyfiction.critical_temperature_domain
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain
    :members:
 
-.. autoclass:: mnt.pyfiction.operational_domain_value_range
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_value_range
    :members:
 
-.. autoclass:: mnt.pyfiction.operational_domain_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_params
    :members:
 
-.. autoclass:: mnt.pyfiction.operational_domain_stats
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_stats
    :members:
 ```
 
@@ -266,26 +266,26 @@ call raises `ValueError`. The sketch pairs best with grid search and random samp
 C++ tab for why combining it with flood fill or contour tracing needs a much higher sample count.
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.operational_domain_grid_search
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_grid_search
 
-.. autofunction:: mnt.pyfiction.operational_domain_random_sampling
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_random_sampling
 
-.. autofunction:: mnt.pyfiction.operational_domain_flood_fill
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_flood_fill
 
-.. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_contour_tracing
 
-.. autofunction:: mnt.pyfiction.critical_temperature_domain_grid_search
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_grid_search
 
-.. autofunction:: mnt.pyfiction.critical_temperature_domain_random_sampling
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_random_sampling
 
-.. autofunction:: mnt.pyfiction.critical_temperature_domain_flood_fill
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_flood_fill
 
-.. autofunction:: mnt.pyfiction.critical_temperature_domain_contour_tracing
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_contour_tracing
 
-.. autoclass:: mnt.pyfiction.operational_domain_ratio_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_ratio_params
    :members:
 
-.. autofunction:: mnt.pyfiction.operational_domain_ratio
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_ratio
 ```
 
 :::
@@ -320,13 +320,13 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.bdl_pair
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_pair
    :members:
 
-.. autoclass:: mnt.pyfiction.detect_bdl_pairs_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_pairs_params
    :members:
 
-.. autofunction:: mnt.pyfiction.detect_bdl_pairs
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_pairs
 ```
 
 :::
@@ -365,16 +365,16 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.bdl_wire_selection
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_wire_selection
    :members:
 
-.. autoclass:: mnt.pyfiction.detect_bdl_wires_params
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_wires_params
    :members:
 
-.. autoclass:: mnt.pyfiction.bdl_wire
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_wire
    :members:
 
-.. autofunction:: mnt.pyfiction.detect_bdl_wires
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_wires
 ```
 
 :::

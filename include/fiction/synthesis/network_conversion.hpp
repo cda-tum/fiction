@@ -21,18 +21,15 @@
 #include "fiction/traits.hpp"
 
 #include <mockturtle/algorithms/cleanup.hpp>
+#include <mockturtle/algorithms/node_resynthesis/shannon.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <cassert>
-#include <cstdint>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
-
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
 
 namespace fiction::synthesis
 {
@@ -52,7 +49,7 @@ class convert_network_impl<NtkDest, NtkSrc, true>
 
     NtkDest run()
     {
-        return mockturtle::cleanup_dangling<NtkSrc, NtkDest>(ntk, true, false);
+        return mockturtle::cleanup_dangling<NtkSrc, NtkDest>(ntk, false, false);
     }
 
   private:
@@ -88,20 +85,10 @@ class convert_network_impl<NtkDest, NtkSrc, false>
             return children;
         };
 
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(ntk.num_gates()), "[i] network conversion: |{0}|"};
-#endif
-
         ntk.foreach_gate(
-            [&, this](const auto& g, [[maybe_unused]] auto i)
+            [&, this](const auto& g)
             {
                 auto children = gather_fanin_signals(g);
-
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
 
                 if constexpr (mockturtle::has_is_and_v<TopoNtkSrc> && mockturtle::has_create_and_v<NtkDest>)
                 {
@@ -167,13 +154,31 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                         return true;
                     }
                 }
+                // a technology network keeps inverters as nodes; a target without `create_node` takes them as
+                // complemented signals
+                if constexpr (fiction::has_is_inv_v<TopoNtkSrc> && mockturtle::has_create_not_v<NtkDest>)
+                {
+                    if (ntk.is_inv(g))
+                    {
+                        old2new[g] = ntk_dest.create_not(children[0]);
+                        return true;
+                    }
+                }
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<NtkDest>)
                 {
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
                     return true;
                 }
 
-                return true;
+                if constexpr (mockturtle::has_node_function_v<TopoNtkSrc>)
+                {
+                    mockturtle::shannon_resynthesis<NtkDest>{}(ntk_dest, ntk.node_function(g), children.begin(),
+                                                               children.end(),
+                                                               [&](const auto& signal) { old2new[g] = signal; });
+                    return true;
+                }
+
+                throw std::invalid_argument("network conversion requires a supported gate or its truth table");
             });
 
         ntk.foreach_po(

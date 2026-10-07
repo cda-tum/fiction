@@ -24,9 +24,9 @@
 
 ```{eval-rst}
 
-.. autofunction:: mnt.pyfiction.read_sqd_layout
+.. autofunction:: mnt.pyfiction.sidb.io.read_sqd_layout
 
-.. autoclass:: mnt.pyfiction.sqd_parsing_error
+.. autoclass:: mnt.pyfiction.sidb.io.sqd_parsing_error
     :members:
 
 ```
@@ -62,12 +62,12 @@
 
 ```{eval-rst}
 
-.. autofunction:: mnt.pyfiction.read_surface_defects
+.. autofunction:: mnt.pyfiction.sidb.io.read_surface_defects
 
-.. autoclass:: mnt.pyfiction.unsupported_defect_index_exception
+.. autoclass:: mnt.pyfiction.sidb.io.unsupported_defect_index_exception
     :members:
 
-.. autoclass:: mnt.pyfiction.missing_position_exception
+.. autoclass:: mnt.pyfiction.sidb.io.missing_position_exception
     :members:
 
 ```
@@ -86,10 +86,10 @@
 
 **Header:** `fiction/technology/sidb/io/write_sqd_layout.hpp`
 
-```{doxygenfunction} fiction::sidb::io::write_sqd_layout(const layout& lyt, std::ostream& os)
+```{doxygenfunction} fiction::sidb::io::write_sqd_layout(const layout& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 ```
 
-```{doxygenfunction} fiction::sidb::io::write_sqd_layout(const layout& lyt, const std::string_view& filename)
+```{doxygenfunction} fiction::sidb::io::write_sqd_layout(const layout& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
 ```
 
 :::
@@ -99,7 +99,7 @@
 
 ```{eval-rst}
 
-.. autofunction:: mnt.pyfiction.write_sqd_layout
+.. autofunction:: mnt.pyfiction.sidb.io.write_sqd_layout
 
 ```
 
@@ -140,11 +140,18 @@
 
 ```{eval-rst}
 
-.. autoclass:: mnt.pyfiction.write_sidb_layout_svg_params
+.. autoclass:: mnt.pyfiction.sidb.io.write_sidb_layout_svg_params
+   :members:
 
-.. autofunction:: mnt.pyfiction.write_sidb_layout_svg
+.. autoclass:: mnt.pyfiction.sidb.io.sidb_lattice_mode
+   :members:
 
-.. autofunction:: mnt.pyfiction.write_sidb_layout_svg_to_string
+.. autoclass:: mnt.pyfiction.sidb.io.color_mode
+   :members:
+
+.. autofunction:: mnt.pyfiction.sidb.io.write_sidb_layout_svg
+
+.. autofunction:: mnt.pyfiction.sidb.io.write_sidb_layout_svg_to_string
 
 ```
 
@@ -154,6 +161,12 @@
 
 ## Layout Printing
 
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
 **Header:** `fiction/technology/sidb/io/print_sidb_layout.hpp`
 
 ```{doxygenfunction} fiction::sidb::io::print_sidb_layout(std::ostream& os, const layout& lyt, const bool lat_color = true, const bool crop_layout = false, const bool draw_lattice = true)
@@ -161,3 +174,16 @@
 
 ```{doxygenfunction} fiction::sidb::io::print_sidb_layout(std::ostream& os, const layout& lyt, const charge_distribution& cd, const bool lat_color = true, const bool crop_layout = false, const bool draw_lattice = true)
 ```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.sidb.io.print_sidb_layout
+```
+
+:::
+
+::::

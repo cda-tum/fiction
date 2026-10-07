@@ -19,17 +19,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/qca/technology.hpp"
+#include "fiction/technology/mol_qca/layout.hpp"
+#include "fiction/technology/qca/layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 
 #include <sstream>
 
@@ -40,9 +37,9 @@ using namespace fiction::qca;
 
 TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
-    const gate_layout layout{gate_layout::aspect_ratio{2, 2}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
+    const gate_layout layout{gate_layout::aspect_ratio{2, 2}, clocking::open(clocking::num_clks::FOUR)};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -61,9 +58,9 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
+    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open(clocking::num_clks::FOUR)};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
@@ -112,7 +109,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -133,7 +130,7 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = qca::layout;
 
     const cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
@@ -154,19 +151,19 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = qca::layout;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
-    layout.assign_cell_type({0, 2}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 4}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, qca_technology::cell_type::CONST_0);
-    layout.assign_cell_type({2, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, qca::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, qca::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
@@ -188,24 +185,24 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 
 TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using cell_layout = qca::layout;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
-    layout.assign_cell_type({0, 2, 0}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0, 0}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 1, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 4, 0}, qca_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({4, 2, 0}, qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_type({2, 0, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_type({1, 2, 0}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 0}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2, 0}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({2, 4, 0}, qca::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2, 0}, qca::cell_type::OUTPUT);
 
-    layout.assign_cell_mode({2, 1, 1}, qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 2, 1}, qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 3, 1}, qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 1, 1}, qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 2, 1}, qca::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 3, 1}, qca::cell_mode::CROSSOVER);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 0}, "b");
@@ -224,4 +221,20 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
     print_cell_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
+}
+
+TEST_CASE("Print molQCA layout with clock phases", "[print-cell-level-layout]")
+{
+    mol_qca::layout layout{{3, 0}, "wire"};
+
+    layout.assign_cell_type({0, 0}, mol_qca::cell_type::INPUT);
+    layout.assign_cell_type({1, 0}, mol_qca::cell_type::NORMAL1);
+    layout.assign_cell_type({2, 0}, mol_qca::cell_type::NORMAL2);
+    layout.assign_cell_type({3, 0}, mol_qca::cell_type::OUTPUT);
+
+    std::stringstream print_stream{};
+
+    print_cell_level_layout(print_stream, layout, false, false);
+
+    CHECK(print_stream.str() == "iabo\n\n");
 }

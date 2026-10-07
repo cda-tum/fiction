@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -21,6 +22,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -30,14 +32,16 @@
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <algorithm>
 #include <any>
+#include <chrono>
 #include <cstdint>
 #include <set>
 #include <stdexcept>
+#include <thread>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -45,6 +49,70 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::utils::math;
+
+TEST_CASE("QuickExact rejects incomplete simulations after the caller deadline", "[quickexact]")
+{
+    layout            lyt{};
+    quickexact_params params{.sim_params            = simulation_parameters{2, -0.32},
+                             .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
+
+    SECTION("Already expired")
+    {
+        params.deadline = std::chrono::steady_clock::now();
+    }
+    SECTION("Expires while enumerating")
+    {
+        for (int32_t i = 0; i < 20; ++i)
+        {
+            lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
+        }
+        params.deadline    = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
+        params.on_progress = [&](auto, auto done, auto total)
+        {
+            // the reporter emits `done == 0` right before enumerating and throttles later reports to 100 ms, so
+            // waiting on the first report expires the deadline however fast the enumeration runs
+            if (done < total)
+            {
+                std::this_thread::sleep_until(params.deadline);
+            }
+        };
+        SECTION("Two-state enumeration")
+        {
+            params.sim_params.base = 2;
+        }
+        SECTION("Three-state enumeration")
+        {
+            params.sim_params.base = 3;
+        }
+    }
+
+    CHECK_THROWS_AS(quickexact(lyt, params), utils::timeout_error);
+}
+
+TEST_CASE("QuickExact returns completed results after a slow final callback", "[quickexact]")
+{
+    layout lyt{};
+    for (int32_t i = 0; i < 8; ++i)
+    {
+        lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
+    }
+    quickexact_params params{.sim_params            = simulation_parameters{2, -0.32},
+                             .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
+    const auto        expected = quickexact(lyt, params);
+    params.deadline            = std::chrono::steady_clock::now() + std::chrono::seconds{1};
+    bool completed             = false;
+    params.on_progress         = [&](auto, auto done, auto total)
+    {
+        if (done == total)
+        {
+            completed = true;
+            std::this_thread::sleep_until(params.deadline);
+        }
+    };
+    const auto actual = quickexact(lyt, params);
+    CHECK(completed);
+    CHECK(actual.charge_distributions.size() == expected.charge_distributions.size());
+}
 
 TEST_CASE("Empty layout QuickExact simulation", "[quickexact]")
 {
@@ -1888,4 +1956,33 @@ TEST_CASE("QuickExact propagates invalid lattice-basis errors", "[quickexact]")
     invalid.z = 2;
     lyt.assign_sidb(invalid, dot_tag::NORMAL);
     CHECK_THROWS_AS(quickexact(lyt), std::out_of_range);
+}
+
+TEST_CASE("QuickExact reports progress", "[quickexact]")
+{
+    layout lyt{};
+    lyt.assign_sidb({-2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
+
+    progress_recorder rec{};
+
+    quickexact_params params{.base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
+    params.on_progress = rec.callback();
+
+    SECTION("two-state simulation")
+    {
+        params.sim_params = simulation_parameters{2, -0.32};
+    }
+    SECTION("three-state simulation")
+    {
+        params.sim_params = simulation_parameters{3, -0.32};
+    }
+
+    const auto simulation_results = quickexact(lyt, params);
+
+    CHECK(!simulation_results.charge_distributions.empty());
+    CHECK(rec.is_consistent("charge configurations"));
+    CHECK(rec.final_count("charge configurations") > 0);
 }

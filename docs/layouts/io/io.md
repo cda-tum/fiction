@@ -38,13 +38,13 @@ Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](h
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.read_cartesian_fgl_layout
+.. autofunction:: mnt.pyfiction.layouts.io.read_cartesian_fgl_layout
 
-.. autofunction:: mnt.pyfiction.read_shifted_cartesian_fgl_layout
+.. autofunction:: mnt.pyfiction.layouts.io.read_shifted_cartesian_fgl_layout
 
-.. autofunction:: mnt.pyfiction.read_hexagonal_fgl_layout
+.. autofunction:: mnt.pyfiction.layouts.io.read_hexagonal_fgl_layout
 
-.. autoclass:: mnt.pyfiction.fgl_parsing_error
+.. autoclass:: mnt.pyfiction.layouts.io.fgl_parsing_error
    :members:
 ```
 
@@ -64,11 +64,11 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 
 **Header:** `fiction/layouts/io/write_fgl_layout.hpp`
 
-```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, std::ostream& os)
+```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
+```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
 
 ```
 
@@ -78,7 +78,7 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.write_fgl_layout
+.. autofunction:: mnt.pyfiction.layouts.io.write_fgl_layout
 ```
 
 :::
@@ -127,11 +127,11 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
+```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {}, utils::progress_callback on_progress = {})
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
+```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {}, utils::progress_callback on_progress = {})
 
 ```
 
@@ -141,7 +141,7 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.write_dot_layout
+.. autofunction:: mnt.pyfiction.layouts.io.write_dot_layout
 ```
 
 :::

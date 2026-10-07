@@ -1,5 +1,10 @@
 # AGENTS.md — tests
 
+`test/python/` holds the `pytest` suite of `mnt.pyfiction`. It mirrors the Python module
+tree, not `include/fiction/`: the tests of `mnt.pyfiction.sidb.simulation.engines` live in
+`test/python/sidb/simulation/engines/`. The directories carry no `__init__.py`, so the suite
+never shadows an installed `mnt.pyfiction`. Everything else below is about the C++ tests.
+
 Catch2 tests. The tree mirrors `include/fiction/` exactly: `layouts/`, `networks/`,
 `synthesis/`, `physical_design/`, `verification/`, `technology/` (with `fcn/`, `qca/`,
 `inml/`, and the `sidb/` subtree), and `utils/`, plus `benchmark/`, shared `resources/`,
@@ -44,9 +49,9 @@ so `technology/sidb/model/charge_state.hpp` is tested by
 
   and writes `quickexact(lyt, params)` rather than
   `sidb::simulation::engines::quickexact(lyt, params)`.
-  - `fiction::layouts::coords` and `fiction::layouts::clocking` are never opened: bare
-    `offset`, `cube`, and `scheme` say nothing. Open `fiction::layouts` instead and
-    write `coords::offset` and `clocking::scheme`. `detail` namespaces are never opened.
+  - `fiction::layouts::clocking` is never opened: a bare `scheme` says nothing. Open
+    `fiction::layouts` instead and write `clocking::scheme`. `detail` namespaces are never
+    opened.
   - Opening a namespace can collide with a local alias or variable -- `using lattice = ...`
     against `sidb::lattice`, or a variable named `defect` against `sidb::model::defect`.
     Rename the local one; the compiler names both candidates.

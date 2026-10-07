@@ -20,6 +20,7 @@
 
 #if (FICTION_Z3_SOLVER)
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
@@ -32,6 +33,7 @@
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <kitty/operations.hpp>
@@ -42,16 +44,13 @@
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 #include <z3++.h>
 #include <z3_api.h>
 
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
@@ -93,6 +92,11 @@ struct exact_physical_design_params
      * Clocking scheme to be used.
      */
     std::string scheme = "2DDWave";
+    /**
+     * Arrangement of the shifted rows or columns of the created layout. Shifted Cartesian and hexagonal layouts require
+     * it, Cartesian layouts ignore it.
+     */
+    std::optional<layouts::arrangement> layout_arrangement = std::nullopt;
     /**
      * Number of total tiles to use as an upper bound.
      *
@@ -146,7 +150,7 @@ struct exact_physical_design_params
      */
     bool desynchronize = false;
     /**
-     * Flag to indicate that the number of used crossing tiles should be minimized.
+     * @brief Minimize the number of wire tiles.
      */
     bool minimize_wires = false;
     /**
@@ -154,13 +158,19 @@ struct exact_physical_design_params
      */
     bool minimize_crossings = false;
     /**
-     * Sets a timeout in ms for the solving process. Standard is 4294967 seconds as defined by Z3.
+     * @brief Timeout budget for the solving process, in milliseconds.
      */
     unsigned timeout = 4294967u;
     /**
      * Technology-specific constraints that are only to be added for a certain target technology.
      */
     technology_constraints technology_specifics = technology_constraints::NONE;
+    /**
+     * Callback that receives the number of examined aspect ratios.
+     */
+    utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 /**
  * Statistics.
@@ -187,15 +197,32 @@ struct exact_physical_design_stats
 namespace detail
 {
 
+/**
+ * @brief Places and routes a network with SMT constraints.
+ *
+ * @tparam Lyt Target gate-level layout type.
+ */
 template <typename Lyt>
 class exact_impl
 {
   public:
+    /**
+     * @brief Initializes exact placement and routing with a validated clocking scheme.
+     *
+     * @param src Network to place and route; output signals are replaced by output nodes.
+     * @param p Placement and routing parameters.
+     * @param st Statistics to update.
+     * @param clocking_scheme Validated clocking scheme for the target layout.
+     * @param sbl Gate orientations forbidden at each tile.
+     */
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
+               exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
+               const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
-            scheme{*layouts::clocking::get_scheme<Lyt>(ps.scheme)},
+            progress{ps.on_progress, "aspect ratios"},
+            worker_progress{ps.on_worker_progress, std::max(std::size_t{1}, ps.num_threads)},
+            scheme{std::move(clocking_scheme)},
             black_list{sbl}
     {
         // create PO nodes in the network
@@ -224,6 +251,15 @@ class exact_impl
 
   private:
     /**
+     * Creates an empty layout of the target type that uses the utilized clocking scheme.
+     *
+     * @return Empty layout.
+     */
+    [[nodiscard]] Lyt make_layout() const
+    {
+        return layouts::make_gate_level_layout<Lyt>(ps.layout_arrangement, {}, scheme);
+    }
+    /**
      * Network type for internal handling. Converting the input network to this type ensures the availability of all
      * necessary member functions.
      */
@@ -242,9 +278,15 @@ class exact_impl
      */
     exact_physical_design_stats& pst;
     /**
+     * Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
+     */
+    utils::progress_reporter progress;
+    /** @brief Serializes the active candidate dimensions of each solver worker. */
+    utils::worker_progress_reporter worker_progress;
+    /**
      * The utilized clocking scheme.
      */
-    layouts::clocking::scheme<tile<Lyt>> scheme;
+    layouts::clocking::scheme scheme;
     /**
      * Maps tiles to blacklisted gate types via their truth tables and port information.
      */
@@ -262,7 +304,7 @@ class exact_impl
      */
     std::optional<typename Lyt::aspect_ratio> result_aspect_ratio;
     /**
-     * Restricts access to the aspect_ratio_iterator and the result_aspect_ratio.
+     * Restricts access to the aspect-ratio iterator, result, and worker context records.
      */
     std::mutex ari_mutex{}, rar_mutex{};
 
@@ -326,12 +368,12 @@ class exact_impl
             else if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR_NAME))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
-                if (ar.x < depth_ntk.depth())
+                if (ar.x < static_cast<int32_t>(depth_ntk.depth()))
                 {
                     return true;
                 }
                 // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
-                if (params.border_io && ar.y < std::max(network.num_pis(), network.num_pos()) - 1)
+                if (params.border_io && ar.y < static_cast<int32_t>(std::max(network.num_pis(), network.num_pos())) - 1)
                 {
                     return true;
                 }
@@ -340,12 +382,12 @@ class exact_impl
             else if (layout.is_clocking_scheme(layouts::clocking::ROW_NAME))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
-                if (ar.y < depth_ntk.depth())
+                if (ar.y < static_cast<int32_t>(depth_ntk.depth()))
                 {
                     return true;
                 }
                 // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
-                if (params.border_io && ar.x < std::max(network.num_pis(), network.num_pos()) - 1)
+                if (params.border_io && ar.x < static_cast<int32_t>(std::max(network.num_pis(), network.num_pos())) - 1)
                 {
                     return true;
                 }
@@ -426,6 +468,16 @@ class exact_impl
         [[nodiscard]] z3::stats get_solver_statistics() const
         {
             return solver->statistics();
+        }
+
+        /**
+         * @brief Returns the solver for interruption without cancelling model evaluation.
+         *
+         * @return The solver for the current aspect ratio.
+         */
+        [[nodiscard]] solver_ptr current_solver() const noexcept
+        {
+            return solver;
         }
 
       private:
@@ -656,6 +708,8 @@ class exact_impl
             solver_state new_state{std::make_shared<z3::solver>(*ctx), {get_lit_e(), get_lit_s()}};
 
             return {std::make_shared<solver_state>(new_state), added_tiles, {}, create_assumptions(new_state)};
+            // MSVC shared_ptr ownership transfers to the returned checkpoint.
+            // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
         }
         /**
          * Checks whether a given tile belongs to the added tiles of the current solver check point.
@@ -971,7 +1025,7 @@ class exact_impl
                 [this, &e, &ve, &one, &zero, &num_phases](const auto& t)
                 {
                     // an artificial latch variable counts as an extra 1 clock cycle (n clock phases)
-                    if (has_synchronization_elements_v<Lyt> && params.synchronization_elements && !params.desynchronize)
+                    if (params.synchronization_elements && !params.desynchronize)
                     {
                         ve.push_back(z3::ite(get_te(t, e), (get_tse(t) * num_phases) + one, zero));
                     }
@@ -1431,7 +1485,7 @@ class exact_impl
                     });
             };
 
-            if (!(params.border_io && layouts::clocking::is_linear<Lyt>(layout.get_clocking_scheme())))
+            if (!(params.border_io && layouts::clocking::is_linear(layout.get_clocking_scheme())))
             {
                 // ensure that exactly one ncl variable is set for each node
                 network.foreach_node(
@@ -1478,7 +1532,8 @@ class exact_impl
                 apply_to_added_tiles(
                     [this, &pi](const auto& t)
                     {
-                        if (t.x > layout.num_clocks() - 1u || t.y > layout.num_clocks() - 1u)
+                        if (t.x >= static_cast<int32_t>(layout.num_clocks()) ||
+                            t.y >= static_cast<int32_t>(layout.num_clocks()))
                         {
                             solver->add(!(get_tn(t, pi)));
                         }
@@ -1859,13 +1914,13 @@ class exact_impl
                             if (!skip_const_or_io_node(n))
                             {
                                 const auto l  = depth_ntk.level(n);
-                                const auto il = inv_levels[network.node_to_index(n)];
+                                const auto il = static_cast<int32_t>(inv_levels[network.node_to_index(n)]);
 
                                 // cannot be placed with too little distance to western border
-                                for (auto column = 0u;
+                                for (int32_t column = 0;
                                      column < std::min(static_cast<decltype(layout.y())>(l), layout.x()); ++column)
                                 {
-                                    for (auto row = 0u; row <= layout.y(); ++row)
+                                    for (int32_t row = 0; row <= layout.y(); ++row)
                                     {
                                         if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
@@ -1885,9 +1940,9 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to eastern border
-                                for (auto column = layout.x() - il + 1; column < layout.x(); ++column)
+                                for (int32_t column = std::max(layout.x() - il + 1, 0); column < layout.x(); ++column)
                                 {
-                                    for (auto row = 0u; row <= layout.y(); ++row)
+                                    for (int32_t row = 0; row <= layout.y(); ++row)
                                     {
                                         const auto t = typename Lyt::tile{column, row};
 
@@ -1923,13 +1978,13 @@ class exact_impl
                             if (!skip_const_or_io_node(n))
                             {
                                 const auto l  = depth_ntk.level(n);
-                                const auto il = inv_levels[network.node_to_index(n)];
+                                const auto il = static_cast<int32_t>(inv_levels[network.node_to_index(n)]);
 
                                 // cannot be placed with too little distance to northern border
-                                for (auto row = 0u; row < std::min(static_cast<decltype(layout.y())>(l), layout.y());
+                                for (int32_t row = 0; row < std::min(static_cast<decltype(layout.y())>(l), layout.y());
                                      ++row)
                                 {
-                                    for (auto column = 0u; column <= layout.x(); ++column)
+                                    for (int32_t column = 0; column <= layout.x(); ++column)
                                     {
                                         if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
@@ -1949,9 +2004,9 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to southern border
-                                for (auto row = layout.y() - il + 1; row < layout.y(); ++row)
+                                for (int32_t row = std::max(layout.y() - il + 1, 0); row < layout.y(); ++row)
                                 {
-                                    for (auto column = 0u; column <= layout.x(); ++column)
+                                    for (int32_t column = 0; column <= layout.x(); ++column)
                                     {
                                         const auto t = typename Lyt::tile{column, row};
 
@@ -1987,7 +2042,7 @@ class exact_impl
                             if (!skip_const_or_io_node(n))
                             {
                                 const auto l  = depth_ntk.level(n);
-                                const auto il = inv_levels[network.node_to_index(n)];
+                                const auto il = static_cast<int32_t>(inv_levels[network.node_to_index(n)]);
 
                                 // cannot be placed with too little distance to north-west corner
                                 apply_to_added_tiles(
@@ -2178,60 +2233,57 @@ class exact_impl
          */
         void enforce_straight_inverters()
         {
-            if constexpr (has_foreach_adjacent_opposite_tiles_v<Lyt>)
-            {
-                apply_to_added_and_updated_tiles(
-                    [this](const auto& t)
-                    {
-                        network.foreach_node(
-                            [this, &t](const auto& inv)
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
+                {
+                    network.foreach_node(
+                        [this, &t](const auto& inv)
+                        {
+                            // skip all operations except for inverters
+                            if (network.is_inv(inv))
                             {
-                                // skip all operations except for inverters
-                                if (network.is_inv(inv))
+                                // I/Os inverters are always straight, so they can be skipped as well
+                                if (!skip_const_or_io_node(inv))
                                 {
-                                    // I/Os inverters are always straight, so they can be skipped as well
-                                    if (!skip_const_or_io_node(inv))
-                                    {
-                                        // vector to store possible direction combinations
-                                        z3::expr_vector ve{*ctx};
+                                    // vector to store possible direction combinations
+                                    z3::expr_vector ve{*ctx};
 
-                                        layout.foreach_adjacent_opposite_tiles(
-                                            t,
-                                            [this, &t, &ve](const auto& cp)
+                                    layout.foreach_adjacent_opposite_tiles(
+                                        t,
+                                        [this, &t, &ve](const auto& cp)
+                                        {
+                                            const auto &t1 = cp.first, t2 = cp.second;
+
+                                            if ((layout.is_incoming_clocked(t, t1) &&
+                                                 layout.is_outgoing_clocked(t, t2)) ||
+                                                !layout.is_regularly_clocked())
                                             {
-                                                const auto &t1 = cp.first, t2 = cp.second;
+                                                ve.push_back(get_tc(t1, t) && get_tc(t, t2));
+                                            }
+                                            if ((layout.is_incoming_clocked(t, t2) &&
+                                                 layout.is_outgoing_clocked(t, t1)) ||
+                                                !layout.is_regularly_clocked())
+                                            {
+                                                ve.push_back(get_tc(t2, t) && get_tc(t, t1));
+                                            }
+                                        });
 
-                                                if ((layout.is_incoming_clocked(t, t1) &&
-                                                     layout.is_outgoing_clocked(t, t2)) ||
-                                                    !layout.is_regularly_clocked())
-                                                {
-                                                    ve.push_back(get_tc(t1, t) && get_tc(t, t2));
-                                                }
-                                                if ((layout.is_incoming_clocked(t, t2) &&
-                                                     layout.is_outgoing_clocked(t, t1)) ||
-                                                    !layout.is_regularly_clocked())
-                                                {
-                                                    ve.push_back(get_tc(t2, t) && get_tc(t, t1));
-                                                }
-                                            });
-
-                                        if (!ve.empty())
-                                        {
-                                            // inverter can be placed here; enforce any of the direction combinations
-                                            // found possible above
-                                            solver->add(mk_as_if_se(z3::implies(get_tn(t, inv), z3::mk_or(ve)), t));
-                                        }
-                                        else
-                                        {
-                                            // inverter cannot be placed here, add constraint to avoid this case and
-                                            // speed up solving
-                                            solver->add(mk_as_if_se(!(get_tn(t, inv)), t));
-                                        }
+                                    if (!ve.empty())
+                                    {
+                                        // inverter can be placed here; enforce any of the direction combinations
+                                        // found possible above
+                                        solver->add(mk_as_if_se(z3::implies(get_tn(t, inv), z3::mk_or(ve)), t));
+                                    }
+                                    else
+                                    {
+                                        // inverter cannot be placed here, add constraint to avoid this case and
+                                        // speed up solving
+                                        solver->add(mk_as_if_se(!(get_tn(t, inv)), t));
                                     }
                                 }
-                            });
-                    });
-            }
+                            }
+                        });
+                });
         }
         /**
          * Adds constraints to the solver to prevent negative valued synchronization elements and that gate tiles cannot
@@ -2239,32 +2291,30 @@ class exact_impl
          */
         void restrict_synchronization_elements()
         {
-            if constexpr (has_synchronization_elements_v<Lyt>)
-            {
-                const auto zero = ctx->int_val(0u);
 
-                apply_to_added_tiles(
-                    [this, &zero](const auto& t)
-                    {
-                        // synchronization elements must be positive
-                        const auto l = get_tse(t);
-                        solver->add(l >= zero);
+            const auto zero = ctx->int_val(0u);
 
-                        // tiles without wires cannot be synchronization elements
-                        z3::expr_vector te{*ctx};
+            apply_to_added_tiles(
+                [this, &zero](const auto& t)
+                {
+                    // synchronization elements must be positive
+                    const auto l = get_tse(t);
+                    solver->add(l >= zero);
 
-                        networks::foreach_edge(network,
-                                               [this, &t, &te](const auto& e)
+                    // tiles without wires cannot be synchronization elements
+                    z3::expr_vector te{*ctx};
+
+                    networks::foreach_edge(network,
+                                           [this, &t, &te](const auto& e)
+                                           {
+                                               if (!skip_const_or_io_edge(e))
                                                {
-                                                   if (!skip_const_or_io_edge(e))
-                                                   {
-                                                       te.push_back(get_te(t, e));
-                                                   }
-                                               });
+                                                   te.push_back(get_te(t, e));
+                                               }
+                                           });
 
-                        solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
-                    });
-            }
+                    solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
+                });
         }
         /**
          * Adds constraints to the solver to enforce technology-specific restrictions.
@@ -2546,13 +2596,11 @@ class exact_impl
          */
         void minimize_synchronization_elements(const optimize_ptr& optimize)
         {
-            if constexpr (has_synchronization_elements_v<Lyt>)
-            {
-                z3::expr_vector se_counter{*ctx};
-                layout.foreach_ground_tile([this, &se_counter](const auto& t) { se_counter.push_back(get_tse(t)); });
 
-                optimize->minimize(z3::sum(se_counter));
-            }
+            z3::expr_vector se_counter{*ctx};
+            layout.foreach_ground_tile([this, &se_counter](const auto& t) { se_counter.push_back(get_tse(t)); });
+
+            optimize->minimize(z3::sum(se_counter));
         }
         /**
          * Generates the SMT instance by calling the constraint generating functions.
@@ -2583,8 +2631,7 @@ class exact_impl
             }
 
             // path/cycle constraints
-            if (!layouts::clocking::is_linear<Lyt>(
-                    layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
+            if (!layouts::clocking::is_linear(layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
             {
                 establish_sub_paths();
                 establish_transitive_paths();
@@ -2698,14 +2745,8 @@ class exact_impl
                         {
                             if (model.eval(get_tcl(t, i), true).bool_value() == Z3_L_TRUE)
                             {
-                                // assign clock number to tile t
+                                // the clock number applies to every layer of tile t
                                 layout.assign_clock_number(t, static_cast<typename Lyt::clock_number_t>(i));
-                                // and to the tile above
-                                layout.assign_clock_number(layout.above(t),
-                                                           static_cast<typename Lyt::clock_number_t>(i));
-                                // NOTE if this algorithm is ever to be extended for stacked FCN, this function needs to
-                                // assign the clock zone to all tiles in the z direction or the clocking lookup must
-                                // only consider the ground tile
                             }
                         }
                     });
@@ -2837,18 +2878,15 @@ class exact_impl
                 });
 
             // assign synchronization elements if there were any in use
-            if constexpr (has_synchronization_elements_v<Lyt>)
+
+            if (params.synchronization_elements)
             {
-                if (params.synchronization_elements)
-                {
-                    layout.foreach_ground_tile(
-                        [this, &model](const auto& t)
-                        {
-                            layout.assign_synchronization_element(
-                                t,
-                                static_cast<typename Lyt::sync_elem_t>(model.eval(get_tse(t), true).get_numeral_int()));
-                        });
-                }
+                layout.foreach_ground_tile(
+                    [this, &model](const auto& t)
+                    {
+                        layout.assign_synchronization_element(
+                            t, static_cast<typename Lyt::sync_elem_t>(model.eval(get_tse(t), true).get_numeral_int()));
+                    });
             }
 
             // restore possibly set signal names
@@ -2876,19 +2914,22 @@ class exact_impl
         handler.set_timeout(time_left);
     }
     /**
-     * Contains a context pointer and a currently worked on aspect ratio and can be shared between multiple worker
-     * threads so that they can notify each other via context interrupts based on their individual results, i.e., a
-     * thread that found a result at aspect ratio x * y can interrupt all other threads that are working on larger
-     * layout sizes.
+     * @brief Shares worker solvers and aspect ratios under `rar_mutex`.
+     *
+     * A worker with a result interrupts solvers exploring layouts of equal or greater area.
      */
     struct thread_info
     {
         /**
-         * Pointer to a context.
+         * @brief Context that owns the worker solver.
          */
         ctx_ptr ctx;
         /**
-         * Currently examined layout aspect ratio.
+         * @brief Current solver, kept alive while other workers may interrupt it.
+         */
+        solver_ptr solver;
+        /**
+         * @brief Currently examined layout aspect ratio.
          */
         typename Lyt::aspect_ratio worker_aspect_ratio;
     };
@@ -2900,17 +2941,27 @@ class exact_impl
      *
      * @param t_num Thread's identifier.
      * @param ti_list Pointer to a list of shared thread info that the threads use for communication.
-     * @return A found layout or nullptr if being interrupted.
+     * @param started Start of the shared timeout budget.
+     * @return A found layout or `std::nullopt` when interrupted or timed out.
      */
     [[nodiscard]] std::optional<Lyt> explore_asynchronously(const unsigned                                   t_num,
-                                                            const std::shared_ptr<std::vector<thread_info>>& ti_list)
+                                                            const std::shared_ptr<std::vector<thread_info>>& ti_list,
+                                                            const std::chrono::steady_clock::time_point      started)
     {
-        const auto ctx = std::make_shared<z3::context>();
+        const utils::worker_progress_scope worker_scope{worker_progress, t_num};
+        const auto                         ctx = std::make_shared<z3::context>();
 
-        Lyt layout{{}, scheme};
+        Lyt layout = make_layout();
 
-        smt_handler handler{ctx, layout, *ntk, ps, black_list};
-        (*ti_list)[t_num].ctx = ctx;
+        // Network views mutate traversal marks and event subscriptions, so each worker needs its own storage.
+        mockturtle::names_view<networks::technology_network> worker_ntk{*ntk};
+        static_cast<networks::technology_network&>(worker_ntk) = ntk->clone();
+        const topology_ntk_t worker_topology{mockturtle::fanout_view{worker_ntk}};
+        smt_handler          handler{ctx, layout, worker_topology, ps, black_list};
+        {
+            const std::scoped_lock guard{rar_mutex};
+            (*ti_list)[t_num].ctx = ctx;
+        }
 
         while (true)
         {
@@ -2926,6 +2977,8 @@ class exact_impl
                 // log the examination of a new aspect ratio
                 pst.num_aspect_ratios++;
             }
+
+            progress.advance();
 
             if ((ar.x + 1) * (ar.y + 1) > ps.upper_bound_area || (ar.x >= ps.upper_bound_x && ar.y >= ps.upper_bound_y))
             {
@@ -2945,7 +2998,7 @@ class exact_impl
                 if (result_aspect_ratio)
                 {
                     // stop working if its area is smaller or equal to the one currently at hand
-                    if (layouts::coords::area_of(*result_aspect_ratio) <= layouts::coords::area_of(ar))
+                    if (layouts::area_of(*result_aspect_ratio) <= layouts::area_of(ar))
                     {
                         return std::nullopt;
                     }
@@ -2953,12 +3006,20 @@ class exact_impl
             }
 
             // update aspect ratio in the thread_info list and the handler
-            (*ti_list)[t_num].worker_aspect_ratio = ar;
+            {
+                const std::scoped_lock guard{rar_mutex};
+                (*ti_list)[t_num].worker_aspect_ratio = ar;
+            }
+            worker_progress.update(t_num, fmt::format("worker {}: {} × {}", t_num + 1, ar.x + 1, ar.y + 1), 0, 0, true);
             handler.update(ar);
+            {
+                const std::scoped_lock guard{rar_mutex};
+                (*ti_list)[t_num].solver = handler.current_solver();
+            }
 
             try
             {
-                mockturtle::stopwatch stop{pst.time_total};
+                update_timeout(handler, std::chrono::steady_clock::now() - started);
 
                 if (handler.is_satisfiable())  // found a layout
                 {
@@ -2973,7 +3034,7 @@ class exact_impl
                         }
                         else  // or if the own one is smaller
                         {
-                            if (layouts::coords::area_of(*result_aspect_ratio) > layouts::coords::area_of(ar))
+                            if (layouts::area_of(*result_aspect_ratio) > layouts::area_of(ar))
                             {
                                 result_aspect_ratio = ar;
                             }
@@ -2985,11 +3046,16 @@ class exact_impl
                     }
 
                     // interrupt other threads that are working on higher aspect ratios
-                    for (const auto& ti : *ti_list)
                     {
-                        if (layouts::coords::area_of(ar) <= layouts::coords::area_of(ti.worker_aspect_ratio))
+                        const std::scoped_lock guard{rar_mutex};
+                        for (const auto& ti : *ti_list)
                         {
-                            ti.ctx->interrupt();
+                            if (ti.solver && ti.ctx != ctx &&
+                                layouts::area_of(ar) <= layouts::area_of(ti.worker_aspect_ratio))
+                            {
+                                // Context-wide interruption also cancels model evaluation inside noexcept traversals.
+                                Z3_solver_interrupt(*ti.ctx, *ti.solver);
+                            }
                         }
                     }
 
@@ -3007,8 +3073,6 @@ class exact_impl
             {
                 return std::nullopt;
             }
-
-            update_timeout(handler, pst.time_total);
         }
 
         // unreachable code, but compiler complains if it's not there
@@ -3021,9 +3085,7 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
-        std::cout << "You have called an unstable beta feature that might crash.\n";
-
-        Lyt layout{{}, scheme};
+        Lyt layout = make_layout();
 
         {
             mockturtle::stopwatch stop{pst.time_total};
@@ -3032,20 +3094,11 @@ class exact_impl
             std::vector<fut_layout> fut(ps.num_threads);
 
             const auto ti_list = std::make_shared<std::vector<thread_info>>(ps.num_threads);
-
-#if (PROGRESS_BARS)
-            mockturtle::progress_bar thread_bar("[i] examining layout aspect ratios using {} threads");
-            thread_bar(ps.num_threads);
-
-            auto post_toggle = false;
-
-            mockturtle::progress_bar post_bar(
-                "[i] some layout has been found; waiting for threads examining smaller aspect ratios to terminate");
-#endif
+            const auto started = std::chrono::steady_clock::now() - pst.time_total;
 
             for (auto i = 0u; i < ps.num_threads; ++i)
             {
-                fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list);
+                fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list, started);
             }
 
             // wait for every task to finish running. This is the join that makes the unguarded `result_aspect_ratio`
@@ -3053,15 +3106,6 @@ class exact_impl
             for (auto& f : fut)
             {
                 f.wait();
-
-#if (PROGRESS_BARS)
-                if (!post_toggle)
-                {
-                    thread_bar.done();
-                    post_bar(true);
-                    post_toggle = true;
-                }
-#endif
             }
 
             // extract the layout from the futures. Every future is consumed, even when no result was found:
@@ -3088,8 +3132,8 @@ class exact_impl
         if (result_aspect_ratio.has_value())
         {
             // statistical information
-            pst.x_size        = layout.x() + 1;
-            pst.y_size        = layout.y() + 1;
+            pst.x_size        = static_cast<uint64_t>(layout.x()) + 1;
+            pst.y_size        = static_cast<uint64_t>(layout.y()) + 1;
             pst.num_gates     = layout.num_gates();
             pst.num_wires     = layout.num_wires();
             pst.num_crossings = layout.num_crossings();
@@ -3104,9 +3148,10 @@ class exact_impl
      *
      * @return A placed and routed gate-level layout or std::nullopt in case a timeout or an upper bound was reached.
      */
-    [[nodiscard]] std::optional<Lyt> run_synchronously() noexcept
+    [[nodiscard]] std::optional<Lyt> run_synchronously()
     {
-        Lyt layout{{}, scheme};
+        const utils::worker_progress_scope worker_scope{worker_progress, 0};
+        Lyt                                layout = make_layout();
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
@@ -3115,28 +3160,18 @@ class exact_impl
 
         for (; ari <= upper_bound; ++ari)  // <= to prevent overflow
         {
-
-#if (PROGRESS_BARS)
-            // `progress_bar::operator()` is non-const, so `bar` cannot be declared `const`; clang-tidy does not
-            // recognize the variadic call below as a mutating use
-            // NOLINTNEXTLINE(misc-const-correctness)
-            mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
-#endif
-
             auto ar = *ari;
 
             // log the examination of a new aspect ratio
             pst.num_aspect_ratios++;
+            progress.advance();
 
             if (handler.skippable(ar))
             {
                 continue;
             }
 
-#if (PROGRESS_BARS)
-            bar(ar.x + 1, ar.y + 1);
-#endif
-
+            worker_progress.update(0, fmt::format("examining layout: {} × {}", ar.x + 1, ar.y + 1), 0, 0, true);
             handler.update(ar);
 
             try
@@ -3147,8 +3182,8 @@ class exact_impl
                 if (sat)
                 {
                     // statistical information
-                    pst.x_size        = layout.x() + 1;
-                    pst.y_size        = layout.y() + 1;
+                    pst.x_size        = static_cast<uint64_t>(layout.x()) + 1;
+                    pst.y_size        = static_cast<uint64_t>(layout.y()) + 1;
                     pst.num_gates     = layout.num_gates();
                     pst.num_wires     = layout.num_wires();
                     pst.num_crossings = layout.num_crossings();
@@ -3218,54 +3253,43 @@ class exact_impl
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
  * parameters; `std::nullopt`, otherwise.
+ * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and
+ * `ps.layout_arrangement` is empty.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps = {},
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
+    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
+
+    auto clocking_scheme =
+        layouts::clocking::get_scheme(ps.scheme, is_hexagonal_layout_v<Lyt> ? ps.layout_arrangement : std::nullopt);
 
     if (!clocking_scheme.has_value())
     {
         throw layouts::clocking::unsupported_scheme_exception();
     }
+    // the layout topology bounds the degrees of schemes that impose no bound of their own
+    const auto max_in_degree  = std::min<uint32_t>(clocking_scheme->max_in_degree(), Lyt::max_fanin_size);
+    const auto max_out_degree = std::min<uint32_t>(clocking_scheme->max_out_degree(), Lyt::max_fanin_size);
     // check for input degree
-    if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (networks::has_high_degree_fanin_nodes(ntk, max_in_degree))
     {
         throw networks::high_degree_fanin_exception();
     }
 
-    if constexpr (!fiction::has_foreach_adjacent_opposite_tiles_v<Lyt>)
-    {
-        if (ps.straight_inverters)
-        {
-            std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
-                         "cannot be guaranteed"
-                      << '\n';
-        }
-    }
-    if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
-    {
-        if (ps.synchronization_elements)
-        {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
-        }
-    }
-
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
         synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
-                  clocking_scheme->max_out_degree, 1ul})};
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme)};
 
     auto result = p.run();
 
@@ -3290,6 +3314,8 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
  * parameters; `std::nullopt`, otherwise.
+ * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and
+ * `ps.layout_arrangement` is empty.
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, fcn::port_direction>& black_list,
@@ -3297,47 +3323,35 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
                                         exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
+    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
+
+    auto clocking_scheme =
+        layouts::clocking::get_scheme(ps.scheme, is_hexagonal_layout_v<Lyt> ? ps.layout_arrangement : std::nullopt);
 
     if (!clocking_scheme.has_value())
     {
         throw layouts::clocking::unsupported_scheme_exception();
     }
+    // the layout topology bounds the degrees of schemes that impose no bound of their own
+    const auto max_in_degree  = std::min<uint32_t>(clocking_scheme->max_in_degree(), Lyt::max_fanin_size);
+    const auto max_out_degree = std::min<uint32_t>(clocking_scheme->max_out_degree(), Lyt::max_fanin_size);
     // check for input degree
-    if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (networks::has_high_degree_fanin_nodes(ntk, max_in_degree))
     {
         throw networks::high_degree_fanin_exception();
     }
 
-    if constexpr (!fiction::has_foreach_adjacent_opposite_tiles_v<Lyt>)
-    {
-        if (ps.straight_inverters)
-        {
-            std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
-                         "cannot be guaranteed\n";
-        }
-    }
-    if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
-    {
-        if (ps.synchronization_elements)
-        {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
-        }
-    }
-
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
         synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
-                  clocking_scheme->max_out_degree, 1ul})};
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, black_list};
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme), black_list};
 
     auto result = p.run();
 

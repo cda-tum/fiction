@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -24,7 +25,10 @@
 #include "fiction/technology/sidb/simulation/detail/simulation_state.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/execution_timeout.hpp"
+#include "fiction/utils/progress.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -32,6 +36,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <future>
 #include <limits>
 #include <mutex>
 #include <optional>
@@ -67,6 +72,17 @@ struct quicksim_params
      * Timeout limit (in ms).
      */
     uint64_t timeout = std::numeric_limits<uint64_t>::max();
+    /**
+     * Shared caller deadline. Expiration throws instead of returning an incomplete simulation.
+     * `time_point::max()` leaves the caller budget unlimited; `timeout` still applies.
+     */
+    std::chrono::steady_clock::time_point deadline{std::chrono::steady_clock::time_point::max()};
+    /**
+     * Callback that receives the number of completed iterations across all threads.
+     */
+    utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 
 /**
@@ -82,9 +98,11 @@ struct quicksim_params
  * @return The physically valid charge distributions found, or `std::nullopt` if the layout is empty, holds charged
  * defects, the iteration count is zero, the timeout was hit, or no valid distribution was found.
  * @throws std::out_of_range if a site has an invalid lattice basis index.
+ * @throws utils::timeout_error if the shared caller deadline expires. No partial result is returned.
  */
 [[nodiscard]] inline std::optional<result> quicksim(const layout& lyt, const quicksim_params& ps = quicksim_params{})
 {
+    utils::check_deadline(ps.deadline);
     if (ps.iteration_steps == 0 || lyt.num_dots() == 0 || lyt.num_charged_defects() > 0)
     {
         return std::nullopt;
@@ -104,7 +122,7 @@ struct quicksim_params
     mockturtle::stopwatch<>::duration time_counter{};
 
     // Track the start time for timeout
-    const auto start_time = std::chrono::high_resolution_clock::now();
+    const auto start_time = std::chrono::steady_clock::now();
 
     // measure run time (artificial scope)
     {
@@ -116,6 +134,8 @@ struct quicksim_params
         const potential_landscape            land{lyt, params};
         simulation::detail::simulation_state state{land, model::charge_state::NEGATIVE,
                                                    simulation::detail::simulation_state::energy_model::INTERNAL_ONLY};
+
+        utils::check_deadline(ps.deadline);
 
         const auto predefined_negative_sidb_indices = state.negative_sidb_detection();
 
@@ -141,8 +161,6 @@ struct quicksim_params
 
         for (std::size_t i = 0; i < state.num_sidbs(); ++i)
         {
-            // no execution policy: predefined_negative_sidb_indices holds a handful of entries, where the dispatch
-            // costs an order of magnitude more than the search itself
             if (std::ranges::find(predefined_negative_sidb_indices, i) == predefined_negative_sidb_indices.cend())
             {
                 all_sidb_indices_with_unknown_charge_state.push_back(i);
@@ -155,6 +173,7 @@ struct quicksim_params
         }
 
         state.update_after_charge_change();
+        utils::check_deadline(ps.deadline);
         if (state.is_physically_valid())
         {
             st.charge_distributions.push_back(state.snapshot());
@@ -169,15 +188,23 @@ struct quicksim_params
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
 
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
         std::mutex mutex{};  // used to control access to shared resources
 
+        utils::progress_reporter progress{ps.on_progress, "iterations", num_threads * iter_per_thread};
+
+        utils::worker_progress_reporter worker_progress{ps.on_worker_progress, num_threads};
+        // Async futures join during unwinding; Apple libc++ does not expose std::jthread.
+        std::vector<std::future<void>> threads{};
+        threads.reserve(num_threads);
         for (uint64_t z = 0ul; z < num_threads; z++)
         {
-            threads.emplace_back(
-                [&]
+            threads.emplace_back(std::async(
+                std::launch::async,
+                [&, z]
                 {
+                    const utils::worker_progress_scope worker_scope{worker_progress, z};
+                    const auto                         description = fmt::format("worker {}: iterations", z + 1);
+                    worker_progress.update(z, description, 0, iter_per_thread);
                     // if all SiDBs are negatively charged, abort
                     if (predefined_negative_sidb_indices.size() == state.num_sidbs())
                     {
@@ -192,8 +219,12 @@ struct quicksim_params
                         for (const auto sidb_index_with_unknown_charge_state :
                              all_sidb_indices_with_unknown_charge_state)
                         {
-                            // Check if the timeout has been reached before starting the iterations
-                            const auto current_time = std::chrono::high_resolution_clock::now();
+                            // One clock read serves the shared deadline and the per-call timeout
+                            const auto current_time = std::chrono::steady_clock::now();
+                            if (current_time >= ps.deadline)
+                            {
+                                throw utils::timeout_error{};
+                            }
                             const auto elapsed_time =
                                 std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time)
                                     .count();
@@ -240,13 +271,16 @@ struct quicksim_params
                                 }
                             }
                         }
+
+                        progress.advance();
+                        worker_progress.update(z, description, l + 1, iter_per_thread);
                     }
-                });
+                }));
         }
 
         for (auto& thread : threads)
         {
-            thread.join();
+            thread.get();
         }
     }
 

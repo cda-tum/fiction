@@ -23,10 +23,6 @@
 #include <algorithm>
 #include <limits>
 
-// data types cannot properly be converted to bit field types
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
 namespace fiction::layouts
 {
 /**
@@ -94,16 +90,16 @@ class bounding_box_2d
                 });
         }
 
-        if constexpr (is_cell_level_layout_v<Lyt>)
+        else if constexpr (is_cell_grid_v<Lyt>)
         {
-            layout.foreach_cell(
-                [&](const auto& c)
-                {
-                    if (!layout.is_empty_cell(c))
-                    {
-                        update_min_max(min, max, c);
-                    }
-                });
+            layout.foreach_cell([&](const auto& c) { update_min_max(min, max, c); });
+        }
+
+        // no non-empty coordinate lies within the layout
+        if (min.x > max.x)
+        {
+            min = {0, 0, 0};
+            max = {0, 0, 0};
         }
 
         // Final bounding box dimensions
@@ -113,7 +109,7 @@ class bounding_box_2d
     /**
      * Returns the minimum corner of the bounding box.
      *
-     * In a `cartesian_layout<coords::offset>` object, this location represents the most north-western coordinate
+     * In a `cartesian_layout` object, this location represents the most north-western coordinate
      * of the bounding box enclosing every non-empty coordinate.
      *
      * @return The minimum enclosing coordinate in the associated layout.
@@ -125,7 +121,7 @@ class bounding_box_2d
     /**
      * Returns the maximum corner of the bounding box.
      *
-     * In a `cartesian_layout<coords::offset>` object, this location represents the most south-eastern coordinate
+     * In a `cartesian_layout` object, this location represents the most south-eastern coordinate
      * of the bounding box enclosing every non-empty coordinate.
      *
      * @return The maximum enclosing coordinate in the associated layout.
@@ -182,21 +178,18 @@ class bounding_box_2d
      */
     [[nodiscard]] bool is_empty_coordinate(const coordinate<Lyt>& c) const noexcept
     {
-        static_assert(has_is_empty_tile_v<Lyt> || has_is_empty_cell_v<Lyt>,
-                      "Lyt does neither implement the is_empty_tile nor the is_empty_cell function");
+        static_assert(is_gate_level_layout_v<Lyt> || is_cell_grid_v<Lyt>,
+                      "Lyt is neither a gate-level nor a cell-level layout");
 
-        if constexpr (has_is_empty_tile_v<Lyt>)
+        if constexpr (is_gate_level_layout_v<Lyt>)
         {
             return layout.is_empty_tile(c);
         }
-        else if constexpr (has_is_empty_cell_v<Lyt>)
+        else
         {
             return layout.is_empty_cell(c);
         }
-
-        return false;
     }
 };
 
 }  // namespace fiction::layouts
-#pragma GCC diagnostic pop

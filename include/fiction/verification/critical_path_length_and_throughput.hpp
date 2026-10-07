@@ -98,64 +98,95 @@ class critical_path_length_and_throughput_impl
 
     phmap::flat_hash_map<tile<Lyt>, path_info> delay_cache{};
 
-    path_info signal_delay(const tile<Lyt> t) noexcept
+    /**
+     * @brief Evaluates an output's incoming paths without consuming the native call stack.
+     * @param t Output tile whose path information is needed.
+     * @return Length, delay, and delay difference of the dominant path.
+     */
+    path_info signal_delay(const tile<Lyt> t)
     {
-        if (lyt.is_empty_tile(t))
+        /** @brief Suspended traversal of one tile's incoming paths. */
+        struct frame
         {
-            return {};
-        }
+            /** @brief Tile whose predecessors are being evaluated. */
+            tile<Lyt> position;
+            /** @brief Incoming tiles in layout traversal order. */
+            std::vector<tile<Lyt>> incoming;
+            /** @brief Completed predecessor paths in the same order. */
+            std::vector<path_info> infos{};
+            /** @brief Wire tiles between this frame's caller and its current position. */
+            uint64_t wire_length{};
+        };
 
-        const auto idf = lyt.incoming_data_flow(t);
-        if (idf.empty())
+        std::vector<frame> pending{{t, lyt.incoming_data_flow(t)}};
+        path_info          dominant_path{};
+        while (!pending.empty())
         {
-            return {1, lyt.get_clock_number(t), 0};
+            auto& current = pending.back();
+            while (current.infos.empty() && current.incoming.size() == 1 && lyt.is_wire_tile(current.position) &&
+                   !lyt.is_pi_tile(current.position))
+            {
+                current.position = current.incoming.front();
+                current.incoming = lyt.incoming_data_flow(current.position);
+                ++current.wire_length;
+            }
+            if (lyt.is_empty_tile(current.position))
+            {
+                dominant_path = {};
+            }
+            else if (current.incoming.empty())
+            {
+                dominant_path = {1, lyt.get_clock_number(current.position), 0};
+            }
+            else if (const auto it = delay_cache.find(current.position); it != delay_cache.end())
+            {
+                dominant_path = it->second;
+            }
+            else if (current.infos.size() < current.incoming.size())
+            {
+                const auto predecessor = current.incoming[current.infos.size()];
+                pending.push_back({predecessor, lyt.incoming_data_flow(predecessor)});
+                continue;
+            }
+            else
+            {
+                auto& infos = current.infos;
+                if (lyt.is_pi_tile(current.position))
+                {
+                    infos.emplace_back(
+                        1ull,
+                        static_cast<uint64_t>((lyt.get_clock_number(current.position) + (lyt.num_clocks() - 1)) %
+                                              lyt.num_clocks()),
+                        0ull);
+                }
+                if (infos.size() == 1)
+                {
+                    dominant_path = infos.front();
+                }
+                else
+                {
+                    std::ranges::sort(infos, [](const auto& i1, const auto& i2) { return i1.length < i2.length; });
+                    dominant_path = {infos.back().length, infos.back().delay,
+                                     static_cast<uint64_t>(
+                                         std::abs(static_cast<int64_t>(infos.back().delay - infos.front().delay)))};
+                }
+                ++dominant_path.length;
+                ++dominant_path.delay;
+
+                // Cache gates only: routed layouts can contain millions of wire tiles.
+                if (!lyt.is_wire_tile(current.position))
+                {
+                    delay_cache[current.position] = dominant_path;
+                }
+            }
+            dominant_path.length += current.wire_length;
+            dominant_path.delay += current.wire_length;
+            pending.pop_back();
+            if (!pending.empty())
+            {
+                pending.back().infos.push_back(dominant_path);
+            }
         }
-        if (const auto it = delay_cache.find(t); it != delay_cache.end())  // cache hit
-        {
-            return it->second;
-        }
-
-        // cache miss
-        // fetch information about all incoming paths
-        std::vector<path_info> infos{};
-
-        std::ranges::transform(idf, std::back_inserter(infos),
-                               [this](const auto& in_tile) { return signal_delay(in_tile); });
-
-        path_info dominant_path{};
-
-        if (lyt.is_pi_tile(t))  // primary input to the circuit
-        {
-            infos.emplace_back(
-                1ull, static_cast<uint64_t>((lyt.get_clock_number(t) + (lyt.num_clocks() - 1)) % lyt.num_clocks()),
-                0ull);
-        }
-
-        if (infos.size() == 1)  // size cannot be 0
-        {
-            dominant_path = infos.front();
-        }
-        else  // fetch the highest delay and difference
-        {
-            // sort by path length
-            std::ranges::sort(infos, [](const auto& i1, const auto& i2) { return i1.length < i2.length; });
-
-            dominant_path.length = infos.back().length;
-            dominant_path.delay  = infos.back().delay;
-            dominant_path.diff =
-                static_cast<uint64_t>(std::abs(static_cast<int64_t>(infos.back().delay - infos.front().delay)));
-        }
-
-        // incorporate self
-        ++dominant_path.length;
-        ++dominant_path.delay;
-
-        // cache value for gates only
-        if (!lyt.is_wire_tile(t))
-        {
-            delay_cache[t] = dominant_path;
-        }
-
         return dominant_path;
     }
 };

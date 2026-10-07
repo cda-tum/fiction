@@ -19,7 +19,6 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cstddef>
 #include <cstdint>

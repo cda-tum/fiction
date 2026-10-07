@@ -7,6 +7,7 @@
 
 fcn/fcn
 qca/qca
+mol_qca/mol_qca
 inml/inml
 sidb/sidb
 ```

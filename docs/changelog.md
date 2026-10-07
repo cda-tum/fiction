@@ -11,6 +11,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
+  - `physical_design::cell_grid_extent` returns the extent of the cell grid that a gate library spans on a
+    gate-level layout
+  - SiDB design and simulation applications support shared millisecond timeouts, including defect-aware circuit retries.
+  - `utils::progress_callback` and `utils::progress_reporter` let long-running algorithms report
+    progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
+  - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
+    Gate mapping, network passes, design-rule checks, and layout writers report counted phases.
+
+- CLI:
+
+  - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
+    completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
+  - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
+  - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
+  - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
+  - Long-running CLI commands show responsive progress. Counted phases use real bars; searches show
+    candidate dimensions on one aggregate row. Quiet mode and redirected output suppress displays.
 
 - Code quality:
 
@@ -23,12 +40,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
-    `sidb::layout` stores tagged dots and defects without templates. `to_sidb_layout` converts
-    Cartesian cell-level layouts
+    `sidb::layout` stores tagged dots and defects without templates
   - `sidb::charge_distribution` assigns one charge state per SiDB and carries its energy;
     `sidb::simulation::result` stores one layout plus its physically valid configurations
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
     charge configurations and simulation worker threads
+  - `clocking::get_scheme(name, arrangement)` looks up a clocking scheme without a layout type and accepts a `3`
+    or `4` suffix on every scheme that supports that phase count.
+
+- Dependencies:
+
+  - `mnt.pyfiction` depends on `prompt_toolkit`, `rich`, and `aigverse` for the shell.
 
 - Documentation:
 
@@ -44,7 +66,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - The callback members of parameter classes accept `None`, which clears the callback.
+  - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.
+  - Marked the SiDB circuit-design integration test as `slow`; `pytest -m 'not slow'` skips it.
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
   - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
     `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
@@ -59,14 +84,56 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `displacement_robustness_domain`, and defect-domain writers return `None`
   - `displacement_robustness_domain` replaces its `_100` and `_111` variants
   - `apply_bestagon_library` returns `sidb_layout`
+  - Added `on_the_fly_sidb_circuit_design` to design SiDB circuits from placed and routed
+    hexagonal gate-level layouts, with configurable gate-design parameters
+  - `aig_network`, `xag_network`, and `mig_network` with their readers, `write_verilog`,
+    `write_blif`, `write_aiger`, `convert_network`, `count_gate_types`, and `print_sidb_layout`
+  - `dynamic_truth_table` gains `create_from_binary_string`, `create_from_hex_string`,
+    `create_from_expression`, `create_random`, `to_binary`, and `to_hex`; networks gain `depth`,
+    gate-level layouts `clone`, clocked layouts `get_clocking_scheme_name`, and `exact_params`
+    `upper_bound_area`
+  - `technology_mapping`, `simulate`, `count_gate_types`, and `write_dot_network` accept every
+    network type; `technology_mapping_params` exposes `lt2`, `gt2`, `le2`, and `ge2`
+  - `area` accepts a `mol_qca_layout`, `orthogonal_params` exposes `number_of_clock_phases` with the
+    `num_clks` enum, `write_qcc_layout_params` exposes `use_filename_as_component_name`, and
+    `gate_level_drvs` fills a `gate_level_drv_stats` whose `report` is the full check as JSON
+  - `convert_network` takes a `target` of the new `network_target` enum, so it produces AIGs, XAGs,
+    and MIGs as well as technology networks
+  - `print_sidb_layout` exposes `lat_color` and `crop_layout`, and `write_dot_network` and
+    `write_dot_layout` expose `indexes` and `clock_colors`
+  - The parameters of the algorithms that report progress accept a Python callable as
+    `on_progress`, and `exhaustive_ground_state_simulation` takes it as an argument. These
+    algorithms release the GIL while they run.
+  - `mnt.pyfiction` ships `.pyi` stubs and a `py.typed` marker, so type checkers and IDEs see the
+    signatures of the bindings. The package declares the `Typing :: Typed` classifier.
+  - Coordinate stubs accept two- and three-element tuples. Domain iterators and simulation
+    parameter dictionaries preserve their element types.
+  - `bdl_wire.port_direction` exposes wire directions and I/O flags; `reserve_input_nodes`
+    returns a Python dictionary of source nodes and reserved layout nodes.
 
 - Tooling:
 
   - Added EditorConfig settings that match the repository's formatters.
+  - Prek formats `pyproject.toml` with `pyproject-fmt`.
+  - Added `nox -s cpp_lint` for local Clang-Tidy checks. Nox uses `cmake` as the sole CMake executable.
+  - Added `nox -s stubs`, which regenerates the `mnt.pyfiction` stubs; CI fails when they are out of date.
 
 ### Changed
 
 - Algorithms:
+
+  - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
+    layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
+    `&a_star_distance<Lyt, Dist>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
+  - Avoid redundant progress-callback copies in algorithms and layout writers.
+  - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
+  - Avoid helper threads for single-worker sampling and contour exploration.
+  - Reduce coordinate-vector allocations during operational-domain traversal.
+  - Reuse completed three-dimensional contour surfaces across initial samples.
+  - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
+    `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.
+  - `convert_network` maps a technology network's inverters to `create_not` on a target without
+    `create_node`, so AIG, XAG, and MIG conversions keep the inverters they used to lose
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
     simulate `sidb::layout` and return the non-template `sidb::simulation::result`
   - _QuickSim_ returns `std::nullopt` for layouts with charged surface defects
@@ -87,12 +154,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `surface_analysis` and `surface_black_list` live in `physical_design/surface_analysis.hpp` and namespace
     `fiction::physical_design`. `surface_analysis` takes the surface as a `sidb::layout`, and `exact` has no
     SiDB header dependency
+  - `graph_oriented_layout_design`, `post_layout_optimization`, and `wiring_reduction` are no longer
+    `noexcept`, so an exception of a progress callback propagates to the caller
+  - **Breaking:** `fcn::area_params` takes the layout type whose cell dimensions it defaults to, e.g.,
+    `area_params<qca::layout>`
+  - **Breaking:** `exact` and `orthogonal` take `layout_arrangement` in their parameters for shifted Cartesian and
+    hexagonal layouts and throw `std::invalid_argument` without it. `graph_oriented_layout_design` requires a
+    Cartesian layout.
+
+- Build system:
+
+  - Direct CMake builds of the Python bindings now require nanobind 3.1 or newer.
+  - The Docker image uses `uv` to install the `mnt.pyfiction` wheel and starts the Python `fiction` shell.
+  - Git ignores the `.pyd` extension modules that Windows builds of the Python bindings produce.
 
 - CLI:
-  - **Breaking:** SiDB commands use `sidb::layout` and simulation results. `read --sqd` reads the lattice
-    from the file; `--lattice_orientation` is removed
-  - `print`, `show`, and statistics use stored ground states; `sqd` exports geometry and defects
-  - SiDB shell descriptions and JSON statistics report dot counts as `dots`.
+
+  - Commands now live in separate modules grouped by help category, with local options and metadata.
+  - **Breaking:** SiDB commands use `sidb::layout` and simulation results. SQD files supply the lattice;
+    `--lattice_orientation` is removed. Descriptions count SiDBs as `dots`.
+  - SiDB simulation commands accept simulated entries and append results; earlier entries remain selectable.
+    `print`, `show`, and statistics use stored ground states; SQD output exports geometry and defects.
+  - **Breaking:** store positions count from 1. `ps --all` describes every entry; `store --pop` removes
+    the active entry from explicitly selected stores.
+  - **Breaking:** format-specific readers complement `read`. Directory imports, `--sort`, `source`, and
+    the `exit` alias are removed; `-f` runs scripts and `quit` ends them.
+  - Help includes command inputs, defaults, restrictions, and examples. Store tables and status text fit
+    terminal widths; `ps` groups related statistics.
+  - Errors use standard error. `--quiet` retains requested results, and `-i` continues scripted runs
+    interactively. `gold --progress` remains accepted for compatibility; Rich controls search progress.
+  - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
+    phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
 - Build system:
   - **Fixed:** an installed _fiction_ shipped mockturtle's own headers but none of the vendored
@@ -102,32 +194,83 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Fixed:** the installed `libfiction` referenced `include/parallel_hashmap` without declaring it
 
 - Continuous integration:
+  - Read the Docs now builds on Ubuntu 26.04.
+  - Replaced Ubuntu 22.04 and GCC 11 CI coverage with Ubuntu 26.04, GCC 15, and Clang 22.
+    Ubuntu 24.04 retains older compiler coverage.
+  - Windows wheel builds no longer install the zero-hit job-local `sccache`; split mode
+    compiles the extension only once per job.
   - Reusable workflows now use GitHub's self-repository reference syntax.
   - Clang-Tidy skips Python-only changes in the bindings tree.
   - PyPI releases now use trusted publishing instead of an API token.
   - Renovate now waits three days for dated dependency releases before updating.
+  - Astral's `ty` now checks Python types in place of `mypy`.
 
 - Data structures:
 
+  - **Breaking:** Gate-level layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
+  - **Breaking:** QCA, molQCA, and iNML have dedicated layout types, `qca::layout`, `mol_qca::layout`, and
+    `inml::layout`, which replace `cell_level_layout`. Each carries only what its technology needs, and copies are
+    independent. molQCA and iNML layouts are planar, only QCA cells have modes and synchronization elements, and
+    molQCA cells name their own clock phase, so molQCA layouts have no clock zones.
+  - **Breaking:** QCA and iNML layouts address clock zones by tile: all cells of a tile, on every layer, share its
+    clock number. `get_clock_zone` returns the clock zone of a cell.
+  - Hexagonal clocking factories now reuse immutable cutouts, and tile-clock comparisons avoid copying schemes.
+  - `clocking::state::get_clocking_scheme` now returns a const reference; layout getters still return copies.
+  - Gate-level `assign_clock_number` now clocks every layer of a tile and ignores the `z` coordinate;
+    `get_clock_number` returns the same clock number on all layers.
+  - **Breaking:** `clocking::scheme` is now a non-template value type over signed `(x, y)` tile positions that can be
+    copied, assigned, and compared. Factories drop their layout argument, e.g., `clocking::twoddwave()`, and
+    `twoddwave_hex` takes a `layouts::arrangement`.
+  - **Breaking:** `clocking::scheme` exposes `name()`, `num_clocks()`, `max_in_degree()`, and `max_out_degree()` as
+    accessors and no longer compares equal to a name string; `clocking::is_linear` drops its layout argument.
+  - **Breaking:** molQCA lives in `technology/mol_qca/` and `namespace fiction::mol_qca`, together with
+    `sim7_mol_library` and `write_mol_qca_layout_svg`. iNML names its element type `inml::magnet_type`.
   - Population-stability results expose the critical dot as `critical_dot` in C++ and Python.
   - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
     `NORMAL` tag. Lattice-site constructors
     take `int32_t` coordinates and an `int8_t` basis index.
   - Simulation results store charge states and energy beside one shared layout and potential
     landscape instead of copying a `charge_distribution_surface` for every configuration
+  - **Breaking:** `hexagonal_layout` and `shifted_cartesian_layout` take their `layouts::arrangement` as a constructor
+    argument instead of a template parameter, and `get_arrangement()` returns it.
+  - **Breaking:** Coordinates are signed. `layouts::layout_base::coordinate` with three `int32_t` axes replaces
+    `coords::offset` and `coords::cube`, and `cartesian_layout`, `hexagonal_layout`, and `shifted_cartesian_layout`
+    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. The default
+    coordinate is invalid, as is any coordinate whose x axis is `INT32_MIN`, and `is_valid()` replaces `is_dead()` on
+    coordinates. Layouts throw `std::invalid_argument` for extents below 0 or above 2^30 - 1, and
+    gate-level layouts throw `std::out_of_range` for tiles with x or y above 2^30 - 1 or z above 1.
+  - **Breaking:** `graph_oriented_layout_design_params::tiles_to_skip_between_pis` is an `int32_t`, and
+    `graph_oriented_layout_design` throws `std::invalid_argument` for values outside of [0, 2^20].
+
+- Dependencies:
+
+  - Native CI and Docker now use Z3 5.1.0. Wheel builds retain Z3 4.14.1 for their deployment floors.
+
+  - `fmt` is fetched as the 12.1.0 release, the version alice carried; mockturtle's bundled
+    11.0.2 does not compile with clang 20.
 
 - Documentation:
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
+  - QCA, molQCA, and iNML each document their layout on a page of its own, like SiDB, and the Python tabs list every
+    bound symbol of their sections.
 
 - Experiments:
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
+  - The Bestagon and hexagonalization experiments compute their unchanged area from the cell-grid extent.
+  - Gate-layout experiments use direct capability headers and simpler status reporting.
+  - The Bestagon, defect-aware, and on-the-fly experiments pass the even-row arrangement at runtime with unchanged results.
 
 - Gate libraries:
+  - **Breaking:** `apply_gate_library<GateLibrary>` and `apply_parameterized_gate_library<GateLibrary>` return the
+    layout type of the library and take no cell-layout template argument. SiDB libraries produce an `sidb::layout`
+    directly. `fcn::gate_library` takes the produced layout type instead of a technology tag.
   - `apply_gate_library_to_defective_surface` and `apply_parameterized_gate_library_to_defective_surface`
     take the defective surface as a `sidb::layout` and return one that carries its defects.
     SiDB gate placement, surface analysis, and circuit design no longer take a cell-layout template argument.
+  - The Bestagon library throws `std::invalid_argument` for layouts that shift columns instead of failing to compile.
+  - The ToPoliNano library and CLI reject row-shifted Cartesian layouts.
 
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
@@ -144,13 +287,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     data they serialize: `layouts/io/`, `networks/io/`, `synthesis/io/`,
     `technology/<tech>/io/`, and `technology/sidb/simulation/io/` for the writers of
     simulation results. The SVG writer is split by the technology it draws into
-    `qca/io/write_qca_layout_svg.hpp` and `sidb/io/write_sidb_layout_svg.hpp`; the QLL
+    `qca/io/write_qca_layout_svg.hpp`, `mol_qca/io/write_mol_qca_layout_svg.hpp`, and
+    `sidb/io/write_sidb_layout_svg.hpp`; the QLL
     writer, which serves iNML, QCA, and molQCA alike, sits in `fcn/io/`
-  - `technology/` is split by technology into `fcn/`, `qca/`, `inml/`, and `sidb/`.
+  - `technology/` is split by technology into `fcn/`, `qca/`, `mol_qca/`, `inml/`, and `sidb/`.
     The SiDB subtree gains `surfaces/`, `model/`, `simulation/` (with `engines/`,
     `analysis/`, `defects/`, `logic/`, and `io/`), `generators/`, and `io/`. The
-    `cell_technologies.hpp` umbrella is gone; each technology's tag is in its own
-    `technology.hpp`
+    `cell_technologies.hpp` umbrella is gone; each technology's layout is in its own
+    `layout.hpp`
   - `utils/` exists once, at the top, and holds what is domain-agnostic: `math/`, `stl/`,
     `graph/` (`graph_coloring`, `mincross`), `optimization/` (`simulated_annealing`),
     and `io/` (`csv_writer`). A module's own helpers sit directly in the module, so
@@ -159,18 +303,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `networks/io/dot_drawers.hpp`
   - Namespaces mirror the directories, so `fiction::quickexact` becomes
     `fiction::sidb::simulation::engines::quickexact`. `technology/` itself adds no
-    namespace level; `coordinates.hpp` and `clocking_scheme.hpp` add `layouts::coords`
-    and `layouts::clocking` for the families they define
+    namespace level; `clocking_scheme.hpp` adds `layouts::clocking` for the family it
+    defines
   - Identifiers shed prefixes the namespace now carries, so `sidb_simulation_parameters`
     becomes `fiction::sidb::model::simulation_parameters`, `design_sidb_gates` becomes
     `fiction::sidb::generators::design_gates`, and `gate_library::fcn_gate` becomes
     `gate`. Published names are kept, so `qca_one_library` stays
-    `fiction::qca::qca_one_library`, and so do the technology tags `qca_technology`,
-    `mol_qca_technology`, `inml_technology` and `sidb_technology`: bare `technology`
-    reads as nothing in a `Technology` template argument and would shadow the
-    `fiction::technology<Lyt>` trait in its own namespace
-  - The coordinate types are renamed: `fiction::offset::ucoord_t` becomes
-    `fiction::layouts::coords::offset`, and likewise for `cube` and `siqad`
+    `fiction::qca::qca_one_library`
+  - The offset coordinate type `fiction::offset::ucoord_t` becomes
+    `fiction::layouts::layout_base::coordinate`
   - The cluster hierarchy that `clustercomplete` and `ground_state_space` build is
     implementation detail, `fiction::sidb::simulation::engines::detail`, and leaves the
     documented API; `ground_state_space_results::top_cluster` stays as the handle into it
@@ -212,12 +353,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `fiction/synthesis/truth_tables.hpp`. Neither header depends on a network; both include only
   `kitty` and the standard library
 
-- **Breaking:** `fiction::layouts::coords` adopts one naming rule: a bare noun is a coordinate
-  type, everything else is an operation on one. `coord_iterator` becomes
-  `coordinate_iterator`, `area` and `volume` become `area_of` and `volume_of`, and the
-  three conversions unify from `to_fiction_coord`, `to_siqad_coord` and `offset_to_cube`
-  into `from_siqad`, `to_siqad` and `to_cube`. The coordinate types `offset`, `cube`
-  and `siqad` keep their names
+- **Breaking:** The coordinate helpers adopt one naming rule: a bare noun is a type, everything
+  else is an operation on one. `coord_iterator` becomes `layout_base::coordinate_iterator`, and
+  `area` and `volume` become `area_of` and `volume_of`
 
 - **Breaking:** `fiction::constants` is gone. `ERROR_MARGIN`, the floating-point comparison
   tolerance, is `fiction::utils::math::ERROR_MARGIN`; `ELEMENTARY_CHARGE`, `K_E`,
@@ -229,20 +367,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Breaking:** Test files are renamed to `test_<header>.cpp` and the `test/` tree mirrors
   `include/fiction/`. CTest case names gain the `test_` prefix accordingly
+  - `read_fgl_layout` creates shifted Cartesian and hexagonal layouts with the arrangement stored in the file; reading into
+    a layout with another arrangement throws `fgl_parsing_error`.
+  - **Breaking:** `additional_graph_attributes` and `additional_node_attributes` of the gate-level layout DOT drawers take the
+    layout as an argument. The shifted Cartesian and hexagonal drawers share one base class.
 
-- The `pyfiction` binding sources and their test suite mirror the new tree as well: each
-  binding sits in the directory of the header it wraps under the header's name, and every
-  directory that holds binding sources has exactly one registry. The Python API is unchanged,
-  except for the two attributes listed under _Python bindings_
+- The `pyfiction` binding sources under `bindings/` mirror the C++ namespaces: each binding sits
+  in the directory of its namespace under the name of the header it wraps, and every directory
+  that holds binding sources has exactly one registry. The Python package lives under `python/`,
+  and its tests under `test/python/`
 
 - Code quality:
 
   - The C++ test suite and the experiments now open the namespaces they use, one
     `using namespace` directive per namespace, rather than qualifying every symbol below
-    `fiction`. That removes about 14,000 qualifier tokens. `fiction::layouts::coords` and
-    `fiction::layouts::clocking` are deliberately left closed, so those references read
-    `coords::offset` and `clocking::scheme`, and `detail` namespaces stay qualified by
-    their module
+    `fiction`. That removes about 14,000 qualifier tokens. `fiction::layouts::clocking`
+    is deliberately left closed, so those references read `clocking::scheme`, and `detail`
+    namespaces stay qualified by their module
   - The `license-tools` hook now covers `.hpp` and `.cpp` as well as Python, and skips the
     generated `pybind11_mkdoc_docstrings.hpp`
   - Every C++ file now opens with the MIT copyright block and a Doxygen block carrying `@file`,
@@ -263,20 +404,97 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** `mnt.pyfiction` has one submodule per C++ namespace, such as `mnt.pyfiction.layouts` and
+    `mnt.pyfiction.sidb.simulation.engines`; import each name from its submodule. The package root
+    loads the submodules on first access and re-exports no bound names.
+
+  - **Breaking:** Use clocking and obstruction methods directly on gate-level layouts. `obstructions` holds
+    additional path-search constraints. `qca_layout` and `inml_layout` expose `get_clock_zone` and tile-size
+    accessors, and their `get_clock_number` looks up the tile that contains the cell.
+
+  - **Breaking:** Cell types are flat enums: `qca_cell_type`, `qca_cell_mode`, `mol_qca_cell_type`, and
+    `inml_magnet_type`. `mol_qca_layout` takes no clocking scheme, and `write_mol_qca_layout_svg` takes
+    `write_mol_qca_layout_svg_params`. Cell layouts support `copy.copy` and `==`.
+
   - **Breaking:** The Python class `sidb_layout` names the lattice-based `sidb::layout`
 
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
 
+  - **Breaking:** `shifted_cartesian_layout`, `hexagonal_layout`, and their gate layouts take a `layouts.arrangement` as
+    first argument. One class per family replaces the per-arrangement classes, and `exact` and `orthogonal` parameters
+    expose `layout_arrangement`.
+
+  - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` and `offset_volume` become `area` and `volume`, in
+    `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor are gone. `coordinate()` has
+    `x`, `y`, and `z` equal to -2147483648 and `is_valid()` returns `False` for it. Axes must lie in [-2147483647,
+    2147483647]; `coordinate`, `coord`, and the axis setters raise `OverflowError` outside of it, and setting an axis of an invalid coordinate raises
+    `ValueError`. Negative or oversized
+    layout extents raise `ValueError`, and gate-level tiles outside of the signal range raise `IndexError`.
+    `stacked_cartesian_layout` is an alias of `cartesian_layout`.
+
 ### Removed
 
+- Build system:
+
+  - **Breaking:** `FICTION_CLI`, `FICTION_ABC`, `ABC_ROOT`, the `deploy` preset, and the `alice`
+    dependency are gone with the C++ command-line interface.
+  - **Breaking:** `FICTION_PROGRESS_BARS` and mockturtle's progress bars on `std::cout`; the
+    `on_progress` callbacks replace them.
+- CLI:
+
+  - **Breaking:** The C++ command-line interface and `shortcuts.fs`. Use the Python `fiction` shell.
+  - `akers`, together with `miginvopt` and `miginvprop`. The truth table store now feeds the
+    gate-based SiDB simulations, `temp -g` and `opdom`, alone.
+  - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
+    `help --docs`.
+- Code quality:
+
+  - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
+- Data structures:
+
+  - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, `is_tile_based_layout_v`, and
+    the capability traits that every gate-level layout satisfies: the clocked-zone traits
+    `has_is_incoming_clocked_v`, `has_is_outgoing_clocked_v`, `has_foreach_incoming_clocked_zone_v`, and
+    `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
+    `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
+    `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
+    and `has_is_empty_v`. Use `is_gate_level_layout_v` or `is_cell_grid_v`. The unused `is_offset_coord_v`
+    and `has_offset_coord_v` are gone as well.
+  - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
+    `wiring_reduction_layout`.
+  - **Breaking:** `cell_level_layout`; the technology tags `qca_technology`, `mol_qca_technology`, `inml_technology`,
+    and `sidb_technology` with their predicates and `cell_mark` enums; the traits `technology`,
+    `has_*_technology_v`, `is_cell_level_layout_v`, and `has_post_layout_optimization_v`; the aliases
+    `qca_cell_clk_lyt`, `mol_qca_cell_clk_lyt`, `inml_cell_clk_lyt`, `sidb_cell_clk_lyt`, `sidb_cell_clk_lyt_cube`,
+    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts and
+    `is_cell_grid_v`.
+  - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
+    types of the other technologies.
+- Dependencies:
+
+  - Removed the optional TBB dependency.
+- I/O:
+
+  - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
+- Python bindings:
+
+  - The `report` methods of the statistics classes that took a C++ output stream, which no Python
+    call could satisfy; `repr()` returns the same text.
+  - **Breaking:** The classes `clocked_cartesian_layout`, `clocked_shifted_cartesian_layout`,
+    `clocked_hexagonal_layout`, their row and column variants, `clocked_stacked_cartesian_layout`, and
+    `cartesian_obstruction_layout`, `shifted_cartesian_obstruction_layout`, and `hexagonal_obstruction_layout`. Use
+    the `*_gate_layout` classes. `qca_layout`, `mol_qca_layout`, and `inml_layout` no longer provide
+    `is_incoming_clocked` and `is_outgoing_clocked`.
+  - **Breaking:** The classes `qca_technology`, `mol_qca_technology`, and `inml_technology`. Cell layouts no longer
+    provide `clone`, obstruction methods, clocked-neighborhood queries, `get_cells_by_type`, and
+    `num_cells_of_given_type`; `mol_qca_layout` has no clocking and no cell modes.
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
   `layouts::coords::siqad` with `from_siqad`/`to_siqad` (an SQD file's `(n, m, l)` triple is a
   `lattice_site`); the type aliases `sidb_cell_clk_lyt_siqad`, `sidb_100_*`, `sidb_111_*`, `cds_*`, and
-  `sidb_defect_*` (`sidb_cell_clk_lyt` and `sidb_cell_clk_lyt_cube` stay as placement targets, converted with
-  `to_sidb_layout`); the traits `is_siqad_coord_v`, `has_siqad_coord_v`, `is_charge_distribution_surface_v`,
+  `sidb_defect_*`; the traits `is_siqad_coord_v`, `has_siqad_coord_v`, `is_charge_distribution_surface_v`,
   `is_sidb_lattice*_v`, `is_sidb_defect_surface_v`, `has_*_sidb_defect_v`, and `has_*_charge_state_v`;
   `convert_layout_to_siqad_coordinates`, `convert_layout_to_fiction_coordinates`, and
   `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box_2d` and
@@ -288,7 +506,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Breaking:** `layouts::coords::to_cube`, the offset-to-cube coordinate conversion, which lost its last caller
   with the SiQAD coordinate type
 - **Breaking:** `sidb::to_cell_level_layout`, `sidb::to_cell`, and `sidb::to_cube`. Physical design converts in
-  one direction only; use `to_sidb_layout` and `to_lattice_site`
+  one direction only; use `to_lattice_site`
 - **Breaking:** The tuple interface of `sidb::simulation::logic::parameter_point`
   (`get<I>`, `std::tuple_size`, `std::tuple_element`). It was fixed at two dimensions and would have bound only
   two of three coordinates in a 3D sweep; use `get_parameters()`
@@ -310,11 +528,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Yen's algorithm now returns no paths for a zero limit and preserves valid alternatives at each spur node.
+  - Path enumeration now reaches occupied crossing-layer targets under the same constraints as A*.
+  - Critical-path analysis now handles long routed paths without overflowing the native stack.
+  - `network_balancing` accepts networks without primary outputs.
+  - `gold` counts expansions only when a search-space graph expands.
+  - Progress reporters now flush each pass's final count before a reset.
+  - Operational-domain sampling now reports worker activity when it runs on the calling thread.
+  - Contour tracing distributes simulation locks across regular parameter grids.
   - SiDB circuit-design exceptions now copy bounded message views without reading past them.
+  - Defect-aware circuit design propagates invalid gate-design parameters.
   - Operational-domain analysis now propagates allocation failures, including failures in flood-fill workers.
   - Defect-influence analysis now propagates worker exceptions to the caller.
   - Canvas filtering now rejects SiDBs missing from the simulation state's layout.
   - Ground State Space reports multiset limits using the potential landscape's charge base.
+  - Multi-threaded `exact` synchronizes worker contexts and measures one shared timeout budget.
   - SiDB simulation engine lookup now handles non-ASCII input without undefined behavior.
   - GOLD now applies each invocation's seed and PI-spacing limit independently
   - Operational checks and gate pruning now reject mismatched input counts; band-bending resilience rejects unusable inputs.
@@ -333,20 +561,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
   - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
+  - `convert_network` keeps the inverters of a technology network when the target network
+    type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
+
+- Build system:
+  - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
+  - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
+  - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
+  - `pyfiction` built against such a Z3 finds `libz3` at import time, so Read the Docs renders the Python API again.
+  - On-the-fly SiDB circuit design from gate-level layouts compiles without Z3.
+  - CMake now verifies the `fmt` 12.2.0 archive with its matching SHA-256 checksum.
+  - Installed CMake packages include the `fmt` headers and their header-only compile definition.
+  - CMake installation includes ALGLIB's generated version metadata.
 
 - CLI:
-  - SiDB store descriptions and statistics handle the full column range without integer overflow
+
+  - Parallel commands now use one aggregate progress row; `exact` retains candidate dimensions at count checkpoints.
+  - Store listings and command summaries skip layout timing analysis; `ps -g` computes it on request.
+  - Store and statistics displays use readable topology names.
+  - TEC readers preserve output drivers instead of inserting output buffers.
+  - Large `ortho` results now finish their statistics calculation while the progress display refreshes.
+  - Progress displays now serialize concurrent reports, clear totals for restarted tasks, and respect nested quiet commands.
+  - `opdom` logs its default algorithm as grid search; JSON logs encode non-finite statistics as `null`.
+  - `show` and `write` reject unsupported drawing options before writing output. Invalid mapping and
+    numeric inputs preserve stored elements.
+  - Hex truth tables retain every bit. Area statistics use each technology's cell dimensions and the
+    SiDB lattice's physical extent.
+  - Unreadable scripts report the cause and exit with status 2. Interrupted commands retain a log entry
+    and leave the shell usable. Status text accounts for Unicode display widths.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
+  - Docstring generation now loads the libclang development symlink on Ubuntu 26.04.
+  - Ubuntu 26.04 jobs now use matching compiler-cache keys and coverage labels.
+  - Coverage collection, extraction, and listing now tolerate GCC 13 function-range and hit-count inconsistencies reported by lcov 2.4.
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
+  - Gate layout geometry now retains its two-layer limit through shared coordinate aliases and base references.
+  - Cell clock zones now use floor division for negative coordinates.
+  - Cell layouts reject zero clock-zone dimensions in constructors and setters.
+  - Gate layouts constructed from coordinate layouts initialize their logic functions.
+  - Clocked degree counts each eligible neighbor once, including neighbors enabled by synchronization.
   - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
+  - Gate- and cell-level layout clones preserve clock overrides without sharing later clock-number edits.
+  - `clocking::get_scheme` now keeps the phase count of `2DDWAVEHEX3` on non-hexagonal layouts.
   - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
     Potential landscapes validate basis indices even for isolated SiDBs and defects.
   - SiDB cell conversion now rejects coordinates outside the target coordinate range.
+  - The BDL input iterator now rejects layouts with more than 63 input pairs instead of overflowing its pattern counter.
   - Lattice sites now reject invalid basis indices in construction, geometry queries, and cube conversion.
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
     defect influence clips to representable sites, and cube conversion rejects rows outside its range
@@ -357,8 +622,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB-to-cell-level conversion preserves bounds from converted cells.
 
 - Documentation:
-
+  - The documentation session builds Python bindings with the installed Z3 dependency.
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
+  - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.
+    Removed duplicate bounding-box entries and corrected the critical-temperature overload reference.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
   - SiDB reader documentation now lists every overload without ambiguous signatures.
 
@@ -372,8 +639,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     kink-rejection policy and reported temperatures.
   - The library walkthrough writes QCA layouts only in QCADesigner and SVG formats.
 
+- Gate libraries:
+
+  - On-the-fly SiDB gate mapping now rejects column arrangements instead of dropping north/south wires.
+  - Gate-library application assigns the synchronization delay of each tile to its clock zone.
+  - ToPoliNano wire optimization now handles two-cell segments and checks every interior cell for obstructions.
+
 - I/O:
 
+  - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
+  - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
+  - QCA SVG output now preserves synchronized cell positions, draws mixed tiles once, and includes partial boundary tiles.
+  - FGL round trips now preserve three-phase clocking across all supported topologies.
+  - `read_fgl_layout` now restores irregular clock numbers on crossing layers.
+  - `read_fgl_layout` now reads BANCS layouts whose clocking scheme is named `BANCS3`.
+  - Network conversion preserves arbitrary gate functions and unused inputs; file bridges retain interface names and output order.
+  - Transactional writers now report filesystem setup and replacement errors as stream failures. They preserve output permissions and symbolic links to existing files, and reject dangling links and non-regular output files.
+  - Network DOT export uses transactional replacement, including intermediate drawings produced by `show`.
+  - Layout readers reject coordinate overflow; writers replace files only after successful serialization.
   - QCA SVG output now uses valid text colors in simple tile mode.
   - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
@@ -385,12 +668,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Linux extensions hide C++ implementation symbols while preserving nanobind's shared exception ABI.
+  - `physically_valid_parameters` and `operational_domain_ratio` now release the GIL so
+    worker progress callbacks can execute without deadlocking.
+  - Added ordered `simulate_outputs`, exposed mapper statistics, and validated truth-table sizes and expressions before native operations. Gate-library errors identify unsupported gates and their coordinates.
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
-  - Exposed the defect-matrix reader exceptions at the package root.
+  - `design_sidb_gates_stats.__repr__` now converts the statistics string to Python.
+  - Exposed the defect-matrix reader exceptions.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
   - The Python bindings compile when Z3 support is disabled
   - `write_sqd_layout` owns its Python filename during export on Windows
+  - `is_clocking_scheme`, `set_name`, and `get_name` accept Python strings, and the `time_total`
+    and `runtime` members of the statistics classes are readable; the casters were missing
+  - `write_dot_layout` draws shifted-Cartesian layouts instead of writing nothing
+  - The readers raise `RuntimeError` with the parser's diagnostics instead of printing them
+  - `energy_state` and `sidb_lattice_mode` are importable
+  - `sidb_defect` accepts a call without `electric_charge`, whose default was a float for an integer parameter
+  - `create_from_binary_string` and `create_from_hex_string` raise `ValueError` for a character outside
+    their alphabet; `kitty` read such a character as a bit pattern and built a wrong truth table
+  - `write_verilog`, `write_blif`, and `write_aiger` raise `RuntimeError` when the file cannot be opened
+    or written; they returned as if they had written it
 
 - Tooling:
 

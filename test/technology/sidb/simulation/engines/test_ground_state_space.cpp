@@ -33,7 +33,6 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>

@@ -15,30 +15,35 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/views/names_view.hpp>
 
+#include <optional>
 #include <sstream>
+#include <stdexcept>
+#include <string_view>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -52,7 +57,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
     CHECK(wlyt.get_layout_name() == rlyt.get_layout_name());
 
     const bounding_box_2d<WLyt> wbb{wlyt};
-    const bounding_box_2d<RLyt> rbb{wlyt};
+    const bounding_box_2d<RLyt> rbb{rlyt};
 
     CHECK(wbb.get_min() == rbb.get_min());
     CHECK(wbb.get_max() == rbb.get_max());
@@ -90,6 +95,11 @@ void check_parsing_equiv_layout(const Lyt& lyt)
 
     compare_written_and_read_layout(lyt, read_layout);
 
+    if constexpr (!is_cartesian_layout_v<Lyt>)
+    {
+        CHECK(read_layout.get_arrangement() == lyt.get_arrangement());
+    }
+
     check_eq(lyt, read_layout);
     CHECK(lyt.get_layout_name() == read_layout.get_layout_name());
 }
@@ -122,40 +132,39 @@ void check_parsing_equiv_layout_all()
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::single_input_tautology_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_odd_row_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_odd_row_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_even_row_gate_clk_lyt>(
-        blueprints::and_or_gate_layout<cart_even_row_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_odd_col_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_even_col_gate_clk_lyt>(
-        blueprints::and_or_gate_layout<cart_even_col_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_odd_row_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_odd_row_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_even_row_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_odd_col_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_even_col_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_even_col_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::and_not_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::use_and_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::res_maj_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::res_tautology_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<hex_even_row_gate_clk_lyt>(
-        blueprints::open_tautology_gate_layout<hex_even_row_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::crossing_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::fanout_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_odd_col_gate_clk_lyt>(
-        blueprints::shifted_cart_and_or_inv_gate_layout<cart_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_even_row_gate_clk_lyt>(
-        blueprints::row_clocked_and_xor_gate_layout<cart_even_row_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::optimization_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(
         blueprints::optimization_layout_corner_case_outputs_1<cart_gate_clk_lyt>());
     check_parsing_equiv_layout<cart_gate_clk_lyt>(
         blueprints::optimization_layout_corner_case_outputs_2<cart_gate_clk_lyt>());
+
+    for (const auto a :
+         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
+    {
+        check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
+            blueprints::and_or_gate_layout<shifted_cart_gate_clk_lyt>(a));
+        check_parsing_equiv_layout<hex_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_gate_clk_lyt>(a));
+    }
+
+    check_parsing_equiv_layout<hex_gate_clk_lyt>(
+        blueprints::open_tautology_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_ROW));
+    check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
+        blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::ODD_COLUMN));
+    check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
+        blueprints::row_clocked_and_xor_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::EVEN_ROW));
 }
 
 TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const gate_layout layout{{}, "empty"};
 
     std::stringstream layout_stream{};
@@ -167,8 +176,95 @@ TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 
 TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     check_parsing_equiv_all<gate_layout>();
     check_parsing_equiv_layout_all();
+}
+
+TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fgl-layout]", cart_gate_clk_lyt,
+                   shifted_cart_gate_clk_lyt, hex_gate_clk_lyt)
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    for (const auto* const name : {"OPEN3", "OPEN4", "COLUMNAR3", "COLUMNAR4", "ROW3", "ROW4", "2DDWAVE3", "2DDWAVE4",
+                                   "2DDWAVEHEX3", "2DDWAVEHEX4", "BANCS"})
+    {
+        if constexpr (!is_hexagonal_layout_v<TestType>)
+        {
+            if (std::string_view{name}.starts_with("2DDWAVEHEX"))
+            {
+                continue;
+            }
+        }
+        INFO(name);
+        const auto scheme =
+            clocking::get_scheme(name, is_hexagonal_layout_v<TestType> ? std::optional{a} : std::nullopt);
+        if (!scheme.has_value())
+        {
+            FAIL("Unknown clocking scheme");
+            return;
+        }
+        auto original = blueprints::make_layout<TestType>(a, {3, 2, 0}, *scheme);
+        original.set_layout_name("clock phases");
+        if (!scheme->is_regular())
+        {
+            original.assign_clock_number({1, 1, 0}, 2);
+        }
+        original.create_pi("a", {0, 0, 0});
+        std::stringstream stream{};
+        write_fgl_layout(original, stream);
+        const auto restored = read_fgl_layout<TestType>(stream);
+        CHECK(restored.num_clocks() == original.num_clocks());
+        CHECK(restored.get_clocking_scheme().name() == original.get_clocking_scheme().name());
+        original.foreach_coordinate(
+            [&](const auto& coordinate)
+            { CHECK(restored.get_clock_number(coordinate) == original.get_clock_number(coordinate)); });
+        compare_written_and_read_layout(original, restored);
+    }
+}
+
+TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    gate_layout original{{2, 2, 1}, clocking::open(), "crossing clocks"};
+    original.assign_clock_number({1, 1, 1}, 2);
+
+    std::stringstream stream{};
+    write_fgl_layout(original, stream);
+    const auto restored = read_fgl_layout<gate_layout>(stream);
+
+    CHECK(restored.get_clock_number({1, 1, 0}) == 2);
+    CHECK(restored.get_clock_number({1, 1, 1}) == 2);
+}
+
+TEST_CASE("FGL refuses nodes it cannot place", "[write-fgl-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    std::stringstream stream{};
+
+    SECTION("Unplaced node")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a");
+
+        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
+    }
+    SECTION("Node on a negative tile")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a", {-1, 0, 0});
+
+        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
+    }
+    SECTION("Placed nodes")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a", {0, 0, 0});
+
+        CHECK_NOTHROW(write_fgl_layout(lyt, stream));
+    }
 }

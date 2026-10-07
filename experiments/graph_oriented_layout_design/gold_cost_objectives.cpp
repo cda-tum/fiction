@@ -19,9 +19,7 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
@@ -60,7 +58,7 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, double, std::string>
         gold_cost_objectives_exp{"graph_oriented_layout_design_exp",
@@ -116,8 +114,8 @@ int main()  // NOLINT
                 // calculate bounding box
                 const auto bounding_box = bounding_box_2d(*gate_level_layout);
 
-                const auto width  = bounding_box.get_x_size() + 1;
-                const auto height = bounding_box.get_y_size() + 1;
+                const auto width  = static_cast<uint64_t>(bounding_box.get_x_size()) + 1;
+                const auto height = static_cast<uint64_t>(bounding_box.get_y_size()) + 1;
                 const auto area   = width * height;
 
                 const auto num_wires =

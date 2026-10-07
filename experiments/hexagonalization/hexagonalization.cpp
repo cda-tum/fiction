@@ -17,28 +17,30 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
 #include <fiction/physical_design/hexagonalization.hpp>      // layout conversion to hexagonal gird
 #include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
-#include <fiction/technology/sidb/technology.hpp>            // cell implementations
-#include <fiction/traits.hpp>                                // traits for type-checking
+#include <fiction/technology/sidb/layout.hpp>                // SiDB layouts
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
-#include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
-#include <mockturtle/utils/tech_library.hpp>                   // technology library utils
+#include <mockturtle/utils/stopwatch.hpp>
+#include <mockturtle/utils/tech_library.hpp>  // technology library utils
+#include <mockturtle/views/depth_view.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -57,9 +59,8 @@ using namespace fiction::verification;
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
-    using hex_lyt  = hex_even_row_gate_clk_lyt;
-    using cell_lyt = sidb_cell_clk_lyt;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using hex_lyt  = hex_gate_clk_lyt;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
@@ -160,28 +161,35 @@ int main()  // NOLINT
         equivalence_checking_stats eq_stats{};
         equivalence_checking(gate_level_layout, hex_layout, &eq_stats);
 
-        const std::string eq_result = eq_stats.eq == eq_type::STRONG ? "STRONG" :
-                                      eq_stats.eq == eq_type::WEAK   ? "WEAK" :
-                                                                       "NO";
+        std::string eq_result{"NO"};
+        if (eq_stats.eq == eq_type::STRONG)
+        {
+            eq_result = "STRONG";
+        }
+        else if (eq_stats.eq == eq_type::WEAK)
+        {
+            eq_result = "WEAK";
+        }
 
         // apply gate library
-        const auto cell_level_layout = apply_gate_library<cell_lyt, bestagon_library>(hex_layout);
+        const auto cell_level_layout = apply_gate_library<bestagon_library>(hex_layout);
 
-        // compute area
-        area_stats                   area_stats{};
-        area_params<sidb_technology> area_ps{};
-        area(cell_level_layout, area_ps, &area_stats);
+        // the area of the Cartesian cell grid that the Bestagon tiles span
+        area_stats area_stats{};
+        area(cartesian_layout{cell_grid_extent<bestagon_library>(hex_layout)}, area_params<layout>{}, &area_stats);
 
         // log results
-        hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
-                             cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
-                             depth_mapped_network.depth(), gate_level_layout.x() + 1, gate_level_layout.y() + 1,
-                             (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), (hex_layout.x() + 1),
-                             (hex_layout.y() + 1), (hex_layout.x() + 1) * (hex_layout.y() + 1),
-                             gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
-                             cp_tp.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
-                             mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result,
-                             cell_level_layout.num_cells(), area_stats.area);
+        hexagonalization_exp(
+            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
+            depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
+            static_cast<uint64_t>(gate_level_layout.x()) + 1, static_cast<uint64_t>(gate_level_layout.y()) + 1,
+            (static_cast<uint64_t>(gate_level_layout.x()) + 1) * (static_cast<uint64_t>(gate_level_layout.y()) + 1),
+            static_cast<uint64_t>(hex_layout.x()) + 1, static_cast<uint64_t>(hex_layout.y()) + 1,
+            (static_cast<uint64_t>(hex_layout.x()) + 1) * (static_cast<uint64_t>(hex_layout.y()) + 1),
+            gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
+            mockturtle::to_seconds(orthogonal_stats.time_total),
+            mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result, cell_level_layout.num_dots(),
+            area_stats.area);
 
         hexagonalization_exp.save();
         hexagonalization_exp.table();

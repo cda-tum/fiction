@@ -48,6 +48,22 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 - Run `clang-format` and `clang-tidy` to check your code for style and linting errors before committing.
 - We recommend installing [prek](https://prek.j178.dev/) and running `prek install` once so that formatting and linting checks run automatically before every commit.
 
+## C++ Static Analysis
+
+The C++ lint session requires [uv](https://docs.astral.sh/uv/) and a C++ compiler. It installs
+CMake, Ninja, Clang-Tidy, and the Python build dependencies in an isolated environment, then
+generates the same compilation database and runs the same Clang-Tidy configuration as CI.
+
+```console
+$ uvx nox -s cpp_lint
+$ uvx nox -s cpp_lint -- --diff-base origin/main
+$ uvx nox -s cpp_lint -- --all
+```
+
+The first command checks staged C++ files when the index contains changes; otherwise, it checks
+the last commit. The second checks files changed from the given Git revision. The third checks
+every eligible C++ file.
+
 ## Pull Request Workflow
 
 - Create PRs early. It is ok to create work-in-progress PRs. You may mark these as draft PRs on GitHub.
@@ -61,7 +77,7 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
   - If a `🐍 Packaging` check fails, this indicates an error in the Python part of the code base. `cibuildwheel` runs the `pyfiction` test suite against every wheel it builds, so a failing test shows up here. Look through the respective logs on GitHub for any error or failure messages.
   - If the `📝 CodeQL` check fails, this indicates a security vulnerability in the code base. Look through the respective logs on GitHub for any error or failure messages.
   - If `🚨 Lint` comments on your PR with a list of suggestions/warnings, `clang-tidy` raised them when checking the C++ part of your changes for warnings or style guideline violations. The individual messages frequently provide helpful suggestions on how to fix the warnings.
-  - If the `🐍 Docstrings` check fails, the generated `pybind11_mkdoc_docstrings.hpp` no longer matches the Doxygen comments in `include/fiction/`. Download the `pyfiction-docstrings` artifact from that run, put it in place of `bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. Never edit that file by hand; the job's summary carries the same instructions.
+  - If the `🐍 Docstrings` check fails, the generated `pybind11_mkdoc_docstrings.hpp` no longer matches the Doxygen comments in `include/fiction/`. Download the `pyfiction-docstrings` artifact from that run, put it in place of `bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. Never edit that file by hand; the job's summary carries the same instructions.
   - If `🚦 Check` fails while every job below it looks green, a job was skipped for a reason change detection did not predict — usually because something it depends on failed first.
 
 - Once your PR is ready, change it from a draft PR to a regular PR and request a review from one of the project maintainers.

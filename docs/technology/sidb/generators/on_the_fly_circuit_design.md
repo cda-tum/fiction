@@ -1,34 +1,103 @@
 (on_the_fly_design)=
 
-# SiDB Circuit Design Algorithm in the Presence of Atomic Defects
+# On-the-fly SiDB Circuit Design
 
-This algorithm is designed to create SiDB circuits on a clocked surface, accommodating the presence of atomic defects.
+## Placed and routed layouts
 
-1. **Blacklist Generation**:
+The circuit designer implements each tile of a hexagonal gate-level layout with SiDBs.
+The input must be placed and routed with port orientations supported by the Bestagon skeletons.
+Convert Cartesian layouts with {ref}`hexagonalization` before designing the SiDB circuit.
 
-   Initially, a blacklist of gate-tile pairs is generated. This blacklist is based on the locations of neutrally charged atomic defects and their overlap with the I/O pins of the SiDB skeletons.
+The default search uses exhaustive gate design with one canvas SiDB and stops at the first
+solution. Crossings and double wires use predefined implementations when possible.
+The required number of canvas SiDBs depends on the gates; the example uses three with QuickCell.
+The returned layout can be exported as SVG or SiQAD SQD.
 
-2. **Gate-Level Layout Design**:
+The circuit's `timeout` covers all gate designs; `design_gate_params.operational_params.timeout` can impose a
+shorter per-gate limit. Both use milliseconds; see {ref}`sidb_timeouts` for defaults and limits.
 
-   Using the generated blacklist, a gate-level layout is designed with the `exact` algorithm. This process involves:
+::::{tab-set}
+:sync-group: language
 
-   - **Valid Layout Found**:
+:::{tab-item} C++
+:sync: cpp
 
-     If a valid gate-level layout is found, the corresponding gates are implemented with SiDBs.
+**Header:** `fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp`
 
-   - **Invalid Layout**:
+```{doxygenstruct} fiction::sidb::generators::on_the_fly_circuit_design_params
+:members:
+```
 
-     If a valid layout is not found, the blacklist is updated, and the placement and routing process is repeated.
+```{doxygenfunction} fiction::sidb::generators::on_the_fly_circuit_design
 
-This iterative approach ensures that the designed SiDB circuits can effectively handle defects present on the surface.
+```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+The Python call accepts `hexagonal_gate_layout` and returns `sidb_layout`.
+The call leaves its input unchanged and releases the GIL during circuit design.
+An unsupported gate type or orientation raises `ValueError`; an unsuccessful gate search
+raises `RuntimeError`. This interface does not accept defective surfaces or logic networks.
+
+Choose the gate-search algorithm through `design_gate_params.design_mode`, as shown below.
+The `PRUNING_ONLY` mode skips operational simulation, so it does not verify the designed gates' functionality.
+
+```python
+from mnt.pyfiction.layouts import hexagonal_gate_layout
+from mnt.pyfiction.sidb.generators import (
+    design_sidb_gates_mode,
+    on_the_fly_sidb_circuit_design,
+    on_the_fly_sidb_circuit_design_params,
+)
+from mnt.pyfiction.sidb.io import write_sqd_layout
+
+layout = hexagonal_gate_layout((2, 2, 0), "ROW", "AND")
+a = layout.create_pi("a", (0, 0, 0))
+b = layout.create_pi("b", (1, 0, 0))
+gate = layout.create_and(a, b, (1, 1, 0))
+layout.create_po(gate, "f", (0, 2, 0))
+
+params = on_the_fly_sidb_circuit_design_params()
+params.timeout = 60_000  # one minute for the whole circuit
+gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
+gates.design_mode = design_sidb_gates_mode.QUICKCELL
+gates.number_of_canvas_sidbs = 3
+circuit = on_the_fly_sidb_circuit_design(layout, params)
+write_sqd_layout(circuit, "and.sqd")
+```
+
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb.generators.sidb_complex_gate_design_policy
+   :members:
+
+.. autoclass:: mnt.pyfiction.sidb.generators.sidb_on_the_fly_gate_library_params
+   :members:
+
+.. autoclass:: mnt.pyfiction.sidb.generators.on_the_fly_sidb_circuit_design_params
+   :members:
+
+.. autofunction:: mnt.pyfiction.sidb.generators.on_the_fly_sidb_circuit_design
+```
+
+:::
+
+::::
+
+## Defective surfaces
+
+The C++ interface for defective surfaces requires Z3. It excludes gate-tile combinations whose
+skeletons overlap neutral defects, then uses `exact` for placement and routing. The gate designer
+implements the placed tiles while accounting for the surface's defects.
+
+If gate design fails, the algorithm blacklists the failing gate-tile-port combination and retries
+placement and routing. It raises `unsuccessful_pr_error` when no placement is possible.
 
 **Header:** `fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp`
 
 ```{doxygenstruct} fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface_params
-:members:
-```
-
-```{doxygenstruct} fiction::sidb::generators::on_the_fly_circuit_design_params
 :members:
 ```
 
@@ -37,9 +106,5 @@ This iterative approach ensures that the designed SiDB circuits can effectively 
 ```
 
 ```{doxygenfunction} fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface
-
-```
-
-```{doxygenfunction} fiction::sidb::generators::on_the_fly_circuit_design
 
 ```

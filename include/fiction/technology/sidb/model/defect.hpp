@@ -112,7 +112,7 @@ struct defect
     /**
      * Standard constructor.
      */
-    constexpr explicit defect(const defect_type defect_type = defect_type::UNKNOWN, const int64_t electric_charge = 0.0,
+    constexpr explicit defect(const defect_type defect_type = defect_type::UNKNOWN, const int64_t electric_charge = 0,
                               const double relative_permittivity = 0.0, const double screening_distance = 0.0) noexcept
             :
             type{defect_type},

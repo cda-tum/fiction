@@ -1,0 +1,132 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+"""The cell command."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.registry import Category, command
+from mnt.fiction.cli.stores import CellEntry, describe
+from mnt.fiction.cli.topologies import DISPLAY_NAMES, topology_name
+from mnt.pyfiction.layouts import (
+    arrangement,
+    cartesian_gate_layout,
+    hexagonal_gate_layout,
+    shifted_cartesian_gate_layout,
+)
+from mnt.pyfiction.physical_design import (
+    apply_bestagon_library,
+    apply_qca_one_library,
+    apply_sim7_mol_library,
+    apply_topolinano_library,
+)
+
+if TYPE_CHECKING:
+    import argparse
+    from collections.abc import Callable
+
+    from mnt.fiction.cli.parsing import Parser
+    from mnt.fiction.cli.registry import Result
+    from mnt.fiction.cli.session import Session
+    from mnt.fiction.cli.stores import CellLayout, GateLayout
+
+
+GATE_LIBRARIES: dict[str, tuple[type[GateLayout], Callable[..., CellLayout]]] = {
+    "qca-one": (cartesian_gate_layout, apply_qca_one_library),
+    "sim7-mol": (cartesian_gate_layout, apply_sim7_mol_library),
+    "topolinano": (shifted_cartesian_gate_layout, apply_topolinano_library),
+    "bestagon": (hexagonal_gate_layout, apply_bestagon_library),
+}
+"""The gate libraries, each with the gate-level layout family it maps."""
+
+FAMILY_NAMES: dict[type[GateLayout], str] = {
+    cartesian_gate_layout: "cartesian",
+    shifted_cartesian_gate_layout: "shifted_cartesian",
+    hexagonal_gate_layout: "hexagonal",
+}
+"""The name of each gate-level layout family."""
+
+ROW_ARRANGEMENTS = (arrangement.ODD_ROW, arrangement.EVEN_ROW)
+"""The arrangements of pointy-top hexagonal layouts."""
+
+
+def _library_key(name: str) -> str:
+    """Normalize a gate library name, so that 'QCA ONE', 'qca_one', and 'qcaone' all find qca-one.
+
+    Args:
+        name: The name the user typed.
+
+    Returns:
+        The name without separators, in lower case.
+    """
+    return name.lower().replace("-", "").replace("_", "").replace(" ", "")
+
+
+LIBRARY_ALIASES = {_library_key(name): name for name in GATE_LIBRARIES}
+"""Every gate library under its normalized name."""
+
+
+def _cell_arguments(parser: Parser) -> None:
+    """Add the command's arguments to the parser."""
+    parser.add_argument(
+        "-l",
+        "--library",
+        default="qca-one",
+        metavar="LIBRARY",
+        type=lambda name: LIBRARY_ALIASES.get(_library_key(name), name),
+        choices=list(GATE_LIBRARIES),
+        help=f"the gate library: {', '.join(GATE_LIBRARIES)}; hyphens, underscores, spaces, and case are ignored",
+    )
+
+
+@command(
+    "cell",
+    Category.TECHNOLOGY,
+    _cell_arguments,
+    inputs="Active gate-level layout.",
+    example="generate mux -b 1; ortho; cell --library qca-one",
+    progress=True,
+)
+def cell(session: Session, args: argparse.Namespace) -> Result:
+    """Compile the active gate-level layout into a cell-level layout with a gate library.
+
+    qca-one and sim7-mol take Cartesian layouts, topolinano takes column-shifted Cartesian layouts
+    (exact --topolinano), and bestagon takes pointy-top hexagonal layouts (hex, or exact --topology
+    hexagonal -s row).
+    """
+    layout = session.gate_layouts.current()
+    library = args.library
+    needed, apply = GATE_LIBRARIES[library]
+    if not isinstance(layout, needed):
+        msg = f"{library} needs a {FAMILY_NAMES[needed]} layout; the active layout is {topology_name(layout)}"
+        raise CommandError(msg)
+    if (
+        library == "bestagon"
+        and isinstance(layout, hexagonal_gate_layout)
+        and layout.get_arrangement() not in ROW_ARRANGEMENTS
+    ):
+        msg = (
+            f"bestagon needs a pointy-top hexagonal layout; the active layout is {DISPLAY_NAMES[topology_name(layout)]}"
+        )
+        raise CommandError(msg)
+    if (
+        library == "topolinano"
+        and isinstance(layout, shifted_cartesian_gate_layout)
+        and layout.get_arrangement() in ROW_ARRANGEMENTS
+    ):
+        msg = (
+            "topolinano needs a column-shifted Cartesian layout; "
+            f"the active layout is {DISPLAY_NAMES[topology_name(layout)]}"
+        )
+        raise CommandError(msg)
+    entry = CellEntry(apply(layout, on_progress=session.report_progress))
+    session.cell_layouts.add(entry)
+    return {"cell_layout": describe(entry)}

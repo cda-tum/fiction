@@ -12,15 +12,12 @@ ci:
   autoupdate_commit_msg: "⬆️ Bump pre-commit hooks"
   autofix_commit_msg: "🎨 Incorporated pre-commit fixes"
   autoupdate_schedule: quarterly
-  # `mypy` needs `numpy` and `matplotlib` to resolve the imports of the files it
-  # checks, which puts its environment over the 250 MiB pre-commit.ci allows a hook. The
-  # 🐍 Lint workflow runs it instead
-  skip: [mypy]
+  skip: [ty]
 
 # The fourth copy of this list. The others are `path_filters:` in `.coderabbit.yaml`, the
 # `ignore:` input of cpp-linter-action in `.github/workflows/cpp-linter.yml`, and `exclude`
 # in `.license-tools-config.json`, which is JSON and cannot say so itself. Keep them in sync
-exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+exclude: "^vendors/|^benchmarks/|bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 # `prek` runs hooks that share a `priority` concurrently and ascends from there; an unset
 # `priority` falls back to file order, which is fully serial. The tiers below are therefore
@@ -31,7 +28,8 @@ exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind
 #         `mixed-line-ending`, `trailing-whitespace`, `fix-ligatures`, and `fix-smartquotes`
 #         all take `types: [text]`, so any two of them sharing a tier would read-modify-write
 #         the same file at the same time and lose one of the two edits
-#   6     the language formatters. These share a tier because their file types are disjoint
+#   6     the language and configuration formatters. These share a tier because their file
+#         types are disjoint
 #   7-9   the hooks that must observe the formatters' result
 #
 # Do not collapse tiers 1-5 to win back the wall clock; those hooks are cheap, and the
@@ -54,6 +52,8 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        # the generated stubs are text and grow with the bindings
+        exclude: ^python/mnt/pyfiction/.*\.pyi$
         priority: 0
       - id: check-case-conflict
         priority: 0
@@ -90,7 +90,7 @@ repos:
 
   # Format and lint documentation with MyST support.
   - repo: https://github.com/rvben/rumdl-pre-commit
-    rev: v0.2.66
+    rev: v0.2.78
     hooks:
       - id: rumdl
         files: ^docs/.*\.md$
@@ -132,23 +132,30 @@ repos:
 
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v23.1.0
+    rev: v23.1.2
     hooks:
       - id: clang-format
         types_or: [c++, c]
         args: ["-style=file"]
         priority: 6
 
+  # Format pyproject.toml
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.29.4
+    hooks:
+      - id: pyproject-fmt
+        priority: 6
+
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.10
+    rev: 0.12.21
     hooks:
       - id: uv-lock
         priority: 0
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.6
+    rev: v0.16.10
     hooks:
       - id: ruff-format
         priority: 6
@@ -181,25 +188,19 @@ repos:
         types_or: [python, pyi, c++]
         priority: 7
 
-  # Check static types with mypy
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.3.1
+  # Check Python types with ty. `--no-install-project` installs the runtime dependencies the
+  # shell imports without compiling the extension, and the `docs` group resolves the imports of
+  # `docs/conf.py` and its Sphinx extension
+  - repo: https://github.com/astral-sh/ty-pre-commit
+    rev: v0.0.84
     hooks:
-      - id: mypy
-        files: ^(bindings/mnt/pyfiction|docs/.*\.py|experiments|noxfile\.py|scripts)
-        args: []
-        additional_dependencies:
-          - nox
-          - pytest
-          - sphinx>=8.2.3
-          # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
-          - matplotlib
-          - numpy
+      - id: ty
+        args: [--no-install-project, --group, docs]
         priority: 9
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.9.6
+    rev: v3.9.9
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
@@ -208,7 +209,7 @@ repos:
 
   # Check JSON schemata
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.38.0
+    rev: 0.38.2
     hooks:
       - id: check-codecov
         priority: 0
@@ -222,7 +223,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.09.04
+    rev: 2026.09.30
     hooks:
       - id: validate-pyproject
         priority: 0

@@ -18,19 +18,20 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.cartesian_gate_layout.bounding_box_2d
+.. autofunction:: mnt.pyfiction.layouts.cartesian_gate_layout.bounding_box_2d
+   :no-index:
 
-.. autofunction:: mnt.pyfiction.hexagonal_gate_layout.bounding_box_2d
+.. autofunction:: mnt.pyfiction.layouts.hexagonal_gate_layout.bounding_box_2d
+   :no-index:
 
-.. autofunction:: mnt.pyfiction.cartesian_obstruction_layout.bounding_box_2d
+.. autofunction:: mnt.pyfiction.qca.qca_layout.bounding_box_2d
+   :no-index:
 
-.. autofunction:: mnt.pyfiction.shifted_cartesian_obstruction_layout.bounding_box_2d
+.. autofunction:: mnt.pyfiction.mol_qca.mol_qca_layout.bounding_box_2d
+   :no-index:
 
-.. autofunction:: mnt.pyfiction.hexagonal_obstruction_layout.bounding_box_2d
-
-.. autofunction:: mnt.pyfiction.qca_layout.bounding_box_2d
-
-.. autofunction:: mnt.pyfiction.inml_layout.bounding_box_2d
+.. autofunction:: mnt.pyfiction.inml.inml_layout.bounding_box_2d
+   :no-index:
 
 ```
 

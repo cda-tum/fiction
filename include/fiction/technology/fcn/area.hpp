@@ -19,8 +19,6 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
-#include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 
@@ -31,29 +29,31 @@ namespace fiction::fcn
 {
 
 /**
- * Parameters for area computation of cell-level layouts. Default parameters are loaded from the given cell technology.
+ * Dimensions for area computation of cell-level layouts: the size of a cell and the spacing between neighboring cells,
+ * in nm. Default dimensions are those of the given layout type, e.g., `qca::layout::CELL_WIDTH`.
  *
- * @tparam Technology Cell technology.
+ * @tparam Lyt Layout type whose cell dimensions are the defaults: `qca::layout`, `mol_qca::layout`, `inml::layout`,
+ * or `sidb::layout`.
  */
-template <typename Technology>
+template <typename Lyt>
 struct area_params
 {
     /**
      * Width of each cell.
      */
-    double width{static_cast<double>(Technology::CELL_WIDTH)};
+    double width{Lyt::CELL_WIDTH};
     /**
      * Height of each cell.
      */
-    double height{static_cast<double>(Technology::CELL_HEIGHT)};
+    double height{Lyt::CELL_HEIGHT};
     /**
      * Horizontal spacing between cells.
      */
-    double hspace{static_cast<double>(Technology::CELL_HSPACE)};
+    double hspace{Lyt::CELL_HSPACE};
     /**
      * Vertical spacing between cells.
      */
-    double vspace{static_cast<double>(Technology::CELL_VSPACE)};
+    double vspace{Lyt::CELL_VSPACE};
 };
 /**
  * Statistics class to store area-related information including width, height, and area of a layout.
@@ -91,17 +91,16 @@ struct area_stats
  * the layout is assigned a vertical and horizontal size. Additionally, a spacing between cell positions in horizontal
  * and vertical direction is taken into account.
  *
- * @tparam Lyt Cell-level layout type.
- * @param lyt The cell-level layout whose area is desired.
+ * @tparam Lyt Layout type with a Cartesian extent, e.g., `qca::layout`, `mol_qca::layout`, or `inml::layout`.
+ * @tparam Dims Layout type whose cell dimensions `ps` holds; `Lyt` by default.
+ * @param lyt The layout whose area is desired.
  * @param ps Area parameters.
  * @param pst Area statistics.
  * @return Area requirements in nm².
  */
-template <typename Lyt>
-double area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr) noexcept
+template <typename Lyt, typename Dims = Lyt>
+double area(const Lyt& lyt, const area_params<Dims>& ps = {}, area_stats* pst = nullptr) noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-
     area_stats st{};
 
     st.width  = (static_cast<double>(lyt.x() + 1) * ps.width) + (static_cast<double>(lyt.x()) * ps.hspace);
@@ -120,18 +119,16 @@ double area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_st
  * cell position in the layout is assigned a vertical and horizontal size. Additionally, a spacing between cell
  * positions in horizontal and vertical direction is taken into account.
  *
- * @tparam Lyt Cell-level layout type.
- * @param bb The bounding box of the cell-level layout whose area is desired.
+ * @tparam Lyt Cell grid layout type: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
+ * @param bb The bounding box of the layout whose area is desired.
  * @param ps Area parameters.
  * @param pst Area statistics.
  * @return Area requirements in nm².
  */
 template <typename Lyt>
-double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& ps = {},
+double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<Lyt>& ps = {},
             area_stats* pst = nullptr) noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-
     area_stats st{};
 
     st.width =
@@ -157,7 +154,7 @@ double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technolog
  * @param pst Area statistics.
  * @return Area requirements in nm².
  */
-[[nodiscard]] inline double area(const sidb::layout& lyt, const area_params<sidb::sidb_technology>& ps = {},
+[[nodiscard]] inline double area(const sidb::layout& lyt, const area_params<sidb::layout>& ps = {},
                                  area_stats* pst = nullptr) noexcept
 {
     area_stats st{};

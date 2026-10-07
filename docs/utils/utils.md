@@ -8,4 +8,5 @@ stl/stl
 graph/graph
 optimization/optimization
 io/utility
+progress
 ```

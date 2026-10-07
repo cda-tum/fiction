@@ -21,6 +21,20 @@
   ],
   customManagers: [
     {
+      customType: "regex",
+      description: "Update nanobind requirements in C++ lint entry points",
+      managerFilePatterns: [
+        "/^noxfile\\.py$/",
+        "/^\\.github/workflows/cpp-linter\\.yml$/"
+      ],
+      matchStrings: [
+        "\"nanobind(?<currentValue>~=[0-9.]+)\""
+      ],
+      depNameTemplate: "nanobind",
+      datasourceTemplate: "pypi",
+      versioningTemplate: "pep440",
+    },
+    {
       // Renovate has no native manager for CMake FetchContent, so the pinned
       // versions in cmake/Dependencies.cmake are tracked via regex managers
       // instead, one per dependency, matching the `set(<DEP>_VERSION ...)`
@@ -70,6 +84,19 @@
     },
     {
       customType: "regex",
+      description: "Update the fmt revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "set\\(FMT_VERSION\\s+(?<currentValue>[0-9.]+)"
+      ],
+      depNameTemplate: "fmtlib/fmt",
+      packageNameTemplate: "fmtlib/fmt",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      customType: "regex",
       description: "Update the tinyxml2 revision pinned for CMake FetchContent",
       managerFilePatterns: [
         "cmake/Dependencies.cmake"
@@ -82,24 +109,10 @@
       datasourceTemplate: "github-tags",
     },
     {
-      // alice and mockturtle are pinned to a commit SHA that tracks the head
-      // of a branch (rather than a release tag), so these use the git-refs
-      // datasource against that branch instead of github-tags. mockturtle is
-      // still fetched as a clone, so its manager matches GIT_TAG.
-      customType: "regex",
-      description: "Update the alice revision pinned for CMake FetchContent",
-      managerFilePatterns: [
-        "cmake/Dependencies.cmake"
-      ],
-      matchStrings: [
-        "set\\(ALICE_REV\\s+(?<currentDigest>[0-9a-f]{40})"
-      ],
-      depNameTemplate: "marcelwa/alice",
-      packageNameTemplate: "https://github.com/marcelwa/alice",
-      currentValueTemplate: "master",
-      datasourceTemplate: "git-refs",
-    },
-    {
+      // mockturtle is pinned to a commit SHA that tracks the head of a branch
+      // (rather than a release tag), so this uses the git-refs datasource
+      // against that branch instead of github-tags. It is fetched as a clone,
+      // so its manager matches GIT_TAG.
       customType: "regex",
       description: "Update the mockturtle revision pinned for CMake FetchContent",
       managerFilePatterns: [
@@ -116,7 +129,9 @@
   ],
   lockFileMaintenance: {
     enabled: true,
-    automerge: true
+    automerge: true,
+    // Lock file maintenance bypasses packageRules, so the emoji prefix must be set here.
+    commitMessagePrefix: "⬆️🐍",
   },
   minimumReleaseAge: "3 days",
   schedule: [
@@ -153,7 +168,11 @@
     },
     {
       matchManagers: [
-        "pep621"
+        "pep621",
+        "custom.regex"
+      ],
+      matchDatasources: [
+        "pypi"
       ],
       addLabels: [
         "dependencies",
@@ -182,10 +201,13 @@
     {
       // This rule is intentionally last: packageRules are applied in order and
       // later rules override earlier ones, so this re-asserts automerge: false
-      // for custom.regex after the "patch versions" rule above would otherwise
+      // for CMake dependencies after the "patch versions" rule above would otherwise
       // auto-merge patch-level CMake tag bumps unattended.
       matchManagers: [
         "custom.regex"
+      ],
+      matchFileNames: [
+        "cmake/Dependencies.cmake"
       ],
       addLabels: [
         "dependencies",
@@ -198,7 +220,7 @@
       // that Renovate cannot compute, so a version bump lands with a stale hash
       // and fails the configure step until someone regenerates it.
       prBodyNotes: [
-        "⚠️ If this bump touches a `*_VERSION` or `ALICE_REV` variable in `cmake/Dependencies.cmake`, the matching `*_SHA256` is now stale and CMake will fail with `Hash mismatch`. Run `python3 scripts/update_dependency_hashes.py` and commit the result."
+        "⚠️ If this bump touches a `*_VERSION` variable in `cmake/Dependencies.cmake`, the matching `*_SHA256` is now stale and CMake will fail with `Hash mismatch`. Run `python3 scripts/update_dependency_hashes.py` and commit the result."
       ],
     }
   ]

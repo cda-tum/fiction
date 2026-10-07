@@ -18,12 +18,15 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
+#include <cstddef>
 #include <sstream>
 
 using namespace fiction;
+using namespace fiction::layouts;
 using namespace fiction::verification;
 
 template <typename Lyt>
@@ -54,10 +57,10 @@ TEST_CASE("Intact layouts", "[drv]")
 {
     // empty layouts
     check_for_drvs(cart_gate_clk_lyt{}, 0, 0);
-    check_for_drvs(hex_even_col_gate_clk_lyt{}, 0, 0);
-    check_for_drvs(hex_odd_col_gate_clk_lyt{}, 0, 0);
-    check_for_drvs(hex_even_row_gate_clk_lyt{}, 0, 0);
-    check_for_drvs(hex_odd_row_gate_clk_lyt{}, 0, 0);
+    check_for_drvs(hex_gate_clk_lyt{arrangement::EVEN_COLUMN}, 0, 0);
+    check_for_drvs(hex_gate_clk_lyt{arrangement::ODD_COLUMN}, 0, 0);
+    check_for_drvs(hex_gate_clk_lyt{arrangement::EVEN_ROW}, 0, 0);
+    check_for_drvs(hex_gate_clk_lyt{arrangement::ODD_ROW}, 0, 0);
 
     // Cartesian gate layouts
     check_for_drvs(blueprints::and_or_gate_layout<cart_gate_clk_lyt>(), 0, 0);

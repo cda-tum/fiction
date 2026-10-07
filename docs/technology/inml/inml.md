@@ -4,35 +4,8 @@
 :maxdepth: 1
 
 io/io
+layout
 ```
-
-## in-plane Nanomagnet Logic (iNML)
-
-::::{tab-set}
-:sync-group: language
-
-:::{tab-item} C++
-:sync: cpp
-
-**Header:** `fiction/technology/inml/technology.hpp`
-
-```{doxygenstruct} fiction::inml::inml_technology
-:members:
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.inml_technology
-   :members:
-```
-
-:::
-
-::::
 
 ## iNML ToPoliNano Library
 

@@ -22,7 +22,6 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 #include <set>

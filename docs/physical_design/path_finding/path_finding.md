@@ -60,15 +60,15 @@ Distance functions compute (an approximation for) the distance between two coord
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.manhattan_distance
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.manhattan_distance
 
-.. autofunction:: mnt.pyfiction.euclidean_distance
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.euclidean_distance
 
-.. autofunction:: mnt.pyfiction.squared_euclidean_distance
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.squared_euclidean_distance
 
-.. autofunction:: mnt.pyfiction.twoddwave_distance
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.twoddwave_distance
 
-.. autofunction:: mnt.pyfiction.chebyshev_distance
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.chebyshev_distance
 ```
 
 :::
@@ -169,12 +169,12 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.a_star_params
+.. autoclass:: mnt.pyfiction.physical_design.path_finding.a_star_params
    :members:
 
-.. autofunction:: mnt.pyfiction.a_star
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.a_star
 
-.. autofunction:: mnt.pyfiction.a_star_distance
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.a_star_distance
 ```
 
 :::
@@ -205,10 +205,10 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.yen_k_shortest_paths_params
+.. autoclass:: mnt.pyfiction.physical_design.path_finding.yen_k_shortest_paths_params
    :members:
 
-.. autofunction:: mnt.pyfiction.yen_k_shortest_paths
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.yen_k_shortest_paths
 ```
 
 :::
@@ -239,10 +239,10 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.enumerate_all_paths_params
+.. autoclass:: mnt.pyfiction.physical_design.path_finding.enumerate_all_paths_params
    :members:
 
-.. autofunction:: mnt.pyfiction.enumerate_all_paths
+.. autofunction:: mnt.pyfiction.physical_design.path_finding.enumerate_all_paths
 ```
 
 :::

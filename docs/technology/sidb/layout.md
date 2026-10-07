@@ -45,16 +45,16 @@ described by setting the vectors directly.
 
 ```{eval-rst}
 
-.. autoclass:: mnt.pyfiction.lattice_site
+.. autoclass:: mnt.pyfiction.sidb.lattice_site
     :members:
 
-.. autofunction:: mnt.pyfiction.row_of
+.. autofunction:: mnt.pyfiction.sidb.row_of
 
-.. autofunction:: mnt.pyfiction.site_at_row
+.. autofunction:: mnt.pyfiction.sidb.site_at_row
 
-.. autofunction:: mnt.pyfiction.sites_in_area
+.. autofunction:: mnt.pyfiction.sidb.sites_in_area
 
-.. autoclass:: mnt.pyfiction.lattice
+.. autoclass:: mnt.pyfiction.sidb.lattice
     :members:
 
 ```
@@ -71,7 +71,7 @@ described by setting the vectors directly.
 :::{tab-item} C++
 :sync: cpp
 
-**Header:** `fiction/technology/sidb/technology.hpp`, `fiction/technology/sidb/layout.hpp`
+**Header:** `fiction/technology/sidb/layout.hpp`
 
 A dot is one silicon dangling bond. `dot_tag` records its role: `NORMAL`, `INPUT`, `OUTPUT`, or
 `LOGIC`. `assign_sidb` places an SiDB at a lattice site and defaults to `NORMAL` when no tag is
@@ -93,10 +93,10 @@ Python exposes the tags as `sidb_dot_tag`.
 
 ```{eval-rst}
 
-.. autoclass:: mnt.pyfiction.sidb_dot_tag
+.. autoclass:: mnt.pyfiction.sidb.sidb_dot_tag
     :members:
 
-.. autoclass:: mnt.pyfiction.sidb_layout
+.. autoclass:: mnt.pyfiction.sidb.sidb_layout
     :members:
 
 ```
@@ -129,7 +129,7 @@ distribution per physically valid state beside a single copy of the simulated la
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.charge_distribution
+.. autoclass:: mnt.pyfiction.sidb.charge_distribution
    :members:
 ```
 
@@ -137,15 +137,12 @@ distribution per physically valid state beside a single copy of the simulated la
 
 ::::
 
-## Conversion from Cell-level Layouts
+## Gate-library Coordinates
 
-Placement and routing produce Cartesian SiDB cell-level layouts whose rows count single SiDB rows. These functions
-map such layouts and their coordinates onto lattice sites.
+SiDB gate libraries describe their gates on a grid whose rows are single SiDB rows. `apply_gate_library` maps these
+grid coordinates onto lattice sites with the following function.
 
-**Header:** `fiction/technology/sidb/cell_level_layout_conversion.hpp`
+**Header:** `fiction/technology/sidb/lattice.hpp`
 
 ```{doxygenfunction} fiction::sidb::to_lattice_site
-```
-
-```{doxygenfunction} fiction::sidb::to_sidb_layout
 ```

@@ -20,19 +20,15 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/technology/qca/technology.hpp>
 #include <fiction/traits.hpp>
 
 #include <mockturtle/networks/aig.hpp>
@@ -49,6 +45,9 @@
 #include <optional>
 #include <stdexcept>
 #include <vector>
+
+// The tests dereference optionals right after REQUIRE(x.has_value()), which the check does not model.
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -68,6 +67,12 @@ const T& required_value(const std::optional<T>& optional)
     return optional.value();  // NOLINT(bugprone-unchecked-optional-access) Catch2 REQUIRE guards each call.
 }
 
+/**
+ * @brief Checks logic equivalence and removal of placement-search obstructions.
+ * @tparam Lyt Gate layout type.
+ * @tparam Ntk Network type.
+ * @param ntk Network to place and route.
+ */
 template <typename Lyt, typename Ntk>
 void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
 {
@@ -80,6 +85,9 @@ void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
     REQUIRE(layout.has_value());
 
     check_eq(ntk, required_value(layout));
+    const auto& result = required_value(layout);
+    result.foreach_coordinate([&result](const auto& c)
+                              { CHECK(result.is_obstructed_coordinate(c) == !result.is_empty_tile(c)); });
 }
 
 template <typename Lyt>
@@ -106,7 +114,7 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         check_graph_oriented_layout_design_equiv_all<gate_layout>();
     }
@@ -114,8 +122,7 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
 
 TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
-    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto check = [](const auto& ntk)
     {
@@ -127,7 +134,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
 
-        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(required_value(layout)));
+        CHECK_NOTHROW(apply_gate_library<qca_one_library>(required_value(layout)));
     };
 
     check(blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>());
@@ -135,7 +142,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 
 TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
@@ -305,7 +312,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
 TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
@@ -345,7 +352,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 
 TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -373,7 +380,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 
 TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto ntk = blueprints::clpl<technology_network>();
 
@@ -383,7 +390,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
     params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
     params.return_first = true;
 
-    for (uint64_t skip = 0; skip < 5; ++skip)
+    for (int32_t skip = 0; skip < 5; ++skip)
     {
         SECTION(fmt::format("tiles_to_skip_between_pis = {}", skip))
         {
@@ -395,7 +402,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
             check_eq(ntk, lyt);
 
             // collect PI coordinates along top (y=0) and left (x=0)
-            std::vector<uint64_t> top_x, left_y;
+            std::vector<int32_t> top_x, left_y;
             lyt.foreach_pi(
                 [&](auto const& gate)
                 {
@@ -432,7 +439,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 
 TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -476,7 +483,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto maj = blueprints::maj1_network<mockturtle::aig_network>();
     maj.set_network_name("maj");
@@ -505,7 +512,7 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
 
 TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const auto ntk    = blueprints::maj1_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -517,7 +524,7 @@ TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 
 TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -530,12 +537,28 @@ TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout
     CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params, &stats), std::invalid_argument);
 }
 
+TEST_CASE("PI spacing outside of its range is rejected", "[graph-oriented-layout-design]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+
+    graph_oriented_layout_design_params params{};
+    params.return_first = true;
+
+    for (const int32_t skip : {-1, 1'048'577, 2147483647})
+    {
+        params.tiles_to_skip_between_pis = skip;
+
+        CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params), std::invalid_argument);
+    }
+}
+
 TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-oriented-layout-design]")
 {
     /**
      * Cartesian gate layout used to compare seeded PI placement.
      */
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     const auto layouts =
@@ -579,3 +602,39 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
     CHECK(pi_positions(required_value(layouts[0])) == pi_positions(required_value(layouts[2])));
     CHECK(pi_positions(required_value(layouts[1])) == pi_positions(required_value(layouts[3])));
 }
+
+TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layout-design]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+
+    progress_recorder rec{};
+
+    graph_oriented_layout_design_params params{};
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+    params.return_first = true;
+    params.on_progress  = rec.callback();
+
+    SECTION("single-threaded")
+    {
+        params.enable_multithreading = false;
+    }
+    SECTION("multi-threaded")
+    {
+        params.enable_multithreading = true;
+    }
+
+    const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params);
+
+    REQUIRE(layout.has_value());
+    check_eq(ntk, *layout);
+
+    // the number of expansions is unknown in advance
+    CHECK(rec.is_consistent("expansions"));
+    CHECK(rec.final_count("expansions") > 0);
+    const auto reports = rec.reports_of("expansions");
+    REQUIRE(!reports.empty());
+    CHECK(reports.back().total == 0);
+}
+
+// NOLINTEND(bugprone-unchecked-optional-access)

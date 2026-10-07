@@ -23,7 +23,7 @@ node is considered a fanout node (or splitter in some contexts) that copies an i
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.technology_network
+.. autoclass:: mnt.pyfiction.networks.technology_network
    :members:
 ```
 

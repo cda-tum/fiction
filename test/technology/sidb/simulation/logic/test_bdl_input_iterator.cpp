@@ -23,16 +23,38 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <cstdint>
 #include <iterator>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::simulation::logic;
+
+TEST_CASE("BDL Input Iterator input pair limit", "[bdl-input-iterator]")
+{
+    // the input pairs sit ten rows apart, so each one forms its own wire
+    const auto layout_with_input_pairs = [](const int32_t num_pairs)
+    {
+        layout lyt{};
+        for (int32_t row = 0; row < num_pairs; ++row)
+        {
+            lyt.assign_sidb(lattice_site{0, row * 10}, dot_tag::INPUT);
+            lyt.assign_sidb(lattice_site{2, row * 10}, dot_tag::INPUT);
+        }
+        return lyt;
+    };
+
+    const bdl_input_iterator bii{layout_with_input_pairs(63)};
+    CHECK(bii.num_input_pairs() == 63);
+    CHECK(bii.is_valid());
+
+    CHECK_THROWS_AS(bdl_input_iterator{layout_with_input_pairs(64)}, std::invalid_argument);
+    CHECK_THROWS_AS(generate_bdl_input_pattern_layouts(layout_with_input_pairs(64)), std::invalid_argument);
+}
 
 TEST_CASE("BDL Input Iterator Traits", "[bdl-input-iterator]")
 {

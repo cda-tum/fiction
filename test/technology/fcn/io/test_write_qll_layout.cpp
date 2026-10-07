@@ -21,9 +21,9 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
-#include <fiction/technology/inml/technology.hpp>
-#include <fiction/technology/qca/technology.hpp>
-#include <fiction/types.hpp>
+#include <fiction/technology/inml/layout.hpp>
+#include <fiction/technology/mol_qca/layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 
 #include <fmt/format.h>
 
@@ -74,7 +74,7 @@ TEST_CASE("Write empty iNML layout", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const inml_cell_clk_lyt layout{{2, 2}, "empty layout"};
+    const inml::layout layout{{2, 2}, "empty layout"};
 
     write_qll_layout(layout, layout_stream);
 
@@ -85,15 +85,15 @@ TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
 {
     std::ostringstream layout_stream{};
 
-    inml_cell_clk_lyt layout{{4, 4}, "Non-pin layout"};
+    inml::layout layout{{4, 4}, "Non-pin layout"};
 
     // add two normal cells to span a bounding boy
-    layout.assign_cell_type({0, 0}, inml_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 4}, inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, inml::magnet_type::NORMAL);
+    layout.assign_cell_type({4, 4}, inml::magnet_type::NORMAL);
 
     // add I/O cells inside the bounding box such that they are not located at the borders
-    layout.assign_cell_type({1, 1}, inml_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 2}, inml_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({1, 1}, inml::magnet_type::INPUT);
+    layout.assign_cell_type({2, 2}, inml::magnet_type::OUTPUT);
 
     // this layout should throw an exception
     CHECK_THROWS_AS(write_qll_layout(layout, layout_stream), std::invalid_argument);
@@ -181,7 +181,7 @@ TEST_CASE("Write single-layer iNML MAJ gate", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const auto layout = blueprints::single_layer_inml_maj_gate<inml_cell_clk_lyt>();
+    const auto layout = blueprints::single_layer_inml_maj_gate();
 
     write_qll_layout(layout, layout_stream);
 
@@ -276,7 +276,7 @@ TEST_CASE("Write single-layer iNML coupler with inverter magnet", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const auto layout = blueprints::single_layer_inml_coupler_with_inverter<inml_cell_clk_lyt>();
+    const auto layout = blueprints::single_layer_inml_coupler_with_inverter();
 
     write_qll_layout(layout, layout_stream);
 
@@ -347,7 +347,7 @@ TEST_CASE("Write single-layer iNML crosswire", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const auto layout = blueprints::single_layer_inml_crosswire<inml_cell_clk_lyt>();
+    const auto layout = blueprints::single_layer_inml_crosswire();
 
     write_qll_layout(layout, layout_stream);
 
@@ -380,7 +380,7 @@ TEST_CASE("Write empty mQCA layout", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const qca_cell_clk_lyt layout{{2, 2, 1}, "empty layout"};
+    const qca::layout layout{{2, 2, 1}, "empty layout"};
 
     write_qll_layout(layout, layout_stream);
 
@@ -425,11 +425,11 @@ TEST_CASE("Write single-layer molQCA phase cells", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    mol_qca_cell_clk_lyt layout{{3, 0}, "molQCA phase cells"};
-    layout.assign_cell_type({0, 0}, mol_qca_technology::cell_type::NORMAL1);
-    layout.assign_cell_type({1, 0}, mol_qca_technology::cell_type::NORMAL2);
-    layout.assign_cell_type({2, 0}, mol_qca_technology::cell_type::NORMAL3);
-    layout.assign_cell_type({3, 0}, mol_qca_technology::cell_type::NORMAL4);
+    mol_qca::layout layout{{3, 0}, "molQCA phase cells"};
+    layout.assign_cell_type({0, 0}, mol_qca::cell_type::NORMAL1);
+    layout.assign_cell_type({1, 0}, mol_qca::cell_type::NORMAL2);
+    layout.assign_cell_type({2, 0}, mol_qca::cell_type::NORMAL3);
+    layout.assign_cell_type({3, 0}, mol_qca::cell_type::NORMAL4);
 
     write_qll_layout(layout, layout_stream);
 
@@ -466,8 +466,8 @@ TEST_CASE("Write molQCA constant cells", "[qll]")
 
         std::ostringstream layout_stream{};
 
-        mol_qca_cell_clk_lyt layout{{0, 0}, "molQCA constant 0 cell"};
-        layout.assign_cell_type({0, 0}, mol_qca_technology::cell_type::CONST_0);
+        mol_qca::layout layout{{0, 0}, "molQCA constant 0 cell"};
+        layout.assign_cell_type({0, 0}, mol_qca::cell_type::CONST_0);
 
         write_qll_layout(layout, layout_stream);
 
@@ -502,91 +502,13 @@ TEST_CASE("Write molQCA constant cells", "[qll]")
 
         std::ostringstream layout_stream{};
 
-        mol_qca_cell_clk_lyt layout{{0, 0}, "molQCA constant 1 cell"};
-        layout.assign_cell_type({0, 0}, mol_qca_technology::cell_type::CONST_1);
+        mol_qca::layout layout{{0, 0}, "molQCA constant 1 cell"};
+        layout.assign_cell_type({0, 0}, mol_qca::cell_type::CONST_1);
 
         write_qll_layout(layout, layout_stream);
 
         CHECK(layout_stream.str() == qll_layout);
     }
-
-    SECTION("vertical constant cell")
-    {
-        static const std::string qll_layout =
-            fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        "<!--Generated by {} ({})-->\n"
-                        "<qcalayout>\n"
-                        "\t<technologies>\n"
-                        "\t\t<settings tech=\"MolFCN\">\n"
-                        "\t\t\t<property name=\"Layoutwidth\" value=\"0\"/>\n"
-                        "\t\t\t<property name=\"Layoutheight\" value=\"0\"/>\n"
-                        "\t\t\t<property name=\"layersEnabled\" value=\"true\"/>\n"
-                        "\t\t\t<property name=\"PhaseNumber\" value=\"4\"/>\n"
-                        "\t\t\t<property name=\"CZSequence\" value=\"4\"/>\n"
-                        "\t\t\t<property name=\"Intermolecular Distance\" value=\"1000\"/>\n"
-                        "\t\t</settings>\n"
-                        "\t</technologies>\n"
-                        "\t<components>\n"
-                        "\t\t<item tech=\"MolFCN\" name=\"Bisferrocene\"/>\n"
-                        "\t</components>\n"
-                        "\t<layout>\n"
-                        "\t\t<pin tech=\"MolFCN\" name=\"const0\" direction=\"0\" id=\"1\" x=\"0\" y=\"0\" "
-                        "layer=\"0\"/>\n"
-                        "\t</layout>\n"
-                        "</qcalayout>\n",
-                        FICTION_VERSION, FICTION_REPO);
-
-        std::ostringstream layout_stream{};
-
-        mol_qca_cell_clk_lyt layout{{0, 0, 1}, "molQCA vertical constant cell"};
-        layout.assign_cell_type({0, 0, 0}, mol_qca_technology::cell_type::CONST_0);
-        layout.assign_cell_mode({0, 0, 0}, mol_qca_technology::cell_mode::VERTICAL);
-
-        write_qll_layout(layout, layout_stream);
-
-        CHECK(layout_stream.str() == qll_layout);
-    }
-}
-
-TEST_CASE("Write dual-layer molQCA vertical cell", "[qll]")
-{
-    static const std::string qll_layout =
-        fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    "<!--Generated by {} ({})-->\n"
-                    "<qcalayout>\n"
-                    "\t<technologies>\n"
-                    "\t\t<settings tech=\"MolFCN\">\n"
-                    "\t\t\t<property name=\"Layoutwidth\" value=\"0\"/>\n"
-                    "\t\t\t<property name=\"Layoutheight\" value=\"0\"/>\n"
-                    "\t\t\t<property name=\"layersEnabled\" value=\"true\"/>\n"
-                    "\t\t\t<property name=\"PhaseNumber\" value=\"4\"/>\n"
-                    "\t\t\t<property name=\"CZSequence\" value=\"4\"/>\n"
-                    "\t\t\t<property name=\"Intermolecular Distance\" value=\"1000\"/>\n"
-                    "\t\t</settings>\n"
-                    "\t</technologies>\n"
-                    "\t<components>\n"
-                    "\t\t<item tech=\"MolFCN\" name=\"Bisferrocene\"/>\n"
-                    "\t</components>\n"
-                    "\t<layout>\n"
-                    "\t\t<item comp=\"0\" id=\"1\" x=\"0\" y=\"0\" layer=\"0\">\n"
-                    "\t\t\t<property name=\"phase\" value=\"2\"/>\n"
-                    "\t\t</item>\n"
-                    "\t\t<item comp=\"0\" id=\"2\" x=\"0\" y=\"0\" layer=\"1\">\n"
-                    "\t\t\t<property name=\"phase\" value=\"2\"/>\n"
-                    "\t\t</item>\n"
-                    "\t</layout>\n"
-                    "</qcalayout>\n",
-                    FICTION_VERSION, FICTION_REPO);
-
-    std::ostringstream layout_stream{};
-
-    mol_qca_cell_clk_lyt layout{{0, 0, 1}, "molQCA vertical cell"};
-    layout.assign_cell_type({0, 0, 0}, mol_qca_technology::cell_type::NORMAL3);
-    layout.assign_cell_mode({0, 0, 0}, mol_qca_technology::cell_mode::VERTICAL);
-
-    write_qll_layout(layout, layout_stream);
-
-    CHECK(layout_stream.str() == qll_layout);
 }
 
 TEST_CASE("Write single-layer mQCA AND gate", "[qll]")
@@ -634,7 +556,7 @@ TEST_CASE("Write single-layer mQCA AND gate", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const auto layout = blueprints::single_layer_qca_and_gate<qca_cell_clk_lyt>();
+    const auto layout = blueprints::single_layer_qca_and_gate();
 
     write_qll_layout(layout, layout_stream);
 
@@ -701,7 +623,7 @@ TEST_CASE("Write dual-layer mQCA crossover", "[qll]")
 
     std::ostringstream layout_stream{};
 
-    const auto layout = blueprints::two_layer_qca_wire_crossing<qca_cell_clk_lyt>();
+    const auto layout = blueprints::two_layer_qca_wire_crossing();
 
     write_qll_layout(layout, layout_stream);
 

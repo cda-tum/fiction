@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Python bindings for `fiction/physical_design/orthogonal.hpp`.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
+#include "pyfiction/documentation.hpp"
+#include "pyfiction/progress.hpp"
+#include "pyfiction/types.hpp"
+
+#include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
+
+#include <sstream>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+
+namespace pyfiction
+{
+
+void orthogonal(nanobind::module_& m)
+{
+    namespace py = nanobind;
+
+    py::enum_<fiction::layouts::clocking::num_clks>(m, "num_clks", DOC(fiction_layouts_clocking_num_clks))
+        .value("THREE", fiction::layouts::clocking::num_clks::THREE, DOC(fiction_layouts_clocking_num_clks_THREE))
+        .value("FOUR", fiction::layouts::clocking::num_clks::FOUR, DOC(fiction_layouts_clocking_num_clks_FOUR));
+
+    py::class_<fiction::physical_design::orthogonal_physical_design_params>(
+        m, "orthogonal_params", DOC(fiction_physical_design_orthogonal_physical_design_params))
+        .def(py::init<>(), "Default constructor.")
+        .def_rw("number_of_clock_phases",
+                &fiction::physical_design::orthogonal_physical_design_params::number_of_clock_phases,
+                DOC(fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases))
+        .def_rw("layout_arrangement", &fiction::physical_design::orthogonal_physical_design_params::layout_arrangement,
+                DOC(fiction_physical_design_orthogonal_physical_design_params_layout_arrangement))
+        .def_rw("on_progress", &fiction::physical_design::orthogonal_physical_design_params::on_progress,
+                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
+                DOC(fiction_physical_design_orthogonal_physical_design_params_on_progress));
+
+    py::class_<fiction::physical_design::orthogonal_physical_design_stats>(
+        m, "orthogonal_stats", DOC(fiction_physical_design_orthogonal_physical_design_stats))
+        .def(py::init<>(), "Default constructor.")
+        .def(
+            "__repr__",
+            [](const fiction::physical_design::orthogonal_physical_design_stats& stats)
+            {
+                std::stringstream stream{};
+                stats.report(stream);
+                return stream.str();
+            },
+            "Returns a string representation of the statistics.")
+        .def_ro("time_total", &fiction::physical_design::orthogonal_physical_design_stats::time_total,
+                DOC(fiction_physical_design_orthogonal_physical_design_stats_time_total))
+        .def_ro("x_size", &fiction::physical_design::orthogonal_physical_design_stats::x_size,
+                DOC(fiction_physical_design_orthogonal_physical_design_stats_x_size))
+        .def_ro("y_size", &fiction::physical_design::orthogonal_physical_design_stats::y_size,
+                DOC(fiction_physical_design_orthogonal_physical_design_stats_y_size))
+        .def_ro("num_gates", &fiction::physical_design::orthogonal_physical_design_stats::num_gates,
+                DOC(fiction_physical_design_orthogonal_physical_design_stats_num_gates))
+        .def_ro("num_wires", &fiction::physical_design::orthogonal_physical_design_stats::num_wires,
+                DOC(fiction_physical_design_orthogonal_physical_design_stats_num_wires))
+        .def_ro("num_crossings", &fiction::physical_design::orthogonal_physical_design_stats::num_crossings,
+                DOC(fiction_physical_design_orthogonal_physical_design_stats_num_crossings));
+
+    m.def("orthogonal", &fiction::physical_design::orthogonal<py_cartesian_gate_layout, py_tec_network>,
+          py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_orthogonal));
+    m.def("orthogonal_hexagonal", &fiction::physical_design::orthogonal<py_hexagonal_gate_layout, py_tec_network>,
+          py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
+          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          DOC(fiction_physical_design_orthogonal));
+}
+
+}  // namespace pyfiction

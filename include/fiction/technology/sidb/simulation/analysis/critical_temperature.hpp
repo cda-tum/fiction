@@ -14,11 +14,11 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
 
-#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
@@ -35,8 +35,9 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/math_utils.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
@@ -62,7 +63,8 @@ namespace fiction::sidb::simulation::analysis
 struct critical_temperature_params
 {
     /**
-     * The parameters used to determine if a layout is `operational` or `non-operational`.
+     * Operational parameters. Their timeout bounds the entire temperature calculation, including every input pattern
+     * and temperature step. Finite budgets reject ClusterComplete and throw `utils::timeout_error` on expiration.
      */
     sidb::simulation::logic::is_operational_params operational_params{};
     /**
@@ -83,6 +85,13 @@ struct critical_temperature_params
      * Alpha parameter for the *QuickSim* algorithm (only applicable if engine == QUICKSIM).
      */
     double alpha{0.7};
+    /**
+     * Callback that receives the number of simulated input patterns (gate-based) or the progress of the physical
+     * simulation (non-gate-based).
+     */
+    utils::progress_callback on_progress{};
+    /** @brief Reports logical worker activity with a fixed worker count for each invocation. */
+    utils::worker_progress_callback on_worker_progress{};
 };
 
 /**
@@ -151,7 +160,7 @@ class critical_temperature_impl
     critical_temperature_impl(layout source_layout, const critical_temperature_params& ps,
                               critical_temperature_stats& st) :
             sidb_layout{std::move(source_layout)},
-            params{ps},
+            params{logic::detail::checked_parameters(ps)},
             stats{st},
             bii(logic::bdl_input_iterator{sidb_layout, params.operational_params.input_bdl_iterator_params}),
             critical_temperature{ps.max_temperature}
@@ -182,7 +191,7 @@ class critical_temperature_impl
                               const std::vector<logic::bdl_wire>& output_wires) :
             // a shallow copy, so that the `is_empty()`, `num_pos()` and `num_dots()` guards keep working
             sidb_layout{input_pattern_lyts.front()},
-            params{ps},
+            params{logic::detail::checked_parameters(ps)},
             stats{st},
             // the input pattern layouts make the iterator redundant; this is the same no-op instantiation that
             // `is_operational_impl` uses on its pre-generated-layouts path
@@ -204,6 +213,7 @@ class critical_temperature_impl
      */
     void gate_based_simulation(const std::vector<kitty::dynamic_truth_table>& spec)
     {
+        utils::check_deadline(params.operational_params.deadline);
         const mockturtle::stopwatch stop{stats.time_total};
         if (sidb_layout.is_empty())
         {
@@ -248,9 +258,12 @@ class critical_temperature_impl
             const auto& output_bdl_wires =
                 pre_detected_output_bdl_wires != nullptr ? *pre_detected_output_bdl_wires : detected_output_bdl_wires;
 
+            utils::progress_reporter progress{params.on_progress, "input patterns", spec.front().num_bits()};
+
             // number of different input combinations
             for (auto i = 0u; i < spec.front().num_bits(); ++i)
             {
+                utils::check_deadline(params.operational_params.deadline);
                 const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
@@ -303,6 +316,8 @@ class critical_temperature_impl
                     critical_temperature = 0.0;  // If no ground state fulfills the logic, the Critical
                                                  // Temperature is zero. May be worth it to change µ_.
                 }
+
+                progress.advance();
             }
         }
     }
@@ -312,6 +327,7 @@ class critical_temperature_impl
      */
     void non_gate_based_simulation()
     {
+        utils::check_deadline(params.operational_params.deadline);
         const mockturtle::stopwatch stop{stats.time_total};
         result                      simulation_results{};
 
@@ -320,7 +336,9 @@ class critical_temperature_impl
             const sidb::simulation::engines::quickexact_params qe_params{
                 .sim_params = params.operational_params.sim_params,
                 .base_number_detection =
-                    sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
+                    sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF,
+                .deadline    = params.operational_params.deadline,
+                .on_progress = params.on_progress};
 
             // All physically valid charge configurations are determined for the given layout (`QuickExact`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
@@ -329,8 +347,10 @@ class critical_temperature_impl
 #if (FICTION_ALGLIB_ENABLED)
         else if (params.operational_params.sim_engine == engine::CLUSTERCOMPLETE)
         {
-            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params =
-                                                                                  params.operational_params.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{
+                .sim_params         = params.operational_params.sim_params,
+                .on_progress        = params.on_progress,
+                .on_worker_progress = params.on_worker_progress};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
@@ -342,7 +362,10 @@ class critical_temperature_impl
             const sidb::simulation::engines::quicksim_params qs_params{.sim_params =
                                                                            params.operational_params.sim_params,
                                                                        .iteration_steps = params.iteration_steps,
-                                                                       .alpha           = params.alpha};
+                                                                       .alpha           = params.alpha,
+                                                                       .deadline = params.operational_params.deadline,
+                                                                       .on_progress        = params.on_progress,
+                                                                       .on_worker_progress = params.on_worker_progress};
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
@@ -385,20 +408,11 @@ class critical_temperature_impl
                          (first_excited_state_energy - ground_state_energy) * 1000);
         }
 
-        std::vector<double> temp_values{};  // unit: K
-
-        // Calculate the number of iterations as an integer
         const auto num_iterations = static_cast<uint64_t>(std::round(params.max_temperature * 100));
-        // Reserve space for the vector
-        temp_values.reserve(num_iterations);
-        for (uint64_t i = 1; i <= num_iterations; i++)
+        for (uint64_t i = 1; i <= num_iterations; ++i)
         {
-            temp_values.emplace_back(static_cast<double>(i) / 100.0);
-        }
-
-        // This function determines the critical temperature for a given confidence level.
-        for (const auto& temp : temp_values)
-        {
+            utils::check_deadline(params.operational_params.deadline);
+            const auto temp = static_cast<double>(i) / 100.0;
             // If the occupation probability of excited states exceeds the given threshold.
             if (occupation_probability_non_gate_based(distribution, temp) > (1 - params.confidence_level) &&
                 (temp < critical_temperature))
@@ -470,19 +484,13 @@ class critical_temperature_impl
      * @param energy_state_type All energies of all physically valid charge distributions with the corresponding
      * state type (i.e. transparent, erroneous).
      */
-    void determine_critical_temperature(const energy_and_state_type& energy_state_type) noexcept
+    void determine_critical_temperature(const energy_and_state_type& energy_state_type)
     {
-        // Vector with temperature values from 0.01 to max_temperature * 100 K in 0.01 K steps is generated.
-        std::vector<double> temp_values{};
-        temp_values.reserve(static_cast<uint64_t>(params.max_temperature * 100));
-
-        for (uint64_t i = 1; i <= static_cast<uint64_t>(params.max_temperature * 100); i++)
+        const auto num_iterations = static_cast<uint64_t>(params.max_temperature * 100);
+        for (uint64_t i = 1; i <= num_iterations; ++i)
         {
-            temp_values.emplace_back(static_cast<double>(i) / 100.0);
-        }
-        // This function determines the Critical Temperature for a given confidence level.
-        for (const auto& temp : temp_values)
-        {
+            utils::check_deadline(params.operational_params.deadline);
+            const auto temp = static_cast<double>(i) / 100.0;
             // If the occupation probability of erroneous states exceeds the given threshold...
             if (occupation_probability_gate_based(energy_state_type, temp) > (1 - params.confidence_level) &&
                 (temp < critical_temperature))
@@ -506,7 +514,7 @@ class critical_temperature_impl
     /**
      * Parameters for the critical_temperature algorithm.
      */
-    const critical_temperature_params& params;
+    const critical_temperature_params params;
     /**
      * Statistics.
      */
@@ -571,8 +579,8 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == engine::EXGS)
         {
             // perform exhaustive ground state simulation
-            return sidb::simulation::engines::exhaustive_ground_state_simulation(lyt_with_input_pattern,
-                                                                                 params.operational_params.sim_params);
+            return sidb::simulation::engines::exhaustive_ground_state_simulation(
+                lyt_with_input_pattern, params.operational_params.sim_params, {}, params.operational_params.deadline);
         }
         if (params.operational_params.sim_engine == engine::QUICKEXACT)
         {
@@ -580,15 +588,17 @@ class critical_temperature_impl
             const sidb::simulation::engines::quickexact_params qe_params{
                 .sim_params = params.operational_params.sim_params,
                 .base_number_detection =
-                    fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
+                    fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF,
+                .deadline = params.operational_params.deadline};
             return sidb::simulation::engines::quickexact(lyt_with_input_pattern, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
         if (params.operational_params.sim_engine == engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params =
-                                                                                  params.operational_params.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{
+                .sim_params         = params.operational_params.sim_params,
+                .on_worker_progress = params.on_worker_progress};
             return sidb::simulation::engines::clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
@@ -599,7 +609,9 @@ class critical_temperature_impl
             const sidb::simulation::engines::quicksim_params qs_params{.sim_params =
                                                                            params.operational_params.sim_params,
                                                                        .iteration_steps = params.iteration_steps,
-                                                                       .alpha           = params.alpha};
+                                                                       .alpha           = params.alpha,
+                                                                       .deadline = params.operational_params.deadline,
+                                                                       .on_worker_progress = params.on_worker_progress};
 
             if (const auto result = sidb::simulation::engines::quicksim(lyt_with_input_pattern, qs_params))
             {
@@ -648,12 +660,14 @@ inline double critical_temperature_gate_based(const layout& lyt, const std::vect
 
     p.gate_based_simulation(spec);
 
+    const auto result = p.get_critical_temperature();
+
     if (pst != nullptr)
     {
         *pst = st;
     }
 
-    return p.get_critical_temperature();
+    return result;
 }
 /**
  * *Gate-based Critical Temperature* simulation of an SiDB layout from its pre-generated input pattern layouts.
@@ -719,12 +733,14 @@ inline double critical_temperature_gate_based(const std::vector<layout>&        
 
     p.gate_based_simulation(spec);
 
+    const auto result = p.get_critical_temperature();
+
     if (pst != nullptr)
     {
         *pst = st;
     }
 
-    return p.get_critical_temperature();
+    return result;
 }
 /**
  * For *Non-gate-based Critical Temperature* simulation, the Critical Temperature is defined as follows: The temperature
@@ -746,12 +762,14 @@ inline double critical_temperature_non_gate_based(const layout& lyt, const criti
 
     p.non_gate_based_simulation();
 
+    const auto result = p.get_critical_temperature();
+
     if (pst != nullptr)
     {
         *pst = st;
     }
 
-    return p.get_critical_temperature();
+    return result;
 }
 
 }  // namespace fiction::sidb::simulation::analysis

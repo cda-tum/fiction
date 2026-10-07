@@ -17,7 +17,9 @@
 
 #pragma once
 
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/networks/technology_network.hpp"
@@ -25,6 +27,7 @@
 #include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -40,11 +43,8 @@
 #include <iostream>
 #include <optional>
 #include <ostream>
+#include <utility>
 #include <vector>
-
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
 
 namespace fiction::physical_design
 {
@@ -58,6 +58,15 @@ struct orthogonal_physical_design_params
      * Number of clock phases to use. 3 and 4 are supported.
      */
     layouts::clocking::num_clks number_of_clock_phases = layouts::clocking::num_clks::FOUR;
+    /**
+     * Arrangement of the shifted rows or columns of the created layout. Shifted Cartesian and hexagonal layouts require
+     * it, Cartesian layouts ignore it.
+     */
+    std::optional<layouts::arrangement> layout_arrangement = std::nullopt;
+    /**
+     * Callback that receives the progress of the gate placement.
+     */
+    utils::progress_callback on_progress{};
 };
 
 struct orthogonal_physical_design_stats
@@ -140,14 +149,8 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
     coloring_container<Ntk> ctn{ntk};
     mockturtle::topo_view   rtv{ntk};
 
-#if (PROGRESS_BARS)
-    // initialize a progress bar
-    mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.num_gates()),
-                                 "[i] determining relative positions: |{0}|"};
-#endif
-
     rtv.foreach_gate_reverse(
-        [&](const auto& n, [[maybe_unused]] const auto i)
+        [&](const auto& n)
         {
             const auto finc = networks::fanin_edges(ctn.color_ntk, n);
 
@@ -172,11 +175,6 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             {
                 ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_south);
             }
-
-#if (PROGRESS_BARS)
-            // update progress
-            bar(i);
-#endif
         });
 
     return ctn;
@@ -241,14 +239,9 @@ template <typename Lyt, typename Ntk>
 aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn,
                                         const uint32_t                 num_multi_output_nodes) noexcept
 {
-#if (PROGRESS_BARS)
-    // initialize a progress bar
-    mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.size()), "[i] determining layout size: |{0}|"};
-#endif
-
-    uint64_t x = 0ull, y = ctn.color_ntk.num_pis() - 1;
+    uint64_t x = 0ull, y = ctn.color_ntk.num_pis() == 0 ? 0 : ctn.color_ntk.num_pis() - 1;
     ctn.color_ntk.foreach_node(
-        [&](const auto& n, [[maybe_unused]] const auto i)
+        [&](const auto& n)
         {
             if (!ctn.color_ntk.is_constant(n))
             {
@@ -289,11 +282,6 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn,
                     }
                 }
             }
-
-#if (PROGRESS_BARS)
-            // update progress
-            bar(i);
-#endif
         });
 
     // for multi-output nodes, add another row
@@ -464,12 +452,16 @@ class orthogonal_impl
      * @param st The statistics object to record execution details.
      */
     orthogonal_impl(const mockturtle::names_view<networks::technology_network>& src,
-                    const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
+                    orthogonal_physical_design_params p, orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{src}},
-            ps{p},
+            ps{std::move(p)},
             pst{st}
     {}
-
+    /**
+     * Places and routes the source network with the orthogonal algorithm.
+     *
+     * @return A gate-level layout that implements the source network.
+     */
     Lyt run()
     {
         // measure run time
@@ -497,8 +489,9 @@ class orthogonal_impl
             });
 
         // instantiate the layout
-        Lyt layout{determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
-                   layouts::clocking::twoddwave<Lyt>(ps.number_of_clock_phases)};
+        auto layout = layouts::make_gate_level_layout<Lyt>(ps.layout_arrangement,
+                                                           determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
+                                                           layouts::clocking::twoddwave(ps.number_of_clock_phases));
 
         // reserve PI nodes without positions
         auto pi2node = reserve_input_nodes(layout, ctn.color_ntk);
@@ -506,14 +499,10 @@ class orthogonal_impl
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
 
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        // NOLINTNEXTLINE(misc-const-correctness): bar(i) is called via a non-const operator() in the lambda below
-        mockturtle::progress_bar bar{ctn.color_ntk.size(), "[i] arranging layout: |{0}|"};
-#endif
+        utils::progress_reporter progress{ps.on_progress, "placing gates", ctn.color_ntk.size()};
 
         ctn.color_ntk.foreach_node(
-            [&](const auto& n, [[maybe_unused]] const auto i)
+            [&](const auto& n)
             {
                 // do not place constants
                 if (!ctn.color_ntk.is_constant(n))
@@ -643,10 +632,7 @@ class orthogonal_impl
                     }
                 }
 
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
+                progress.advance();
             });
 
         // place outputs after the main algorithm to handle possible multi-output or unordered nodes
@@ -656,8 +642,8 @@ class orthogonal_impl
         networks::restore_names(ctn.color_ntk, layout, node2pos);
 
         // statistical information
-        pst.x_size        = layout.x() + 1;
-        pst.y_size        = layout.y() + 1;
+        pst.x_size        = static_cast<uint64_t>(layout.x()) + 1;
+        pst.y_size        = static_cast<uint64_t>(layout.y()) + 1;
         pst.num_gates     = layout.num_gates();
         pst.num_wires     = layout.num_wires();
         pst.num_crossings = layout.num_crossings();
@@ -708,6 +694,8 @@ class orthogonal_impl
  * @param ps Parameters.
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
+ * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `ps.layout_arrangement` is
+ * empty.
  */
 template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
@@ -717,6 +705,8 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
+
+    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, 2))

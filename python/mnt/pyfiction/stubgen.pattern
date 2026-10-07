@@ -1,0 +1,23 @@
+^mnt\.pyfiction\.utils\.__compiled_date__$:
+    __compiled_date__: str
+
+^mnt\.pyfiction\.utils\.__compiled_time__$:
+    __compiled_time__: str
+
+^mnt\.pyfiction\.utils\.__suffix__$:
+    __version__: str
+
+# A property that shares its class's name shadows the class inside the class body, so the
+# annotations name the class by its qualified name
+^mnt\.pyfiction\.physical_design\.path_finding\.yen_k_shortest_paths_params\.a_star_params$:
+    @property
+    def a_star_params(self) -> mnt.pyfiction.physical_design.path_finding.a_star_params:
+        """Parameters for the internal A* algorithm."""
+
+    @a_star_params.setter
+    def a_star_params(self, arg: mnt.pyfiction.physical_design.path_finding.a_star_params, /) -> None: ...
+
+^mnt\.pyfiction\.synthesis\.technology_mapping_stats\.mapper_stats$:
+    @property
+    def mapper_stats(self) -> mnt.pyfiction.synthesis.mapper_stats:
+        """Statistics for mockturtle's mapper."""

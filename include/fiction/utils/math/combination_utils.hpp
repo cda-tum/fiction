@@ -13,13 +13,18 @@
  * @brief Enumerates all ways of distributing k entities over n positions.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
 
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
+#include <algorithm>
+#include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <stdexcept>
 #include <vector>
@@ -36,13 +41,18 @@ namespace fiction::utils::math
  *
  * @param k The number of entities to distribute.
  * @param n The number of positions available for distribution.
+ * @param deadline Shared execution deadline; unlimited by default.
  * @return A vector of vectors representing all possible combinations of
  *         distributing k entities on n positions.
  * @throws std::length_error if the number of combinations exceeds the vector's capacity.
+ * @throws timeout_error if the deadline is reached during enumeration.
  */
 [[nodiscard]] inline std::vector<std::vector<std::size_t>>
-determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::size_t k, const std::size_t n)
+determine_all_combinations_of_distributing_k_entities_on_n_positions(
+    const std::size_t k, const std::size_t n,
+    const std::chrono::steady_clock::time_point deadline = std::chrono::steady_clock::time_point::max())
 {
+    check_deadline(deadline);
     // Handle a special case
     if (k > n)
     {
@@ -61,15 +71,22 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
     {
         throw std::length_error{"number of combinations exceeds vector capacity"};
     }
-    all_combinations.reserve(static_cast<std::size_t>(number_of_combinations));
+    // Reserve small searches fully without allocating a combinatorial search space before cancellation.
+    all_combinations.reserve(static_cast<std::size_t>(deadline == std::chrono::steady_clock::time_point::max() ?
+                                                          number_of_combinations :
+                                                          std::min<uint64_t>(number_of_combinations, 1024)));
 
     std::vector<std::size_t> numbers(n);
     std::iota(numbers.begin(), numbers.end(), 0);
 
     combinations::for_each_combination(
         numbers.begin(), numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(k), numbers.end(),
-        [&k, &all_combinations](const auto begin, const auto end)
+        [&k, &all_combinations, deadline](const auto begin, const auto end)
         {
+            if ((all_combinations.size() & 1023u) == 0)
+            {
+                check_deadline(deadline);
+            }
             std::vector<std::size_t> combination{};
             combination.reserve(k);
 

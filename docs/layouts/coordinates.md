@@ -1,12 +1,18 @@
-# Coordinate Systems
+# Coordinates
 
-**Header:** `fiction/layouts/coordinates.hpp`
+**Header:** `fiction/layouts/layout_base.hpp`
 
-Coordinate types identify positions in a coordinate system, e.g., a Cartesian or hexagonal grid. This file provides implementations for various types of coordinates.
+Every layout (Cartesian, shifted Cartesian, and hexagonal) derives from `layout_base`, which defines the one coordinate
+type that all of them share. A coordinate is an offset from a fixed point (origin) with three signed 32-bit axes. The
+default-constructed coordinate is invalid, and so is every coordinate whose x axis is `-2147483648`. Layouts
+return an invalid coordinate for neighbors that lie outside of them, and gate-level layouts return it for the tile of a
+node that is not placed.
+Each layout exposes the type as `coordinate`, gate-level layouts in C++ also as `tile`, and its aspect ratio as
+`aspect_ratio`. An aspect ratio is the highest coordinate that still belongs to a layout, not a size.
 
-## Offset coordinates
-
-An offset coordinate is a coordinate that defines a location via an offset from a fixed point (origin). Cartesian coordinates are offset coordinates.
+Gate-level layouts identify tiles by a 64-bit signal. It holds x and y as 31-bit signed values and z as one bit, so the
+x and y extents of gate-level layouts are limited to $2^{30} - 1$ and z to 1. Every other layout limits each extent to
+$2^{30} - 1$, so that coordinate arithmetic stays within 32 bits.
 
 ::::{tab-set}
 :sync-group: language
@@ -14,7 +20,11 @@ An offset coordinate is a coordinate that defines a location via an offset from 
 :::{tab-item} C++
 :sync: cpp
 
-```{doxygenstruct} fiction::layouts::coords::offset
+```{doxygenclass} fiction::layouts::layout_base
+
+```
+
+```{doxygenstruct} fiction::layouts::layout_base::coordinate
 
 ```
 
@@ -24,35 +34,8 @@ An offset coordinate is a coordinate that defines a location via an offset from 
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.offset_coordinate
-```
-
-:::
-
-::::
-
-## Cube coordinates
-
-Cube coordinates are used as a way to identify faces in a hexagonal grid. A wonderful resource on the topic is: <https://www.redblobgames.com/grids/hexagons/#coordinates-cube>
-At the same time, they can be used to address 3-dimensional grids.
-
-::::{tab-set}
-:sync-group: language
-
-:::{tab-item} C++
-:sync: cpp
-
-```{doxygenstruct} fiction::layouts::coords::cube
-
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.cube_coordinate
+.. autoclass:: mnt.pyfiction.layouts.coordinate
+   :members:
 ```
 
 :::
@@ -63,7 +46,7 @@ At the same time, they can be used to address 3-dimensional grids.
 
 An iterator type that allows to enumerate coordinates in order within a boundary.
 
-```{doxygenclass} fiction::layouts::coords::coordinate_iterator
+```{doxygenclass} fiction::layouts::layout_base::coordinate_iterator
 
 ```
 
@@ -75,11 +58,11 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 :::{tab-item} C++
 :sync: cpp
 
-```{doxygenfunction} fiction::layouts::coords::area_of(const CoordinateType& coord) noexcept
+```{doxygenfunction} fiction::layouts::area_of(const CoordinateType& coord) noexcept
 
 ```
 
-```{doxygenfunction} fiction::layouts::coords::volume_of(const CoordinateType& coord) noexcept
+```{doxygenfunction} fiction::layouts::volume_of(const CoordinateType& coord) noexcept
 
 ```
 
@@ -89,13 +72,9 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.offset_area
+.. autofunction:: mnt.pyfiction.layouts.area
 
-.. autofunction:: mnt.pyfiction.cube_area
-
-.. autofunction:: mnt.pyfiction.offset_volume
-
-.. autofunction:: mnt.pyfiction.cube_volume
+.. autofunction:: mnt.pyfiction.layouts.volume
 ```
 
 :::

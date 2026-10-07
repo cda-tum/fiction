@@ -135,7 +135,7 @@ code comments, and error messages.
 - Prefer everyday English to a jargon term where it costs no precision. Where it does cost
   precision, keep the precise term.
 - Preserve the capitalization of project names: _fiction_, `pyfiction`, `nanobind`,
-  `mockturtle`, `kitty`, `alice`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
+  `mockturtle`, `kitty`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
 - Write for the final design, not for the history of how you got there. Never narrate
   review rounds, prompts, former names, or the order in which you did the work. Where a
   rejected alternative is worth recording because a reader would otherwise retry it, put
@@ -211,13 +211,12 @@ Each subtree below adds rules to this file and never contradicts it. Read the on
 matches what you touch. **If your tool does not load nested instruction files
 automatically, open the file yourself** — several do not.
 
-| Touching                  | Read                               | Why it matters                                                      |
-| ------------------------- | ---------------------------------- | ------------------------------------------------------------------- |
-| `bindings/mnt/pyfiction/` | `bindings/mnt/pyfiction/AGENTS.md` | nanobind wiring; five steps, no compiler reminder                   |
-| `test/`                   | `test/AGENTS.md`                   | test file base names must be globally unique                        |
-| `docs/`                   | `docs/AGENTS.md`                   | a page missing from a `toctree` builds silently and is unreachable  |
-| `cli/`                    | `cli/AGENTS.md`                    | the one subtree with manual source lists, in two places             |
-| `experiments/`            | `experiments/AGENTS.md`            | published-paper reproductions; the code may change, the results not |
+| Touching               | Read                    | Why it matters                                                      |
+| ---------------------- | ----------------------- | ------------------------------------------------------------------- |
+| `bindings/`, `python/` | `bindings/AGENTS.md`    | nanobind wiring; six steps, no compiler reminder                    |
+| `test/`                | `test/AGENTS.md`        | test file base names must be globally unique                        |
+| `docs/`                | `docs/AGENTS.md`        | a page missing from a `toctree` builds silently and is unreachable  |
+| `experiments/`         | `experiments/AGENTS.md` | published-paper reproductions; the code may change, the results not |
 
 Everything else: `include/fiction/` is the header-only C++20 library; `vendors/` holds
 third-party sources and is never modified; `benchmarks/` is input data. Build presets live
@@ -241,7 +240,8 @@ Use these commands to validate your work.
 - **Test (Quick)**: `pytest` (Use if only Python code changed to avoid C++ rebuilds)
 - **Test (Floors)**: `nox -s minimums` (Runs pytest on Python 3.10 against the lowest declared
   dependency versions)
-- **Lint**: `nox -s lint` (Runs prek hooks including ruff and mypy)
+- **Lint**: `nox -s lint` (Runs prek hooks including ruff and ty)
+- **C++ Lint**: `nox -s cpp_lint -- --all` (Runs the CI Clang-Tidy configuration on all eligible C++ files)
 
 ### General
 
@@ -302,7 +302,7 @@ imitate.
 ## Code Style
 
 `clang-format` and `clang-tidy` enforce C++ formatting and identifier naming; `ruff` and
-`mypy` cover Python. The rules below are the ones no tool checks.
+`ty` cover Python. The rules below are the ones no tool checks.
 
 ### C++
 
@@ -313,11 +313,10 @@ imitate.
   accordingly.
 - **Namespaces**: headers never carry a `using namespace` directive; they qualify. A `.cpp`
   under `test/` or `experiments/` opens the namespaces it draws symbols from, one directive
-  per namespace, general to specific, starting from `using namespace fiction;`. Two are never
-  opened, because their leaf names cannot stand alone: `fiction::layouts::coords` (`offset`,
-  `cube`) and `fiction::layouts::clocking` (`scheme`) -- a reference to either is
-  shortened only as far as `coords::offset` and `clocking::scheme`. `detail` namespaces are
-  never opened either. `cli/` and the `pyfiction` bindings qualify in full. See
+  per namespace, general to specific, starting from `using namespace fiction;`. One is never
+  opened, because its leaf name cannot stand alone: `fiction::layouts::clocking` (`scheme`) --
+  a reference to it is shortened only as far as `clocking::scheme`. `detail` namespaces are
+  never opened either. The `pyfiction` bindings qualify in full. See
   `test/AGENTS.md`.
 - **Documentation**:
   - Apply to **ALL** new and edited code.
@@ -387,8 +386,7 @@ enforces the following:
 
 - ✅ **Always**:
   - Run `prek run -a` before finishing a task.
-  - Write tests for new functionality (`test/` for C++, `bindings/mnt/pyfiction/test/` for
-    Python).
+  - Write tests for new functionality (`test/` for C++, `test/python/` for Python).
   - Update `docs/changelog.md`'s `Unreleased` section for any user-facing change; see
     `docs/AGENTS.md` for the entry style.
   - Satisfy every box in `.github/pull_request_template.md` before calling a PR done.
@@ -406,6 +404,6 @@ enforces the following:
   - Modify the contents of an existing `vendors/` source tree. Adding a new one is the
     ask-first case above; editing what is already there is not.
   - Edit generated files by hand, including
-    `bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp`.
+    `bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp`.
   - Commit secrets or large binary files.
   - Use `using namespace std;`.

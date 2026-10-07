@@ -16,13 +16,16 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #if (FICTION_Z3_SOLVER)
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/progress_recorder.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
@@ -44,13 +47,16 @@
 
 #include <chrono>
 #include <cstdint>
+#include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::inml;
+using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
@@ -315,9 +321,11 @@ void check_drvs(const Lyt& lyt)
 }
 
 template <typename Lyt, typename Ntk>
-Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
+Lyt generate_layout(const Ntk& ntk, exact_physical_design_params ps, const std::optional<arrangement> a = std::nullopt)
 {
     exact_physical_design_stats stats{};
+
+    ps.layout_arrangement = a;
 
     const auto layout = exact<Lyt>(ntk, ps, &stats);
 
@@ -344,10 +352,10 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
     return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 
-template <typename CellLyt, typename Lib, typename GateLyt>
+template <typename Lib, typename GateLyt>
 void check_apply_lib(const GateLyt& lyt)
 {
-    CHECK_NOTHROW(apply_gate_library<CellLyt, Lib>(lyt));
+    CHECK_NOTHROW(apply_gate_library<Lib>(lyt));
 }
 
 template <typename Ntk, typename Lyt>
@@ -369,21 +377,23 @@ void check_io_names(const Ntk& ntk, const Lyt& lyt)
     }
 }
 
-template <typename CellLyt, typename Lib, typename GateLyt, typename Ntk>
-void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params& ps)
+template <typename Lib, typename GateLyt, typename Ntk>
+void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params& ps,
+                             const std::optional<arrangement> a = std::nullopt)
 {
-    const auto layout = generate_layout<GateLyt>(ntk, ps);
+    const auto layout = generate_layout<GateLyt>(ntk, ps, a);
 
     check_eq(ntk, layout);
     check_tp(layout, 1);
-    check_apply_lib<CellLyt, Lib>(layout);
+    check_apply_lib<Lib>(layout);
     check_io_names(ntk, layout);
 }
 
 template <typename Lyt, typename Ntk>
-void check_without_gate_library(const Ntk& ntk, const exact_physical_design_params& ps)
+void check_without_gate_library(const Ntk& ntk, const exact_physical_design_params& ps,
+                                const std::optional<arrangement> a = std::nullopt)
 {
-    const auto layout = generate_layout<Lyt>(ntk, ps);
+    const auto layout = generate_layout<Lyt>(ntk, ps, a);
 
     check_eq(ntk, layout);
     check_tp(layout, 1);
@@ -420,47 +430,47 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
     SECTION("Open clocking")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration())));
     }
     SECTION("2DDWave clocking")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), twoddwave(crossings(configuration())));
     }
     SECTION("USE clocking")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), use(crossings(configuration())));
     }
     SECTION("RES clocking")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), res(crossings(configuration())));
     }
     SECTION("ESR clocking")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), esr(crossings(configuration())));
     }
     SECTION("CFE clocking")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), cfe(crossings(configuration())));
     }
     SECTION("SRS clocking")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), srs(crossings(configuration())));
     }
     SECTION("Border I/O")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::and_or_network<mockturtle::mig_network>(), twoddwave(crossings(border_io(configuration()))));
     }
     SECTION("Planar")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()));
     }
     SECTION("Straight inverters")
@@ -545,7 +555,7 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     }
     //    SECTION("Asynchronicity")
     //    {
-    //        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+    //        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
     //            blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
     //            twoddwave(crossings(border_io(async(2, configuration())))));
     //    }
@@ -555,19 +565,19 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         //                                                     twoddwave(border_io(sync_elems(configuration()))))
         //                      .num_se() > 0);
 
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
             use(border_io(sync_elems(configuration()))));
     }
     SECTION("Minimize wires")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
             res(crossings(minimize_wires(configuration()))));
     }
     SECTION("Minimize crossings")
     {
-        check_with_gate_library<qca_cell_clk_lyt, qca_one_library, cart_gate_clk_lyt>(
+        check_with_gate_library<qca_one_library, cart_gate_clk_lyt>(
             blueprints::one_to_five_path_difference_network<mockturtle::aig_network>(),
             res(crossings(minimize_crossings(configuration()))));
     }
@@ -577,13 +587,14 @@ TEST_CASE("Exact shifted Cartesian physical design", "[exact]")
 {
     SECTION("odd col")
     {
-        using shift_lyt = cart_odd_col_gate_clk_lyt;
+        using shift_lyt    = shifted_cart_gate_clk_lyt;
+        constexpr auto arr = arrangement::ODD_COLUMN;
 
         SECTION("Technology constraints: ToPoliNano")
         {
-            check_with_gate_library<inml_cell_clk_lyt, topolinano_library, shift_lyt>(
+            check_with_gate_library<topolinano_library, shift_lyt>(
                 blueprints::topolinano_network<mockturtle::mig_network>(),
-                columnar(crossings(border_io(topolinano(configuration())))));
+                columnar(crossings(border_io(topolinano(configuration())))), arr);
         }
     }
 }
@@ -592,154 +603,154 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
 {
     SECTION("odd row")
     {
-        using hex_lyt = hex_odd_row_gate_clk_lyt;
+        using hex_lyt      = hex_gate_clk_lyt;
+        constexpr auto arr = arrangement::ODD_ROW;
 
         SECTION("Open clocking")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration())));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              open(crossings(configuration())), arr);
         }
         SECTION("Row clocking")
         {
-            check_with_gate_library<sidb_cell_clk_lyt, bestagon_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), row(crossings(border_io(configuration()))));
+            check_with_gate_library<bestagon_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                               row(crossings(border_io(configuration()))), arr);
 
-            check_with_gate_library<sidb_cell_clk_lyt, bestagon_library, hex_lyt>(
-                blueprints::nand_xnor_network<technology_network>(), row(crossings(border_io(configuration()))));
+            check_with_gate_library<bestagon_library, hex_lyt>(blueprints::nand_xnor_network<technology_network>(),
+                                                               row(crossings(border_io(configuration()))), arr);
         }
         SECTION("2DDWave clocking")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), twoddwave(crossings(configuration())));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              twoddwave(crossings(configuration())), arr);
         }
         SECTION("Border I/O")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(),
-                twoddwave(crossings(border_io(configuration()))));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              twoddwave(crossings(border_io(configuration()))), arr);
         }
         SECTION("Planar")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()));
+            check_with_gate_library<qca_one_library, hex_lyt>(
+                blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()), arr);
         }
         SECTION("Straight inverters")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  use(straight_inverter(configuration())))));
+                                                                  use(straight_inverter(configuration())), arr)));
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  open(straight_inverter(configuration())))));
+                                                                  open(straight_inverter(configuration())), arr)));
         }
     }
     SECTION("even row")
     {
-        using hex_lyt = hex_even_row_gate_clk_lyt;
+        using hex_lyt      = hex_gate_clk_lyt;
+        constexpr auto arr = arrangement::EVEN_ROW;
 
         SECTION("Open clocking")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration())));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              open(crossings(configuration())), arr);
         }
         SECTION("Row clocking")
         {
-            check_with_gate_library<sidb_cell_clk_lyt, bestagon_library, hex_lyt>(
+            check_with_gate_library<bestagon_library, hex_lyt>(
                 blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(),
-                row(crossings(border_io(configuration()))));
+                row(crossings(border_io(configuration()))), arr);
         }
         SECTION("2DDWave clocking")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), twoddwave(crossings(configuration())));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              twoddwave(crossings(configuration())), arr);
         }
         SECTION("Border I/O")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(),
-                twoddwave(crossings(border_io(configuration()))));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              twoddwave(crossings(border_io(configuration()))), arr);
         }
         SECTION("Planar")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()));
+            check_with_gate_library<qca_one_library, hex_lyt>(
+                blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()), arr);
         }
         SECTION("Straight inverters")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  use(straight_inverter(configuration())))));
+                                                                  use(straight_inverter(configuration())), arr)));
         }
     }
     SECTION("odd column")
     {
-        using hex_lyt = hex_odd_col_gate_clk_lyt;
+        using hex_lyt      = hex_gate_clk_lyt;
+        constexpr auto arr = arrangement::ODD_COLUMN;
 
         SECTION("Open clocking")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration())));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              open(crossings(configuration())), arr);
         }
         SECTION("Columnar clocking")
         {
             check_without_gate_library<hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
-                                                columnar(crossings(border_io(configuration()))));
+                                                columnar(crossings(border_io(configuration()))), arr);
         }
         SECTION("2DDWave clocking")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), twoddwave(crossings(configuration())));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              twoddwave(crossings(configuration())), arr);
         }
         SECTION("Border I/O")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(),
-                twoddwave(crossings(border_io(configuration()))));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              twoddwave(crossings(border_io(configuration()))), arr);
         }
         SECTION("Planar")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()));
+            check_with_gate_library<qca_one_library, hex_lyt>(
+                blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()), arr);
         }
         SECTION("Straight inverters")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  use(straight_inverter(configuration())))));
+                                                                  use(straight_inverter(configuration())), arr)));
         }
     }
     SECTION("even column")
     {
-        using hex_lyt = hex_even_col_gate_clk_lyt;
+        using hex_lyt      = hex_gate_clk_lyt;
+        constexpr auto arr = arrangement::EVEN_COLUMN;
 
         SECTION("Open clocking")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), open(crossings(configuration())));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              open(crossings(configuration())), arr);
         }
         SECTION("Columnar clocking")
         {
             check_without_gate_library<hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
-                                                columnar(crossings(border_io(configuration()))));
+                                                columnar(crossings(border_io(configuration()))), arr);
         }
         SECTION("2DDWave clocking")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(), twoddwave(crossings(configuration())));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              twoddwave(crossings(configuration())), arr);
         }
         SECTION("Border I/O")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::and_or_network<mockturtle::mig_network>(),
-                twoddwave(crossings(border_io(configuration()))));
+            check_with_gate_library<qca_one_library, hex_lyt>(blueprints::and_or_network<mockturtle::mig_network>(),
+                                                              twoddwave(crossings(border_io(configuration()))), arr);
         }
         SECTION("Planar")
         {
-            check_with_gate_library<qca_cell_clk_lyt, qca_one_library, hex_lyt>(
-                blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()));
+            check_with_gate_library<qca_one_library, hex_lyt>(
+                blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), twoddwave(configuration()), arr);
         }
         SECTION("Straight inverters")
         {
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  use(straight_inverter(configuration())))));
+                                                                  use(straight_inverter(configuration())), arr)));
             CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  open(straight_inverter(configuration())))));
+                                                                  open(straight_inverter(configuration())), arr)));
         }
     }
 }
@@ -794,12 +805,12 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 TEST_CASE("Exact physical design timeout", "[exact]")
 {
     auto timeout_config    = use(crossings(configuration()));
-    timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
+    timeout_config.timeout = 1u;  // allow one millisecond to find a solution
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
     const auto layout     = exact<cart_gate_clk_lyt>(half_adder, timeout_config);
 
-    // since a half adder cannot be synthesized in just one second, layout should not have a value
+    // The one-millisecond budget is insufficient for placing and routing the half adder.
     CHECK(!layout.has_value());
 }
 
@@ -808,7 +819,16 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
 
-    const auto layout = exact<cart_gate_clk_lyt>(maj, res(configuration()));
+    auto params = res(configuration());
+    SECTION("single-threaded")
+    {
+        params.num_threads = 1;
+    }
+    SECTION("multi-threaded")
+    {
+        params.num_threads = 2;
+    }
+    const auto layout = exact<cart_gate_clk_lyt>(maj, params);
 
     REQUIRE(layout.has_value());
 
@@ -825,6 +845,51 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
         // PO names
         CHECK(layout->get_output_name(0) == "f");
     }
+}
+
+TEST_CASE("Exact physical design reports progress", "[exact]")
+{
+    const auto ntk = blueprints::and_or_network<technology_network>();
+
+    auto params = twoddwave(configuration());
+
+    SECTION("single-threaded")
+    {
+        params.num_threads = 1;
+    }
+    SECTION("multi-threaded")
+    {
+        params.num_threads = 2;
+    }
+
+    // Repeated starts cover workers finding a layout while another worker initializes its context.
+    for (unsigned trial = 0; trial < (params.num_threads > 1 ? 8u : 1u); ++trial)
+    {
+        CAPTURE(trial);
+        progress_recorder rec{};
+        params.on_progress = rec.callback();
+
+        exact_physical_design_stats stats{};
+
+        const auto layout = exact<cart_gate_clk_lyt>(ntk, params, &stats);
+
+        REQUIRE(layout.has_value());
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
+        check_eq(ntk, *layout);
+
+        // the number of aspect ratios is unknown in advance
+        CHECK(rec.is_consistent("aspect ratios"));
+        CHECK(rec.final_count("aspect ratios") == stats.num_aspect_ratios);
+    }
+}
+
+TEST_CASE("Exact physical design requires an arrangement for shifted Cartesian and hexagonal layouts", "[exact]")
+{
+    const auto ntk = blueprints::and_or_network<mockturtle::mig_network>();
+
+    CHECK_THROWS_AS(exact<shifted_cart_gate_clk_lyt>(ntk), std::invalid_argument);
+    CHECK_THROWS_AS(exact<hex_gate_clk_lyt>(ntk), std::invalid_argument);
+    CHECK_THROWS_AS(exact_with_blacklist<hex_gate_clk_lyt>(ntk, {}), std::invalid_argument);
 }
 
 #else  // FICTION_Z3_SOLVER

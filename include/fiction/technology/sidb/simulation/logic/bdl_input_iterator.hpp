@@ -21,13 +21,13 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction::sidb::simulation::logic
@@ -86,6 +86,7 @@ class bdl_input_iterator
      *
      * @param source_layout The layout to iterate over.
      * @param ps Parameters for the BDL pair and wire detection and the input encoding.
+     * @throws std::invalid_argument if the layout has more than 63 input BDL pairs.
      */
     explicit bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps = {}) :
             bdl_input_iterator{source_layout, ps,
@@ -97,6 +98,7 @@ class bdl_input_iterator
      * @param source_layout The layout to iterate over.
      * @param ps Parameters for the BDL pair detection and the input encoding.
      * @param source_input_wires The input wires of `source_layout`.
+     * @throws std::invalid_argument if the layout has more than 63 input BDL pairs.
      */
     bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps,
                        const std::vector<bdl_wire>& source_input_wires) :
@@ -107,6 +109,11 @@ class bdl_input_iterator
             upper_input_closer_to_wire_end{determine_upper_input_closer_to_wire_end()},
             params{ps}
     {
+        // an input pattern is a 64-bit index, and enumerating all patterns shifts `1` by the number of pairs
+        if (input_pairs.size() >= std::numeric_limits<uint64_t>::digits)
+        {
+            throw std::invalid_argument("At most 63 input BDL pairs are supported");
+        }
         set_all_inputs();
     }
     /**
@@ -455,6 +462,7 @@ class bdl_input_iterator
  * @param ps Parameters for the BDL pair detection and the input encoding.
  * @param input_wires The input wires of `lyt`.
  * @return One layout per input pattern.
+ * @throws std::invalid_argument if the layout has more than 63 input BDL pairs.
  */
 [[nodiscard]] inline std::vector<layout> generate_bdl_input_pattern_layouts(const layout&                    lyt,
                                                                             const bdl_input_iterator_params& ps,
@@ -466,8 +474,6 @@ class bdl_input_iterator
     {
         return {};
     }
-
-    assert(bii.num_input_pairs() < 64 && "too many input BDL pairs to enumerate");
 
     const auto num_input_patterns = uint64_t{1} << bii.num_input_pairs();
 
@@ -488,6 +494,7 @@ class bdl_input_iterator
  * @param lyt The layout.
  * @param ps Parameters for the BDL detection and the input encoding.
  * @return One layout per input pattern.
+ * @throws std::invalid_argument if the layout has more than 63 input BDL pairs.
  */
 [[nodiscard]] inline std::vector<layout> generate_bdl_input_pattern_layouts(const layout&                    lyt,
                                                                             const bdl_input_iterator_params& ps = {})

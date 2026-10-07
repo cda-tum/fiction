@@ -1,0 +1,67 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Python bindings for `fiction/technology/fcn/io/write_qll_layout.hpp`.
+ * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
+ */
+
+#include "pyfiction/documentation.hpp"
+
+#include <fiction/technology/fcn/io/write_qll_layout.hpp>
+#include <fiction/technology/inml/layout.hpp>
+#include <fiction/technology/mol_qca/layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
+#include <fiction/utils/progress.hpp>
+
+#include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner): enables callback conversion
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+
+namespace pyfiction
+{
+
+namespace detail
+{
+
+template <typename Lyt>
+void write_qll_layout(nanobind::module_& m)
+{
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+
+    // NOLINTNEXTLINE(misc-const-correctness)
+    void (*const write_qll_layout_function_pointer)(const Lyt&, const std::string_view&,
+                                                    fiction::utils::progress_callback) =
+        &fiction::fcn::io::write_qll_layout<Lyt>;
+
+    m.def("write_qll_layout", write_qll_layout_function_pointer, py::arg("layout"), py::arg("filename"),
+          py::arg("on_progress").none() = py::none(), DOC(fiction_fcn_io_write_qll_layout),
+          py::call_guard<py::gil_scoped_release>());
+}
+
+}  // namespace detail
+
+void write_qll_layout(nanobind::module_& m)
+{
+    detail::write_qll_layout<fiction::qca::layout>(m);
+    detail::write_qll_layout<fiction::inml::layout>(m);
+    detail::write_qll_layout<fiction::mol_qca::layout>(m);
+}
+
+}  // namespace pyfiction

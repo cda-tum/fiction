@@ -23,11 +23,12 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -37,7 +38,6 @@
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
@@ -164,11 +164,11 @@ TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", 
 
 TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]")
 {
-    gate_level_layout<hex_even_row_gate_clk_lyt> gate_lyt{{2, 2}};
+    hex_gate_clk_lyt gate_lyt{arrangement::EVEN_ROW, {2, 2}};
     gate_lyt.create_nand({}, {}, {0, 0});
     gate_lyt.create_nand({}, {}, {2, 2});
 
-    const auto cell_lyt = to_sidb_layout(apply_gate_library<sidb_cell_clk_lyt, bestagon_library>(gate_lyt));
+    const auto cell_lyt = (apply_gate_library<bestagon_library>(gate_lyt));
 
     clustercomplete_params params{.sim_params = simulation_parameters{2}};
 
@@ -1817,6 +1817,40 @@ TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomp
 
         CHECK(ground_state.front().get_charge_state({23, 29, 1}) == charge_state::NEGATIVE);
     }
+}
+
+TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
+{
+    layout lyt{};
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
+
+    progress_recorder rec{};
+
+    clustercomplete_params params{.sim_params = simulation_parameters{2}};
+    params.on_progress = rec.callback();
+
+    SECTION("single-threaded")
+    {
+        params.available_threads = 1;
+    }
+    SECTION("multi-threaded")
+    {
+        params.available_threads = 2;
+    }
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.size() == 1);
+
+    // the number of compositions is unknown in advance
+    CHECK(rec.is_consistent("compositions"));
+    CHECK(rec.final_count("compositions") > 0);
+    const auto reports = rec.reports_of("compositions");
+    REQUIRE(!reports.empty());
+    CHECK(reports.back().total == 0);
 }
 
 #else  // FICTION_ALGLIB_ENABLED

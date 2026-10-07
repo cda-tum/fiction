@@ -14,21 +14,22 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
 
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/technology/sidb/technology.hpp"
+#include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -162,8 +163,7 @@ struct on_the_fly_gate_library_params
  * defects, thus enabling the design of SiDB circuits in the presence of atomic defects. The skeleton (i.e., the
  * pre-defined input and output wires) are hexagonal in shape.
  */
-class on_the_fly_gate_library
-        : public fcn::gate_library<sidb::sidb_technology, 60, 46>  // width and height of a hexagon
+class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit on_the_fly_gate_library() = delete;
@@ -176,33 +176,39 @@ class on_the_fly_gate_library
      * @tparam Params Type of the parameter used for the gate library.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @param params Parameters for SiDB gate design.
+     * @param parameters Parameters for SiDB gate design. Each gate shares one budget across predefined-gate
+     * validation and any subsequent search, capped by the enclosing deadline.
      * @param defect_surface Optional atomic defect surface in case atomic defects are present.
      * @return Bestagon gate representation of `t` including mirroring.
+     * @throws std::invalid_argument if `lyt` shifts columns instead of rows.
      * @throws gate_design_exception if no gate can be designed.
      * @throws fcn::unsupported_gate_orientation_exception if the gate orientation is unsupported.
      * @throws fcn::unsupported_gate_type_exception if the gate type is unsupported.
+     * @throws utils::timeout_error if the per-gate or enclosing deadline is reached.
      */
     template <typename GateLyt, typename Params>
-    static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& params,
+    static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& parameters,
                             const std::optional<layout>& defect_surface = std::nullopt)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
+        auto params               = parameters;
+        params.design_gate_params = simulation::logic::detail::checked_parameters(params.design_gate_params);
+
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);
-        const auto p = determine_port_routing(lyt, t);
+        const auto p = skeleton_bestagon_library::determine_port_routing(lyt, t);
 
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
         // middle is at 22.66666 (34*2/3). However, this is not an integer and does not specify a cell. Cell close to it
         // is chosen.
-        const auto center_cell = to_lattice_site(
-            layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, sidb_cell_clk_lyt_cube>(
-                lyt, t, cell<sidb_cell_clk_lyt_cube>{gate_x_size() / 2, gate_y_size() / 2}));
+        const auto center_cell =
+            to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size()>(
+                lyt, t, layouts::layout_base::coordinate{gate_x_size() / 2, gate_y_size() / 2}));
         // center cell of the current tile
-        const auto absolute_cell = to_lattice_site(
-            layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, sidb_cell_clk_lyt_cube>(
-                lyt, t, cell<sidb_cell_clk_lyt_cube>{0, 0}));
+        const auto absolute_cell =
+            to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size()>(
+                lyt, t, layouts::layout_base::coordinate{0, 0}));
 
         auto complex_gate_param                                      = params;
         complex_gate_param.design_gate_params.number_of_canvas_sidbs = params.canvas_sidb_complex_gates;
@@ -241,7 +247,7 @@ class on_the_fly_gate_library
                         if (const auto at = lyt.above(t); (t != at) && lyt.is_wire_tile(at))
                         {
                             // two possible options: actual crossover and (parallel) hourglass wire
-                            const auto pa = determine_port_routing(lyt, at);
+                            const auto pa = skeleton_bestagon_library::determine_port_routing(lyt, at);
 
                             const auto skeleton = cell_list_to_layout(TWO_IN_TWO_OUT);
 
@@ -606,69 +612,6 @@ class on_the_fly_gate_library
 
         return skeleton_with_defect;
     }
-    /**
-     * @brief Determines the port directions of a given tile.
-     *
-     * @tparam Lyt Pointy-top hexagonal gate-level layout type.
-     * @param lyt Layout that contains the tile.
-     * @param t Tile whose incoming and outgoing port directions are determined.
-     * @return Incoming and outgoing port directions of the tile.
-     */
-    template <typename Lyt>
-    [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
-    {
-        fcn::port_list<fcn::port_direction> p{};
-
-        // determine incoming connector ports
-        if (lyt.has_north_eastern_incoming_signal(t))
-        {
-            p.inp.emplace(fcn::port_direction::cardinal::NORTH_EAST);
-        }
-        if (lyt.has_north_western_incoming_signal(t))
-        {
-            p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
-        }
-
-        // determine outgoing connector ports
-        if (lyt.has_south_eastern_outgoing_signal(t))
-        {
-            p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
-        }
-        if (lyt.has_south_western_outgoing_signal(t))
-        {
-            p.out.emplace(fcn::port_direction::cardinal::SOUTH_WEST);
-        }
-
-        // gates without connector ports
-
-        // 1-input functions
-        if (const auto n = lyt.get_node(t); lyt.is_pi(n) || lyt.is_po(n) || lyt.is_buf(n) || lyt.is_inv(n))
-        {
-            if (lyt.has_no_incoming_signal(t))
-            {
-                p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
-            }
-            if (lyt.has_no_outgoing_signal(t))
-            {
-                p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
-            }
-        }
-        else  // 2-input functions
-        {
-            if (lyt.has_no_incoming_signal(t))
-            {
-                p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
-                p.inp.emplace(fcn::port_direction::cardinal::NORTH_EAST);
-            }
-            if (lyt.has_no_outgoing_signal(t))
-            {
-                p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
-            }
-        }
-
-        return p;
-    }
-
     // clang-format off
 
     static constexpr const gate CROSSING{cell_list_to_gate<char>({{

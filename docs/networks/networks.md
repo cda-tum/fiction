@@ -85,10 +85,10 @@ views/views
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.high_degree_fanin_exception
+.. autoclass:: mnt.pyfiction.networks.high_degree_fanin_exception
    :members:
 
-.. autofunction:: mnt.pyfiction.has_high_degree_fanin_nodes
+.. autofunction:: mnt.pyfiction.networks.has_high_degree_fanin_nodes
 ```
 
 :::
@@ -147,9 +147,9 @@ views/views
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.get_name
+.. autofunction:: mnt.pyfiction.networks.get_name
 
-.. autofunction:: mnt.pyfiction.set_name
+.. autofunction:: mnt.pyfiction.networks.set_name
 ```
 
 :::

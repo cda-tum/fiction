@@ -24,7 +24,6 @@
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>

@@ -15,11 +15,14 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Benjamin Hien (hibenj)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
@@ -31,11 +34,12 @@
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <chrono>
 #include <cstddef>
 #include <stdexcept>
 #include <thread>
@@ -76,6 +80,37 @@ TEST_CASE("Gate design propagates worker failures", "[design-sidb-gates]")
 TEST_CASE("Reject an empty gate specification", "[design-sidb-gates]")
 {
     CHECK_THROWS_AS(design_gates(layout{}, std::vector<tt>{}), std::invalid_argument);
+}
+
+TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
+{
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
+
+    design_gates_params params{};
+
+    SECTION("Zero expires immediately")
+    {
+        params.operational_params.timeout = 0;
+    }
+    SECTION("One positive budget covers setup and every candidate")
+    {
+        params.operational_params.timeout = 20;
+        params.canvas                     = {site_at_row(27, 12), site_at_row(28, 13)};
+        params.number_of_canvas_sidbs     = 1;
+        params.on_progress = [](auto, auto, auto) { std::this_thread::sleep_for(std::chrono::milliseconds{25}); };
+    }
+
+    for (const auto mode :
+         {design_gates_params::design_gates_mode::QUICKCELL,
+          design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+          design_gates_params::design_gates_mode::RANDOM, design_gates_params::design_gates_mode::PRUNING_ONLY})
+    {
+        CAPTURE(mode);
+        params.design_mode = mode;
+        const auto start   = std::chrono::steady_clock::now();
+        CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params), utils::timeout_error);
+        CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
+    }
 }
 
 TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",
@@ -776,4 +811,63 @@ TEST_CASE("Random gate design bounds work without enumerating canvas layouts", "
     params.maximal_random_design_attempts = 1;
     CHECK(design_gates(lyt, std::vector<tt>{create_and_tt()}, params, &stats).empty());
     CHECK(stats.number_of_layouts == 0);
+}
+
+TEST_CASE("Gate design reports progress", "[design-sidb-gates]")
+{
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
+
+    progress_recorder rec{};
+
+    design_gates_params params{
+        .operational_params =
+            is_operational_params{.sim_params                = simulation_parameters{2, -0.31},
+                                  .sim_engine                = engine::QUICKEXACT,
+                                  .input_bdl_iterator_params = bdl_input_iterator_params{},
+                                  .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
+        .canvas                 = {{27, 6, 0}, {30, 8, 0}},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+    params.on_progress = rec.callback();
+
+    SECTION("QuickCell")
+    {
+        params.design_mode = design_gates_params::design_gates_mode::QUICKCELL;
+
+        const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+
+        CHECK(found_gate_layouts.size() == 10);
+
+        // every canvas layout is pruned, and every survivor is simulated
+        CHECK(rec.is_consistent("pruning"));
+        CHECK(rec.final_count("pruning") == 1140);
+        CHECK(rec.is_consistent("candidates"));
+        CHECK(rec.final_count("candidates") == 11);
+    }
+
+    SECTION("Automatic Exhaustive Gate Designer")
+    {
+        params.design_mode = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+
+        const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+
+        CHECK(found_gate_layouts.size() == 10);
+
+        CHECK(rec.is_consistent("canvas layouts"));
+        CHECK(rec.final_count("canvas layouts") == 1140);
+    }
+
+    SECTION("Random")
+    {
+        params.design_mode      = design_gates_params::design_gates_mode::RANDOM;
+        params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
+
+        const auto found_gate_layouts = design_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+
+        CHECK(!found_gate_layouts.empty());
+
+        // the number of attempts is unknown in advance
+        CHECK(rec.is_consistent("attempts"));
+        CHECK(rec.final_count("attempts") > 0);
+    }
 }

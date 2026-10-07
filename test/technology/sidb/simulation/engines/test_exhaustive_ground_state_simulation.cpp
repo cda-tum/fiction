@@ -21,20 +21,46 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
-#include <fiction/technology/sidb/technology.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
+
+#include <chrono>
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::utils::math;
+
+TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exhaustive-ground-state-simulation]")
+{
+    layout lyt{};
+    auto   deadline = std::chrono::steady_clock::time_point::max();
+
+    SECTION("Already expired")
+    {
+        deadline = std::chrono::steady_clock::now();
+    }
+    SECTION("Expires while enumerating")
+    {
+        for (int32_t i = 0; i < 20; ++i)
+        {
+            lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
+        }
+        deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+    }
+
+    CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, {}, deadline),
+                    utils::timeout_error);
+}
 
 TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]")
 {
@@ -368,4 +394,24 @@ TEST_CASE("7 SiDB layout", "[exhaustive-ground-state-simulation]")
     const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 1);
+}
+
+TEST_CASE("ExGS reports progress", "[exhaustive-ground-state-simulation]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+
+    progress_recorder rec{};
+
+    const auto simulation_results =
+        exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, rec.callback());
+
+    CHECK(simulation_results.charge_distributions.size() == 1);
+
+    // three SiDBs in base 2 have eight charge configurations
+    CHECK(rec.is_consistent("charge configurations"));
+    CHECK(rec.final_count("charge configurations") == 8);
 }

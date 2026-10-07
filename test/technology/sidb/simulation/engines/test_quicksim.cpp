@@ -20,6 +20,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -27,9 +28,10 @@
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/technology.hpp>
+#include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <chrono>
 #include <optional>
 #include <stdexcept>
 
@@ -40,6 +42,26 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::utils::math;
+
+TEST_CASE("QuickSim joins its workers before reporting the caller deadline", "[quicksim]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    quicksim_params params{.iteration_steps = 1'000'000, .number_threads = 2, .timeout = 1000};
+
+    SECTION("Already expired")
+    {
+        params.deadline = std::chrono::steady_clock::now();
+    }
+    SECTION("Expires while workers search")
+    {
+        params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+    }
+
+    CHECK_THROWS_AS(quicksim(lyt, params), utils::timeout_error);
+}
 
 /**
  * @brief Returns the result contained in a successful QuickSim invocation.
@@ -1123,4 +1145,27 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 
         REQUIRE(!simulation_results_timeout_100.has_value());
     }
+}
+
+TEST_CASE("QuickSim reports progress", "[quicksim]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+
+    progress_recorder rec{};
+
+    quicksim_params qs_params{.sim_params      = simulation_parameters{2, -0.32},
+                              .iteration_steps = 10,
+                              .number_threads  = 2};
+    qs_params.on_progress = rec.callback();
+
+    const auto simulation_results = quicksim(lyt, qs_params);
+
+    REQUIRE(simulation_results.has_value());
+
+    // every thread runs its share of the iterations
+    CHECK(rec.is_consistent("iterations"));
+    CHECK(rec.final_count("iterations") == 10);
 }

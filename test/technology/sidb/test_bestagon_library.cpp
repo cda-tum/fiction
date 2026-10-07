@@ -17,18 +17,17 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb/bestagon_library.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>
+
+#include <type_traits>
 
 using namespace fiction;
 using namespace fiction::sidb;
 
 TEST_CASE("Bestagon traits", "[sidb-bestagon-gate-library]")
 {
-    CHECK(!has_post_layout_optimization_v<bestagon_library, qca_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<bestagon_library, inml_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<bestagon_library, sidb_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<bestagon_library, cart_gate_clk_lyt>);
+    CHECK(std::is_same_v<bestagon_library::layout, sidb::layout>);
     CHECK(has_get_functional_implementations_v<bestagon_library>);
     CHECK(has_get_gate_ports_v<bestagon_library>);
 }

@@ -20,6 +20,7 @@ import argparse
 import contextlib
 import os
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -39,6 +40,17 @@ if os.environ.get("CI", None):
 nox.options.sessions = ["lint", "tests"]
 
 PYTHON_ALL_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+CPP_LINT_IGNORED_PATHS = (
+    "build-*",
+    "build/*",
+    "libs/*",
+    "vendors/*",
+    "docs/*",
+    "benchmarks/*",
+    "bib/*",
+    "bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp",
+    "bindings/include/pyfiction/documentation.hpp",
+)
 
 
 @contextlib.contextmanager
@@ -76,6 +88,18 @@ def lint(session: nox.Session) -> None:
     session.run("prek", "run", "--all-files", *session.posargs, external=True)
 
 
+def _install_build_tools(session: nox.Session) -> None:
+    """Install CMake and Ninja when they are unavailable on ``PATH``.
+
+    Args:
+        session: Nox session that provides the isolated environment.
+    """
+    if shutil.which("cmake") is None:
+        session.install("cmake")
+    if shutil.which("ninja") is None:
+        session.install("ninja")
+
+
 def _run_tests(
     session: nox.Session,
     *,
@@ -84,10 +108,7 @@ def _run_tests(
     pytest_run_args: Sequence[str] = (),
 ) -> None:
     env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
-    if shutil.which("cmake") is None and shutil.which("cmake3") is None:
-        session.install("cmake")
-    if shutil.which("ninja") is None:
-        session.install("ninja")
+    _install_build_tools(session)
 
     # install build and test dependencies on top of the existing environment
     session.run(
@@ -165,6 +186,133 @@ def check_sdist(session: nox.Session) -> None:
 
 
 @nox.session(python="3.12", reuse_venv=True)
+def cpp_lint(session: nox.Session) -> None:
+    """Run the CI Clang-Tidy configuration on changed or all C++ files.
+
+    Args:
+        session: Nox session that supplies the lint scope and isolated environment.
+    """
+    parser = argparse.ArgumentParser(prog="nox -s cpp_lint --")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--all", action="store_true", dest="all_files", help="lint every eligible C++ file")
+    scope.add_argument("--diff-base", help="lint files changed from this Git revision")
+    args = parser.parse_args(session.posargs)
+
+    _install_build_tools(session)
+    session.install(
+        "clang-tools==1.2.0",
+        "cpp-linter==1.13.0",
+        "nanobind~=3.1.0",
+        "z3-solver==5.1.0",
+    )
+    session.run("clang-tools", "install", "clang-tidy", "--version", "21")
+    installed_z3_output = session.run(
+        "python",
+        "-c",
+        "import pathlib, z3; print(pathlib.Path(z3.__file__).parent)",
+        silent=True,
+    )
+    if not installed_z3_output:
+        session.error("Could not locate the installed Z3 package")
+    installed_z3_root = Path(installed_z3_output.strip())
+
+    with tempfile.TemporaryDirectory(prefix="fiction-z3-") as temp_dir_name:
+        z3_root = Path(temp_dir_name, "z3")
+        shutil.copytree(installed_z3_root, z3_root)
+        z3_library_name = "libz3.dll" if os.name == "nt" else "libz3.dylib" if sys.platform == "darwin" else "libz3.so"
+
+        cmake_args = [
+            "-S",
+            ".",
+            "--preset",
+            "ci-tidy",
+            "-DSKBUILD_SABI_COMPONENT=Development.SABIModule",
+            f"-DZ3_ROOT={z3_root}",
+            f"-DZ3_CXX_INCLUDE_DIRS={z3_root / 'include'}",
+            f"-DZ3_LIBRARIES={z3_root / 'lib' / z3_library_name}",
+        ]
+        session.run("cmake", *cmake_args, external=True)
+
+        linter_args = [
+            "--style=",
+            "--tidy-checks=",
+            "--database=build-ci-tidy",
+            "--version=21",
+            "--lines-changed-only=false",
+            f"--files-changed-only={'false' if args.all_files else 'true'}",
+            f"--ignore={'|'.join(CPP_LINT_IGNORED_PATHS)}",
+            "--file-annotations=false",
+            "--jobs=0",
+        ]
+        if args.diff_base:
+            linter_args.append(f"--diff-base={args.diff_base}")
+
+        session.run("cpp-linter", *linter_args)
+
+
+@nox.session(reuse_venv=True)
+def stubs(session: nox.Session) -> None:
+    """Generate the type stubs of the `mnt.pyfiction` extension modules with nanobind.
+
+    The stubs cover the optional bindings only when the build finds Z3 and ALGLIB, which is what
+    `pyproject.toml` requests.
+    """
+    env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
+    _install_build_tools(session)
+    session.run("uv", "sync", "--inexact", "--only-group", "build", env=env)
+    session.run("uv", "sync", "--inexact", "--no-dev", "--no-build-isolation-package", "mnt-pyfiction", env=env)
+
+    package_root = Path(__file__).parent / "python" / "mnt" / "pyfiction"
+    # every `.pyi` file in the package is generated; removing them first drops the stubs of removed modules
+    for stub in package_root.glob("**/*.pyi"):
+        stub.unlink()
+    modules = [
+        "fcn",
+        "inml",
+        "layouts",
+        "mol_qca",
+        "networks",
+        "physical_design",
+        "qca",
+        "sidb",
+        "synthesis",
+        "utils",
+        "verification",
+    ]
+    session.run(
+        "uv",
+        "run",
+        "--no-sync",
+        "python",
+        "-m",
+        "nanobind.stubgen",
+        "--recursive",
+        "--include-private",
+        "--output-dir",
+        str(package_root),
+        "--pattern-file",
+        str(package_root / "stubgen.pattern"),
+        *(argument for module in modules for argument in ("--module", f"mnt.pyfiction.{module}")),
+        env=env,
+    )
+
+    # nanobind names a stub after the extension's file, which carries the `.abi3` tag of the
+    # Stable ABI build
+    for abi3_stub in package_root.glob("*.abi3.pyi"):
+        abi3_stub.replace(package_root / abi3_stub.name.replace(".abi3.pyi", ".pyi"))
+
+    pyi_files = [str(path) for path in package_root.glob("**/*.pyi")]
+    if shutil.which("prek") is None:
+        session.install("prek")
+
+    # the first passes fix what they can and exit with 1 when they changed a file
+    success_codes = [0, 1]
+    for hook in ("license-tools", "ruff-check", "ruff-format"):
+        session.run("prek", "run", hook, "--files", *pyi_files, external=True, success_codes=success_codes)
+    session.run("prek", "run", "ruff-check", "--files", *pyi_files, external=True)
+
+
+@nox.session(python="3.12", reuse_venv=True)
 def docs(session: nox.Session) -> None:
     """Build documentation, serving interactive HTML builds with live reload.
 
@@ -185,7 +333,20 @@ def docs(session: nox.Session) -> None:
         "SKBUILD_BUILD_DIR": "build-pyfiction",
         "SKBUILD_CMAKE_ARGS": "--preset=pyfiction",
     }
-    session.run("uv", "sync", "--frozen", "--no-dev", "--group", "build", "--group", "docs", env=env)
+    # The native build discovers Z3 through the Python dependencies installed by uv.
+    session.run(
+        "uv",
+        "sync",
+        "--frozen",
+        "--no-dev",
+        "--group",
+        "build",
+        "--group",
+        "docs",
+        "--no-build-isolation-package",
+        "mnt-pyfiction",
+        env=env,
+    )
     with session.chdir("docs"):
         serve = args.builder == "html" and session.interactive
         command = ["sphinx-autobuild" if serve else "sphinx-build"]

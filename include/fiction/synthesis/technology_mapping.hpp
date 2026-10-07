@@ -356,6 +356,14 @@ class technology_mapping_impl
      */
     void validate_required_gates() const
     {
+        // emap's phase matching assumes a non-affine gate basis. Affine-only libraries can
+        // dereference an absent match before reporting mapping_error.
+        if (!(params.and2 || params.nand2 || params.or2 || params.nor2 || params.lt2 || params.gt2 || params.le2 ||
+              params.ge2 || params.and3 || params.xor_and || params.or_and || params.onehot || params.maj3 ||
+              params.gamble || params.dot || params.mux || params.and_xor))
+        {
+            throw missing_required_gates_exception("mapping", "a non-affine gate (for example AND or MAJ)");
+        }
         std::string              network_type{};
         std::vector<std::string> missing_gates{};
 
@@ -568,9 +576,32 @@ class technology_mapping_impl
      * @return Mapped network.
      */
     template <unsigned NumInp>
-    [[nodiscard]] tec_nt perform_mapping(const std::vector<mockturtle::gate>& gates) const noexcept
+    [[nodiscard]] tec_nt perform_mapping(const std::vector<mockturtle::gate>& gates) const
     {
         mockturtle::tech_library<NumInp> lib{gates};
+
+        // A missing local match can reach emap's phase bookkeeping before its error path.
+        // Require a cover for each source gate before entering that bookkeeping.
+        ntk.foreach_gate(
+            [&](const auto& node)
+            {
+                const auto function = ntk.node_function(node);
+                if (function.num_vars() > NumInp)
+                {
+                    stats.mapper_stats.mapping_error = true;
+                    return;
+                }
+                const auto extended = kitty::extend_to<6>(function);
+                if (lib.get_supergates(extended) == nullptr &&
+                    (!params.inv || lib.get_supergates(~extended) == nullptr))
+                {
+                    stats.mapper_stats.mapping_error = true;
+                }
+            });
+        if (stats.mapper_stats.mapping_error)
+        {
+            return tec_nt{};
+        }
 
         const auto mapped_ntk = mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
 

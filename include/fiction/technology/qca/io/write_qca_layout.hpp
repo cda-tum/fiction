@@ -16,18 +16,20 @@
 
 #pragma once
 
-#include "fiction/technology/qca/technology.hpp"
-#include "fiction/traits.hpp"
+#include "fiction/technology/qca/layout.hpp"
+#include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
-#include <fstream>
 #include <ostream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace fiction::qca::io
@@ -42,6 +44,8 @@ struct write_qca_layout_params
      * Create via cells in between each layer.
      */
     bool create_inter_layer_via_cells = true;
+    /** @brief Receives completed serialization work and the phase total. */
+    utils::progress_callback on_progress{};
 };
 
 namespace detail
@@ -172,11 +176,20 @@ struct color
 
 }  // namespace qcad
 
-template <typename Lyt>
 class write_qca_layout_impl
 {
   public:
-    write_qca_layout_impl(const Lyt& src, std::ostream& s, const write_qca_layout_params p) : lyt{src}, os{s}, ps{p} {}
+    /**
+     * @brief Stores the layout and serialization parameters.
+     * @param src Layout to serialize.
+     * @param s Output stream.
+     * @param p Serialization parameters.
+     */
+    write_qca_layout_impl(const qca::layout& src, std::ostream& s, write_qca_layout_params p) :
+            lyt{src},
+            os{s},
+            ps{std::move(p)}
+    {}
 
     void run()
     {
@@ -190,7 +203,7 @@ class write_qca_layout_impl
     }
 
   private:
-    Lyt lyt;
+    const qca::layout& lyt;
 
     std::ostream& os;
 
@@ -199,7 +212,7 @@ class write_qca_layout_impl
     uint32_t via_counter{1ul};
 
     // via cells
-    std::vector<cell<Lyt>> via_layer_cells{};
+    std::vector<qca::layout::cell> via_layer_cells{};
 
     void write_header()
     {
@@ -210,6 +223,9 @@ class write_qca_layout_impl
 
     void write_cell_layers()
     {
+        utils::progress_reporter progress{ps.on_progress, "writing rows",
+                                          static_cast<std::size_t>(lyt.y() + 1) *
+                                              static_cast<std::size_t>(lyt.z() + 1)};
         // for each layer
         for (decltype(lyt.z()) z = 0; z <= lyt.z(); ++z)
         {
@@ -229,7 +245,7 @@ class write_qca_layout_impl
                 // for each cell
                 for (decltype(lyt.x()) x = 0; x <= lyt.x(); ++x)
                 {
-                    const cell<Lyt> c{x, y, z};
+                    const qca::layout::cell c{x, y, z};
 
                     // skip empty cells
                     if (!lyt.is_empty_cell(c))
@@ -237,6 +253,7 @@ class write_qca_layout_impl
                         write_cell(c, ps.create_inter_layer_via_cells);
                     }
                 }
+                progress.advance();
             }
 
             // close design layer
@@ -244,25 +261,25 @@ class write_qca_layout_impl
         }
     }
 
-    qcad::color write_cell_colors(const cell<Lyt>& c)
+    qcad::color write_cell_colors(const qca::layout::cell& c)
     {
         const auto cell_type = lyt.get_cell_type(c);
 
         // colors for 4 clocks are supported exclusively
         qcad::color color{};
-        if (qca::qca_technology::is_input_cell(cell_type))
+        if (cell_type == qca::cell_type::INPUT)
         {
             color.red   = qcad::COLOR_MIN;
             color.green = qcad::COLOR_MIN;
             color.blue  = qcad::COLOR_MAX;
         }
-        else if (qca::qca_technology::is_output_cell(cell_type))
+        else if (cell_type == qca::cell_type::OUTPUT)
         {
             color.red   = qcad::COLOR_MAX;
             color.green = qcad::COLOR_MAX;
             color.blue  = qcad::COLOR_MIN;
         }
-        else if (qca::qca_technology::is_constant_cell(cell_type))
+        else if (qca::is_constant(cell_type))
         {
             color.red   = qcad::COLOR_MAX;
             color.green = qcad::COLOR_HALF;
@@ -308,11 +325,11 @@ class write_qca_layout_impl
         return color;
     }
 
-    void write_cell_mode(const cell<Lyt>& c, bool save_via_cells)
+    void write_cell_mode(const qca::layout::cell& c, bool save_via_cells)
     {
         // handle cell mode
         os << qcad::CELL_OPTIONS_MODE;
-        if (const auto mode = lyt.get_cell_mode(c); qca::qca_technology::is_vertical_cell_mode(mode))
+        if (const auto mode = lyt.get_cell_mode(c); mode == qca::cell_mode::VERTICAL)
         {
             os << qcad::CELL_MODE_VERTICAL;
 
@@ -325,7 +342,7 @@ class write_qca_layout_impl
         {
             os << qcad::CELL_MODE_CROSSOVER;
         }
-        else if (qca::qca_technology::is_rotated_cell_mode(mode))
+        else if (mode == qca::cell_mode::ROTATED)
         {
             os << qcad::CELL_MODE_ROTATED;
         }
@@ -335,32 +352,32 @@ class write_qca_layout_impl
         }
     }
 
-    void write_cell_function(const cell<Lyt>& c)
+    void write_cell_function(const qca::layout::cell& c)
     {
         const auto cell_type = lyt.get_cell_type(c);
 
         // handle cell function
         os << qcad::CELL_FUNCTION;
 
-        if (qca::qca_technology::is_normal_cell(cell_type))
+        if (cell_type == qca::cell_type::NORMAL)
         {
             os << qcad::CELL_FUNCTION_NORMAL;
         }
-        else if (qca::qca_technology::is_constant_cell(cell_type))
+        else if (qca::is_constant(cell_type))
         {
             os << qcad::CELL_FUNCTION_FIXED;
         }
-        else if (qca::qca_technology::is_input_cell(cell_type))
+        else if (cell_type == qca::cell_type::INPUT)
         {
             os << qcad::CELL_FUNCTION_INPUT;
         }
-        else if (qca::qca_technology::is_output_cell(cell_type))
+        else if (cell_type == qca::cell_type::OUTPUT)
         {
             os << qcad::CELL_FUNCTION_OUTPUT;
         }
     }
 
-    void write_quantum_dots(const cell<Lyt>& c, const qcad::cell_pos pos)
+    void write_quantum_dots(const qca::layout::cell& c, const qcad::cell_pos pos)
     {
         const auto cell_type = lyt.get_cell_type(c);
 
@@ -382,17 +399,17 @@ class write_qca_layout_impl
 
                 // determine charge
                 os << qcad::CHARGE;
-                if (!qca::qca_technology::is_constant_cell(cell_type))
+                if (!qca::is_constant(cell_type))
                 {
                     os << qcad::CHARGE_8;
                 }
-                else if ((qca::qca_technology::is_const_0_cell(cell_type) && std::abs(i + j) == 2) ||
-                         (qca::qca_technology::is_const_1_cell(cell_type) && std::abs(i + j) == 0))
+                else if (((cell_type == qca::cell_type::CONST_0) && std::abs(i + j) == 2) ||
+                         ((cell_type == qca::cell_type::CONST_1) && std::abs(i + j) == 0))
                 {
                     os << qcad::CHARGE_1;
                 }
-                else if ((qca::qca_technology::is_const_0_cell(cell_type) && std::abs(i + j) == 0) ||
-                         (qca::qca_technology::is_const_1_cell(cell_type) && std::abs(i + j) == 2))
+                else if (((cell_type == qca::cell_type::CONST_0) && std::abs(i + j) == 0) ||
+                         ((cell_type == qca::cell_type::CONST_1) && std::abs(i + j) == 2))
                 {
                     os << qcad::CHARGE_0;
                 }
@@ -400,7 +417,7 @@ class write_qca_layout_impl
 
                 // determine spin
                 os << qcad::SPIN;
-                if (qca::qca_technology::is_input_cell(cell_type) || qca::qca_technology::is_output_cell(cell_type))
+                if ((cell_type == qca::cell_type::INPUT) || (cell_type == qca::cell_type::OUTPUT))
                 {
                     os << qcad::NEGATIVE_SPIN;
                 }
@@ -418,17 +435,17 @@ class write_qca_layout_impl
         }
     }
 
-    void write_cell_name(const cell<Lyt>& c, const qcad::cell_pos pos, const qcad::color color)
+    void write_cell_name(const qca::layout::cell& c, const qcad::cell_pos pos, const qcad::color color)
     {
         const auto cell_type = lyt.get_cell_type(c);
 
         // override cell_name if cell is constant; if cell has a name
         auto cell_name = lyt.get_cell_name(c);
-        if (qca::qca_technology::is_const_0_cell(cell_type))
+        if (cell_type == qca::cell_type::CONST_0)
         {
             cell_name = "-1.00";
         }
-        else if (qca::qca_technology::is_const_1_cell(cell_type))
+        else if (cell_type == qca::cell_type::CONST_1)
         {
             cell_name = "1.00";
         }
@@ -461,7 +478,7 @@ class write_qca_layout_impl
         }
     };
 
-    void write_cell(const cell<Lyt>& c, const bool save_via_cells)
+    void write_cell(const qca::layout::cell& c, const bool save_via_cells)
     {
         // open cell
         os << qcad::OPEN_QCAD_CELL;
@@ -470,8 +487,8 @@ class write_qca_layout_impl
 
         // calculate cell position
         const qcad::cell_pos pos{
-            static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
-            static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
+            .x = static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
+            .y = static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';
@@ -525,9 +542,11 @@ class write_qca_layout_impl
         os << qcad::STATUS << "0\n";
         os << qcad::PSZ_DESCRIPTION << "Via Layer " << std::to_string(via_counter++) << '\n';
 
+        utils::progress_reporter progress{ps.on_progress, "writing via cells", via_layer_cells.size()};
         for (const auto& v : via_layer_cells)
         {
             write_cell(v, false);
+            progress.advance();
         }
 
         // close design layer
@@ -540,49 +559,35 @@ class write_qca_layout_impl
 }  // namespace detail
 
 /**
- * Writes a cell-level QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
+ * Writes a QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
  * a physical simulator for the QCA technology platform.
  *
  * This overload uses an output stream to write into.
  *
- * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.
  */
-template <typename Lyt>
-void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
+inline void write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca_layout_params ps = {})
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
 
-    detail::write_qca_layout_impl p{lyt, os, ps};
+    detail::write_qca_layout_impl p{lyt, os, std::move(ps)};
 
     p.run();
 }
 /**
- * Writes a cell-level QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
+ * Writes a QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
  * a physical simulator for the QCA technology platform.
  *
  * This overload uses a file name to create and write into.
  *
- * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.qca` extension.
  * @param ps Parameters.
  */
-template <typename Lyt>
-void write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
+inline void write_qca_layout(const qca::layout& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 {
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_qca_layout(lyt, os, ps);
-    os.close();
+    fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_qca_layout(lyt, os, ps); });
 }
 
 }  // namespace fiction::qca::io

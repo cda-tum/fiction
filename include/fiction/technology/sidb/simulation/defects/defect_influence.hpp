@@ -13,6 +13,7 @@
  * @brief Determines at which positions a defect disturbs an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -25,7 +26,8 @@
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/technology/sidb/technology.hpp"
+#include "fiction/utils/execution_timeout.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -73,7 +75,8 @@ struct defect_influence_params
      */
     model::defect defect{};
     /**
-     * Parameters of the operational check and the simulation.
+     * Operational and simulation parameters. Their timeout bounds the entire defect domain calculation, including
+     * ground-state comparisons. Expiration throws `utils::timeout_error` without returning a partial result.
      */
     logic::is_operational_params operational_params{};
     /**
@@ -88,6 +91,10 @@ struct defect_influence_params
      * Number of threads to use.
      */
     std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
+    /**
+     * Callback that receives the number of evaluated defect positions or, for *QuickTrace*, contour points.
+     */
+    utils::progress_callback on_progress{};
 };
 
 /**
@@ -158,7 +165,7 @@ class defect_influence_impl
     defect_influence_impl(const layout& lyt, const defect_influence_params& ps, defect_influence_stats& st) :
             layout_to_analyze{lyt},
             base_layout{lyt},
-            params{ps},
+            params{logic::detail::checked_parameters(ps)},
             stats{st}
     {
         if (params.additional_scanning_area.first < 0 || params.additional_scanning_area.second < 0)
@@ -186,19 +193,18 @@ class defect_influence_impl
 
         const mockturtle::stopwatch stop{stats.time_total};
 
-        const auto positions = all_positions();
+        auto positions = all_positions();
+        std::erase_if(positions,
+                      [step_size](const auto& p)
+                      {
+                          return static_cast<std::size_t>(std::abs(int64_t{p.x})) % step_size != 0 ||
+                                 static_cast<std::size_t>(std::abs(row_of(p))) % step_size != 0;
+                      });
 
-        run_in_parallel(positions.size(),
-                        [this, &positions, step_size, &spec](const std::size_t i)
-                        {
-                            const auto& p = positions[i];
+        utils::progress_reporter progress{params.on_progress, "defect positions", positions.size()};
 
-                            if (static_cast<std::size_t>(std::abs(int64_t{p.x})) % step_size == 0 &&
-                                static_cast<std::size_t>(std::abs(row_of(p))) % step_size == 0)
-                            {
-                                is_defect_influential(spec, p);
-                            }
-                        });
+        run_in_parallel(positions.size(), progress,
+                        [this, &positions, &spec](const std::size_t i) { is_defect_influential(spec, positions[i]); });
 
         log_stats();
 
@@ -222,7 +228,9 @@ class defect_influence_impl
 
         const auto num = std::min(positions.size(), samples);
 
-        run_in_parallel(num,
+        utils::progress_reporter progress{params.on_progress, "defect positions", num};
+
+        run_in_parallel(num, progress,
                         [this, &positions, &spec](const std::size_t i) { is_defect_influential(spec, positions[i]); });
 
         log_stats();
@@ -260,8 +268,12 @@ class defect_influence_impl
 
         std::unordered_set<lattice_site> starting_points{};
 
+        // the contour length is not known in advance, so the total stays unknown
+        utils::progress_reporter progress{params.on_progress, "contour points"};
+
         for (std::size_t sample = 0; sample < samples; ++sample)
         {
+            utils::check_deadline(params.operational_params.deadline);
             const auto operational_starting_point = find_non_influential_defect_position_at_left_side(spec);
 
             if (!operational_starting_point.has_value())
@@ -303,6 +315,7 @@ class defect_influence_impl
             while (next_point != contour_starting_point)
             {
                 const auto status = is_defect_influential(spec, next_point);
+                progress.advance();
 
                 if (status == defect_influence_status::INFLUENTIAL)
                 {
@@ -342,7 +355,7 @@ class defect_influence_impl
     /**
      * Parameters.
      */
-    const defect_influence_params& params;
+    const defect_influence_params params;
     /**
      * Statistics.
      */
@@ -400,10 +413,11 @@ class defect_influence_impl
      *
      * @tparam Fn Callable type.
      * @param n Number of indices.
+     * @param progress The reporter to advance after each processed index.
      * @param fn The function to run.
      */
     template <typename Fn>
-    void run_in_parallel(const std::size_t n, const Fn& fn) const
+    void run_in_parallel(const std::size_t n, utils::progress_reporter& progress, const Fn& fn) const
     {
         const auto number_of_threads =
             std::max(std::min(std::max(params.number_of_threads, std::size_t{1}), n), std::size_t{1});
@@ -423,11 +437,12 @@ class defect_influence_impl
             }
 
             threads.emplace_back(std::async(std::launch::async,
-                                            [start, end, &fn]
+                                            [start, end, &fn, &progress]
                                             {
                                                 for (auto i = start; i < end; ++i)
                                                 {
                                                     fn(i);
+                                                    progress.advance();
                                                 }
                                             }));
         }
@@ -467,6 +482,7 @@ class defect_influence_impl
     defect_influence_status is_defect_influential(const std::optional<std::vector<kitty::dynamic_truth_table>>& spec,
                                                   const lattice_site& defect_cell)
     {
+        utils::check_deadline(params.operational_params.deadline);
         ++num_evaluated_defect_positions;
 
         if (const auto op_value = influence_domain.contains(defect_cell); op_value.has_value())
@@ -554,9 +570,10 @@ class defect_influence_impl
             return defect_influence_status::NON_INFLUENTIAL;
         }
 
-        const engines::quickexact_params qe_params{
-            .sim_params            = params.operational_params.sim_params,
-            .base_number_detection = engines::quickexact_params::automatic_base_number_detection::OFF};
+        const engines::quickexact_params qe_params{.sim_params = params.operational_params.sim_params,
+                                                   .base_number_detection =
+                                                       engines::quickexact_params::automatic_base_number_detection::OFF,
+                                                   .deadline = params.operational_params.deadline};
 
         const auto ground_states = engines::quickexact(lyt_without_candidate, qe_params).groundstates();
 
@@ -577,6 +594,7 @@ class defect_influence_impl
 
         for (const auto& gs_defect : ground_states_defect)
         {
+            utils::check_deadline(params.operational_params.deadline);
             if (!std::ranges::any_of(ground_states,
                                      [&gs_defect](const auto& gs) { return gs.same_charge_states(gs_defect); }))
             {

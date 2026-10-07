@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -24,8 +25,12 @@
 #include "fiction/technology/sidb/simulation/detail/simulation_state.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/execution_timeout.hpp"
+#include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
+
+#include <chrono>
 
 namespace fiction::sidb::simulation::engines
 {
@@ -38,13 +43,18 @@ namespace fiction::sidb::simulation::engines
  *
  * @param lyt Layout to simulate.
  * @param params Physical parameters.
+ * @param on_progress Callback that receives the number of enumerated charge configurations.
+ * @param deadline Shared caller deadline. `time_point::max()` leaves the simulation unlimited.
  * @return The physically valid charge distributions.
  * @throws std::out_of_range if a site has an invalid lattice basis index.
+ * @throws utils::timeout_error if the shared caller deadline expires. No partial result is returned.
  */
-[[nodiscard]] inline result
-exhaustive_ground_state_simulation(const layout&                       lyt,
-                                   const model::simulation_parameters& params = model::simulation_parameters{})
+[[nodiscard]] inline result exhaustive_ground_state_simulation(
+    const layout& lyt, const model::simulation_parameters& params = model::simulation_parameters{},
+    const utils::progress_callback&             on_progress = {},
+    const std::chrono::steady_clock::time_point deadline    = std::chrono::steady_clock::time_point::max())
 {
+    utils::check_deadline(deadline);
     result simulation_result{};
     simulation_result.algorithm_name = "ExGS";
     simulation_result.sim_params     = params;
@@ -62,15 +72,25 @@ exhaustive_ground_state_simulation(const layout&                       lyt,
         const potential_landscape            land{lyt, params};
         simulation::detail::simulation_state state{land, model::charge_state::NEGATIVE};
 
+        utils::progress_reporter progress{on_progress, "charge configurations", state.max_charge_index() + 1};
+
         while (state.charge_index() < state.max_charge_index())
         {
+            // Reading the clock per configuration costs more than the configuration's validity check.
+            if ((state.charge_index() & 1023u) == 0)
+            {
+                utils::check_deadline(deadline);
+            }
             if (state.is_physically_valid())
             {
                 simulation_result.charge_distributions.push_back(state.snapshot());
             }
 
             state.increase_charge_index_by_one();
+            progress.advance();
         }
+
+        progress.advance();
 
         if (state.is_physically_valid())
         {

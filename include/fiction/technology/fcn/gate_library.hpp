@@ -119,8 +119,7 @@ class unsupported_gate_orientation_exception : public std::exception
    \verbatim embed:rst
    .. code-block:: c++
 
-      template <typename CellLyt>
-      static void post_layout_optimization(CellLyt& lyt)
+      static void post_layout_optimization(Layout& lyt)
    \endverbatim
  *
  * can optionally be provided if some cleanup or optimization is necessary on the cell-level layout after each gate has
@@ -149,15 +148,25 @@ class unsupported_gate_orientation_exception : public std::exception
  * can optionally be provided to allow reverse access to the gate ports given a gate implementation. This interface is
  * for example used in `sidb::surface_analysis` to determine which ports to blacklist.
  *
- * @tparam Technology FCN technology type of the implementing gate library.
+ * The library produces layouts of type `Layout`, e.g., `qca::layout` or `sidb::layout`, which `apply_gate_library`
+ * returns. `Layout::cell_type` is the element type of the gates; it is an enumeration with an `EMPTY` enumerator.
+ *
+ * @tparam Layout Layout type that the library produces.
  * @tparam GateSizeX Tile size in x-dimension.
  * @tparam GateSizeY Tile size in y-dimension.
  */
-template <typename Technology, uint16_t GateSizeX, uint16_t GateSizeY>
+template <typename Layout, uint16_t GateSizeX, uint16_t GateSizeY>
 class gate_library
 {
   public:
-    using technology = Technology;
+    /**
+     * Layout type that the library produces.
+     */
+    using layout = Layout;
+    /**
+     * Element type of the gates.
+     */
+    using cell_type = typename Layout::cell_type;
 
     /**
      * A `cell_list` is an array of size `GateSizeX` \f$\times\f$ `GateSizeY` of type `T`.
@@ -165,9 +174,9 @@ class gate_library
     template <typename T>
     using cell_list = std::array<std::array<T, GateSizeX>, GateSizeY>;
     /**
-     * Each gate is thus a `cell_list` of cell types defined in `Technology`.
+     * Each gate is thus a `cell_list` of the cell types of `Layout`.
      */
-    using gate = cell_list<typename Technology::cell_type>;
+    using gate = cell_list<cell_type>;
     /**
      * Maps truth tables to respective FCN gate implementations.
      */
@@ -193,7 +202,7 @@ class gate_library
     template <typename T>
     static constexpr gate cell_list_to_gate(const cell_list<T>& c) noexcept
     {
-        return fiction::utils::stl::convert_array_of_arrays<typename Technology::cell_type, T, GateSizeY, GateSizeX>(c);
+        return fiction::utils::stl::convert_array_of_arrays<cell_type, T, GateSizeY, GateSizeX>(c);
     }
     /**
      * Rotates the given `gate` by 90° clockwise at compile time.
@@ -242,7 +251,7 @@ class gate_library
             {
                 for (const auto& g : gates)
                 {
-                    if (!Technology::is_empty_cell(g[x][y]))
+                    if (g[x][y] != cell_type::EMPTY)
                     {
                         merged[x][y] = g[x][y];
                     }
@@ -253,19 +262,20 @@ class gate_library
         return merged;
     }
     /**
-     * Applies given mark to given `gate` `g` at given port `p` at compile time.
+     * Replaces the cell of `gate` `g` at port `p` by the given cell type at compile time, e.g., to mark it as input or
+     * output.
      *
-     * @param g Gate to apply mark to.
-     * @param p Port specifying where to apply the mark.
-     * @param mark Mark to be applied
+     * @param g Gate to mark.
+     * @param p Port specifying which cell to replace.
+     * @param mark Cell type to place at `p`.
      * @return Marked `gate`.
      */
     template <typename Port>
-    static constexpr gate mark_cell(const gate& g, const Port& p, const typename Technology::cell_mark& mark) noexcept
+    static constexpr gate mark_cell(const gate& g, const Port& p, const cell_type mark) noexcept
     {
         auto marked_gate = g;
 
-        marked_gate[p.y][p.x] = static_cast<typename Technology::cell_type>(mark);
+        marked_gate[p.y][p.x] = mark;
 
         return marked_gate;
     }
@@ -338,11 +348,11 @@ class gate_library
         return rev_rows;
     }
     /**
-     * Single empty gate in given technology and tile size. Used as a blue print to create new ones in merge and
+     * Single empty gate of the given tile size. Used as a blue print to create new ones in merge and
      * transpose for example.
      */
-    static constexpr const gate EMPTY_GATE = fiction::utils::stl::create_array<GateSizeY>(
-        fiction::utils::stl::create_array<GateSizeX>(Technology::cell_type::EMPTY));
+    static constexpr const gate EMPTY_GATE =
+        fiction::utils::stl::create_array<GateSizeY>(fiction::utils::stl::create_array<GateSizeX>(cell_type::EMPTY));
 };
 
 }  // namespace fiction::fcn

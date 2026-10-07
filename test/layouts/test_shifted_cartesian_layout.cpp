@@ -16,11 +16,11 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/traits.hpp>
-
-#include <iostream>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -42,7 +42,7 @@ void check_common_traits()
     CHECK(has_below_v<Lyt>);
     CHECK(has_elevation_operations_v<Lyt>);
     CHECK(is_coordinate_layout_v<Lyt>);
-    CHECK(!is_tile_based_layout_v<Lyt>);
+    CHECK(!is_gate_level_layout_v<Lyt>);
     CHECK(!is_cartesian_layout_v<Lyt>);
     CHECK(!is_hexagonal_layout_v<Lyt>);
     CHECK(is_shifted_cartesian_layout_v<Lyt>);
@@ -56,63 +56,23 @@ void check_common_traits()
 // shifted_cartesian_layout is a hexagonal_layout
 TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
 {
-    SECTION("odd row")
-    {
-        using layout = shifted_cartesian_layout<coords::offset, odd_row_cartesian>;
+    check_common_traits<shifted_cartesian_layout>();
+}
 
-        CHECK(has_horizontally_shifted_cartesian_orientation_v<layout>);
-        CHECK(!has_vertically_shifted_cartesian_orientation_v<layout>);
-        CHECK(has_odd_row_cartesian_arrangement_v<layout>);
-        CHECK(!has_even_row_cartesian_arrangement_v<layout>);
-        CHECK(!has_odd_column_cartesian_arrangement_v<layout>);
-        CHECK(!has_even_column_cartesian_arrangement_v<layout>);
+TEST_CASE("Shifted Cartesian layout arrangement", "[shifted-cartesian-layout]")
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-        check_common_traits<layout>();
-    }
-    SECTION("even row")
-    {
-        using layout = shifted_cartesian_layout<coords::offset, even_row_cartesian>;
+    const shifted_cartesian_layout lyt{a, {3, 3}};
 
-        CHECK(has_horizontally_shifted_cartesian_orientation_v<layout>);
-        CHECK(!has_vertically_shifted_cartesian_orientation_v<layout>);
-        CHECK(!has_odd_row_cartesian_arrangement_v<layout>);
-        CHECK(has_even_row_cartesian_arrangement_v<layout>);
-        CHECK(!has_odd_column_cartesian_arrangement_v<layout>);
-        CHECK(!has_even_column_cartesian_arrangement_v<layout>);
-
-        check_common_traits<layout>();
-    }
-    SECTION("odd column")
-    {
-        using layout = shifted_cartesian_layout<coords::offset, odd_column_cartesian>;
-
-        CHECK(!has_horizontally_shifted_cartesian_orientation_v<layout>);
-        CHECK(has_vertically_shifted_cartesian_orientation_v<layout>);
-        CHECK(!has_odd_row_cartesian_arrangement_v<layout>);
-        CHECK(!has_even_row_cartesian_arrangement_v<layout>);
-        CHECK(has_odd_column_cartesian_arrangement_v<layout>);
-        CHECK(!has_even_column_cartesian_arrangement_v<layout>);
-
-        check_common_traits<layout>();
-    }
-    SECTION("even column")
-    {
-        using layout = shifted_cartesian_layout<coords::offset, even_column_cartesian>;
-
-        CHECK(!has_horizontally_shifted_cartesian_orientation_v<layout>);
-        CHECK(has_vertically_shifted_cartesian_orientation_v<layout>);
-        CHECK(!has_odd_row_cartesian_arrangement_v<layout>);
-        CHECK(!has_even_row_cartesian_arrangement_v<layout>);
-        CHECK(!has_odd_column_cartesian_arrangement_v<layout>);
-        CHECK(has_even_column_cartesian_arrangement_v<layout>);
-
-        check_common_traits<layout>();
-    }
+    CHECK(lyt.get_arrangement() == a);
+    CHECK(lyt.clone().get_arrangement() == a);
 }
 
 TEST_CASE("Deep copy shifted Cartesian layout", "[shifted-cartesian-layout]")
 {
-    const shifted_cartesian_layout original{{5, 5, 0}};
+    const shifted_cartesian_layout original{arrangement::EVEN_ROW, {5, 5, 0}};
 
     auto copy = original.clone();
 

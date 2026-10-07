@@ -88,9 +88,9 @@ path_finding/path_finding
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.reserve_input_nodes
+.. autofunction:: mnt.pyfiction.physical_design.reserve_input_nodes
 
-.. autofunction:: mnt.pyfiction.place
+.. autofunction:: mnt.pyfiction.physical_design.place
 ```
 
 :::
@@ -145,13 +145,13 @@ path_finding/path_finding
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.is_crossable_wire
+.. autofunction:: mnt.pyfiction.physical_design.is_crossable_wire
 
-.. autofunction:: mnt.pyfiction.route_path
+.. autofunction:: mnt.pyfiction.physical_design.route_path
 
-.. autofunction:: mnt.pyfiction.extract_routing_objectives
+.. autofunction:: mnt.pyfiction.physical_design.extract_routing_objectives
 
-.. autofunction:: mnt.pyfiction.clear_routing
+.. autofunction:: mnt.pyfiction.physical_design.clear_routing
 ```
 
 :::

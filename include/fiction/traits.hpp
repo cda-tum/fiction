@@ -18,13 +18,7 @@
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/inml/technology.hpp"
-#include "fiction/technology/qca/technology.hpp"
-#include "fiction/technology/sidb/technology.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -35,6 +29,12 @@
 
 namespace fiction
 {
+
+namespace layouts
+{
+template <typename CellType>
+class cell_grid;
+}  // namespace layouts
 
 /**
  * This file includes fiction's trait system that is modeled after mockturtle/traits.hpp. It allows to check at compile
@@ -325,33 +325,12 @@ struct is_shifted_cartesian_layout : std::false_type
 template <class Lyt>
 struct is_shifted_cartesian_layout<
     Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
-                          std::void_t<typename Lyt::base_type, typename Lyt::cartesian_arrangement, aspect_ratio<Lyt>,
+                          std::void_t<typename Lyt::base_type, typename Lyt::is_shifted_cartesian, aspect_ratio<Lyt>,
                                       coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 
 template <class Lyt>
 inline constexpr bool is_shifted_cartesian_layout_v = is_shifted_cartesian_layout<Lyt>::value;
-#pragma endregion
-
-#pragma region shifted cartesian orientation and arrangement
-template <typename Lyt>
-constexpr bool has_horizontally_shifted_cartesian_orientation_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, layouts::horizontal_shift_cartesian>;
-template <typename Lyt>
-constexpr bool has_vertically_shifted_cartesian_orientation_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, layouts::vertical_shift_cartesian>;
-template <typename Lyt>
-constexpr bool has_odd_row_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::odd_row_cartesian>;
-template <typename Lyt>
-constexpr bool has_even_row_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::even_row_cartesian>;
-template <typename Lyt>
-constexpr bool has_odd_column_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::odd_column_cartesian>;
-template <typename Lyt>
-constexpr bool has_even_column_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::even_column_cartesian>;
 #pragma endregion
 
 #pragma region is_hexagonal_layout
@@ -360,216 +339,26 @@ struct is_hexagonal_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_hexagonal_layout<Lyt,
-                           std::enable_if_t<!is_shifted_cartesian_layout_v<Lyt> && is_coordinate_layout_v<Lyt> &&
-                                                has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
-                                            std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement,
-                                                        aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
-        : std::true_type
+struct is_hexagonal_layout<
+    Lyt, std::enable_if_t<!is_shifted_cartesian_layout_v<Lyt> && is_coordinate_layout_v<Lyt> &&
+                              has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
+                          std::void_t<typename Lyt::base_type, decltype(std::declval<Lyt>().get_arrangement()),
+                                      aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 
 template <class Lyt>
 inline constexpr bool is_hexagonal_layout_v = is_hexagonal_layout<Lyt>::value;
 #pragma endregion
 
-#pragma region hexagonal orientation and arrangement
-template <typename Lyt>
-inline constexpr const bool has_pointy_top_hex_orientation_v =
-    std::is_same_v<typename Lyt::hex_arrangement::orientation, layouts::pointy_top_hex>;
-template <typename Lyt>
-inline constexpr const bool has_flat_top_hex_orientation_v =
-    std::is_same_v<typename Lyt::hex_arrangement::orientation, layouts::flat_top_hex>;
-template <typename Lyt>
-inline constexpr const bool has_odd_row_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, layouts::odd_row_hex>;
-template <typename Lyt>
-inline constexpr const bool has_even_row_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, layouts::even_row_hex>;
-template <typename Lyt>
-inline constexpr const bool has_odd_column_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, layouts::odd_column_hex>;
-template <typename Lyt>
-inline constexpr const bool has_even_column_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, layouts::even_column_hex>;
-#pragma endregion
-
 /**
- * Tile-based layouts
+ * Tiles of gate-level layouts and clock zones of gate-level and cell-level layouts
  */
 
 template <typename Lyt>
 using tile = typename Lyt::tile;
 
-#pragma region is_tile_based_layout
-template <class Lyt, class = void>
-struct is_tile_based_layout : std::false_type
-{};
-
-template <class Lyt>
-struct is_tile_based_layout<Lyt,
-                            std::enable_if_t<is_coordinate_layout_v<Lyt>,
-                                             std::void_t<typename Lyt::base_type, tile<Lyt>, typename Lyt::storage>>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool is_tile_based_layout_v = is_tile_based_layout<Lyt>::value;
-#pragma endregion
-
-#pragma region has_foreach_tile
-template <class Lyt, class = void>
-struct has_foreach_tile : std::false_type
-{};
-
-template <class Lyt>
-struct has_foreach_tile<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_tile(std::declval<void(tile<Lyt>, uint32_t)>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_foreach_tile_v = has_foreach_tile<Lyt>::value;
-#pragma endregion
-
-#pragma region has_foreach_adjacent_tile
-template <class Lyt, class = void>
-struct has_foreach_adjacent_tile : std::false_type
-{};
-
-template <class Lyt>
-struct has_foreach_adjacent_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_adjacent_tile(
-                                          std::declval<tile<Lyt>>(), std::declval<void(tile<Lyt>, uint32_t)>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_foreach_adjacent_tile_v = has_foreach_adjacent_tile<Lyt>::value;
-#pragma endregion
-
-#pragma region has_foreach_adjacent_opposite_tiles
-template <class Lyt, class = void>
-struct has_foreach_adjacent_opposite_tiles : std::false_type
-{};
-
-template <class Lyt>
-struct has_foreach_adjacent_opposite_tiles<Lyt,
-                                           std::void_t<decltype(std::declval<Lyt>().foreach_adjacent_opposite_tiles(
-                                               std::declval<tile<Lyt>>(), std::declval<void(tile<Lyt>, uint32_t)>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_foreach_adjacent_opposite_tiles_v = has_foreach_adjacent_opposite_tiles<Lyt>::value;
-#pragma endregion
-
-/**
- * Clocked layouts
- */
-
 template <typename Lyt>
 using clock_zone = typename Lyt::clock_zone;
-
-#pragma region is_clocked_layout
-template <class Lyt, class = void>
-struct is_clocked_layout : std::false_type
-{};
-
-template <class Lyt>
-struct is_clocked_layout<
-    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt>,
-                          std::void_t<typename Lyt::base_type, clock_zone<Lyt>, typename Lyt::clocking_scheme_t,
-                                      typename Lyt::clock_number_t, typename Lyt::degree_t, typename Lyt::storage,
-                                      decltype(std::declval<Lyt>().get_clock_number(clock_zone<Lyt>())),
-                                      decltype(std::declval<Lyt>().num_clocks()),
-                                      decltype(std::declval<Lyt>().is_regularly_clocked()),
-                                      decltype(std::declval<Lyt>().is_clocking_scheme(std::string()))>>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool is_clocked_layout_v = is_clocked_layout<Lyt>::value;
-#pragma endregion
-
-#pragma region has_is_incoming_clocked
-template <class Lyt, class = void>
-struct has_is_incoming_clocked : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_incoming_clocked<Lyt, std::void_t<decltype(std::declval<Lyt>().is_incoming_clocked(
-                                        std::declval<clock_zone<Lyt>>(), std::declval<clock_zone<Lyt>>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_is_incoming_clocked_v = has_is_incoming_clocked<Lyt>::value;
-#pragma endregion
-
-#pragma region has_foreach_incoming_clocked_zone
-template <class Lyt, class = void>
-struct has_foreach_incoming_clocked_zone : std::false_type
-{};
-
-template <class Lyt>
-struct has_foreach_incoming_clocked_zone<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_incoming_clocked_zone(
-             std::declval<clock_zone<Lyt>>(), std::declval<void(clock_zone<Lyt>, uint32_t)>()))>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_foreach_incoming_clocked_zone_v = has_foreach_incoming_clocked_zone<Lyt>::value;
-#pragma endregion
-
-#pragma region has_is_outgoing_clocked
-template <class Lyt, class = void>
-struct has_is_outgoing_clocked : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_outgoing_clocked<Lyt, std::void_t<decltype(std::declval<Lyt>().is_outgoing_clocked(
-                                        std::declval<clock_zone<Lyt>>(), std::declval<clock_zone<Lyt>>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_is_outgoing_clocked_v = has_is_outgoing_clocked<Lyt>::value;
-#pragma endregion
-
-#pragma region has_foreach_outgoing_clocked_zone
-template <class Lyt, class = void>
-struct has_foreach_outgoing_clocked_zone : std::false_type
-{};
-
-template <class Lyt>
-struct has_foreach_outgoing_clocked_zone<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_outgoing_clocked_zone(
-             std::declval<clock_zone<Lyt>>(), std::declval<void(clock_zone<Lyt>, uint32_t)>()))>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_foreach_outgoing_clocked_zone_v = has_foreach_outgoing_clocked_zone<Lyt>::value;
-#pragma endregion
-
-#pragma region has_synchronization_elements
-template <class Lyt, class = void>
-struct has_synchronization_elements : std::false_type
-{};
-
-template <class Lyt>
-struct has_synchronization_elements<
-    Lyt, std::enable_if_t<
-             is_clocked_layout_v<Lyt>,
-             std::void_t<typename Lyt::sync_elem_t, typename Lyt::base_type, typename Lyt::storage,
-                         decltype(std::declval<Lyt>().assign_synchronization_element(
-                             std::declval<clock_zone<Lyt>>(), std::declval<typename Lyt::sync_elem_t>())),
-                         decltype(std::declval<Lyt>().is_synchronization_element(std::declval<clock_zone<Lyt>>())),
-                         decltype(std::declval<Lyt>().get_synchronization_element(std::declval<clock_zone<Lyt>>())),
-                         decltype(std::declval<Lyt>().num_se())>>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_synchronization_elements_v = has_synchronization_elements<Lyt>::value;
-#pragma endregion
 
 /**
  * Cell-level layouts
@@ -578,74 +367,21 @@ inline constexpr bool has_synchronization_elements_v = has_synchronization_eleme
 template <typename Lyt>
 using cell = typename Lyt::cell;
 
-template <typename Lyt>
-using technology = typename Lyt::technology;
-
-template <typename CoordinateType>
-inline constexpr const bool is_offset_coord_v = std::is_same_v<CoordinateType, layouts::coords::offset>;
-template <typename CoordinateType>
-inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, layouts::coords::cube>;
-
-template <typename Lyt>
-inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca::qca_technology>;
-template <typename Lyt>
-inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Lyt>, inml::inml_technology>;
-template <typename Lyt>
-inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb::sidb_technology>;
-template <typename Lyt>
-inline constexpr const bool has_mol_qca_technology_v = std::is_same_v<technology<Lyt>, qca::mol_qca_technology>;
-template <typename Lyt>
-inline constexpr const bool has_offset_coord_v = is_offset_coord_v<coordinate<Lyt>>;
-template <typename Lyt>
-inline constexpr const bool has_cube_coord_v = is_cube_coord_v<coordinate<Lyt>>;
-
-#pragma region is_cell_level_layout
+#pragma region is_cell_grid
 template <class Lyt, class = void>
-struct is_cell_level_layout : std::false_type
+struct is_cell_grid : std::false_type
 {};
 
 template <class Lyt>
-struct is_cell_level_layout<
-    Lyt, std::enable_if_t<is_clocked_layout_v<Lyt>,
-                          std::void_t<typename Lyt::base_type, cell<Lyt>, typename Lyt::cell_type,
-                                      typename Lyt::cell_mode, technology<Lyt>, typename Lyt::storage,
-                                      decltype(std::declval<Lyt>().get_cell_type(cell<Lyt>())),
-                                      decltype(std::declval<Lyt>().is_empty_cell(cell<Lyt>())),
-                                      decltype(std::declval<Lyt>().get_cell_mode(cell<Lyt>())),
-                                      decltype(std::declval<Lyt>().get_cell_name(cell<Lyt>()))>>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool is_cell_level_layout_v = is_cell_level_layout<Lyt>::value;
-#pragma endregion
-
-#pragma region has_is_empty_cell
-template <class Lyt, class = void>
-struct has_is_empty_cell : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_empty_cell<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty_cell(std::declval<cell<Lyt>>()))>>
+struct is_cell_grid<Lyt, std::enable_if_t<std::is_base_of_v<layouts::cell_grid<typename Lyt::cell_type>, Lyt>>>
         : std::true_type
 {};
 
+/**
+ * Whether `Lyt` is a cell grid layout, i.e., a QCA, molQCA, or iNML layout that derives from `layouts::cell_grid`.
+ */
 template <class Lyt>
-inline constexpr bool has_is_empty_cell_v = has_is_empty_cell<Lyt>::value;
-#pragma endregion
-
-#pragma region has_foreach_cell
-template <class Lyt, class = void>
-struct has_foreach_cell : std::false_type
-{};
-
-template <class Lyt>
-struct has_foreach_cell<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_cell(std::declval<void(cell<Lyt>, uint32_t)>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_foreach_cell_v = has_foreach_cell<Lyt>::value;
+inline constexpr bool is_cell_grid_v = is_cell_grid<Lyt>::value;
 #pragma endregion
 
 #pragma region has_set_layout_name
@@ -704,7 +440,7 @@ struct is_gate_level_layout : std::false_type
 
 template <class Lyt>
 struct is_gate_level_layout<
-    Lyt, std::enable_if_t<std::conjunction_v<is_clocked_layout<Lyt>, mockturtle::is_network_type<Lyt>>,
+    Lyt, std::enable_if_t<std::conjunction_v<is_coordinate_layout<Lyt>, mockturtle::is_network_type<Lyt>>,
                           std::void_t<typename Lyt::base_type, tile<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 
@@ -712,94 +448,9 @@ template <class Lyt>
 inline constexpr bool is_gate_level_layout_v = is_gate_level_layout<Lyt>::value;
 #pragma endregion
 
-#pragma region has_is_gate_tile
-template <class Lyt, class = void>
-struct has_is_gate_tile : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_gate_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().is_gate_tile(std::declval<tile<Lyt>>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_is_gate_tile_v = has_is_gate_tile<Lyt>::value;
-#pragma endregion
-
-#pragma region has_is_wire_tile
-template <class Lyt, class = void>
-struct has_is_wire_tile : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_wire_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().is_wire_tile(std::declval<tile<Lyt>>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_is_wire_tile_v = has_is_wire_tile<Lyt>::value;
-#pragma endregion
-
-#pragma region has_is_empty_tile
-template <class Lyt, class = void>
-struct has_is_empty_tile : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_empty_tile<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty_tile(std::declval<tile<Lyt>>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_is_empty_tile_v = has_is_empty_tile<Lyt>::value;
-#pragma endregion
-
-#pragma region has_is_empty
-template <class Lyt, class = void>
-struct has_is_empty : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_empty<Lyt, std::void_t<decltype(std::declval<Lyt>().is_empty())>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_is_empty_v = has_is_empty<Lyt>::value;
-#pragma endregion
-
 /**
  * Obstruction layout
  */
-
-#pragma region has_is_obstructed_coordinate
-template <class Lyt, class = void>
-struct has_is_obstructed_coordinate : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_obstructed_coordinate<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().is_obstructed_coordinate(std::declval<coordinate<Lyt>>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_is_obstructed_coordinate_v = has_is_obstructed_coordinate<Lyt>::value;
-#pragma endregion
-
-#pragma region has_is_obstructed_connection
-template <class Lyt, class = void>
-struct has_is_obstructed_connection : std::false_type
-{};
-
-template <class Lyt>
-struct has_is_obstructed_connection<Lyt, std::void_t<decltype(std::declval<Lyt>().is_obstructed_connection(
-                                             std::declval<coordinate<Lyt>>(), std::declval<coordinate<Lyt>>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_is_obstructed_connection_v = has_is_obstructed_connection<Lyt>::value;
-#pragma endregion
 
 /**
  * Gate libraries
@@ -836,23 +487,6 @@ struct has_get_gate_ports<
 
 template <class Lib>
 inline constexpr bool has_get_gate_ports_v = has_get_gate_ports<Lib>::value;
-#pragma endregion
-
-#pragma region has_post_layout_optimization
-template <class Lib, class Lyt, class = void>
-struct has_post_layout_optimization : std::false_type
-{};
-
-template <class Lib, class Lyt>
-struct has_post_layout_optimization<
-    Lib, Lyt,
-    std::enable_if_t<std::conjunction_v<is_cell_level_layout<Lyt>, std::is_same<technology<Lib>, technology<Lyt>>>,
-                     std::void_t<decltype(std::declval<Lib>().post_layout_optimization(std::declval<Lyt>))>>>
-        : std::true_type
-{};
-
-template <class Lib, class Lyt>
-inline constexpr bool has_post_layout_optimization_v = has_post_layout_optimization<Lib, Lyt>::value;
 #pragma endregion
 
 /**

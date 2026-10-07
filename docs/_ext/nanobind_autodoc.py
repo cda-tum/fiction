@@ -18,6 +18,7 @@ from typing_extensions import override
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
+    from sphinx.config import Config
     from sphinx.ext.autodoc import Documenter, Options
     from sphinx.util.typing import ExtensionMetadata
 
@@ -111,13 +112,18 @@ def prepare_docstring(_app: Sphinx, _what: str, name: str, _obj: object, _option
     lines[:] = result
 
 
+def register_documenters(app: Sphinx, _config: Config) -> None:
+    """Register nanobind renderers after Sphinx installs its default renderers."""
+    app.add_autodocumenter(NanobindMethodDocumenter)
+    app.add_autodocumenter(NanobindClassDocumenter, override=True)
+
+
 def setup(app: Sphinx) -> ExtensionMetadata:
     """Register the bound-method documenter and generated-docstring adapter.
 
     Returns:
         Parallel-build support for the stateless extension.
     """
-    app.add_autodocumenter(NanobindMethodDocumenter)
-    app.add_autodocumenter(NanobindClassDocumenter, override=True)
+    app.connect("config-inited", register_documenters, priority=800)
     app.connect("autodoc-process-docstring", prepare_docstring, priority=400)
     return {"parallel_read_safe": True, "parallel_write_safe": True}
