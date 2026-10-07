@@ -56,6 +56,23 @@ TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-de
     CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params), unsuccessful_gate_design_error);
 }
 
+TEST_CASE("Circuit design rejects unsupported gates before gate search", "[on-the-fly-circuit-design]")
+{
+    hex_gate_clk_lyt                 gate_layout{arrangement::EVEN_ROW, {3, 2}, clocking::row()};
+    const auto                       first    = gate_layout.create_pi("a", {0, 0});
+    const auto                       second   = gate_layout.create_pi("b", {1, 0});
+    const auto                       third    = gate_layout.create_pi("c", {2, 0});
+    const auto                       majority = gate_layout.create_maj(first, second, third, {1, 1});
+    on_the_fly_circuit_design_params params{};
+    params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
+
+    CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params),
+                    fcn::unsupported_gate_type_exception<tile<hex_gate_clk_lyt>>);
+    CHECK(gate_layout.num_pis() == 3);
+    CHECK(gate_layout.is_maj(majority.object));
+    CHECK(gate_layout.source({majority.object, 0}) == first);
+}
+
 TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-circuit-design]")
 {
     hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};

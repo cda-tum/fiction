@@ -86,8 +86,7 @@ void on_the_fly_circuit_design(nanobind::module_& m)
         // NOLINTNEXTLINE(performance-unnecessary-value-param): Own parameters while Python can mutate the original.
         [](const py_hexagonal_gate_layout& layout, const circuit_params params)
         {
-            // Gate layouts share storage on copy; clone before releasing the GIL so Python edits cannot race the
-            // design.
+            // Own the layout before releasing the GIL so Python edits cannot race the design.
             const auto                   snapshot = layout.clone();
             const py::gil_scoped_release release{};
 

@@ -168,6 +168,20 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
   public:
     explicit on_the_fly_gate_library() = delete;
     /**
+     * @brief Returns whether an object's function has an on-the-fly Bestagon implementation.
+     * @tparam GateLyt Gate-level layout type.
+     * @param lyt Layout that owns the object.
+     * @param object Object to inspect.
+     * @return Whether the object implements identity, INV, or a supported binary function.
+     */
+    template <typename GateLyt>
+    [[nodiscard]] static bool is_supported_gate_type(const GateLyt& lyt, const typename GateLyt::object_id object)
+    {
+        return lyt.is_buf(object) || lyt.is_inv(object) || lyt.is_and(object) || lyt.is_or(object) ||
+               lyt.is_nand(object) || lyt.is_nor(object) || lyt.is_xor(object) || lyt.is_xnor(object) ||
+               lyt.is_ge(object) || lyt.is_le(object) || lyt.is_gt(object) || lyt.is_lt(object);
+    }
+    /**
      * @brief Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
      * information from the stored grid into account to design the correct gate representation for that tile. In
      * case there is no possible SiDB design, the function throws `gate_design_exception`.
@@ -201,6 +215,10 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
             throw fcn::unsupported_gate_type_exception(t);
         }
         const auto n = *object;
+        if (!is_supported_gate_type(lyt, n))
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
         const auto f = lyt.node_function(n);
         const auto p = skeleton_bestagon_library::determine_port_routing(lyt, t);
 
@@ -345,14 +363,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                 return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
             }
 
-            /**
-             * @brief Whether the node implements a supported binary gate.
-             */
-            const auto is_supported_binary_gate = lyt.is_and(n) || lyt.is_or(n) || lyt.is_nand(n) || lyt.is_nor(n) ||
-                                                  lyt.is_xor(n) || lyt.is_xnor(n) || lyt.is_ge(n) || lyt.is_le(n) ||
-                                                  lyt.is_gt(n) || lyt.is_lt(n);
-
-            if (is_supported_binary_gate)
+            if (is_supported_gate_type(lyt, n))
             {
                 const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
 
