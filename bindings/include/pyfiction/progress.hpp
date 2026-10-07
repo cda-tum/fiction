@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <array>
+
+#include <Python.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>  // NOLINT(misc-include-cleaner): exposes Python callback references
 
@@ -144,10 +147,14 @@ nanobind::type_slots progress_type_slots()
     /**
      * @brief Garbage collection callbacks for this parameter type.
      */
-    static const PyType_Slot slots[] = {{Py_tp_traverse, reinterpret_cast<void*>(detail::progress_traverse<Params>)},
-                                        {Py_tp_clear, reinterpret_cast<void*>(detail::progress_clear<Params>)},
-                                        {0, nullptr}};
-    return nanobind::type_slots{slots};
+    // CPython stores callback pointers in PyType_Slot::pfunc, whose ABI type is void*.
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
+    static const std::array<PyType_Slot, 3> slots = {
+        {{.slot = Py_tp_traverse, .pfunc = reinterpret_cast<void*>(detail::progress_traverse<Params>)},
+         {.slot = Py_tp_clear, .pfunc = reinterpret_cast<void*>(detail::progress_clear<Params>)},
+         {.slot = 0, .pfunc = nullptr}}};
+    // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
+    return nanobind::type_slots{slots.data()};
 }
 
 }  // namespace pyfiction

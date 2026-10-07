@@ -37,14 +37,12 @@ namespace detail
 template <typename Lyt>
 void write_fgl_layout(nanobind::module_& m)
 {
-    namespace py = nanobind;
-
     m.def(
         "write_fgl_layout",
         [](const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
-        { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename, on_progress); }, py::arg("layout"),
-        py::arg("filename"), py::arg("on_progress").none() = py::none(), DOC(fiction_layouts_io_write_fgl_layout_2),
-        py::call_guard<py::gil_scoped_release>());
+        { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename, on_progress); }, nanobind::arg("layout"),
+        nanobind::arg("filename"), nanobind::arg("on_progress").none() = nanobind::none(),
+        DOC(fiction_layouts_io_write_fgl_layout_2), nanobind::call_guard<nanobind::gil_scoped_release>());
 }
 
 }  // namespace detail

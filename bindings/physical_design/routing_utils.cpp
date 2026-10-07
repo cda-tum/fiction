@@ -21,8 +21,8 @@
 #include <fiction/traits.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>

@@ -21,6 +21,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -374,7 +375,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
              {
                  std::vector<typename GateLyt::object_id> pis{};
                  pis.reserve(lyt.num_pis());
-                 lyt.foreach_pi([&pis, &lyt](const auto& pi) { pis.push_back(pi); });
+                 lyt.foreach_pi([&pis](const auto& pi) { pis.push_back(pi); });
                  return pis;
              })
         .def("pos",
@@ -382,7 +383,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
              {
                  std::vector<typename GateLyt::object_id> pos{};
                  pos.reserve(lyt.num_pos());
-                 lyt.foreach_po([&pos, &lyt](const auto& po) { pos.push_back(po); });
+                 lyt.foreach_po([&pos](const auto& po) { pos.push_back(po); });
                  return pos;
              })
         .def("gates",
@@ -390,7 +391,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
              {
                  std::vector<typename GateLyt::object_id> gates{};
                  gates.reserve(lyt.num_gates());
-                 lyt.foreach_gate([&gates, &lyt](const auto& g) { gates.push_back(g); });
+                 lyt.foreach_gate([&gates](const auto& g) { gates.push_back(g); });
                  return gates;
              })
         .def("wires",
@@ -398,7 +399,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
              {
                  std::vector<typename GateLyt::object_id> wires{};
                  wires.reserve(lyt.num_wires());
-                 lyt.foreach_wire([&wires, &lyt](const auto& w) { wires.push_back(w); });
+                 lyt.foreach_wire([&wires](const auto& w) { wires.push_back(w); });
                  return wires;
              })
 
@@ -548,27 +549,27 @@ void gate_level_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
     /** @brief Layout-local object identity. */
-    using Id = fiction::layouts::layout_object_id;
+    using object_id = fiction::layouts::layout_object_id;
     /** @brief Numbered output endpoint. */
-    using Output = fiction::layouts::layout_output_port;
+    using output_port = fiction::layouts::layout_output_port;
     /** @brief Ordered input endpoint. */
-    using Input = fiction::layouts::layout_input_port;
-    py::class_<Id>(m, "LayoutObjectId", "Layout-local generation-checked object identity.")
+    using input_port = fiction::layouts::layout_input_port;
+    py::class_<object_id>(m, "LayoutObjectId", "Layout-local generation-checked object identity.")
         .def(py::init<uint32_t, uint32_t>(), py::arg("index"), py::arg("generation"))
-        .def_ro("index", &Id::index)
-        .def_ro("generation", &Id::generation)
-        .def("__eq__", [](const Id a, const Id b) { return a == b; })
-        .def("__hash__", [](const Id id) { return std::hash<Id>{}(id); });
-    py::class_<Output>(m, "LayoutOutputPort", "An object's numbered output port.")
-        .def(py::init<Id, uint32_t>(), py::arg("object"), py::arg("index") = 0)
-        .def_ro("object", &Output::object)
-        .def_ro("index", &Output::index)
-        .def("__eq__", [](const Output a, const Output b) { return a == b; });
-    py::class_<Input>(m, "LayoutInputPort", "An object's ordered input port.")
-        .def(py::init<Id, uint32_t>(), py::arg("object"), py::arg("index"))
-        .def_ro("object", &Input::object)
-        .def_ro("index", &Input::index)
-        .def("__eq__", [](const Input a, const Input b) { return a == b; });
+        .def_ro("index", &object_id::index)
+        .def_ro("generation", &object_id::generation)
+        .def("__eq__", [](const object_id a, const object_id b) { return a == b; })
+        .def("__hash__", [](const object_id id) { return std::hash<object_id>{}(id); });
+    py::class_<output_port>(m, "LayoutOutputPort", "An object's numbered output port.")
+        .def(py::init<object_id, uint32_t>(), py::arg("object"), py::arg("index") = 0)
+        .def_ro("object", &output_port::object)
+        .def_ro("index", &output_port::index)
+        .def("__eq__", [](const output_port a, const output_port b) { return a == b; });
+    py::class_<input_port>(m, "LayoutInputPort", "An object's ordered input port.")
+        .def(py::init<object_id, uint32_t>(), py::arg("object"), py::arg("index"))
+        .def_ro("object", &input_port::object)
+        .def_ro("index", &input_port::index)
+        .def("__eq__", [](const input_port a, const input_port b) { return a == b; });
 
     /**
      * Gate-level clocked Cartesian layout.

@@ -34,8 +34,6 @@ namespace detail
 template <typename NtkOrLyt>
 void count_gate_types(nanobind::module_& m)
 {
-    namespace py = nanobind;
-
     m.def(
         "count_gate_types",
         [](const NtkOrLyt& ntk_or_lyt)
@@ -44,7 +42,7 @@ void count_gate_types(nanobind::module_& m)
             fiction::verification::count_gate_types(ntk_or_lyt, &stats);
             return stats;
         },
-        py::arg("ntk_or_lyt"), DOC(fiction_verification_count_gate_types));
+        nanobind::arg("ntk_or_lyt"), DOC(fiction_verification_count_gate_types));
 }
 
 }  // namespace detail

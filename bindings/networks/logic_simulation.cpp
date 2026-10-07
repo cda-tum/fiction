@@ -50,8 +50,6 @@ namespace detail
 template <typename NtkOrLyt>
 void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
 {
-    namespace py = nanobind;
-
     /**
      * @brief Simulate outputs in declaration order, including repeated labels.
      */
@@ -90,11 +88,11 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
             });
         return result;
     };
-    m.def("simulate_outputs", outputs, py::arg(type_name.c_str()),
+    m.def("simulate_outputs", outputs, nanobind::arg(type_name.c_str()),
           "Return (name, bits) pairs in output declaration order, preserving duplicate labels. "
           "Truth-table storage grows exponentially with the input count; fewer than 38 inputs "
           "is a representation bound, not a memory guarantee.",
-          py::call_guard<py::gil_scoped_release>());
+          nanobind::call_guard<nanobind::gil_scoped_release>());
     m.def(
         "simulate",
         [outputs](const NtkOrLyt& ntk)
@@ -106,7 +104,7 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
             }
             return result;
         },
-        py::arg(type_name.c_str()), py::call_guard<py::gil_scoped_release>());
+        nanobind::arg(type_name.c_str()), nanobind::call_guard<nanobind::gil_scoped_release>());
 }
 
 }  // namespace detail

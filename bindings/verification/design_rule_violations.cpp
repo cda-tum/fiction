@@ -41,8 +41,6 @@ namespace detail
 template <typename Lyt>
 void gate_level_drvs_impl(nanobind::module_& m)
 {
-    namespace py = nanobind;
-
     m.def(
         "gate_level_drvs",
         [](const Lyt& lyt, fiction::verification::gate_level_drv_params params = {}, const bool print_report = false,
@@ -54,7 +52,7 @@ void gate_level_drvs_impl(nanobind::module_& m)
             fiction::verification::gate_level_drv_stats stats{};
 
             {
-                const py::gil_scoped_release release{};
+                const nanobind::gil_scoped_release release{};
                 fiction::verification::gate_level_drvs(lyt, params, &stats);
             }
 
@@ -70,8 +68,9 @@ void gate_level_drvs_impl(nanobind::module_& m)
 
             return {stats.warnings, stats.drvs};
         },
-        py::arg("layout"), py::arg("params") = fiction::verification::gate_level_drv_params{},
-        py::arg("print_report") = false, py::arg("statistics") = nullptr, DOC(fiction_verification_gate_level_drvs));
+        nanobind::arg("layout"), nanobind::arg("params") = fiction::verification::gate_level_drv_params{},
+        nanobind::arg("print_report") = false, nanobind::arg("statistics") = nullptr,
+        DOC(fiction_verification_gate_level_drvs));
 }
 
 }  // namespace detail

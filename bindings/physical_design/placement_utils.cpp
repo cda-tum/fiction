@@ -17,6 +17,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/placement_utils.hpp>
+#include <fiction/traits.hpp>
 
 #include <mockturtle/traits.hpp>
 

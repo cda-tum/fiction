@@ -22,8 +22,8 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/graph/graph_coloring.hpp>
 
+#include <cstdint>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>

@@ -35,8 +35,6 @@ namespace detail
 template <typename Lyt>
 void critical_path_length_and_throughput_impl(nanobind::module_& m)
 {
-    namespace py = nanobind;
-
     m.def(
         "critical_path_length_and_throughput",
         [](const Lyt& lyt) -> std::pair<uint64_t, uint64_t>
@@ -45,7 +43,7 @@ void critical_path_length_and_throughput_impl(nanobind::module_& m)
 
             return {result.critical_path_length, result.throughput};
         },
-        py::arg("layout"), py::call_guard<py::gil_scoped_release>(),
+        nanobind::arg("layout"), nanobind::call_guard<nanobind::gil_scoped_release>(),
         DOC(fiction_verification_critical_path_length_and_throughput));
 }
 
