@@ -18,6 +18,7 @@ from rich.table import Table
 
 from mnt.fiction.cli.commands.io.tt import _table_from_string
 from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.opdom_plotting import atomic_output, plot_arguments, validate_outputs, write_plot
 from mnt.fiction.cli.parsing import finite_float, integer, positive_float, positive_int
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
@@ -46,6 +47,8 @@ from mnt.pyfiction.sidb.simulation.logic import (
     sweep_parameter,
 )
 
+from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
+
 if TYPE_CHECKING:
     import argparse
 
@@ -54,9 +57,6 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.session import Session
     from mnt.pyfiction.sidb import sidb_layout
     from mnt.pyfiction.synthesis import dynamic_truth_table
-from mnt.fiction.cli.opdom_plotting import atomic_output, plot_arguments, validate_outputs, write_plot
-
-from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
 
 SWEEPS = {
     "epsilon_r": sweep_parameter.EPSILON_R,
