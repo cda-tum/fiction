@@ -57,7 +57,7 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<cartesian_layout<>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, double, std::string>
@@ -112,8 +112,8 @@ int main()  // NOLINT
             // calculate bounding box
             const auto bounding_box = bounding_box_2d(*gate_level_layout);
 
-            const auto width  = bounding_box.get_x_size() + 1;
-            const auto height = bounding_box.get_y_size() + 1;
+            const auto width  = static_cast<uint64_t>(bounding_box.get_x_size()) + 1;
+            const auto height = static_cast<uint64_t>(bounding_box.get_y_size()) + 1;
             const auto area   = width * height;
 
             // log results

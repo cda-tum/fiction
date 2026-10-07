@@ -17,7 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/tile_clocking.hpp>
 #include <fiction/technology/inml/layout.hpp>
 
@@ -69,8 +69,8 @@ TEST_CASE("Clock zones are tiles on every layer", "[tile-clocking]")
     // a layout provides the geometry that clocking::twoddwave needs
     const inml::layout lyt{{4, 4}, clocking::twoddwave(), "", 2, 2};
 
-    CHECK(lyt.get_clock_zone({3, 2}) == coords::offset{1, 1});
-    CHECK(lyt.get_clock_zone({3, 2, 1}) == coords::offset{1, 1});
+    CHECK(lyt.get_clock_zone({3, 2}) == layout_base::coordinate{1, 1});
+    CHECK(lyt.get_clock_zone({3, 2, 1}) == layout_base::coordinate{1, 1});
 
     CHECK(lyt.get_clock_number({0, 0}) == 0);
     CHECK(lyt.get_clock_number({1, 1}) == 0);

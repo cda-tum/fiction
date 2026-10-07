@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <ostream>
@@ -305,7 +306,8 @@ class write_qll_layout_impl
 
     void write_layout()
     {
-        utils::progress_reporter               progress{on_progress, "writing rows", (lyt.y() + 1) * (lyt.z() + 1)};
+        utils::progress_reporter progress{
+            on_progress, "writing rows", static_cast<std::size_t>(lyt.y() + 1) * static_cast<std::size_t>(lyt.z() + 1)};
         std::unordered_set<typename Lyt::cell> skip{};
 
         os << qll::OPEN_LAYOUT;

@@ -20,7 +20,6 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/mol_qca/layout.hpp"
 #include "fiction/technology/qca/layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -38,7 +37,7 @@ using namespace fiction::qca;
 
 TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const gate_layout layout{gate_layout::aspect_ratio{2, 2}, clocking::open(clocking::num_clks::FOUR)};
 
@@ -59,7 +58,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open(clocking::num_clks::FOUR)};
 
@@ -110,7 +109,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 

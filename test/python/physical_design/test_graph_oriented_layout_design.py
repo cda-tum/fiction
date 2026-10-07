@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from mnt.pyfiction.physical_design import (
     gold_cost_objective,
     gold_effort_mode,
@@ -88,6 +90,16 @@ def test_graph_oriented_layout_design_with_different_parameters(mux21):
     assert layout is not None
 
     assert equivalence_checking(mux21, layout) != eq_type.NO
+
+
+@pytest.mark.parametrize("skip", [-1, 2**20 + 1])
+def test_graph_oriented_layout_design_rejects_pi_spacing_outside_of_its_range(mux21, skip):
+    params = graph_oriented_layout_design_params()
+    params.return_first = True
+    params.tiles_to_skip_between_pis = skip
+
+    with pytest.raises(ValueError, match="tiles_to_skip_between_pis"):
+        graph_oriented_layout_design(mux21, params)
 
 
 def test_graph_oriented_layout_design_with_custom_cost_function(mux21):

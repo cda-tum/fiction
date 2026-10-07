@@ -58,7 +58,7 @@ static Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt = gate_level_layout<cartesian_layout<>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint64_t, size_t, size_t, float, uint64_t, uint64_t, float, uint64_t, uint64_t,
@@ -110,9 +110,11 @@ int main()  // NOLINT
         // calculate bounding box
         const auto bounding_box_before_wiring_reduction = bounding_box_2d(gate_level_layout);
 
-        const auto width_before_wiring_reduction  = bounding_box_before_wiring_reduction.get_x_size() + 1;
-        const auto height_before_wiring_reduction = bounding_box_before_wiring_reduction.get_y_size() + 1;
-        const auto area_before_wiring_reduction   = width_before_wiring_reduction * height_before_wiring_reduction;
+        const auto width_before_wiring_reduction =
+            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_x_size()) + 1;
+        const auto height_before_wiring_reduction =
+            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_y_size()) + 1;
+        const auto area_before_wiring_reduction = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
         wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
@@ -144,9 +146,11 @@ int main()  // NOLINT
         // calculate bounding box
         const auto bounding_box_after_wiring_reduction = bounding_box_2d(gate_level_layout);
 
-        const auto width_after_wiring_reduction  = bounding_box_after_wiring_reduction.get_x_size() + 1;
-        const auto height_after_wiring_reduction = bounding_box_after_wiring_reduction.get_y_size() + 1;
-        const auto area_after_wiring_reduction   = width_after_wiring_reduction * height_after_wiring_reduction;
+        const auto width_after_wiring_reduction =
+            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_x_size()) + 1;
+        const auto height_after_wiring_reduction =
+            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_y_size()) + 1;
+        const auto area_after_wiring_reduction = width_after_wiring_reduction * height_after_wiring_reduction;
 
         const float improv_wires =
             100 * static_cast<float>((num_wires - num_wires_after)) / static_cast<float>(num_wires);

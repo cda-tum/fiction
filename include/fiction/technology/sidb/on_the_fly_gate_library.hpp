@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -204,11 +204,11 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
         // is chosen.
         const auto center_cell =
             to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size()>(
-                lyt, t, layouts::coords::cube{gate_x_size() / 2, gate_y_size() / 2}));
+                lyt, t, layouts::layout_base::coordinate{gate_x_size() / 2, gate_y_size() / 2}));
         // center cell of the current tile
         const auto absolute_cell =
             to_lattice_site(layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size()>(
-                lyt, t, layouts::coords::cube{0, 0}));
+                lyt, t, layouts::layout_base::coordinate{0, 0}));
 
         auto complex_gate_param                                      = params;
         complex_gate_param.design_gate_params.number_of_canvas_sidbs = params.canvas_sidb_complex_gates;

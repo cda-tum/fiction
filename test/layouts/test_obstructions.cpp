@@ -19,8 +19,8 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 
 using namespace fiction;
@@ -28,11 +28,11 @@ using namespace fiction::layouts;
 
 TEST_CASE("Coordinate obstruction: Cartesian layout", "[obstruction-layout]")
 {
-    using layout = cartesian_layout<coords::offset>;
+    using layout = cartesian_layout;
 
     const layout lyt{{4, 4}};
 
-    obstructions<coords::offset> obstr_lyt{};
+    obstructions obstr_lyt{};
 
     lyt.foreach_coordinate([&obstr_lyt](const auto& c) { CHECK(!obstr_lyt.is_obstructed_coordinate(c)); });
 
@@ -72,7 +72,7 @@ TEST_CASE("Coordinate obstruction: Cartesian layout", "[obstruction-layout]")
 
 TEST_CASE("Coordinate obstruction: Gate-level layout", "[obstruction-layout]")
 {
-    using layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using layout = gate_level_layout<cartesian_layout>;
 
     const auto lyt = blueprints::xor_maj_gate_layout<layout>();
 
@@ -134,11 +134,11 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
 {
     SECTION("Cartesian layout")
     {
-        using layout = cartesian_layout<coords::offset>;
+        using layout = cartesian_layout;
 
         const layout lyt{{4, 4}};
 
-        obstructions<coords::offset> obstr_lyt{};
+        obstructions obstr_lyt{};
 
         lyt.foreach_coordinate(
             [&obstr_lyt, &lyt](const auto& c)
@@ -188,7 +188,7 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     }
     SECTION("Gate-level layout")
     {
-        using layout = gate_level_layout<cartesian_layout<coords::offset>>;
+        using layout = gate_level_layout<cartesian_layout>;
 
         const auto lyt = blueprints::xor_maj_gate_layout<layout>();
 

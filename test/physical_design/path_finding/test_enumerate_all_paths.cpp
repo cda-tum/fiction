@@ -18,8 +18,8 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
@@ -31,7 +31,7 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 {
-    using lyt  = cartesian_layout<coords::offset>;
+    using lyt  = cartesian_layout;
     using path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -126,7 +126,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
 TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 {
-    using lyt  = cartesian_layout<coords::offset>;
+    using lyt  = cartesian_layout;
     using path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -171,7 +171,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
     using path     = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
@@ -180,8 +180,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 
         SECTION("(0,0) to (3,3) with coordinate obstruction")  // 108 valid paths
         {
-            auto                                          obstr_lyt = static_cast<cartesian_layout<>>(layout);
-            obstructions<coordinate<decltype(obstr_lyt)>> search_obstructions{};
+            auto         obstr_lyt = static_cast<cartesian_layout>(layout);
+            obstructions search_obstructions{};
 
             // mark coordinate as obstructed
             search_obstructions.obstruct_coordinate({3, 0});  // blocks 75 paths
@@ -231,7 +231,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 
 TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
     using path     = layout_coordinate_path<gate_lyt>;
 
     // enable crossings
@@ -350,7 +350,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
 
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruction", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_lyt = gate_level_layout<cartesian_layout>;
     using path     = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
@@ -359,8 +359,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
 
         SECTION("(0,0) to (3,3) with connection obstruction")  // 108 valid paths
         {
-            auto                                          obstr_lyt = static_cast<cartesian_layout<>>(layout);
-            obstructions<coordinate<decltype(obstr_lyt)>> search_obstructions{};
+            auto         obstr_lyt = static_cast<cartesian_layout>(layout);
+            obstructions search_obstructions{};
 
             // create a connection obstruction
             search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 75 paths
@@ -379,8 +379,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // 19 valid paths
             {
-                auto                                          obstr_lyt = layout;
-                obstructions<coordinate<decltype(obstr_lyt)>> search_obstructions{};
+                const auto&  obstr_lyt = layout;
+                obstructions search_obstructions{};
 
                 // create a connection obstruction
                 search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 1 path
@@ -397,8 +397,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // 1 valid path
             {
-                auto                                          obstr_lyt = layout;
-                obstructions<coordinate<decltype(obstr_lyt)>> search_obstructions{};
+                const auto&  obstr_lyt = layout;
+                obstructions search_obstructions{};
 
                 // create a PI as obstruction
                 search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths

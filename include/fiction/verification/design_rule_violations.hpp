@@ -360,7 +360,7 @@ class gate_level_drvs_impl
                     if (!lyt.is_constant(n))
                     {
                         // if a node is alive but placed on a dead tile (e.g. not placed at all)
-                        if (lyt.get_tile(n).is_dead())
+                        if (!lyt.get_tile(n).is_valid())
                         {
                             all_placed = false;
                             log_node(n, unplaced_report);

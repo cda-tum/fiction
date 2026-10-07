@@ -56,7 +56,7 @@ void check_common_traits()
 // shifted_cartesian_layout is a hexagonal_layout
 TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
 {
-    check_common_traits<shifted_cartesian_layout<>>();
+    check_common_traits<shifted_cartesian_layout>();
 }
 
 TEST_CASE("Shifted Cartesian layout arrangement", "[shifted-cartesian-layout]")
@@ -64,7 +64,7 @@ TEST_CASE("Shifted Cartesian layout arrangement", "[shifted-cartesian-layout]")
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    const shifted_cartesian_layout<> lyt{a, {3, 3}};
+    const shifted_cartesian_layout lyt{a, {3, 3}};
 
     CHECK(lyt.get_arrangement() == a);
     CHECK(lyt.clone().get_arrangement() == a);
@@ -72,7 +72,7 @@ TEST_CASE("Shifted Cartesian layout arrangement", "[shifted-cartesian-layout]")
 
 TEST_CASE("Deep copy shifted Cartesian layout", "[shifted-cartesian-layout]")
 {
-    const shifted_cartesian_layout<> original{arrangement::EVEN_ROW, {5, 5, 0}};
+    const shifted_cartesian_layout original{arrangement::EVEN_ROW, {5, 5, 0}};
 
     auto copy = original.clone();
 

@@ -250,7 +250,7 @@ class write_mol_qca_layout_svg_impl
     {
         std::stringstream cell_descriptions{};
 
-        utils::progress_reporter progress{ps.on_progress, "rendering cell positions", (lyt.x() + 1) * (lyt.y() + 1)};
+        utils::progress_reporter progress{ps.on_progress, "rendering cell positions", lyt.area()};
         lyt.foreach_cell_position(
             [this, &cell_descriptions, &progress](const auto& c)
             {

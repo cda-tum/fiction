@@ -27,6 +27,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
@@ -170,14 +171,24 @@ class write_qcc_layout_impl
         return po_list;
     }
 
+    /**
+     * @brief Returns the x axis relative to the bounding box.
+     * @param c Cell coordinate.
+     * @return The relative x axis.
+     */
     [[nodiscard]] auto bb_x(const inml::layout::cell& c) const noexcept
     {
-        return static_cast<decltype(c.x)>(c.x - bb.get_min().x);
+        return c.x - bb.get_min().x;
     }
 
+    /**
+     * @brief Returns the y axis relative to the bounding box.
+     * @param c Cell coordinate.
+     * @return The relative y axis.
+     */
     [[nodiscard]] auto bb_y(const inml::layout::cell& c) const noexcept
     {
-        return static_cast<decltype(c.y)>(c.y - bb.get_min().y);
+        return c.y - bb.get_min().y;
     }
 
     [[nodiscard]] bool has_border_io_pins() const noexcept
@@ -281,7 +292,7 @@ class write_qcc_layout_impl
 
     void write_layout()
     {
-        utils::progress_reporter               progress{ps.on_progress, "writing rows", (lyt.y() + 1)};
+        utils::progress_reporter progress{ps.on_progress, "writing rows", static_cast<std::size_t>(lyt.y() + 1)};
         std::unordered_set<inml::layout::cell> skip{};
 
         os << qcc::OPEN_LAYOUT;
