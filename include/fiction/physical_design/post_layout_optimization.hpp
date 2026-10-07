@@ -37,11 +37,13 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <limits>
 #include <optional>
 #include <ostream>
+#include <stdexcept>
 #include <unordered_set>
 #include <utility>
 #include <vector>

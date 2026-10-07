@@ -198,7 +198,7 @@ class write_qll_layout_impl
      */
     [[nodiscard]] auto bb_x(const typename Lyt::cell& c) const noexcept
     {
-        return static_cast<uint64_t>(static_cast<int64_t>(c.x) - bb.get_min()->x);
+        return static_cast<uint64_t>(static_cast<int64_t>(c.x) - bb.get_min().value_or(typename Lyt::cell{}).x);
     }
 
     /**
@@ -208,7 +208,7 @@ class write_qll_layout_impl
      */
     [[nodiscard]] auto bb_y(const typename Lyt::cell& c) const noexcept
     {
-        return static_cast<uint64_t>(static_cast<int64_t>(c.y) - bb.get_min()->y);
+        return static_cast<uint64_t>(static_cast<int64_t>(c.y) - bb.get_min().value_or(typename Lyt::cell{}).y);
     }
 
     /**

@@ -30,6 +30,8 @@
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
+#include <kitty/bit_operations.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>

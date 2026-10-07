@@ -167,7 +167,9 @@ class network_reader
                             if (!input.is_open())
                             {
                                 if (diag != nullptr)
+                                {
                                     diag->report(lorina::diag_id::ERR_FILE_OPEN).add_argument(file);
+                                }
                                 return lorina::return_code::parse_error;
                             }
                             // Lorina checks string::back before skipping empty BLIF lines.
@@ -177,7 +179,9 @@ class network_reader
                             for (std::string line{}; std::getline(input, line);)
                             {
                                 if (line.find_first_not_of(" \t\r\f\v") != std::string::npos)
+                                {
                                     normalized << line << '\n';
+                                }
                             }
                             return lorina::read_blif(normalized, reader, diag);
                         });

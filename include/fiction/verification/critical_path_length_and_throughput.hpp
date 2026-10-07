@@ -113,7 +113,7 @@ class critical_path_length_and_throughput_impl
                 }
                 result.critical_path_length = std::max(result.critical_path_length, cache.at(po)->length);
             });
-        result.throughput = max_diff / lyt.num_clocks() + 1;
+        result.throughput = (max_diff / lyt.num_clocks()) + 1;
         return result;
     }
 

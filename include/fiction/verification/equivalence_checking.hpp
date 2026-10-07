@@ -31,6 +31,8 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -39,9 +41,9 @@
 namespace fiction::verification
 {
 /**
- * The different equivalence types possible.
+ * @brief Equivalence classification for logic and layout throughput.
  */
-enum class eq_type
+enum class eq_type : uint8_t
 {
     /**
      * `Spec` and `Impl` differ logically, contain required topology defects, or either layout has DRVs.
@@ -221,15 +223,14 @@ class equivalence_checking_impl
             }
             else
             {
-                std::cout << "[e] resource limit exceeded" << std::endl;
+                std::cout << "[e] resource limit exceeded" << '\n';
 
                 return eq_type::NO;
             }
         }
         else
         {
-            std::cout << "[w] both networks/layouts must have the same number of primary inputs and outputs"
-                      << std::endl;
+            std::cout << "[w] both networks/layouts must have the same number of primary inputs and outputs" << '\n';
 
             return eq_type::NO;
         }
@@ -237,7 +238,6 @@ class equivalence_checking_impl
         return pst.eq;
     }
 
-  private:
     /**
      * Specification.
      */

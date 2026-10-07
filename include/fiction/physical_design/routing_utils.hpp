@@ -20,7 +20,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <functional>
+#include <cstdint>
 #include <optional>
 #include <set>
 #include <stdexcept>

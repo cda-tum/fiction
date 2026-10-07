@@ -26,10 +26,9 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
-#include <mockturtle/traits.hpp>
-
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <type_traits>
 #include <utility>

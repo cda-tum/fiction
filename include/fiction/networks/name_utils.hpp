@@ -22,6 +22,7 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 

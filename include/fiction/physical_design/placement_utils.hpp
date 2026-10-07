@@ -32,7 +32,6 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <string>
 
 namespace fiction::physical_design
 {

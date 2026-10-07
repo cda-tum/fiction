@@ -26,7 +26,6 @@
 #include <fmt/format.h>
 #include <phmap.h>
 
-#include <algorithm>
 #include <stdexcept>
 #include <vector>
 

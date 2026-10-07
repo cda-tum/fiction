@@ -32,7 +32,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -391,7 +390,7 @@ class hexagonalization_impl
         {
             HexLyt empty{layouts::arrangement::EVEN_ROW, {}, layouts::clocking::row()};
             empty.set_layout_name(layout.get_layout_name());
-            if (pst)
+            if (pst != nullptr)
             {
                 *pst = {};
             }

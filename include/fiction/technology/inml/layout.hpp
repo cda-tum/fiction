@@ -17,6 +17,7 @@
 #pragma once
 
 #include "fiction/layouts/cell_grid.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/tile_clocking.hpp"
 
 #include <cstdint>
