@@ -1261,11 +1261,12 @@ class gate_level_layout : public CoordinateLayout
         return clocking_state.is_clocking_scheme(name);
     }
     /**
-     * Returns a copy of the stored clocking scheme object.
+     * Returns a read-only reference to the stored clocking scheme object. Clock overrides and scheme replacements
+     * update the referenced object.
      *
-     * @return A copy of the stored clocking scheme object.
+     * @return A reference valid for the lifetime of this layout.
      */
-    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const
+    [[nodiscard]] const clocking_scheme_t& get_clocking_scheme() const noexcept
     {
         return clocking_state.get_clocking_scheme();
     }

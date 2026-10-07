@@ -30,6 +30,7 @@
 #include <new>
 #include <set>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 using namespace fiction;
@@ -166,6 +167,25 @@ TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
     CHECK(copy.height() == 11);
     CHECK(copy.layers() == 2);
     CHECK(copy.is_clocking_scheme(clocking::USE_NAME));
+}
+
+TEST_CASE("Borrowed clocking schemes observe overrides and isolate clones", "[clocked-layout]")
+{
+    /** Clocked gate layout under test. */
+    using clk_lyt = gate_level_layout<cartesian_layout>;
+
+    clk_lyt     original{{6, 6, 1}, clocking::twoddwave()};
+    const auto& scheme = original.get_clocking_scheme();
+    CHECK((std::is_same_v<decltype(original.get_clocking_scheme()), const clk_lyt::clocking_scheme_t&>));
+    CHECK(noexcept(original.get_clocking_scheme()));
+
+    auto copy = original.clone();
+    original.assign_clock_number({0, 0}, 3);
+    CHECK(scheme(0, 0) == 3);
+    CHECK(copy.get_clocking_scheme()(0, 0) == 0);
+    copy.assign_clock_number({0, 0}, 2);
+    CHECK(scheme(0, 0) == 3);
+    CHECK(copy.get_clocking_scheme()(0, 0) == 2);
 }
 
 TEST_CASE("Clock zone assignment", "[clocked-layout]")
