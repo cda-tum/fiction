@@ -36,7 +36,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
     SECTION("coordinate paths")
     {
-        const lyt layout{{1, 1}};
+        const lyt layout{lyt::extent{2, 2, 1}};
 
         SECTION("(0,0) to (1,1)")  // two valid paths
         {
@@ -70,7 +70,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
         SECTION("2DDWave")
         {
-            const clk_lyt layout{{1, 1}, clocking::twoddwave()};
+            const clk_lyt layout{clk_lyt::extent{2, 2, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (1,1)")  // two valid paths
             {
@@ -100,7 +100,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{{1, 1}, clocking::use()};
+            const clk_lyt layout{clk_lyt::extent{2, 2, 1}, clocking::use()};
 
             SECTION("(0,0) to (0,1)")  // one valid path
             {
@@ -131,7 +131,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 
     SECTION("coordinate paths")
     {
-        const lyt layout{{3, 3}};
+        const lyt layout{lyt::extent{4, 4, 1}};
 
         SECTION("(0,0) to (3,3) without obstruction")  // 184 valid paths
         {
@@ -146,7 +146,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 
         SECTION("2DDWave")
         {
-            const clk_lyt layout{{3, 3}, clocking::twoddwave()};
+            const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
             {
@@ -157,7 +157,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{{3, 3}, clocking::use()};
+            const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
             {
@@ -176,7 +176,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 
     SECTION("coordinate paths")
     {
-        const gate_lyt layout{{3, 3}};
+        const gate_lyt layout{gate_lyt::extent{4, 4, 1}};
 
         SECTION("(0,0) to (3,3) with coordinate obstruction")  // 108 valid paths
         {
@@ -196,7 +196,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{{3, 3}, clocking::twoddwave()};
+            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // 19 valid paths
             {
@@ -212,7 +212,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
         }
         SECTION("USE")
         {
-            const gate_lyt layout{{3, 3}, clocking::use()};
+            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // 1 valid path
             {
@@ -243,7 +243,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{2, 2, 1}, clocking::twoddwave()};  // create a crossing layer
+                const gate_lyt layout{gate_lyt::extent{3, 3, 2}, clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
@@ -263,7 +263,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             }
             SECTION("USE")
             {
-                const gate_lyt layout{{2, 2, 1}, clocking::use()};  // create a crossing layer
+                const gate_lyt layout{gate_lyt::extent{3, 3, 2}, clocking::use()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
@@ -289,7 +289,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{3, 3, 1}, clocking::twoddwave()};  // create a crossing layer
+                const gate_lyt layout{gate_lyt::extent{4, 4, 2}, clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
                 {
@@ -322,7 +322,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{3, 2, 1}, clocking::twoddwave()};  // create a crossing layer
+                const gate_lyt layout{gate_lyt::extent{4, 3, 2}, clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
                 {
@@ -355,7 +355,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
 
     SECTION("coordinate paths")
     {
-        const gate_lyt layout{{3, 3}};
+        const gate_lyt layout{gate_lyt::extent{4, 4, 1}};
 
         SECTION("(0,0) to (3,3) with connection obstruction")  // 108 valid paths
         {
@@ -375,7 +375,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{{3, 3}, clocking::twoddwave()};
+            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // 19 valid paths
             {
@@ -393,7 +393,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
         }
         SECTION("USE")
         {
-            const gate_lyt layout{{3, 3}, clocking::use()};
+            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // 1 valid path
             {
