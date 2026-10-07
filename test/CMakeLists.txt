@@ -64,6 +64,10 @@ foreach(FILE IN LISTS FILENAMES)
     target_include_directories(
       ${TEST_NAME}
       PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_include_directories(
+      ${TEST_NAME} SYSTEM
+      PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>
+    )
     target_compile_options(
       ${TEST_NAME}
       PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_COMPILE_OPTIONS>)
