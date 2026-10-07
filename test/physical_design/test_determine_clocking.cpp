@@ -32,21 +32,93 @@
 #include <fiction/traits.hpp>
 
 #include <bill/sat/interface/common.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+
+#include <cstddef>
+#include <cstdlib>
+#include <new>
+#include <optional>
+#include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
+namespace
+{
+/**
+ * Number of successful allocations before the test injects a failure; unset disables injection.
+ */
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables): Test allocation control.
+thread_local std::optional<std::size_t> allocation_budget{};
+}  // namespace
+/**
+ * Allocates memory and injects a failure when the test allocation budget is exhausted.
+ *
+ * @param size Requested byte count.
+ * @return Allocated memory.
+ * @throws std::bad_alloc if allocation fails or the test exhausts its budget.
+ */
+void* operator new(const std::size_t size)
+{
+    if (allocation_budget.has_value())
+    {
+        if (*allocation_budget == 0)
+        {
+            allocation_budget.reset();
+            throw std::bad_alloc{};
+        }
+        --*allocation_budget;
+    }
+    // The global new replacement must use malloc to avoid recursion.
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
+    if (auto* const memory = std::malloc(size == 0 ? 1 : size))
+    {
+        return memory;
+    }
+    throw std::bad_alloc{};
+}
+/**
+ * Releases memory allocated by the test's global allocation replacement.
+ *
+ * @param memory Memory to release.
+ */
+void operator delete(void* const memory) noexcept
+{
+    // Matches malloc in the global new replacement.
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
+    std::free(memory);
+}
+/**
+ * Releases a sized allocation through the matching global deallocator.
+ *
+ * @param memory Memory to release.
+ */
+void operator delete(void* const memory, std::size_t) noexcept
+{
+    ::operator delete(memory);
+}
+/**
+ * @brief Assigns clock zero to every tile.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout to update.
+ */
 template <typename Lyt>
-void remove_clocking(Lyt& lyt) noexcept
+void remove_clocking(Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
+/**
+ * @brief Checks clock assignment with each supported solver.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout to clock and compare.
+ */
 template <typename Lyt>
 void remove_assign_and_check_clocking(Lyt lyt)
 {
@@ -156,5 +228,146 @@ TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-cloc
 
     auto lyt = blueprints::unclockable_gate_layout<gate_layout>();
 
+    const auto scheme = lyt.get_clocking_scheme();
     CHECK(determine_clocking(lyt) == false);
+    CHECK(lyt.get_clocking_scheme() == scheme);
+}
+
+TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[determine-clocking-ports]")
+{
+    using layout = gate_level_layout<cartesian_layout>;
+    layout     lyt{{4, 4}, clocking::twoddwave()};
+    const auto original_scheme = lyt.get_clocking_scheme();
+    SECTION("Missing input outside output dependencies")
+    {
+        lyt.create_buf({1, 1});
+    }
+    SECTION("Nonadjacent declared connection")
+    {
+        const auto pi = lyt.create_pi("a", {0, 0});
+        lyt.create_buf(pi, {3, 3});
+    }
+    SECTION("Outside the frame")
+    {
+        lyt.create_pi("a", {-1, 0});
+    }
+    SECTION("Complete adjacent cycle")
+    {
+        const auto a = lyt.create_buf({0, 0});
+        const auto b = lyt.create_buf(a, {1, 0});
+        const auto c = lyt.create_buf(b, {1, 1});
+        const auto d = lyt.create_buf(c, {0, 1});
+        lyt.connect(d, {a.object, 0});
+    }
+    CHECK_THROWS_AS(determine_clocking(lyt), std::invalid_argument);
+    CHECK(lyt.get_clocking_scheme() == original_scheme);
+}
+
+TEST_CASE("Clock determination uses explicit constants and logical input ports", "[determine-clocking-ports]")
+{
+    using layout = gate_level_layout<cartesian_layout>;
+    layout lyt{{3, 1}, clocking::open()};
+    SECTION("Placed constant without PIs")
+    {
+        const auto constant = lyt.create_node({}, kitty::dynamic_truth_table{0}, {0, 0});
+        lyt.create_po(constant, "zero", {1, 0});
+    }
+    SECTION("Duplicate source input ports")
+    {
+        const auto pi   = lyt.create_pi("a", {0, 0});
+        const auto gate = lyt.create_lt(pi, pi, {1, 0});
+        lyt.create_po(gate, "less", {2, 0});
+    }
+    REQUIRE(determine_clocking(lyt));
+    lyt.foreach_node(
+        [&](const auto id)
+        {
+            lyt.foreach_fanin(id, [&](const auto src)
+                              { CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(src.object))); });
+        });
+}
+
+TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[determine-clocking-ports]")
+{
+    using layout = gate_level_layout<cartesian_layout>;
+    layout lyt{{3, 1, 3}, clocking::open()};
+    SECTION("Floating crossing wire")
+    {
+        const auto pi   = lyt.create_pi("a", {0, 0});
+        const auto wire = lyt.create_buf(pi, {1, 0, 1});
+        lyt.create_po(wire, "out", {2, 0});
+        CHECK_FALSE(lyt.find_object({1, 0}).has_value());
+    }
+    SECTION("Occupied layers with an empty intermediate layer")
+    {
+        for (const auto layer : {0, 2})
+        {
+            const auto pi   = lyt.create_pi("a", {0, 0, layer});
+            const auto wire = lyt.create_buf(pi, {1, 0, layer});
+            lyt.create_po(wire, "out", {2, 0, layer});
+        }
+    }
+    REQUIRE(determine_clocking(lyt));
+    lyt.foreach_node(
+        [&](const auto id)
+        {
+            const auto t = lyt.get_tile(id);
+            CHECK(lyt.get_clock_number(t) == lyt.get_clock_number({t.x, t.y, 0}));
+            lyt.foreach_fanin(id, [&](const auto src) { CHECK(lyt.is_incoming_clocked(t, lyt.get_tile(src.object))); });
+        });
+}
+
+TEST_CASE("Clock determination commits complete clocking values", "[determine-clocking-ports]")
+{
+    using layout = gate_level_layout<cartesian_layout>;
+    layout     original{{3, 1}, clocking::open()};
+    const auto pi   = original.create_pi("a", {0, 0});
+    const auto wire = original.create_buf(pi, {1, 0});
+    const auto po   = original.create_po(wire, "out", {2, 0});
+    original.assign_clock_number({9, 9}, 2);
+    original.assign_synchronization_element({1, 0}, 2);
+    const auto original_scheme = original.get_clocking_scheme();
+    for (std::size_t failure{};; ++failure)
+    {
+        auto candidate = original;
+        try
+        {
+            allocation_budget  = failure;
+            const auto success = determine_clocking(candidate);
+            allocation_budget.reset();
+            REQUIRE(success);
+            CHECK(candidate.get_clock_number({9, 9}) == 2);
+            CHECK(candidate.get_synchronization_element({1, 0}) == 2);
+            CHECK(candidate.source({wire.object, 0}) == pi);
+            CHECK(candidate.source({po.object, 0}) == wire);
+            CHECK(candidate.is_incoming_clocked({1, 0}, {0, 0}));
+            CHECK(candidate.is_incoming_clocked({2, 0}, {1, 0}));
+            break;
+        }
+        catch (const std::bad_alloc&)
+        {
+            allocation_budget.reset();
+            CHECK(candidate.get_clocking_scheme() == original_scheme);
+            CHECK(candidate.get_synchronization_element({1, 0}) == 2);
+            CHECK(candidate.source({wire.object, 0}) == pi);
+            CHECK(candidate.source({po.object, 0}) == wire);
+        }
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+    }
+}
+
+TEST_CASE("Clock determination visits sparse occupancy independently of frame area", "[determine-clocking-ports]")
+{
+    gate_level_layout<cartesian_layout> lyt{{1'000'000, 1'000'000}, clocking::open()};
+    const auto                          pi   = lyt.create_pi("a", {0, 0});
+    const auto                          wire = lyt.create_buf(pi, {1, 0});
+    lyt.create_po(wire, "out", {2, 0});
+    REQUIRE(determine_clocking(lyt));
+    CHECK(lyt.size() == 3);
+    CHECK(lyt.is_incoming_clocked({1, 0}, {0, 0}));
+    CHECK(lyt.is_incoming_clocked({2, 0}, {1, 0}));
 }
