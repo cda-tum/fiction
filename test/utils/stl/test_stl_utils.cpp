@@ -90,3 +90,18 @@ TEST_CASE("Test find_first_two_of with layout_coordinate_paths", "[first_first_t
     CHECK(it3 == p1.begin());
     CHECK(it4 == std::next(p2.begin(), 1));
 }
+
+/** @brief Ranges without a pair have no shared two-element subsequence. */
+TEST_CASE("find_first_two_of rejects ranges shorter than a pair", "[find_first_two_of]")
+{
+    /** @brief Candidate two-element subsequence. */
+    const std::vector<int> pair{1, 2};
+    for (const auto& short_range : {std::vector<int>{}, std::vector<int>{1}})
+    {
+        CHECK(find_first_two_of(short_range.cbegin(), short_range.cend(), pair.cbegin(), pair.cend()) ==
+              short_range.cend());
+        CHECK(find_first_two_of(pair.cbegin(), pair.cend(), short_range.cbegin(), short_range.cend()) == pair.cend());
+        CHECK(find_first_two_of(short_range.cbegin(), short_range.cend(), short_range.cbegin(), short_range.cend()) ==
+              short_range.cend());
+    }
+}
