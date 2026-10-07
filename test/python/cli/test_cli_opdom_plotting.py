@@ -278,3 +278,18 @@ def test_atomic_output_keeps_destination_on_failure(tmp_path: Path) -> None:
     with plotting.atomic_output(path) as temporary:
         temporary.write_text("new")
     assert path.read_text() == "new"
+
+
+@pytest.mark.parametrize("suffix", [".png", ".html"])
+@pytest.mark.parametrize("status", [operational_status.OPERATIONAL, operational_status.NON_OPERATIONAL])
+def test_plot_with_an_empty_status_series(
+    domain: operational_domain, tmp_path: Path, suffix: str, status: operational_status
+) -> None:
+    """A domain without points of one status still plots in 2D and 3D."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    uniform = operational_domain([domain.get_dimension(index) for index in range(domain.get_number_of_dimensions())])
+    for point in domain:
+        uniform[point] = status
+    path = tmp_path / f"domain{suffix}"
+    plotting.write_plot(uniform, path, options())
+    assert path.stat().st_size > 0
