@@ -72,18 +72,19 @@ def test_clock_zone_iteration(make_layout):
         pytest.param(partial(hexagonal_gate_layout, arrangement.EVEN_ROW), id="hexagonal_gate_layout"),
     ],
 )
-def test_fetch_clocking_scheme(layout):
+def test_fetch_clocking_scheme(layout: Callable[..., Any]) -> None:
+    """Construct known clocking schemes and reject unknown names with ValueError."""
     layout((1, 1), "USE")
     layout((2, 2), "2DDWave")
     layout((3, 3), "RES")
     layout((4, 4), "ESR")
     layout((5, 5), "BANCS")
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError, match="clocking scheme"):
         layout((1, 2), "3DDWave")
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError, match="clocking scheme"):
         layout((1, 2), "SUE")
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError, match="clocking scheme"):
         layout((1, 2), "PES")
 
 

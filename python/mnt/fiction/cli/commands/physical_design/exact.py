@@ -50,7 +50,7 @@ def _clocking_scheme(name: str, topology: str) -> str:
     scheme = name.upper()
     try:
         make_gate_layout(topology, (0, 0), scheme)
-    except RuntimeError as error:
+    except ValueError as error:
         msg = f"'{name}' is not a clocking scheme for {topology} layouts; see the CLI documentation for the list"
         raise CommandError(msg) from error
     return scheme
