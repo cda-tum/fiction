@@ -93,14 +93,16 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
     const auto gate_repr = [&layout](const auto& t)
     {
-        if (layout.is_empty_tile(t))
+        /** @brief Occupant at the tile position. */
+        const auto occupant = layout.find_object(t);
+        if (!occupant)
         {
             return "▢";
         }
 
         // NOLINTBEGIN(*-else-after-return)
 
-        if (const auto n = layout.find_object(t).value(); layout.is_and(n))
+        if (const auto n = *occupant; layout.is_and(n))
         {
             return "&";
         }

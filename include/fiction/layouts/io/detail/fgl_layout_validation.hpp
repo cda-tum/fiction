@@ -108,8 +108,9 @@ void validate_layout(const Lyt& lyt)
     {
         arrangement = lyt.get_arrangement();
     }
-    const auto source_scheme = lyt.get_clocking_scheme();
-    auto       scheme        = layouts::clocking::get_scheme(clocking_name(source_scheme), arrangement);
+    /** @brief Borrowed clocking scheme used to validate the serialized base scheme. */
+    const auto& source_scheme = lyt.get_clocking_scheme();
+    auto        scheme        = layouts::clocking::get_scheme(clocking_name(source_scheme), arrangement);
     if (!scheme)
     {
         throw std::invalid_argument("FGL requires a supported named clocking scheme");

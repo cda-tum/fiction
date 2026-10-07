@@ -109,12 +109,15 @@ class simple_gate_layout_tile_drawer
     /** @brief Return the gate label. */
     [[nodiscard]] virtual std::string tile_label(const Lyt& lyt, const tile<Lyt>& t) const
     {
-        if (lyt.is_empty_tile(t))
+        /** @brief Occupant at the tile position. */
+        const auto occupant = lyt.find_object(t);
+        if (!occupant)
         {
             return "";
         }
 
-        const auto id = lyt.find_object(t).value();
+        /** @brief Identity of the occupied tile. */
+        const auto id = *occupant;
         if (lyt.is_pi(id) || lyt.is_po(id))
         {
             if (lyt.has_name(id))
@@ -151,17 +154,19 @@ class simple_gate_layout_tile_drawer
         }
         else
         {
-            if (lyt.is_empty_tile(t))
+            /** @brief Occupant at the tile position. */
+            const auto occupant = lyt.find_object(t);
+            if (!occupant)
             {
                 return "white";
             }
 
-            if (lyt.is_pi_tile(t) || lyt.is_po_tile(t))
+            if (lyt.is_pi(*occupant) || lyt.is_po(*occupant))
             {
                 return "snow2";
             }
 
-            return std::string{gate_description(lyt, lyt.find_object(t).value()).second};
+            return std::string{gate_description(lyt, *occupant).second};
         }
     }
 
