@@ -291,9 +291,11 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         // A truth-table argument implies that synthesis is loaded. Import synthesis only when returning a table;
         // importing it during layouts registration would create a cycle through networks.
         .def("create_node", &GateLyt::create_node, py::arg("inputs"), py::arg("function"), py::arg("t"),
-             py::sig("def create_node(self, inputs: collections.abc.Sequence[LayoutOutputPort], function: "
-                     "mnt.pyfiction.synthesis.dynamic_truth_table, t: mnt.pyfiction.layouts.coordinate) -> "
-                     "LayoutOutputPort"),
+             py::sig(
+                 "def create_node(self, inputs: collections.abc.Sequence[LayoutOutputPort], function: "
+                 "mnt.pyfiction.synthesis.dynamic_truth_table, t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | "
+                 "tuple[int, int, int]) -> "
+                 "LayoutOutputPort"),
              "Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be "
              "disconnected.")
         .def(
