@@ -251,7 +251,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     bound symbol of their sections.
 
 - Experiments:
-  - Gate-layout experiments use specific lint suppressions with reasons.
+  - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
   - Gate-layout experiments use extent counts and extract logic networks for mockturtle algorithms. The reported dimensions and areas retain their definitions.
   - The Bestagon and hexagonalization experiments compute their unchanged area from the cell-grid extent.
@@ -592,6 +592,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Unreadable scripts report the cause and exit with status 2. Interrupted commands retain a log entry
     and leave the shell usable. Status text accounts for Unicode display widths.
 
+- Code quality:
+  - `find_first_two_of` now returns the end iterator when either range has fewer than two elements.
+
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
   - Docstring generation now loads the libclang development symlink on Ubuntu 26.04.
@@ -601,6 +604,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Cartesian and hexagonal neighbor visitors now invoke temporary and move-only callbacks as lvalues.
   - Python gate-layout constructors now raise `ValueError` for unknown clocking schemes.
   - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
   - Cell clock zones now use floor division for negative coordinates.
@@ -651,6 +655,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
 
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
+  - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
   - Gate-layout DOT output now preserves signed coordinate IDs and quoted terminal names.
   - FGL version 2 now preserves manual obstructions and XML whitespace in names. Readers reject unfinished or physically invalid layouts; writers reject illegal XML control characters before changing output.
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.

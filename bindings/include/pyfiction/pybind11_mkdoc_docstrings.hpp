@@ -390,11 +390,29 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_run = R"d
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pi_list = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pis = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pis =
+R"doc(Returns primary input cells ordered by y, then x.
+
+Returns:
+    Sorted input cells.
+
+Raises:
+    std::bad_alloc: If allocating the cell list fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_po_list = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pos = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pos =
+R"doc(Returns primary output cells ordered by y, then x.
+
+Returns:
+    Sorted output cells.
+
+Raises:
+    std::bad_alloc: If allocating the cell list fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_components = R"doc()doc";
 
@@ -814,11 +832,29 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_run = R"
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pi_list = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pis = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pis =
+R"doc(Returns primary input cells ordered by y, then x.
+
+Returns:
+    Sorted input cells.
+
+Raises:
+    std::bad_alloc: If allocating the cell list fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_po_list = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pos = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pos =
+R"doc(Returns primary output cells ordered by y, then x.
+
+Returns:
+    Sorted output cells.
+
+Raises:
+    std::bad_alloc: If allocating the cell list fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_components = R"doc()doc";
 
@@ -1358,7 +1394,8 @@ Thereby, at most 4 coordinates are touched.
 
 Args:
     c: Coordinate whose adjacent ones are desired.
-    fn: Functor to apply to each of `c`'s adjacent coordinates.
+    fn: Functor invoked as an lvalue for each of `c`'s adjacent
+        coordinates.
 
 Template Args:
     Fn: Functor type.
@@ -1372,8 +1409,8 @@ given one. In this Cartesian layout, the function will be applied to
 
 Args:
     c: Coordinate whose opposite adjacent ones are desired.
-    fn: Functor to apply to each of `c`'s opposite adjacent coordinate
-        pairs.
+    fn: Functor invoked as an lvalue for each of `c`'s opposite
+        adjacent coordinate pairs.
 
 Template Args:
     Fn: Functor type.
@@ -3694,15 +3731,15 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind =
 R"doc(Object role; removed slots have no coordinate or connections visible
 through the API.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_gate = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_GATE = R"doc(Logic gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_pi = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_PI = R"doc(Primary input terminal.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_po = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_PO = R"doc(Primary output terminal.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_removed = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_REMOVED = R"doc(Removed object slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_wire = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_WIRE = R"doc(Identity wire.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record = R"doc(Hot object data. Names and truth-table payloads are stored separately.)doc";
 
@@ -4206,7 +4243,8 @@ Thereby, at most 6 coordinates are touched.
 
 Args:
     c: Coordinate whose adjacent ones are desired.
-    fn: Functor to apply to each of `c`'s adjacent coordinates.
+    fn: Functor invoked as an lvalue for each of `c`'s adjacent
+        coordinates.
 
 Template Args:
     Fn: Functor type.
@@ -4232,8 +4270,8 @@ Coordinates outside of the layout bounds are not being considered.
 
 Args:
     c: Coordinate whose opposite adjacent ones are desired.
-    fn: Functor to apply to each of `c`'s opposite adjacent coordinate
-        pairs.
+    fn: Functor invoked as an lvalue for each of `c`'s opposite
+        adjacent coordinate pairs.
 
 Template Args:
     Fn: Functor type.
@@ -5309,9 +5347,19 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_operator_assign = R"doc(Copies the stateless drawer. @return This drawer.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_operator_assign_2 = R"doc(Moves the stateless drawer. @return This drawer.)doc";
+
 static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_rows = R"doc(List tile labels by row.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_same_rank = R"doc(Format a rank constraint.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_simple_gate_layout_tile_drawer = R"doc(Creates a stateless drawer.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_simple_gate_layout_tile_drawer_2 = R"doc(Copies the stateless drawer.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_simple_gate_layout_tile_drawer_3 = R"doc(Moves the stateless drawer.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_fillcolor = R"doc(Return the tile color.)doc";
 
@@ -10230,9 +10278,9 @@ static const char *mkd_doc_fiction_physical_design_detail_placement_info_constan
 R"doc(Whether space for constant outputs has been reserved in this rebuilt
 candidate.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_node = R"doc(The index of the current node being placed.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_node = R"doc(Index of the current network node being placed.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_po = R"doc(The index of the current primary output.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_po = R"doc(Index of the current primary output.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_placement_info_node2pos = R"doc(Mapping of logic-network nodes to their current routed output ports.)doc";
 
@@ -10655,6 +10703,20 @@ This class provides functionality for a wiring reduction layout based
 on a Cartesian coordinate system. It inherits from the
 `cartesian_layout` class and extends it with specific behavior for
 finding excess wiring.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_apply_if_not_coordinate =
+R"doc(Calls the visitor for an existing coordinate distinct from the
+reference coordinate.
+
+Args:
+    c: Reference coordinate.
+    cardinal: Optional neighbor coordinate.
+    fn: Visitor called as an lvalue.
+
+Template Args:
+    Fn: Reusable visitor type.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_foreach_adjacent_coordinate =
 R"doc(Iterates over adjacent coordinates of a given coordinate and applies a
@@ -25799,11 +25861,9 @@ Args:
 static const char *mkd_doc_fiction_utils_io_csv_writer_stream = R"doc(Output stream to write to.)doc";
 
 static const char *mkd_doc_fiction_utils_io_csv_writer_write_line =
-R"doc(Writes a single line of values to the output stream separated by a
-DELIMITER. No delimiter placed after the last value. Note that no
-escape checks are performed. Upon receiving no arguments, only a
-newline is written. This function uses template recursion to process
-the variadic parameters.
+R"doc(Writes one line of delimiter-separated values without a trailing
+delimiter or flushing the stream. The writer does not escape values.
+With no arguments, the writer emits a newline.
 
 Args:
     arg: First argument to write to the stream.
@@ -26580,7 +26640,8 @@ Template Args:
 Returns:
     Iterator in the range `[first, last)` to the first position of the
     first 2-element sub-sequence shared between the two ranges, or
-    `last` if no such shared sub-sequence exists.
+    `last` if either range has fewer than two elements or no shared
+    sub-sequence exists.
 
 )doc";
 
@@ -27163,7 +27224,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_verification_eq_type = R"doc(The different equivalence types possible.)doc";
+static const char *mkd_doc_fiction_verification_eq_type = R"doc(Equivalence classification for logic and layout throughput.)doc";
 
 static const char *mkd_doc_fiction_verification_eq_type_NO =
 R"doc(`Spec` and `Impl` differ logically, contain required topology defects,
