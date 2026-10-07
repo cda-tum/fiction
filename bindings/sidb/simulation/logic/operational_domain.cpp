@@ -26,12 +26,15 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <cstddef>
+#include <memory>
 #include <tuple>
 #include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 #include <nanobind/operators.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
@@ -377,6 +380,44 @@ void operational_domain(nanobind::module_& m)
                                { items.emplace_back(key, std::get<0>(value)); });
                  return items;
              })
+        .def(
+            "to_numpy",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                using fiction::sidb::simulation::logic::operational_status;
+
+                const auto points     = self.size();
+                const auto dimensions = self.get_number_of_dimensions();
+
+                auto coordinates = std::make_unique<double[]>(points * dimensions);
+                auto operational = std::make_unique<bool[]>(points);
+
+                std::size_t row = 0;
+                self.for_each(
+                    [&](const auto& key, const auto& value)
+                    {
+                        const auto& parameters = key.get_parameters();
+                        std::ranges::copy(parameters, coordinates.get() + row * dimensions);
+                        operational[row++] = std::get<0>(value) == operational_status::OPERATIONAL;
+                    });
+
+                // the capsules own the buffers from here on and free them with the arrays
+                auto* const       coordinates_data = coordinates.release();
+                auto* const       operational_data = operational.release();
+                const py::capsule coordinates_owner{coordinates_data,
+                                                    [](void* p) noexcept { delete[] static_cast<double*>(p); }};
+                const py::capsule operational_owner{operational_data,
+                                                    [](void* p) noexcept { delete[] static_cast<bool*>(p); }};
+
+                return std::make_tuple(
+                    py::ndarray<py::numpy, double, py::ndim<2>>{coordinates_data,
+                                                                {points, dimensions},
+                                                                coordinates_owner},
+                    py::ndarray<py::numpy, bool, py::ndim<1>>{operational_data, {points}, operational_owner});
+            },
+            "Returns the domain as NumPy arrays: a float64 array of shape (points, dimensions) holding the sampled "
+            "parameter values in dimension order, and a boolean array of length points that is True where the "
+            "point is operational. Requires NumPy.")
 
         ;
 

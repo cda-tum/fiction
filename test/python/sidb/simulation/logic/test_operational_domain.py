@@ -483,3 +483,24 @@ def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
     assert all(total in (done, 0) for done, total in finished)
     if strategy == "flood":
         assert any("exploring" in description and total == 0 for _, _, description, _, total, _ in workers)
+
+
+def test_operational_domain_to_numpy() -> None:
+    np = pytest.importorskip("numpy")
+    domain = operational_domain([sweep_parameter.LAMBDA_TF, sweep_parameter.EPSILON_R])
+    domain[parameter_point([5.0, 5.6])] = operational_status.OPERATIONAL
+    domain[parameter_point([5.1, 5.7])] = operational_status.NON_OPERATIONAL
+
+    coordinates, operational = domain.to_numpy()
+
+    assert coordinates.shape == (2, 2)
+    assert coordinates.dtype == np.float64
+    assert operational.dtype == np.bool_
+    assert {(tuple(row.tolist()), bool(flag)) for row, flag in zip(coordinates, operational, strict=True)} == {
+        ((5.0, 5.6), True),
+        ((5.1, 5.7), False),
+    }
+
+    empty_coordinates, empty_operational = operational_domain([sweep_parameter.EPSILON_R]).to_numpy()
+    assert empty_coordinates.shape == (0, 1)
+    assert empty_operational.shape == (0,)

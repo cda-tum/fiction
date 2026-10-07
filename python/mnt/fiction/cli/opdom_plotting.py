@@ -15,7 +15,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.sidb.simulation.logic import operational_status, sweep_parameter
+from mnt.pyfiction.sidb.simulation.logic import sweep_parameter
 
 from .drawing import open_viewer
 from .errors import CommandError
@@ -25,7 +25,9 @@ if TYPE_CHECKING:
     import argparse
     from collections.abc import Generator
 
+    import numpy as np
     from matplotlib.figure import Figure
+    from numpy.typing import NDArray
     from plotly.graph_objects import Figure as PlotlyFigure
 
     from mnt.pyfiction.sidb.simulation.logic import operational_domain
@@ -199,7 +201,7 @@ def _colors(args: argparse.Namespace) -> tuple[str, str]:
     return args.operational_color or ("#FBBF24" if args.sketch else "#801A99"), args.non_operational_color
 
 
-def _series(domain: operational_domain, args: argparse.Namespace) -> list[tuple[str, str, float, list[list[float]]]]:
+def _series(domain: operational_domain, args: argparse.Namespace) -> list[tuple[str, str, float, NDArray[np.float64]]]:
     """Group returned samples by status without interpolating missing points.
 
     Args:
@@ -207,18 +209,20 @@ def _series(domain: operational_domain, args: argparse.Namespace) -> list[tuple[
         args: Status visibility and marker options.
 
     Returns:
-        Label, color, diameter, and coordinates for each visible status.
+        Label, color, diameter, and a (points, dimensions) coordinate array for each visible status.
     """
     colors = _colors(args)
-    operational: list[list[float]] = []
-    non_operational: list[list[float]] = []
-    for point, status in domain.items():
-        (operational if status == operational_status.OPERATIONAL else non_operational).append(point.get_parameters())
+    coordinates, operational = domain.to_numpy()
     result = [
-        ("Potentially operational" if args.sketch else "Operational", colors[0], args.operational_size, operational)
+        (
+            "Potentially operational" if args.sketch else "Operational",
+            colors[0],
+            args.operational_size,
+            coordinates[operational],
+        )
     ]
     if not args.no_non_operational:
-        result.append(("Non-operational", colors[1], args.non_operational_size, non_operational))
+        result.append(("Non-operational", colors[1], args.non_operational_size, coordinates[~operational]))
     return result
 
 
@@ -250,8 +254,7 @@ def matplotlib_figure(domain: operational_domain, args: argparse.Namespace) -> F
     figure = Figure(figsize=(args.width, args.height), dpi=args.dpi, layout="constrained")
     axis = figure.add_subplot(projection="3d" if dimensions == DIMENSIONS_3D else None)
     for label, color, size, points in _series(domain, args):
-        coordinates = [[point[index] for point in points] for index in range(dimensions)]
-        axis.scatter(*coordinates, color=color, s=size**2, label=label)
+        axis.scatter(*points.T, color=color, s=size**2, label=label)
     for index, name in enumerate(("x", "y", "z")[:dimensions]):
         getattr(axis, f"set_{name}label")(LABELS[domain.get_dimension(index)][0])
         low, high, step = (getattr(args, f"{name}_{key}") for key in ("min", "max", "step"))
@@ -279,9 +282,7 @@ def plotly_figure(domain: operational_domain, args: argparse.Namespace) -> Plotl
     labels = [LABELS[domain.get_dimension(index)][1] for index in range(dimensions)]
     figure = go.Figure()
     for label, color, size, points in _series(domain, args):
-        coordinates = {
-            name: [point[index] for point in points] for index, name in enumerate(("x", "y", "z")[:dimensions])
-        }
+        coordinates = dict(zip(("x", "y", "z"), points.T, strict=False))
         trace = go.Scatter3d if dimensions == DIMENSIONS_3D else go.Scatter
         hover = "<br>".join(f"{labels[index]}: %{{{name}}}" for index, name in enumerate(coordinates))
         figure.add_trace(
