@@ -56,6 +56,7 @@ static Ntk read_ntk(const std::string& name)
     return *nets.front();
 }
 
+/** @brief Run the experiment. @return Process exit status. */
 int main()  // NOLINT
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
@@ -110,10 +111,11 @@ int main()  // NOLINT
         // calculate bounding box
         const auto bounding_box_before_wiring_reduction = bounding_box_2d(gate_level_layout);
 
-        const auto width_before_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_x_size()) + 1;
-        const auto height_before_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_y_size()) + 1;
+        /** @brief Number of occupied bounding columns before wiring reduction. */
+        const auto width_before_wiring_reduction = bounding_box_before_wiring_reduction.get_x_size();
+        /** @brief Number of occupied bounding rows before wiring reduction. */
+        const auto height_before_wiring_reduction = bounding_box_before_wiring_reduction.get_y_size();
+        /** @brief Occupied bounding area before wiring reduction. */
         const auto area_before_wiring_reduction = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
@@ -146,10 +148,11 @@ int main()  // NOLINT
         // calculate bounding box
         const auto bounding_box_after_wiring_reduction = bounding_box_2d(gate_level_layout);
 
-        const auto width_after_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_x_size()) + 1;
-        const auto height_after_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_y_size()) + 1;
+        /** @brief Number of occupied bounding columns after wiring reduction. */
+        const auto width_after_wiring_reduction = bounding_box_after_wiring_reduction.get_x_size();
+        /** @brief Number of occupied bounding rows after wiring reduction. */
+        const auto height_after_wiring_reduction = bounding_box_after_wiring_reduction.get_y_size();
+        /** @brief Occupied bounding area after wiring reduction. */
         const auto area_after_wiring_reduction = width_after_wiring_reduction * height_after_wiring_reduction;
 
         const float improv_wires =
