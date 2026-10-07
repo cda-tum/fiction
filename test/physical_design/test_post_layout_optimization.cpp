@@ -276,24 +276,25 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
     {
         post_layout_optimization_stats stats_wrong_clocking_scheme{};
 
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme));
+        CHECK_THROWS_AS(post_layout_optimization<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme),
+                        std::invalid_argument);
     }
 }
 
-TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
+TEST_CASE("Optimization accepts interior terminals", "[post_layout_optimization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    SECTION("Invalid layout with PI not in borders")
+    SECTION("Interior primary input")
     {
         auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
-        CHECK_THROWS_AS(post_layout_optimization<gate_layout>(layout), std::invalid_argument);
+        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
     }
 
-    SECTION("Invalid layout with PO not in borders")
+    SECTION("Interior primary output")
     {
         auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
-        CHECK_THROWS_AS(post_layout_optimization<gate_layout>(layout), std::invalid_argument);
+        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
     }
 
     SECTION("PO have to be moved to borders during optimization")
@@ -359,13 +360,13 @@ TEST_CASE("Post-layout optimization edits its caller and preserves terminal iden
     CHECK(stats.y_size_after == 1);
 }
 
-TEST_CASE("Post-layout optimization rejects invalid inputs without mutation", "[post-layout-ports]")
+TEST_CASE("Post-layout optimization rejects outside objects without mutation", "[post-layout-ports]")
 {
     gate_level_layout<cartesian_layout> layout{{4, 4}, layouts::clocking::twoddwave()};
-    const auto                          pi = layout.create_pi("a", {1, 1});
+    const auto                          pi = layout.create_pi("a", {-1, 1});
     const auto                          po = layout.create_po(pi, "f", {3, 1});
     CHECK_THROWS_AS(post_layout_optimization(layout), std::invalid_argument);
-    CHECK(layout.get_tile(pi.object) == gate_level_layout<cartesian_layout>::tile{1, 1});
+    CHECK(layout.get_tile(pi.object) == gate_level_layout<cartesian_layout>::tile{-1, 1});
     CHECK(layout.source({po.object, 0}) == pi);
     CHECK(layout.height() == 4);
 }

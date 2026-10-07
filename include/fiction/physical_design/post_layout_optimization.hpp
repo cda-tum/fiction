@@ -834,7 +834,7 @@ class post_layout_optimization_impl
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to optimize.
  * @param ps Parameters.
  * @param pst Statistics.
- * @throws std::invalid_argument If clocking, occupied geometry, or interface placement is invalid.
+ * @throws std::invalid_argument If clocking or occupied geometry is invalid.
  * @throws std::overflow_error If dimensions leave no room for signed routing coordinates.
  */
 template <typename Lyt>
@@ -862,25 +862,6 @@ void post_layout_optimization(Lyt& lyt, post_layout_optimization_params ps = {},
                 throw std::invalid_argument("Post-layout optimization requires objects inside the geometry");
             }
         });
-    lyt.foreach_pi(
-        [&](const auto id)
-        {
-            const auto t = lyt.get_tile(id);
-            if (!lyt.is_at_northern_border(t) && !lyt.is_at_western_border(t))
-            {
-                throw std::invalid_argument("Primary inputs must lie on the northern or western border");
-            }
-        });
-    lyt.foreach_po(
-        [&](const auto id)
-        {
-            const auto t = lyt.get_tile(id);
-            if (!lyt.is_at_eastern_border(t) && !lyt.is_at_southern_border(t))
-            {
-                throw std::invalid_argument("Primary outputs must lie on the eastern or southern border");
-            }
-        });
-
     // initialize stats for runtime measurement
     post_layout_optimization_stats             st{};
     detail::post_layout_optimization_impl<Lyt> p{lyt, ps, st};

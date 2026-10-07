@@ -215,20 +215,20 @@ TEST_CASE("Search Direction", "[wiring_reduction]")
     }
 }
 
-TEST_CASE("PI and PO border validation", "[wiring_reduction]")
+TEST_CASE("Optimization accepts interior terminals", "[wiring_reduction]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    SECTION("Invalid layout with PI not in borders")
+    SECTION("Interior primary input")
     {
         auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
-        CHECK_THROWS_AS(wiring_reduction<gate_layout>(layout), std::invalid_argument);
+        CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
     }
 
-    SECTION("Invalid layout with PO not in borders")
+    SECTION("Interior primary output")
     {
         auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
-        CHECK_THROWS_AS(wiring_reduction<gate_layout>(layout), std::invalid_argument);
+        CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
     }
 }
 

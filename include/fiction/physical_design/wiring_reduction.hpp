@@ -189,7 +189,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout
             {
                 wiring_reduction_layout::foreach_adjacent_coordinate_first_column(c, std::forward<Fn>(fn));
             }
-            else if (c.x == (layouts::cartesian_layout::width() - 1))
+            else if (std::cmp_equal(c.x, layouts::cartesian_layout::width() - 1))
             {
                 wiring_reduction_layout::foreach_adjacent_coordinate_last_column(c, std::forward<Fn>(fn));
             }
@@ -204,7 +204,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout
             {
                 wiring_reduction_layout::foreach_adjacent_coordinate_first_row(c, std::forward<Fn>(fn));
             }
-            else if (c.y == (layouts::cartesian_layout::height() - 1))
+            else if (std::cmp_equal(c.y, layouts::cartesian_layout::height() - 1))
             {
                 wiring_reduction_layout::foreach_adjacent_coordinate_last_row(c, std::forward<Fn>(fn));
             }
@@ -1127,7 +1127,7 @@ class wiring_reduction_impl
  * @param lyt The 2DDWave-clocked layout whose wiring is to be reduced.
  * @param ps Parameters.
  * @param pst Statistics.
- * @throws std::invalid_argument If clocking, occupied geometry, or interface placement is invalid.
+ * @throws std::invalid_argument If clocking or occupied geometry is invalid.
  * @throws std::overflow_error If dimensions leave no room for signed routing coordinates.
  */
 template <typename Lyt>
@@ -1154,25 +1154,6 @@ void wiring_reduction(Lyt& lyt, wiring_reduction_params ps = {}, wiring_reductio
                 throw std::invalid_argument("Wiring reduction requires objects inside the geometry");
             }
         });
-    lyt.foreach_pi(
-        [&](const auto id)
-        {
-            const auto t = lyt.get_tile(id);
-            if (!lyt.is_at_northern_border(t) && !lyt.is_at_western_border(t))
-            {
-                throw std::invalid_argument("Primary inputs must lie on the northern or western border");
-            }
-        });
-    lyt.foreach_po(
-        [&](const auto id)
-        {
-            const auto t = lyt.get_tile(id);
-            if (!lyt.is_at_eastern_border(t) && !lyt.is_at_southern_border(t))
-            {
-                throw std::invalid_argument("Primary outputs must lie on the eastern or southern border");
-            }
-        });
-
     // initialize stats for runtime measurement
     wiring_reduction_stats             st{};
     detail::wiring_reduction_impl<Lyt> p{lyt, ps, st};
