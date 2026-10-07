@@ -168,185 +168,183 @@ class count_gate_types_impl
         {
             return true;
         }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_fanout(node); })
         {
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_fanout(node); })
+            if (ntk.is_fanout(n))
             {
-                if (ntk.is_fanout(n))
-                {
-                    ++pst.num_fanout;
-                    return true;
-                }
+                ++pst.num_fanout;
+                return true;
             }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_buf(node); })
-            {
-                if (ntk.is_buf(n))
-                {
-                    ++pst.num_buf;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_inv(node); })
-            {
-                if (ntk.is_inv(n))
-                {
-                    ++pst.num_inv;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_and(node); })
-            {
-                if (ntk.is_and(n))
-                {
-                    ++pst.num_and2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_or(node); })
-            {
-                if (ntk.is_or(n))
-                {
-                    ++pst.num_or2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_nand(node); })
-            {
-                if (ntk.is_nand(n))
-                {
-                    ++pst.num_nand2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_nor(node); })
-            {
-                if (ntk.is_nor(n))
-                {
-                    ++pst.num_nor2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_xor(node); })
-            {
-                if (ntk.is_xor(n))
-                {
-                    ++pst.num_xor2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_xnor(node); })
-            {
-                if (ntk.is_xnor(n))
-                {
-                    ++pst.num_xnor2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_lt(node); })
-            {
-                if (ntk.is_lt(n))
-                {
-                    ++pst.num_lt2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_gt(node); })
-            {
-                if (ntk.is_gt(n))
-                {
-                    ++pst.num_gt2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_le(node); })
-            {
-                if (ntk.is_le(n))
-                {
-                    ++pst.num_le2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_ge(node); })
-            {
-                if (ntk.is_ge(n))
-                {
-                    ++pst.num_ge2;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_and3(node); })
-            {
-                if (ntk.is_and3(n))
-                {
-                    ++pst.num_and3;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_xor_and(node); })
-            {
-                if (ntk.is_xor_and(n))
-                {
-                    ++pst.num_xor_and;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_or_and(node); })
-            {
-                if (ntk.is_or_and(n))
-                {
-                    ++pst.num_or_and;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_onehot(node); })
-            {
-                if (ntk.is_onehot(n))
-                {
-                    ++pst.num_onehot;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_maj(node); })
-            {
-                if (ntk.is_maj(n))
-                {
-                    ++pst.num_maj3;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_gamble(node); })
-            {
-                if (ntk.is_gamble(n))
-                {
-                    ++pst.num_gamble;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_dot(node); })
-            {
-                if (ntk.is_dot(n))
-                {
-                    ++pst.num_dot;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_ite(node); })
-            {
-                if (ntk.is_ite(n))
-                {
-                    ++pst.num_mux;
-                    return true;
-                }
-            }
-            if constexpr (requires(const Ntk& network, const Node& node) { network.is_and_xor(node); })
-            {
-                if (ntk.is_and_xor(n))
-                {
-                    ++pst.num_and_xor;
-                    return true;
-                }
-            }
-            ++pst.num_other;
         }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_buf(node); })
+        {
+            if (ntk.is_buf(n))
+            {
+                ++pst.num_buf;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_inv(node); })
+        {
+            if (ntk.is_inv(n))
+            {
+                ++pst.num_inv;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_and(node); })
+        {
+            if (ntk.is_and(n))
+            {
+                ++pst.num_and2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_or(node); })
+        {
+            if (ntk.is_or(n))
+            {
+                ++pst.num_or2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_nand(node); })
+        {
+            if (ntk.is_nand(n))
+            {
+                ++pst.num_nand2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_nor(node); })
+        {
+            if (ntk.is_nor(n))
+            {
+                ++pst.num_nor2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_xor(node); })
+        {
+            if (ntk.is_xor(n))
+            {
+                ++pst.num_xor2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_xnor(node); })
+        {
+            if (ntk.is_xnor(n))
+            {
+                ++pst.num_xnor2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_lt(node); })
+        {
+            if (ntk.is_lt(n))
+            {
+                ++pst.num_lt2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_gt(node); })
+        {
+            if (ntk.is_gt(n))
+            {
+                ++pst.num_gt2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_le(node); })
+        {
+            if (ntk.is_le(n))
+            {
+                ++pst.num_le2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_ge(node); })
+        {
+            if (ntk.is_ge(n))
+            {
+                ++pst.num_ge2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_and3(node); })
+        {
+            if (ntk.is_and3(n))
+            {
+                ++pst.num_and3;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_xor_and(node); })
+        {
+            if (ntk.is_xor_and(n))
+            {
+                ++pst.num_xor_and;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_or_and(node); })
+        {
+            if (ntk.is_or_and(n))
+            {
+                ++pst.num_or_and;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_onehot(node); })
+        {
+            if (ntk.is_onehot(n))
+            {
+                ++pst.num_onehot;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_maj(node); })
+        {
+            if (ntk.is_maj(n))
+            {
+                ++pst.num_maj3;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_gamble(node); })
+        {
+            if (ntk.is_gamble(n))
+            {
+                ++pst.num_gamble;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_dot(node); })
+        {
+            if (ntk.is_dot(n))
+            {
+                ++pst.num_dot;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_ite(node); })
+        {
+            if (ntk.is_ite(n))
+            {
+                ++pst.num_mux;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_and_xor(node); })
+        {
+            if (ntk.is_and_xor(n))
+            {
+                ++pst.num_and_xor;
+                return true;
+            }
+        }
+        ++pst.num_other;
 
         return true;
     }
