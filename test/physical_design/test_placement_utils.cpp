@@ -41,10 +41,10 @@ TEST_CASE("Placement reduces a constant input without changing variable order", 
     const auto                          left   = lyt.create_pi("a", {0, 0});
     const auto                          right  = lyt.create_pi("b", {1, 0});
     const auto                          placed = place(lyt, {1, 1}, ntk, ntk.get_node(gate), left, right, true);
-    CHECK(lyt.input_count(placed.object) == 2);
-    CHECK(lyt.source({placed.object, 0}) == left);
-    CHECK(lyt.source({placed.object, 1}) == right);
+    CHECK(lyt.input_count(placed) == 2);
+    CHECK(lyt.source({placed, 0}) == left);
+    CHECK(lyt.source({placed, 1}) == right);
     kitty::dynamic_truth_table expected{2};
     kitty::create_from_expression(expected, "(a!b)");
-    CHECK(lyt.node_function(placed.object) == expected);
+    CHECK(lyt.node_function(placed) == expected);
 }

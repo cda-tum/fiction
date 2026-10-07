@@ -72,13 +72,13 @@ def test_update_gate_level_bounding_box() -> None:
     assert max_coord == layout.coord(5, 7)
 
     layout.clear_tile((4, 7))
-    layout.move_node(output.object, (5, 6))
-    layout.connect(wire, LayoutInputPort(output.object, 0))
+    layout.move_node(output, (5, 6))
+    layout.connect(wire, LayoutInputPort(output, 0))
     min_coord, max_coord = layout.bounding_box_2d()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 6)
 
-    layout.move_node(output.object, (4, 7))
+    layout.move_node(output, (4, 7))
     min_coord, max_coord = layout.bounding_box_2d()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(4, 7)

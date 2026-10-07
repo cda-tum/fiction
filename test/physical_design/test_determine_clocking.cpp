@@ -203,7 +203,7 @@ TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[
         const auto b = lyt.create_buf(a, {1, 0});
         const auto c = lyt.create_buf(b, {1, 1});
         const auto d = lyt.create_buf(c, {0, 1});
-        lyt.connect(d, {a.object, 0});
+        lyt.connect(d, {a, 0});
     }
     CHECK_THROWS_AS(determine_clocking(lyt), std::invalid_argument);
     CHECK(lyt.get_clocking_scheme() == original_scheme);
@@ -229,7 +229,7 @@ TEST_CASE("Clock determination uses explicit constants and logical input ports",
         [&](const auto id)
         {
             lyt.foreach_fanin(id, [&](const auto src)
-                              { CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(src.object))); });
+                              { CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(src))); });
         });
 }
 
@@ -259,7 +259,7 @@ TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[d
         {
             const auto t = lyt.get_tile(id);
             CHECK(lyt.get_clock_number(t) == lyt.get_clock_number({t.x, t.y, 0}));
-            lyt.foreach_fanin(id, [&](const auto src) { CHECK(lyt.is_incoming_clocked(t, lyt.get_tile(src.object))); });
+            lyt.foreach_fanin(id, [&](const auto src) { CHECK(lyt.is_incoming_clocked(t, lyt.get_tile(src))); });
         });
 }
 
@@ -286,8 +286,8 @@ TEST_CASE("Clock determination commits complete clocking values", "[determine-cl
             REQUIRE(success);
             CHECK(candidate.get_clock_number({9, 9}) == 2);
             CHECK(candidate.get_synchronization_element({1, 0}) == 2);
-            CHECK(candidate.source({wire.object, 0}) == pi);
-            CHECK(candidate.source({po.object, 0}) == wire);
+            CHECK(candidate.source({wire, 0}) == pi);
+            CHECK(candidate.source({po, 0}) == wire);
             CHECK(candidate.is_incoming_clocked({1, 0}, {0, 0}));
             CHECK(candidate.is_incoming_clocked({2, 0}, {1, 0}));
             break;
@@ -297,8 +297,8 @@ TEST_CASE("Clock determination commits complete clocking values", "[determine-cl
             allocation_budget.reset();
             CHECK(candidate.get_clocking_scheme() == original_scheme);
             CHECK(candidate.get_synchronization_element({1, 0}) == 2);
-            CHECK(candidate.source({wire.object, 0}) == pi);
-            CHECK(candidate.source({po.object, 0}) == wire);
+            CHECK(candidate.source({wire, 0}) == pi);
+            CHECK(candidate.source({po, 0}) == wire);
         }
         catch (...)
         {

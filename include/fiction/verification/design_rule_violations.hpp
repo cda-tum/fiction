@@ -345,7 +345,7 @@ class gate_level_drvs_impl
                     lyt.foreach_fanin(id,
                                       [&](const auto child)
                                       {
-                                          const auto ct = lyt.get_tile(child.object);
+                                          const auto ct = lyt.get_tile(child);
                                           if (!lyt.is_adjacent_elevation_of(t, ct))
                                           {
                                               adjacencies_respected = false;
@@ -458,7 +458,7 @@ class gate_level_drvs_impl
                     lyt.foreach_fanin(id,
                                       [&](const auto child)
                                       {
-                                          const auto ct = lyt.get_tile(child.object);
+                                          const auto ct = lyt.get_tile(child);
                                           if (!lyt.is_incoming_clocked(t, ct))
                                           {
                                               data_flow_respected = false;

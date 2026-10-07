@@ -219,9 +219,9 @@ TEST_CASE("Physical equivalence extracts placed objects and rejects physical def
     const auto                          pi = lyt.create_pi("a", {0, 0});
     const auto                          po = lyt.create_po(pi, "result", {0, 1});
     CHECK(equivalence_checking(spec, lyt) == eq_type::STRONG);
-    lyt.move_node(po.object, {0, 10});
+    lyt.move_node(po, {0, 10});
     CHECK(equivalence_checking(spec, lyt) == eq_type::NO);
-    lyt.disconnect({po.object, 0});
+    lyt.disconnect({po, 0});
     CHECK(equivalence_checking(spec, lyt) == eq_type::NO);
 }
 
@@ -258,7 +258,7 @@ TEST_CASE("Physical equivalence returns NO for a clocked required cycle", "[equi
     const auto first  = lyt.create_buf(gate, {2, 1});
     const auto second = lyt.create_buf(first, {2, 2});
     const auto third  = lyt.create_buf(second, {1, 2});
-    lyt.connect(third, {gate.object, 1});
+    lyt.connect(third, {gate, 1});
     lyt.create_po(third, "result", {0, 2});
     lyt.assign_clock_number({0, 1}, 3);
     lyt.assign_clock_number({1, 1}, 0);

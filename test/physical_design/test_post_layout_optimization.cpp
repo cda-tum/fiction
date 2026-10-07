@@ -358,9 +358,9 @@ TEST_CASE("Post-layout optimization edits its caller and preserves terminal iden
     params.timeout = 0;
     post_layout_optimization_stats stats{};
     post_layout_optimization(layout, params, &stats);
-    CHECK(layout.contains(a.object));
-    CHECK(layout.contains(po.object));
-    CHECK(layout.source({po.object, 0}) == wire);
+    CHECK(layout.contains(a));
+    CHECK(layout.contains(po));
+    CHECK(layout.source({po, 0}) == wire);
     CHECK(layout.width() == 6);
     CHECK(layout.height() == 1);
     CHECK(independent.height() == 3);
@@ -374,8 +374,8 @@ TEST_CASE("Post-layout optimization rejects outside objects without mutation", "
     const auto                          pi = layout.create_pi("a", {-1, 1});
     const auto                          po = layout.create_po(pi, "f", {3, 1});
     CHECK_THROWS_AS(post_layout_optimization(layout), std::invalid_argument);
-    CHECK(layout.get_tile(pi.object) == gate_level_layout<cartesian_layout>::tile{-1, 1});
-    CHECK(layout.source({po.object, 0}) == pi);
+    CHECK(layout.get_tile(pi) == gate_level_layout<cartesian_layout>::tile{-1, 1});
+    CHECK(layout.source({po, 0}) == pi);
     CHECK(layout.height() == 4);
 }
 
@@ -396,15 +396,13 @@ TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-l
     post_layout_optimization_params params{};
     params.max_gate_relocations = 20;
     post_layout_optimization(layout, params);
-    CHECK(layout.contains(gate.object));
-    CHECK(layout.contains(po.object));
-    CHECK(layout.is_lt(gate.object));
+    CHECK(layout.contains(gate));
+    CHECK(layout.contains(po));
+    CHECK(layout.is_lt(gate));
     const auto objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives,
-                            routing_objective<gate_level_layout<cartesian_layout>>{
-                                layout.get_tile(a.object), layout.get_tile(gate.object), 0}) != objectives.end());
-    CHECK(std::ranges::find(objectives,
-                            routing_objective<gate_level_layout<cartesian_layout>>{
-                                layout.get_tile(b.object), layout.get_tile(gate.object), 1}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective<gate_level_layout<cartesian_layout>>{
+                                            layout.get_tile(a), layout.get_tile(gate), 0}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective<gate_level_layout<cartesian_layout>>{
+                                            layout.get_tile(b), layout.get_tile(gate), 1}) != objectives.end());
     CHECK(layout.area() <= 16);
 }

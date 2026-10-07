@@ -48,8 +48,8 @@ def test_crossings():
     lyt.create_buf(buf1, (2, 2))
 
     gate = lyt.create_and(x1, x2, (4, 2))
-    lyt.disconnect(LayoutInputPort(gate.object, 0))
-    lyt.disconnect(LayoutInputPort(gate.object, 1))
+    lyt.disconnect(LayoutInputPort(gate, 0))
+    lyt.disconnect(LayoutInputPort(gate, 1))
 
     params = color_routing_params()
     params.crossings = True

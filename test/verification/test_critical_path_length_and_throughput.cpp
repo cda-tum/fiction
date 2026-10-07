@@ -102,13 +102,13 @@ TEST_CASE("Timing rejects required holes and cycles without rejecting dangling o
     const auto                          wire     = lyt.create_buf(pi, {0, 1});
     const auto                          po       = lyt.create_po(wire, "result", {0, 2});
     const auto                          dangling = lyt.create_buf({0, 3});
-    lyt.connect(dangling, {dangling.object, 0});
+    lyt.connect(dangling, {dangling, 0});
     const auto result = critical_path_length_and_throughput(lyt);
     CHECK(result.critical_path_length == 3);
     CHECK(result.throughput == 1);
-    lyt.disconnect({wire.object, 0});
+    lyt.disconnect({wire, 0});
     CHECK_THROWS_AS(critical_path_length_and_throughput(lyt), std::invalid_argument);
-    lyt.connect(po, {wire.object, 0});
+    lyt.connect(po, {wire, 0});
     CHECK_THROWS_AS(critical_path_length_and_throughput(lyt), std::invalid_argument);
 }
 

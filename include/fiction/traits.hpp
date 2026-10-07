@@ -437,10 +437,9 @@ struct is_gate_level_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_gate_level_layout<Lyt,
-                            std::enable_if_t<is_coordinate_layout_v<Lyt>,
-                                             std::void_t<typename Lyt::base_type, tile<Lyt>, typename Lyt::object_id,
-                                                         typename Lyt::input_port, typename Lyt::output_port>>>
+struct is_gate_level_layout<
+    Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt>, std::void_t<typename Lyt::base_type, tile<Lyt>,
+                                                                   typename Lyt::object_id, typename Lyt::input_port>>>
         : std::true_type
 {};
 

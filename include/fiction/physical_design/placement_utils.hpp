@@ -48,8 +48,8 @@ namespace fiction::physical_design
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::output_port place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                              const mockturtle::node<Ntk>& n)
+[[nodiscard]] typename Lyt::object_id place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
+                                            const mockturtle::node<Ntk>& n)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -83,8 +83,8 @@ template <typename Lyt, typename Ntk>
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::output_port place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                              const mockturtle::node<Ntk>& n, const typename Lyt::output_port& a)
+[[nodiscard]] typename Lyt::object_id place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
+                                            const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -122,9 +122,9 @@ template <typename Lyt, typename Ntk>
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::output_port
-place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::output_port& a,
-      const typename Lyt::output_port& b, const std::optional<bool>& c = std::nullopt)
+[[nodiscard]] typename Lyt::object_id
+place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a,
+      const typename Lyt::object_id& b, const std::optional<bool>& c = std::nullopt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -266,9 +266,9 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::output_port place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                              const mockturtle::node<Ntk>& n, const typename Lyt::output_port& a,
-                                              const typename Lyt::output_port& b, const typename Lyt::output_port& c)
+[[nodiscard]] typename Lyt::object_id place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
+                                            const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a,
+                                            const typename Lyt::object_id& b, const typename Lyt::object_id& c)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -307,9 +307,9 @@ template <typename Lyt, typename Ntk>
  * @return Output port of the newly placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::output_port place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                              const mockturtle::node<Ntk>&                                n,
-                                              const mockturtle::node_map<typename Lyt::output_port, Ntk>& node2pos)
+[[nodiscard]] typename Lyt::object_id place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
+                                            const mockturtle::node<Ntk>&                              n,
+                                            const mockturtle::node_map<typename Lyt::object_id, Ntk>& node2pos)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -373,14 +373,12 @@ struct branching_signal_container
         /**
          * Output port at the end of the route.
          */
-        typename Lyt::output_port lyt_signal;
+        typename Lyt::object_id lyt_signal;
 
         /**
          * Associates a network destination with a layout output port.
          */
-        branching_signal(const mockturtle::node<Ntk>& n, const typename Lyt::output_port& s) :
-                ntk_node{n},
-                lyt_signal{s}
+        branching_signal(const mockturtle::node<Ntk>& n, const typename Lyt::object_id& s) : ntk_node{n}, lyt_signal{s}
         {
             static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
             static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
@@ -393,7 +391,7 @@ struct branching_signal_container
      * @param n Node whose branching position is desired.
      * @return Signal to `n`'s layout location or the default signal if it wasn't found.
      */
-    [[nodiscard]] typename Lyt::output_port operator[](const mockturtle::node<Ntk>& n) const
+    [[nodiscard]] typename Lyt::object_id operator[](const mockturtle::node<Ntk>& n) const
     {
         if (const auto branch = std::ranges::find_if(branches,
                                                      [&n](const auto& b)
@@ -422,7 +420,7 @@ struct branching_signal_container
      * @param ntk_node Node whose branch is to be updated.
      * @param lyt_signal New signal pointing to the end of the branch.
      */
-    void update_branch(const mockturtle::node<Ntk>& ntk_node, const typename Lyt::output_port& lyt_signal)
+    void update_branch(const mockturtle::node<Ntk>& ntk_node, const typename Lyt::object_id& lyt_signal)
     {
         for (auto i = 0u; i < branches.size(); ++i)
         {
@@ -468,7 +466,7 @@ struct branching_signal_container
  * @return Output port of the newly placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk, uint16_t fanout_size = 2>
-[[nodiscard]] typename Lyt::output_port
+[[nodiscard]] typename Lyt::object_id
 place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
       const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos)
 {

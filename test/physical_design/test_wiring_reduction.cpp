@@ -277,19 +277,17 @@ TEST_CASE("Wiring reduction preserves identities and ordered input ports", "[wir
     const auto             independent = layout;
     wiring_reduction_stats stats{};
     wiring_reduction(layout, {}, &stats);
-    CHECK(layout.contains(a.object));
-    CHECK(layout.contains(b.object));
-    CHECK(layout.contains(gate.object));
-    CHECK(layout.contains(po.object));
-    CHECK(layout.source({po.object, 0}) == gate);
+    CHECK(layout.contains(a));
+    CHECK(layout.contains(b));
+    CHECK(layout.contains(gate));
+    CHECK(layout.contains(po));
+    CHECK(layout.source({po, 0}) == gate);
     const auto objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives,
-                            routing_objective<gate_level_layout<cartesian_layout>>{
-                                layout.get_tile(a.object), layout.get_tile(gate.object), 0}) != objectives.end());
-    CHECK(std::ranges::find(objectives,
-                            routing_objective<gate_level_layout<cartesian_layout>>{
-                                layout.get_tile(b.object), layout.get_tile(gate.object), 1}) != objectives.end());
-    CHECK(layout.is_lt(gate.object));
+    CHECK(std::ranges::find(objectives, routing_objective<gate_level_layout<cartesian_layout>>{
+                                            layout.get_tile(a), layout.get_tile(gate), 0}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective<gate_level_layout<cartesian_layout>>{
+                                            layout.get_tile(b), layout.get_tile(gate), 1}) != objectives.end());
+    CHECK(layout.is_lt(gate));
     CHECK(layout.num_wires() < independent.num_wires());
     CHECK(independent.height() == 6);
     CHECK(stats.y_size_after == layout.height());
@@ -306,7 +304,7 @@ TEST_CASE("Wiring reduction handles empty layouts and invalid geometry", "[wirin
     gate_level_layout<cartesian_layout> invalid{{2, 2}, layouts::clocking::twoddwave()};
     const auto                          outside = invalid.create_buf({-1, 0});
     CHECK_THROWS_AS(wiring_reduction(invalid), std::invalid_argument);
-    CHECK(invalid.get_tile(outside.object) == gate_level_layout<cartesian_layout>::tile{-1, 0});
+    CHECK(invalid.get_tile(outside) == gate_level_layout<cartesian_layout>::tile{-1, 0});
 }
 
 TEST_CASE("Wiring reduction rejects dimensions beyond its routing range", "[wiring-reduction-ports]")
@@ -314,5 +312,5 @@ TEST_CASE("Wiring reduction rejects dimensions beyond its routing range", "[wiri
     gate_level_layout<cartesian_layout> layout{{2147483647, 1}, layouts::clocking::twoddwave()};
     const auto                          object = layout.create_buf({0, 0});
     CHECK_THROWS_AS(wiring_reduction(layout), std::overflow_error);
-    CHECK(layout.get_tile(object.object) == gate_level_layout<cartesian_layout>::tile{0, 0});
+    CHECK(layout.get_tile(object) == gate_level_layout<cartesian_layout>::tile{0, 0});
 }

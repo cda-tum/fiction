@@ -158,16 +158,16 @@ def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
 
     assert not layout.is_empty()
 
-    assert layout.pis() == [x1.object, x2.object, x3.object, x4.object]
-    assert layout.pos() == [f1.object, f2.object]
+    assert layout.pis() == [x1, x2, x3, x4]
+    assert layout.pos() == [f1, f2]
     gates = layout.gates()
     assert len(gates) == 2
-    assert a1.object in gates
-    assert a2.object in gates
+    assert a1 in gates
+    assert a2 in gates
     wires = layout.wires()
     assert len(wires) == 9
     for port in (x1, x2, x3, x4, b1, b2, c, f1, f2):
-        assert port.object in wires
+        assert port in wires
     for port, position in [
         (x1, coordinate(1, 0)),
         (x2, coordinate(0, 1)),
@@ -181,19 +181,18 @@ def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
         (f1, coordinate(3, 1)),
         (f2, coordinate(3, 2)),
     ]:
-        assert layout.find_object(position) == port.object
-        assert layout.get_tile(port.object) == position
-        assert layout.output(port.object) == port
+        assert layout.find_object(position) == port
+        assert layout.get_tile(port) == position
 
     # Declared inputs retain logical argument order.
-    assert layout.inputs(x1.object) == []
-    assert layout.inputs(f1.object) == [c]
-    assert layout.inputs(a2.object) == [b1, b2]
+    assert layout.inputs(x1) == []
+    assert layout.inputs(f1) == [c]
+    assert layout.inputs(a2) == [b1, b2]
 
     # Sink ports identify each destination input.
-    assert layout.sinks(x1) == [LayoutInputPort(a1.object, 0)]
+    assert layout.sinks(x1) == [LayoutInputPort(a1, 0)]
     assert layout.sinks(f1) == []
-    assert layout.sinks(a2) == [LayoutInputPort(f2.object, 0)]
+    assert layout.sinks(a2) == [LayoutInputPort(f2, 0)]
 
     cp, tp = critical_path_length_and_throughput(layout)
     assert cp == 4
@@ -212,19 +211,19 @@ def test_disconnect_and_move_update_implicit_obstructions(make_layout: Callable[
     output = layout.create_po(wire, "f", (1, 1))
     assert layout.is_obstructed_connection((0, 0), (1, 0))
     assert layout.is_obstructed_connection((1, 0), (1, 1))
-    layout.disconnect(LayoutInputPort(output.object, 0))
-    assert layout.source(LayoutInputPort(output.object, 0)) is None
+    layout.disconnect(LayoutInputPort(output, 0))
+    assert layout.source(LayoutInputPort(output, 0)) is None
     assert not layout.is_obstructed_connection((1, 0), (1, 1))
     assert layout.is_obstructed_coordinate((1, 1))
-    layout.move_node(wire.object, (0, 1))
+    layout.move_node(wire, (0, 1))
     assert not layout.is_obstructed_coordinate((1, 0))
     assert layout.is_obstructed_coordinate((0, 1))
     assert not layout.is_obstructed_connection((0, 0), (1, 0))
     assert layout.is_obstructed_connection((0, 0), (0, 1))
-    layout.connect(wire, LayoutInputPort(output.object, 0))
+    layout.connect(wire, LayoutInputPort(output, 0))
     assert layout.is_obstructed_connection((0, 1), (1, 1))
-    layout.remove(wire.object)
-    assert layout.source(LayoutInputPort(output.object, 0)) is None
+    layout.remove(wire)
+    assert layout.source(LayoutInputPort(output, 0)) is None
     assert not layout.is_obstructed_coordinate((0, 1))
     assert not layout.is_obstructed_connection((0, 1), (1, 1))
 
@@ -239,13 +238,13 @@ def test_clearing_manual_obstructions_preserves_objects_and_ports(make_layout: C
     layout.obstruct_connection((0, 0), (1, 0))
     layout.clear_obstructed_coordinate((1, 0))
     layout.clear_obstructed_connection((0, 0), (1, 0))
-    assert layout.contains(wire.object)
-    assert layout.source(LayoutInputPort(wire.object, 0)) == source
+    assert layout.contains(wire)
+    assert layout.source(LayoutInputPort(wire, 0)) == source
     assert layout.is_obstructed_coordinate((1, 0))
     assert layout.is_obstructed_connection((0, 0), (1, 0))
-    layout.disconnect(LayoutInputPort(wire.object, 0))
+    layout.disconnect(LayoutInputPort(wire, 0))
     assert not layout.is_obstructed_connection((0, 0), (1, 0))
-    layout.remove(wire.object)
+    layout.remove(wire)
     assert not layout.is_obstructed_coordinate((1, 0))
 
 
@@ -261,15 +260,15 @@ def test_clone_owns_obstructions_objects_and_connections(make_layout: Callable[[
     clone = layout.clone()
     clone.clear_obstructed_coordinates()
     clone.clear_obstructed_connections()
-    clone.remove(wire.object)
+    clone.remove(wire)
     assert layout.is_obstructed_coordinate((0, 2))
     assert layout.is_obstructed_connection((0, 0), (0, 1))
     assert not clone.is_obstructed_coordinate((0, 2))
     assert not clone.is_obstructed_connection((0, 0), (0, 1))
     assert layout.is_obstructed_coordinate((1, 0))
     assert not clone.is_obstructed_coordinate((1, 0))
-    assert layout.source(LayoutInputPort(output.object, 0)) == wire
-    assert clone.source(LayoutInputPort(output.object, 0)) is None
+    assert layout.source(LayoutInputPort(output, 0)) == wire
+    assert clone.source(LayoutInputPort(output, 0)) is None
 
 
 def test_explicit_obstruction_lists_own_values() -> None:

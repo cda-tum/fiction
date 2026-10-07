@@ -2842,12 +2842,12 @@ class exact_impl
                                 // was node n placed on tile t according to the model?
                                 if (model.eval(get_tn(t, n)).bool_value() == Z3_L_TRUE)
                                 {
-                                    typename Lyt::output_port lyt_signal;
+                                    typename Lyt::object_id lyt_signal;
 
                                     if (network.is_pi(n))
                                     {
                                         lyt_signal = place(layout, t, network, n);
-                                        pis[n]     = lyt_signal.object;
+                                        pis[n]     = lyt_signal;
                                     }
                                     else if (network.is_po(n))
                                     {

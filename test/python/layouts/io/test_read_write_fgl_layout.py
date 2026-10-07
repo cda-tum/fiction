@@ -89,7 +89,7 @@ def test_fgl_preserves_interface_order(tmp_path: Path) -> None:
     a = layout.create_pi("a", (0, 1, 0))
     gate = layout.create_lt(a, b, (1, 1, 0))
     layout.create_po(gate, "f", (2, 1, 0))
-    layout.set_input_order([a.object, b.object])
+    layout.set_input_order([a, b])
     path = tmp_path / "ordered.fgl"
     write_fgl_layout(layout, str(path))
     assert '<fgl version="2">' in path.read_text(encoding="utf-8")
@@ -108,7 +108,7 @@ def test_fgl_failure_preserves_file(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="connected"):
         write_fgl_layout(layout, str(path))
     assert path.read_text(encoding="utf-8") == "sentinel"
-    layout.connect(wire, LayoutInputPort(wire.object, 0))
+    layout.connect(wire, LayoutInputPort(wire, 0))
     with pytest.raises(ValueError, match="acyclic"):
         write_fgl_layout(layout, str(path))
     assert path.read_text(encoding="utf-8") == "sentinel"

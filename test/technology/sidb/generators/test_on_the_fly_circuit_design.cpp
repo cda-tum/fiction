@@ -71,8 +71,8 @@ TEST_CASE("Circuit design rejects unsupported gates before gate search", "[on-th
     CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params),
                     fcn::unsupported_gate_type_exception<tile<hex_gate_clk_lyt>>);
     CHECK(gate_layout.num_pis() == 3);
-    CHECK(gate_layout.is_maj(majority.object));
-    CHECK(gate_layout.source({majority.object, 0}) == first);
+    CHECK(gate_layout.is_maj(majority));
+    CHECK(gate_layout.source({majority, 0}) == first);
 }
 
 TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-circuit-design]")

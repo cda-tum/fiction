@@ -77,7 +77,7 @@ TEST_CASE("Signal names transfer from a logic network to placed objects", "[name
     /** Named output terminal independent of the driver name. */
     const auto placed_output = lyt.create_po(placed_sink, "terminal", {3, 0});
     /** Source-node map with native output endpoints as its values. */
-    mockturtle::node_map<decltype(lyt)::output_port, decltype(ntk)> mapping{ntk};
+    mockturtle::node_map<decltype(lyt)::object_id, decltype(ntk)> mapping{ntk};
     mapping[ntk.get_node(input)]    = placed_input;
     mapping[ntk.get_node(internal)] = placed_internal;
     mapping[ntk.get_node(sink)]     = placed_sink;
@@ -113,7 +113,7 @@ TEST_CASE("Signal name restoration covers output drivers and mapped unused input
     /** Placed unused input. */
     const auto placed_unused = lyt.create_pi("", {3, 0});
     /** Mapped native endpoints; unmapped nodes retain an absent default endpoint. */
-    mockturtle::node_map<decltype(lyt)::output_port, decltype(ntk)> mapping{ntk};
+    mockturtle::node_map<decltype(lyt)::object_id, decltype(ntk)> mapping{ntk};
     mapping[ntk.get_node(input)]  = placed_input;
     mapping[ntk.get_node(driver)] = placed_driver;
     mapping[ntk.get_node(unused)] = placed_unused;
@@ -127,7 +127,7 @@ TEST_CASE("Signal name restoration covers output drivers and mapped unused input
     }
     SECTION("Stale native mappings reject")
     {
-        lyt.remove(placed_unused.object);
+        lyt.remove(placed_unused);
         CHECK_THROWS_AS(restore_signal_names(ntk, lyt, mapping), std::invalid_argument);
     }
 }

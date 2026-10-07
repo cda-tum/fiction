@@ -73,13 +73,13 @@ TEST_CASE("Color routing preserves destination input indices", "[color-routing]"
     const auto        a    = layout.create_pi("a", {0, 1});
     const auto        b    = layout.create_pi("b", {1, 0});
     const auto        gate = layout.create_lt(a, b, {1, 1});
-    layout.disconnect({gate.object, 0});
-    layout.disconnect({gate.object, 1});
+    layout.disconnect({gate, 0});
+    layout.disconnect({gate, 1});
     const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{1, 0}, {1, 1}, 1}, {{0, 1}, {1, 1}, 0}};
 
     REQUIRE(color_routing(layout, objectives));
-    CHECK(layout.source({gate.object, 0}) == a);
-    CHECK(layout.source({gate.object, 1}) == b);
+    CHECK(layout.source({gate, 0}) == a);
+    CHECK(layout.source({gate, 1}) == b);
 }
 
 TEST_CASE("Two paths wire connections", "[color-routing]")
@@ -296,8 +296,8 @@ TEST_CASE("Routing failure 3", "[color-routing]")
 
     SECTION("Wires without connections")
     {
-        layout.disconnect({a1.object, 0});
-        layout.disconnect({a1.object, 1});
+        layout.disconnect({a1, 0});
+        layout.disconnect({a1, 1});
 
         const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {2, 1}, 0}, {{1, 1}, {2, 1}, 1}};
 
@@ -313,7 +313,7 @@ TEST_CASE("Routing failure 3", "[color-routing]")
     }
     SECTION("Goal node behind wire crossing")
     {
-        layout.disconnect({a1.object, 0});
+        layout.disconnect({a1, 0});
 
         const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {2, 1}, 0}, {{1, 1}, {2, 1}, 1}};
 

@@ -115,7 +115,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
                 /** @brief Corresponding connection in the restored layout. */
                 const auto restored_source = rlyt.source({*restored, i});
                 CHECK((written_source.has_value() && restored_source.has_value() &&
-                       wlyt.get_tile(written_source->object) == rlyt.get_tile(restored_source->object)));
+                       wlyt.get_tile(*written_source) == rlyt.get_tile(*restored_source)));
             }
         });
 }
@@ -333,8 +333,8 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     const auto        gate  = layout.create_lt(a, b, {1, 1, 0});
     const auto        other = layout.create_po(a, "pass", {0, 2, 0});
     const auto        po    = layout.create_po(gate, "f", {2, 1, 0});
-    layout.set_output_order(std::array{po.object, other.object});
-    layout.set_input_order(std::array{a.object, b.object});
+    layout.set_output_order(std::array{po, other});
+    layout.set_input_order(std::array{a, b});
     kitty::dynamic_truth_table constant{0};
     kitty::create_from_hex_string(constant, "1");
     layout.create_node({}, constant, {0, 0, 0});
@@ -359,12 +359,12 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     const auto first_input = restored.source({*rg, 0});
     /** @brief Second restored gate input. */
     const auto second_input = restored.source({*rg, 1});
-    CHECK((first_input.has_value() && restored.get_tile(first_input->object) == layout.get_tile(a.object)));
-    CHECK((second_input.has_value() && restored.get_tile(second_input->object) == layout.get_tile(b.object)));
+    CHECK((first_input.has_value() && restored.get_tile(*first_input) == layout.get_tile(a)));
+    CHECK((second_input.has_value() && restored.get_tile(*second_input) == layout.get_tile(b)));
     /** @brief Placed zero-input function restored from the file. */
     const auto constant_object = restored.find_object({0, 0, 0});
     CHECK((constant_object.has_value() && restored.node_function(*constant_object).num_vars() == 0));
-    CHECK(restored.get_output_name(0) == layout.get_name(po.object));
+    CHECK(restored.get_output_name(0) == layout.get_name(po));
     CHECK(restored.get_output_name(1) == "pass");
     compare_written_and_read_layout(layout, restored);
 }
@@ -378,7 +378,7 @@ TEST_CASE("FGL validates every object before changing the stream", "[write-fgl-l
     stream << "sentinel";
     CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
     CHECK(stream.str() == "sentinel");
-    layout.connect(wire, {wire.object, 0});
+    layout.connect(wire, {wire, 0});
     CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
     CHECK(stream.str() == "sentinel");
 }
@@ -398,7 +398,7 @@ TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-lay
     }
     SECTION("Outside extent")
     {
-        layout.move_node(source.object, {-1, 0, 0});
+        layout.move_node(source, {-1, 0, 0});
     }
     SECTION("Unsupported clocking name")
     {

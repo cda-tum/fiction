@@ -1045,9 +1045,8 @@ TEST_CASE("Draw object identities and constants", "[dot-drawers]")
     const auto  constant = layout.create_node({}, kitty::dynamic_truth_table{0}, {0, 0});
     const auto  wire     = layout.create_buf(constant, {1, 0});
     const gate_layout_cartesian_drawer<gate_layout, false, true> drawer{};
-    CHECK(drawer.tile_label(layout, {0, 0}) ==
-          fmt::format("{}:{}: 0", constant.object.index, constant.object.generation));
-    CHECK(drawer.tile_label(layout, {1, 0}) == fmt::format("{}:{}: BUF", wire.object.index, wire.object.generation));
+    CHECK(drawer.tile_label(layout, {0, 0}) == fmt::format("{}:{}: 0", constant.index, constant.generation));
+    CHECK(drawer.tile_label(layout, {1, 0}) == fmt::format("{}:{}: BUF", wire.index, wire.generation));
     CHECK(drawer.tile_fillcolor(layout, {0, 0}) == "white");
 }
 
@@ -1076,8 +1075,8 @@ TEST_CASE("Layout DOT identifiers serialize signed coordinate boundaries", "[dot
     const auto        output = layout.create_buf(input, {0, 0});
     std::stringstream stream{};
     write_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout>>(layout, stream);
-    const auto source_id = drawer.tile_id(layout.get_tile(input.object));
-    const auto target_id = drawer.tile_id(layout.get_tile(output.object));
+    const auto source_id = drawer.tile_id(layout.get_tile(input));
+    const auto target_id = drawer.tile_id(layout.get_tile(output));
     CHECK(std::regex_match(source_id, identifier));
     CHECK(std::regex_match(target_id, identifier));
     CHECK(stream.str().find(source_id + " -> " + target_id + " [style=solid]") != std::string::npos);

@@ -292,9 +292,9 @@ extent<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn, const uint
 }
 
 template <typename Lyt>
-typename Lyt::output_port wire_east(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
+typename Lyt::object_id wire_east(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
 {
-    auto a = lyt.output(lyt.find_object(src).value());
+    auto a = lyt.find_object(src).value();
 
     for (auto x = src.x + 1; x < dest.x; ++x)
     {
@@ -311,9 +311,9 @@ typename Lyt::output_port wire_east(Lyt& lyt, const tile<Lyt>& src, const tile<L
 }
 
 template <typename Lyt>
-typename Lyt::output_port wire_south(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
+typename Lyt::object_id wire_south(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
 {
-    auto a = lyt.output(lyt.find_object(src).value());
+    auto a = lyt.find_object(src).value();
 
     for (auto y = src.y + 1; y < dest.y; ++y)
     {
@@ -330,9 +330,9 @@ typename Lyt::output_port wire_south(Lyt& lyt, const tile<Lyt>& src, const tile<
 }
 
 template <typename Lyt, typename Ntk>
-typename Lyt::output_port connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>& n, tile<Lyt> pre1_t, tile<Lyt> pre2_t,
-                                            const std::optional<bool>& c = std::nullopt)
+typename Lyt::object_id connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                                          tile<Lyt> pre1_t, tile<Lyt> pre2_t,
+                                          const std::optional<bool>& c = std::nullopt)
 {
     const bool reversed = pre2_t < pre1_t;
     if (reversed)
@@ -345,8 +345,8 @@ typename Lyt::output_port connect_and_place(Lyt& lyt, const tile<Lyt>& t, const 
 }
 
 template <typename Lyt, typename Ntk>
-typename Lyt::output_port connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>& n, const tile<Lyt>& pre_t)
+typename Lyt::object_id connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                                          const tile<Lyt>& pre_t)
 {
     if (lyt.is_westwards_of(t, pre_t))
     {
@@ -383,7 +383,7 @@ typename Lyt::output_port connect_and_place(Lyt& lyt, const tile<Lyt>& t, const 
  */
 template <typename Ntk, typename Lyt>
 void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_counter,
-                   const mockturtle::node_map<typename Lyt::output_port, decltype(ctn.color_ntk)>& node2pos)
+                   const mockturtle::node_map<typename Lyt::object_id, decltype(ctn.color_ntk)>& node2pos)
 {
     std::vector<mockturtle::node<Ntk>> output_nodes{};
 
@@ -393,7 +393,7 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
             if (!ctn.color_ntk.is_constant(po))
             {
                 auto n_s     = node2pos[po];
-                auto po_tile = layout.get_tile(n_s.object);
+                auto po_tile = layout.get_tile(n_s);
 
                 const auto multi_output_node = std::ranges::find(output_nodes, po) != output_nodes.cend();
 
@@ -401,7 +401,7 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
                 if (!is_eastern_po_orientation_available(ctn, po) || multi_output_node)
                 {
                     n_s     = wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2});
-                    po_tile = layout.get_tile(n_s.object);
+                    po_tile = layout.get_tile(n_s);
                 }
 
                 // check if PO position is located at the border
@@ -488,7 +488,7 @@ class orthogonal_impl
         // compute a coloring
         const auto ctn = east_south_edge_coloring(ntk);
 
-        mockturtle::node_map<typename Lyt::output_port, decltype(ctn.color_ntk)> node2pos{ctn.color_ntk};
+        mockturtle::node_map<typename Lyt::object_id, decltype(ctn.color_ntk)> node2pos{ctn.color_ntk};
 
         // find multi-output nodes
         std::vector<mockturtle::node<decltype(ntk)>> output_nodes{};
@@ -529,7 +529,7 @@ class orthogonal_impl
                     if (ctn.color_ntk.is_pi(n))
                     {
                         node2pos[n] = place(layout, {0, latest_pos.y}, ctn.color_ntk, n);
-                        pi2node[n]  = node2pos[n].object;
+                        pi2node[n]  = node2pos[n];
 
                         // resolve conflicting PIs
                         ctn.color_ntk.foreach_fanout(
@@ -554,7 +554,7 @@ class orthogonal_impl
                     {
                         const auto& pre = fc.fanin_nodes[0];
 
-                        const auto pre_t = layout.get_tile(node2pos[pre].object);
+                        const auto pre_t = layout.get_tile(node2pos[pre]);
 
                         // n is colored east
                         if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
@@ -581,8 +581,7 @@ class orthogonal_impl
                     {
                         const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
 
-                        auto pre1_t = layout.get_tile(node2pos[pre1].object),
-                             pre2_t = layout.get_tile(node2pos[pre2].object);
+                        auto pre1_t = layout.get_tile(node2pos[pre1]), pre2_t = layout.get_tile(node2pos[pre2]);
 
                         tile<Lyt> t{};
                         bool      reversed = false;
@@ -601,7 +600,7 @@ class orthogonal_impl
                             t = {latest_pos.x, pre2_t.y};
 
                             // each 2-input gate has one incoming bent wire
-                            pre1_t = layout.get_tile(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}).object);
+                            pre1_t = layout.get_tile(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}));
 
                             ++latest_pos.x;
                         }
@@ -619,7 +618,7 @@ class orthogonal_impl
                             t = {pre1_t.x, latest_pos.y};
 
                             // each 2-input gate has one incoming bent wire
-                            pre2_t = layout.get_tile(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}).object);
+                            pre2_t = layout.get_tile(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}));
 
                             ++latest_pos.y;
                         }
@@ -637,8 +636,8 @@ class orthogonal_impl
                             t = latest_pos;
 
                             // both wires have one bent
-                            pre1_t = layout.get_tile(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}).object);
-                            pre2_t = layout.get_tile(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}).object);
+                            pre1_t = layout.get_tile(wire_east(layout, pre1_t, {t.x + 1, pre1_t.y}));
+                            pre2_t = layout.get_tile(wire_south(layout, pre2_t, {pre2_t.x, t.y + 1}));
 
                             ++latest_pos.x;
                             ++latest_pos.y;

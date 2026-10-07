@@ -19,7 +19,7 @@ def test_empty_layout() -> None:
     x1 = lyt.create_pi("x1", (0, 1))
     po = lyt.create_po(x1, "f1", (4, 1))
 
-    route_path(lyt, [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)], LayoutInputPort(po.object, 0))
+    route_path(lyt, [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)], LayoutInputPort(po, 0))
 
     for x, y in [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)]:
         assert lyt.is_wire_tile((x, y))
@@ -31,7 +31,7 @@ def test_empty_layout_a_star() -> None:
     x1 = lyt.create_pi("x1", (0, 1))
     po = lyt.create_po(x1, "f1", (4, 1))
 
-    route_path(lyt, a_star(lyt, (0, 1), (4, 1)), LayoutInputPort(po.object, 0))
+    route_path(lyt, a_star(lyt, (0, 1), (4, 1)), LayoutInputPort(po, 0))
 
     for x, y in [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)]:
         assert lyt.is_wire_tile((x, y))

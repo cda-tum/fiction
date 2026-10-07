@@ -182,16 +182,16 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     CHECK((routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 0} !=
            routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 1}));
     clear_routing(layout);
-    CHECK(layout.contains(a.object));
-    CHECK(layout.contains(gate.object));
-    CHECK(layout.contains(po.object));
-    CHECK_FALSE(layout.source({gate.object, 0}));
-    CHECK_FALSE(layout.source({gate.object, 1}));
+    CHECK(layout.contains(a));
+    CHECK(layout.contains(gate));
+    CHECK(layout.contains(po));
+    CHECK_FALSE(layout.source({gate, 0}));
+    CHECK_FALSE(layout.source({gate, 1}));
     const layout_coordinate_path<cart_gate_clk_lyt> second{{0, 0}, {1, 0}, {4, 2}};
-    route_path(layout, second, {gate.object, 1});
-    CHECK_FALSE(layout.source({gate.object, 0}));
+    route_path(layout, second, {gate, 1});
+    CHECK_FALSE(layout.source({gate, 0}));
     /** @brief Routed source connected to the second input port. */
-    const auto second_source = layout.source({gate.object, 1});
+    const auto second_source = layout.source({gate, 1});
     REQUIRE(second_source.has_value());
     if (!second_source.has_value())
     {
@@ -199,13 +199,13 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     }
     /** @brief Retained identity of the second routed wire. */
     const auto second_wire = *second_source;
-    CHECK(layout.source({second_wire.object, 0}) == a);
+    CHECK(layout.source({second_wire, 0}) == a);
     const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {0, 1}, {4, 2}};
-    route_path(layout, first, {gate.object, 0});
-    CHECK(layout.source({gate.object, 1}) == second_wire);
-    CHECK(layout.is_lt(gate.object));
-    layout.move_node(gate.object, {4, 3});
-    CHECK(layout.source({gate.object, 1}) == second_wire);
+    route_path(layout, first, {gate, 0});
+    CHECK(layout.source({gate, 1}) == second_wire);
+    CHECK(layout.is_lt(gate));
+    layout.move_node(gate, {4, 3});
+    CHECK(layout.source({gate, 1}) == second_wire);
 }
 
 TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-ports]")
@@ -215,18 +215,18 @@ TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-po
     const auto                                      b    = layout.create_pi("b", {0, 1});
     const auto                                      gate = layout.create_lt(a, b, {4, 0});
     const layout_coordinate_path<cart_gate_clk_lyt> path{{0, 0}, {1, 0}, {4, 0}};
-    CHECK_THROWS_AS(route_path(layout, path, {gate.object, 2}), std::out_of_range);
+    CHECK_THROWS_AS(route_path(layout, path, {gate, 2}), std::out_of_range);
     CHECK(layout.size() == 3);
-    CHECK(layout.source({gate.object, 0}) == a);
-    CHECK(layout.source({gate.object, 1}) == b);
+    CHECK(layout.source({gate, 0}) == a);
+    CHECK(layout.source({gate, 1}) == b);
     const layout_coordinate_path<cart_gate_clk_lyt> mismatch{{0, 0}, {1, 0}, {4, 1}};
-    CHECK_THROWS_AS(route_path(layout, mismatch, {gate.object, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(route_path(layout, mismatch, {gate, 0}), std::invalid_argument);
     CHECK_FALSE(layout.find_object({1, 0}));
     const auto blocker = layout.create_buf({1, 0});
     layout.create_buf({1, 0, 1});
-    CHECK_THROWS_AS(route_path(layout, path, {gate.object, 0}), std::invalid_argument);
-    CHECK(layout.find_object({1, 0}) == blocker.object);
-    CHECK(layout.source({gate.object, 0}) == a);
+    CHECK_THROWS_AS(route_path(layout, path, {gate, 0}), std::invalid_argument);
+    CHECK(layout.find_object({1, 0}) == blocker);
+    CHECK(layout.source({gate, 0}) == a);
 }
 
 TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[routing-ports]")
@@ -238,15 +238,15 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
     clear_routing(layout);
     const layout_coordinate_path<cart_gate_clk_lyt> second{{0, 1}, {1, 1}, {4, 1}};
     const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {1, 0}, {4, 1}};
-    route_path(layout, second, {gate.object, 1});
-    route_path(layout, first, {gate.object, 0});
+    route_path(layout, second, {gate, 1});
+    route_path(layout, first, {gate, 0});
     /** @brief Routed source connected to the first input port. */
-    const auto first_source = layout.source({gate.object, 0});
+    const auto first_source = layout.source({gate, 0});
     /** @brief Routed source connected to the second input port. */
-    const auto second_source = layout.source({gate.object, 1});
-    CHECK((first_source.has_value() && layout.source({first_source->object, 0}) == a));
-    CHECK((second_source.has_value() && layout.source({second_source->object, 0}) == b));
-    CHECK(layout.is_lt(gate.object));
+    const auto second_source = layout.source({gate, 1});
+    CHECK((first_source.has_value() && layout.source({*first_source, 0}) == a));
+    CHECK((second_source.has_value() && layout.source({*second_source, 0}) == b));
+    CHECK(layout.is_lt(gate));
     const auto objectives = extract_routing_objectives(layout);
     CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 1}, 0}) != objectives.end());
     CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 1}, {4, 1}, 1}) != objectives.end());

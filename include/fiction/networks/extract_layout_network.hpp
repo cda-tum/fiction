@@ -79,10 +79,10 @@ template <typename Lyt>
                     {
                         throw std::invalid_argument("A primary output dependency has a disconnected input");
                     }
-                    const auto [entry, inserted] = signals.try_emplace(source->object, std::nullopt);
+                    const auto [entry, inserted] = signals.try_emplace(*source, std::nullopt);
                     if (inserted)
                     {
-                        stack.push_back({source->object, 0});
+                        stack.push_back({*source, 0});
                     }
                     else if (!entry->second)
                     {
@@ -93,7 +93,7 @@ template <typename Lyt>
                 children.clear();
                 for (uint32_t input{}; input < lyt.input_count(current.object); ++input)
                 {
-                    children.push_back(*signals.at(lyt.source({current.object, input})->object));
+                    children.push_back(*signals.at(*lyt.source({current.object, input})));
                 }
                 const auto result          = lyt.is_buf(current.object) || lyt.is_po(current.object) ?
                                                  children.at(0) :

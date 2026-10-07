@@ -51,21 +51,21 @@ TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gat
     const auto                          a    = lyt.create_pi("a", {0, 0});
     const auto                          b    = lyt.create_pi("b", {1, 0});
     const auto                          gate = lyt.create_lt(a, b, {1, 1});
-    const auto                          id   = gate.object;
-    lyt.move_node(a.object, {-2, 3, 7});
-    CHECK(lyt.get_tile(a.object) == layout_base::coordinate{-2, 3, 7});
+    const auto                          id   = gate;
+    lyt.move_node(a, {-2, 3, 7});
+    CHECK(lyt.get_tile(a) == layout_base::coordinate{-2, 3, 7});
     CHECK(lyt.source({id, 0}) == a);
     CHECK(lyt.source({id, 1}) == b);
-    CHECK_THROWS_AS(lyt.move_node(id, lyt.get_tile(b.object)), std::invalid_argument);
+    CHECK_THROWS_AS(lyt.move_node(id, lyt.get_tile(b)), std::invalid_argument);
     CHECK(lyt.get_tile(id) == layout_base::coordinate{1, 1});
     CHECK_THROWS_AS(lyt.create_pi("occupied", {1, 1}), std::invalid_argument);
     CHECK(lyt.size() == 3);
-    lyt.remove(a.object);
+    lyt.remove(a);
     CHECK_FALSE(lyt.source({id, 0}).has_value());
     CHECK(lyt.source({id, 1}) == b);
     const auto replacement = lyt.create_pi("replacement", {0, 0});
-    CHECK(replacement.object != a.object);
-    CHECK_FALSE(lyt.contains(a.object));
+    CHECK(replacement != a);
+    CHECK_FALSE(lyt.contains(a));
     CHECK_THROWS_AS(lyt.connect(a, {id, 0}), std::invalid_argument);
     CHECK(lyt.source({id, 1}) == b);
     lyt.connect(replacement, {id, 0});
@@ -79,17 +79,17 @@ TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gate-layout-
     const auto                          b    = original.create_pi("b", {1, 0});
     const auto                          gate = original.create_and(a, b, {1, 1});
     auto                                copy = original;
-    copy.move_node(gate.object, {2, 2});
-    copy.disconnect({gate.object, 0});
-    copy.set_input_order(std::vector{b.object, a.object});
+    copy.move_node(gate, {2, 2});
+    copy.disconnect({gate, 0});
+    copy.set_input_order(std::vector{b, a});
     copy.resize({9, 9});
-    CHECK(original.get_tile(gate.object) == layout_base::coordinate{1, 1});
-    CHECK(original.source({gate.object, 0}) == a);
-    CHECK(original.pi_at(0) == a.object);
-    CHECK(copy.pi_at(0) == b.object);
+    CHECK(original.get_tile(gate) == layout_base::coordinate{1, 1});
+    CHECK(original.source({gate, 0}) == a);
+    CHECK(original.pi_at(0) == a);
+    CHECK(copy.pi_at(0) == b);
     CHECK(original.width() != copy.width());
-    CHECK_THROWS_AS(copy.set_input_order(std::vector{a.object, a.object}), std::invalid_argument);
-    CHECK(copy.pi_at(0) == b.object);
+    CHECK_THROWS_AS(copy.set_input_order(std::vector{a, a}), std::invalid_argument);
+    CHECK(copy.pi_at(0) == b);
 }
 
 TEST_CASE("Connections expose declared ports despite physical violations", "[gate-layout-editing]")
@@ -97,13 +97,12 @@ TEST_CASE("Connections expose declared ports despite physical violations", "[gat
     gate_level_layout<cartesian_layout> lyt{{1, 1}, clocking::twoddwave()};
     const auto                          a    = lyt.create_pi("a", {-5, 0});
     const auto                          gate = lyt.create_buf(a, {99, 0, 3});
-    CHECK(lyt.source({gate.object, 0}) == a);
+    CHECK(lyt.source({gate, 0}) == a);
     std::vector<gate_level_layout<cartesian_layout>::input_port> sinks{};
     lyt.foreach_sink(a, [&](const auto port) { sinks.push_back(port); });
-    CHECK(sinks == std::vector{gate_level_layout<cartesian_layout>::input_port{gate.object, 0}});
-    CHECK_THROWS_AS(lyt.connect({a.object, 1}, {gate.object, 0}), std::out_of_range);
-    CHECK_THROWS_AS(lyt.connect(a, {gate.object, 1}), std::out_of_range);
-    CHECK(lyt.source({gate.object, 0}) == a);
+    CHECK(sinks == std::vector{gate_level_layout<cartesian_layout>::input_port{gate, 0}});
+    CHECK_THROWS_AS(lyt.connect(a, {gate, 1}), std::out_of_range);
+    CHECK(lyt.source({gate, 0}) == a);
     CHECK_FALSE(lyt.find_object({0, 0}).has_value());
 }
 
@@ -126,8 +125,8 @@ TEST_CASE("Layouts move without throwing so containers move them on growth", "[g
 
 TEST_CASE("Objects with more inputs than the inline capacity keep ordered ports", "[gate-layout-editing]")
 {
-    gate_level_layout<cartesian_layout>                           lyt{{6, 6}};
-    std::vector<gate_level_layout<cartesian_layout>::output_port> pis{};
+    gate_level_layout<cartesian_layout>                         lyt{{6, 6}};
+    std::vector<gate_level_layout<cartesian_layout>::object_id> pis{};
     for (uint32_t i = 0; i < 5; ++i)
     {
         pis.push_back(lyt.create_pi("pi" + std::to_string(i), {static_cast<int64_t>(i), 0}));
@@ -135,17 +134,17 @@ TEST_CASE("Objects with more inputs than the inline capacity keep ordered ports"
     kitty::dynamic_truth_table parity{5};
     kitty::create_from_hex_string(parity, "96696996");
     const auto gate = lyt.create_node(pis, parity, {2, 2});
-    CHECK(lyt.input_count(gate.object) == 5);
-    CHECK(lyt.fanin_size(gate.object) == 5);
+    CHECK(lyt.input_count(gate) == 5);
+    CHECK(lyt.fanin_size(gate) == 5);
     for (uint32_t i = 0; i < 5; ++i)
     {
-        CHECK(lyt.source({gate.object, i}) == pis[i]);
+        CHECK(lyt.source({gate, i}) == pis[i]);
     }
-    lyt.disconnect({gate.object, 3});
-    CHECK(lyt.fanin_size(gate.object) == 4);
-    CHECK_FALSE(lyt.source({gate.object, 3}).has_value());
-    CHECK(lyt.source({gate.object, 4}) == pis[4]);
-    CHECK_THROWS_AS(lyt.source({gate.object, 5}), std::out_of_range);
+    lyt.disconnect({gate, 3});
+    CHECK(lyt.fanin_size(gate) == 4);
+    CHECK_FALSE(lyt.source({gate, 3}).has_value());
+    CHECK(lyt.source({gate, 4}) == pis[4]);
+    CHECK_THROWS_AS(lyt.source({gate, 5}), std::out_of_range);
 }
 
 TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
@@ -153,19 +152,19 @@ TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
     gate_level_layout<cartesian_layout> source{{4, 4}};
     const auto                          removed = source.create_pi("removed", {0, 0});
     source.create_pi("kept", {1, 0});
-    source.remove(removed.object);
+    source.remove(removed);
     auto destination = std::move(source);
     // The layout contract permits moved-from reuse.
     // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move,hicpp-invalid-access-moved)
     REQUIRE(source.is_empty());
     const auto reused = source.create_pi("reused", {0, 0});
-    CHECK(source.contains(reused.object));
+    CHECK(source.contains(reused));
     CHECK(destination.num_pis() == 1);
     source = std::move(destination);
     // The layout contract permits moved-from reuse.
     // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move,hicpp-invalid-access-moved)
     REQUIRE(destination.is_empty());
-    CHECK(destination.create_pi("new", {2, 0}).object.generation != 0);
+    CHECK(destination.create_pi("new", {2, 0}).generation != 0);
     CHECK(source.get_input_name(0) == "kept");
 }
 
@@ -174,13 +173,13 @@ TEST_CASE("Deletion disconnects self loops and duplicate destination inputs", "[
     gate_level_layout<cartesian_layout> lyt{{4, 4}};
     const auto                          input = lyt.create_pi("a", {0, 0});
     const auto                          gate  = lyt.create_and(input, input, {1, 0});
-    CHECK(lyt.fanout_size(input.object) == 2);
-    lyt.disconnect({gate.object, 0});
-    CHECK(lyt.fanout_size(input.object) == 1);
-    CHECK(lyt.source({gate.object, 1}) == input);
-    lyt.connect(gate, {gate.object, 0});
-    lyt.remove(gate.object);
-    CHECK(lyt.fanout_size(input.object) == 0);
+    CHECK(lyt.fanout_size(input) == 2);
+    lyt.disconnect({gate, 0});
+    CHECK(lyt.fanout_size(input) == 1);
+    CHECK(lyt.source({gate, 1}) == input);
+    lyt.connect(gate, {gate, 0});
+    lyt.remove(gate);
+    CHECK(lyt.fanout_size(input) == 0);
     CHECK(lyt.size() == 1);
 }
 
@@ -569,9 +568,8 @@ TEST_CASE("Synchronization element layout properties", "[synchronization-element
 
 TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout-editing]")
 {
-    using layout = gate_level_layout<cartesian_layout>;
-    using binary_creator =
-        layout::output_port (layout::*)(layout::output_port, layout::output_port, const layout::tile&);
+    using layout         = gate_level_layout<cartesian_layout>;
+    using binary_creator = layout::object_id (layout::*)(layout::object_id, layout::object_id, const layout::tile&);
     const std::array<std::pair<binary_creator, uint64_t>, 10> creators{{{&layout::create_and, 0x8},
                                                                         {&layout::create_nand, 0x7},
                                                                         {&layout::create_or, 0xe},
@@ -593,21 +591,21 @@ TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout-ed
         /** @brief The truth-table word supplied to the constructor. */
         const std::array words{literal};
         kitty::create_from_words(expected, words.cbegin(), words.cend());
-        CHECK(lyt.node_function(gate.object) == expected);
-        CHECK(lyt.source({gate.object, 0}) == a);
-        CHECK(lyt.source({gate.object, 1}) == b);
+        CHECK(lyt.node_function(gate) == expected);
+        CHECK(lyt.source({gate, 0}) == a);
+        CHECK(lyt.source({gate, 1}) == b);
     }
     const auto wire = lyt.create_buf(a, {0, 2});
     const auto inv  = lyt.create_not(a, {1, 2});
     const auto maj  = lyt.create_maj(a, b, wire, {2, 2});
-    CHECK(lyt.is_buf(wire.object));
-    CHECK(lyt.is_inv(inv.object));
-    CHECK(lyt.is_maj(maj.object));
+    CHECK(lyt.is_buf(wire));
+    CHECK(lyt.is_inv(inv));
+    CHECK(lyt.is_maj(maj));
     kitty::dynamic_truth_table identity{1};
     kitty::create_nth_var(identity, 0);
     const auto generic_wire = lyt.create_node({a}, identity, {3, 2});
-    CHECK(lyt.is_wire(generic_wire.object));
-    CHECK_FALSE(lyt.is_gate(generic_wire.object));
+    CHECK(lyt.is_wire(generic_wire));
+    CHECK_FALSE(lyt.is_gate(generic_wire));
     uint32_t gates{};
     lyt.foreach_gate([&](const auto) { ++gates; });
     CHECK(gates == lyt.num_gates());
@@ -620,16 +618,16 @@ TEST_CASE("Removing terminals updates declared order and sparse names", "[gate-l
     const auto                          b      = lyt.create_pi("b", {1, 0});
     const auto                          c      = lyt.create_pi("c", {2, 0});
     const auto                          output = lyt.create_po(c, "result", {2, 1});
-    lyt.set_input_order(std::vector{c.object, a.object, b.object});
-    lyt.remove(a.object);
+    lyt.set_input_order(std::vector{c, a, b});
+    lyt.remove(a);
     CHECK(lyt.num_pis() == 2);
-    CHECK(lyt.pi_at(0) == c.object);
-    CHECK(lyt.pi_at(1) == b.object);
+    CHECK(lyt.pi_at(0) == c);
+    CHECK(lyt.pi_at(1) == b);
     lyt.set_name(b, "");
     CHECK_FALSE(lyt.has_name(b));
-    lyt.remove(output.object);
+    lyt.remove(output);
     CHECK(lyt.num_pos() == 0);
-    CHECK(lyt.fanout_size(c.object) == 0);
+    CHECK(lyt.fanout_size(c) == 0);
 }
 
 TEST_CASE("Copied capabilities remain independent", "[gate-layout-editing]")
@@ -710,10 +708,10 @@ TEST_CASE("Moved-from layouts recover from interrupted cache initialization", "[
         const auto a    = source.create_pi("a", {0, 0});
         const auto b    = source.create_pi("b", {1, 0});
         const auto gate = source.create_and(a, b, {1, 1});
-        CHECK(source.node_function(a.object).num_vars() == 1);
-        CHECK(source.node_function(gate.object).num_vars() == 2);
-        CHECK(kitty::get_bit(source.node_function(gate.object), 3));
-        CHECK_FALSE(kitty::get_bit(source.node_function(gate.object), 0));
+        CHECK(source.node_function(a).num_vars() == 1);
+        CHECK(source.node_function(gate).num_vars() == 2);
+        CHECK(kitty::get_bit(source.node_function(gate), 3));
+        CHECK_FALSE(kitty::get_bit(source.node_function(gate), 0));
         CHECK(destination.get_name(original) == "original");
         if (created)
         {

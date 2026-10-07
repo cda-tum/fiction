@@ -177,7 +177,7 @@ class sat_clocking_handler
                     id,
                     [this, &destination](const auto source)
                     {
-                        const auto predecessor = clock_zone(source.object);
+                        const auto predecessor = clock_zone(source);
                         for (typename Lyt::clock_number_t dst{}; dst < number_of_clocks; ++dst)
                         {
                             for (typename Lyt::clock_number_t src{}; src < number_of_clocks; ++src)
@@ -207,7 +207,7 @@ class sat_clocking_handler
         {
             solver.add_clause(variables.at({clock_zone(*current), clk}));
             std::optional<typename Lyt::object_id> next{};
-            layout.foreach_sink(layout.output(*current),
+            layout.foreach_sink(*current,
                                 [&next](const auto destination)
                                 {
                                     next = destination.object;
@@ -320,7 +320,7 @@ class determine_clocking_impl
                     {
                         throw std::invalid_argument("Clock assignment requires every input to be connected");
                     }
-                    if (!layout.is_adjacent_elevation_of(t, layout.get_tile(source->object)))
+                    if (!layout.is_adjacent_elevation_of(t, layout.get_tile(*source)))
                     {
                         throw std::invalid_argument("Clock assignment requires adjacent connected objects");
                     }
@@ -328,7 +328,7 @@ class determine_clocking_impl
             });
         for (std::size_t next{}; next < ready.size(); ++next)
         {
-            layout.foreach_sink(layout.output(ready[next]),
+            layout.foreach_sink(ready[next],
                                 [&](const auto sink)
                                 {
                                     if (--remaining_inputs.at(sink.object) == 0)

@@ -346,7 +346,7 @@ void route_path(Lyt& lyt, const Path& path, const typename Lyt::input_port desti
         }
         positions.push_back(position);
     }
-    auto                                 incoming = lyt.output(*source);
+    auto                                 incoming = *source;
     std::vector<typename Lyt::object_id> created{};
     created.reserve(positions.size());
     try
@@ -354,7 +354,7 @@ void route_path(Lyt& lyt, const Path& path, const typename Lyt::input_port desti
         for (const auto& position : positions)
         {
             incoming = lyt.create_buf(incoming, position);
-            created.push_back(incoming.object);
+            created.push_back(incoming);
         }
         lyt.connect(incoming, destination);
     }
@@ -394,7 +394,7 @@ std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt)
             lyt.foreach_fanin(id,
                               [&](const auto port, const auto input)
                               {
-                                  auto                                        source = port.object;
+                                  auto                                        source = port;
                                   std::unordered_set<typename Lyt::object_id> visited{};
                                   while (intermediate(source))
                                   {
@@ -407,7 +407,7 @@ std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt)
                                       {
                                           return;
                                       }
-                                      source = previous->object;
+                                      source = *previous;
                                   }
                                   objectives.push_back({lyt.get_tile(source), lyt.get_tile(id), input});
                               });

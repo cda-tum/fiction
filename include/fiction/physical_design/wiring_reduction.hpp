@@ -868,15 +868,15 @@ void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
             lyt.foreach_fanin(id,
                               [&](const auto source, const auto input)
                               {
-                                  auto upstream = std::optional<typename Lyt::output_port>{source};
+                                  auto upstream = std::optional<typename Lyt::object_id>{source};
                                   std::unordered_set<typename Lyt::object_id> visited{};
-                                  while (upstream && removed.contains(upstream->object))
+                                  while (upstream && removed.contains(*upstream))
                                   {
-                                      if (!visited.insert(upstream->object).second)
+                                      if (!visited.insert(*upstream).second)
                                       {
                                           throw std::invalid_argument("A wiring cut contains a cyclic wire chain");
                                       }
-                                      upstream = lyt.source({upstream->object, 0});
+                                      upstream = lyt.source({*upstream, 0});
                                   }
                                   if (upstream)
                                   {

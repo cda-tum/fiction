@@ -81,10 +81,10 @@ class critical_path_length_and_throughput_impl
                         {
                             throw std::invalid_argument("A primary output dependency has a disconnected input");
                         }
-                        const auto [entry, inserted] = cache.try_emplace(source->object, std::nullopt);
+                        const auto [entry, inserted] = cache.try_emplace(*source, std::nullopt);
                         if (inserted)
                         {
-                            pending.push_back({source->object, 0});
+                            pending.push_back({*source, 0});
                         }
                         else if (!entry->second)
                         {
@@ -99,7 +99,7 @@ class critical_path_length_and_throughput_impl
                         path                    = {};
                         for (uint32_t input{}; input < lyt.input_count(current.object); ++input)
                         {
-                            const auto child = *cache.at(lyt.source({current.object, input})->object);
+                            const auto child = *cache.at(*lyt.source({current.object, input}));
                             path.length      = std::max(path.length, child.length);
                             path.delay       = std::max(path.delay, child.delay);
                             shortest_delay   = std::min(shortest_delay, child.delay);

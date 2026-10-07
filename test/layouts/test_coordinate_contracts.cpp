@@ -291,17 +291,17 @@ TEST_CASE("Gate-level layouts map tiles to object identities and back", "[coordi
     const auto a = lyt.create_pi("a", {0, 1, 0});
     const auto b = lyt.create_buf(a, {1, 1, 1});
 
-    CHECK(lyt.get_tile(a.object) == coordinate<cartesian_layout>{0, 1, 0});
-    CHECK(lyt.get_tile(b.object) == coordinate<cartesian_layout>{1, 1, 1});
-    CHECK(lyt.find_object({1, 1, 1}) == b.object);
+    CHECK(lyt.get_tile(a) == coordinate<cartesian_layout>{0, 1, 0});
+    CHECK(lyt.get_tile(b) == coordinate<cartesian_layout>{1, 1, 1});
+    CHECK(lyt.find_object({1, 1, 1}) == b);
     CHECK(lyt.is_empty_tile({2, 2, 0}));
     CHECK_FALSE(lyt.is_empty_tile({0, 1, 0}));
 
-    const auto moved = lyt.move_node(b.object, {2, 2, 0});
+    const auto moved = lyt.move_node(b, {2, 2, 0});
 
     CHECK(moved == b);
-    CHECK(lyt.get_tile(b.object) == coordinate<cartesian_layout>{2, 2, 0});
-    CHECK(lyt.source({b.object, 0}) == a);
+    CHECK(lyt.get_tile(b) == coordinate<cartesian_layout>{2, 2, 0});
+    CHECK(lyt.source({b, 0}) == a);
     CHECK(lyt.is_empty_tile({1, 1, 1}));
 }
 
@@ -325,16 +325,16 @@ TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-co
         const auto po  = lyt.create_po(buf, "po", {2, 0, 0});
 
         CHECK_THROWS_AS(lyt.create_pi("b", {0, 0, 0}), std::invalid_argument);
-        CHECK_THROWS_AS(lyt.move_node(buf.object, {2, 0, 0}), std::invalid_argument);
-        CHECK(lyt.get_tile(buf.object) == tile{1, 0, 0});
-        CHECK(lyt.source({po.object, 0}) == buf);
+        CHECK_THROWS_AS(lyt.move_node(buf, {2, 0, 0}), std::invalid_argument);
+        CHECK(lyt.get_tile(buf) == tile{1, 0, 0});
+        CHECK(lyt.source({po, 0}) == buf);
         CHECK(lyt.size() == 3);
         CHECK(lyt.num_pis() == 1);
         CHECK(lyt.num_pos() == 1);
 
-        CHECK(lyt.move_node(buf.object, {5, 0, 2}) == buf);
-        CHECK_FALSE(lyt.contains_coordinate(lyt.get_tile(buf.object)));
-        CHECK(lyt.source({po.object, 0}) == buf);
+        CHECK(lyt.move_node(buf, {5, 0, 2}) == buf);
+        CHECK_FALSE(lyt.contains_coordinate(lyt.get_tile(buf)));
+        CHECK(lyt.source({po, 0}) == buf);
     }
     SECTION("Every layer has distinct placement")
     {
@@ -343,11 +343,11 @@ TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-co
         const auto ground = lyt.create_pi("a", {2, 0, 0});
         /** Primary input beyond the declared layer count. */
         const auto elevated = lyt.create_pi("b", {2, 0, 2});
-        CHECK(lyt.find_object({2, 0, 0}) == ground.object);
-        CHECK(lyt.find_object({2, 0, 2}) == elevated.object);
+        CHECK(lyt.find_object({2, 0, 0}) == ground);
+        CHECK(lyt.find_object({2, 0, 2}) == elevated);
         lyt.clear_tile({2, 0, 2});
         CHECK_FALSE(lyt.find_object({2, 0, 2}));
-        CHECK(lyt.find_object({2, 0, 0}) == ground.object);
+        CHECK(lyt.find_object({2, 0, 0}) == ground);
     }
     SECTION("Negative coordinates identify placed objects")
     {
@@ -355,8 +355,8 @@ TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-co
         const auto a = lyt.create_pi("a", {std::numeric_limits<int32_t>::min(), 0, 0});
         const auto b = lyt.create_pi("b", {-1, -1, -1});
         CHECK(lyt.num_pis() == 2);
-        CHECK(lyt.get_tile(a.object) == tile{std::numeric_limits<int32_t>::min(), 0, 0});
-        CHECK(lyt.get_tile(b.object) == tile{-1, -1, -1});
+        CHECK(lyt.get_tile(a) == tile{std::numeric_limits<int32_t>::min(), 0, 0});
+        CHECK(lyt.get_tile(b) == tile{-1, -1, -1});
     }
 }
 

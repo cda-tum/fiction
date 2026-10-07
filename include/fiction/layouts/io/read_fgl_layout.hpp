@@ -432,7 +432,7 @@ class read_fgl_layout_impl
                     {
                         throw fgl_parsing_error("Error parsing FGL file: duplicate gate ID");
                     }
-                    typename Lyt::output_port port{};
+                    typename Lyt::object_id port{};
                     const auto arity = version_two ? gate.arity : static_cast<uint32_t>(gate.incoming.size());
                     if (gate.type == "PI" && arity == 0)
                     {
@@ -476,8 +476,8 @@ class read_fgl_layout_impl
                         kitty::create_from_hex_string(function, hex);
                         port = lyt.create_node({}, function, gate.loc);
                     }
-                    lyt.set_name(port.object, gate.name);
-                    objects.emplace(gate.id, port.object);
+                    lyt.set_name(port, gate.name);
+                    objects.emplace(gate.id, port);
                 }
                 for (const auto& gate : gates)
                 {
@@ -490,7 +490,7 @@ class read_fgl_layout_impl
                             {
                                 throw fgl_parsing_error("Error parsing FGL file: missing source or duplicate input");
                             }
-                            lyt.connect(lyt.output(objects.at(source)), {id, input});
+                            lyt.connect(objects.at(source), {id, input});
                         }
                     }
                     else
@@ -502,7 +502,7 @@ class read_fgl_layout_impl
                             {
                                 throw fgl_parsing_error("Error parsing FGL file: missing source object");
                             }
-                            lyt.connect(lyt.output(*source), {id, input});
+                            lyt.connect(*source, {id, input});
                         }
                     }
                     for (uint32_t input = 0; input < lyt.input_count(id); ++input)

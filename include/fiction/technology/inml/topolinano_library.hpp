@@ -340,7 +340,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
         lyt.foreach_fanin(n,
                           [&lyt, &pre_and_or_maj](const auto& fi)
                           {
-                              const auto fin = fi.object;
+                              const auto fin = fi;
 
                               if (lyt.is_and(fin))
                               {

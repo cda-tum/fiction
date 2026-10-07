@@ -39,8 +39,8 @@ TEST_CASE("Occupied bounds include outside objects and clear after removal", "[b
     CHECK(bounds.get_max() == layout_base::coordinate{9, 12});
     CHECK(bounds.get_x_size() == 15);
     CHECK(bounds.get_y_size() == 16);
-    lyt.remove(a.object);
-    lyt.remove(b.object);
+    lyt.remove(a);
+    lyt.remove(b);
     bounds.update_bounding_box();
     CHECK_FALSE(bounds.get_max().has_value());
     CHECK(bounds.get_x_size() == 0);

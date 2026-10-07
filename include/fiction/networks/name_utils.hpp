@@ -132,7 +132,7 @@ void restore_input_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
                 {
                     if constexpr (is_gate_level_layout_v<NtkSrc>)
                     {
-                        return ntk_src.output(pi);
+                        return pi;
                     }
                     else
                     {
@@ -216,7 +216,7 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mocktu
                 const auto target = old2new[ntk_src.get_node(f)];
                 if constexpr (is_gate_level_layout_v<NtkDest>)
                 {
-                    if (target == typename NtkDest::output_port{})
+                    if (target == typename NtkDest::object_id{})
                     {
                         return;
                     }

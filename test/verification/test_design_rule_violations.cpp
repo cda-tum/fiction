@@ -97,13 +97,13 @@ TEST_CASE("DRVs inspect declared input holes", "[drv][placed-objects]")
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
     const auto gate = lyt.create_node({pi}, function, {0, 1});
-    lyt.disconnect({gate.object, 0});
-    lyt.connect(pi, {gate.object, 1});
+    lyt.disconnect({gate, 0});
+    lyt.connect(pi, {gate, 1});
     lyt.create_po(gate, "result", {0, 2});
     const auto stats = get_drvs(lyt);
     CHECK(stats.drvs == 1);
     CHECK(stats.report["Missing connections"].size() == 1);
-    lyt.connect(pi, {gate.object, 0});
+    lyt.connect(pi, {gate, 0});
     CHECK(get_drvs(lyt).drvs == 0);
 }
 

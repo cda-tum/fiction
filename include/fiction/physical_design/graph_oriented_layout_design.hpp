@@ -461,7 +461,7 @@ class priority_queue
  * @tparam Ntk Type of the mockturtle network.
  */
 template <typename Lyt, typename Ntk>
-using node_dict_type = mockturtle::node_map<typename Lyt::output_port, Ntk>;
+using node_dict_type = mockturtle::node_map<typename Lyt::object_id, Ntk>;
 /**
  * This enum class indicates the allowed positions for PIs.
  */
@@ -1429,7 +1429,7 @@ class graph_oriented_layout_design_impl
         coord_vec_type<Lyt> possible_positions{};
 
         const auto& pre             = fc.fanin_nodes[0];
-        const auto  pre_t           = layout.get_tile(place_info.node2pos[pre].object);
+        const auto  pre_t           = layout.get_tile(place_info.node2pos[pre]);
         const auto  expansion_limit = std::max(static_cast<int64_t>(layout.width()) - 1 - pre_t.x,
                                                static_cast<int64_t>(layout.height()) - 1 - pre_t.y);
 
@@ -1481,7 +1481,7 @@ class graph_oriented_layout_design_impl
         uint64_t count_expansions = 0ul;
 
         const auto& pre   = fc.fanin_nodes[0];
-        const auto  pre_t = layout.get_tile(place_info.node2pos[pre].object);
+        const auto  pre_t = layout.get_tile(place_info.node2pos[pre]);
 
         // check if path from previous tile to new tile and from new tile to drain exist
         const auto check_tile = [&](const int64_t x, const int64_t y)
@@ -1548,8 +1548,8 @@ class graph_oriented_layout_design_impl
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
 
-        const auto pre1_t = layout.get_tile(place_info.node2pos[pre1].object);
-        const auto pre2_t = layout.get_tile(place_info.node2pos[pre2].object);
+        const auto pre1_t = layout.get_tile(place_info.node2pos[pre1]);
+        const auto pre2_t = layout.get_tile(place_info.node2pos[pre2]);
 
         const auto min_x = static_cast<int64_t>(std::max(pre1_t.x, pre2_t.x)) + (pre1_t.x == pre2_t.x ? 1 : 0);
         const auto min_y = static_cast<int64_t>(std::max(pre1_t.y, pre2_t.y)) + (pre1_t.y == pre2_t.y ? 1 : 0);
@@ -1713,7 +1713,7 @@ class graph_oriented_layout_design_impl
 
         for (uint64_t node = 0ul; node < place_info.current_node; node++)
         {
-            const auto layout_tile = layout.get_tile(place_info.node2pos[ssg.nodes_to_place[node]].object);
+            const auto layout_tile = layout.get_tile(place_info.node2pos[ssg.nodes_to_place[node]]);
             const bool no_fanout_and_not_po =
                 !layout.is_po_tile(layout_tile) && (layout.fanout_size(*layout.find_object(layout_tile)) == 0);
             const bool one_dangling_fanout = (layout.fanout_size(*layout.find_object(layout_tile)) == 1) &&
@@ -1780,7 +1780,7 @@ class graph_oriented_layout_design_impl
                                  const networks::fanin_container<tec_nt>& fc)
     {
         const auto& pre   = fc.fanin_nodes[0];
-        const auto  pre_t = layout.get_tile(node2pos[pre].object);
+        const auto  pre_t = layout.get_tile(node2pos[pre]);
 
         const auto destination = *layout.find_object(position);
         layout.disconnect({destination, 0});
@@ -1809,8 +1809,8 @@ class graph_oriented_layout_design_impl
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
 
-        const auto pre1_t = layout.get_tile(node2pos[pre1].object);
-        const auto pre2_t = layout.get_tile(node2pos[pre2].object);
+        const auto pre1_t = layout.get_tile(node2pos[pre1]);
+        const auto pre2_t = layout.get_tile(node2pos[pre2]);
 
         const auto destination = *layout.find_object(position);
         layout.disconnect({destination, 0});
@@ -1867,7 +1867,7 @@ class graph_oriented_layout_design_impl
             place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
                 place(layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node]);
             place_info.pi2node[ssg.nodes_to_place[place_info.current_node]] =
-                place_info.node2pos[ssg.nodes_to_place[place_info.current_node]].object;
+                place_info.node2pos[ssg.nodes_to_place[place_info.current_node]];
         }
         else if (fc.fanin_nodes.empty())
         {
@@ -2214,7 +2214,7 @@ class graph_oriented_layout_design_impl
                     layout.foreach_po(
                         [&layout, &apply_plo](const auto& gate)
                         {
-                            if (const auto source = layout.source({gate, 0}); source && layout.is_inv(source->object))
+                            if (const auto source = layout.source({gate, 0}); source && layout.is_inv(*source))
                             {
                                 apply_plo = false;
                             }

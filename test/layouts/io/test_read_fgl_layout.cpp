@@ -1965,7 +1965,7 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
         }
         /** @brief Source connected to the restored output. */
         const auto source = restored.source({*output, 0});
-        CHECK((source.has_value() && restored.get_tile(source->object) == cart_gate_clk_lyt::tile{0, 0, 0}));
+        CHECK((source.has_value() && restored.get_tile(*source) == cart_gate_clk_lyt::tile{0, 0, 0}));
     }
     SECTION("Missing input")
     {
@@ -2040,7 +2040,7 @@ TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read
     CHECK(target.get_layout_name() == "kept");
     /** @brief Object retained after the failed read. */
     const auto retained = target.find_object({0, 0});
-    CHECK((retained.has_value() && target.output(*retained) == id));
+    CHECK((retained.has_value() && *retained == id));
     CHECK(target.is_obstructed_coordinate({-4, -5, -6}));
     CHECK(target.is_obstructed_connection({-4, -5, -6}, {7, 8, 9}));
 }
@@ -2086,7 +2086,7 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
     CHECK(target.get_layout_name() == "kept");
     /** @brief Object retained after the failed read. */
     const auto retained = target.find_object({0, 0});
-    CHECK((retained.has_value() && target.output(*retained) == kept));
+    CHECK((retained.has_value() && *retained == kept));
     CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
     std::stringstream rejected{xml};
     CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(rejected), fgl_parsing_error);

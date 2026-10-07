@@ -90,7 +90,7 @@ void validate_layout(const Lyt& lyt)
         });
     for (std::size_t i = 0; i < ready.size(); ++i)
     {
-        lyt.foreach_sink(lyt.output(ready[i]),
+        lyt.foreach_sink(ready[i],
                          [&](const auto port)
                          {
                              if (--remaining.at(port.object) == 0)

@@ -9,8 +9,8 @@ The layout represents logic placement and routing independently of a cell techno
 A gate library supplies physical cell implementations and tile dimensions.
 
 Each gate, wire, input, and output is a placed object with a generation-checked `object_id`.
-Coordinates describe positions; IDs describe objects; `output_port` and `input_port` describe
-connections. Input port indices follow the gate truth table's variable order. Wires and fanouts
+Coordinates describe positions; IDs describe objects and their single output; an `input_port`
+names the object and the truth-table argument where a connection enters. Wires and fanouts
 are explicit objects. An empty layout contains no objects or implicit constants.
 
 Use `find_object(tile)` to look up an occupied coordinate and `get_tile(id)` to read an object's

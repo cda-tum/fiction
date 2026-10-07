@@ -46,13 +46,13 @@ void place(nanobind::module_& m)
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const typename Lyt::output_port& a) { return fiction::physical_design::place(lyt, t, ntk, n, a); },
+           const typename Lyt::object_id& a) { return fiction::physical_design::place(lyt, t, ntk, n, a); },
         nanobind::arg("lyt"), nanobind::arg("t"), nanobind::arg("ntk"), nanobind::arg("n"), nanobind::arg("a"));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const typename Lyt::output_port& a, const typename Lyt::output_port& b,
+           const typename Lyt::object_id& a, const typename Lyt::object_id& b,
            const std::optional<bool>& c = std::nullopt)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
         nanobind::arg("lyt"), nanobind::arg("t"), nanobind::arg("ntk"), nanobind::arg("n"), nanobind::arg("a"),
@@ -61,7 +61,7 @@ void place(nanobind::module_& m)
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const typename Lyt::output_port& a, const typename Lyt::output_port& b, const typename Lyt::output_port& c)
+           const typename Lyt::object_id& a, const typename Lyt::object_id& b, const typename Lyt::object_id& c)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
         nanobind::arg("lyt"), nanobind::arg("t"), nanobind::arg("ntk"), nanobind::arg("n"), nanobind::arg("a"),
         nanobind::arg("b"), nanobind::arg("c"));

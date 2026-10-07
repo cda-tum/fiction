@@ -631,7 +631,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
             lyt.foreach_fanin(n,
                               [&lyt, &drawer, &edges, &n](const auto& f)
                               {
-                                  edges << fmt::format("{} -> {} [style={}];\n", drawer.tile_id(lyt.get_tile(f.object)),
+                                  edges << fmt::format("{} -> {} [style={}];\n", drawer.tile_id(lyt.get_tile(f)),
                                                        drawer.tile_id(lyt.get_tile(n)), "solid");
                               });
         });

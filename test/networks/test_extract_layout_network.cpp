@@ -47,8 +47,8 @@ TEST_CASE("Extraction preserves interface order and truth-table argument indices
     const auto wire   = lyt.create_buf(gate, {30, 0});
     const auto result = lyt.create_po(wire, "result", {40, 0});
     const auto pass   = lyt.create_po(a, "pass", {50, 0});
-    lyt.set_input_order(std::array{b.object, a.object, unused.object});
-    lyt.set_output_order(std::array{pass.object, result.object});
+    lyt.set_input_order(std::array{b, a, unused});
+    lyt.set_output_order(std::array{pass, result});
 
     const auto ntk = extract_layout_network(lyt);
     REQUIRE(ntk.num_pis() == 3);
@@ -70,22 +70,22 @@ TEST_CASE("Extraction validates only dependencies of primary outputs", "[extract
     extraction_layout lyt{};
     const auto        a     = lyt.create_pi("a", {0, 0});
     const auto        cycle = lyt.create_buf({1, 0});
-    lyt.connect(cycle, {cycle.object, 0});
+    lyt.connect(cycle, {cycle, 0});
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
     const auto gate = lyt.create_node({a}, function, {2, 0});
-    lyt.disconnect({gate.object, 0});
-    lyt.connect(a, {gate.object, 1});
+    lyt.disconnect({gate, 0});
+    lyt.connect(a, {gate, 1});
     const auto po = lyt.create_po(a, "result", {3, 0});
     CHECK_NOTHROW(extract_layout_network(lyt));
 
-    lyt.connect(gate, {po.object, 0});
+    lyt.connect(gate, {po, 0});
     CHECK_THROWS_AS(extract_layout_network(lyt), std::invalid_argument);
-    lyt.connect(a, {gate.object, 0});
+    lyt.connect(a, {gate, 0});
     CHECK_NOTHROW(extract_layout_network(lyt));
-    lyt.connect(cycle, {po.object, 0});
+    lyt.connect(cycle, {po, 0});
     CHECK_THROWS_AS(extract_layout_network(lyt), std::invalid_argument);
-    lyt.disconnect({po.object, 0});
+    lyt.disconnect({po, 0});
     CHECK_THROWS_AS(extract_layout_network(lyt), std::invalid_argument);
 }
 
@@ -121,16 +121,16 @@ TEST_CASE("Extraction follows connections across allocation order and reused ide
 {
     extraction_layout lyt{};
     const auto        removed = lyt.create_pi("removed", {0, 0});
-    lyt.remove(removed.object);
+    lyt.remove(removed);
     const auto                 po = lyt.create_po("result", {0, 0});
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "4");  // !a & b
     const auto gate = lyt.create_node({}, function, {1, 0});
     const auto b    = lyt.create_pi("b", {2, 0});
     const auto a    = lyt.create_pi("a", {3, 0});
-    lyt.connect(a, {gate.object, 0});
-    lyt.connect(b, {gate.object, 1});
-    lyt.connect(gate, {po.object, 0});
+    lyt.connect(a, {gate, 0});
+    lyt.connect(b, {gate, 1});
+    lyt.connect(gate, {po, 0});
     const auto ntk = extract_layout_network(lyt);
     REQUIRE(ntk.num_pis() == 2);
     const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(

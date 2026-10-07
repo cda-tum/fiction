@@ -66,6 +66,6 @@ def test_layout_simulation_preserves_input_slots_and_unused_inputs() -> None:
     assert [name for name, _ in outputs] == ["same", "same"]
     assert outputs[0][1] == [False, True, False, False, False, True, False, False]
     assert outputs[1][1] == [True, False, True, False, True, False, True, False]
-    layout.disconnect(LayoutInputPort(less.object, 0))
+    layout.disconnect(LayoutInputPort(less, 0))
     with pytest.raises(ValueError, match="disconnected input"):
         simulate_outputs(layout)

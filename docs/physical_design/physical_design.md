@@ -54,19 +54,19 @@ path_finding/path_finding
 
 ```
 
-```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::output_port& a)
+```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::output_port& a, const typename Lyt::output_port& b, const std::optional<bool>& c = std::nullopt)
+```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a, const typename Lyt::object_id& b, const std::optional<bool>& c = std::nullopt)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::output_port& a, const typename Lyt::output_port& b, const typename Lyt::output_port& c)
+```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a, const typename Lyt::object_id& b, const typename Lyt::object_id& c)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<typename Lyt::output_port, Ntk>& node2pos)
+```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<typename Lyt::object_id, Ntk>& node2pos)
 
 ```
 

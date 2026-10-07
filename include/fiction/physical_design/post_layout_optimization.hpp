@@ -582,7 +582,7 @@ class post_layout_optimization_impl
                           [&](const auto source, const auto index)
                           {
                               layout_coordinate_path<Lyt>                 path{position};
-                              auto                                        id = source.object;
+                              auto                                        id = source;
                               std::unordered_set<typename Lyt::object_id> visited{};
                               while (true)
                               {
@@ -601,14 +601,14 @@ class post_layout_optimization_impl
                                   {
                                       throw std::invalid_argument("A routing wire has no input connection");
                                   }
-                                  id = previous->object;
+                                  id = *previous;
                               }
                               std::ranges::reverse(path);
                               data.fanins.push_back(path.source());
                               data.routes.push_back(std::move(path));
                               data.destinations.push_back({gate, index});
                           });
-        lyt.foreach_sink(lyt.output(gate),
+        lyt.foreach_sink(gate,
                          [&](auto destination)
                          {
                              layout_coordinate_path<Lyt>                 path{position};
@@ -626,7 +626,7 @@ class post_layout_optimization_impl
                                      throw std::invalid_argument("A routing wire chain contains a cycle");
                                  }
                                  data.to_clear.push_back(lyt.get_tile(id));
-                                 lyt.foreach_sink(lyt.output(id), [&](const auto next) { destination = next; });
+                                 lyt.foreach_sink(id, [&](const auto next) { destination = next; });
                              }
                              data.fanouts.push_back(path.target());
                              data.routes.push_back(std::move(path));

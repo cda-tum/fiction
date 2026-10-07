@@ -260,7 +260,7 @@ class write_fgl_layout_impl
                     const auto source = *lyt.source({id, input});
                     os << fmt::format(
                         "        <signal><source>{}</source><index>{}</index><input>{}</input></signal>\n",
-                        source.object.index, source.index, input);
+                        source.index, 0, input);
                 }
                 os << fgl::CLOSE_INCOMING << fgl::CLOSE_GATE;
                 progress.advance();

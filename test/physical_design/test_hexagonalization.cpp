@@ -352,9 +352,9 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
     const auto        b    = layout.create_pi("b", {0, 1});
     const auto        a    = layout.create_pi("a", {1, 0});
     const auto        gate = layout.create_lt(a, b, {1, 1});
-    layout.disconnect({gate.object, 0});
+    layout.disconnect({gate, 0});
     layout.create_po(gate, "f", {3, 1});
-    layout.set_input_order(std::vector{a.object, b.object});
+    layout.set_input_order(std::vector{a, b});
     const auto hex = hexagonalization<hex_gate_clk_lyt>(layout);
     CHECK(hex.get_input_name(0) == "a");
     CHECK(hex.get_input_name(1) == "b");
@@ -365,6 +365,6 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
             CHECK(hex.is_lt(id));
             CHECK_FALSE(hex.source({id, 0}));
             REQUIRE(hex.source({id, 1}));
-            CHECK(hex.get_name(hex.source({id, 1})->object) == "b");
+            CHECK(hex.get_name(*hex.source({id, 1})) == "b");
         });
 }

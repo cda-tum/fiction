@@ -2159,16 +2159,6 @@ class LayoutObjectId:
     def __eq__(self, arg: LayoutObjectId, /) -> bool: ...
     def __hash__(self) -> int: ...
 
-class LayoutOutputPort:
-    """An object's numbered output port."""
-
-    def __init__(self, object: LayoutObjectId, index: int = 0) -> None: ...
-    @property
-    def object(self) -> LayoutObjectId: ...
-    @property
-    def index(self) -> int: ...
-    def __eq__(self, arg: LayoutOutputPort, /) -> bool: ...
-
 class LayoutInputPort:
     """An object's ordered input port."""
 
@@ -2474,7 +2464,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """
         Creates a primary input at `t`. Occupied coordinates reject without
         mutation.
@@ -2482,12 +2472,12 @@ class cartesian_gate_layout(cartesian_layout):
 
     @overload
     def create_po(
-        self, s: LayoutOutputPort, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, s: LayoutObjectId, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
     def is_pi(self, n: LayoutObjectId) -> bool:
         """Returns whether an object is a primary input."""
 
@@ -2573,82 +2563,75 @@ class cartesian_gate_layout(cartesian_layout):
     def get_output_name(self, index: int) -> str:
         """Returns the output name at an interface index."""
 
-    @overload
-    def get_name(self, s: LayoutOutputPort) -> str:
+    def get_name(self, object: LayoutObjectId) -> str:
         """Returns an object's name, or an empty string for an unnamed object."""
 
     @overload
-    def get_name(self, object: LayoutObjectId) -> str: ...
-    @overload
-    def create_buf(
-        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+    def create_buf(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
-    def create_not(
-        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a NOT gate."""
 
     def create_and(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a AND gate."""
 
     def create_nand(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a NAND gate."""
 
     def create_or(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a OR gate."""
 
     def create_nor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a NOR gate."""
 
     def create_xor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a XOR gate."""
 
     def create_xnor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a XNOR gate."""
 
     def create_lt(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a LT gate."""
 
     def create_le(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a LE gate."""
 
     def create_gt(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a GT gate."""
 
     def create_ge(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a GE gate."""
 
     def create_maj(
         self,
-        a: LayoutOutputPort,
-        b: LayoutOutputPort,
-        c: LayoutOutputPort,
+        a: LayoutObjectId,
+        b: LayoutObjectId,
+        c: LayoutObjectId,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutOutputPort:
+    ) -> LayoutObjectId:
         """Creates a majority gate."""
 
     def num_pis(self) -> int:
@@ -2671,10 +2654,10 @@ class cartesian_gate_layout(cartesian_layout):
 
     def create_node(
         self,
-        inputs: Sequence[LayoutOutputPort],
+        inputs: Sequence[LayoutObjectId],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutOutputPort:
+    ) -> LayoutObjectId:
         """
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
@@ -2689,24 +2672,20 @@ class cartesian_gate_layout(cartesian_layout):
     def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
     def contains(self, object: LayoutObjectId) -> bool: ...
     def get_tile(self, object: LayoutObjectId) -> coordinate: ...
-    def output(self, object: LayoutObjectId) -> LayoutOutputPort: ...
-    def source(self, input: LayoutInputPort) -> LayoutOutputPort | None: ...
-    def connect(self, output: LayoutOutputPort, input: LayoutInputPort) -> None: ...
+    def source(self, input: LayoutInputPort) -> LayoutObjectId | None: ...
+    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
     def disconnect(self, input: LayoutInputPort) -> None: ...
     def remove(self, object: LayoutObjectId) -> None: ...
     def move_node(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort: ...
+    ) -> LayoutObjectId: ...
     def pi_at(self, index: int) -> LayoutObjectId: ...
     def po_at(self, index: int) -> LayoutObjectId: ...
     def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
     def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    @overload
     def set_name(self, object: LayoutObjectId, name: str) -> None: ...
-    @overload
-    def set_name(self, output: LayoutOutputPort, name: str) -> None: ...
-    def inputs(self, object: LayoutObjectId) -> list[LayoutOutputPort | None]: ...
-    def sinks(self, output: LayoutOutputPort) -> list[LayoutInputPort]: ...
+    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]: ...
+    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]: ...
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """Removes the occupant of a coordinate if present."""
 
@@ -3377,7 +3356,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """
         Creates a primary input at `t`. Occupied coordinates reject without
         mutation.
@@ -3385,12 +3364,12 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     @overload
     def create_po(
-        self, s: LayoutOutputPort, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, s: LayoutObjectId, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
     def is_pi(self, n: LayoutObjectId) -> bool:
         """Returns whether an object is a primary input."""
 
@@ -3476,82 +3455,75 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def get_output_name(self, index: int) -> str:
         """Returns the output name at an interface index."""
 
-    @overload
-    def get_name(self, s: LayoutOutputPort) -> str:
+    def get_name(self, object: LayoutObjectId) -> str:
         """Returns an object's name, or an empty string for an unnamed object."""
 
     @overload
-    def get_name(self, object: LayoutObjectId) -> str: ...
-    @overload
-    def create_buf(
-        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+    def create_buf(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
-    def create_not(
-        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a NOT gate."""
 
     def create_and(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a AND gate."""
 
     def create_nand(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a NAND gate."""
 
     def create_or(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a OR gate."""
 
     def create_nor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a NOR gate."""
 
     def create_xor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a XOR gate."""
 
     def create_xnor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a XNOR gate."""
 
     def create_lt(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a LT gate."""
 
     def create_le(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a LE gate."""
 
     def create_gt(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a GT gate."""
 
     def create_ge(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a GE gate."""
 
     def create_maj(
         self,
-        a: LayoutOutputPort,
-        b: LayoutOutputPort,
-        c: LayoutOutputPort,
+        a: LayoutObjectId,
+        b: LayoutObjectId,
+        c: LayoutObjectId,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutOutputPort:
+    ) -> LayoutObjectId:
         """Creates a majority gate."""
 
     def num_pis(self) -> int:
@@ -3574,10 +3546,10 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     def create_node(
         self,
-        inputs: Sequence[LayoutOutputPort],
+        inputs: Sequence[LayoutObjectId],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutOutputPort:
+    ) -> LayoutObjectId:
         """
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
@@ -3592,24 +3564,20 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
     def contains(self, object: LayoutObjectId) -> bool: ...
     def get_tile(self, object: LayoutObjectId) -> coordinate: ...
-    def output(self, object: LayoutObjectId) -> LayoutOutputPort: ...
-    def source(self, input: LayoutInputPort) -> LayoutOutputPort | None: ...
-    def connect(self, output: LayoutOutputPort, input: LayoutInputPort) -> None: ...
+    def source(self, input: LayoutInputPort) -> LayoutObjectId | None: ...
+    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
     def disconnect(self, input: LayoutInputPort) -> None: ...
     def remove(self, object: LayoutObjectId) -> None: ...
     def move_node(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort: ...
+    ) -> LayoutObjectId: ...
     def pi_at(self, index: int) -> LayoutObjectId: ...
     def po_at(self, index: int) -> LayoutObjectId: ...
     def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
     def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    @overload
     def set_name(self, object: LayoutObjectId, name: str) -> None: ...
-    @overload
-    def set_name(self, output: LayoutOutputPort, name: str) -> None: ...
-    def inputs(self, object: LayoutObjectId) -> list[LayoutOutputPort | None]: ...
-    def sinks(self, output: LayoutOutputPort) -> list[LayoutInputPort]: ...
+    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]: ...
+    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]: ...
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """Removes the occupant of a coordinate if present."""
 
@@ -4280,7 +4248,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """
         Creates a primary input at `t`. Occupied coordinates reject without
         mutation.
@@ -4288,12 +4256,12 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     @overload
     def create_po(
-        self, s: LayoutOutputPort, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, s: LayoutObjectId, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
     def is_pi(self, n: LayoutObjectId) -> bool:
         """Returns whether an object is a primary input."""
 
@@ -4379,82 +4347,75 @@ class hexagonal_gate_layout(hexagonal_layout):
     def get_output_name(self, index: int) -> str:
         """Returns the output name at an interface index."""
 
-    @overload
-    def get_name(self, s: LayoutOutputPort) -> str:
+    def get_name(self, object: LayoutObjectId) -> str:
         """Returns an object's name, or an empty string for an unnamed object."""
 
     @overload
-    def get_name(self, object: LayoutObjectId) -> str: ...
-    @overload
-    def create_buf(
-        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+    def create_buf(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
-    def create_not(
-        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a NOT gate."""
 
     def create_and(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a AND gate."""
 
     def create_nand(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a NAND gate."""
 
     def create_or(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a OR gate."""
 
     def create_nor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a NOR gate."""
 
     def create_xor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a XOR gate."""
 
     def create_xnor(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a XNOR gate."""
 
     def create_lt(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a LT gate."""
 
     def create_le(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a LE gate."""
 
     def create_gt(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a GT gate."""
 
     def create_ge(
-        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort:
+        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutObjectId:
         """Creates a GE gate."""
 
     def create_maj(
         self,
-        a: LayoutOutputPort,
-        b: LayoutOutputPort,
-        c: LayoutOutputPort,
+        a: LayoutObjectId,
+        b: LayoutObjectId,
+        c: LayoutObjectId,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutOutputPort:
+    ) -> LayoutObjectId:
         """Creates a majority gate."""
 
     def num_pis(self) -> int:
@@ -4477,10 +4438,10 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     def create_node(
         self,
-        inputs: Sequence[LayoutOutputPort],
+        inputs: Sequence[LayoutObjectId],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutOutputPort:
+    ) -> LayoutObjectId:
         """
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
@@ -4495,24 +4456,20 @@ class hexagonal_gate_layout(hexagonal_layout):
     def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
     def contains(self, object: LayoutObjectId) -> bool: ...
     def get_tile(self, object: LayoutObjectId) -> coordinate: ...
-    def output(self, object: LayoutObjectId) -> LayoutOutputPort: ...
-    def source(self, input: LayoutInputPort) -> LayoutOutputPort | None: ...
-    def connect(self, output: LayoutOutputPort, input: LayoutInputPort) -> None: ...
+    def source(self, input: LayoutInputPort) -> LayoutObjectId | None: ...
+    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
     def disconnect(self, input: LayoutInputPort) -> None: ...
     def remove(self, object: LayoutObjectId) -> None: ...
     def move_node(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutOutputPort: ...
+    ) -> LayoutObjectId: ...
     def pi_at(self, index: int) -> LayoutObjectId: ...
     def po_at(self, index: int) -> LayoutObjectId: ...
     def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
     def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    @overload
     def set_name(self, object: LayoutObjectId, name: str) -> None: ...
-    @overload
-    def set_name(self, output: LayoutOutputPort, name: str) -> None: ...
-    def inputs(self, object: LayoutObjectId) -> list[LayoutOutputPort | None]: ...
-    def sinks(self, output: LayoutOutputPort) -> list[LayoutInputPort]: ...
+    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]: ...
+    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]: ...
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """Removes the occupant of a coordinate if present."""
 

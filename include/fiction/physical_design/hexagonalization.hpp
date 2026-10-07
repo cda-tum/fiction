@@ -592,10 +592,9 @@ class hexagonalization_impl
                         id,
                         [&](const auto source, const auto input)
                         {
-                            auto position =
-                                detail::to_hex<CartLyt, HexLyt>(layout.get_tile(source.object), layout_height);
-                            position = {static_cast<int64_t>(position.x) + x_shift, position.y, position.z};
-                            hex_layout.connect(hex_layout.output(*hex_layout.find_object(position)), {target, input});
+                            auto position = detail::to_hex<CartLyt, HexLyt>(layout.get_tile(source), layout_height);
+                            position      = {static_cast<int64_t>(position.x) + x_shift, position.y, position.z};
+                            hex_layout.connect(*hex_layout.find_object(position), {target, input});
                         });
                 });
 
@@ -611,7 +610,7 @@ class hexagonalization_impl
                 {
                     const auto                               id = *hex_layout.find_object(c);
                     std::vector<typename HexLyt::input_port> sinks{};
-                    hex_layout.foreach_sink(hex_layout.output(id), [&](const auto sink) { sinks.push_back(sink); });
+                    hex_layout.foreach_sink(id, [&](const auto sink) { sinks.push_back(sink); });
                     middle_pi = {static_cast<int64_t>(middle_pi.x) - 1, middle_pi.y, middle_pi.z};
                     hex_layout.move_node(id, middle_pi);
                     for (const auto sink : sinks)
@@ -631,7 +630,7 @@ class hexagonalization_impl
                 {
                     const auto                               id = *hex_layout.find_object(c);
                     std::vector<typename HexLyt::input_port> sinks{};
-                    hex_layout.foreach_sink(hex_layout.output(id), [&](const auto sink) { sinks.push_back(sink); });
+                    hex_layout.foreach_sink(id, [&](const auto sink) { sinks.push_back(sink); });
                     middle_pi = {static_cast<int64_t>(middle_pi.x) + 1, middle_pi.y, middle_pi.z};
                     hex_layout.move_node(id, middle_pi);
                     for (const auto sink : sinks)
@@ -712,7 +711,7 @@ class hexagonalization_impl
                     {
                         throw hexagonalization_io_pin_routing_error("An extended output requires an input connection");
                     }
-                    const auto fanin = hex_layout.get_tile(source->object);
+                    const auto fanin = hex_layout.get_tile(*source);
                     middle_po        = {static_cast<int64_t>(middle_po.x) - 1, middle_po.y, middle_po.z};
                     hex_layout.move_node(id, middle_po);
                     objectives.push_back({fanin, middle_po, 0});
@@ -733,7 +732,7 @@ class hexagonalization_impl
                     {
                         throw hexagonalization_io_pin_routing_error("An extended output requires an input connection");
                     }
-                    const auto fanin = hex_layout.get_tile(source->object);
+                    const auto fanin = hex_layout.get_tile(*source);
                     middle_po        = {static_cast<int64_t>(middle_po.x) + 1, middle_po.y, middle_po.z};
                     hex_layout.move_node(id, middle_po);
                     objectives.push_back({fanin, middle_po, 0});

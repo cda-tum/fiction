@@ -213,7 +213,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("create_pi", &GateLyt::create_pi, py::arg("name"), py::arg("t"),
              DOC(fiction_layouts_gate_level_layout_create_pi))
         .def("create_po",
-             py::overload_cast<typename GateLyt::output_port, const std::string&, const fiction::tile<GateLyt>&>(
+             py::overload_cast<typename GateLyt::object_id, const std::string&, const fiction::tile<GateLyt>&>(
                  &GateLyt::create_po),
              py::arg("s"), py::arg("name"), py::arg("t"), DOC(fiction_layouts_gate_level_layout_create_po))
         .def("is_pi", &GateLyt::is_pi, py::arg("n"), DOC(fiction_layouts_gate_level_layout_is_pi))
@@ -252,12 +252,11 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
              DOC(fiction_layouts_gate_level_layout_set_output_name))
         .def("get_output_name", &GateLyt::get_output_name, py::arg("index"),
              DOC(fiction_layouts_gate_level_layout_get_output_name))
-        .def(
-            "get_name", [](const GateLyt& layout, const typename GateLyt::output_port& signal)
-            { return layout.get_name(signal); }, py::arg("s"), DOC(fiction_layouts_gate_level_layout_get_name))
+        .def("get_name", py::overload_cast<typename GateLyt::object_id>(&GateLyt::get_name, py::const_),
+             py::arg("object"), DOC(fiction_layouts_gate_level_layout_get_name))
 
         .def("create_buf",
-             py::overload_cast<typename GateLyt::output_port, const fiction::tile<GateLyt>&>(&GateLyt::create_buf),
+             py::overload_cast<typename GateLyt::object_id, const fiction::tile<GateLyt>&>(&GateLyt::create_buf),
              py::arg("a"), py::arg("t"), DOC(fiction_layouts_gate_level_layout_create_buf))
         .def("create_not", &GateLyt::create_not, py::arg("a"), py::arg("t"),
              DOC(fiction_layouts_gate_level_layout_create_not))
@@ -295,10 +294,10 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         // importing it during layouts registration would create a cycle through networks.
         .def("create_node", &GateLyt::create_node, py::arg("inputs"), py::arg("function"), py::arg("t"),
              py::sig(
-                 "def create_node(self, inputs: collections.abc.Sequence[LayoutOutputPort], function: "
+                 "def create_node(self, inputs: collections.abc.Sequence[LayoutObjectId], function: "
                  "mnt.pyfiction.synthesis.dynamic_truth_table, t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | "
                  "tuple[int, int, int]) -> "
-                 "LayoutOutputPort"),
+                 "LayoutObjectId"),
              "Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be "
              "disconnected.")
         .def(
@@ -318,9 +317,8 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("find_object", &GateLyt::find_object, py::arg("t"))
         .def("contains", &GateLyt::contains, py::arg("object"))
         .def("get_tile", &GateLyt::get_tile, py::arg("object"))
-        .def("output", &GateLyt::output, py::arg("object"))
         .def("source", &GateLyt::source, py::arg("input"))
-        .def("connect", &GateLyt::connect, py::arg("output"), py::arg("input"))
+        .def("connect", &GateLyt::connect, py::arg("source"), py::arg("input"))
         .def("disconnect", &GateLyt::disconnect, py::arg("input"))
         .def("remove", &GateLyt::remove, py::arg("object"))
         .def("move_node", &GateLyt::move_node, py::arg("object"), py::arg("t"))
@@ -335,17 +333,13 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("create_po", py::overload_cast<const std::string&, const fiction::tile<GateLyt>&>(&GateLyt::create_po),
              py::arg("name"), py::arg("t"))
         .def("create_buf", py::overload_cast<const fiction::tile<GateLyt>&>(&GateLyt::create_buf), py::arg("t"))
-        .def("get_name", py::overload_cast<typename GateLyt::object_id>(&GateLyt::get_name, py::const_),
-             py::arg("object"))
         .def("set_name", py::overload_cast<typename GateLyt::object_id, const std::string&>(&GateLyt::set_name),
              py::arg("object"), py::arg("name"))
-        .def("set_name", py::overload_cast<typename GateLyt::output_port, const std::string&>(&GateLyt::set_name),
-             py::arg("output"), py::arg("name"))
         .def(
             "inputs",
             [](const GateLyt& lyt, const typename GateLyt::object_id object)
             {
-                std::vector<std::optional<typename GateLyt::output_port>> inputs{};
+                std::vector<std::optional<typename GateLyt::object_id>> inputs{};
                 inputs.reserve(lyt.input_count(object));
                 for (uint32_t i = 0; i < lyt.input_count(object); ++i)
                 {
@@ -356,13 +350,13 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             py::arg("object"))
         .def(
             "sinks",
-            [](const GateLyt& lyt, const typename GateLyt::output_port output)
+            [](const GateLyt& lyt, const typename GateLyt::object_id object)
             {
                 std::vector<typename GateLyt::input_port> sinks{};
-                lyt.foreach_sink(output, [&](const auto& input) { sinks.push_back(input); });
+                lyt.foreach_sink(object, [&](const auto& input) { sinks.push_back(input); });
                 return sinks;
             },
-            py::arg("output"))
+            py::arg("object"))
         .def("clear_tile", &GateLyt::clear_tile, py::arg("t"), DOC(fiction_layouts_gate_level_layout_clear_tile))
 
         .def("is_gate_tile", &GateLyt::is_gate_tile, py::arg("t"), DOC(fiction_layouts_gate_level_layout_is_gate_tile))
@@ -550,8 +544,6 @@ void gate_level_layout(nanobind::module_& m)
     namespace py = nanobind;
     /** @brief Layout-local object identity. */
     using object_id = fiction::layouts::layout_object_id;
-    /** @brief Numbered output endpoint. */
-    using output_port = fiction::layouts::layout_output_port;
     /** @brief Ordered input endpoint. */
     using input_port = fiction::layouts::layout_input_port;
     py::class_<object_id>(m, "LayoutObjectId", "Layout-local generation-checked object identity.")
@@ -560,11 +552,6 @@ void gate_level_layout(nanobind::module_& m)
         .def_ro("generation", &object_id::generation)
         .def("__eq__", [](const object_id a, const object_id b) { return a == b; })
         .def("__hash__", [](const object_id id) { return std::hash<object_id>{}(id); });
-    py::class_<output_port>(m, "LayoutOutputPort", "An object's numbered output port.")
-        .def(py::init<object_id, uint32_t>(), py::arg("object"), py::arg("index") = 0)
-        .def_ro("object", &output_port::object)
-        .def_ro("index", &output_port::index)
-        .def("__eq__", [](const output_port a, const output_port b) { return a == b; });
     py::class_<input_port>(m, "LayoutInputPort", "An object's ordered input port.")
         .def(py::init<object_id, uint32_t>(), py::arg("object"), py::arg("index"))
         .def_ro("object", &input_port::object)
