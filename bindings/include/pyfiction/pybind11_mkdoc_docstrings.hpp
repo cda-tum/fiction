@@ -3108,10 +3108,11 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clocking_scheme =
-R"doc(Returns a copy of the stored clocking scheme object.
+R"doc(Returns a read-only reference to the stored clocking scheme object.
+Clock overrides and scheme replacements update the referenced object.
 
 Returns:
-    A copy of the stored clocking scheme object.
+    A reference valid for the lifetime of this layout.
 
 )doc";
 
@@ -5318,19 +5319,32 @@ static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_sam
 
 static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_fillcolor = R"doc(Return the tile color.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_id = R"doc(Return the coordinate label.)doc";
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_id =
+R"doc(Return a DOT identifier for the planar tile position.
+
+Args:
+    t: Tile coordinate.
+
+Returns:
+    Identifier with signed axes encoded as letters and digits.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_label = R"doc(Return the gate label.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_write_dot_layout =
-R"doc(Writes layout in DOT format into output stream
-
-An overloaded variant exists that writes the layout into a file.
+R"doc(Writes a layout in DOT format into an output stream. Terminal names
+use quoted DOT strings.
 
 Args:
-    lyt: Layout
+    lyt: Layout.
+    os: Output stream.
+    drawer: Formats the layout's tiles and topology.
     on_progress: Receives completed drawing work.
-    os: Output stream
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Drawer: DOT drawer type.
 
 )doc";
 
@@ -6869,7 +6883,8 @@ static const char *mkd_doc_fiction_networks_io_edge_color_view_drawer_signal_sty
 
 static const char *mkd_doc_fiction_networks_io_network_reader =
 R"doc(Helper class to read directories of mockturtle networks of certain
-types.
+types. BLIF input permits empty and whitespace-only lines, comments,
+and continued declarations.
 
 Template Args:
     NtkPtr: Pointer type to a logic network.)doc";
@@ -14214,8 +14229,8 @@ static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design =
 R"doc(Designs a lattice-based SiDB circuit for a placed and routed pointy-
 top hexagonal gate-level layout.
 
-For each gate, the SiDB gate design algorithm designs the
-corresponding SiDB implementation.
+The function validates every gate type before designing the SiDB
+implementations.
 
 Args:
     gate_lyt: Pointy-top hexagonal gate-level layout.
@@ -14232,6 +14247,8 @@ Returns:
 Raises:
     std::invalid_argument: if gate mapping uses a column arrangement
                            instead of a row arrangement.
+    fcn::unsupported_gate_type_exception: if any object has an
+                                          unsupported function.
     unsuccessful_gate_design_error: if a gate cannot be designed.
     utils::timeout_error: if the shared circuit budget or an
                           individual gate budget expires. No partial
@@ -15902,6 +15919,23 @@ Args:
 
 Returns:
     `true` if the predefined gate can be used.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_is_supported_gate_type =
+R"doc(Returns whether an object's function has an on-the-fly Bestagon
+implementation.
+
+Args:
+    lyt: Layout that owns the object.
+    object: Object to inspect.
+
+Template Args:
+    GateLyt: Gate-level layout type.
+
+Returns:
+    Whether the object implements identity, INV, or a supported binary
+    function.
 
 )doc";
 
@@ -26879,6 +26913,20 @@ iteration. @tparam Ntk Network or layout.)doc";
 static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_gate_types_impl =
 R"doc(Stores the operand and statistics without copying. @param src Network
 or layout. @param st Counts.
+
+)doc";
+
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_node =
+R"doc(Counts one node through the predicates its operand supports.
+
+Args:
+    n: Node to classify.
+
+Template Args:
+    Node: Network node or native layout object identity.
+
+Returns:
+    `true` to continue node iteration.
 
 )doc";
 

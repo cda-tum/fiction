@@ -15,6 +15,7 @@ from typing import TypeAlias, overload
 import mnt.pyfiction.inml
 import mnt.pyfiction.mol_qca
 import mnt.pyfiction.qca
+import mnt.pyfiction.synthesis
 from mnt.pyfiction.layouts import io as io
 
 class coordinate:
@@ -23,30 +24,24 @@ class coordinate:
 
     A coordinate defines a location relative to a fixed point (origin).
     Each axis is a signed 32-bit integer. The default-constructed
-    coordinate is invalid; it has all axes set to `INVALID_AXIS` and
-    stands for "no coordinate", e.g., a neighbor outside of a layout or
-    the tile of a node that is not placed. A coordinate is invalid iff its
-    x axis is `INVALID_AXIS`; no other axis of a coordinate should have
-    this value.
-
-    Gate-level layouts pack a coordinate into a 64-bit signal with
-    `explicit operator uint64_t`. This encoding holds 31-bit signed x and
-    y values and a single z bit.
+    coordinate is the origin. Every signed 32-bit axis value identifies a
+    position.
     """
 
     @overload
     def __init__(self) -> None:
-        """Default constructor. Creates the invalid coordinate."""
+        """Default constructor. Creates the origin."""
 
     @overload
     def __init__(self, x: int, y: int, z: int = 0) -> None:
         """
-        Standard constructor. Creates a coordinate at (x_, y_, z_).
+        Standard constructor. Creates a coordinate at (coordinate_x,
+        coordinate_y, coordinate_z).
 
         Args:
-            x_: x position.
-            y_: y position.
-            z_: z position.
+            coordinate_x: x position.
+            coordinate_y: y position.
+            coordinate_z: z position.
 
         Template Args:
             X: Type of x.
@@ -80,15 +75,6 @@ class coordinate:
 
     @z.setter
     def z(self, arg: int, /) -> None: ...
-    def is_valid(self) -> bool:
-        """
-        Returns whether the coordinate is valid, i.e., whether its x axis
-        differs from `INVALID_AXIS`.
-
-        Returns:
-            `true` iff the coordinate is valid.
-        """
-
     def __eq__(self, other: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Compares against another coordinate for equality, axis by axis.
@@ -166,34 +152,66 @@ class coordinate:
     def __hash__(self) -> int:
         """Returns a hash value of the coordinate."""
 
-def area(coord: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
+class Extent:
+    """Nonnegative width, height, and layer counts of a zero-origin layout."""
+
+    @overload
+    def __init__(self) -> None:
+        """Creates an empty extent."""
+
+    @overload
+    def __init__(self, width: int, height: int, layers: int = 1) -> None:
+        """
+        Creates checked sizes. Two axes describe one layer. Each size lies between zero and 2147483648.
+        """
+
+    @overload
+    def __init__(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None: ...
+    @overload
+    def __init__(self, dimensions: tuple[int, int] | tuple[int, int, int]) -> None: ...
+    @property
+    def width(self) -> int:
+        """Checked width in coordinates."""
+
+    @width.setter
+    def width(self, arg: int, /) -> None: ...
+    @property
+    def height(self) -> int:
+        """Checked height in coordinates."""
+
+    @height.setter
+    def height(self, arg: int, /) -> None: ...
+    @property
+    def layers(self) -> int:
+        """Checked number of layers."""
+
+    @layers.setter
+    def layers(self, arg: int, /) -> None: ...
+    def __eq__(self, other: Extent | tuple[int, int] | tuple[int, int, int]) -> bool: ...
+
+def area(dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
     """
-    Computes the area of a given coordinate assuming its origin is (0, 0,
-    0). Calculates :math:`(|x| + 1) \\cdot (|y| + 1)`.
+    Computes width times height.
 
     Args:
-        coord: Coordinate.
-
-    Template Args:
-        CoordinateType: Coordinate type.
+        size: Axis sizes.
 
     Returns:
-        Area of coord.
+        Area.
     """
 
-def volume(coord: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
+def volume(dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
     """
-    Computes the volume of a given coordinate assuming its origin is (0,
-    0, 0). Calculates :math:`(|x| + 1) \\cdot (|y| + 1) \\cdot (|z| + 1)`.
+    Computes width times height times layers with checked multiplication.
 
     Args:
-        coord: Coordinate.
-
-    Template Args:
-        CoordinateType: Coordinate type.
+        size: Axis sizes.
 
     Returns:
-        Volume of coord.
+        Volume.
+
+    Raises:
+        std::overflow_error: If the volume exceeds `uint64_t`.
     """
 
 class arrangement(enum.Enum):
@@ -239,19 +257,16 @@ class cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
-        Standard constructor. The given aspect ratio points to the highest
-        possible coordinate in the layout. That means in the ASCII layout
-        above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has
-        exactly one coordinate.
+        Creates geometry with half-open, zero-origin bounds. The default
+        extent is empty.
 
         Args:
-            ar: Highest possible position in the layout.
+            size: Axis sizes.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative or larger
-                                   than :math:`2^{30} - 1`.
+            std::invalid_argument: If a size exceeds the coordinate domain.
         """
 
     def coord(self, x: int, y: int, z: int = 0) -> coordinate:
@@ -280,193 +295,162 @@ class cartesian_layout:
             This function is equivalent to calling `coordinate(x, y, z)`.
         """
 
-    def x(self) -> int:
-        """
-        Returns the layout's x-dimension, i.e., returns the biggest x-value
-        that still belongs to the layout.
+    def width(self) -> int:
+        """Returns the width count."""
 
-        Returns:
-            x-dimension.
-        """
+    def height(self) -> int:
+        """Returns the height count."""
 
-    def y(self) -> int:
-        """
-        Returns the layout's y-dimension, i.e., returns the biggest y-value
-        that still belongs to the layout.
+    def layers(self) -> int:
+        """Returns the layers count."""
 
-        Returns:
-            y-dimension.
-        """
+    def dimensions(self) -> Extent:
+        """Returns the axis sizes."""
 
-    def z(self) -> int:
-        """
-        Returns the layout's z-dimension, i.e., returns the biggest z-value
-        that still belongs to the layout.
+    def last_coordinate(self) -> coordinate | None:
+        """Returns the last coordinate, or None for empty geometry."""
 
-        Returns:
-            z-dimension.
-        """
+    def contains_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+        """Tests the half-open geometry bounds."""
+
+    def volume(self) -> int:
+        """Returns the checked volume in coordinates."""
 
     def area(self) -> int:
         """
-        Returns the layout's number of faces depending on the coordinate type.
-
         Returns:
-            Area of layout.
+            Width times height.
         """
 
-    def resize(self, dimension: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
-        Updates the layout's dimensions, effectively resizing it.
+        Changes the geometry's axis sizes.
 
         Args:
-            ar: New aspect ratio.
+            size: Axis sizes.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative or larger
-                                   than :math:`2^{30} - 1`.
-            std::out_of_range: If shared gate geometry limits the z extent to
-                               1 and `ar.z` exceeds 1.
+            std::invalid_argument: If a size exceeds the coordinate domain.
         """
 
-    def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in northern direction
-        of a given coordinate `c`, i.e., the face whose y-dimension is lower
-        by 1. If `c`'s y-dimension is already at minimum, `c` is returned
-        instead.
+        Returns the north neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose northern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and north of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def north_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in north-eastern direction of a
-        given coordinate `c`, i.e., the face whose x-dimension is higher by 1
-        and whose y-dimension is lower by 1. If `c`'s x-dimension is already
-        at maximum or `c`'s y-dimension is already at minimum, `c` is returned
-        instead.
+        Returns the north-east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose north-eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly north-eastern of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in eastern direction
-        of a given coordinate `c`, i.e., the face whose x-dimension is higher
-        by 1. If `c`'s x-dimension is already at maximum, `c` is returned
-        instead.
+        Returns the east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and east of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in south-eastern direction of a
-        given coordinate `c`, i.e., the face whose x-dimension and y-dimension
-        are higher by 1. If `c`'s x-dimension or y-dimension are already at
-        maximum, `c` is returned instead.
+        Returns the south-east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose south-eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly south-eastern of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in southern direction
-        of a given coordinate `c`, i.e., the face whose y-dimension is higher
-        by 1. If `c`'s y-dimension is already at maximum, `c` is returned
-        instead.
+        Returns the south neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose southern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and south of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in south-western direction of a
-        given coordinate `c`, i.e., the face whose x-dimension is lower by 1
-        and whose y-dimension is higher by 1. If `c`'s x-dimension is already
-        at minimum or `c`'s y-dimension is already at maximum, `c` is returned
-        instead.
+        Returns the south-west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose south-western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly south-western of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in western direction
-        of a given coordinate `c`, i.e., the face whose x-dimension is lower
-        by 1. If `c`'s x-dimension is already at minimum, `c` is returned
-        instead.
+        Returns the west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and west of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def north_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in north-western direction of a
-        given coordinate `c`, i.e., the face whose x-dimension and y-dimension
-        are lower by 1. If `c`'s x-dimension or y-dimension are already at
-        minimum, `c` is returned instead.
+        Returns the north-west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose north-western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly north-western of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def above(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def above(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly above a given coordinate `c`,
-        i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
-        is already at maximum, `c` is returned instead.
+        Returns the above neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose above counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly above `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def below(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def below(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly below a given coordinate `c`,
-        i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
-        is already at minimum, `c` is returned instead.
+        Returns the below neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose below counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly below `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
     def is_north_of(
@@ -733,52 +717,52 @@ class cartesian_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def northern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same x and z values as a given
-        coordinate but that is located at the layout's northern border.
+        Projects a coordinate to the northern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The northern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def eastern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def eastern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same y and z values as a given
-        coordinate but that is located at the layout's eastern border.
+        Projects a coordinate to the eastern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The eastern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def southern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def southern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same x and z values as a given
-        coordinate but that is located at the layout's southern border.
+        Projects a coordinate to the southern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The southern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def western_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def western_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same y and z values as a given
-        coordinate but that is located at the layout's western border.
+        Projects a coordinate to the western border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The western border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
     def is_ground_layer(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -807,54 +791,27 @@ class cartesian_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
-        Returns whether the given coordinate is located within the layout
-        bounds.
-
         Args:
-            c: Coordinate to check for boundary.
-
-        Returns:
-            `true` iff `c` is located within the layout bounds.
+            c: Coordinate. @return Whether the geometry contains the
+               coordinate.
         """
 
-    def coordinates(self) -> list[coordinate]:
+    def coordinates(
+        self,
+        start: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+        stop: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+    ) -> list[coordinate]:
         """
-        Returns a range of all coordinates accessible in the layout between
-        `start` and `stop`. If no values are provided, all coordinates in the
-        layout will be included. The returned iterator range points to the
-        first and last coordinate, respectively. The range object can be used
-        within a for-each loop. Incrementing the iterator is equivalent to
-        nested for loops in the order z, y, x. Consequently, the iteration
-        will happen inside out, i.e., x will be iterated first, then y, then
-        z.
-
-        Args:
-            start: First coordinate to include in the range of all
-                   coordinates.
-            stop: Last coordinate (exclusive) to include in the range of all
-                  coordinates.
-
-        Returns:
-            An iterator range from `start` to `stop`. If they are not
-            provided, the first/last coordinate is used as a default.
+        Returns coordinates in z/y/x order from the inclusive start to the exclusive stop. None uses the frame boundary.
         """
 
-    def ground_coordinates(self) -> list[coordinate]:
+    def ground_coordinates(
+        self,
+        start: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+        stop: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+    ) -> list[coordinate]:
         """
-        Returns a range of all coordinates accessible in the layout's ground
-        layer between `start` and `stop`. The iteration order is the same as
-        for the coordinates function but without the z dimension.
-
-        Args:
-            start: First coordinate to include in the range of all ground
-                   coordinates.
-            stop: Last coordinate (exclusive) to include in the range of all
-                  ground coordinates.
-
-        Returns:
-            An iterator range from `start` to `stop`. If they are not
-            provided, the first/last coordinate in the ground layer is used as
-            a default.
+        Returns layer-zero coordinates from the inclusive start to the exclusive stop. None uses the frame boundary. Bounds outside layer zero raise ValueError.
         """
 
     def adjacent_coordinates(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]:
@@ -895,6 +852,12 @@ class cartesian_layout:
             A container that contains pairs of `c`'s opposing coordinates.
         """
 
+    def __copy__(self) -> cartesian_layout:
+        """Returns an independent geometry copy."""
+
+    def __deepcopy__(self, memo: dict) -> cartesian_layout:
+        """Returns an independent geometry copy."""
+
 stacked_cartesian_layout: TypeAlias = cartesian_layout
 
 class shifted_cartesian_layout:
@@ -924,20 +887,17 @@ class shifted_cartesian_layout:
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(
-        self, arrangement: arrangement, dimension: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> None:
+    def __init__(self, arrangement: arrangement, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
-        Standard constructor. The given aspect ratio points to the highest
-        possible coordinate in the layout. That means in the
-        `arrangement::EVEN_COLUMN` ASCII layout representation above `ar =
-        (3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one
-        coordinate.
+        Creates geometry with half-open, zero-origin bounds. The default
+        extent is empty.
 
         Args:
-            a: Arrangement of the shifted rows or columns. It cannot change
-               after construction.
-            ar: Highest possible position in the layout.
+            a: Arrangement of shifted rows or columns.
+            size: Axis sizes.
+
+        Raises:
+            std::invalid_argument: If a size exceeds the coordinate domain.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -974,193 +934,162 @@ class shifted_cartesian_layout:
             This function is equivalent to calling `coordinate(x, y, z)`.
         """
 
-    def x(self) -> int:
-        """
-        Returns the layout's x-dimension, i.e., returns the biggest x-value
-        that still belongs to the layout.
+    def width(self) -> int:
+        """Returns the width count."""
 
-        Returns:
-            x-dimension.
-        """
+    def height(self) -> int:
+        """Returns the height count."""
 
-    def y(self) -> int:
-        """
-        Returns the layout's y-dimension, i.e., returns the biggest y-value
-        that still belongs to the layout.
+    def layers(self) -> int:
+        """Returns the layers count."""
 
-        Returns:
-            y-dimension.
-        """
+    def dimensions(self) -> Extent:
+        """Returns the axis sizes."""
 
-    def z(self) -> int:
-        """
-        Returns the layout's z-dimension, i.e., returns the biggest z-value
-        that still belongs to the layout.
+    def last_coordinate(self) -> coordinate | None:
+        """Returns the last coordinate, or None for empty geometry."""
 
-        Returns:
-            z-dimension.
-        """
+    def contains_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+        """Tests the half-open geometry bounds."""
+
+    def volume(self) -> int:
+        """Returns the checked volume in coordinates."""
 
     def area(self) -> int:
         """
-        Returns the layout's number of faces depending on the coordinate type.
-
         Returns:
-            Area of layout.
+            Width times height.
         """
 
-    def resize(self, dimension: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
-        Updates the layout's dimensions, effectively resizing it.
+        Changes the geometry's axis sizes.
 
         Args:
-            ar: New aspect ratio.
+            size: Axis sizes.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative or larger
-                                   than :math:`2^{30} - 1`.
-            std::out_of_range: If shared gate geometry limits the z extent to
-                               1 and `ar.z` exceeds 1.
+            std::invalid_argument: If a size exceeds the coordinate domain.
         """
 
-    def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in northern direction
-        of a given coordinate `c`, i.e., the face whose y-dimension is lower
-        by 1. If `c`'s y-dimension is already at minimum, `c` is returned
-        instead.
+        Returns the north neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose northern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and north of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def north_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in north-eastern direction of a
-        given coordinate `c`, i.e., the face whose x-dimension is higher by 1
-        and whose y-dimension is lower by 1. If `c`'s x-dimension is already
-        at maximum or `c`'s y-dimension is already at minimum, `c` is returned
-        instead.
+        Returns the north-east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose north-eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly north-eastern of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in eastern direction
-        of a given coordinate `c`, i.e., the face whose x-dimension is higher
-        by 1. If `c`'s x-dimension is already at maximum, `c` is returned
-        instead.
+        Returns the east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and east of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in south-eastern direction of a
-        given coordinate `c`, i.e., the face whose x-dimension and y-dimension
-        are higher by 1. If `c`'s x-dimension or y-dimension are already at
-        maximum, `c` is returned instead.
+        Returns the south-east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose south-eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly south-eastern of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in southern direction
-        of a given coordinate `c`, i.e., the face whose y-dimension is higher
-        by 1. If `c`'s y-dimension is already at maximum, `c` is returned
-        instead.
+        Returns the south neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose southern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and south of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in south-western direction of a
-        given coordinate `c`, i.e., the face whose x-dimension is lower by 1
-        and whose y-dimension is higher by 1. If `c`'s x-dimension is already
-        at minimum or `c`'s y-dimension is already at maximum, `c` is returned
-        instead.
+        Returns the south-west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose south-western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly south-western of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in western direction
-        of a given coordinate `c`, i.e., the face whose x-dimension is lower
-        by 1. If `c`'s x-dimension is already at minimum, `c` is returned
-        instead.
+        Returns the west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and west of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def north_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in north-western direction of a
-        given coordinate `c`, i.e., the face whose x-dimension and y-dimension
-        are lower by 1. If `c`'s x-dimension or y-dimension are already at
-        minimum, `c` is returned instead.
+        Returns the north-west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose north-western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly north-western of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def above(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def above(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly above a given coordinate `c`,
-        i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
-        is already at maximum, `c` is returned instead.
+        Returns the above neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose above counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly above `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def below(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def below(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly below a given coordinate `c`,
-        i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
-        is already at minimum, `c` is returned instead.
+        Returns the below neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose below counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly below `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
     def is_north_of(
@@ -1427,52 +1356,52 @@ class shifted_cartesian_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def northern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same x and z values as a given
-        coordinate but that is located at the layout's northern border.
+        Projects a coordinate to the northern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The northern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def eastern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def eastern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same y and z values as a given
-        coordinate but that is located at the layout's eastern border.
+        Projects a coordinate to the eastern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The eastern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def southern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def southern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same x and z values as a given
-        coordinate but that is located at the layout's southern border.
+        Projects a coordinate to the southern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The southern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def western_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def western_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same y and z values as a given
-        coordinate but that is located at the layout's western border.
+        Projects a coordinate to the western border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The western border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
     def is_ground_layer(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -1501,54 +1430,27 @@ class shifted_cartesian_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
-        Returns whether the given coordinate is located within the layout
-        bounds.
-
         Args:
-            c: Coordinate to check for boundary.
-
-        Returns:
-            `true` iff `c` is located within the layout bounds.
+            c: Coordinate. @return Whether the geometry contains the
+               coordinate.
         """
 
-    def coordinates(self) -> list[coordinate]:
+    def coordinates(
+        self,
+        start: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+        stop: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+    ) -> list[coordinate]:
         """
-        Returns a range of all coordinates accessible in the layout between
-        `start` and `stop`. If no values are provided, all coordinates in the
-        layout will be included. The returned iterator range points to the
-        first and last coordinate, respectively. The range object can be used
-        within a for-each loop. Incrementing the iterator is equivalent to
-        nested for loops in the order z, y, x. Consequently, the iteration
-        will happen inside out, i.e., x will be iterated first, then y, then
-        z.
-
-        Args:
-            start: First coordinate to include in the range of all
-                   coordinates.
-            stop: Last coordinate (exclusive) to include in the range of all
-                  coordinates.
-
-        Returns:
-            An iterator range from `start` to `stop`. If they are not
-            provided, the first/last coordinate is used as a default.
+        Returns coordinates in z/y/x order from the inclusive start to the exclusive stop. None uses the frame boundary.
         """
 
-    def ground_coordinates(self) -> list[coordinate]:
+    def ground_coordinates(
+        self,
+        start: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+        stop: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+    ) -> list[coordinate]:
         """
-        Returns a range of all coordinates accessible in the layout's ground
-        layer between `start` and `stop`. The iteration order is the same as
-        for the coordinates function but without the z dimension.
-
-        Args:
-            start: First coordinate to include in the range of all ground
-                   coordinates.
-            stop: Last coordinate (exclusive) to include in the range of all
-                  ground coordinates.
-
-        Returns:
-            An iterator range from `start` to `stop`. If they are not
-            provided, the first/last coordinate in the ground layer is used as
-            a default.
+        Returns layer-zero coordinates from the inclusive start to the exclusive stop. None uses the frame boundary. Bounds outside layer zero raise ValueError.
         """
 
     def adjacent_coordinates(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]:
@@ -1588,6 +1490,12 @@ class shifted_cartesian_layout:
         Returns:
             A container that contains pairs of `c`'s opposing coordinates.
         """
+
+    def __copy__(self) -> shifted_cartesian_layout:
+        """Returns an independent geometry copy."""
+
+    def __deepcopy__(self, memo: dict) -> shifted_cartesian_layout:
+        """Returns an independent geometry copy."""
 
 class hexagonal_layout:
     """
@@ -1624,24 +1532,17 @@ class hexagonal_layout:
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(
-        self, arrangement: arrangement, dimension: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> None:
+    def __init__(self, arrangement: arrangement, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
-        Standard constructor. The given aspect ratio points to the highest
-        possible coordinate in the layout. That means in the
-        `arrangement::EVEN_COLUMN` ASCII layout representation above `ar =
-        (3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one
-        coordinate.
+        Creates geometry with half-open, zero-origin bounds. The default
+        extent is empty.
 
         Args:
-            a: Arrangement of the shifted rows or columns. It cannot change
-               after construction.
-            ar: Highest possible position in the layout.
+            a: Arrangement of shifted rows or columns.
+            size: Axis sizes.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative or larger
-                                   than :math:`2^{30} - 1`.
+            std::invalid_argument: If a size exceeds the coordinate domain.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -1678,191 +1579,162 @@ class hexagonal_layout:
             This function is equivalent to calling `coordinate(x, y, z)`.
         """
 
-    def x(self) -> int:
-        """
-        Returns the layout's x-dimension, i.e., returns the biggest x-value
-        that still belongs to the layout.
+    def width(self) -> int:
+        """Returns the width count."""
 
-        Returns:
-            x-dimension.
-        """
+    def height(self) -> int:
+        """Returns the height count."""
 
-    def y(self) -> int:
-        """
-        Returns the layout's y-dimension, i.e., returns the biggest y-value
-        that still belongs to the layout.
+    def layers(self) -> int:
+        """Returns the layers count."""
 
-        Returns:
-            y-dimension.
-        """
+    def dimensions(self) -> Extent:
+        """Returns the axis sizes."""
 
-    def z(self) -> int:
-        """
-        Returns the layout's z-dimension, i.e., returns the biggest z-value
-        that still belongs to the layout.
+    def last_coordinate(self) -> coordinate | None:
+        """Returns the last coordinate, or None for empty geometry."""
 
-        Returns:
-            z-dimension.
-        """
+    def contains_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+        """Tests the half-open geometry bounds."""
+
+    def volume(self) -> int:
+        """Returns the checked volume in coordinates."""
 
     def area(self) -> int:
         """
-        Returns the layout's number of faces depending on the coordinate type.
-
         Returns:
-            Area of layout.
+            Width times height.
         """
 
-    def resize(self, dimension: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
-        Updates the layout's dimensions, effectively resizing it.
+        Changes the geometry's axis sizes.
 
         Args:
-            ar: New aspect ratio.
+            size: Axis sizes.
 
         Raises:
-            std::invalid_argument: If an axis of `ar` is negative or larger
-                                   than :math:`2^{30} - 1`.
-            std::out_of_range: If shared gate geometry limits the z extent to
-                               1 and `ar.z` exceeds 1.
+            std::invalid_argument: If a size exceeds the coordinate domain.
         """
 
-    def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in northern direction
-        of a given coordinate `c`, i.e., the face whose y-dimension is lower
-        by 1. If `c`'s y-dimension is already at minimum, `c` is returned
-        instead.
+        Returns the north neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose northern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and north of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def north_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in north-eastern direction of a
-        given coordinate `c`. Depending on the arrangement of the layout, the
-        dimension values of the returned coordinate may differ.
+        Returns the north-east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose north-eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly north-eastern of `c`; `c` itself if the
-            neighbor lies outside of the layout.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in eastern direction
-        of a given coordinate `c`, i.e., the face whose x-dimension is higher
-        by 1. If `c`'s x-dimension is already at maximum, `c` is returned
-        instead.
+        Returns the east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and east of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south_east(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in south-eastern direction of a
-        given coordinate `c`. Depending on the arrangement of the layout, the
-        dimension values of the returned coordinate may differ.
+        Returns the south-east neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose south-eastern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly south-eastern of `c`; `c` itself if the
-            neighbor lies outside of the layout.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in southern direction
-        of a given coordinate `c`, i.e., the face whose y-dimension is higher
-        by 1. If `c`'s y-dimension is already at maximum, `c` is returned
-        instead.
+        Returns the south neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose southern counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and south of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def south_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def south_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in south-western direction of a
-        given coordinate `c`. Depending on the arrangement of the layout, the
-        dimension values of the returned coordinate may differ.
+        Returns the south-west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose south-western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly south-western of `c`; `c` itself if the
-            neighbor lies outside of the layout.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly adjacent in western direction
-        of a given coordinate `c`, i.e., the face whose x-dimension is lower
-        by 1. If `c`'s x-dimension is already at minimum, `c` is returned
-        instead.
+        Returns the west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate adjacent and west of `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def north_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def north_west(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is located in north-western direction of a
-        given coordinate `c`. Depending on the arrangement of the layout, the
-        dimension values of the returned coordinate may differ.
+        Returns the north-west neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose north-western counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly north-western of `c`; `c` itself if the
-            neighbor lies outside of the layout.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def above(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def above(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly above a given coordinate `c`,
-        i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
-        is already at maximum, `c` is returned instead.
+        Returns the above neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose above counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly above `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
-    def below(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def below(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate that is directly below a given coordinate `c`,
-        i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
-        is already at minimum, `c` is returned instead.
+        Returns the below neighbor when both coordinates lie inside the
+        geometry.
 
         Args:
-            c: Coordinate whose below counterpart is desired.
+            c: Base coordinate.
 
         Returns:
-            Coordinate directly below `c`.
+            Neighbor, or no value at a boundary or outside the geometry.
         """
 
     def is_north_of(
@@ -2129,52 +2001,52 @@ class hexagonal_layout:
             `true` iff `c` is located at any of the layout's borders.
         """
 
-    def northern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def northern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same x and z values as a given
-        coordinate but that is located at the layout's northern border.
+        Projects a coordinate to the northern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The northern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def eastern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def eastern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same y and z values as a given
-        coordinate but that is located at the layout's eastern border.
+        Projects a coordinate to the eastern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The eastern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def southern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def southern_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same x and z values as a given
-        coordinate but that is located at the layout's southern border.
+        Projects a coordinate to the southern border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The southern border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
-    def western_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate:
+    def western_border_of(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
         """
-        Returns the coordinate with the same y and z values as a given
-        coordinate but that is located at the layout's western border.
+        Projects a coordinate to the western border.
 
         Args:
-            c: Coordinate whose border counterpart is desired.
+            c: Coordinate to project.
 
         Returns:
-            The western border equivalent of `c`.
+            Projection, or no value if the projection lies outside the
+            geometry.
         """
 
     def is_ground_layer(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -2203,54 +2075,27 @@ class hexagonal_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
-        Returns whether the given coordinate is located within the layout
-        bounds.
-
         Args:
-            c: Coordinate to check for boundary.
-
-        Returns:
-            `true` iff `c` is located within the layout bounds.
+            c: Coordinate. @return Whether the geometry contains the
+               coordinate.
         """
 
-    def coordinates(self) -> list[coordinate]:
+    def coordinates(
+        self,
+        start: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+        stop: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+    ) -> list[coordinate]:
         """
-        Returns a range of all coordinates accessible in the layout between
-        `start` and `stop`. If no values are provided, all coordinates in the
-        layout will be included. The returned iterator range points to the
-        first and last coordinate, respectively. The range object can be used
-        within a for-each loop. Incrementing the iterator is equivalent to
-        nested for loops in the order z, y, x. Consequently, the iteration
-        will happen inside out, i.e., x will be iterated first, then y, then
-        z.
-
-        Args:
-            start: First coordinate to include in the range of all
-                   coordinates.
-            stop: Last coordinate (exclusive) to include in the range of all
-                  coordinates.
-
-        Returns:
-            An iterator range from `start` to `stop`. If they are not
-            provided, the first/last coordinate is used as a default.
+        Returns coordinates in z/y/x order from the inclusive start to the exclusive stop. None uses the frame boundary.
         """
 
-    def ground_coordinates(self) -> list[coordinate]:
+    def ground_coordinates(
+        self,
+        start: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+        stop: coordinate | tuple[int, int] | tuple[int, int, int] | None = None,
+    ) -> list[coordinate]:
         """
-        Returns a range of all coordinates accessible in the layout's ground
-        layer between `start` and `stop`. The iteration order is the same as
-        for the coordinates function but without the z dimension.
-
-        Args:
-            start: First coordinate to include in the range of all ground
-                   coordinates.
-            stop: Last coordinate (exclusive) to include in the range of all
-                  ground coordinates.
-
-        Returns:
-            An iterator range from `start` to `stop`. If they are not
-            provided, the first/last coordinate in the ground layer is used as
-            a default.
+        Returns layer-zero coordinates from the inclusive start to the exclusive stop. None uses the frame boundary. Bounds outside layer zero raise ValueError.
         """
 
     def adjacent_coordinates(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]:
@@ -2297,107 +2142,74 @@ class hexagonal_layout:
             A container that contains pairs of `c`'s opposing coordinates.
         """
 
+    def __copy__(self) -> hexagonal_layout:
+        """Returns an independent geometry copy."""
+
+    def __deepcopy__(self, memo: dict) -> hexagonal_layout:
+        """Returns an independent geometry copy."""
+
+class LayoutObjectId:
+    """Layout-local generation-checked object identity."""
+
+    def __init__(self, index: int, generation: int) -> None: ...
+    @property
+    def index(self) -> int: ...
+    @property
+    def generation(self) -> int: ...
+    def __eq__(self, arg: LayoutObjectId, /) -> bool: ...
+    def __hash__(self) -> int: ...
+
+class LayoutOutputPort:
+    """An object's numbered output port."""
+
+    def __init__(self, object: LayoutObjectId, index: int = 0) -> None: ...
+    @property
+    def object(self) -> LayoutObjectId: ...
+    @property
+    def index(self) -> int: ...
+    def __eq__(self, arg: LayoutOutputPort, /) -> bool: ...
+
+class LayoutInputPort:
+    """An object's ordered input port."""
+
+    def __init__(self, object: LayoutObjectId, index: int) -> None: ...
+    @property
+    def object(self) -> LayoutObjectId: ...
+    @property
+    def index(self) -> int: ...
+    def __eq__(self, arg: LayoutInputPort, /) -> bool: ...
+
 class cartesian_gate_layout(cartesian_layout):
     """
-    A gate-level FCN layout owns gates, clocking, synchronization delays,
-    and persistent obstructions. Clock zones are tiles in the coordinate
-    geometry supplied by `CoordinateLayout`. The gate_level_layout class
-    fulfills the requirements of a `mockturtle` logic network so that it
-    can be used in many of `mockturtle`'s algorithms. Since a layout has
-    to assign fixed positions to its gates (logic nodes), most generative
-    member functions like `create_pi`, `create_po`, `create_and`, etc.
-    require additional coordinate parameters. Consequently, `mockturtle`'s
-    algorithms cannot be used to generate gate_level_layout networks. To
-    make the class compliant with the API anyways, these member functions
-    have their parameters defaulted but they are, in fact required to
-    create meaningful layouts.
+    Placed FCN objects, ordered ports, clocking, and obstructions.
 
-    The following notion is utilized in this implementation:
-    - a node `n` is an index representing the `n`th created gate. All
-      properties of said gate, e.g., its type and
-    position, are stored independently and can be requested from the
-    layout. An empty layout has 2 nodes, namely `const0` and `const1` as
-    required by `mockturtle`. At the moment, they are not used for
-    anything meaningful but could be.
-
-    - a signal is an unsigned integer representation of a `tile`, i.e., a
-      coordinate in the layout. It can be seen as a
-    pointer to a position. Consequently, the utilized coordinates need to
-    be convertible to `uint64_t`.
-
-    - the creation of PIs and POs creates nodes (the latter in contrast to
-      other `mockturtle` networks) that have a
-    position on the layout.
-
-    - the creation of buffers (`create_buf`) creates nodes as well. A
-      buffer with more than one output is a fanout such
-    that `is_fanout` will return `true` on it. However, it is also still a
-    buffer (`is_buf` returns `true` as well). Buffers and wires are used
-    interchangeably.
-
-    - each node has an associated gate function. PIs, POs, and buffers
-      compute the identity function.
-
-    - signals (pointers to tiles) cannot be inverting. Thereby, inverter
-      nodes (gates) have to be created that can be
-    checked for via is_inv.
-
-    - each `create_...` function requires a tile parameter that determines
-      its placement. If the provided tile is
-    invalid, the location will not be stored and the node will not count
-    towards number of gates or wires. A valid tile must have a signal,
-    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\\{0,
-    1\\}`; otherwise, the function throws `std::out_of_range` and leaves
-    the layout unchanged.
-
-    - a node can be overwritten by creating another node on its location.
-      This can, however, lead to unwanted effects and
-    should be avoided.
-
-    - nodes can be moved via the `move_node` function. This function can
-      also be used to update their children, i.e.,
-    incoming signals.
-
-    Most implementation details regarding `mockturtle`-specific functions
-    are borrowed from `mockturtle/networks/klut.hpp`. Therefore,
-    `mockturtle` API functions are only sporadically documented where
-    their behavior might differ. Information on their functionality can be
-    found in `mockturtle`'s docs.
+    Objects have stable identities independent of their coordinates.
+    Connections describe declared topology; physical validation checks
+    adjacency, clocking, and geometry separately. Copies own independent
+    state.
 
     Template Args:
-        CoordinateLayout: Coordinate geometry used for gate placement.
+        CoordinateLayout: Coordinate geometry used for placement.
     """
 
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, dimension: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
-        """
-        Standard constructor. Creates a named gate-level layout of the given
-        aspect ratio. To this end, it calls `CoordinateLayout`'s standard
-        constructor.
-
-        Args:
-            ar: Highest possible position in the layout.
-            name: Layout name.
-        """
+    def __init__(self, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+        """Creates an empty layout with the given geometry and name."""
 
     @overload
     def __init__(
         self,
-        dimension: coordinate | tuple[int, int] | tuple[int, int, int],
+        dimensions: Extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
         """
-        Standard constructor. Creates a gate-level layout of the given aspect
-        ratio and clocks it via the given clocking scheme. To this end, it
-        calls `CoordinateLayout`'s standard constructor.
+        Creates an empty layout with the given geometry, clocking, and name.
 
-        Args:
-            ar: Highest possible position in the layout.
-            scheme: Clocking scheme to apply to this layout.
-            name: Layout name.
+        Raises:
+            ValueError: The clocking scheme name is unknown.
         """
 
     def assign_clock_number(self, cz: coordinate | tuple[int, int] | tuple[int, int, int], cn: int) -> None:
@@ -2624,6 +2436,16 @@ class cartesian_gate_layout(cartesian_layout):
         `obstruct_connection`.
         """
 
+    def obstructed_coordinates(self) -> list[coordinate]:
+        """
+        Returns manual coordinate obstructions in unspecified order, without implicit occupancy.
+        """
+
+    def obstructed_connections(self) -> list[tuple[coordinate, coordinate]]:
+        """
+        Returns manual directed-connection obstructions in unspecified order, without physical connections.
+        """
+
     def is_obstructed_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
@@ -2652,355 +2474,263 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort:
         """
-        Creates a primary input on tile `t`.
-
-        Args:
-            name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
-                  the number of PIs before the new one.
-            t: Tile to place the PI on. An invalid tile leaves the PI
-               unplaced.
-
-        Returns:
-            Signal pointing to `t`.
-
-        Raises:
-            std::out_of_range: If `t` is valid but has no signal encoding.
+        Creates a primary input at `t`. Occupied coordinates reject without
+        mutation.
         """
 
-    def create_po(self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
-        """
-        Creates a primary output on tile `t` that is driven by signal `s`.
+    @overload
+    def create_po(
+        self, s: LayoutOutputPort, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a primary output driven by `s` at `t`."""
 
-        Args:
-            s: Signal that drives the PO.
-            name: Name of the PO. If empty, the name is `po<i>`, where `i` is
-                  the number of POs before the new one.
-            t: Tile to place the PO on. An invalid tile leaves the PO
-               unplaced.
+    @overload
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def is_pi(self, n: LayoutObjectId) -> bool:
+        """Returns whether an object is a primary input."""
 
-        Returns:
-            Signal pointing to `t`.
-
-        Raises:
-            std::out_of_range: If `t` is valid but has no signal encoding.
-        """
-
-    def is_pi(self, n: int) -> bool:
-        """
-        Check whether `n` is a primary input.
-
-        Args:
-            n: Node to be checked.
-
-        Returns:
-            `true` iff `n` is a PI.
-        """
-
-    def is_po(self, n: int) -> bool:
-        """
-        Check whether `n` is a primary output.
-
-        Args:
-            n: Node to be checked.
-
-        Returns:
-            `true` iff `n` is a PO.
-        """
+    def is_po(self, n: LayoutObjectId) -> bool:
+        """Returns whether an object is a primary output."""
 
     def is_pi_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Check whether tile `t` hosts a primary input.
-
-        Args:
-            t: Tile to be checked.
-
-        Returns:
-            `true` iff the node located at tile `t` is a PI.
-        """
+        """Returns whether the coordinate hosts a pi."""
 
     def is_po_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Check whether tile `t` hosts a primary output.
+        """Returns whether the coordinate hosts a po."""
 
-        Args:
-            t: Tile to be checked.
+    def is_inv(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes INV."""
 
-        Returns:
-            `true` iff the node located at tile `t` is a PO.
-        """
+    def is_and(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes AND."""
 
-    def is_inv(self, arg: int, /) -> bool:
-        """
-        Returns whether `n` computes the binary inversion (NOT gate).
+    def is_nand(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes NAND."""
 
-        Args:
-            n: Node to check.
+    def is_or(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes OR."""
 
-        Returns:
-            `true` iff `n` is a NOT gate.
-        """
+    def is_nor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes NOR."""
 
-    def is_and(self, arg: int, /) -> bool: ...
-    def is_nand(self, arg: int, /) -> bool: ...
-    def is_or(self, arg: int, /) -> bool: ...
-    def is_nor(self, arg: int, /) -> bool: ...
-    def is_xor(self, arg: int, /) -> bool: ...
-    def is_xnor(self, arg: int, /) -> bool: ...
-    def is_lt(self, arg: int, /) -> bool: ...
-    def is_le(self, arg: int, /) -> bool: ...
-    def is_gt(self, arg: int, /) -> bool: ...
-    def is_ge(self, arg: int, /) -> bool: ...
-    def is_maj(self, arg: int, /) -> bool: ...
-    def is_fanout(self, arg: int, /) -> bool:
-        """
-        Returns whether `n` is a wire and has multiple outputs, thereby,
-        acting as a fanout gate. Note that a fanout will return `true` for
-        both `is_wire` and `is_fanout`.
+    def is_xor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes XOR."""
 
-        Args:
-            n: Node to check.
+    def is_xnor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes XNOR."""
 
-        Returns:
-            `true` iff `n` is a fanout gate.
-        """
+    def is_lt(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes LT."""
 
-    def is_wire(self, arg: int, /) -> bool:
-        """Equivalent to `is_buf`."""
+    def is_le(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes LE."""
 
-    def set_layout_name(self, name: str) -> None: ...
-    def get_layout_name(self) -> str: ...
+    def is_gt(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes GT."""
+
+    def is_ge(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes GE."""
+
+    def is_maj(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes MAJ."""
+
+    def is_fanout(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an identity object drives more than one input port."""
+
+    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an object computes the identity function."""
+
+    def set_layout_name(self, name: str) -> None:
+        """Sets the layout name."""
+
+    def get_layout_name(self) -> str:
+        """Returns the layout name."""
+
     def clone(self) -> cartesian_gate_layout:
-        """
-        Clones the layout returning a deep copy.
+        """Returns an independent value copy."""
 
-        Returns:
-            Deep copy of the layout.
+    def __copy__(self) -> cartesian_gate_layout:
+        """
+        Returns an independent layout copy, including placed objects and metadata.
         """
 
-    def set_input_name(self, index: int, name: str) -> None: ...
-    def get_input_name(self, index: int) -> str: ...
-    def set_output_name(self, index: int, name: str) -> None: ...
-    def get_output_name(self, index: int) -> str: ...
-    def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_not(self, a: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def __deepcopy__(self, memo: dict) -> cartesian_gate_layout:
+        """
+        Returns an independent layout copy, including placed objects and metadata.
+        """
+
+    def set_input_name(self, index: int, name: str) -> None:
+        """Sets the input name at an interface index."""
+
+    def get_input_name(self, index: int) -> str:
+        """Returns the input name at an interface index."""
+
+    def set_output_name(self, index: int, name: str) -> None:
+        """Sets the output name at an interface index."""
+
+    def get_output_name(self, index: int) -> str:
+        """Returns the output name at an interface index."""
+
+    @overload
+    def get_name(self, s: LayoutOutputPort) -> str:
+        """Returns an object's name, or an empty string for an unnamed object."""
+
+    @overload
+    def get_name(self, object: LayoutObjectId) -> str: ...
+    @overload
+    def create_buf(
+        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a wire driven by `a`."""
+
+    @overload
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def create_not(
+        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NOT gate."""
+
+    def create_and(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a AND gate."""
+
+    def create_nand(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NAND gate."""
+
+    def create_or(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a OR gate."""
+
+    def create_nor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NOR gate."""
+
+    def create_xor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a XOR gate."""
+
+    def create_xnor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a XNOR gate."""
+
+    def create_lt(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a LT gate."""
+
+    def create_le(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a LE gate."""
+
+    def create_gt(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a GT gate."""
+
+    def create_ge(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a GE gate."""
+
     def create_maj(
-        self, a: int, b: int, c: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...
-    ) -> int: ...
-    def num_pis(self) -> int: ...
-    def num_pos(self) -> int: ...
-    def num_gates(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that do not compute
-        the identity function.
+        self,
+        a: LayoutOutputPort,
+        b: LayoutOutputPort,
+        c: LayoutOutputPort,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> LayoutOutputPort:
+        """Creates a majority gate."""
 
-        Returns:
-            Number of gates in the layout.
-        """
+    def num_pis(self) -> int:
+        """Counts primary inputs."""
+
+    def num_pos(self) -> int:
+        """Counts primary outputs."""
+
+    def num_gates(self) -> int:
+        """Counts non-identity objects."""
 
     def num_wires(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that compute the
-        identity function including PIs and POs.
-
-        Returns:
-            Number of wires in the layout.
-        """
+        """Counts identity objects, including terminals."""
 
     def num_crossings(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that compute the
-        identity function and cross other nodes.
-
-        Returns:
-            Number of crossings in the layout.
-        """
+        """Counts crossing-layer wires above occupied ground-layer tiles."""
 
     def is_empty(self) -> bool:
+        """Returns whether the layout has no objects."""
+
+    def create_node(
+        self,
+        inputs: Sequence[LayoutOutputPort],
+        function: mnt.pyfiction.synthesis.dynamic_truth_table,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> LayoutOutputPort:
         """
-        Checks whether there are no gates or wires assigned to the layout's
-        coordinates.
-
-        Returns:
-            `true` iff the layout is empty.
-        """
-
-    def fanin_size(self, n: int) -> int:
-        """
-        Returns the number of incoming, adjacently placed, and properly
-        clocked signals to the given node.
-
-        Args:
-            n: Node to check.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanins.
-
-        Returns:
-            Number of fanins to `n`.
+        Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def fanout_size(self, n: int) -> int:
-        """
-        Returns the number of outgoing, adjacently placed, and properly
-        clocked signals of the given node.
+    def node_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+        """Returns the object's truth table."""
 
-        Args:
-            n: Node to check.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanouts.
-
-        Returns:
-            Number of fanouts to `n`.
-        """
-
-    def get_node(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
-        """
-        Fetches the node that is placed onto a tile pointed to by a given
-        signal. If no node is placed there, the `const0` node is returned.
-
-        Args:
-            s: Pointer to a tile.
-
-        Returns:
-            Node at position `t` where `s` points at `t`; or 0 if no node is
-            placed at `t`.
-        """
-
-    def get_tile(self, n: int) -> coordinate:
-        """
-        The inverse function of `get_node`. Fetches the tile that the provided
-        node is placed on. Returns the invalid tile if the node is not placed.
-
-        Args:
-            n: Node whose location is desired.
-
-        Returns:
-            Tile at which `n` is placed or the invalid tile if `n` is not
-            placed.
-        """
-
-    def make_signal(self, n: int) -> int:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
-        """
-
+    def size(self) -> int: ...
+    def fanin_size(self, object: LayoutObjectId) -> int: ...
+    def fanout_size(self, object: LayoutObjectId) -> int: ...
+    def input_count(self, object: LayoutObjectId) -> int: ...
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
+    def contains(self, object: LayoutObjectId) -> bool: ...
+    def get_tile(self, object: LayoutObjectId) -> coordinate: ...
+    def output(self, object: LayoutObjectId) -> LayoutOutputPort: ...
+    def source(self, input: LayoutInputPort) -> LayoutOutputPort | None: ...
+    def connect(self, output: LayoutOutputPort, input: LayoutInputPort) -> None: ...
+    def disconnect(self, input: LayoutInputPort) -> None: ...
+    def remove(self, object: LayoutObjectId) -> None: ...
     def move_node(
-        self, n: int, t: coordinate | tuple[int, int] | tuple[int, int, int], new_children: Sequence[int] = []
-    ) -> int:
-        """
-        Moves a given node to a new position and also updates its children,
-        i.e., incoming signals.
-
-        Args:
-            n: Node to move.
-            t: Tile to move `n` to.
-            new_children: New incoming signals to `n`.
-
-        Returns:
-            Signal pointing to `n`'s new tile.
-
-        Raises:
-            std::out_of_range: If `t` has no signal encoding.
-        """
-
+        self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort: ...
+    def pi_at(self, index: int) -> LayoutObjectId: ...
+    def po_at(self, index: int) -> LayoutObjectId: ...
+    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
+    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
+    @overload
+    def set_name(self, object: LayoutObjectId, name: str) -> None: ...
+    @overload
+    def set_name(self, output: LayoutOutputPort, name: str) -> None: ...
+    def inputs(self, object: LayoutObjectId) -> list[LayoutOutputPort | None]: ...
+    def sinks(self, output: LayoutOutputPort) -> list[LayoutInputPort]: ...
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
-        """
-        Removes all assigned nodes from the given tile and marks them as dead.
-
-        Args:
-            t: Tile whose nodes are to be removed.
-
-        Note:
-            This function does not reduce the number of nodes in the layout
-            nor does it reduce the number of PIs that are being returned via
-            `num_pis()` even if the tile to clear is an input tile. However,
-            the number of POs is reduced if the tile to clear is an output
-            tile. While this seems counter-intuitive and inconsistent, it is
-            in line with mockturtle's understanding of nodes and primary
-            outputs.
-        """
+        """Removes the occupant of a coordinate if present."""
 
     def is_gate_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether the node assigned to `t` fulfills `is_gate` (in
-        accordance with `mockturtle`'s definition of gates).
-
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` hosts a node that is a neither a constant nor a PI.
-        """
+        """Returns whether the coordinate hosts a gate."""
 
     def is_wire_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether the node assigned to `t` fulfills `is_wire`.
-
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` hosts a node that computes the identity.
-        """
+        """Returns whether the coordinate hosts a wire."""
 
     def is_empty_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether `t` does not have a node assigned to it.
+        """Returns whether a coordinate has no occupant."""
 
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` is an empty tile.
-        """
-
-    def pis(self) -> list[coordinate]: ...
-    def pos(self) -> list[coordinate]: ...
-    def gates(self) -> list[coordinate]: ...
-    def wires(self) -> list[coordinate]: ...
-    def fanins(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def fanouts(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def is_incoming_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
-        """
-        Checks whether signal `s` is incoming to tile `t`. That is, whether
-        tile `t` hosts a node that has a fanin assigned to the tile that
-        signal `s` points to.
-
-        Args:
-            t: Base tile.
-            s: Signal pointing to a potential incoming tile to `t`.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanins.
-
-        Returns:
-            `true` iff `s` is incoming to `t`.
-        """
+    def pis(self) -> list[LayoutObjectId]: ...
+    def pos(self) -> list[LayoutObjectId]: ...
+    def gates(self) -> list[LayoutObjectId]: ...
+    def wires(self) -> list[LayoutObjectId]: ...
+    def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def is_incoming_signal(
+        self,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+        s: coordinate | tuple[int, int] | tuple[int, int, int] | None,
+    ) -> bool:
+        """Checks for a physical incoming connection from the given x/y location."""
 
     def has_no_incoming_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
@@ -3145,23 +2875,12 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
-        """
-        Checks whether signal `s` is outgoing from tile `t`. That is, whether
-        tile `t` hosts a node that has a fanout assigned to the tile that
-        signal `s` points to.
-
-        Args:
-            t: Base tile.
-            s: Signal pointing to a potential outgoing tile of `t`.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanouts.
-
-        Returns:
-            `true` iff `s` is outgoing from `t`.
-        """
+    def is_outgoing_signal(
+        self,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+        s: coordinate | tuple[int, int] | tuple[int, int, int] | None,
+    ) -> bool:
+        """Checks for a physical outgoing connection to the given x/y location."""
 
     def has_no_outgoing_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
@@ -3306,7 +3025,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `north_west(t)` is outgoing from `t`.
         """
 
-    def bounding_box_2d(self) -> tuple[coordinate, coordinate]:
+    def bounding_box_2d(self) -> tuple[coordinate | None, coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all
@@ -3319,21 +3038,6 @@ class cartesian_gate_layout(cartesian_layout):
 
         Returns:
             The minimum  and maximum enclosing coordinate in the associated layout.
-        """
-
-    def is_dead(self, n: int) -> bool:
-        """
-        Checks whether a node (not its assigned tile) is dead. Nodes can be
-        dead for a variety of reasons. For instance if they are dangling (see
-        the `mockturtle` API). In this layout type, nodes are also marked dead
-        when they are not assigned to a tile (which is considered equivalent
-        to dangling).
-
-        Args:
-            n: Node to check for liveliness.
-
-        Returns:
-            `true` iff `n` is dead.
         """
 
     def assign_synchronization_element(
@@ -3379,108 +3083,36 @@ class cartesian_gate_layout(cartesian_layout):
 
 class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     """
-    A gate-level FCN layout owns gates, clocking, synchronization delays,
-    and persistent obstructions. Clock zones are tiles in the coordinate
-    geometry supplied by `CoordinateLayout`. The gate_level_layout class
-    fulfills the requirements of a `mockturtle` logic network so that it
-    can be used in many of `mockturtle`'s algorithms. Since a layout has
-    to assign fixed positions to its gates (logic nodes), most generative
-    member functions like `create_pi`, `create_po`, `create_and`, etc.
-    require additional coordinate parameters. Consequently, `mockturtle`'s
-    algorithms cannot be used to generate gate_level_layout networks. To
-    make the class compliant with the API anyways, these member functions
-    have their parameters defaulted but they are, in fact required to
-    create meaningful layouts.
+    Placed FCN objects, ordered ports, clocking, and obstructions.
 
-    The following notion is utilized in this implementation:
-    - a node `n` is an index representing the `n`th created gate. All
-      properties of said gate, e.g., its type and
-    position, are stored independently and can be requested from the
-    layout. An empty layout has 2 nodes, namely `const0` and `const1` as
-    required by `mockturtle`. At the moment, they are not used for
-    anything meaningful but could be.
-
-    - a signal is an unsigned integer representation of a `tile`, i.e., a
-      coordinate in the layout. It can be seen as a
-    pointer to a position. Consequently, the utilized coordinates need to
-    be convertible to `uint64_t`.
-
-    - the creation of PIs and POs creates nodes (the latter in contrast to
-      other `mockturtle` networks) that have a
-    position on the layout.
-
-    - the creation of buffers (`create_buf`) creates nodes as well. A
-      buffer with more than one output is a fanout such
-    that `is_fanout` will return `true` on it. However, it is also still a
-    buffer (`is_buf` returns `true` as well). Buffers and wires are used
-    interchangeably.
-
-    - each node has an associated gate function. PIs, POs, and buffers
-      compute the identity function.
-
-    - signals (pointers to tiles) cannot be inverting. Thereby, inverter
-      nodes (gates) have to be created that can be
-    checked for via is_inv.
-
-    - each `create_...` function requires a tile parameter that determines
-      its placement. If the provided tile is
-    invalid, the location will not be stored and the node will not count
-    towards number of gates or wires. A valid tile must have a signal,
-    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\\{0,
-    1\\}`; otherwise, the function throws `std::out_of_range` and leaves
-    the layout unchanged.
-
-    - a node can be overwritten by creating another node on its location.
-      This can, however, lead to unwanted effects and
-    should be avoided.
-
-    - nodes can be moved via the `move_node` function. This function can
-      also be used to update their children, i.e.,
-    incoming signals.
-
-    Most implementation details regarding `mockturtle`-specific functions
-    are borrowed from `mockturtle/networks/klut.hpp`. Therefore,
-    `mockturtle` API functions are only sporadically documented where
-    their behavior might differ. Information on their functionality can be
-    found in `mockturtle`'s docs.
+    Objects have stable identities independent of their coordinates.
+    Connections describe declared topology; physical validation checks
+    adjacency, clocking, and geometry separately. Copies own independent
+    state.
 
     Template Args:
-        CoordinateLayout: Coordinate geometry used for gate placement.
+        CoordinateLayout: Coordinate geometry used for placement.
     """
 
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(
-        self, arrangement: arrangement, dimension: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> None:
-        """
-        Standard constructor. Creates a named gate-level layout of the given
-        aspect ratio. To this end, it calls `CoordinateLayout`'s standard
-        constructor.
-
-        Args:
-            ar: Highest possible position in the layout.
-            name: Layout name.
-        """
+    def __init__(self, arrangement: arrangement, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+        """Creates an empty layout with shifted rows or columns."""
 
     @overload
     def __init__(
         self,
         arrangement: arrangement,
-        dimension: coordinate | tuple[int, int] | tuple[int, int, int],
+        dimensions: Extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
         """
-        Standard constructor. Creates a gate-level layout of the given aspect
-        ratio and clocks it via the given clocking scheme. To this end, it
-        calls `CoordinateLayout`'s standard constructor.
+        Creates an empty layout with shifted rows or columns and clocking.
 
-        Args:
-            ar: Highest possible position in the layout.
-            scheme: Clocking scheme to apply to this layout.
-            name: Layout name.
+        Raises:
+            ValueError: The clocking scheme name is unknown.
         """
 
     def assign_clock_number(self, cz: coordinate | tuple[int, int] | tuple[int, int, int], cn: int) -> None:
@@ -3707,6 +3339,16 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         `obstruct_connection`.
         """
 
+    def obstructed_coordinates(self) -> list[coordinate]:
+        """
+        Returns manual coordinate obstructions in unspecified order, without implicit occupancy.
+        """
+
+    def obstructed_connections(self) -> list[tuple[coordinate, coordinate]]:
+        """
+        Returns manual directed-connection obstructions in unspecified order, without physical connections.
+        """
+
     def is_obstructed_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
@@ -3735,355 +3377,263 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort:
         """
-        Creates a primary input on tile `t`.
-
-        Args:
-            name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
-                  the number of PIs before the new one.
-            t: Tile to place the PI on. An invalid tile leaves the PI
-               unplaced.
-
-        Returns:
-            Signal pointing to `t`.
-
-        Raises:
-            std::out_of_range: If `t` is valid but has no signal encoding.
+        Creates a primary input at `t`. Occupied coordinates reject without
+        mutation.
         """
 
-    def create_po(self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
-        """
-        Creates a primary output on tile `t` that is driven by signal `s`.
+    @overload
+    def create_po(
+        self, s: LayoutOutputPort, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a primary output driven by `s` at `t`."""
 
-        Args:
-            s: Signal that drives the PO.
-            name: Name of the PO. If empty, the name is `po<i>`, where `i` is
-                  the number of POs before the new one.
-            t: Tile to place the PO on. An invalid tile leaves the PO
-               unplaced.
+    @overload
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def is_pi(self, n: LayoutObjectId) -> bool:
+        """Returns whether an object is a primary input."""
 
-        Returns:
-            Signal pointing to `t`.
-
-        Raises:
-            std::out_of_range: If `t` is valid but has no signal encoding.
-        """
-
-    def is_pi(self, n: int) -> bool:
-        """
-        Check whether `n` is a primary input.
-
-        Args:
-            n: Node to be checked.
-
-        Returns:
-            `true` iff `n` is a PI.
-        """
-
-    def is_po(self, n: int) -> bool:
-        """
-        Check whether `n` is a primary output.
-
-        Args:
-            n: Node to be checked.
-
-        Returns:
-            `true` iff `n` is a PO.
-        """
+    def is_po(self, n: LayoutObjectId) -> bool:
+        """Returns whether an object is a primary output."""
 
     def is_pi_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Check whether tile `t` hosts a primary input.
-
-        Args:
-            t: Tile to be checked.
-
-        Returns:
-            `true` iff the node located at tile `t` is a PI.
-        """
+        """Returns whether the coordinate hosts a pi."""
 
     def is_po_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Check whether tile `t` hosts a primary output.
+        """Returns whether the coordinate hosts a po."""
 
-        Args:
-            t: Tile to be checked.
+    def is_inv(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes INV."""
 
-        Returns:
-            `true` iff the node located at tile `t` is a PO.
-        """
+    def is_and(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes AND."""
 
-    def is_inv(self, arg: int, /) -> bool:
-        """
-        Returns whether `n` computes the binary inversion (NOT gate).
+    def is_nand(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes NAND."""
 
-        Args:
-            n: Node to check.
+    def is_or(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes OR."""
 
-        Returns:
-            `true` iff `n` is a NOT gate.
-        """
+    def is_nor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes NOR."""
 
-    def is_and(self, arg: int, /) -> bool: ...
-    def is_nand(self, arg: int, /) -> bool: ...
-    def is_or(self, arg: int, /) -> bool: ...
-    def is_nor(self, arg: int, /) -> bool: ...
-    def is_xor(self, arg: int, /) -> bool: ...
-    def is_xnor(self, arg: int, /) -> bool: ...
-    def is_lt(self, arg: int, /) -> bool: ...
-    def is_le(self, arg: int, /) -> bool: ...
-    def is_gt(self, arg: int, /) -> bool: ...
-    def is_ge(self, arg: int, /) -> bool: ...
-    def is_maj(self, arg: int, /) -> bool: ...
-    def is_fanout(self, arg: int, /) -> bool:
-        """
-        Returns whether `n` is a wire and has multiple outputs, thereby,
-        acting as a fanout gate. Note that a fanout will return `true` for
-        both `is_wire` and `is_fanout`.
+    def is_xor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes XOR."""
 
-        Args:
-            n: Node to check.
+    def is_xnor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes XNOR."""
 
-        Returns:
-            `true` iff `n` is a fanout gate.
-        """
+    def is_lt(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes LT."""
 
-    def is_wire(self, arg: int, /) -> bool:
-        """Equivalent to `is_buf`."""
+    def is_le(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes LE."""
 
-    def set_layout_name(self, name: str) -> None: ...
-    def get_layout_name(self) -> str: ...
+    def is_gt(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes GT."""
+
+    def is_ge(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes GE."""
+
+    def is_maj(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes MAJ."""
+
+    def is_fanout(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an identity object drives more than one input port."""
+
+    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an object computes the identity function."""
+
+    def set_layout_name(self, name: str) -> None:
+        """Sets the layout name."""
+
+    def get_layout_name(self) -> str:
+        """Returns the layout name."""
+
     def clone(self) -> shifted_cartesian_gate_layout:
-        """
-        Clones the layout returning a deep copy.
+        """Returns an independent value copy."""
 
-        Returns:
-            Deep copy of the layout.
+    def __copy__(self) -> shifted_cartesian_gate_layout:
+        """
+        Returns an independent layout copy, including placed objects and metadata.
         """
 
-    def set_input_name(self, index: int, name: str) -> None: ...
-    def get_input_name(self, index: int) -> str: ...
-    def set_output_name(self, index: int, name: str) -> None: ...
-    def get_output_name(self, index: int) -> str: ...
-    def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_not(self, a: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def __deepcopy__(self, memo: dict) -> shifted_cartesian_gate_layout:
+        """
+        Returns an independent layout copy, including placed objects and metadata.
+        """
+
+    def set_input_name(self, index: int, name: str) -> None:
+        """Sets the input name at an interface index."""
+
+    def get_input_name(self, index: int) -> str:
+        """Returns the input name at an interface index."""
+
+    def set_output_name(self, index: int, name: str) -> None:
+        """Sets the output name at an interface index."""
+
+    def get_output_name(self, index: int) -> str:
+        """Returns the output name at an interface index."""
+
+    @overload
+    def get_name(self, s: LayoutOutputPort) -> str:
+        """Returns an object's name, or an empty string for an unnamed object."""
+
+    @overload
+    def get_name(self, object: LayoutObjectId) -> str: ...
+    @overload
+    def create_buf(
+        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a wire driven by `a`."""
+
+    @overload
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def create_not(
+        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NOT gate."""
+
+    def create_and(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a AND gate."""
+
+    def create_nand(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NAND gate."""
+
+    def create_or(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a OR gate."""
+
+    def create_nor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NOR gate."""
+
+    def create_xor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a XOR gate."""
+
+    def create_xnor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a XNOR gate."""
+
+    def create_lt(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a LT gate."""
+
+    def create_le(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a LE gate."""
+
+    def create_gt(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a GT gate."""
+
+    def create_ge(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a GE gate."""
+
     def create_maj(
-        self, a: int, b: int, c: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...
-    ) -> int: ...
-    def num_pis(self) -> int: ...
-    def num_pos(self) -> int: ...
-    def num_gates(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that do not compute
-        the identity function.
+        self,
+        a: LayoutOutputPort,
+        b: LayoutOutputPort,
+        c: LayoutOutputPort,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> LayoutOutputPort:
+        """Creates a majority gate."""
 
-        Returns:
-            Number of gates in the layout.
-        """
+    def num_pis(self) -> int:
+        """Counts primary inputs."""
+
+    def num_pos(self) -> int:
+        """Counts primary outputs."""
+
+    def num_gates(self) -> int:
+        """Counts non-identity objects."""
 
     def num_wires(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that compute the
-        identity function including PIs and POs.
-
-        Returns:
-            Number of wires in the layout.
-        """
+        """Counts identity objects, including terminals."""
 
     def num_crossings(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that compute the
-        identity function and cross other nodes.
-
-        Returns:
-            Number of crossings in the layout.
-        """
+        """Counts crossing-layer wires above occupied ground-layer tiles."""
 
     def is_empty(self) -> bool:
+        """Returns whether the layout has no objects."""
+
+    def create_node(
+        self,
+        inputs: Sequence[LayoutOutputPort],
+        function: mnt.pyfiction.synthesis.dynamic_truth_table,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> LayoutOutputPort:
         """
-        Checks whether there are no gates or wires assigned to the layout's
-        coordinates.
-
-        Returns:
-            `true` iff the layout is empty.
-        """
-
-    def fanin_size(self, n: int) -> int:
-        """
-        Returns the number of incoming, adjacently placed, and properly
-        clocked signals to the given node.
-
-        Args:
-            n: Node to check.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanins.
-
-        Returns:
-            Number of fanins to `n`.
+        Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def fanout_size(self, n: int) -> int:
-        """
-        Returns the number of outgoing, adjacently placed, and properly
-        clocked signals of the given node.
+    def node_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+        """Returns the object's truth table."""
 
-        Args:
-            n: Node to check.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanouts.
-
-        Returns:
-            Number of fanouts to `n`.
-        """
-
-    def get_node(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
-        """
-        Fetches the node that is placed onto a tile pointed to by a given
-        signal. If no node is placed there, the `const0` node is returned.
-
-        Args:
-            s: Pointer to a tile.
-
-        Returns:
-            Node at position `t` where `s` points at `t`; or 0 if no node is
-            placed at `t`.
-        """
-
-    def get_tile(self, n: int) -> coordinate:
-        """
-        The inverse function of `get_node`. Fetches the tile that the provided
-        node is placed on. Returns the invalid tile if the node is not placed.
-
-        Args:
-            n: Node whose location is desired.
-
-        Returns:
-            Tile at which `n` is placed or the invalid tile if `n` is not
-            placed.
-        """
-
-    def make_signal(self, n: int) -> int:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
-        """
-
+    def size(self) -> int: ...
+    def fanin_size(self, object: LayoutObjectId) -> int: ...
+    def fanout_size(self, object: LayoutObjectId) -> int: ...
+    def input_count(self, object: LayoutObjectId) -> int: ...
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
+    def contains(self, object: LayoutObjectId) -> bool: ...
+    def get_tile(self, object: LayoutObjectId) -> coordinate: ...
+    def output(self, object: LayoutObjectId) -> LayoutOutputPort: ...
+    def source(self, input: LayoutInputPort) -> LayoutOutputPort | None: ...
+    def connect(self, output: LayoutOutputPort, input: LayoutInputPort) -> None: ...
+    def disconnect(self, input: LayoutInputPort) -> None: ...
+    def remove(self, object: LayoutObjectId) -> None: ...
     def move_node(
-        self, n: int, t: coordinate | tuple[int, int] | tuple[int, int, int], new_children: Sequence[int] = []
-    ) -> int:
-        """
-        Moves a given node to a new position and also updates its children,
-        i.e., incoming signals.
-
-        Args:
-            n: Node to move.
-            t: Tile to move `n` to.
-            new_children: New incoming signals to `n`.
-
-        Returns:
-            Signal pointing to `n`'s new tile.
-
-        Raises:
-            std::out_of_range: If `t` has no signal encoding.
-        """
-
+        self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort: ...
+    def pi_at(self, index: int) -> LayoutObjectId: ...
+    def po_at(self, index: int) -> LayoutObjectId: ...
+    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
+    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
+    @overload
+    def set_name(self, object: LayoutObjectId, name: str) -> None: ...
+    @overload
+    def set_name(self, output: LayoutOutputPort, name: str) -> None: ...
+    def inputs(self, object: LayoutObjectId) -> list[LayoutOutputPort | None]: ...
+    def sinks(self, output: LayoutOutputPort) -> list[LayoutInputPort]: ...
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
-        """
-        Removes all assigned nodes from the given tile and marks them as dead.
-
-        Args:
-            t: Tile whose nodes are to be removed.
-
-        Note:
-            This function does not reduce the number of nodes in the layout
-            nor does it reduce the number of PIs that are being returned via
-            `num_pis()` even if the tile to clear is an input tile. However,
-            the number of POs is reduced if the tile to clear is an output
-            tile. While this seems counter-intuitive and inconsistent, it is
-            in line with mockturtle's understanding of nodes and primary
-            outputs.
-        """
+        """Removes the occupant of a coordinate if present."""
 
     def is_gate_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether the node assigned to `t` fulfills `is_gate` (in
-        accordance with `mockturtle`'s definition of gates).
-
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` hosts a node that is a neither a constant nor a PI.
-        """
+        """Returns whether the coordinate hosts a gate."""
 
     def is_wire_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether the node assigned to `t` fulfills `is_wire`.
-
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` hosts a node that computes the identity.
-        """
+        """Returns whether the coordinate hosts a wire."""
 
     def is_empty_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether `t` does not have a node assigned to it.
+        """Returns whether a coordinate has no occupant."""
 
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` is an empty tile.
-        """
-
-    def pis(self) -> list[coordinate]: ...
-    def pos(self) -> list[coordinate]: ...
-    def gates(self) -> list[coordinate]: ...
-    def wires(self) -> list[coordinate]: ...
-    def fanins(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def fanouts(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def is_incoming_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
-        """
-        Checks whether signal `s` is incoming to tile `t`. That is, whether
-        tile `t` hosts a node that has a fanin assigned to the tile that
-        signal `s` points to.
-
-        Args:
-            t: Base tile.
-            s: Signal pointing to a potential incoming tile to `t`.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanins.
-
-        Returns:
-            `true` iff `s` is incoming to `t`.
-        """
+    def pis(self) -> list[LayoutObjectId]: ...
+    def pos(self) -> list[LayoutObjectId]: ...
+    def gates(self) -> list[LayoutObjectId]: ...
+    def wires(self) -> list[LayoutObjectId]: ...
+    def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def is_incoming_signal(
+        self,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+        s: coordinate | tuple[int, int] | tuple[int, int, int] | None,
+    ) -> bool:
+        """Checks for a physical incoming connection from the given x/y location."""
 
     def has_no_incoming_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
@@ -4228,23 +3778,12 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
-        """
-        Checks whether signal `s` is outgoing from tile `t`. That is, whether
-        tile `t` hosts a node that has a fanout assigned to the tile that
-        signal `s` points to.
-
-        Args:
-            t: Base tile.
-            s: Signal pointing to a potential outgoing tile of `t`.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanouts.
-
-        Returns:
-            `true` iff `s` is outgoing from `t`.
-        """
+    def is_outgoing_signal(
+        self,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+        s: coordinate | tuple[int, int] | tuple[int, int, int] | None,
+    ) -> bool:
+        """Checks for a physical outgoing connection to the given x/y location."""
 
     def has_no_outgoing_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
@@ -4389,7 +3928,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `north_west(t)` is outgoing from `t`.
         """
 
-    def bounding_box_2d(self) -> tuple[coordinate, coordinate]:
+    def bounding_box_2d(self) -> tuple[coordinate | None, coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all
@@ -4402,21 +3941,6 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
         Returns:
             The minimum  and maximum enclosing coordinate in the associated layout.
-        """
-
-    def is_dead(self, n: int) -> bool:
-        """
-        Checks whether a node (not its assigned tile) is dead. Nodes can be
-        dead for a variety of reasons. For instance if they are dangling (see
-        the `mockturtle` API). In this layout type, nodes are also marked dead
-        when they are not assigned to a tile (which is considered equivalent
-        to dangling).
-
-        Args:
-            n: Node to check for liveliness.
-
-        Returns:
-            `true` iff `n` is dead.
         """
 
     def assign_synchronization_element(
@@ -4462,108 +3986,36 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
 class hexagonal_gate_layout(hexagonal_layout):
     """
-    A gate-level FCN layout owns gates, clocking, synchronization delays,
-    and persistent obstructions. Clock zones are tiles in the coordinate
-    geometry supplied by `CoordinateLayout`. The gate_level_layout class
-    fulfills the requirements of a `mockturtle` logic network so that it
-    can be used in many of `mockturtle`'s algorithms. Since a layout has
-    to assign fixed positions to its gates (logic nodes), most generative
-    member functions like `create_pi`, `create_po`, `create_and`, etc.
-    require additional coordinate parameters. Consequently, `mockturtle`'s
-    algorithms cannot be used to generate gate_level_layout networks. To
-    make the class compliant with the API anyways, these member functions
-    have their parameters defaulted but they are, in fact required to
-    create meaningful layouts.
+    Placed FCN objects, ordered ports, clocking, and obstructions.
 
-    The following notion is utilized in this implementation:
-    - a node `n` is an index representing the `n`th created gate. All
-      properties of said gate, e.g., its type and
-    position, are stored independently and can be requested from the
-    layout. An empty layout has 2 nodes, namely `const0` and `const1` as
-    required by `mockturtle`. At the moment, they are not used for
-    anything meaningful but could be.
-
-    - a signal is an unsigned integer representation of a `tile`, i.e., a
-      coordinate in the layout. It can be seen as a
-    pointer to a position. Consequently, the utilized coordinates need to
-    be convertible to `uint64_t`.
-
-    - the creation of PIs and POs creates nodes (the latter in contrast to
-      other `mockturtle` networks) that have a
-    position on the layout.
-
-    - the creation of buffers (`create_buf`) creates nodes as well. A
-      buffer with more than one output is a fanout such
-    that `is_fanout` will return `true` on it. However, it is also still a
-    buffer (`is_buf` returns `true` as well). Buffers and wires are used
-    interchangeably.
-
-    - each node has an associated gate function. PIs, POs, and buffers
-      compute the identity function.
-
-    - signals (pointers to tiles) cannot be inverting. Thereby, inverter
-      nodes (gates) have to be created that can be
-    checked for via is_inv.
-
-    - each `create_...` function requires a tile parameter that determines
-      its placement. If the provided tile is
-    invalid, the location will not be stored and the node will not count
-    towards number of gates or wires. A valid tile must have a signal,
-    i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\\{0,
-    1\\}`; otherwise, the function throws `std::out_of_range` and leaves
-    the layout unchanged.
-
-    - a node can be overwritten by creating another node on its location.
-      This can, however, lead to unwanted effects and
-    should be avoided.
-
-    - nodes can be moved via the `move_node` function. This function can
-      also be used to update their children, i.e.,
-    incoming signals.
-
-    Most implementation details regarding `mockturtle`-specific functions
-    are borrowed from `mockturtle/networks/klut.hpp`. Therefore,
-    `mockturtle` API functions are only sporadically documented where
-    their behavior might differ. Information on their functionality can be
-    found in `mockturtle`'s docs.
+    Objects have stable identities independent of their coordinates.
+    Connections describe declared topology; physical validation checks
+    adjacency, clocking, and geometry separately. Copies own independent
+    state.
 
     Template Args:
-        CoordinateLayout: Coordinate geometry used for gate placement.
+        CoordinateLayout: Coordinate geometry used for placement.
     """
 
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(
-        self, arrangement: arrangement, dimension: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> None:
-        """
-        Standard constructor. Creates a named gate-level layout of the given
-        aspect ratio. To this end, it calls `CoordinateLayout`'s standard
-        constructor.
-
-        Args:
-            ar: Highest possible position in the layout.
-            name: Layout name.
-        """
+    def __init__(self, arrangement: arrangement, dimensions: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+        """Creates an empty layout with shifted rows or columns."""
 
     @overload
     def __init__(
         self,
         arrangement: arrangement,
-        dimension: coordinate | tuple[int, int] | tuple[int, int, int],
+        dimensions: Extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
         """
-        Standard constructor. Creates a gate-level layout of the given aspect
-        ratio and clocks it via the given clocking scheme. To this end, it
-        calls `CoordinateLayout`'s standard constructor.
+        Creates an empty layout with shifted rows or columns and clocking.
 
-        Args:
-            ar: Highest possible position in the layout.
-            scheme: Clocking scheme to apply to this layout.
-            name: Layout name.
+        Raises:
+            ValueError: The clocking scheme name is unknown.
         """
 
     def assign_clock_number(self, cz: coordinate | tuple[int, int] | tuple[int, int, int], cn: int) -> None:
@@ -4790,6 +4242,16 @@ class hexagonal_gate_layout(hexagonal_layout):
         `obstruct_connection`.
         """
 
+    def obstructed_coordinates(self) -> list[coordinate]:
+        """
+        Returns manual coordinate obstructions in unspecified order, without implicit occupancy.
+        """
+
+    def obstructed_connections(self) -> list[tuple[coordinate, coordinate]]:
+        """
+        Returns manual directed-connection obstructions in unspecified order, without physical connections.
+        """
+
     def is_obstructed_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Checks if the given coordinate is obstructed of some sort.
@@ -4818,355 +4280,263 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort:
         """
-        Creates a primary input on tile `t`.
-
-        Args:
-            name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
-                  the number of PIs before the new one.
-            t: Tile to place the PI on. An invalid tile leaves the PI
-               unplaced.
-
-        Returns:
-            Signal pointing to `t`.
-
-        Raises:
-            std::out_of_range: If `t` is valid but has no signal encoding.
+        Creates a primary input at `t`. Occupied coordinates reject without
+        mutation.
         """
 
-    def create_po(self, s: int, name: str = "", t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int:
-        """
-        Creates a primary output on tile `t` that is driven by signal `s`.
+    @overload
+    def create_po(
+        self, s: LayoutOutputPort, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a primary output driven by `s` at `t`."""
 
-        Args:
-            s: Signal that drives the PO.
-            name: Name of the PO. If empty, the name is `po<i>`, where `i` is
-                  the number of POs before the new one.
-            t: Tile to place the PO on. An invalid tile leaves the PO
-               unplaced.
+    @overload
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def is_pi(self, n: LayoutObjectId) -> bool:
+        """Returns whether an object is a primary input."""
 
-        Returns:
-            Signal pointing to `t`.
-
-        Raises:
-            std::out_of_range: If `t` is valid but has no signal encoding.
-        """
-
-    def is_pi(self, n: int) -> bool:
-        """
-        Check whether `n` is a primary input.
-
-        Args:
-            n: Node to be checked.
-
-        Returns:
-            `true` iff `n` is a PI.
-        """
-
-    def is_po(self, n: int) -> bool:
-        """
-        Check whether `n` is a primary output.
-
-        Args:
-            n: Node to be checked.
-
-        Returns:
-            `true` iff `n` is a PO.
-        """
+    def is_po(self, n: LayoutObjectId) -> bool:
+        """Returns whether an object is a primary output."""
 
     def is_pi_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Check whether tile `t` hosts a primary input.
-
-        Args:
-            t: Tile to be checked.
-
-        Returns:
-            `true` iff the node located at tile `t` is a PI.
-        """
+        """Returns whether the coordinate hosts a pi."""
 
     def is_po_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Check whether tile `t` hosts a primary output.
+        """Returns whether the coordinate hosts a po."""
 
-        Args:
-            t: Tile to be checked.
+    def is_inv(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes INV."""
 
-        Returns:
-            `true` iff the node located at tile `t` is a PO.
-        """
+    def is_and(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes AND."""
 
-    def is_inv(self, arg: int, /) -> bool:
-        """
-        Returns whether `n` computes the binary inversion (NOT gate).
+    def is_nand(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes NAND."""
 
-        Args:
-            n: Node to check.
+    def is_or(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes OR."""
 
-        Returns:
-            `true` iff `n` is a NOT gate.
-        """
+    def is_nor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes NOR."""
 
-    def is_and(self, arg: int, /) -> bool: ...
-    def is_nand(self, arg: int, /) -> bool: ...
-    def is_or(self, arg: int, /) -> bool: ...
-    def is_nor(self, arg: int, /) -> bool: ...
-    def is_xor(self, arg: int, /) -> bool: ...
-    def is_xnor(self, arg: int, /) -> bool: ...
-    def is_lt(self, arg: int, /) -> bool: ...
-    def is_le(self, arg: int, /) -> bool: ...
-    def is_gt(self, arg: int, /) -> bool: ...
-    def is_ge(self, arg: int, /) -> bool: ...
-    def is_maj(self, arg: int, /) -> bool: ...
-    def is_fanout(self, arg: int, /) -> bool:
-        """
-        Returns whether `n` is a wire and has multiple outputs, thereby,
-        acting as a fanout gate. Note that a fanout will return `true` for
-        both `is_wire` and `is_fanout`.
+    def is_xor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes XOR."""
 
-        Args:
-            n: Node to check.
+    def is_xnor(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes XNOR."""
 
-        Returns:
-            `true` iff `n` is a fanout gate.
-        """
+    def is_lt(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes LT."""
 
-    def is_wire(self, arg: int, /) -> bool:
-        """Equivalent to `is_buf`."""
+    def is_le(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes LE."""
 
-    def set_layout_name(self, name: str) -> None: ...
-    def get_layout_name(self) -> str: ...
+    def is_gt(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes GT."""
+
+    def is_ge(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes GE."""
+
+    def is_maj(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether the object computes MAJ."""
+
+    def is_fanout(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an identity object drives more than one input port."""
+
+    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an object computes the identity function."""
+
+    def set_layout_name(self, name: str) -> None:
+        """Sets the layout name."""
+
+    def get_layout_name(self) -> str:
+        """Returns the layout name."""
+
     def clone(self) -> hexagonal_gate_layout:
-        """
-        Clones the layout returning a deep copy.
+        """Returns an independent value copy."""
 
-        Returns:
-            Deep copy of the layout.
+    def __copy__(self) -> hexagonal_gate_layout:
+        """
+        Returns an independent layout copy, including placed objects and metadata.
         """
 
-    def set_input_name(self, index: int, name: str) -> None: ...
-    def get_input_name(self, index: int) -> str: ...
-    def set_output_name(self, index: int, name: str) -> None: ...
-    def get_output_name(self, index: int) -> str: ...
-    def get_name(self, s: int) -> str: ...
-    def create_buf(self, a: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_not(self, a: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_and(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_nand(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_or(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_nor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_xor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_xnor(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_lt(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_le(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_gt(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
-    def create_ge(self, a: int, b: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...) -> int: ...
+    def __deepcopy__(self, memo: dict) -> hexagonal_gate_layout:
+        """
+        Returns an independent layout copy, including placed objects and metadata.
+        """
+
+    def set_input_name(self, index: int, name: str) -> None:
+        """Sets the input name at an interface index."""
+
+    def get_input_name(self, index: int) -> str:
+        """Returns the input name at an interface index."""
+
+    def set_output_name(self, index: int, name: str) -> None:
+        """Sets the output name at an interface index."""
+
+    def get_output_name(self, index: int) -> str:
+        """Returns the output name at an interface index."""
+
+    @overload
+    def get_name(self, s: LayoutOutputPort) -> str:
+        """Returns an object's name, or an empty string for an unnamed object."""
+
+    @overload
+    def get_name(self, object: LayoutObjectId) -> str: ...
+    @overload
+    def create_buf(
+        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a wire driven by `a`."""
+
+    @overload
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutOutputPort: ...
+    def create_not(
+        self, a: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NOT gate."""
+
+    def create_and(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a AND gate."""
+
+    def create_nand(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NAND gate."""
+
+    def create_or(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a OR gate."""
+
+    def create_nor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a NOR gate."""
+
+    def create_xor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a XOR gate."""
+
+    def create_xnor(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a XNOR gate."""
+
+    def create_lt(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a LT gate."""
+
+    def create_le(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a LE gate."""
+
+    def create_gt(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a GT gate."""
+
+    def create_ge(
+        self, a: LayoutOutputPort, b: LayoutOutputPort, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort:
+        """Creates a GE gate."""
+
     def create_maj(
-        self, a: int, b: int, c: int, t: coordinate | tuple[int, int] | tuple[int, int, int] = ...
-    ) -> int: ...
-    def num_pis(self) -> int: ...
-    def num_pos(self) -> int: ...
-    def num_gates(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that do not compute
-        the identity function.
+        self,
+        a: LayoutOutputPort,
+        b: LayoutOutputPort,
+        c: LayoutOutputPort,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> LayoutOutputPort:
+        """Creates a majority gate."""
 
-        Returns:
-            Number of gates in the layout.
-        """
+    def num_pis(self) -> int:
+        """Counts primary inputs."""
+
+    def num_pos(self) -> int:
+        """Counts primary outputs."""
+
+    def num_gates(self) -> int:
+        """Counts non-identity objects."""
 
     def num_wires(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that compute the
-        identity function including PIs and POs.
-
-        Returns:
-            Number of wires in the layout.
-        """
+        """Counts identity objects, including terminals."""
 
     def num_crossings(self) -> int:
-        """
-        Returns the number of placed nodes in the layout that compute the
-        identity function and cross other nodes.
-
-        Returns:
-            Number of crossings in the layout.
-        """
+        """Counts crossing-layer wires above occupied ground-layer tiles."""
 
     def is_empty(self) -> bool:
+        """Returns whether the layout has no objects."""
+
+    def create_node(
+        self,
+        inputs: Sequence[LayoutOutputPort],
+        function: mnt.pyfiction.synthesis.dynamic_truth_table,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+    ) -> LayoutOutputPort:
         """
-        Checks whether there are no gates or wires assigned to the layout's
-        coordinates.
-
-        Returns:
-            `true` iff the layout is empty.
-        """
-
-    def fanin_size(self, n: int) -> int:
-        """
-        Returns the number of incoming, adjacently placed, and properly
-        clocked signals to the given node.
-
-        Args:
-            n: Node to check.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanins.
-
-        Returns:
-            Number of fanins to `n`.
+        Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def fanout_size(self, n: int) -> int:
-        """
-        Returns the number of outgoing, adjacently placed, and properly
-        clocked signals of the given node.
+    def node_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+        """Returns the object's truth table."""
 
-        Args:
-            n: Node to check.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanouts.
-
-        Returns:
-            Number of fanouts to `n`.
-        """
-
-    def get_node(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
-        """
-        Fetches the node that is placed onto a tile pointed to by a given
-        signal. If no node is placed there, the `const0` node is returned.
-
-        Args:
-            s: Pointer to a tile.
-
-        Returns:
-            Node at position `t` where `s` points at `t`; or 0 if no node is
-            placed at `t`.
-        """
-
-    def get_tile(self, n: int) -> coordinate:
-        """
-        The inverse function of `get_node`. Fetches the tile that the provided
-        node is placed on. Returns the invalid tile if the node is not placed.
-
-        Args:
-            n: Node whose location is desired.
-
-        Returns:
-            Tile at which `n` is placed or the invalid tile if `n` is not
-            placed.
-        """
-
-    def make_signal(self, n: int) -> int:
-        """
-        Invokes the same behavior as `get_tile(n)` but additionally casts the
-        return value to a signal. That is, this function returns the signal
-        representation of the tile that the node `n` is assigned to.
-
-        Args:
-            n: Node whose signal is desired.
-
-        Returns:
-            Signal that points to `n`.
-        """
-
+    def size(self) -> int: ...
+    def fanin_size(self, object: LayoutObjectId) -> int: ...
+    def fanout_size(self, object: LayoutObjectId) -> int: ...
+    def input_count(self, object: LayoutObjectId) -> int: ...
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
+    def contains(self, object: LayoutObjectId) -> bool: ...
+    def get_tile(self, object: LayoutObjectId) -> coordinate: ...
+    def output(self, object: LayoutObjectId) -> LayoutOutputPort: ...
+    def source(self, input: LayoutInputPort) -> LayoutOutputPort | None: ...
+    def connect(self, output: LayoutOutputPort, input: LayoutInputPort) -> None: ...
+    def disconnect(self, input: LayoutInputPort) -> None: ...
+    def remove(self, object: LayoutObjectId) -> None: ...
     def move_node(
-        self, n: int, t: coordinate | tuple[int, int] | tuple[int, int, int], new_children: Sequence[int] = []
-    ) -> int:
-        """
-        Moves a given node to a new position and also updates its children,
-        i.e., incoming signals.
-
-        Args:
-            n: Node to move.
-            t: Tile to move `n` to.
-            new_children: New incoming signals to `n`.
-
-        Returns:
-            Signal pointing to `n`'s new tile.
-
-        Raises:
-            std::out_of_range: If `t` has no signal encoding.
-        """
-
+        self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> LayoutOutputPort: ...
+    def pi_at(self, index: int) -> LayoutObjectId: ...
+    def po_at(self, index: int) -> LayoutObjectId: ...
+    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
+    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
+    @overload
+    def set_name(self, object: LayoutObjectId, name: str) -> None: ...
+    @overload
+    def set_name(self, output: LayoutOutputPort, name: str) -> None: ...
+    def inputs(self, object: LayoutObjectId) -> list[LayoutOutputPort | None]: ...
+    def sinks(self, output: LayoutOutputPort) -> list[LayoutInputPort]: ...
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
-        """
-        Removes all assigned nodes from the given tile and marks them as dead.
-
-        Args:
-            t: Tile whose nodes are to be removed.
-
-        Note:
-            This function does not reduce the number of nodes in the layout
-            nor does it reduce the number of PIs that are being returned via
-            `num_pis()` even if the tile to clear is an input tile. However,
-            the number of POs is reduced if the tile to clear is an output
-            tile. While this seems counter-intuitive and inconsistent, it is
-            in line with mockturtle's understanding of nodes and primary
-            outputs.
-        """
+        """Removes the occupant of a coordinate if present."""
 
     def is_gate_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether the node assigned to `t` fulfills `is_gate` (in
-        accordance with `mockturtle`'s definition of gates).
-
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` hosts a node that is a neither a constant nor a PI.
-        """
+        """Returns whether the coordinate hosts a gate."""
 
     def is_wire_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether the node assigned to `t` fulfills `is_wire`.
-
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` hosts a node that computes the identity.
-        """
+        """Returns whether the coordinate hosts a wire."""
 
     def is_empty_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
-        """
-        Returns whether `t` does not have a node assigned to it.
+        """Returns whether a coordinate has no occupant."""
 
-        Args:
-            t: Tile to check.
-
-        Returns:
-            `true` iff `t` is an empty tile.
-        """
-
-    def pis(self) -> list[coordinate]: ...
-    def pos(self) -> list[coordinate]: ...
-    def gates(self) -> list[coordinate]: ...
-    def wires(self) -> list[coordinate]: ...
-    def fanins(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def fanouts(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def is_incoming_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
-        """
-        Checks whether signal `s` is incoming to tile `t`. That is, whether
-        tile `t` hosts a node that has a fanin assigned to the tile that
-        signal `s` points to.
-
-        Args:
-            t: Base tile.
-            s: Signal pointing to a potential incoming tile to `t`.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanins.
-
-        Returns:
-            `true` iff `s` is incoming to `t`.
-        """
+    def pis(self) -> list[LayoutObjectId]: ...
+    def pos(self) -> list[LayoutObjectId]: ...
+    def gates(self) -> list[LayoutObjectId]: ...
+    def wires(self) -> list[LayoutObjectId]: ...
+    def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def is_incoming_signal(
+        self,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+        s: coordinate | tuple[int, int] | tuple[int, int, int] | None,
+    ) -> bool:
+        """Checks for a physical incoming connection from the given x/y location."""
 
     def has_no_incoming_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
@@ -5311,23 +4681,12 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `north_west(t)` is incoming to `t`.
         """
 
-    def is_outgoing_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int], s: int) -> bool:
-        """
-        Checks whether signal `s` is outgoing from tile `t`. That is, whether
-        tile `t` hosts a node that has a fanout assigned to the tile that
-        signal `s` points to.
-
-        Args:
-            t: Base tile.
-            s: Signal pointing to a potential outgoing tile of `t`.
-
-        Template Args:
-            RespectClocking: Flag to indicate that the underlying clocking is
-                             to be respected when evaluating fanouts.
-
-        Returns:
-            `true` iff `s` is outgoing from `t`.
-        """
+    def is_outgoing_signal(
+        self,
+        t: coordinate | tuple[int, int] | tuple[int, int, int],
+        s: coordinate | tuple[int, int] | tuple[int, int, int] | None,
+    ) -> bool:
+        """Checks for a physical outgoing connection to the given x/y location."""
 
     def has_no_outgoing_signal(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
@@ -5472,7 +4831,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `north_west(t)` is outgoing from `t`.
         """
 
-    def bounding_box_2d(self) -> tuple[coordinate, coordinate]:
+    def bounding_box_2d(self) -> tuple[coordinate | None, coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all
@@ -5485,21 +4844,6 @@ class hexagonal_gate_layout(hexagonal_layout):
 
         Returns:
             The minimum  and maximum enclosing coordinate in the associated layout.
-        """
-
-    def is_dead(self, n: int) -> bool:
-        """
-        Checks whether a node (not its assigned tile) is dead. Nodes can be
-        dead for a variety of reasons. For instance if they are dangling (see
-        the `mockturtle` API). In this layout type, nodes are also marked dead
-        when they are not assigned to a tile (which is considered equivalent
-        to dangling).
-
-        Args:
-            n: Node to check for liveliness.
-
-        Returns:
-            `true` iff `n` is dead.
         """
 
     def assign_synchronization_element(
@@ -5561,6 +4905,9 @@ class obstructions:
 
         Args:
             c: Coordinate to obstruct.
+
+        Raises:
+            std::bad_alloc: If allocation fails.
         """
 
     def obstruct_connection(
@@ -5575,6 +4922,9 @@ class obstructions:
         Args:
             src: Source coordinate.
             tgt: Target coordinate.
+
+        Raises:
+            std::bad_alloc: If allocation fails.
 
         Note:
             Coordinates marked this way will not be crossed with wires by path
@@ -5615,6 +4965,14 @@ class obstructions:
         """
         Clears all obstructed connections that were manually marked via
         `obstruct_connection`.
+        """
+
+    def obstructed_coordinates(self) -> list[coordinate]:
+        """Returns explicit coordinate obstructions in unspecified order."""
+
+    def obstructed_connections(self) -> list[tuple[coordinate, coordinate]]:
+        """
+        Returns explicit directed-connection obstructions in unspecified order.
         """
 
     def is_obstructed_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -5699,18 +5057,17 @@ def random_coordinate(
     coordinate_2: coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> coordinate:
     """
-    Generates a random coordinate within the region spanned by two given
-    coordinates. The two given coordinates form the top left corner and
-    the bottom right corner of the spanned region.
+    Generates a random coordinate with each axis inside the inclusive
+    region spanned by two coordinates.
 
     Args:
-        coordinate1: Top left Coordinate.
-        coordinate2: Bottom right Coordinate (coordinate order is not
-                     important, automatically swapped if necessary).
+        coordinate1: One corner of the region.
+        coordinate2: Opposite corner of the region; axes may appear in
+                     either order.
 
     Template Args:
-        CoordinateType: The coordinate implementation to be used.
+        CoordinateType: Coordinate type to generate.
 
     Returns:
-        Randomly generated coordinate.
+        Random coordinate between the corresponding corner axes.
     """
