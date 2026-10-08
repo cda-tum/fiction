@@ -224,17 +224,15 @@ class apply_gate_library_impl
         gate_lyt.foreach_node(
             [&, this](const auto& n)
             {
-                {
-                    const auto t = gate_lyt.get_tile(n);
+                const auto t = gate_lyt.get_tile(n);
 
-                    // retrieve the top-leftmost cell in tile t
-                    const auto c = layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
-                                                                               GateLibrary::gate_y_size()>(
-                        gate_lyt, t, cell_t{0, 0});
+                // retrieve the top-leftmost cell in tile t
+                const auto c = layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
+                                                                           GateLibrary::gate_y_size()>(
+                    gate_lyt, t, cell_t{0, 0});
 
-                    assign_gate(c, set_up_gate(gate_lyt, t), n);
-                    progress.advance();
-                }
+                assign_gate(c, set_up_gate(gate_lyt, t), n);
+                progress.advance();
             });
     }
     /**

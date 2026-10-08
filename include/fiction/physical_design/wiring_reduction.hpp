@@ -409,11 +409,6 @@ wiring_reduction_layout create_wiring_reduction_layout(const Lyt& lyt, const int
             const tile<Lyt> old_coord = lyt.get_tile(node);
             const tile<Lyt> new_coord{old_coord.x + x_offset, old_coord.y + y_offset, old_coord.z};
 
-            // skip if the tile is empty
-            if (lyt.is_empty_tile(old_coord))
-            {
-                return;
-            }
             // handle Primary Inputs (PI) and Primary Outputs (PO)
             if (lyt.is_pi(node) || lyt.is_po(node))
             {
