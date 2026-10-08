@@ -225,7 +225,9 @@ TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-
             created = true;
         }
         catch (const std::bad_alloc&)
-        {}
+        {
+            created = false;
+        }
         catch (...)
         {
             allocation_budget.reset();
@@ -880,19 +882,19 @@ TEST_CASE("Clocked neighbor visitors accept move-only lvalues and temporaries", 
     /** @brief Incoming neighbors visited through both callback value categories. */
     std::set<layout::coordinate> incoming{};
     /** @brief Move-only lvalue callback. */
-    visitor incoming_visitor{std::make_unique<uint32_t>(0), incoming};
+    visitor incoming_visitor{.calls = std::make_unique<uint32_t>(0), .observed = incoming};
     lyt.foreach_incoming_clocked_zone({1, 1}, incoming_visitor);
     CHECK(incoming == std::set<layout::coordinate>{{0, 1}, {1, 0}});
     incoming.clear();
-    lyt.foreach_incoming_clocked_zone({1, 1}, visitor{std::make_unique<uint32_t>(0), incoming});
+    lyt.foreach_incoming_clocked_zone({1, 1}, visitor{.calls = std::make_unique<uint32_t>(0), .observed = incoming});
     CHECK(incoming == std::set<layout::coordinate>{{0, 1}, {1, 0}});
     /** @brief Outgoing neighbors visited through both callback value categories. */
     std::set<layout::coordinate> outgoing{};
     /** @brief Move-only lvalue callback. */
-    visitor outgoing_visitor{std::make_unique<uint32_t>(0), outgoing};
+    visitor outgoing_visitor{.calls = std::make_unique<uint32_t>(0), .observed = outgoing};
     lyt.foreach_outgoing_clocked_zone({1, 1}, outgoing_visitor);
     CHECK(outgoing == std::set<layout::coordinate>{{1, 2}, {2, 1}});
     outgoing.clear();
-    lyt.foreach_outgoing_clocked_zone({1, 1}, visitor{std::make_unique<uint32_t>(0), outgoing});
+    lyt.foreach_outgoing_clocked_zone({1, 1}, visitor{.calls = std::make_unique<uint32_t>(0), .observed = outgoing});
     CHECK(outgoing == std::set<layout::coordinate>{{1, 2}, {2, 1}});
 }

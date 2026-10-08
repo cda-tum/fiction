@@ -41,7 +41,7 @@ using namespace fiction::networks;
 using namespace fiction::synthesis;
 
 template <typename Ntk>
-void substitute(const Ntk& ntk, const fanout_substitution_params ps, const uint32_t size)
+void substitute(const Ntk& ntk, const fanout_substitution_params& ps, const uint32_t size)
 {
     const auto substituted = fanout_substitution<technology_network>(ntk, ps);
 

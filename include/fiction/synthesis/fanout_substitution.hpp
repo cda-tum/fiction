@@ -244,7 +244,7 @@ class fanout_substitution_impl
         const uint32_t fanouts     = ntk_topo.fanout_size(n);
         const auto     excess      = fanouts > ps.threshold ? fanouts - ps.threshold : 0u;
         const auto     gain        = ps.degree - 1;
-        const auto     num_fanouts = excess / gain + static_cast<uint32_t>(excess % gain != 0);
+        const auto     num_fanouts = (excess / gain) + static_cast<uint32_t>(excess % gain != 0);
 
         auto child = old2new[n];
 
