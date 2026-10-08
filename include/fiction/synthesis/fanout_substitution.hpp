@@ -287,21 +287,14 @@ class fanout_substitution_impl
     {
         if (substituted.fanout_size(substituted.get_node(child)) >= ps.threshold)
         {
-            if (auto fanouts = available_fanouts[n]; !fanouts.empty())
+            auto& fanouts = available_fanouts[n];
+            while (!fanouts.empty() && substituted.fanout_size(substituted.get_node(fanouts.front())) >= ps.degree)
             {
-                // find non-overfull fanout node
-                while (true)
-                {
-                    child = fanouts.front();
-                    if (substituted.fanout_size(substituted.get_node(child)) >= ps.degree)
-                    {
-                        fanouts.pop();
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+                fanouts.pop();
+            }
+            if (!fanouts.empty())
+            {
+                child = fanouts.front();
             }
         }
 
@@ -381,7 +374,7 @@ class fanout_substitution_impl
 
             const auto new_buf = substituted.create_buf(selected);
 
-            // add 'ps.degree' copies of the new buffer into available_vec
+            // Add at most one candidate copy per source consumer.
             for (auto i = 0u; i < std::min(ps.degree, static_cast<uint32_t>(ntk_topo.fanout_size(n))); ++i)
             {
                 available_vec.push_back(new_buf);
@@ -462,7 +455,8 @@ class is_fanout_substituted_impl
 /**
  * Substitutes high-output degrees in a logic network with fanout nodes that compute the identity function. For this
  * purpose, `create_buf` is utilized. Therefore, `NtkDest` should support identity nodes. If it does not, no new nodes
- * will in fact be created. In either case, the returned network will be logically equivalent to the input one.
+ * will in fact be created. A destination that elides buffer nodes may exceed the requested fanout degrees.
+ * The returned network is logically equivalent to the input network.
  *
  * The algorithm builds breadth-first, depth-first, or random fanout trees. Parameters set the maximum output degrees
  * of ordinary nodes and fanout nodes.

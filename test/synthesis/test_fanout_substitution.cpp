@@ -237,3 +237,13 @@ TEST_CASE("Fanout substitution preserves uint32 parameter bounds", "[fanout-subs
     CHECK(substituted.num_gates() == original.num_gates() + (params.threshold == 1 ? 2 : 0));
     check_eq(original, substituted);
 }
+
+TEST_CASE("Fanout substitution preserves logic when the destination elides buffers", "[fanout-substitution]")
+{
+    using strategy                            = fanout_substitution_params::substitution_strategy;
+    const auto                       choice   = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
+    const auto                       original = blueprints::multi_output_and_network<mockturtle::aig_network>();
+    const fanout_substitution_params params{.strategy = choice, .seed = 42};
+    const auto                       substituted = fanout_substitution<mockturtle::aig_network>(original, params);
+    check_eq(original, substituted);
+}

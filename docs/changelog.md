@@ -539,6 +539,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Fanout substitution now separates repeated gate inputs into distinct routing branches.
     The algorithm rejects degrees below two and a zero threshold.
   - Fanout substitution now handles the full `uint32_t` range for degree and threshold.
+  - Fanout substitution now preserves logic when the destination elides buffer nodes.
   - DOT drawing progress now reports frame areas beyond the unsigned 32-bit range.
   - Gate-type counting now compiles for native gate layouts with MSVC.
   - On-the-fly SiDB circuit design now rejects unsupported gate types before starting gate design.
