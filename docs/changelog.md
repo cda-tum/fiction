@@ -279,7 +279,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
-  - FGL writers now emit version 2 with size counts, declared interface order, and numbered input connections. Readers also accept legacy maximum-coordinate sizes; writers reject incomplete or physically invalid layouts before writing.
+  - **Breaking:** FGL writers now emit version 2 with size counts, declared interface order, and numbered input connections. Readers also accept legacy maximum-coordinate sizes; writers reject incomplete or physically invalid layouts before writing.
 
 - **Breaking:** Restructured `include/fiction/` so that the directory a header lives in tells
   you what the header is about, and introduced nested namespaces mirroring that tree
@@ -625,6 +625,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
   - Cartesian, hexagonal, and gate-layout clocked neighbor visitors now invoke temporary and move-only callbacks
     as lvalues.
+  - Gate-layout crossings now exclude primary input and output terminals.
   - Python gate-layout constructors now raise `ValueError` for unknown clocking schemes.
   - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
   - Cell clock zones now use floor division for negative coordinates.

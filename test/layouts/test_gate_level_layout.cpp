@@ -46,6 +46,26 @@ using namespace fiction;
 using namespace fiction::test;
 using namespace fiction::layouts;
 
+TEST_CASE("Crossings count routing wires rather than identity terminals", "[gate-layout-editing]")
+{
+    gate_level_layout<cartesian_layout> lyt{{4, 2, 2}};
+    for (int64_t x{}; x < 4; ++x)
+    {
+        lyt.create_buf({x, 0, 0});
+    }
+    const auto pi = lyt.create_pi("a", {0, 0, 1});
+    const auto po = lyt.create_po("f", {1, 0, 1});
+    lyt.create_buf({2, 0, 1});
+    kitty::dynamic_truth_table identity{1};
+    kitty::create_from_hex_string(identity, "2");
+    const auto gate = lyt.create_gate({}, identity, {3, 0, 1});
+    CHECK(lyt.is_wire(pi));
+    CHECK(lyt.is_wire(po));
+    CHECK(lyt.is_wire(gate));
+    CHECK(lyt.num_wires() == 8);
+    CHECK(lyt.num_crossings() == 2);
+}
+
 TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-layout-editing]")
 {
     gate_level_layout<cartesian_layout> lyt{{8, 8}};
@@ -67,7 +87,7 @@ TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gat
     const auto replacement = lyt.create_pi("replacement", {0, 0});
     CHECK(replacement != a);
     CHECK_FALSE(lyt.contains(a));
-    CHECK_THROWS_AS(lyt.connect(a, {id, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(lyt.connect(a, {id, 1}), std::invalid_argument);
     CHECK(lyt.source({id, 1}) == b);
     lyt.connect(replacement, {id, 0});
     CHECK(lyt.source({id, 0}) == replacement);

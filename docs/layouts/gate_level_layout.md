@@ -123,8 +123,9 @@ Generations detect removed-slot reuse within one layout contents lifetime. IDs d
 The caller must use an ID only with its owning contents.
 
 Object and terminal visitors permit coordinate, name, and capability edits. Callbacks must not create or remove
-objects, change terminal order, or replace the layout. Connection visitors additionally preserve the traversed
-input or sink connections. Collect IDs before changing membership or connections. Object traversal scans
+objects, change terminal order, or replace the layout. Connection visitors preserve the traversed object and its
+input or sink connections. Connection callbacks may create or remove unrelated objects if those connections
+remain unchanged. Collect IDs before changing traversed membership or connections. Object traversal scans
 retained storage slots, so its cost depends on the historical slot count.
 
 The layout stores object records and mutable connections in contiguous reusable pools. Indexed sink lists

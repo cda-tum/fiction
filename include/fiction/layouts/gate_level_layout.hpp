@@ -507,7 +507,8 @@ class gate_level_layout : public CoordinateLayout
             [&](const auto id)
             {
                 const auto t = get_tile(id);
-                count += t.z == 1 && find_object({t.x, t.y, 0}).has_value();
+                count +=
+                    checked_object(id).kind == object_kind::WIRE && t.z == 1 && find_object({t.x, t.y, 0}).has_value();
             });
         return count;
     }
@@ -734,6 +735,7 @@ class gate_level_layout : public CoordinateLayout
         const auto count = input_count(id);
         for (uint32_t input{}; input < count; ++input)
         {
+            // Reacquire inputs because callbacks can grow object storage.
             const auto edge = input_edges(id.index)[input];
             if (edge != NO_INDEX && !visit(fn, identity(edges[edge].source), input))
             {
