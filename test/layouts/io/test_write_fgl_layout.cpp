@@ -93,7 +93,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
     {
         CHECK(wlyt.get_output_name(i) == rlyt.get_output_name(i));
     }
-    wlyt.foreach_node(
+    wlyt.foreach_object(
         [&](const auto id)
         {
             const auto restored = rlyt.find_object(wlyt.get_tile(id));
@@ -107,7 +107,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
             CHECK(wlyt.is_po(id) == rlyt.is_po(*restored));
             CHECK(wlyt.is_buf(id) == rlyt.is_buf(*restored));
             CHECK(wlyt.input_count(id) == rlyt.input_count(*restored));
-            CHECK(wlyt.node_function(id) == rlyt.node_function(*restored));
+            CHECK(wlyt.object_function(id) == rlyt.object_function(*restored));
             for (uint32_t i = 0; i < wlyt.input_count(id); ++i)
             {
                 /** @brief Input connection in the written layout. */
@@ -337,7 +337,7 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     layout.set_input_order(std::array{a, b});
     kitty::dynamic_truth_table constant{0};
     kitty::create_from_hex_string(constant, "1");
-    layout.create_node({}, constant, {0, 0, 0});
+    layout.create_gate({}, constant, {0, 0, 0});
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     CHECK(stream.str().find("<fgl version=\"2\">") != std::string::npos);
@@ -363,7 +363,7 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     CHECK((second_input.has_value() && restored.get_tile(*second_input) == layout.get_tile(b)));
     /** @brief Placed zero-input function restored from the file. */
     const auto constant_object = restored.find_object({0, 0, 0});
-    CHECK((constant_object.has_value() && restored.node_function(*constant_object).num_vars() == 0));
+    CHECK((constant_object.has_value() && restored.object_function(*constant_object).num_vars() == 0));
     CHECK(restored.get_output_name(0) == layout.get_name(po));
     CHECK(restored.get_output_name(1) == "pass");
     compare_written_and_read_layout(layout, restored);
@@ -398,7 +398,7 @@ TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-lay
     }
     SECTION("Outside extent")
     {
-        layout.move_node(source, {-1, 0, 0});
+        layout.move_object(source, {-1, 0, 0});
     }
     SECTION("Unsupported clocking name")
     {
@@ -502,7 +502,7 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
     write_fgl_layout(layout, stream);
     const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
     CHECK(restored.get_layout_name() == label);
-    restored.foreach_node([&](const auto id) { CHECK(restored.get_name(id) == label); });
+    restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
 }
 
 TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl-layout]")

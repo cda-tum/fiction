@@ -138,7 +138,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
-    layout.create_node({}, function, {1, 2});
+    layout.create_gate({}, function, {1, 2});
 
     SECTION("Apply static Bestagon gate library")
     {

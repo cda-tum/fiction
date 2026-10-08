@@ -384,7 +384,7 @@ std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt)
     const auto intermediate = [&lyt](const auto id)
     { return lyt.is_wire(id) && !lyt.is_gate(id) && !lyt.is_fanout(id) && !lyt.is_pi(id) && !lyt.is_po(id); };
     std::vector<routing_objective<Lyt>> objectives{};
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             if (intermediate(id))
@@ -424,7 +424,7 @@ void clear_routing(Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     std::vector<typename Lyt::object_id> wires{};
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             if (lyt.is_wire(id) && !lyt.is_gate(id) && !lyt.is_fanout(id) && !lyt.is_pi(id) && !lyt.is_po(id))
@@ -436,7 +436,7 @@ void clear_routing(Lyt& lyt)
     {
         lyt.remove(id);
     }
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             for (uint32_t input{}; input < lyt.input_count(id); ++input)

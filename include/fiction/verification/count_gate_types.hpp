@@ -140,18 +140,26 @@ class count_gate_types_impl
     /** @brief Classifies every logic gate or wire object. */
     void run()
     {
-        ntk.foreach_node([this](const auto& n) { return this->count_node(n); });
+        const auto count = [this](const auto& id) { return this->count_gate(id); };
+        if constexpr (is_gate_level_layout_v<Ntk>)
+        {
+            ntk.foreach_object(count);
+        }
+        else
+        {
+            ntk.foreach_node(count);
+        }
     }
 
   private:
     /**
-     * @brief Counts one node through the predicates its operand supports.
+     * @brief Counts one gate or wire through the predicates its operand supports.
      * @tparam Node Network node or native layout object identity.
-     * @param n Node to classify.
-     * @return `true` to continue node iteration.
+     * @param n Gate or wire to classify.
+     * @return `true` to continue iteration.
      */
     template <typename Node>
-    bool count_node(const Node& n)
+    bool count_gate(const Node& n)
     {
         if (ntk.is_pi(n))
         {

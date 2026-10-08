@@ -297,7 +297,7 @@ TEST_CASE("Gate-level layouts map tiles to object identities and back", "[coordi
     CHECK(lyt.is_empty_tile({2, 2, 0}));
     CHECK_FALSE(lyt.is_empty_tile({0, 1, 0}));
 
-    const auto moved = lyt.move_node(b, {2, 2, 0});
+    const auto moved = lyt.move_object(b, {2, 2, 0});
 
     CHECK(moved == b);
     CHECK(lyt.get_tile(b) == coordinate<cartesian_layout>{2, 2, 0});
@@ -325,14 +325,14 @@ TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-co
         const auto po  = lyt.create_po(buf, "po", {2, 0, 0});
 
         CHECK_THROWS_AS(lyt.create_pi("b", {0, 0, 0}), std::invalid_argument);
-        CHECK_THROWS_AS(lyt.move_node(buf, {2, 0, 0}), std::invalid_argument);
+        CHECK_THROWS_AS(lyt.move_object(buf, {2, 0, 0}), std::invalid_argument);
         CHECK(lyt.get_tile(buf) == tile{1, 0, 0});
         CHECK(lyt.source({po, 0}) == buf);
         CHECK(lyt.size() == 3);
         CHECK(lyt.num_pis() == 1);
         CHECK(lyt.num_pos() == 1);
 
-        CHECK(lyt.move_node(buf, {5, 0, 2}) == buf);
+        CHECK(lyt.move_object(buf, {5, 0, 2}) == buf);
         CHECK_FALSE(lyt.contains_coordinate(lyt.get_tile(buf)));
         CHECK(lyt.source({po, 0}) == buf);
     }

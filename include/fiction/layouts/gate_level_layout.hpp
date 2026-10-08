@@ -50,6 +50,9 @@ namespace fiction::layouts
  * @brief Layout-local object identity. A removed object's generation cannot identify its replacement.
  *
  * Copies preserve identities; use an identity only with the layout that supplied it or its copy.
+ * Generations detect slot reuse within that contents lifetime, not IDs from unrelated layouts.
+ * Whole-layout assignment invalidates destination handles. Callers must not use transferred IDs with a moved-from
+ * layout after its reuse.
  */
 struct layout_object_id
 {
@@ -93,6 +96,9 @@ namespace fiction::layouts
  *
  * Objects have stable identities independent of their coordinates. Connections describe declared topology;
  * physical validation checks adjacency, clocking, and geometry separately. Copies own independent state.
+ * Visitors may edit coordinates, names, and capabilities. Object and terminal visitors must not create
+ * or remove objects, change terminal order, or replace the layout during traversal. Connection visitors
+ * must also preserve the traversed input or sink connections, as specified on each visitor.
  * @tparam CoordinateLayout Coordinate geometry used for placement.
  */
 template <typename CoordinateLayout>
@@ -313,7 +319,7 @@ class gate_level_layout : public CoordinateLayout
      * Unspecified trailing inputs remain disconnected. Constant functions require an explicit placed object.
      * @throws std::invalid_argument If placement is occupied, or children exceed the function arity.
      */
-    object_id create_node(const std::vector<object_id>& children, const kitty::dynamic_truth_table& function,
+    object_id create_gate(const std::vector<object_id>& children, const kitty::dynamic_truth_table& function,
                           const tile& t)
     {
         check_placement(t);
@@ -348,7 +354,7 @@ class gate_level_layout : public CoordinateLayout
         return checked_object(id).position;
     }
     /** @brief Returns the truth table in logical input-index order. */
-    [[nodiscard]] kitty::dynamic_truth_table node_function(const object_id id) const
+    [[nodiscard]] kitty::dynamic_truth_table object_function(const object_id id) const
     {
         return functions[checked_object(id).function];
     }
@@ -401,7 +407,7 @@ class gate_level_layout : public CoordinateLayout
         }
     }
     /** @brief Moves an object without changing its identity or connections. */
-    object_id move_node(const object_id id, const tile& t)
+    object_id move_object(const object_id id, const tile& t)
     {
         auto& object = checked_object(id);
         if (object.position == t)
@@ -657,10 +663,14 @@ class gate_level_layout : public CoordinateLayout
     {
         return !find_object(t);
     }
-    /** @brief Visits live objects. Callbacks may accept an object and enumeration index and return false to stop. */
+    /**
+     * @brief Visits live objects. Callbacks may accept an object and enumeration index and return false to stop.
+     * Callbacks must not create or remove objects, change terminal order, or replace the layout.
+     * Traversal scans retained storage slots, including removed objects.
+     */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
-    void foreach_node(Fn&& fn) const
+    void foreach_object(Fn&& fn) const
     {
         uint32_t index{};
         for (uint32_t slot{}; slot < objects.size(); ++slot)
@@ -671,35 +681,47 @@ class gate_level_layout : public CoordinateLayout
             }
         }
     }
-    /** @brief Visits primary inputs in declared interface order. */
+    /**
+     * @brief Visits primary inputs in declared interface order.
+     * Callbacks must not create or remove objects, change terminal order, or replace the layout.
+     */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_pi(Fn&& fn) const
     {
         foreach_terminal(inputs, fn);
     }
-    /** @brief Visits primary outputs in declared interface order. */
+    /**
+     * @brief Visits primary outputs in declared interface order.
+     * Callbacks must not create or remove objects, change terminal order, or replace the layout.
+     */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_po(Fn&& fn) const
     {
         foreach_terminal(outputs, fn);
     }
-    /** @brief Visits logic gates. */
+    /**
+     * @brief Visits logic gates.
+     * Callbacks must not create or remove objects, change terminal order, or replace the layout.
+     */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_gate(Fn&& fn) const
     {
         uint32_t index{};
-        foreach_node([&](const auto id) { return !is_gate(id) || visit(fn, id, index++); });
+        foreach_object([&](const auto id) { return !is_gate(id) || visit(fn, id, index++); });
     }
-    /** @brief Visits identity objects, including terminals. */
+    /**
+     * @brief Visits identity objects, including terminals.
+     * Callbacks must not create or remove objects, change terminal order, or replace the layout.
+     */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_wire(Fn&& fn) const
     {
         uint32_t index{};
-        foreach_node([&](const auto id) { return !is_wire(id) || visit(fn, id, index++); });
+        foreach_object([&](const auto id) { return !is_wire(id) || visit(fn, id, index++); });
     }
     /**
      * @brief Visits declared sources in input-index order. Disconnected inputs retain their indices.

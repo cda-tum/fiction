@@ -242,10 +242,10 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
                 {
                     kitty::cofactor0_inplace(function, uint8_t{2});
                 }
-                return lyt.create_node({a, b}, kitty::shrink_to(function, 2), t);
+                return lyt.create_gate({a, b}, kitty::shrink_to(function, 2), t);
             }
 
-            return lyt.create_node({a, b}, ntk.node_function(n), t);
+            return lyt.create_gate({a, b}, ntk.node_function(n), t);
         }
     }
 
@@ -285,7 +285,7 @@ template <typename Lyt, typename Ntk>
     {
         if (ntk.is_function(n))
         {
-            return lyt.create_node({a, b, c}, ntk.node_function(n), t);
+            return lyt.create_gate({a, b, c}, ntk.node_function(n), t);
         }
     }
 

@@ -53,11 +53,11 @@ TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gat
     const auto                          b    = lyt.create_pi("b", {1, 0});
     const auto                          gate = lyt.create_lt(a, b, {1, 1});
     const auto                          id   = gate;
-    lyt.move_node(a, {-2, 3, 7});
+    lyt.move_object(a, {-2, 3, 7});
     CHECK(lyt.get_tile(a) == layout_base::coordinate{-2, 3, 7});
     CHECK(lyt.source({id, 0}) == a);
     CHECK(lyt.source({id, 1}) == b);
-    CHECK_THROWS_AS(lyt.move_node(id, lyt.get_tile(b)), std::invalid_argument);
+    CHECK_THROWS_AS(lyt.move_object(id, lyt.get_tile(b)), std::invalid_argument);
     CHECK(lyt.get_tile(id) == layout_base::coordinate{1, 1});
     CHECK_THROWS_AS(lyt.create_pi("occupied", {1, 1}), std::invalid_argument);
     CHECK(lyt.size() == 3);
@@ -80,7 +80,7 @@ TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gate-layout-
     const auto                          b    = original.create_pi("b", {1, 0});
     const auto                          gate = original.create_and(a, b, {1, 1});
     auto                                copy = original;
-    copy.move_node(gate, {2, 2});
+    copy.move_object(gate, {2, 2});
     copy.disconnect({gate, 0});
     copy.set_input_order(std::vector{b, a});
     copy.resize({9, 9});
@@ -135,7 +135,7 @@ TEST_CASE("Objects with more inputs than the inline capacity keep ordered ports"
     }
     kitty::dynamic_truth_table parity{5};
     kitty::create_from_hex_string(parity, "96696996");
-    const auto gate = lyt.create_node(pis, parity, {2, 2});
+    const auto gate = lyt.create_gate(pis, parity, {2, 2});
     CHECK(lyt.input_count(gate) == 5);
     CHECK(lyt.fanin_size(gate) == 5);
     for (uint32_t i = 0; i < 5; ++i)
@@ -157,7 +157,7 @@ TEST_CASE("Large-arity objects preserve disconnected ports through copying, movi
     const auto                          b = original.create_pi("b", {1, 0});
     kitty::dynamic_truth_table          parity{5};
     kitty::create_from_hex_string(parity, "96696996");
-    const auto gate = original.create_node({a}, parity, {2, 2});
+    const auto gate = original.create_gate({a}, parity, {2, 2});
     original.connect(b, {gate, 4});
     auto copy = original;
     copy.disconnect({gate, 0});
@@ -170,7 +170,7 @@ TEST_CASE("Large-arity objects preserve disconnected ports through copying, movi
     moved.remove(gate);
     CHECK(moved.fanout_size(a) == 0);
     CHECK(moved.fanout_size(b) == 0);
-    const auto replacement = moved.create_node({b}, parity, {2, 2});
+    const auto replacement = moved.create_gate({b}, parity, {2, 2});
     CHECK_FALSE(moved.contains(gate));
     CHECK(moved.source({replacement, 0}) == b);
     CHECK_FALSE(moved.source({replacement, 4}).has_value());
@@ -191,7 +191,7 @@ TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-
         const auto                          a = lyt.create_pi("a", {0, 0});
         kitty::dynamic_truth_table          parity{5};
         kitty::create_from_hex_string(parity, "96696996");
-        lyt.remove(lyt.create_node({}, parity, {2, 2}));
+        lyt.remove(lyt.create_gate({}, parity, {2, 2}));
         if (!reuse)
         {
             lyt.create_pi("extra", {3, 3});
@@ -201,7 +201,7 @@ TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-
         allocation_budget = failure;
         try
         {
-            lyt.create_node({a, a, a, a, a}, parity, {2, 2});
+            lyt.create_gate({a, a, a, a, a}, parity, {2, 2});
             created = true;
         }
         catch (const std::bad_alloc&)
@@ -219,7 +219,7 @@ TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-
         CHECK(lyt.size() == initial_size);
         CHECK_FALSE(lyt.find_object({2, 2}).has_value());
         CHECK(lyt.fanout_size(a) == 0);
-        const auto recovered = lyt.create_node({a}, parity, {2, 2});
+        const auto recovered = lyt.create_gate({a}, parity, {2, 2});
         CHECK(lyt.source({recovered, 0}) == a);
         CHECK_FALSE(lyt.source({recovered, 4}).has_value());
     }
@@ -669,7 +669,7 @@ TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout-ed
         /** @brief The truth-table word supplied to the constructor. */
         const std::array words{literal};
         kitty::create_from_words(expected, words.cbegin(), words.cend());
-        CHECK(lyt.node_function(gate) == expected);
+        CHECK(lyt.object_function(gate) == expected);
         CHECK(lyt.source({gate, 0}) == a);
         CHECK(lyt.source({gate, 1}) == b);
     }
@@ -681,7 +681,7 @@ TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout-ed
     CHECK(lyt.is_maj(maj));
     kitty::dynamic_truth_table identity{1};
     kitty::create_nth_var(identity, 0);
-    const auto generic_wire = lyt.create_node({a}, identity, {3, 2});
+    const auto generic_wire = lyt.create_gate({a}, identity, {3, 2});
     CHECK(lyt.is_wire(generic_wire));
     CHECK_FALSE(lyt.is_gate(generic_wire));
     uint32_t gates{};
@@ -786,10 +786,10 @@ TEST_CASE("Moved-from layouts recover from interrupted cache initialization", "[
         const auto a    = source.create_pi("a", {0, 0});
         const auto b    = source.create_pi("b", {1, 0});
         const auto gate = source.create_and(a, b, {1, 1});
-        CHECK(source.node_function(a).num_vars() == 1);
-        CHECK(source.node_function(gate).num_vars() == 2);
-        CHECK(kitty::get_bit(source.node_function(gate), 3));
-        CHECK_FALSE(kitty::get_bit(source.node_function(gate), 0));
+        CHECK(source.object_function(a).num_vars() == 1);
+        CHECK(source.object_function(gate).num_vars() == 2);
+        CHECK(kitty::get_bit(source.object_function(gate), 3));
+        CHECK_FALSE(kitty::get_bit(source.object_function(gate), 0));
         CHECK(destination.get_name(original) == "original");
         if (created)
         {
@@ -828,11 +828,11 @@ TEST_CASE("Object visitors accept move-only lvalues and temporaries", "[gate-lay
     uint32_t observed{};
     /** @brief Move-only callback passed as an lvalue. */
     move_only_visitor visitor{.calls = std::make_unique<uint32_t>(0), .observed = observed};
-    lyt.foreach_node(visitor);
+    lyt.foreach_object(visitor);
     CHECK(observed == 2);
 
     /** @brief Visits reported by the temporary callback. */
     uint32_t observed_temporary{};
-    lyt.foreach_node(move_only_visitor{.calls = std::make_unique<uint32_t>(0), .observed = observed_temporary});
+    lyt.foreach_object(move_only_visitor{.calls = std::make_unique<uint32_t>(0), .observed = observed_temporary});
     CHECK(observed_temporary == 2);
 }

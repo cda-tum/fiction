@@ -265,12 +265,12 @@ def test_gate_function_owns_truth_table_and_preserves_input_holes(make_layout: C
     c = layout.create_pi("c", (2, 0))
     function = dynamic_truth_table(3)
     function.create_from_hex_string("ac")
-    gate = layout.create_node([a], function, (1, 1))
+    gate = layout.create_gate([a], function, (1, 1))
     function.create_from_hex_string("00")
-    assert layout.node_function(gate).to_hex() == "ac"
-    returned = layout.node_function(gate)
+    assert layout.object_function(gate).to_hex() == "ac"
+    returned = layout.object_function(gate)
     returned.create_from_hex_string("ff")
-    assert layout.node_function(gate).to_hex() == "ac"
+    assert layout.object_function(gate).to_hex() == "ac"
     assert layout.input_count(gate) == 3
     assert layout.fanin_size(gate) == 1
     assert layout.source(LayoutInputPort(gate, 0)) == a
@@ -304,7 +304,7 @@ def test_gate_move_and_removal_preserve_identity_contract() -> None:
     source = layout.create_pi("a", (0, 0))
     wire = layout.create_buf(source, (1, 0))
     output = layout.create_po(wire, "f", (2, 0))
-    moved = layout.move_node(wire, (-10, 20, 3))
+    moved = layout.move_object(wire, (-10, 20, 3))
     assert moved == wire
     assert layout.find_object((1, 0)) is None
     assert layout.find_object((-10, 20, 3)) == wire
@@ -354,7 +354,7 @@ def test_gate_interface_order_and_clone_ownership(copy_layout: Callable[[GateLay
     assert layout.get_output_name(0) == "compare"
     assert layout.source(LayoutInputPort(gate, 0)) == a
     assert clone.source(LayoutInputPort(gate, 0)) is None
-    assert clone.node_function(gate).to_hex() == layout.node_function(gate).to_hex()
+    assert clone.object_function(gate).to_hex() == layout.object_function(gate).to_hex()
 
 
 def test_gate_creation_requires_placement_and_valid_ports() -> None:
@@ -381,11 +381,11 @@ def test_gate_constant_function_requires_an_explicit_placed_object() -> None:
     assert layout.wires() == []
     function = dynamic_truth_table(0)
     function.create_from_hex_string("1")
-    constant = layout.create_node([], function, (0, 0))
+    constant = layout.create_gate([], function, (0, 0))
     assert layout.size() == 1
     assert layout.input_count(constant) == 0
-    assert layout.node_function(constant).num_vars() == 0
-    assert layout.node_function(constant).to_hex() == "1"
+    assert layout.object_function(constant).num_vars() == 0
+    assert layout.object_function(constant).to_hex() == "1"
     assert layout.gates() == [constant]
     assert layout.wires() == []
 

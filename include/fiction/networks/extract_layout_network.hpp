@@ -97,7 +97,7 @@ template <typename Lyt>
                 }
                 const auto result          = lyt.is_buf(current.object) || lyt.is_po(current.object) ?
                                                  children.at(0) :
-                                                 ntk.create_node(children, lyt.node_function(current.object));
+                                                 ntk.create_node(children, lyt.object_function(current.object));
                 signals.at(current.object) = result;
                 stack.pop_back();
             }

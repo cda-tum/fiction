@@ -46,5 +46,5 @@ TEST_CASE("Placement reduces a constant input without changing variable order", 
     CHECK(lyt.source({placed, 1}) == right);
     kitty::dynamic_truth_table expected{2};
     kitty::create_from_expression(expected, "(a!b)");
-    CHECK(lyt.node_function(placed) == expected);
+    CHECK(lyt.object_function(placed) == expected);
 }

@@ -69,7 +69,7 @@ lyt.obstruct_coordinate({2, 2});
 const auto input = lyt.create_pi("a", {0, 0});
 const auto wire = lyt.create_buf(input, {1, 0});
 lyt.create_po(wire, "f", {2, 0});
-lyt.move_node(wire, {1, 1});
+lyt.move_object(wire, {1, 1});
 lyt.disconnect({wire, 0});
 lyt.connect(input, {wire, 0});
 auto independent = lyt.clone();
@@ -89,7 +89,7 @@ lyt.obstruct_coordinate((2, 2))
 input_port = lyt.create_pi("a", (0, 0))
 wire = lyt.create_buf(input_port, (1, 0))
 lyt.create_po(wire, "f", (2, 0))
-lyt.move_node(wire, (1, 1))
+lyt.move_object(wire, (1, 1))
 lyt.disconnect(LayoutInputPort(wire, 0))
 lyt.connect(input_port, LayoutInputPort(wire, 0))
 independent = lyt.clone()
@@ -117,3 +117,17 @@ unique on both sides first, then pairs the remaining terminals in declared order
 An empty layout uses the four-phase OPEN scheme. Assigning a synchronization delay of zero
 removes the synchronization element. Replacing the clocking scheme preserves synchronization
 delays. Synchronization changes clocked traversal; it does not add support for sequential circuits.
+
+Generations detect removed-slot reuse within one layout contents lifetime. IDs do not carry a layout identity;
+`contains` cannot detect IDs from unrelated layouts or contents invalidated by whole-layout assignment.
+The caller must use an ID only with its owning contents.
+
+Object and terminal visitors permit coordinate, name, and capability edits. Callbacks must not create or remove
+objects, change terminal order, or replace the layout. Connection visitors additionally preserve the traversed
+input or sink connections. Collect IDs before changing membership or connections. Object traversal scans
+retained storage slots, so its cost depends on the historical slot count.
+
+The layout stores object records and mutable connections in contiguous reusable pools. Indexed sink lists
+permit constant-time unlinking. Every built-in gate keeps its ordered inputs inline; gates with more than
+three inputs use separate overflow storage. Names and truth-table payloads also live outside object records.
+Removing an object releases its overflow inputs; the object and connection pools retain capacity for reuse.

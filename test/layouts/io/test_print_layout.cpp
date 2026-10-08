@@ -120,14 +120,14 @@ TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-g
     SECTION("Nodes to tiles")
     {
         std::stringstream print_stream{};
-        print_node_to_tile_assignments(layout, print_stream);
+        print_object_to_tile_assignments(layout, print_stream);
 
         CHECK(print_stream.str().find("	   0:1 @ ") != std::string::npos);
     }
     SECTION("Tiles to nodes")
     {
         std::stringstream print_stream{};
-        print_tile_to_node_assignments(layout, print_stream);
+        print_tile_to_object_assignments(layout, print_stream);
 
         CHECK(print_stream.str().find("	   0:1 @ ") != std::string::npos);
     }

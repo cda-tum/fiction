@@ -64,7 +64,7 @@ class bounding_box_2d
         };
         if constexpr (is_gate_level_layout_v<Lyt>)
         {
-            layout.foreach_node([&](const auto id) { include(layout.get_tile(id)); });
+            layout.foreach_object([&](const auto id) { include(layout.get_tile(id)); });
         }
         else
         {

@@ -308,7 +308,7 @@ class gate_level_drvs_impl
         nlohmann::json           report{};
         bool                     contained = true;
         utils::progress_reporter traversal{ps.on_progress, "outside extent", lyt.size()};
-        lyt.foreach_node(
+        lyt.foreach_object(
             [&](const auto id)
             {
                 const auto t = lyt.get_tile(id);
@@ -337,7 +337,7 @@ class gate_level_drvs_impl
         if (!lyt.is_empty())
         {
             utils::progress_reporter traversal{ps.on_progress, "non adjacent connections", lyt.size()};
-            lyt.foreach_node(
+            lyt.foreach_object(
                 [this, &non_adjacency_report, &adjacencies_respected, &traversal](const auto id)
                 {
                     const auto t = lyt.get_tile(id);
@@ -376,7 +376,7 @@ class gate_level_drvs_impl
         if (!lyt.is_empty())
         {
             utils::progress_reporter traversal{ps.on_progress, "missing connections", lyt.size()};
-            lyt.foreach_node(
+            lyt.foreach_object(
                 [this, &connections_report, &all_connected, &traversal](const auto id)
                 {
                     const auto t = lyt.get_tile(id);
@@ -450,7 +450,7 @@ class gate_level_drvs_impl
         if (!lyt.is_empty())
         {
             utils::progress_reporter traversal{ps.on_progress, "clocked data flow", lyt.size()};
-            lyt.foreach_node(
+            lyt.foreach_object(
                 [this, &data_flow_report, &data_flow_respected, &traversal](const auto id)
                 {
                     const auto t = lyt.get_tile(id);

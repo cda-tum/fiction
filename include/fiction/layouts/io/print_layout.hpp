@@ -380,7 +380,7 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
 }
 
 /**
- * Prints every node of a gate-level layout with the tile it occupies and the tiles of its fanins and
+ * Prints every object of a gate-level layout with the tile it occupies and the tiles of its fanins and
  * fanouts. This is a debugging aid; the output format is not stable.
  *
  * @tparam Lyt Gate-level layout type.
@@ -388,13 +388,13 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
  * @param os Output stream. Defaults to `std::cout`.
  */
 template <typename Lyt>
-void print_node_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::cout)
+void print_object_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::cout)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    os << "\n---- NODE TO TILE ----\n";
+    os << "\n---- OBJECT TO TILE ----\n";
 
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&lyt, &os](const auto& n)
         {
             os << fmt::format("object {}:{} @ {}\n", n.index, n.generation, lyt.get_tile(n));
@@ -409,7 +409,7 @@ void print_node_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::cout
     os << "\n----------------------\n";
 }
 /**
- * Prints every tile of a gate-level layout with the node it holds, if any, and the tiles of that node's
+ * Prints every tile of a gate-level layout with the object it holds, if any, and the tiles of that object's
  * fanins and fanouts. This is a debugging aid; the output format is not stable.
  *
  * @tparam Lyt Gate-level layout type.
@@ -417,11 +417,11 @@ void print_node_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::cout
  * @param os Output stream. Defaults to `std::cout`.
  */
 template <typename Lyt>
-void print_tile_to_node_assignments(const Lyt& lyt, std::ostream& os = std::cout)
+void print_tile_to_object_assignments(const Lyt& lyt, std::ostream& os = std::cout)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    os << "\n---- TILE TO NODE ----\n";
+    os << "\n---- TILE TO OBJECT ----\n";
 
     lyt.foreach_tile(
         [&lyt, &os](const auto& t)

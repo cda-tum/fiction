@@ -201,7 +201,7 @@ class apply_gate_library_impl
     }
     /**
      * @brief Counts live objects, or skips the scan without a callback.
-     * @return Number of nodes mapped to cell implementations.
+     * @return Number of objects mapped to cell implementations.
      */
     [[nodiscard]] std::size_t mapping_count() const
     {
@@ -221,28 +221,28 @@ class apply_gate_library_impl
     void map_gates(const SetUpGate& set_up_gate)
     {
         utils::progress_reporter progress{on_progress, "mapping gates", mapping_count()};
-        gate_lyt.foreach_node(
+        gate_lyt.foreach_object(
             [&, this](const auto& n)
             {
                 const auto t = gate_lyt.get_tile(n);
 
                 // retrieve the top-leftmost cell in tile t
-                const auto c = layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
-                                                                           GateLibrary::gate_y_size()>(
-                    gate_lyt, t, cell_t{0, 0});
+                const auto c =
+                    layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size()>(
+                        gate_lyt, t, cell_t{0, 0});
 
                 assign_gate(c, set_up_gate(gate_lyt, t), n);
                 progress.advance();
             });
     }
     /**
-     * Assigns a gate implementation to the cells of its tile. Input and output cells of a cell grid receive the node
+     * Assigns a gate implementation to the cells of its tile. Input and output cells of a cell grid receive the object
      * name. If the layout has synchronization elements, the tile's synchronization delay goes to the clock zone that
      * contains the tile; a ground wire and a crossing wire share one clock zone, which keeps the larger delay.
      *
      * @param c Top-left cell of the tile where the gate is placed.
      * @param g Gate implementation.
-     * @param n Corresponding node in the gate-level layout.
+     * @param n Corresponding object in the gate-level layout.
      */
     void assign_gate(const cell_t& c, const typename GateLibrary::gate& g, const typename GateLyt::object_id& n)
     {
@@ -300,7 +300,7 @@ class apply_gate_library_impl
  * A cell grid spans the gate-level layout; if it has tile-based clocking, its clock zones are the library's tiles and
  * follow the gate-level clocking, and, if it has synchronization elements, each clock zone receives the
  * synchronization delay of its gate tile. The delay therefore also covers cells that are added to the zone later,
- * e.g., via cells. Input and output cells carry the names of their nodes. An SiDB layout lies on the H-Si(100)-2x1
+ * e.g., via cells. Input and output cells carry the names of their objects. An SiDB layout lies on the H-Si(100)-2x1
  * lattice.
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an

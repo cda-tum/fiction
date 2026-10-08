@@ -1042,7 +1042,7 @@ TEST_CASE("Draw object identities and constants", "[dot-drawers]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
     gate_layout layout{{2, 1}};
-    const auto  constant = layout.create_node({}, kitty::dynamic_truth_table{0}, {0, 0});
+    const auto  constant = layout.create_gate({}, kitty::dynamic_truth_table{0}, {0, 0});
     const auto  wire     = layout.create_buf(constant, {1, 0});
     const gate_layout_cartesian_drawer<gate_layout, false, true> drawer{};
     CHECK(drawer.tile_label(layout, {0, 0}) == fmt::format("{}:{}: 0", constant.index, constant.generation));

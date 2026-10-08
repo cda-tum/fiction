@@ -219,7 +219,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
         {
             throw fcn::unsupported_gate_type_exception(t);
         }
-        const auto f = lyt.node_function(n);
+        const auto f = lyt.object_function(n);
         const auto p = skeleton_bestagon_library::determine_port_routing(lyt, t);
 
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The

@@ -57,7 +57,7 @@ void remove_clocking(Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    lyt.foreach_node([&lyt](const auto id) { lyt.assign_clock_number(lyt.get_tile(id), 0); });
+    lyt.foreach_object([&lyt](const auto id) { lyt.assign_clock_number(lyt.get_tile(id), 0); });
 }
 
 /**
@@ -215,7 +215,7 @@ TEST_CASE("Clock determination uses explicit constants and logical input ports",
     layout lyt{{3, 1}, clocking::open()};
     SECTION("Placed constant without PIs")
     {
-        const auto constant = lyt.create_node({}, kitty::dynamic_truth_table{0}, {0, 0});
+        const auto constant = lyt.create_gate({}, kitty::dynamic_truth_table{0}, {0, 0});
         lyt.create_po(constant, "zero", {1, 0});
     }
     SECTION("Duplicate source input ports")
@@ -225,7 +225,7 @@ TEST_CASE("Clock determination uses explicit constants and logical input ports",
         lyt.create_po(gate, "less", {2, 0});
     }
     REQUIRE(determine_clocking(lyt));
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             lyt.foreach_fanin(id, [&](const auto src)
@@ -254,7 +254,7 @@ TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[d
         }
     }
     REQUIRE(determine_clocking(lyt));
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             const auto t = lyt.get_tile(id);

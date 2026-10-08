@@ -215,7 +215,7 @@ def test_disconnect_and_move_update_implicit_obstructions(make_layout: Callable[
     assert layout.source(LayoutInputPort(output, 0)) is None
     assert not layout.is_obstructed_connection((1, 0), (1, 1))
     assert layout.is_obstructed_coordinate((1, 1))
-    layout.move_node(wire, (0, 1))
+    layout.move_object(wire, (0, 1))
     assert not layout.is_obstructed_coordinate((1, 0))
     assert layout.is_obstructed_coordinate((0, 1))
     assert not layout.is_obstructed_connection((0, 0), (1, 0))

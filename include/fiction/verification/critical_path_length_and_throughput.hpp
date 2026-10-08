@@ -164,7 +164,7 @@ class critical_path_length_and_throughput_impl
  * Field-coupled Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer
  * Nature in 2022.
  *
- * The complexity of this function is \f$\mathcal{O}(|T|)\f$ where \f$T\f$ is the set of all occupied tiles in `lyt`.
+ * The complexity is \f$\mathcal{O}(|V| + |E|)\f$ for objects and connections in the output dependency cones.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout whose CP and TP are desired.

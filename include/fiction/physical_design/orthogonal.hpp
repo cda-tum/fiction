@@ -439,7 +439,7 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
                 {
                     kitty::set_bit(function, 0);
                 }
-                const auto constant = layout.create_node({}, function, {0, y});
+                const auto constant = layout.create_gate({}, function, {0, y});
                 layout.create_po(constant,
                                  ctn.color_ntk.has_output_name(po_counter) ? ctn.color_ntk.get_output_name(po_counter) :
                                                                              fmt::format("po{}", po_counter),

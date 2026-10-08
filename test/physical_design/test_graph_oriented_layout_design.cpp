@@ -668,7 +668,7 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     const auto                                                      extracted = extract_layout_network(layout);
     CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extracted, simulator) ==
           mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
-    layout.foreach_node([&](const auto id) { CHECK(layout.is_within_bounds(layout.get_tile(id))); });
+    layout.foreach_object([&](const auto id) { CHECK(layout.is_within_bounds(layout.get_tile(id))); });
 }
 
 TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty", "[gold-ports]")

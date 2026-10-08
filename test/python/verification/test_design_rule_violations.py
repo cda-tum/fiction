@@ -27,7 +27,7 @@ def test_drvs() -> None:
     fourth_wire = layout.create_buf(second_and, (2, 2))
     result = layout.create_or(first_and, fourth_wire, (2, 3))
     output = layout.create_po(result, "f1", (2, 4))
-    layout.move_node(output, (2, 5))
+    layout.move_object(output, (2, 5))
     color_routing(layout, [((2, 3), (2, 5), 0)])
 
     warnings, drvs = gate_level_drvs(layout)

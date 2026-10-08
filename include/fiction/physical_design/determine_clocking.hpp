@@ -84,7 +84,7 @@ class sat_clocking_handler
     /** @brief Creates variables for occupied clock zones. @param lyt Validated layout. */
     explicit sat_clocking_handler(Lyt& lyt) : layout{lyt}, number_of_clocks{layout.num_clocks()}
     {
-        layout.foreach_node(
+        layout.foreach_object(
             [this](const auto id)
             {
                 const auto zone = clock_zone(id);
@@ -169,7 +169,7 @@ class sat_clocking_handler
     /** @brief Requires every declared source to precede its destination by one phase. */
     void exclude_clock_assignments_that_violate_information_flow()
     {
-        layout.foreach_node(
+        layout.foreach_object(
             [this](const auto id)
             {
                 const auto destination = clock_zone(id);
@@ -299,7 +299,7 @@ class determine_clocking_impl
         std::unordered_map<typename Lyt::object_id, uint32_t> remaining_inputs{};
         std::vector<typename Lyt::object_id>                  ready{};
         ready.reserve(layout.size());
-        layout.foreach_node(
+        layout.foreach_object(
             [&](const auto id)
             {
                 const auto t = layout.get_tile(id);

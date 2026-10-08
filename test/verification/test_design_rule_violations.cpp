@@ -96,7 +96,7 @@ TEST_CASE("DRVs inspect declared input holes", "[drv][placed-objects]")
     const auto                 pi = lyt.create_pi("a", {0, 0});
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
-    const auto gate = lyt.create_node({pi}, function, {0, 1});
+    const auto gate = lyt.create_gate({pi}, function, {0, 1});
     lyt.disconnect({gate, 0});
     lyt.connect(pi, {gate, 1});
     lyt.create_po(gate, "result", {0, 2});

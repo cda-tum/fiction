@@ -474,7 +474,7 @@ class read_fgl_layout_impl
                         }
                         kitty::dynamic_truth_table function{arity};
                         kitty::create_from_hex_string(function, hex);
-                        port = lyt.create_node({}, function, gate.loc);
+                        port = lyt.create_gate({}, function, gate.loc);
                     }
                     lyt.set_name(port, gate.name);
                     objects.emplace(gate.id, port);

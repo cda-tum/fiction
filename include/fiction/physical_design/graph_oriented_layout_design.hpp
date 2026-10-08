@@ -1880,7 +1880,7 @@ class graph_oriented_layout_design_impl
             {
                 kitty::set_bit(function, 0);
             }
-            const auto constant = layout.create_node({}, function, {position.x - 1, position.y});
+            const auto constant = layout.create_gate({}, function, {position.x - 1, position.y});
             place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
                 layout.create_po(constant, fmt::format("po{}", place_info.current_po++), position);
         }

@@ -317,7 +317,7 @@ template <typename HexLyt, typename CartLyt>
 
     int32_t offset{};
     int64_t first_diagonal = std::numeric_limits<int64_t>::max();
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             const auto t = lyt.get_tile(id);
@@ -396,7 +396,7 @@ class hexagonalization_impl
             }
             return empty;
         }
-        layout.foreach_node(
+        layout.foreach_object(
             [&](const auto id)
             {
                 if (!layout.is_within_bounds(layout.get_tile(id)))
@@ -532,7 +532,7 @@ class hexagonalization_impl
 
             utils::progress_reporter object_progress{ps.on_progress, "objects", layout.size()};
             // Create every placed object before translating declared input endpoints.
-            layout.foreach_node(
+            layout.foreach_object(
                 [&](const auto id)
                 {
                     object_progress.advance();
@@ -542,8 +542,9 @@ class hexagonalization_impl
                     }
                     auto t             = detail::to_hex<CartLyt, HexLyt>(layout.get_tile(id), layout_height);
                     t                  = {static_cast<int64_t>(t.x) + x_shift, t.y, t.z};
-                    const auto created = layout.is_gate(id) ? hex_layout.create_node({}, layout.node_function(id), t) :
-                                                              hex_layout.create_buf(t);
+                    const auto created = layout.is_gate(id) ?
+                                             hex_layout.create_gate({}, layout.object_function(id), t) :
+                                             hex_layout.create_buf(t);
                     hex_layout.set_name(created, layout.get_name(id));
                     x_max = std::max(x_max, t.x);
                     y_max = std::max(y_max, t.y);
@@ -582,7 +583,7 @@ class hexagonalization_impl
             std::ranges::sort(right_pos, [](const auto& lhs, const auto& rhs)
                               { return (lhs.y > rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x); });
 
-            layout.foreach_node(
+            layout.foreach_object(
                 [&](const auto id)
                 {
                     auto destination  = detail::to_hex<CartLyt, HexLyt>(layout.get_tile(id), layout_height);
@@ -612,7 +613,7 @@ class hexagonalization_impl
                     std::vector<typename HexLyt::input_port> sinks{};
                     hex_layout.foreach_sink(id, [&](const auto sink) { sinks.push_back(sink); });
                     middle_pi = {static_cast<int64_t>(middle_pi.x) - 1, middle_pi.y, middle_pi.z};
-                    hex_layout.move_node(id, middle_pi);
+                    hex_layout.move_object(id, middle_pi);
                     for (const auto sink : sinks)
                     {
                         objectives.push_back({middle_pi, hex_layout.get_tile(sink.object), sink.index});
@@ -632,7 +633,7 @@ class hexagonalization_impl
                     std::vector<typename HexLyt::input_port> sinks{};
                     hex_layout.foreach_sink(id, [&](const auto sink) { sinks.push_back(sink); });
                     middle_pi = {static_cast<int64_t>(middle_pi.x) + 1, middle_pi.y, middle_pi.z};
-                    hex_layout.move_node(id, middle_pi);
+                    hex_layout.move_object(id, middle_pi);
                     for (const auto sink : sinks)
                     {
                         objectives.push_back({middle_pi, hex_layout.get_tile(sink.object), sink.index});
@@ -713,7 +714,7 @@ class hexagonalization_impl
                     }
                     const auto fanin = hex_layout.get_tile(*source);
                     middle_po        = {static_cast<int64_t>(middle_po.x) - 1, middle_po.y, middle_po.z};
-                    hex_layout.move_node(id, middle_po);
+                    hex_layout.move_object(id, middle_po);
                     objectives.push_back({fanin, middle_po, 0});
                     x_max = std::max(middle_po.x, x_max);
                     y_max = std::max(middle_po.y, y_max);
@@ -734,7 +735,7 @@ class hexagonalization_impl
                     }
                     const auto fanin = hex_layout.get_tile(*source);
                     middle_po        = {static_cast<int64_t>(middle_po.x) + 1, middle_po.y, middle_po.z};
-                    hex_layout.move_node(id, middle_po);
+                    hex_layout.move_object(id, middle_po);
                     objectives.push_back({fanin, middle_po, 0});
                     x_max = std::max(middle_po.x, x_max);
                     y_max = std::max(middle_po.y, y_max);

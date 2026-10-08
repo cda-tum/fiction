@@ -292,23 +292,23 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
 
         // A truth-table argument implies that synthesis is loaded. Import synthesis only when returning a table;
         // importing it during layouts registration would create a cycle through networks.
-        .def("create_node", &GateLyt::create_node, py::arg("inputs"), py::arg("function"), py::arg("t"),
+        .def("create_gate", &GateLyt::create_gate, py::arg("inputs"), py::arg("function"), py::arg("t"),
              py::sig(
-                 "def create_node(self, inputs: collections.abc.Sequence[LayoutObjectId], function: "
+                 "def create_gate(self, inputs: collections.abc.Sequence[LayoutObjectId], function: "
                  "mnt.pyfiction.synthesis.dynamic_truth_table, t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | "
                  "tuple[int, int, int]) -> "
                  "LayoutObjectId"),
              "Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be "
              "disconnected.")
         .def(
-            "node_function",
+            "object_function",
             [](const GateLyt& lyt, const typename GateLyt::object_id id)
             {
                 py::module_::import_("mnt.pyfiction.synthesis");
-                return lyt.node_function(id);
+                return lyt.object_function(id);
             },
             py::arg("object"),
-            py::sig("def node_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table"),
+            py::sig("def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table"),
             "Returns the object's truth table.")
         .def("size", &GateLyt::size)
         .def("fanin_size", &GateLyt::fanin_size, py::arg("object"))
@@ -321,7 +321,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("connect", &GateLyt::connect, py::arg("source"), py::arg("input"))
         .def("disconnect", &GateLyt::disconnect, py::arg("input"))
         .def("remove", &GateLyt::remove, py::arg("object"))
-        .def("move_node", &GateLyt::move_node, py::arg("object"), py::arg("t"))
+        .def("move_object", &GateLyt::move_object, py::arg("object"), py::arg("t"))
         .def("pi_at", &GateLyt::pi_at, py::arg("index"))
         .def("po_at", &GateLyt::po_at, py::arg("index"))
         .def(

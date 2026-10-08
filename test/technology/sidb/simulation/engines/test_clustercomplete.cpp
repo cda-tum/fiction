@@ -171,8 +171,8 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     /** @brief NAND function with two declared input slots. */
     kitty::dynamic_truth_table nand_function{2};
     kitty::create_from_hex_string(nand_function, "7");
-    gate_lyt.create_node({}, nand_function, {0, 0});
-    gate_lyt.create_node({}, nand_function, {2, 2});
+    gate_lyt.create_gate({}, nand_function, {0, 0});
+    gate_lyt.create_gate({}, nand_function, {2, 2});
 
     REQUIRE(gate_lyt.num_gates() == 2);
     gate_lyt.foreach_gate(

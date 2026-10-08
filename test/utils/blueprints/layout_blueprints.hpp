@@ -163,8 +163,8 @@ xor_maj_gate_layout(const fiction::layouts::arrangement layout_arrangement = fic
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_xor, "6");
 
-    const auto n_maj = layout.create_node({a, b, c}, tt_maj, {2, 1});
-    const auto n_xor = layout.create_node({a, b}, tt_xor, {1, 0});
+    const auto n_maj = layout.create_gate({a, b, c}, tt_maj, {2, 1});
+    const auto n_xor = layout.create_gate({a, b}, tt_xor, {1, 0});
 
     layout.create_po(n_maj, "f1", {2, 2});
     layout.create_po(n_xor, "f2", {0, 0});
@@ -380,7 +380,7 @@ GateLyt single_input_tautology_gate_layout(
     kitty::dynamic_truth_table tt_t(1u);
     kitty::create_from_hex_string(tt_t, "3");
 
-    const auto n = layout.create_node({x1}, tt_t, {1, 0});
+    const auto n = layout.create_gate({x1}, tt_t, {1, 0});
 
     layout.create_po(n, "f1", {2, 0});
 
@@ -409,7 +409,7 @@ tautology_gate_layout(const fiction::layouts::arrangement layout_arrangement = f
     kitty::dynamic_truth_table tt_t(2u);
     kitty::create_from_hex_string(tt_t, "F");
 
-    const auto n_xor = layout.create_node({x1, x2}, tt_t, {1, 1});
+    const auto n_xor = layout.create_gate({x1, x2}, tt_t, {1, 1});
 
     layout.create_po(n_xor, "f1", {2, 1});
 
@@ -439,7 +439,7 @@ GateLyt res_tautology_gate_layout(
     kitty::dynamic_truth_table tt_t(3u);
     kitty::create_from_hex_string(tt_t, "FF");
 
-    const auto n = layout.create_node({x1, x2, x3}, tt_t, {1, 1});
+    const auto n = layout.create_gate({x1, x2, x3}, tt_t, {1, 1});
 
     layout.create_po(n, "f1", {1, 2});
 
@@ -477,7 +477,7 @@ GateLyt open_tautology_gate_layout(
     kitty::dynamic_truth_table tt_t(4u);
     kitty::create_from_hex_string(tt_t, "FFFF");
 
-    const auto n = layout.create_node({x1, x2, x3, x4}, tt_t, {1, 1});
+    const auto n = layout.create_gate({x1, x2, x3, x4}, tt_t, {1, 1});
 
     layout.create_po(n, "f1", {2, 1});
 

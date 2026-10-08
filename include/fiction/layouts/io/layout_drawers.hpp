@@ -46,7 +46,7 @@ namespace fiction::layouts::io
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class simple_gate_layout_tile_drawer
@@ -93,8 +93,8 @@ class simple_gate_layout_tile_drawer
         return id;
     }
 
-    /** @brief Return node attributes. */
-    [[nodiscard]] virtual std::vector<std::string> additional_node_attributes(const Lyt& /*lyt*/) const
+    /** @brief Returns Graphviz attributes of the tile vertices. */
+    [[nodiscard]] virtual std::vector<std::string> additional_tile_attributes(const Lyt& /*lyt*/) const
     {
         if constexpr (DrawIndexes)
         {
@@ -236,7 +236,7 @@ class simple_gate_layout_tile_drawer
         {
             return {"MAJ", "lightsalmon"};
         }
-        if (const auto function = lyt.node_function(id); function.num_vars() == 0)
+        if (const auto function = lyt.object_function(id); function.num_vars() == 0)
         {
             return {kitty::get_bit(function, 0) ? "1" : "0", "white"};
         }
@@ -305,7 +305,7 @@ class simple_gate_layout_tile_drawer
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
@@ -330,14 +330,14 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         return graph_attributes;
     }
 
-    /** @brief Return node attributes. */
-    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const override
+    /** @brief Returns Graphviz attributes of the tile vertices. */
+    [[nodiscard]] std::vector<std::string> additional_tile_attributes(const Lyt& lyt) const override
     {
-        auto node_attributes = base_drawer::additional_node_attributes(lyt);
+        auto tile_attributes = base_drawer::additional_tile_attributes(lyt);
 
-        node_attributes.emplace_back("shape=square");
+        tile_attributes.emplace_back("shape=square");
 
-        return node_attributes;
+        return tile_attributes;
     }
 
     /** @brief Format the grid topology. */
@@ -383,7 +383,7 @@ namespace detail
  *
  * @tparam Lyt Gate-level layout type with shifted rows or columns.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors, bool DrawIndexes>
 class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
@@ -522,21 +522,21 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
  *
  * @tparam Lyt Shifted Cartesian gate-level layout type.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_shifted_cartesian_drawer
         : public detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    /** @brief Return node attributes. */
-    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const override
+    /** @brief Returns Graphviz attributes of the tile vertices. */
+    [[nodiscard]] std::vector<std::string> additional_tile_attributes(const Lyt& lyt) const override
     {
-        auto node_attributes = shifted_drawer::additional_node_attributes(lyt);
+        auto tile_attributes = shifted_drawer::additional_tile_attributes(lyt);
 
-        node_attributes.emplace_back("shape=square");
+        tile_attributes.emplace_back("shape=square");
 
-        return node_attributes;
+        return tile_attributes;
     }
 
   protected:
@@ -555,26 +555,26 @@ class gate_layout_shifted_cartesian_drawer
  *
  * @tparam Lyt Hexagonal gate-level layout type.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_hexagonal_drawer : public detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    /** @brief Return node attributes. */
-    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const override
+    /** @brief Returns Graphviz attributes of the tile vertices. */
+    [[nodiscard]] std::vector<std::string> additional_tile_attributes(const Lyt& lyt) const override
     {
-        auto node_attributes = shifted_drawer::additional_node_attributes(lyt);
+        auto tile_attributes = shifted_drawer::additional_tile_attributes(lyt);
 
-        node_attributes.emplace_back("shape=hexagon");
+        tile_attributes.emplace_back("shape=hexagon");
 
         if (is_row_arrangement(lyt.get_arrangement()))
         {
             // pointy top hexagons are rotated by 30°
-            node_attributes.emplace_back("orientation=30");
+            tile_attributes.emplace_back("orientation=30");
         }
 
-        return node_attributes;
+        return tile_attributes;
     }
 
   protected:
@@ -607,10 +607,10 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
 
     std::stringstream nodes{}, edges{}, topology{};
 
-    auto node_attributes = drawer.additional_node_attributes(lyt);
-    node_attributes.emplace_back("style=filled");
+    auto tile_attributes = drawer.additional_tile_attributes(lyt);
+    tile_attributes.emplace_back("style=filled");
 
-    nodes << fmt::format("node [{}];\n", fmt::join(node_attributes, ", "));
+    nodes << fmt::format("node [{}];\n", fmt::join(tile_attributes, ", "));
 
     utils::progress_reporter tiles_progress{std::move(on_progress), "drawing tiles", lyt.area()};
     // draw tiles
@@ -625,7 +625,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
     edges << "edge [constraint=false];\n";
 
     // draw connections
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&lyt, &drawer, &edges](const auto& n)
         {
             lyt.foreach_fanin(n,

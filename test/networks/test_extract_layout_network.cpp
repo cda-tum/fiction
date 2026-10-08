@@ -42,7 +42,7 @@ TEST_CASE("Extraction preserves interface order and truth-table argument indices
     const auto                 b      = lyt.create_pi("b", {7, 0});
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "4");  // !a & b
-    const auto gate = lyt.create_node({a, b}, function, {20, 0});
+    const auto gate = lyt.create_gate({a, b}, function, {20, 0});
     lyt.set_name(gate, "gate");
     const auto wire   = lyt.create_buf(gate, {30, 0});
     const auto result = lyt.create_po(wire, "result", {40, 0});
@@ -73,7 +73,7 @@ TEST_CASE("Extraction validates only dependencies of primary outputs", "[extract
     lyt.connect(cycle, {cycle, 0});
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
-    const auto gate = lyt.create_node({a}, function, {2, 0});
+    const auto gate = lyt.create_gate({a}, function, {2, 0});
     lyt.disconnect({gate, 0});
     lyt.connect(a, {gate, 1});
     const auto po = lyt.create_po(a, "result", {3, 0});
@@ -94,7 +94,7 @@ TEST_CASE("Extraction accepts explicitly placed constant functions", "[extract-l
     extraction_layout          lyt{};
     kitty::dynamic_truth_table function{0};
     kitty::create_from_hex_string(function, "1");
-    const auto constant = lyt.create_node({}, function, {0, 0});
+    const auto constant = lyt.create_gate({}, function, {0, 0});
     lyt.create_po(constant, "one", {1, 0});
     const auto ntk = extract_layout_network(lyt);
     REQUIRE(ntk.num_pis() == 0);
@@ -125,7 +125,7 @@ TEST_CASE("Extraction follows connections across allocation order and reused ide
     const auto                 po = lyt.create_po("result", {0, 0});
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "4");  // !a & b
-    const auto gate = lyt.create_node({}, function, {1, 0});
+    const auto gate = lyt.create_gate({}, function, {1, 0});
     const auto b    = lyt.create_pi("b", {2, 0});
     const auto a    = lyt.create_pi("a", {3, 0});
     lyt.connect(a, {gate, 0});

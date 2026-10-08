@@ -2176,7 +2176,11 @@ class cartesian_gate_layout(cartesian_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state.
+    state. Visitors may edit coordinates, names, and capabilities. Object
+    and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -2652,7 +2656,7 @@ class cartesian_gate_layout(cartesian_layout):
     def is_empty(self) -> bool:
         """Returns whether the layout has no objects."""
 
-    def create_node(
+    def create_gate(
         self,
         inputs: Sequence[LayoutObjectId],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
@@ -2662,7 +2666,7 @@ class cartesian_gate_layout(cartesian_layout):
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def node_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+    def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
     def size(self) -> int: ...
@@ -2676,7 +2680,7 @@ class cartesian_gate_layout(cartesian_layout):
     def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
     def disconnect(self, input: LayoutInputPort) -> None: ...
     def remove(self, object: LayoutObjectId) -> None: ...
-    def move_node(
+    def move_object(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> LayoutObjectId: ...
     def pi_at(self, index: int) -> LayoutObjectId: ...
@@ -3067,7 +3071,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state.
+    state. Visitors may edit coordinates, names, and capabilities. Object
+    and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -3544,7 +3552,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def is_empty(self) -> bool:
         """Returns whether the layout has no objects."""
 
-    def create_node(
+    def create_gate(
         self,
         inputs: Sequence[LayoutObjectId],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
@@ -3554,7 +3562,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def node_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+    def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
     def size(self) -> int: ...
@@ -3568,7 +3576,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
     def disconnect(self, input: LayoutInputPort) -> None: ...
     def remove(self, object: LayoutObjectId) -> None: ...
-    def move_node(
+    def move_object(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> LayoutObjectId: ...
     def pi_at(self, index: int) -> LayoutObjectId: ...
@@ -3959,7 +3967,11 @@ class hexagonal_gate_layout(hexagonal_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state.
+    state. Visitors may edit coordinates, names, and capabilities. Object
+    and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -4436,7 +4448,7 @@ class hexagonal_gate_layout(hexagonal_layout):
     def is_empty(self) -> bool:
         """Returns whether the layout has no objects."""
 
-    def create_node(
+    def create_gate(
         self,
         inputs: Sequence[LayoutObjectId],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
@@ -4446,7 +4458,7 @@ class hexagonal_gate_layout(hexagonal_layout):
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def node_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+    def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
     def size(self) -> int: ...
@@ -4460,7 +4472,7 @@ class hexagonal_gate_layout(hexagonal_layout):
     def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
     def disconnect(self, input: LayoutInputPort) -> None: ...
     def remove(self, object: LayoutObjectId) -> None: ...
-    def move_node(
+    def move_object(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> LayoutObjectId: ...
     def pi_at(self, index: int) -> LayoutObjectId: ...

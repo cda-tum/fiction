@@ -402,15 +402,15 @@ wiring_reduction_layout create_wiring_reduction_layout(const Lyt& lyt, const int
                                                   static_cast<int64_t>(lyt.height()) + y_offset + 1, lyt.layers()},
                                                  direction};
 
-    // iterate through nodes in the layout
-    lyt.foreach_node(
-        [&lyt, &wiring_reduction_lyt, &x_offset, &y_offset](const auto& node)
+    // iterate through objects in the layout
+    lyt.foreach_object(
+        [&lyt, &wiring_reduction_lyt, &x_offset, &y_offset](const auto& object)
         {
-            const tile<Lyt> old_coord = lyt.get_tile(node);
+            const tile<Lyt> old_coord = lyt.get_tile(object);
             const tile<Lyt> new_coord{old_coord.x + x_offset, old_coord.y + y_offset, old_coord.z};
 
             // handle Primary Inputs (PI) and Primary Outputs (PO)
-            if (lyt.is_pi(node) || lyt.is_po(node))
+            if (lyt.is_pi(object) || lyt.is_po(object))
             {
                 wiring_reduction_lyt.search_obstructions.obstruct_coordinate(new_coord);
                 wiring_reduction_lyt.search_obstructions.obstruct_coordinate({new_coord.x, new_coord.y, 1});
@@ -450,7 +450,7 @@ wiring_reduction_layout create_wiring_reduction_layout(const Lyt& lyt, const int
                     {new_coord.x - add_x_offset, new_coord.y - add_y_offset, 1});
             };
 
-            if (lyt.is_gate(node) || !lyt.is_wire(node) || lyt.fanout_size(node) != 1 || old_coord.z != 0)
+            if (lyt.is_gate(object) || !lyt.is_wire(object) || lyt.fanout_size(object) != 1 || old_coord.z != 0)
             {
                 obstruct_coordinate(0, 0);
             }
@@ -466,7 +466,8 @@ wiring_reduction_layout create_wiring_reduction_layout(const Lyt& lyt, const int
                 wiring_reduction_lyt.search_obstructions.obstruct_connection(shifted_tile, new_coord);
 
                 // obstruct horizontal/vertical wires, non-wire gates (inv) and fanouts
-                if (!lyt.is_wire(node) || lyt.is_gate(node) || (lyt.fanout_size(node) != 1) || (old_coord.z != 0) ||
+                if (!lyt.is_wire(object) || lyt.is_gate(object) || (lyt.fanout_size(object) != 1) ||
+                    (old_coord.z != 0) ||
                     (lyt.has_western_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}) &&
                      (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)) ||
                     (lyt.has_northern_incoming_signal({old_coord}) && lyt.has_southern_outgoing_signal({old_coord}) &&
@@ -853,7 +854,7 @@ void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
         }
     }
     auto reduced = lyt;
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             if (removed.contains(id))
@@ -889,7 +890,7 @@ void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
     }
     std::vector<std::pair<typename Lyt::object_id, tile<Lyt>>> placements{};
     placements.reserve(reduced.size());
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             if (!removed.contains(id))
@@ -902,11 +903,11 @@ void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
         });
     for (std::size_t i{}; i < placements.size(); ++i)
     {
-        reduced.move_node(placements[i].first, {-1, static_cast<int64_t>(i), 0});
+        reduced.move_object(placements[i].first, {-1, static_cast<int64_t>(i), 0});
     }
     for (const auto& [id, position] : placements)
     {
-        reduced.move_node(id, position);
+        reduced.move_object(id, position);
     }
     const auto maximum = layouts::bounding_box_2d{reduced}.get_max();
     reduced.resize(maximum ? typename Lyt::extent{static_cast<int64_t>(maximum->x) + 1,
@@ -1127,7 +1128,7 @@ void wiring_reduction(Lyt& lyt, wiring_reduction_params ps = {}, wiring_reductio
     {
         throw std::overflow_error("Layout extent leaves no room for signed routing coordinates");
     }
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             if (!lyt.is_within_bounds(lyt.get_tile(id)))

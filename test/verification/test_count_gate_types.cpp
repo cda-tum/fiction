@@ -92,7 +92,7 @@ TEMPLATE_TEST_CASE("Native gate counts classify supported functions and generic 
     lyt.create_maj(a, b, c, {16, 0});
     kitty::dynamic_truth_table and3{3};
     kitty::create_from_hex_string(and3, "80");
-    lyt.create_node({a, b, c}, and3, {17, 0});
+    lyt.create_gate({a, b, c}, and3, {17, 0});
 
     count_gate_types_stats stats{};
     count_gate_types(lyt, &stats);

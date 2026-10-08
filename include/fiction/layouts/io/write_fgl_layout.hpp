@@ -228,7 +228,7 @@ class write_fgl_layout_impl
         os << fgl::CLOSE_LAYOUT_METADATA;
         os << fgl::OPEN_GATES;
         utils::progress_reporter progress{on_progress, "writing gates", lyt.size()};
-        lyt.foreach_node(
+        lyt.foreach_object(
             [this, &progress](const auto id)
             {
                 const auto coordinate = lyt.get_tile(id);
@@ -248,7 +248,7 @@ class write_fgl_layout_impl
                 }
                 else
                 {
-                    type = kitty::to_hex(lyt.node_function(id));
+                    type = kitty::to_hex(lyt.object_function(id));
                 }
                 os << fgl::OPEN_GATE;
                 os << fmt::format(fgl::GATE, id.index, type, fgl::xml_text(lyt.get_name(id)), coordinate.x,

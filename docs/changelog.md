@@ -203,6 +203,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - Gate-level layouts now keep large-arity input storage outside the common object record.
+  - Gate-level layouts now use `create_gate`, `object_function`, `move_object`, and `foreach_object`.
+    Layout assignment printers use object terminology; update callers to these names.
   - **Breaking:** Gate-level layouts now store placed objects with generation-checked IDs and typed ports. Replace tile-valued signals with object lookup and explicit input connections; copies are independent.
   - **Breaking:** Layouts expose their frame through `get_extent()` in C++ and Python; Python constructors, `resize`, `area`, and `volume` use the `extent` keyword. Extent values use `ex` rather than `ar`.
   - **Breaking:** Layout frames now use width, height, and layer counts. Replace maximum coordinates with extent counts; missing neighbors and empty bounds return optional values.

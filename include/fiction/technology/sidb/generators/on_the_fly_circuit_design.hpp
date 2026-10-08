@@ -300,7 +300,7 @@ template <typename GateLyt>
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
     deadline             = utils::make_deadline(params.timeout, deadline);
     utils::check_deadline(deadline);
-    gate_lyt.foreach_node(
+    gate_lyt.foreach_object(
         [&](const auto object)
         {
             if (!sidb::on_the_fly_gate_library::is_supported_gate_type(gate_lyt, object))

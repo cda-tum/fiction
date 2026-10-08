@@ -111,7 +111,7 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
             hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
             const auto       input1 = gate_layout.create_pi("input1", {0, 0});
             const auto       input2 = gate_layout.create_pi("input2", {1, 0});
-            const auto       gate   = gate_layout.create_node({input1, input2}, function, {1, 1});
+            const auto       gate   = gate_layout.create_gate({input1, input2}, function, {1, 1});
             gate_layout.create_po(gate, "output", {0, 2});
 
             on_the_fly_gate_library_params params{};

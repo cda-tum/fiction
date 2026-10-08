@@ -185,7 +185,7 @@ void extend_output_position(Lyt& lyt, const typename Lyt::object_id id, const ti
 {
     const auto old    = lyt.get_tile(id);
     const auto source = lyt.source({id, 0});
-    lyt.move_node(id, target);
+    lyt.move_object(id, target);
     const auto wire = source ? lyt.create_buf(*source, old) : lyt.create_buf(old);
     lyt.connect(wire, {id, 0});
 }
@@ -218,7 +218,7 @@ void optimize_output_positions(Lyt& lyt)
         {
             if (const auto id = lyt.find_object({x, y_max}); id && lyt.is_po(*id))
             {
-                lyt.move_node(*id, {x + 1, y_max - 1});
+                lyt.move_object(*id, {x + 1, y_max - 1});
             }
         }
     }
@@ -238,7 +238,7 @@ void optimize_output_positions(Lyt& lyt)
         {
             if (const auto id = lyt.find_object({x_max, y}); id && lyt.is_po(*id))
             {
-                lyt.move_node(*id, {x_max - 1, y + 1});
+                lyt.move_object(*id, {x_max - 1, y + 1});
             }
         }
     }
@@ -270,13 +270,13 @@ void optimize_output_positions(Lyt& lyt)
             if (lyt.has_western_incoming_signal({x_max, y_max}) && x_max <= y_max &&
                 lyt.is_empty_tile({x_max - 1, y_max + 1}))
             {
-                lyt.move_node(*id, {x_max - 1, y_max + 1});
+                lyt.move_object(*id, {x_max - 1, y_max + 1});
                 fit_occupied_geometry(lyt);
             }
             else if (lyt.has_northern_incoming_signal({x_max, y_max}) && y_max <= x_max &&
                      lyt.is_empty_tile({x_max + 1, y_max - 1}))
             {
-                lyt.move_node(*id, {x_max + 1, y_max - 1});
+                lyt.move_object(*id, {x_max + 1, y_max - 1});
                 fit_occupied_geometry(lyt);
             }
         }
@@ -290,31 +290,32 @@ void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates)
 {
     const auto x_max = static_cast<int32_t>(lyt.width()) - 1;
     const auto y_max = static_cast<int32_t>(lyt.height()) - 1;
-    lyt.foreach_po(
-        [&](const auto id)
+    // Output extension inserts wires, so select terminals without an active visitor.
+    for (uint32_t output{}; output < lyt.num_pos(); ++output)
+    {
+        const auto id = lyt.po_at(output);
+        const auto t  = lyt.get_tile(id);
+        if (lyt.is_at_eastern_border(t) || lyt.is_at_southern_border(t))
         {
-            const auto t = lyt.get_tile(id);
-            if (lyt.is_at_eastern_border(t) || lyt.is_at_southern_border(t))
+            continue;
+        }
+        if (t.x == x_max - 1 && lyt.is_empty_tile({x_max, t.y}))
+        {
+            extend_output_position(lyt, id, {x_max, t.y});
+            if (moved_gates)
             {
-                return;
+                --moved_gates;
             }
-            if (t.x == x_max - 1 && lyt.is_empty_tile({x_max, t.y}))
+        }
+        else if (t.y == y_max - 1 && lyt.is_empty_tile({t.x, y_max}))
+        {
+            extend_output_position(lyt, id, {t.x, y_max});
+            if (moved_gates)
             {
-                extend_output_position(lyt, id, {x_max, t.y});
-                if (moved_gates)
-                {
-                    --moved_gates;
-                }
+                --moved_gates;
             }
-            else if (t.y == y_max - 1 && lyt.is_empty_tile({t.x, y_max}))
-            {
-                extend_output_position(lyt, id, {t.x, y_max});
-                if (moved_gates)
-                {
-                    --moved_gates;
-                }
-            }
-        });
+        }
+    }
     fit_occupied_geometry(lyt);
 }
 /**
@@ -418,11 +419,11 @@ class post_layout_optimization_impl
                 // gather all relevant gate tiles for relocation
                 std::vector<tile<Lyt>> gate_tiles{};
                 gate_tiles.reserve(layout.num_gates() + layout.num_pis() + layout.num_pos());
-                layout.foreach_node(
-                    [this, &layout, &gate_tiles](const auto& node)
+                layout.foreach_object(
+                    [this, &layout, &gate_tiles](const auto& object)
                     {
-                        if (const tile<Lyt> gate_tile = layout.get_tile(node);
-                            layout.is_gate(node) || layout.is_fanout(node) || layout.is_pi_tile(gate_tile) ||
+                        if (const tile<Lyt> gate_tile = layout.get_tile(object);
+                            layout.is_gate(object) || layout.is_fanout(object) || layout.is_pi_tile(gate_tile) ||
                             layout.is_po_tile(gate_tile))
                         {
                             search_obstructions.obstruct_coordinate({gate_tile.x, gate_tile.y, 1});
@@ -562,7 +563,7 @@ class post_layout_optimization_impl
             {
                 if (const auto id = lyt.find_object(*above); id && lyt.is_wire(*id))
                 {
-                    lyt.move_node(*id, ground);
+                    lyt.move_object(*id, ground);
                     search_obstructions.clear_obstructed_coordinate(*above);
                 }
             }
@@ -690,7 +691,7 @@ class post_layout_optimization_impl
         }
         ++attempts;
         const auto id = *lyt.find_object(current);
-        lyt.move_node(id, candidate);
+        lyt.move_object(id, candidate);
         search_obstructions.clear_obstructed_coordinate(current);
         search_obstructions.clear_obstructed_coordinate({current.x, current.y, 1});
         search_obstructions.obstruct_coordinate(candidate);
@@ -730,7 +731,7 @@ class post_layout_optimization_impl
     void restore_original_wiring(Lyt& lyt, const tile<Lyt>& current, const tile<Lyt>& original,
                                  const fanin_fanout_data<Lyt>& data)
     {
-        lyt.move_node(*lyt.find_object(current), original);
+        lyt.move_object(*lyt.find_object(current), original);
         for (std::size_t index{}; index < data.routes.size(); ++index)
         {
             route_path(lyt, data.routes[index], data.destinations[index]);
@@ -874,7 +875,7 @@ void post_layout_optimization(Lyt& lyt, post_layout_optimization_params ps = {},
     {
         throw std::overflow_error("Layout extent leaves no room for signed routing coordinates");
     }
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             if (!lyt.is_within_bounds(lyt.get_tile(id)))

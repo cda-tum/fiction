@@ -204,7 +204,7 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     route_path(layout, first, {gate, 0});
     CHECK(layout.source({gate, 1}) == second_wire);
     CHECK(layout.is_lt(gate));
-    layout.move_node(gate, {4, 3});
+    layout.move_object(gate, {4, 3});
     CHECK(layout.source({gate, 1}) == second_wire);
 }
 

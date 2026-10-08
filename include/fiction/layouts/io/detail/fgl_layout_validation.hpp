@@ -71,7 +71,7 @@ void validate_layout(const Lyt& lyt)
     validate_xml_text(lyt.get_layout_name());
     std::unordered_map<typename Lyt::object_id, uint32_t> remaining{};
     std::vector<typename Lyt::object_id>                  ready{};
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&](const auto id)
         {
             validate_xml_text(lyt.get_name(id));

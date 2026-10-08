@@ -435,7 +435,7 @@ TEST_CASE("Straight inverter validation", "[exact]")
     const auto        inverter = lyt.create_not(input, {1, 0});
     const auto        output   = lyt.create_po(inverter, "f", {2, 0});
     CHECK(has_straight_inverters(lyt));
-    lyt.move_node(output, {1, 1});
+    lyt.move_object(output, {1, 1});
     CHECK_FALSE(has_straight_inverters(lyt));
 }
 

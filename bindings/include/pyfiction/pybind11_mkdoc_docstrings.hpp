@@ -2758,7 +2758,11 @@ R"doc(Placed FCN objects, ordered ports, clocking, and obstructions.
 Objects have stable identities independent of their coordinates.
 Connections describe declared topology; physical validation checks
 adjacency, clocking, and geometry separately. Copies own independent
-state.
+state. Visitors may edit coordinates, names, and capabilities. Object
+and terminal visitors must not create or remove objects, change
+terminal order, or replace the layout during traversal. Connection
+visitors must also preserve the traversed input or sink connections,
+as specified on each visitor.
 
 Template Args:
     CoordinateLayout: Coordinate geometry used for placement.)doc";
@@ -2875,19 +2879,7 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_create_buf = R"doc(
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_create_buf_2 = R"doc(Creates a wire with its input disconnected.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_ge = R"doc(Creates a GE gate.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_gt = R"doc(Creates a GT gate.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_le = R"doc(Creates a LE gate.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_lt = R"doc(Creates a LT gate.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_maj = R"doc(Creates a majority gate.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nand = R"doc(Creates a NAND gate.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_node =
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_gate =
 R"doc(Creates a gate with an ordered truth table and initial input
 connections.
 
@@ -2899,6 +2891,18 @@ Raises:
                            exceed the function arity.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_ge = R"doc(Creates a GE gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_gt = R"doc(Creates a GT gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_le = R"doc(Creates a LE gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_lt = R"doc(Creates a LT gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_maj = R"doc(Creates a majority gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nand = R"doc(Creates a NAND gate.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nor = R"doc(Creates a NOR gate.)doc";
 
@@ -2997,7 +3001,13 @@ connections.
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_fanout = R"doc(Visits destination objects once per connected input port.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_gate = R"doc(Visits logic gates.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_gate =
+R"doc(Visits logic gates.
+
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_ground_tile =
 R"doc(Applies a function to each ground-layer tile in the coordinate range.
@@ -3024,9 +3034,14 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_node =
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_object =
 R"doc(Visits live objects. Callbacks may accept an object and enumeration
 index and return false to stop.
+
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
+
+Traversal scans retained storage slots, including removed objects.
 
 )doc";
 
@@ -3065,9 +3080,21 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_pi = R"doc(Visits primary inputs in declared interface order.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_pi =
+R"doc(Visits primary inputs in declared interface order.
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_po = R"doc(Visits primary outputs in declared interface order.)doc";
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_po =
+R"doc(Visits primary outputs in declared interface order.
+
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_sink =
 R"doc(Visits sink input ports of an output, irrespective of physical
@@ -3104,7 +3131,13 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_wire = R"doc(Visits identity objects, including terminals.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_wire =
+R"doc(Visits identity objects, including terminals.
+
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_free_edge = R"doc(First reusable connection slot.)doc";
 
@@ -3543,31 +3576,13 @@ objects.
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_input_count = R"doc(Returns the number of input slots, including disconnected slots.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots =
-R"doc(Connection indices of an object's inputs. Up to three inputs live
-inline; more spill to the heap.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_edges =
+R"doc(Returns an object's ordered connection indices, including disconnected
+slots.
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_assign = R"doc(Resets to `n` disconnected slots.)doc";
+)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_begin = R"doc(Returns the first slot.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_begin_mutable = R"doc(Returns the first slot.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_clear = R"doc(Releases all slots.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_count = R"doc(Number of slots in use.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_end = R"doc(Returns the end of the slots.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_fixed = R"doc(Inline slots.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_operator_array = R"doc(Returns the connection index at slot `i`.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_operator_array_2 = R"doc(Returns the connection index at slot `i`.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_size = R"doc(Number of slots.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_slots_spill = R"doc(Slots of objects with more than `INLINE_CAPACITY` inputs.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_edges_2 = R"doc(Returns an object's mutable ordered connection indices.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_inputs = R"doc(Declared primary input order.)doc";
 
@@ -3719,11 +3734,9 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_layout_name = R"doc
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_live_count = R"doc(Live object count.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_move_node = R"doc(Moves an object without changing its identity or connections.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_move_object = R"doc(Moves an object without changing its identity or connections.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_names = R"doc(Sparse cold names.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_node_function = R"doc(Returns the truth table in logical input-index order.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_clocks =
 R"doc(Returns the number of clock phases in the layout. Each clock cycle is
@@ -3751,6 +3764,8 @@ Synchronization element count.
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_wires = R"doc(Counts identity objects, including terminals.)doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_function = R"doc(Returns the truth table in logical input-index order.)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind =
 R"doc(Object role; removed slots have no coordinate or connections visible
 through the API.)doc";
@@ -3773,7 +3788,9 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_funct
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_generation = R"doc(Generation checked by object handles.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_inputs = R"doc(Input-index to connection mapping; missing entries remain holes.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_input_count = R"doc(Number of input ports, including disconnected ports.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_inputs = R"doc(Inline input-index to connection mapping for every built-in gate.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_kind = R"doc(Physical role.)doc";
 
@@ -3887,6 +3904,10 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_set_terminal_order 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_size = R"doc(Counts live objects.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_source = R"doc(Returns the declared source of an input, or no source if disconnected.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_spilled_inputs =
+R"doc(Input-index to connection mapping for objects with more than three
+inputs.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_swap_owned_state = R"doc(Swaps owned state without changing geometry.)doc";
 
@@ -4956,7 +4977,7 @@ Template Args:
     Lyt: Gate-level layout type with shifted rows or columns.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_additional_graph_attributes = R"doc(Return graph attributes.)doc";
 
@@ -5151,11 +5172,11 @@ Template Args:
     Lyt: Cartesian gate-level layout type.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_additional_graph_attributes = R"doc(Return graph attributes.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_additional_node_attributes = R"doc(Return node attributes.)doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_additional_tile_attributes = R"doc(Returns Graphviz attributes of the tile vertices.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_enforce_topology = R"doc(Format the grid topology.)doc";
 
@@ -5166,9 +5187,9 @@ Template Args:
     Lyt: Hexagonal gate-level layout type.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_additional_node_attributes = R"doc(Return node attributes.)doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_additional_tile_attributes = R"doc(Returns Graphviz attributes of the tile vertices.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_rank_separation = R"doc(Define the drawer configuration.)doc";
 
@@ -5180,9 +5201,9 @@ Template Args:
     Lyt: Shifted Cartesian gate-level layout type.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_additional_node_attributes = R"doc(Return node attributes.)doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_additional_tile_attributes = R"doc(Returns Graphviz attributes of the tile vertices.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_rank_separation = R"doc(Define the drawer configuration.)doc";
 
@@ -5240,9 +5261,9 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_print_node_to_tile_assignments =
-R"doc(Prints every node of a gate-level layout with the tile it occupies and
-the tiles of its fanins and fanouts. This is a debugging aid; the
+static const char *mkd_doc_fiction_layouts_io_print_object_to_tile_assignments =
+R"doc(Prints every object of a gate-level layout with the tile it occupies
+and the tiles of its fanins and fanouts. This is a debugging aid; the
 output format is not stable.
 
 Args:
@@ -5254,9 +5275,9 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_print_tile_to_node_assignments =
-R"doc(Prints every tile of a gate-level layout with the node it holds, if
-any, and the tiles of that node's fanins and fanouts. This is a
+static const char *mkd_doc_fiction_layouts_io_print_tile_to_object_assignments =
+R"doc(Prints every tile of a gate-level layout with the object it holds, if
+any, and the tiles of that object's fanins and fanouts. This is a
 debugging aid; the output format is not stable.
 
 Args:
@@ -5345,11 +5366,11 @@ Template Args:
     Lyt: Gate-level layout type.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_additional_graph_attributes = R"doc(Return graph attributes.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_additional_node_attributes = R"doc(Return node attributes.)doc";
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_additional_tile_attributes = R"doc(Returns Graphviz attributes of the tile vertices.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_columns = R"doc(List tile labels by column.)doc";
 
@@ -5783,7 +5804,10 @@ R"doc(Layout-local object identity. A removed object's generation cannot
 identify its replacement.
 
 Copies preserve identities; use an identity only with the layout that
-supplied it or its copy.)doc";
+supplied it or its copy. Generations detect slot reuse within that
+contents lifetime, not IDs from unrelated layouts. Whole-layout
+assignment invalidates destination handles. Callers must not use
+transferred IDs with a moved-from layout after its reuse.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_object_id_generation = R"doc(Slot generation; zero does not identify a live object.)doc";
 
@@ -7847,7 +7871,7 @@ clocking, its clock zones are the library's tiles and follow the gate-
 level clocking, and, if it has synchronization elements, each clock
 zone receives the synchronization delay of its gate tile. The delay
 therefore also covers cells that are added to the zone later, e.g.,
-via cells. Input and output cells carry the names of their nodes. An
+via cells. Input and output cells carry the names of their objects. An
 SiDB layout lies on the H-Si(100)-2x1 lattice.
 
 May pass through, and thereby throw, an
@@ -8221,7 +8245,7 @@ Args:
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_assign_gate =
 R"doc(Assigns a gate implementation to the cells of its tile. Input and
-output cells of a cell grid receive the node name. If the layout has
+output cells of a cell grid receive the object name. If the layout has
 synchronization elements, the tile's synchronization delay goes to the
 clock zone that contains the tile; a ground wire and a crossing wire
 share one clock zone, which keeps the larger delay.
@@ -8229,7 +8253,7 @@ share one clock zone, which keeps the larger delay.
 Args:
     c: Top-left cell of the tile where the gate is placed.
     g: Gate implementation.
-    n: Corresponding node in the gate-level layout.
+    n: Corresponding object in the gate-level layout.
 
 )doc";
 
@@ -8268,7 +8292,7 @@ static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_imp
 R"doc(Counts live objects, or skips the scan without a callback.
 
 Returns:
-    Number of nodes mapped to cell implementations.
+    Number of objects mapped to cell implementations.
 
 )doc";
 
@@ -18623,7 +18647,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
@@ -24998,7 +25022,8 @@ parameterization includes thresholds for the maximum number of output
 each node and fanout is allowed to have.
 
 The returned network is newly created from scratch because its type
-`NtkDest` may differ from `NtkSrc`.
+`NtkDest` may differ from `NtkSrc`. Repeated nonconstant inputs use
+distinct routing branches when `NtkDest` preserves buffer nodes.
 
 Args:
     ntk_src: The input logic network.
@@ -26949,8 +26974,8 @@ Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO
 M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
 Springer Nature in 2022.
 
-The complexity of this function is :math:`\mathcal{O}(|T|)` where
-:math:`T` is the set of all occupied tiles in `lyt`.
+The complexity is :math:`\mathcal{O}(|V| + |E|)` for objects and
+connections in the output dependency cones.
 
 Args:
     lyt: The gate-level layout whose CP and TP are desired.
@@ -26971,23 +26996,23 @@ static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl =
 R"doc(Counts supported gate predicates through public node or object
 iteration. @tparam Ntk Network or layout.)doc";
 
-static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_gate_types_impl =
-R"doc(Stores the operand and statistics without copying. @param src Network
-or layout. @param st Counts.
-
-)doc";
-
-static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_node =
-R"doc(Counts one node through the predicates its operand supports.
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_gate =
+R"doc(Counts one gate or wire through the predicates its operand supports.
 
 Args:
-    n: Node to classify.
+    n: Gate or wire to classify.
 
 Template Args:
     Node: Network node or native layout object identity.
 
 Returns:
-    `true` to continue node iteration.
+    `true` to continue iteration.
+
+)doc";
+
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_gate_types_impl =
+R"doc(Stores the operand and statistics without copying. @param src Network
+or layout. @param st Counts.
 
 )doc";
 
