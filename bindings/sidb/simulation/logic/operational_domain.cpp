@@ -26,8 +26,8 @@
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <tuple>
 #include <utility>
@@ -56,6 +56,22 @@ namespace pyfiction
 
 namespace detail
 {
+
+/**
+ * Buffers behind the NumPy arrays of `operational_domain.to_numpy`. The operational flags are bytes because
+ * `std::vector<bool>` has no contiguous storage.
+ */
+struct numpy_buffers
+{
+    /**
+     * Row-major (points, dimensions) parameter values.
+     */
+    std::vector<double> coordinates;
+    /**
+     * One flag per point; 1 marks an operational point.
+     */
+    std::vector<std::uint8_t> operational;
+};
 
 /**
  * Registers the operational domain and critical temperature domain algorithms on `sidb_layout`.
@@ -389,31 +405,30 @@ void operational_domain(nanobind::module_& m)
                 const auto points     = self.size();
                 const auto dimensions = self.get_number_of_dimensions();
 
-                auto coordinates = std::make_unique<double[]>(points * dimensions);
-                auto operational = std::make_unique<bool[]>(points);
+                auto buffers = std::make_unique<detail::numpy_buffers>();
+                buffers->coordinates.reserve(points * dimensions);
+                buffers->operational.reserve(points);
 
-                std::size_t row = 0;
                 self.for_each(
-                    [&](const auto& key, const auto& value)
+                    [&buffers](const auto& key, const auto& value)
                     {
                         const auto& parameters = key.get_parameters();
-                        std::ranges::copy(parameters, coordinates.get() + row * dimensions);
-                        operational[row++] = std::get<0>(value) == operational_status::OPERATIONAL;
+                        buffers->coordinates.insert(buffers->coordinates.end(), parameters.begin(), parameters.end());
+                        buffers->operational.push_back(std::get<0>(value) == operational_status::OPERATIONAL);
                     });
 
-                // the capsules own the buffers from here on and free them with the arrays
-                auto* const       coordinates_data = coordinates.release();
-                auto* const       operational_data = operational.release();
-                const py::capsule coordinates_owner{coordinates_data,
-                                                    [](void* p) noexcept { delete[] static_cast<double*>(p); }};
-                const py::capsule operational_owner{operational_data,
-                                                    [](void* p) noexcept { delete[] static_cast<bool*>(p); }};
+                // the capsule owns the buffers from here on; both arrays keep it alive and free it together
+                auto* const       data = buffers.release();
+                const py::capsule owner{data, [](void* p) noexcept
+                                        {
+                                            // the capsule is the owner and runs this when the last array dies
+                                            // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+                                            delete static_cast<detail::numpy_buffers*>(p);
+                                        }};
 
                 return std::make_tuple(
-                    py::ndarray<py::numpy, double, py::ndim<2>>{coordinates_data,
-                                                                {points, dimensions},
-                                                                coordinates_owner},
-                    py::ndarray<py::numpy, bool, py::ndim<1>>{operational_data, {points}, operational_owner});
+                    py::ndarray<py::numpy, double, py::ndim<2>>{data->coordinates.data(), {points, dimensions}, owner},
+                    py::ndarray<py::numpy, bool, py::ndim<1>>{data->operational.data(), {points}, owner});
             },
             "Returns the domain as NumPy arrays: a float64 array of shape (points, dimensions) holding the sampled "
             "parameter values in dimension order, and a boolean array of length points that is True where the "
