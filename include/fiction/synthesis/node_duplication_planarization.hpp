@@ -1433,7 +1433,7 @@ node_duplication_planarization(const Ntk& ntk, const node_duplication_planarizat
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
     static_assert(mockturtle::has_depth_v<Ntk>, "Ntk does not implement the depth method");
 
-    if (!is_balanced(ntk, {.unify_outputs = true}))
+    if (!is_balanced(ntk, {.unify_outputs = true, .buffer_constant_outputs = false}))
     {
         throw std::invalid_argument("The network must be balanced with unified outputs before planarization");
     }

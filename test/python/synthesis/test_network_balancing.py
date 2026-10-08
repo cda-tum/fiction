@@ -31,3 +31,14 @@ def test_balancing(mux21: technology_network) -> None:
     balanced_unify = network_balancing(mux21, unify_params)
     assert balanced_unify.num_gates() == 6
     assert is_balanced(balanced_unify, unify_params)
+
+
+def test_balancing_keeps_constant_outputs_unbuffered_on_request(mux21: technology_network) -> None:
+    params = network_balancing_params()
+    assert params.buffer_constant_outputs is True
+
+    params.unify_outputs = True
+    params.buffer_constant_outputs = False
+    balanced = network_balancing(mux21, params)
+    assert balanced.num_gates() == 6
+    assert is_balanced(balanced, params)

@@ -211,7 +211,8 @@ int main(const int argc, const char** argv)  // NOLINT
             const auto ntk = mockturtle::cleanup_dangling(read_network(benchmark));
 
             network_balancing_params b_ps{};
-            b_ps.unify_outputs = true;
+            b_ps.unify_outputs           = true;
+            b_ps.buffer_constant_outputs = false;
 
             const auto balanced = network_balancing<technology_network>(ntk, b_ps);
 

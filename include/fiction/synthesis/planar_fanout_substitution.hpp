@@ -435,7 +435,7 @@ template <typename Ntk>
         throw std::invalid_argument("The fanout degree must be at least 2");
     }
 
-    if (!is_balanced(ntk, {.unify_outputs = true}))
+    if (!is_balanced(ntk, {.unify_outputs = true, .buffer_constant_outputs = false}))
     {
         throw std::invalid_argument("The network must be balanced with unified outputs before fanout substitution");
     }

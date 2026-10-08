@@ -119,9 +119,17 @@ TEST_CASE("Constant primary outputs are not buffered when unifying outputs", "[n
     ntk.create_po(a2);
     ntk.create_po(ntk.get_constant(false));
 
-    const auto balanced = network_balancing<technology_network>(ntk, {.unify_outputs = true});
+    // by default, the constant output is buffered up to the output level like any other
+    const auto buffered = network_balancing<technology_network>(ntk, {.unify_outputs = true});
 
-    CHECK(is_balanced(balanced, {.unify_outputs = true}));
+    CHECK(is_balanced(buffered, {.unify_outputs = true}));
+    CHECK(buffered.size() == ntk.size() + 1 + 2);
+
+    const auto balanced =
+        network_balancing<technology_network>(ntk, {.unify_outputs = true, .buffer_constant_outputs = false});
+
+    CHECK(is_balanced(balanced, {.unify_outputs = true, .buffer_constant_outputs = false}));
+    CHECK(!is_balanced(balanced, {.unify_outputs = true}));
     CHECK(balanced.num_pos() == 2);
 
     uint32_t constant_pos = 0;

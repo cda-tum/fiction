@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 def _unified() -> network_balancing_params:
     params = network_balancing_params()
     params.unify_outputs = True
+    params.buffer_constant_outputs = False
     return params
 
 

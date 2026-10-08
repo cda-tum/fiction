@@ -57,7 +57,8 @@ template <typename Ntk>
 mutable_rank_view<technology_network> prepare(const Ntk& ntk)
 {
     network_balancing_params ps{};
-    ps.unify_outputs = true;
+    ps.unify_outputs           = true;
+    ps.buffer_constant_outputs = false;
 
     return mutable_rank_view{network_balancing<technology_network>(fanout_substitution<technology_network>(ntk), ps)};
 }
@@ -69,7 +70,8 @@ template <typename Ntk>
 mutable_rank_view<technology_network> rank_without_substitution(const Ntk& ntk)
 {
     network_balancing_params ps{};
-    ps.unify_outputs = true;
+    ps.unify_outputs           = true;
+    ps.buffer_constant_outputs = false;
 
     return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
 }
@@ -333,7 +335,8 @@ TEST_CASE("Consecutive consumers share one copy", "[node-duplication-planarizati
     tec.create_po(f3);
 
     network_balancing_params ps{};
-    ps.unify_outputs = true;
+    ps.unify_outputs           = true;
+    ps.buffer_constant_outputs = false;
 
     // balance without fanout substitution: the input keeps nodes with fanout greater than one
     const mutable_rank_view ranked{network_balancing<technology_network>(tec, ps)};
@@ -400,7 +403,7 @@ TEST_CASE("Hybrid strategy keeps crossings only where gadgets are cheaper", "[no
 
             // the hybrid result is equivalent and balanced, and crossing-free iff no level kept its crossings
             check_equivalent(ntk, hybrid);
-            CHECK(is_balanced(hybrid, {.unify_outputs = true}));
+            CHECK(is_balanced(hybrid, {.unify_outputs = true, .buffer_constant_outputs = false}));
             CHECK((count_crossings(hybrid) == 0) == (st.num_crossing_levels == 0));
             CHECK((st.num_crossings == 0) == (st.num_crossing_levels == 0));
 
@@ -412,7 +415,7 @@ TEST_CASE("Hybrid strategy keeps crossings only where gadgets are cheaper", "[no
             const auto                        planar = crossing_gate_planarization(hybrid, cg_ps, &cg_st);
 
             check_planar_and_equivalent(ntk, planar);
-            CHECK(is_balanced(planar, {.unify_outputs = true}));
+            CHECK(is_balanced(planar, {.unify_outputs = true, .buffer_constant_outputs = false}));
             CHECK(cg_st.num_crossings >= st.num_crossings);
         }
     }
@@ -500,7 +503,7 @@ TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")
         const auto planar = crossing_gate_planarization(hybrid, cg_ps);
 
         check_planar_and_equivalent(ntk, planar);
-        CHECK(is_balanced(planar, {.unify_outputs = true}));
+        CHECK(is_balanced(planar, {.unify_outputs = true, .buffer_constant_outputs = false}));
     }
 }
 TEST_CASE("Balanced networks without unified outputs are rejected", "[node-duplication-planarization]")
@@ -516,7 +519,7 @@ TEST_CASE("Balanced networks without unified outputs are rejected", "[node-dupli
 
     const mutable_rank_view ranked{network_balancing<technology_network>(tec)};
     REQUIRE(is_balanced(ranked));
-    REQUIRE(!is_balanced(ranked, {.unify_outputs = true}));
+    REQUIRE(!is_balanced(ranked, {.unify_outputs = true, .buffer_constant_outputs = false}));
 
     CHECK_THROWS_AS(node_duplication_planarization(ranked), std::invalid_argument);
 }

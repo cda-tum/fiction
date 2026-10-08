@@ -26327,6 +26327,12 @@ Note:
 
 static const char *mkd_doc_fiction_synthesis_network_balancing_params = R"doc(Parameters for the network balancing algorithm.)doc";
 
+static const char *mkd_doc_fiction_synthesis_network_balancing_params_buffer_constant_outputs =
+R"doc(Whether primary outputs driven by a constant receive a buffer chain
+when unifying outputs. Placement flows that do not place constants set
+this to `false`: such outputs then stay unbuffered, and `is_balanced`
+ignores them.)doc";
+
 static const char *mkd_doc_fiction_synthesis_network_balancing_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
 static const char *mkd_doc_fiction_synthesis_network_balancing_params_unify_outputs = R"doc(Flag to indicate that all output nodes should be in the same rank.)doc";

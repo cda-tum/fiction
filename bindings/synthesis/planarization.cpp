@@ -210,7 +210,7 @@ void planarization(nanobind::module_& m)
             // the pipeline needs a balanced network with unified outputs and ranks; the ranks follow the node order.
             // The result's node order is its rank order, and every input is reported with the index of the original
             // input it stands for, so that virtual inputs can be tied to their real ones.
-            if (!fiction::synthesis::is_balanced(network, {.unify_outputs = true}))
+            if (!fiction::synthesis::is_balanced(network, {.unify_outputs = true, .buffer_constant_outputs = false}))
             {
                 throw std::invalid_argument("The network must be balanced with unified outputs; see network_balancing");
             }

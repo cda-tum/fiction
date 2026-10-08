@@ -43,6 +43,11 @@ struct network_balancing_params
      * Flag to indicate that all output nodes should be in the same rank.
      */
     bool unify_outputs = false;
+    /**
+     * Whether primary outputs driven by a constant receive a buffer chain when unifying outputs. Placement flows that
+     * do not place constants set this to `false`: such outputs then stay unbuffered, and `is_balanced` ignores them.
+     */
+    bool buffer_constant_outputs = true;
     /** @brief Reports completed work in each bounded phase. */
     utils::progress_callback on_progress{};
 };
@@ -133,8 +138,7 @@ class network_balancing_impl
 
                 auto tgt_po = ntk_topo.is_complemented(po) ? balanced.create_not(tgt_signal) : tgt_signal;
 
-                // constants have no level and are never buffered
-                if (ps.unify_outputs && !ntk_topo.is_constant(ntk_topo.get_node(po)))
+                if (ps.unify_outputs && (ps.buffer_constant_outputs || !ntk_topo.is_constant(ntk_topo.get_node(po))))
                 {
                     insert_buf_chain(balanced, max_po_level - po_levels[i], tgt_po);
                 }
@@ -196,13 +200,13 @@ class is_balanced_impl
 
         if (ps.unify_outputs)
         {
-            // constants have no level, so only outputs driven by gates or primary inputs must agree
+            // unbuffered constant outputs do not take part in the comparison
             std::vector<uint32_t> po_levels{};
             po_levels.reserve(ntk.num_pos());
             ntk.foreach_po(
                 [this, &po_levels](const auto& po)
                 {
-                    if (const auto n = ntk.get_node(po); !ntk.is_constant(n))
+                    if (const auto n = ntk.get_node(po); ps.buffer_constant_outputs || !ntk.is_constant(n))
                     {
                         po_levels.push_back(ntk_depth.level(n));
                     }

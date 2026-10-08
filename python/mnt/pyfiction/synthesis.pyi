@@ -446,6 +446,17 @@ class network_balancing_params:
 
     @unify_outputs.setter
     def unify_outputs(self, arg: bool, /) -> None: ...
+    @property
+    def buffer_constant_outputs(self) -> bool:
+        """
+        Whether primary outputs driven by a constant receive a buffer chain
+        when unifying outputs. Placement flows that do not place constants set
+        this to `false`: such outputs then stay unbuffered, and `is_balanced`
+        ignores them.
+        """
+
+    @buffer_constant_outputs.setter
+    def buffer_constant_outputs(self, arg: bool, /) -> None: ...
 
 def network_balancing(
     network: mnt.pyfiction.networks.technology_network, params: network_balancing_params = ...

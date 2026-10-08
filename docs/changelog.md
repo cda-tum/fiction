@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     level where crossing gates are cheaper, decided by a budgeted lookahead or by weighted cone sizes
   - `synthesis::crossing_gate_planarization` replaces the crossings of a balanced, ranked network with XOR or
     AND-OR-NOT gadgets
+  - `synthesis::network_balancing_params::buffer_constant_outputs` lets a flow that does not place constants keep
+    constant outputs unbuffered when unifying outputs; `is_balanced` then ignores them
   - `synthesis::planar_fanout_substitution` and `synthesis::planar_rebalancing` substitute fanouts and minimize
     buffers while keeping ranks and planarity
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
@@ -540,8 +542,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `convert_network` keeps the inverters of a technology network when the target network
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
   - `synthesis::delete_virtual_pis` maps outputs driven by a virtual primary input to the real one
-  - `synthesis::network_balancing` leaves constant outputs unbuffered when unifying outputs, and `is_balanced`
-    ignores them
   - `networks::views::mutable_rank_view` skips dangling nodes instead of throwing when initializing ranks
 
 - Build system:

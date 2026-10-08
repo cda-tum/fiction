@@ -56,7 +56,8 @@ template <typename Ntk>
 mutable_rank_view<technology_network> rank(const Ntk& ntk)
 {
     network_balancing_params ps{};
-    ps.unify_outputs = true;
+    ps.unify_outputs           = true;
+    ps.buffer_constant_outputs = false;
 
     return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
 }
@@ -103,7 +104,7 @@ template <typename Spec, typename Impl>
 void check_contract(const Spec& spec, const Impl& impl, const uint32_t degree = 2)
 {
     CHECK(count_crossings(impl) == 0);
-    CHECK(is_balanced(impl, {.unify_outputs = true}));
+    CHECK(is_balanced(impl, {.unify_outputs = true, .buffer_constant_outputs = false}));
     CHECK(is_fanout_substituted(impl, {.degree = degree}));
     CHECK(mockturtle::cleanup_dangling(impl).size() == impl.size());
     check_equivalent(spec, impl);
@@ -178,8 +179,8 @@ TEST_CASE("Fanout-substituted inputs are accepted", "[planarization]")
 {
     const auto ntk = blueprints::full_adder_network<mockturtle::aig_network>();
 
-    const auto ranked = mutable_rank_view{
-        network_balancing<technology_network>(fanout_substitution<technology_network>(ntk), {.unify_outputs = true})};
+    const auto ranked = mutable_rank_view{network_balancing<technology_network>(
+        fanout_substitution<technology_network>(ntk), {.unify_outputs = true, .buffer_constant_outputs = false})};
 
     planarization_stats st{};
     const auto          result = planarization(ranked, {}, &st);
