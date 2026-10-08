@@ -23,12 +23,11 @@
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/planarization.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <fmt/format.h>
 #include <kitty/partial_truth_table.hpp>
 #include <mockturtle/algorithms/cleanup.hpp>
-#include <mockturtle/algorithms/equivalence_checking.hpp>
-#include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -46,6 +45,7 @@ using namespace fiction::networks::io;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::physical_design;
+using namespace fiction::verification;
 
 namespace
 {
@@ -103,17 +103,7 @@ std::pair<bool, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
         return {reference == candidate, "simulation"};
     }
 
-    const auto miter = mockturtle::miter<technology_network>(ntk, lyt);
-
-    if (!miter.has_value())
-    {
-        return {false, "miter failed"};
-    }
-
-    mockturtle::equivalence_checking_stats st{};
-    const auto                             cec = mockturtle::equivalence_checking(*miter, {}, &st);
-
-    return {cec.value_or(false), "SAT"};
+    return {equivalence_checking(ntk, lyt) != eq_type::NO, "SAT"};
 }
 
 }  // namespace
@@ -151,8 +141,9 @@ int main(const int argc, const char** argv)  // NOLINT
             const auto ntk = mockturtle::cleanup_dangling(read_network(benchmark));
 
             network_balancing_params b_ps{};
-            b_ps.unify_outputs  = true;
-            const auto balanced = network_balancing<technology_network>(ntk, b_ps);
+            b_ps.unify_outputs           = true;
+            b_ps.buffer_constant_outputs = false;
+            const auto balanced          = network_balancing<technology_network>(ntk, b_ps);
 
             if (balanced.size() > MAX_BALANCED_NODES)
             {
