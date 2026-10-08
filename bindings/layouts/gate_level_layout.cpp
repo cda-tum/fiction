@@ -560,13 +560,15 @@ void gate_level_layout(nanobind::module_& m)
         .def(py::init<uint32_t, uint32_t>(), py::arg("index"), py::arg("generation"))
         .def_ro("index", &object_id::index)
         .def_ro("generation", &object_id::generation)
-        .def("__eq__", [](const object_id a, const object_id b) { return a == b; })
+        .def(
+            "__eq__", [](const object_id a, const object_id b) { return a == b; }, py::is_operator())
         .def("__hash__", [](const object_id id) { return std::hash<object_id>{}(id); });
     py::class_<input_port>(m, "LayoutInputPort", "An object's ordered input port.")
         .def(py::init<object_id, uint32_t>(), py::arg("object"), py::arg("index"))
         .def_ro("object", &input_port::object)
         .def_ro("index", &input_port::index)
-        .def("__eq__", [](const input_port a, const input_port b) { return a == b; })
+        .def(
+            "__eq__", [](const input_port a, const input_port b) { return a == b; }, py::is_operator())
         .def("__hash__", [](const input_port input) { return py::hash(py::make_tuple(input.object, input.index)); });
 
     /**

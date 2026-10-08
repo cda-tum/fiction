@@ -702,6 +702,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
+    Mutable extents are unhashable.
   - `LayoutInputPort` now hashes by object identity and input index for set and dictionary keys.
   - Gate-layout editing methods expose their API contracts in Python docstrings.
   - Python port collections now reuse input counts and reserve sink storage.

@@ -9,11 +9,13 @@
 from __future__ import annotations
 
 import copy
+import operator
 from typing import TYPE_CHECKING, cast
 
 import pytest
 
 from mnt.pyfiction.layouts import (
+    Extent,
     LayoutInputPort,
     LayoutObjectId,
     arrangement,
@@ -416,3 +418,39 @@ def test_layout_input_port_value_keys() -> None:
     assert hash(port) == hash(equal_port)
     assert len({port, equal_port, other_index, other_generation}) == 3
     assert {port: "source"}[equal_port] == "source"
+
+
+@pytest.mark.parametrize(
+    ("value", "equal_value", "different_value"),
+    [
+        pytest.param(LayoutObjectId(0, 1), LayoutObjectId(0, 1), LayoutObjectId(0, 2), id="object_id"),
+        pytest.param(
+            LayoutInputPort(LayoutObjectId(0, 1), 0),
+            LayoutInputPort(LayoutObjectId(0, 1), 0),
+            LayoutInputPort(LayoutObjectId(0, 1), 1),
+            id="input_port",
+        ),
+        pytest.param(Extent(1, 2), Extent(1, 2), Extent(2, 2), id="extent"),
+    ],
+)
+@pytest.mark.parametrize("unrelated", [None, 0, "identity", object()])
+def test_layout_values_compare_with_unrelated_values(
+    value: LayoutObjectId | LayoutInputPort | Extent,
+    equal_value: LayoutObjectId | LayoutInputPort | Extent,
+    different_value: LayoutObjectId | LayoutInputPort | Extent,
+    unrelated: object,
+) -> None:
+    """Layout values compare unequal to unrelated operands without raising."""
+    assert operator.eq(value, unrelated) is False
+    assert operator.eq(unrelated, value) is False
+    assert operator.eq(value, equal_value) is True
+    assert operator.eq(value, different_value) is False
+
+
+def test_mutable_layout_extent_is_unhashable() -> None:
+    """Mutable extents cannot serve as hash keys."""
+    extent = Extent(1, 2)
+    extent.width = 3
+    assert extent.width == 3
+    with pytest.raises(TypeError, match="unhashable"):
+        hash(extent)

@@ -189,6 +189,8 @@ class Extent:
     def layers(self, arg: int, /) -> None: ...
     def __eq__(self, other: Extent | tuple[int, int] | tuple[int, int, int]) -> bool: ...
 
+    __hash__: None = None
+
 def area(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes width times height.

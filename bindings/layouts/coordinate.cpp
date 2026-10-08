@@ -152,7 +152,8 @@ void coordinate(nanobind::module_& m)
         .def_prop_rw(
             "layers", [](const py_extent& self) { return self.layers; }, [](py_extent& self, const int64_t value)
             { self.layers = py_extent{0, 0, value}.layers; }, "Checked number of layers.")
-        .def("__eq__", &py_extent::operator==, py::arg("other"));
+        .def("__eq__", &py_extent::operator==, py::arg("other"), py::is_operator())
+        .attr("__hash__") = py::none();
 
     py::implicitly_convertible<py::tuple, py_extent>();
 }
