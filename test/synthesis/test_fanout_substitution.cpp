@@ -40,6 +40,13 @@ using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
 
+/**
+ * @brief Checks fanout substitution size and Boolean behavior.
+ * @tparam Ntk Source logic network type.
+ * @param ntk Source logic network.
+ * @param ps Fanout substitution parameters.
+ * @param size Expected destination size.
+ */
 template <typename Ntk>
 void substitute(const Ntk& ntk, const fanout_substitution_params& ps, const uint32_t size)
 {

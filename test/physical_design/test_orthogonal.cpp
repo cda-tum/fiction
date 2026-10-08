@@ -56,15 +56,19 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
     technology_network ntk{};
     const auto         a        = ntk.create_pi();
     const auto         function = GENERATE(0, 1, 2);
-    auto               output   = ntk.create_xor(a, a);
-    if (function == 0)
+    /** @brief Gate with repeated input ports for the selected Boolean function. */
+    const auto output = [&ntk, a, function]()
     {
-        output = ntk.create_and(a, a);
-    }
-    else if (function == 1)
-    {
-        output = ntk.create_or(a, a);
-    }
+        if (function == 0)
+        {
+            return ntk.create_and(a, a);
+        }
+        if (function == 1)
+        {
+            return ntk.create_or(a, a);
+        }
+        return ntk.create_xor(a, a);
+    }();
     if (GENERATE(false, true))
     {
         ntk.create_po(a);
