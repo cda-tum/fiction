@@ -74,6 +74,7 @@ def plane(session: Session, args: argparse.Namespace) -> Result:
 
     balancing = network_balancing_params()
     balancing.unify_outputs = True
+    balancing.buffer_constant_outputs = False
     balanced = network_balancing(network, balancing)
 
     planarization_parameters = planarization_params()

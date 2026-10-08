@@ -59,7 +59,8 @@ template <typename Ntk>
 mutable_rank_view<technology_network> rank(const Ntk& ntk)
 {
     network_balancing_params ps{};
-    ps.unify_outputs = true;
+    ps.unify_outputs           = true;
+    ps.buffer_constant_outputs = false;
 
     return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
 }

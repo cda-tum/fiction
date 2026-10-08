@@ -31,6 +31,7 @@ def _planar(network: technology_network) -> technology_network:
     """
     params = network_balancing_params()
     params.unify_outputs = True
+    params.buffer_constant_outputs = False
     planar, _ = planarization(network_balancing(network, params))
     return planar
 
@@ -79,5 +80,6 @@ def test_plane_rejects_crossings(mux21: technology_network) -> None:
     # the balanced network is ranked by node order, which still has crossings
     params = network_balancing_params()
     params.unify_outputs = True
+    params.buffer_constant_outputs = False
     with pytest.raises(ValueError, match="crossings"):
         plane(network_balancing(mux21, params))
