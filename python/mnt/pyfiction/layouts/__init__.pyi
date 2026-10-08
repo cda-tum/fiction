@@ -2168,6 +2168,7 @@ class LayoutInputPort:
     @property
     def index(self) -> int: ...
     def __eq__(self, arg: LayoutInputPort, /) -> bool: ...
+    def __hash__(self) -> int: ...
 
 class cartesian_gate_layout(cartesian_layout):
     """
@@ -2481,7 +2482,9 @@ class cartesian_gate_layout(cartesian_layout):
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+        """Creates a primary output with its input disconnected."""
+
     def is_pi(self, n: LayoutObjectId) -> bool:
         """Returns whether an object is a primary input."""
 
@@ -2575,7 +2578,9 @@ class cartesian_gate_layout(cartesian_layout):
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+        """Creates a wire with its input disconnected."""
+
     def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a NOT gate."""
 
@@ -2669,27 +2674,87 @@ class cartesian_gate_layout(cartesian_layout):
     def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
-    def size(self) -> int: ...
-    def fanin_size(self, object: LayoutObjectId) -> int: ...
-    def fanout_size(self, object: LayoutObjectId) -> int: ...
-    def input_count(self, object: LayoutObjectId) -> int: ...
-    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
-    def contains(self, object: LayoutObjectId) -> bool: ...
-    def get_tile(self, object: LayoutObjectId) -> coordinate: ...
-    def source(self, input: LayoutInputPort) -> LayoutObjectId | None: ...
-    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
-    def disconnect(self, input: LayoutInputPort) -> None: ...
-    def remove(self, object: LayoutObjectId) -> None: ...
+    def size(self) -> int:
+        """Counts live objects."""
+
+    def fanin_size(self, object: LayoutObjectId) -> int:
+        """Counts connected input slots, irrespective of physical legality."""
+
+    def fanout_size(self, object: LayoutObjectId) -> int:
+        """Counts sink input ports, including multiple ports on one object."""
+
+    def input_count(self, object: LayoutObjectId) -> int:
+        """Returns the number of input slots, including disconnected slots."""
+
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None:
+        """Finds the object at a coordinate; empty coordinates have no identity."""
+
+    def contains(self, object: LayoutObjectId) -> bool:
+        """Returns whether this identity names a live object."""
+
+    def get_tile(self, object: LayoutObjectId) -> coordinate:
+        """
+        Returns the object's coordinate. @throws std::invalid_argument If the
+        identity is stale.
+        """
+
+    def source(self, input: LayoutInputPort) -> LayoutObjectId | None:
+        """Returns the declared source of an input, or no source if disconnected."""
+
+    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None:
+        """
+        Connects an output to an ordered input, replacing the input's existing
+        source.
+
+        Port and identity checks precede mutation. Adjacency, clocking, and
+        geometry need not be valid during editing.
+        """
+
+    def disconnect(self, input: LayoutInputPort) -> None:
+        """Disconnects one input without changing the indices of other inputs."""
+
+    def remove(self, object: LayoutObjectId) -> None:
+        """
+        Removes an object and disconnects all inputs and sinks. Stale
+        identities reject.
+        """
+
     def move_object(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId: ...
-    def pi_at(self, index: int) -> LayoutObjectId: ...
-    def po_at(self, index: int) -> LayoutObjectId: ...
-    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    def set_name(self, object: LayoutObjectId, name: str) -> None: ...
-    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]: ...
-    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]: ...
+    ) -> LayoutObjectId:
+        """Moves an object without changing its identity or connections."""
+
+    def pi_at(self, index: int) -> LayoutObjectId:
+        """Returns a primary input in declared interface order."""
+
+    def po_at(self, index: int) -> LayoutObjectId:
+        """Returns a primary output in declared interface order."""
+
+    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None:
+        """
+        Sets the complete input permutation. Invalid orders reject without
+        mutation.
+        """
+
+    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None:
+        """
+        Sets the complete output permutation. Invalid orders reject without
+        mutation.
+        """
+
+    def set_name(self, object: LayoutObjectId, name: str) -> None:
+        """Sets an object's name."""
+
+    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]:
+        """
+        Returns input sources in port-index order, including None for disconnected ports.
+        """
+
+    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
+        """
+        Returns the connected sink input ports, including repeated inputs of one object.
+        """
+
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """Removes the occupant of a coordinate if present."""
 
@@ -3377,7 +3442,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+        """Creates a primary output with its input disconnected."""
+
     def is_pi(self, n: LayoutObjectId) -> bool:
         """Returns whether an object is a primary input."""
 
@@ -3471,7 +3538,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+        """Creates a wire with its input disconnected."""
+
     def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a NOT gate."""
 
@@ -3565,27 +3634,87 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
-    def size(self) -> int: ...
-    def fanin_size(self, object: LayoutObjectId) -> int: ...
-    def fanout_size(self, object: LayoutObjectId) -> int: ...
-    def input_count(self, object: LayoutObjectId) -> int: ...
-    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
-    def contains(self, object: LayoutObjectId) -> bool: ...
-    def get_tile(self, object: LayoutObjectId) -> coordinate: ...
-    def source(self, input: LayoutInputPort) -> LayoutObjectId | None: ...
-    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
-    def disconnect(self, input: LayoutInputPort) -> None: ...
-    def remove(self, object: LayoutObjectId) -> None: ...
+    def size(self) -> int:
+        """Counts live objects."""
+
+    def fanin_size(self, object: LayoutObjectId) -> int:
+        """Counts connected input slots, irrespective of physical legality."""
+
+    def fanout_size(self, object: LayoutObjectId) -> int:
+        """Counts sink input ports, including multiple ports on one object."""
+
+    def input_count(self, object: LayoutObjectId) -> int:
+        """Returns the number of input slots, including disconnected slots."""
+
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None:
+        """Finds the object at a coordinate; empty coordinates have no identity."""
+
+    def contains(self, object: LayoutObjectId) -> bool:
+        """Returns whether this identity names a live object."""
+
+    def get_tile(self, object: LayoutObjectId) -> coordinate:
+        """
+        Returns the object's coordinate. @throws std::invalid_argument If the
+        identity is stale.
+        """
+
+    def source(self, input: LayoutInputPort) -> LayoutObjectId | None:
+        """Returns the declared source of an input, or no source if disconnected."""
+
+    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None:
+        """
+        Connects an output to an ordered input, replacing the input's existing
+        source.
+
+        Port and identity checks precede mutation. Adjacency, clocking, and
+        geometry need not be valid during editing.
+        """
+
+    def disconnect(self, input: LayoutInputPort) -> None:
+        """Disconnects one input without changing the indices of other inputs."""
+
+    def remove(self, object: LayoutObjectId) -> None:
+        """
+        Removes an object and disconnects all inputs and sinks. Stale
+        identities reject.
+        """
+
     def move_object(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId: ...
-    def pi_at(self, index: int) -> LayoutObjectId: ...
-    def po_at(self, index: int) -> LayoutObjectId: ...
-    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    def set_name(self, object: LayoutObjectId, name: str) -> None: ...
-    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]: ...
-    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]: ...
+    ) -> LayoutObjectId:
+        """Moves an object without changing its identity or connections."""
+
+    def pi_at(self, index: int) -> LayoutObjectId:
+        """Returns a primary input in declared interface order."""
+
+    def po_at(self, index: int) -> LayoutObjectId:
+        """Returns a primary output in declared interface order."""
+
+    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None:
+        """
+        Sets the complete input permutation. Invalid orders reject without
+        mutation.
+        """
+
+    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None:
+        """
+        Sets the complete output permutation. Invalid orders reject without
+        mutation.
+        """
+
+    def set_name(self, object: LayoutObjectId, name: str) -> None:
+        """Sets an object's name."""
+
+    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]:
+        """
+        Returns input sources in port-index order, including None for disconnected ports.
+        """
+
+    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
+        """
+        Returns the connected sink input ports, including repeated inputs of one object.
+        """
+
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """Removes the occupant of a coordinate if present."""
 
@@ -4273,7 +4402,9 @@ class hexagonal_gate_layout(hexagonal_layout):
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+        """Creates a primary output with its input disconnected."""
+
     def is_pi(self, n: LayoutObjectId) -> bool:
         """Returns whether an object is a primary input."""
 
@@ -4367,7 +4498,9 @@ class hexagonal_gate_layout(hexagonal_layout):
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId: ...
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+        """Creates a wire with its input disconnected."""
+
     def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
         """Creates a NOT gate."""
 
@@ -4461,27 +4594,87 @@ class hexagonal_gate_layout(hexagonal_layout):
     def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
-    def size(self) -> int: ...
-    def fanin_size(self, object: LayoutObjectId) -> int: ...
-    def fanout_size(self, object: LayoutObjectId) -> int: ...
-    def input_count(self, object: LayoutObjectId) -> int: ...
-    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None: ...
-    def contains(self, object: LayoutObjectId) -> bool: ...
-    def get_tile(self, object: LayoutObjectId) -> coordinate: ...
-    def source(self, input: LayoutInputPort) -> LayoutObjectId | None: ...
-    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None: ...
-    def disconnect(self, input: LayoutInputPort) -> None: ...
-    def remove(self, object: LayoutObjectId) -> None: ...
+    def size(self) -> int:
+        """Counts live objects."""
+
+    def fanin_size(self, object: LayoutObjectId) -> int:
+        """Counts connected input slots, irrespective of physical legality."""
+
+    def fanout_size(self, object: LayoutObjectId) -> int:
+        """Counts sink input ports, including multiple ports on one object."""
+
+    def input_count(self, object: LayoutObjectId) -> int:
+        """Returns the number of input slots, including disconnected slots."""
+
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None:
+        """Finds the object at a coordinate; empty coordinates have no identity."""
+
+    def contains(self, object: LayoutObjectId) -> bool:
+        """Returns whether this identity names a live object."""
+
+    def get_tile(self, object: LayoutObjectId) -> coordinate:
+        """
+        Returns the object's coordinate. @throws std::invalid_argument If the
+        identity is stale.
+        """
+
+    def source(self, input: LayoutInputPort) -> LayoutObjectId | None:
+        """Returns the declared source of an input, or no source if disconnected."""
+
+    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None:
+        """
+        Connects an output to an ordered input, replacing the input's existing
+        source.
+
+        Port and identity checks precede mutation. Adjacency, clocking, and
+        geometry need not be valid during editing.
+        """
+
+    def disconnect(self, input: LayoutInputPort) -> None:
+        """Disconnects one input without changing the indices of other inputs."""
+
+    def remove(self, object: LayoutObjectId) -> None:
+        """
+        Removes an object and disconnects all inputs and sinks. Stale
+        identities reject.
+        """
+
     def move_object(
         self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId: ...
-    def pi_at(self, index: int) -> LayoutObjectId: ...
-    def po_at(self, index: int) -> LayoutObjectId: ...
-    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None: ...
-    def set_name(self, object: LayoutObjectId, name: str) -> None: ...
-    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]: ...
-    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]: ...
+    ) -> LayoutObjectId:
+        """Moves an object without changing its identity or connections."""
+
+    def pi_at(self, index: int) -> LayoutObjectId:
+        """Returns a primary input in declared interface order."""
+
+    def po_at(self, index: int) -> LayoutObjectId:
+        """Returns a primary output in declared interface order."""
+
+    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None:
+        """
+        Sets the complete input permutation. Invalid orders reject without
+        mutation.
+        """
+
+    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None:
+        """
+        Sets the complete output permutation. Invalid orders reject without
+        mutation.
+        """
+
+    def set_name(self, object: LayoutObjectId, name: str) -> None:
+        """Sets an object's name."""
+
+    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]:
+        """
+        Returns input sources in port-index order, including None for disconnected ports.
+        """
+
+    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
+        """
+        Returns the connected sink input ports, including repeated inputs of one object.
+        """
+
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """Removes the occupant of a coordinate if present."""
 

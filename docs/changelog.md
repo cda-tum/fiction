@@ -702,6 +702,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - `LayoutInputPort` now hashes by object identity and input index for set and dictionary keys.
+  - Gate-layout editing methods expose their API contracts in Python docstrings.
   - Progress parameters now release unreachable callback cycles owned by parameter values.
     Borrowed nested parameters preserve callbacks in live owners.
   - `copy.copy` and `copy.deepcopy` now preserve gate objects and independently copy layout metadata. Layout simulation extracts ordered logic and rejects incomplete output cones.

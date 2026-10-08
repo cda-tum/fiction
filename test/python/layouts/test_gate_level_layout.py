@@ -404,3 +404,15 @@ def test_unknown_clocking_scheme_rejects_construction(make_layout: Callable[[], 
     """Every gate-layout geometry rejects an unknown scheme with ValueError."""
     with pytest.raises(ValueError, match="clocking scheme"):
         make_layout()
+
+
+def test_layout_input_port_value_keys() -> None:
+    """Equal immutable input ports identify one set entry and dictionary key."""
+    port = LayoutInputPort(LayoutObjectId(3, 2), 1)
+    equal_port = LayoutInputPort(LayoutObjectId(3, 2), 1)
+    other_index = LayoutInputPort(LayoutObjectId(3, 2), 0)
+    other_generation = LayoutInputPort(LayoutObjectId(3, 3), 1)
+    assert port == equal_port
+    assert hash(port) == hash(equal_port)
+    assert len({port, equal_port, other_index, other_generation}) == 3
+    assert {port: "source"}[equal_port] == "source"

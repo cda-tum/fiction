@@ -1565,6 +1565,12 @@ def post_layout_optimization(
     Note:
         This function requires the gate-level layout to be 2DDWave-
         clocked!
+
+    Note:
+        Exceptions may leave a partially edited layout. Object identities,
+        occupancy, and connection storage remain structurally valid;
+        logical equivalence and physical validity are not guaranteed after
+        failure.
     """
 
 class wiring_reduction_params:

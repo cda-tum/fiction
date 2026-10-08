@@ -36,7 +36,10 @@ Template Args:
 
 Raises:
     std::ios_base::failure: If creating, writing, closing, or
-                            replacing the file fails.
+                            replacing the file fails, or the
+                            serialization callback raises
+                            std::filesystem::filesystem_error.
+    Any: other exception raised by the serialization callback.
 
 )doc";
 
@@ -2565,6 +2568,8 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_clocking_state_get_clocking_scheme =
 R"doc(Returns a read-only reference to the stored clocking scheme object.
+Assignment or moving from the state replaces the referenced contents;
+the reference stays attached to the state that supplied it.
 
 Returns:
     A reference valid for the lifetime of this state.
@@ -2999,7 +3004,11 @@ connections.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_fanout = R"doc(Visits destination objects once per connected input port.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_fanout =
+R"doc(Visits destination objects once per connected input port in
+unspecified order.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_gate =
 R"doc(Visits logic gates.
@@ -3023,7 +3032,8 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_incoming_clocked_zone =
-R"doc(Applies a function to all incoming clock zones of a given one.
+R"doc(Applies a function as an lvalue to all incoming clock zones of a given
+one.
 
 Args:
     cz: Base clock zone.
@@ -3069,7 +3079,8 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_outgoing_clocked_zone =
-R"doc(Applies a function to all outgoing clock zones of a given one.
+R"doc(Applies a function as an lvalue to all outgoing clock zones of a given
+one.
 
 Args:
     cz: Base clock zone.
@@ -3100,8 +3111,8 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_sink =
 R"doc(Visits sink input ports of an output, irrespective of physical
 legality.
 
-Callbacks must not remove the source object or change its sink
-connections.
+Sink order is unspecified. Callbacks must not remove the source object
+or change its sink connections.
 
 )doc";
 
@@ -3182,6 +3193,8 @@ Returns:
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clocking_scheme =
 R"doc(Returns a read-only reference to the stored clocking scheme object.
 Clock overrides and scheme replacements update the referenced object.
+Assignment or moving from the layout replaces the referenced contents;
+the reference stays attached to the layout that supplied it.
 
 Returns:
     A reference valid for the lifetime of this layout.
@@ -8529,7 +8542,7 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_detail_delete_wires =
 R"doc(Removes selected wires, bypasses their declared inputs, and shifts
-surviving object identities.
+surviving object coordinates.
 
 The copy is committed after all reconnections and moves succeed.
 Logical input indices and disconnected slots remain unchanged.
@@ -12915,6 +12928,12 @@ Raises:
 Note:
     This function requires the gate-level layout to be 2DDWave-
     clocked!
+
+Note:
+    Exceptions may leave a partially edited layout. Object identities,
+    occupancy, and connection storage remain structurally valid;
+    logical equivalence and physical validity are not guaranteed after
+    failure.
 
 )doc";
 
@@ -18647,7 +18666,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
