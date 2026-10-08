@@ -884,16 +884,16 @@ void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
                                   }
                               });
         });
-    for (const auto id : removed)
-    {
-        reduced.remove(id);
-    }
     std::vector<std::pair<typename Lyt::object_id, tile<Lyt>>> placements{};
-    placements.reserve(reduced.size());
+    placements.reserve(reduced.size() - removed.size());
     lyt.foreach_object(
         [&](const auto id)
         {
-            if (!removed.contains(id))
+            if (removed.contains(id))
+            {
+                reduced.remove(id);
+            }
+            else
             {
                 const auto old    = lyt.get_tile(id);
                 const auto offset = offset_at(offsets, old.y, old.x);
