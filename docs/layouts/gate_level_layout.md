@@ -69,9 +69,9 @@ lyt.obstruct_coordinate({2, 2});
 const auto input = lyt.create_pi("a", {0, 0});
 const auto wire = lyt.create_buf(input, {1, 0});
 lyt.create_po(wire, "f", {2, 0});
-lyt.move_node(wire.object, {1, 1});
-lyt.disconnect({wire.object, 0});
-lyt.connect(input, {wire.object, 0});
+lyt.move_node(wire, {1, 1});
+lyt.disconnect({wire, 0});
+lyt.connect(input, {wire, 0});
 auto independent = lyt.clone();
 ```
 
@@ -89,9 +89,9 @@ lyt.obstruct_coordinate((2, 2))
 input_port = lyt.create_pi("a", (0, 0))
 wire = lyt.create_buf(input_port, (1, 0))
 lyt.create_po(wire, "f", (2, 0))
-lyt.move_node(wire.object, (1, 1))
-lyt.disconnect(LayoutInputPort(wire.object, 0))
-lyt.connect(input_port, LayoutInputPort(wire.object, 0))
+lyt.move_node(wire, (1, 1))
+lyt.disconnect(LayoutInputPort(wire, 0))
+lyt.connect(input_port, LayoutInputPort(wire, 0))
 independent = lyt.clone()
 ```
 
