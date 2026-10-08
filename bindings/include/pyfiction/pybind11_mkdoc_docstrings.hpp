@@ -24839,7 +24839,15 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_generate_fanout_tree = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_generate_fanout_tree =
+R"doc(Creates enough fanout branches to meet the source's output threshold.
+
+Args:
+    substituted: Partially constructed destination network.
+    n: Original source node.
+    old2new: Mapping from original nodes to destination signals.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_generate_random_tree =
 R"doc(RANDOM strategy: insert buffers at randomly chosen positions in the
@@ -24855,7 +24863,19 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_get_fanout = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_get_fanout =
+R"doc(Selects an output branch with capacity without changing the original
+source signal.
+
+Args:
+    substituted: Partially constructed destination network.
+    n: Original source node.
+    child: Original source signal in the destination network.
+
+Returns:
+    The source signal or an available fanout branch.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_ntk_topo = R"doc(Topological view of the converted network.)doc";
 
@@ -25012,14 +25032,13 @@ static const char *mkd_doc_fiction_synthesis_fanout_substitution =
 R"doc(Substitutes high-output degrees in a logic network with fanout nodes
 that compute the identity function. For this purpose, `create_buf` is
 utilized. Therefore, `NtkDest` should support identity nodes. If it
-does not, no new nodes will in fact be created. In either case, the
-returned network will be logically equivalent to the input one.
+does not, no new nodes will in fact be created. A destination that
+elides buffer nodes may exceed the requested fanout degrees. The
+returned network is logically equivalent to the input network.
 
-The process is rather naive with two possible strategies to pick from:
-breath-first and depth-first. The former creates partially balanced
-fanout trees while the latter leads to fanout chains. Further
-parameterization includes thresholds for the maximum number of output
-each node and fanout is allowed to have.
+The algorithm builds breadth-first, depth-first, or random fanout
+trees. Parameters set the maximum output degrees of ordinary nodes and
+fanout nodes.
 
 The returned network is newly created from scratch because its type
 `NtkDest` may differ from `NtkSrc`. Repeated nonconstant inputs use
@@ -25037,6 +25056,10 @@ Returns:
     A fanout-substituted logic network of type `NtkDest` that is
     logically equivalent to `ntk_src`.
 
+Raises:
+    std::invalid_argument: If `ps.degree` is less than two or
+                           `ps.threshold` is zero.
+
 Note:
     The physical design algorithms natively provided in fiction do not
     require their input networks to be fanout-substituted. If that is
@@ -25048,7 +25071,7 @@ Note:
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params = R"doc(Parameters for the fanout substitution algorithm.)doc";
 
-static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node.)doc";
+static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node. Must be at least two.)doc";
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
@@ -25072,7 +25095,7 @@ fanout tree.)doc";
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before
-substitution applies.)doc";
+substitution applies. Must be at least one.)doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader =
 R"doc(Simple reader to parse truth tables from files. The files must be
