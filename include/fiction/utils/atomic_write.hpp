@@ -78,6 +78,7 @@ try
     catch (...)
     {
         std::error_code ignored{};
+        std::filesystem::permissions(directory / destination.filename(), std::filesystem::perms::owner_all, ignored);
         std::filesystem::remove_all(directory, ignored);
         throw;
     }

@@ -1002,6 +1002,11 @@ TEST_CASE("Network DOT export preserves files and symbolic links", "[dot-drawers
             SKIP("Windows did not grant symbolic-link creation privileges");
         }
 #endif
+        if (link_error == std::errc::function_not_supported)
+        {
+            std::filesystem::remove_all(directory);
+            SKIP("The filesystem runtime does not implement symbolic links");
+        }
         REQUIRE_FALSE(link_error);
     }
 #ifndef _WIN32

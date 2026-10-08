@@ -536,6 +536,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Transactional writes now remove read-only temporary files after failed replacement.
   - Fanout substitution now separates repeated gate inputs into distinct routing branches.
     The algorithm rejects degrees below two and a zero threshold.
   - Fanout substitution now handles the full `uint32_t` range for degree and threshold.
