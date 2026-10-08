@@ -344,9 +344,11 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             "inputs",
             [](const GateLyt& lyt, const typename GateLyt::object_id object)
             {
+                /** @brief Number of ordered input slots. */
+                const auto                                              input_count = lyt.input_count(object);
                 std::vector<std::optional<typename GateLyt::object_id>> inputs{};
-                inputs.reserve(lyt.input_count(object));
-                for (uint32_t i = 0; i < lyt.input_count(object); ++i)
+                inputs.reserve(input_count);
+                for (uint32_t i = 0; i < input_count; ++i)
                 {
                     inputs.push_back(lyt.source({object, i}));
                 }
@@ -358,10 +360,13 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             [](const GateLyt& lyt, const typename GateLyt::object_id object)
             {
                 std::vector<typename GateLyt::input_port> sinks{};
+                sinks.reserve(lyt.fanout_size(object));
                 lyt.foreach_sink(object, [&](const auto& input) { sinks.push_back(input); });
                 return sinks;
             },
-            py::arg("object"), "Returns the connected sink input ports, including repeated inputs of one object.")
+            py::arg("object"),
+            "Returns the connected sink input ports, including repeated inputs of one object. Sink order is "
+            "unspecified.")
         .def("clear_tile", &GateLyt::clear_tile, py::arg("t"), DOC(fiction_layouts_gate_level_layout_clear_tile))
 
         .def("is_gate_tile", &GateLyt::is_gate_tile, py::arg("t"), DOC(fiction_layouts_gate_level_layout_is_gate_tile))

@@ -2752,7 +2752,7 @@ class cartesian_gate_layout(cartesian_layout):
 
     def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
         """
-        Returns the connected sink input ports, including repeated inputs of one object.
+        Returns the connected sink input ports, including repeated inputs of one object. Sink order is unspecified.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
@@ -3712,7 +3712,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
         """
-        Returns the connected sink input ports, including repeated inputs of one object.
+        Returns the connected sink input ports, including repeated inputs of one object. Sink order is unspecified.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
@@ -4672,7 +4672,7 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
         """
-        Returns the connected sink input ports, including repeated inputs of one object.
+        Returns the connected sink input ports, including repeated inputs of one object. Sink order is unspecified.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
