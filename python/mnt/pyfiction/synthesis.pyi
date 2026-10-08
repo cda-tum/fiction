@@ -346,7 +346,7 @@ class fanout_substitution_params:
     def strategy(self, arg: substitution_strategy, /) -> None: ...
     @property
     def degree(self) -> int:
-        """Maximum output degree of each fan-out node."""
+        """Maximum output degree of each fan-out node. Must be at least two."""
 
     @degree.setter
     def degree(self, arg: int, /) -> None: ...
@@ -354,7 +354,7 @@ class fanout_substitution_params:
     def threshold(self) -> int:
         """
         Maximum number of outputs any gate is allowed to have before
-        substitution applies.
+        substitution applies. Must be at least one.
         """
 
     @threshold.setter
@@ -376,17 +376,17 @@ def fanout_substitution(
     Substitutes high-output degrees in a logic network with fanout nodes
     that compute the identity function. For this purpose, `create_buf` is
     utilized. Therefore, `NtkDest` should support identity nodes. If it
-    does not, no new nodes will in fact be created. In either case, the
-    returned network will be logically equivalent to the input one.
+    does not, no new nodes will in fact be created. A destination that
+    elides buffer nodes may exceed the requested fanout degrees. The
+    returned network is logically equivalent to the input network.
 
-    The process is rather naive with two possible strategies to pick from:
-    breath-first and depth-first. The former creates partially balanced
-    fanout trees while the latter leads to fanout chains. Further
-    parameterization includes thresholds for the maximum number of output
-    each node and fanout is allowed to have.
+    The algorithm builds breadth-first, depth-first, or random fanout
+    trees. Parameters set the maximum output degrees of ordinary nodes and
+    fanout nodes.
 
     The returned network is newly created from scratch because its type
-    `NtkDest` may differ from `NtkSrc`.
+    `NtkDest` may differ from `NtkSrc`. Repeated nonconstant inputs use
+    distinct routing branches when `NtkDest` preserves buffer nodes.
 
     Args:
         ntk_src: The input logic network.
@@ -399,6 +399,10 @@ def fanout_substitution(
     Returns:
         A fanout-substituted logic network of type `NtkDest` that is
         logically equivalent to `ntk_src`.
+
+    Raises:
+        std::invalid_argument: If `ps.degree` is less than two or
+                               `ps.threshold` is zero.
 
     Note:
         The physical design algorithms natively provided in fiction do not

@@ -987,7 +987,7 @@ def apply_qca_one_library(
     level clocking, and, if it has synchronization elements, each clock
     zone receives the synchronization delay of its gate tile. The delay
     therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their nodes. An
+    via cells. Input and output cells carry the names of their objects. An
     SiDB layout lies on the H-Si(100)-2x1 lattice.
 
     May pass through, and thereby throw, an
@@ -1024,7 +1024,7 @@ def apply_sim7_mol_library(
     level clocking, and, if it has synchronization elements, each clock
     zone receives the synchronization delay of its gate tile. The delay
     therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their nodes. An
+    via cells. Input and output cells carry the names of their objects. An
     SiDB layout lies on the H-Si(100)-2x1 lattice.
 
     May pass through, and thereby throw, an
@@ -1062,7 +1062,7 @@ def apply_topolinano_library(
     level clocking, and, if it has synchronization elements, each clock
     zone receives the synchronization delay of its gate tile. The delay
     therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their nodes. An
+    via cells. Input and output cells carry the names of their objects. An
     SiDB layout lies on the H-Si(100)-2x1 lattice.
 
     May pass through, and thereby throw, an
@@ -1099,7 +1099,7 @@ def apply_bestagon_library(
     level clocking, and, if it has synchronization elements, each clock
     zone receives the synchronization delay of its gate tile. The delay
     therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their nodes. An
+    via cells. Input and output cells carry the names of their objects. An
     SiDB layout lies on the H-Si(100)-2x1 lattice.
 
     May pass through, and thereby throw, an
