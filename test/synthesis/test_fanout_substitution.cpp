@@ -16,6 +16,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -24,12 +25,15 @@
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -184,4 +188,26 @@ TEST_CASE("Consistent fanout substitution after balancing", "[fanout-substitutio
     CHECK(is_fanout_substituted(substituted_tec));
     auto balanced_tec = network_balancing<technology_network>(substituted_tec);
     CHECK(is_fanout_substituted(balanced_tec));
+}
+
+TEST_CASE("Repeated inputs respect fanout degrees below the source threshold", "[fanout-substitution]")
+{
+    using strategy                    = fanout_substitution_params::substitution_strategy;
+    const auto                 choice = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
+    technology_network         original{};
+    const auto                 a = original.create_pi();
+    kitty::dynamic_truth_table parity{5};
+    kitty::create_from_hex_string(parity, "96696996");
+    original.create_po(original.create_node({a, a, a, a, a}, parity));
+    const fanout_substitution_params ps{.strategy = choice, .degree = 2, .threshold = 3, .seed = 42};
+    const auto                       substituted = fanout_substitution<technology_network>(original, ps);
+    CHECK(is_fanout_substituted(substituted, ps));
+    check_eq(original, substituted);
+}
+
+TEST_CASE("Fanout substitution rejects degrees and thresholds that cannot branch", "[fanout-substitution]")
+{
+    const auto params = GENERATE(fanout_substitution_params{.degree = 0}, fanout_substitution_params{.degree = 1},
+                                 fanout_substitution_params{.threshold = 0});
+    CHECK_THROWS_AS(fanout_substitution<technology_network>(technology_network{}, params), std::invalid_argument);
 }

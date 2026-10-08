@@ -32,6 +32,7 @@
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
+#include <fiction/verification/design_rule_violations.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -39,6 +40,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <optional>
+#include <sstream>
 #include <stdexcept>
 
 using namespace fiction;
@@ -47,6 +49,31 @@ using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
 using namespace fiction::synthesis;
+using namespace fiction::verification;
+
+TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
+{
+    technology_network ntk{};
+    const auto         a        = ntk.create_pi();
+    const auto         function = GENERATE(0, 1, 2);
+    const auto         output   = function == 0 ? ntk.create_and(a, a) :
+                                  function == 1 ? ntk.create_or(a, a) :
+                                                  ntk.create_xor(a, a);
+    if (GENERATE(false, true))
+    {
+        ntk.create_po(a);
+    }
+    ntk.create_po(output);
+
+    const auto layout = orthogonal<gate_level_layout<cartesian_layout>>(ntk);
+    check_eq(ntk, layout);
+    std::ostringstream    report{};
+    gate_level_drv_params params{};
+    params.out = &report;
+    gate_level_drv_stats stats{};
+    gate_level_drvs(layout, params, &stats);
+    CHECK(stats.drvs == 0);
+}
 
 TEST_CASE("East-south coloring", "[orthogonal]")
 {
