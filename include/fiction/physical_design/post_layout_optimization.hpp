@@ -850,6 +850,8 @@ class post_layout_optimization_impl
  * determined based on the location of all other gates.
  *
  * @note This function requires the gate-level layout to be 2DDWave-clocked!
+ * @note Exceptions may leave a partially edited layout. Object identities, occupancy, and connection storage remain
+ * structurally valid; logical equivalence and physical validity are not guaranteed after failure.
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to optimize.

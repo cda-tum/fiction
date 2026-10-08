@@ -131,7 +131,8 @@ class state
         return clocking.name() == name;
     }
     /**
-     * Returns a read-only reference to the stored clocking scheme object.
+     * Returns a read-only reference to the stored clocking scheme object. Assignment or moving from the state
+     * replaces the referenced contents; the reference stays attached to the state that supplied it.
      *
      * @return A reference valid for the lifetime of this state.
      */

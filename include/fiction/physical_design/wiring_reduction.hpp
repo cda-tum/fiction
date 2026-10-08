@@ -825,7 +825,7 @@ template <typename Lyt, typename WiringReductionLyt>
     return new_coord;
 }
 /**
- * @brief Removes selected wires, bypasses their declared inputs, and shifts surviving object identities.
+ * @brief Removes selected wires, bypasses their declared inputs, and shifts surviving object coordinates.
  *
  * The copy is committed after all reconnections and moves succeed. Logical input indices and disconnected slots
  * remain unchanged. Temporary negative coordinates prevent occupied-target conflicts during bulk movement.

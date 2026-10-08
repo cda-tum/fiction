@@ -623,7 +623,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
-  - Cartesian and hexagonal neighbor visitors now invoke temporary and move-only callbacks as lvalues.
+  - Cartesian, hexagonal, and gate-layout clocked neighbor visitors now invoke temporary and move-only callbacks
+    as lvalues.
   - Python gate-layout constructors now raise `ValueError` for unknown clocking schemes.
   - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
   - Cell clock zones now use floor division for negative coordinates.

@@ -836,3 +836,43 @@ TEST_CASE("Object visitors accept move-only lvalues and temporaries", "[gate-lay
     lyt.foreach_object(move_only_visitor{.calls = std::make_unique<uint32_t>(0), .observed = observed_temporary});
     CHECK(observed_temporary == 2);
 }
+
+TEST_CASE("Clocked neighbor visitors accept move-only lvalues and temporaries", "[gate-layout-editing]")
+{
+    /** @brief Cartesian gate layout used for the neighbor traversal. */
+    using layout = gate_level_layout<cartesian_layout>;
+    /** @brief Layout with two incoming and two outgoing neighbors of the center. */
+    const layout lyt{{3, 3, 1}, clocking::twoddwave()};
+    /** @brief Collects neighbors through an lvalue-qualified move-only callback. */
+    struct visitor
+    {
+        /** @brief Owns the callback state. */
+        std::unique_ptr<uint32_t> calls;
+        /** @brief Reports visited neighbors. */
+        std::set<layout::coordinate>& observed;
+        /** @brief Records a clocked neighbor. @param coordinate Visited neighbor. */
+        void operator()(const layout::coordinate& coordinate) &
+        {
+            ++*calls;
+            observed.insert(coordinate);
+        }
+    };
+    /** @brief Incoming neighbors visited through both callback value categories. */
+    std::set<layout::coordinate> incoming{};
+    /** @brief Move-only lvalue callback. */
+    visitor incoming_visitor{std::make_unique<uint32_t>(0), incoming};
+    lyt.foreach_incoming_clocked_zone({1, 1}, incoming_visitor);
+    CHECK(incoming == std::set<layout::coordinate>{{0, 1}, {1, 0}});
+    incoming.clear();
+    lyt.foreach_incoming_clocked_zone({1, 1}, visitor{std::make_unique<uint32_t>(0), incoming});
+    CHECK(incoming == std::set<layout::coordinate>{{0, 1}, {1, 0}});
+    /** @brief Outgoing neighbors visited through both callback value categories. */
+    std::set<layout::coordinate> outgoing{};
+    /** @brief Move-only lvalue callback. */
+    visitor outgoing_visitor{std::make_unique<uint32_t>(0), outgoing};
+    lyt.foreach_outgoing_clocked_zone({1, 1}, outgoing_visitor);
+    CHECK(outgoing == std::set<layout::coordinate>{{1, 2}, {2, 1}});
+    outgoing.clear();
+    lyt.foreach_outgoing_clocked_zone({1, 1}, visitor{std::make_unique<uint32_t>(0), outgoing});
+    CHECK(outgoing == std::set<layout::coordinate>{{1, 2}, {2, 1}});
+}

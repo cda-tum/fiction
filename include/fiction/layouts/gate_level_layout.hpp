@@ -743,7 +743,7 @@ class gate_level_layout : public CoordinateLayout
     }
     /**
      * @brief Visits sink input ports of an output, irrespective of physical legality.
-     * Callbacks must not remove the source object or change its sink connections.
+     * Sink order is unspecified. Callbacks must not remove the source object or change its sink connections.
      */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
@@ -760,7 +760,7 @@ class gate_level_layout : public CoordinateLayout
             }
         }
     }
-    /** @brief Visits destination objects once per connected input port. */
+    /** @brief Visits destination objects once per connected input port in unspecified order. */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_fanout(const object_id id, Fn&& fn) const
@@ -1195,8 +1195,6 @@ class gate_level_layout : public CoordinateLayout
         return opposite_signals;
     }
 
-#pragma endregion
-
     /**
      * Replaces the stored clocking scheme with the provided one.
      *
@@ -1260,7 +1258,8 @@ class gate_level_layout : public CoordinateLayout
     }
     /**
      * Returns a read-only reference to the stored clocking scheme object. Clock overrides and scheme replacements
-     * update the referenced object.
+     * update the referenced object. Assignment or moving from the layout replaces the referenced contents;
+     * the reference stays attached to the layout that supplied it.
      *
      * @return A reference valid for the lifetime of this layout.
      */
@@ -1430,7 +1429,7 @@ class gate_level_layout : public CoordinateLayout
                is_outgoing_signal(src, tgt);
     }
 
-#pragma region Iteration
+#pragma region Clocked neighbor iteration
 
     /**
      * Returns a container with all clock zones that are incoming to the given one.
@@ -1447,13 +1446,14 @@ class gate_level_layout : public CoordinateLayout
         return incoming;
     }
     /**
-     * Applies a function to all incoming clock zones of a given one.
+     * Applies a function as an lvalue to all incoming clock zones of a given one.
      *
      * @tparam Fn Functor type.
      * @param cz Base clock zone.
      * @param fn Functor to apply to each of `cz`'s incoming clock zones.
      */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
         CoordinateLayout::foreach_adjacent_coordinate(cz,
@@ -1461,7 +1461,7 @@ class gate_level_layout : public CoordinateLayout
                                                       {
                                                           if (is_incoming_clocked(cz, ct))
                                                           {
-                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                              std::invoke(fn, ct);
                                                           }
                                                       });
     }
@@ -1480,13 +1480,14 @@ class gate_level_layout : public CoordinateLayout
         return outgoing;
     }
     /**
-     * Applies a function to all outgoing clock zones of a given one.
+     * Applies a function as an lvalue to all outgoing clock zones of a given one.
      *
      * @tparam Fn Functor type.
      * @param cz Base clock zone.
      * @param fn Functor to apply to each of `cz`'s outgoing clock zones.
      */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
         CoordinateLayout::foreach_adjacent_coordinate(cz,
@@ -1494,7 +1495,7 @@ class gate_level_layout : public CoordinateLayout
                                                       {
                                                           if (is_outgoing_clocked(cz, ct))
                                                           {
-                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                              std::invoke(fn, ct);
                                                           }
                                                       });
     }
@@ -1550,7 +1551,7 @@ class gate_level_layout : public CoordinateLayout
     }
 
 #pragma endregion
-#pragma region Iteration
+#pragma region Tile iteration
 
     /**
      * @brief Returns the tiles in the coordinate range.
