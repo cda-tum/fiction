@@ -121,8 +121,7 @@ struct equivalence_result
 
 /**
  * Simulates `SIMULATION_PATTERNS` random patterns on the original network and on the planarized one, where every
- * virtual primary input takes the value of its real one, and compares the outputs. Independent of `virtual_miter`,
- * which cannot handle rank views with unused primary inputs.
+ * virtual primary input takes the value of its real one, and compares the outputs. Used where SAT does not scale.
  */
 template <typename Spec, typename Impl>
 bool simulate_equivalent(const Spec& spec, const Impl& impl)
@@ -178,16 +177,12 @@ bool simulate_equivalent(const Spec& spec, const Impl& impl)
 
 /**
  * Checks equivalence of a planarized network against the original, virtual primary inputs included: by SAT on the
- * `virtual_miter` for results up to `MAX_NODES_FOR_SAT` nodes whose original has no unused primary inputs, by
- * random simulation otherwise.
+ * `virtual_miter` for results up to `MAX_NODES_FOR_SAT` nodes, by random simulation otherwise.
  */
 template <typename Spec, typename Impl>
 equivalence_result is_equivalent(const Spec& spec, const Impl& impl)
 {
-    bool unused_pis = false;
-    spec.foreach_pi([&spec, &unused_pis](const auto& n) { unused_pis = unused_pis || spec.fanout_size(n) == 0; });
-
-    if (impl.size() > MAX_NODES_FOR_SAT || unused_pis)
+    if (impl.size() > MAX_NODES_FOR_SAT)
     {
         return {simulate_equivalent(spec, impl), "simulation"};
     }
