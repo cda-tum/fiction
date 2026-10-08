@@ -33,6 +33,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 
 using namespace fiction;
@@ -210,4 +211,29 @@ TEST_CASE("Fanout substitution rejects degrees and thresholds that cannot branch
     const auto params = GENERATE(fanout_substitution_params{.degree = 0}, fanout_substitution_params{.degree = 1},
                                  fanout_substitution_params{.threshold = 0});
     CHECK_THROWS_AS(fanout_substitution<technology_network>(technology_network{}, params), std::invalid_argument);
+}
+
+TEST_CASE("Fanout substitution preserves uint32 parameter bounds", "[fanout-substitution]")
+{
+    using strategy            = fanout_substitution_params::substitution_strategy;
+    const auto         choice = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
+    technology_network original{};
+    const auto         a = original.create_pi();
+    const auto         b = original.create_pi();
+    original.create_po(original.create_and(a, b));
+    original.create_po(original.create_or(a, b));
+    original.create_po(original.create_xor(a, b));
+    fanout_substitution_params params{.strategy = choice, .seed = 42};
+    if (GENERATE(false, true))
+    {
+        params.threshold = std::numeric_limits<uint32_t>::max();
+    }
+    else
+    {
+        params.degree = std::numeric_limits<uint32_t>::max();
+    }
+    const auto substituted = fanout_substitution<technology_network>(original, params);
+    CHECK(is_fanout_substituted(substituted, params));
+    CHECK(substituted.num_gates() == original.num_gates() + (params.threshold == 1 ? 2 : 0));
+    check_eq(original, substituted);
 }

@@ -26,7 +26,6 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -225,6 +224,12 @@ class fanout_substitution_impl
      */
     std::optional<rng_state> rng;
 
+    /**
+     * @brief Creates enough fanout branches to meet the source's output threshold.
+     * @param substituted Partially constructed destination network.
+     * @param n Original source node.
+     * @param old2new Mapping from original nodes to destination signals.
+     */
     void generate_fanout_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n, const old2new_map& old2new)
     {
         // skip fanout tree generation if n is a proper fanout node
@@ -236,10 +241,10 @@ class fanout_substitution_impl
             }
         }
 
-        auto num_fanouts = static_cast<uint32_t>(
-            std::ceil(static_cast<double>(std::max(
-                          static_cast<int32_t>(ntk_topo.fanout_size(n)) - static_cast<int32_t>(ps.threshold), 0)) /
-                      static_cast<double>(std::max(static_cast<int32_t>(ps.degree) - 1, 1))));
+        const uint32_t fanouts     = ntk_topo.fanout_size(n);
+        const auto     excess      = fanouts > ps.threshold ? fanouts - ps.threshold : 0u;
+        const auto     gain        = ps.degree - 1;
+        const auto     num_fanouts = excess / gain + static_cast<uint32_t>(excess % gain != 0);
 
         auto child = old2new[n];
 
@@ -340,7 +345,7 @@ class fanout_substitution_impl
             q.pop();
             child = substituted.create_buf(child);
 
-            for (auto i = 0u; i < ps.degree; ++i)
+            for (auto i = 0u; i < std::min(ps.degree, static_cast<uint32_t>(ntk_topo.fanout_size(n))); ++i)
             {
                 q.push(child);
             }
@@ -377,7 +382,7 @@ class fanout_substitution_impl
             const auto new_buf = substituted.create_buf(selected);
 
             // add 'ps.degree' copies of the new buffer into available_vec
-            for (auto i = 0u; i < ps.degree; ++i)
+            for (auto i = 0u; i < std::min(ps.degree, static_cast<uint32_t>(ntk_topo.fanout_size(n))); ++i)
             {
                 available_vec.push_back(new_buf);
             }
