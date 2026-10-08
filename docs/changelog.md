@@ -542,6 +542,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `convert_network` keeps the inverters of a technology network when the target network
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
   - `synthesis::delete_virtual_pis` maps outputs driven by a virtual primary input to the real one
+  - `verification::virtual_miter` pairs primary inputs by creation order, so ranked networks whose inputs are
+    reordered or unused compare correctly
   - `networks::views::mutable_rank_view` skips dangling nodes instead of throwing when initializing ranks
 
 - Build system:

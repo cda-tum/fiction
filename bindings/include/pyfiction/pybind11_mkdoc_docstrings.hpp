@@ -28829,7 +28829,8 @@ two networks differ.
 
 The input networks may have different types. If the two input networks
 have mismatched numbers of primary inputs or outputs, the method
-returns `std::nullopt`.
+returns `std::nullopt`. Primary inputs are paired by creation order,
+also for ranked networks that list them in rank order.
 
 Args:
     ntk1_in: The first input network.

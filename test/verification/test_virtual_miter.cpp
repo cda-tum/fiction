@@ -19,6 +19,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/verification/virtual_miter.hpp>
 
@@ -31,6 +32,7 @@
 
 using namespace fiction;
 using namespace fiction::networks;
+using namespace fiction::networks::views;
 using namespace fiction::verification;
 
 TEST_CASE("Virtual miter different num_pis", "[virtual-miter]")
@@ -192,4 +194,35 @@ TEMPLATE_TEST_CASE("Virtual miter with mockturtle networks", "[virtual-miter]", 
     {
         CHECK(*maybe_cec_m == 1);
     }
+}
+
+TEST_CASE("Virtual miter pairs the inputs of a rank view by creation order", "[virtual-miter]")
+{
+    // the second input drives nothing, so a rank view lists it after the third one
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    tec.create_pi();
+    const auto x3 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x3));
+    tec.create_po(x3);
+
+    virtual_pi_network<technology_network> vpi{};
+
+    const auto y1 = vpi.create_pi();
+    vpi.create_pi();
+    const auto y3 = vpi.create_pi();
+    const auto v1 = vpi.create_virtual_pi(y1);
+    vpi.create_po(vpi.create_and(v1, y3));
+    vpi.create_po(y3);
+
+    const mutable_rank_view ranked{vpi};
+
+    const auto miter = virtual_miter<technology_network>(tec, ranked);
+    REQUIRE(miter.has_value());
+
+    mockturtle::equivalence_checking_stats st{};
+    const auto                             cec = mockturtle::equivalence_checking(*miter, {}, &st);
+    REQUIRE(cec.has_value());
+    CHECK(*cec);
 }

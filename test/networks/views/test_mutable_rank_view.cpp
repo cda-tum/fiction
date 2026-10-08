@@ -317,14 +317,15 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
 
     auto vpi_r = mutable_rank_view(tec);
 
-    // after the swap no equivalence is giving due to different ordering of the pi when calling `foreach_pi`
+    // the swap changes the order in which `foreach_pi` visits the inputs; the miter pairs them by creation order, so
+    // the equivalence is unaffected
     vpi_r.swap(2, 3);
 
     mockturtle::equivalence_checking_stats st;
     auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     bool cec_m = *maybe_cec_m;
-    CHECK(cec_m == 0);
+    CHECK(cec_m == 1);
 
     // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in
     // _storage)
