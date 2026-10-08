@@ -26420,8 +26420,7 @@ inverter weighs `buffer_weight`. The sum is scaled by
 :math:`\text{depth\_growth}^{d}` for a duplication on level :math:`d`,
 because duplicates on deep levels are duplicated again by the
 decisions below. The weights are in units of one crossing gadget node.
-The defaults were determined empirically on the benchmark sets; see
-`experiments/planarization/cost_model_sweep.cpp`.)doc";
+The defaults were determined empirically on the benchmark sets.)doc";
 
 static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_buffer_weight = R"doc(Weight of a buffer or inverter chain node.)doc";
 

@@ -105,7 +105,7 @@ struct node_duplication_planarization_params
      * along. A gate weighs `node_weight` and a chain buffer or inverter weighs `buffer_weight`. The sum is scaled by
      * \f$\text{depth\_growth}^{d}\f$ for a duplication on level \f$d\f$, because duplicates on deep levels are
      * duplicated again by the decisions below. The weights are in units of one crossing gadget node. The defaults
-     * were determined empirically on the benchmark sets; see `experiments/planarization/cost_model_sweep.cpp`.
+     * were determined empirically on the benchmark sets.
      */
     struct duplication_cost_model
     {
