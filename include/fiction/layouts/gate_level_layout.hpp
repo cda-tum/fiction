@@ -160,6 +160,7 @@ class gate_level_layout : public CoordinateLayout
     gate_level_layout(const gate_level_layout& other) :
             CoordinateLayout{static_cast<const CoordinateLayout&>(other).clone()},
             objects{other.objects},
+            spilled_inputs{other.spilled_inputs},
             edges{other.edges},
             occupancy{other.occupancy},
             functions{other.functions},
@@ -354,7 +355,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Returns the number of input slots, including disconnected slots. */
     [[nodiscard]] uint32_t input_count(const object_id id) const
     {
-        return static_cast<uint32_t>(checked_object(id).inputs.size());
+        return checked_object(id).input_count;
     }
     /** @brief Returns the declared source of an input, or no source if disconnected. */
     [[nodiscard]] std::optional<object_id> source(const input_port port) const
@@ -389,7 +390,7 @@ class gate_level_layout : public CoordinateLayout
         }
         src_object.first_sink = edge_id;
         ++src_object.sink_count;
-        objects[dst.object.index].inputs[dst.index] = edge_id;
+        input_edges(dst.object.index)[dst.index] = edge_id;
     }
     /** @brief Disconnects one input without changing the indices of other inputs. */
     void disconnect(const input_port port)
@@ -417,7 +418,7 @@ class gate_level_layout : public CoordinateLayout
     void remove(const object_id id)
     {
         auto& object = checked_object(id);
-        for (const auto edge : object.inputs)
+        for (const auto edge : input_edges(id.index))
         {
             if (edge != NO_INDEX)
             {
@@ -440,8 +441,9 @@ class gate_level_layout : public CoordinateLayout
         }
         --live_count;
         wire_count -= object.function == 2;
-        object.inputs.clear();
-        object.kind = object_kind::REMOVED;
+        spilled_inputs.erase(id.index);
+        object.input_count = 0;
+        object.kind        = object_kind::REMOVED;
         if (object.generation == std::numeric_limits<uint32_t>::max())
         {
             object.generation = 0;  // Exhausted generations retire the slot rather than revive a stale identity.
@@ -506,7 +508,8 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Counts connected input slots, irrespective of physical legality. */
     [[nodiscard]] uint32_t fanin_size(const object_id id) const
     {
-        const auto& ins = checked_object(id).inputs;
+        static_cast<void>(checked_object(id));
+        const auto ins = input_edges(id.index);
         return static_cast<uint32_t>(std::ranges::count_if(ins, [](const auto edge) { return edge != NO_INDEX; }));
     }
     /** @brief Counts sink input ports, including multiple ports on one object. */
@@ -709,7 +712,7 @@ class gate_level_layout : public CoordinateLayout
         const auto count = input_count(id);
         for (uint32_t input{}; input < count; ++input)
         {
-            const auto edge = objects[id.index].inputs[input];
+            const auto edge = input_edges(id.index)[input];
             if (edge != NO_INDEX && !visit(fn, identity(edges[edge].source), input))
             {
                 break;
@@ -1653,67 +1656,6 @@ class gate_level_layout : public CoordinateLayout
         /** @brief Logic gate. */
         GATE
     };
-    /** @brief Connection indices of an object's inputs. Up to three inputs live inline; more spill to the heap. */
-    class input_slots
-    {
-      public:
-        /** @brief Number of slots. */
-        [[nodiscard]] uint32_t size() const noexcept
-        {
-            return count;
-        }
-        /** @brief Resets to `n` disconnected slots. */
-        void assign(const uint32_t n)
-        {
-            count = n;
-            fixed.fill(NO_INDEX);
-            if (n > INLINE_CAPACITY)
-            {
-                spill.assign(n, NO_INDEX);
-            }
-        }
-        /** @brief Releases all slots. */
-        void clear() noexcept
-        {
-            count = 0;
-            spill.clear();
-        }
-        /** @brief Returns the connection index at slot `i`. */
-        [[nodiscard]] uint32_t& operator[](const uint32_t i) noexcept
-        {
-            return std::span{begin_mutable(), count}[i];
-        }
-        /** @brief Returns the connection index at slot `i`. */
-        [[nodiscard]] const uint32_t& operator[](const uint32_t i) const noexcept
-        {
-            return std::span{begin(), count}[i];
-        }
-        /** @brief Returns the first slot. */
-        [[nodiscard]] const uint32_t* begin() const noexcept
-        {
-            return count > INLINE_CAPACITY ? spill.data() : fixed.data();
-        }
-        /** @brief Returns the end of the slots. */
-        [[nodiscard]] const uint32_t* end() const noexcept
-        {
-            return begin() + count;
-        }
-
-      private:
-        /** @brief Returns the first slot. */
-        [[nodiscard]] uint32_t* begin_mutable() noexcept
-        {
-            return count > INLINE_CAPACITY ? spill.data() : fixed.data();
-        }
-        /** @brief Slots stored without allocation; covers every built-in gate. */
-        static constexpr uint32_t INLINE_CAPACITY = 3;
-        /** @brief Number of slots in use. */
-        uint32_t count{};
-        /** @brief Inline slots. */
-        std::array<uint32_t, INLINE_CAPACITY> fixed{NO_INDEX, NO_INDEX, NO_INDEX};
-        /** @brief Slots of objects with more than `INLINE_CAPACITY` inputs. */
-        std::vector<uint32_t> spill{};
-    };
     /** @brief Hot object data. Names and truth-table payloads are stored separately. */
     struct object_record
     {
@@ -1729,8 +1671,10 @@ class gate_level_layout : public CoordinateLayout
         uint32_t sink_count{};
         /** @brief Physical role. */
         object_kind kind{object_kind::REMOVED};
-        /** @brief Input-index to connection mapping; missing entries remain holes. */
-        input_slots inputs{};
+        /** @brief Number of input ports, including disconnected ports. */
+        uint32_t input_count{};
+        /** @brief Inline input-index to connection mapping for every built-in gate. */
+        std::array<uint32_t, 3> inputs{NO_INDEX, NO_INDEX, NO_INDEX};
     };
     /** @brief Mutable connection with constant-time removal from the source's sink list. */
     struct edge_record
@@ -1748,6 +1692,8 @@ class gate_level_layout : public CoordinateLayout
     };
     /** @brief Reusable object slots. */
     std::vector<object_record> objects{};
+    /** @brief Input-index to connection mapping for objects with more than three inputs. */
+    phmap::flat_hash_map<uint32_t, std::vector<uint32_t>> spilled_inputs{};
     /** @brief Reusable contiguous connection storage. */
     std::vector<edge_record> edges{};
     /** @brief Coordinate lookup independent of identities and connections. */
@@ -1780,6 +1726,7 @@ class gate_level_layout : public CoordinateLayout
     {
         using std::swap;
         swap(objects, other.objects);
+        swap(spilled_inputs, other.spilled_inputs);
         swap(edges, other.edges);
         swap(occupancy, other.occupancy);
         swap(functions, other.functions);
@@ -1822,15 +1769,29 @@ class gate_level_layout : public CoordinateLayout
         static_cast<void>(std::as_const(*this).checked_object(id));
         return objects[id.index];
     }
+    /** @brief Returns an object's ordered connection indices, including disconnected slots. */
+    [[nodiscard]] std::span<const uint32_t> input_edges(const uint32_t slot) const
+    {
+        const auto& object = objects[slot];
+        return object.input_count > object.inputs.size() ? std::span{spilled_inputs.at(slot)} :
+                                                           std::span{object.inputs.data(), object.input_count};
+    }
+    /** @brief Returns an object's mutable ordered connection indices. */
+    [[nodiscard]] std::span<uint32_t> input_edges(const uint32_t slot)
+    {
+        auto& object = objects[slot];
+        return object.input_count > object.inputs.size() ? std::span{spilled_inputs.at(slot)} :
+                                                           std::span{object.inputs.data(), object.input_count};
+    }
     /** @brief Validates an input endpoint and returns its connection index. */
     [[nodiscard]] uint32_t checked_input(const input_port port) const
     {
         const auto& object = checked_object(port.object);
-        if (port.index >= object.inputs.size())
+        if (port.index >= object.input_count)
         {
             throw std::out_of_range("Input index exceeds the object's arity");
         }
-        return object.inputs[port.index];
+        return input_edges(port.object.index)[port.index];
     }
     /** @brief Rejects occupied placement before any object mutation. Coordinates outside the extent are valid during
      * editing. */
@@ -1875,9 +1836,9 @@ class gate_level_layout : public CoordinateLayout
             edges[edge.next].previous = edge.previous;
         }
         --src.sink_count;
-        objects[edge.destination].inputs[edge.input] = NO_INDEX;
-        edge.next                                    = free_edge;
-        free_edge                                    = id;
+        input_edges(edge.destination)[edge.input] = NO_INDEX;
+        edge.next                                 = free_edge;
+        free_edge                                 = id;
     }
     /** @brief Creates a validated object and its initial ordered connections. */
     object_id create_object(const std::span<const object_id> children, const uint32_t function, const object_kind kind,
@@ -1894,10 +1855,10 @@ class gate_level_layout : public CoordinateLayout
             static_cast<void>(checked_object(child));
         }
         object_record record{};
-        record.position = t;
-        record.function = function;
-        record.kind     = kind;
-        record.inputs.assign(arity);
+        record.position    = t;
+        record.function    = function;
+        record.kind        = kind;
+        record.input_count = arity;
         if (children.size() > NO_INDEX - edges.size())
         {
             throw std::length_error("Layout connection capacity exhausted");
@@ -1908,24 +1869,29 @@ class gate_level_layout : public CoordinateLayout
             throw std::length_error("Layout object capacity exhausted");
         }
         const auto slot = reuse ? free_object : static_cast<uint32_t>(objects.size());
-        occupancy.emplace(t, slot);
-        if (reuse)
+        if (arity > record.inputs.size())
         {
-            record.generation = objects[slot].generation;
-            free_object       = objects[slot].first_sink;
-            objects[slot]     = std::move(record);
+            spilled_inputs.emplace(slot, std::vector<uint32_t>(arity, NO_INDEX));
         }
-        else
+        try
         {
-            try
+            occupancy.emplace(t, slot);
+            if (reuse)
+            {
+                record.generation = objects[slot].generation;
+                free_object       = objects[slot].first_sink;
+                objects[slot]     = std::move(record);
+            }
+            else
             {
                 objects.push_back(std::move(record));
             }
-            catch (...)
-            {
-                occupancy.erase(t);
-                throw;
-            }
+        }
+        catch (...)
+        {
+            occupancy.erase(t);
+            spilled_inputs.erase(slot);
+            throw;
         }
         ++live_count;
         wire_count += static_cast<uint32_t>(function == 2);

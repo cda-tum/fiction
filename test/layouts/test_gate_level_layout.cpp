@@ -16,6 +16,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/allocation_failure.hpp"
 
@@ -146,6 +147,82 @@ TEST_CASE("Objects with more inputs than the inline capacity keep ordered ports"
     CHECK_FALSE(lyt.source({gate, 3}).has_value());
     CHECK(lyt.source({gate, 4}) == pis[4]);
     CHECK_THROWS_AS(lyt.source({gate, 5}), std::out_of_range);
+}
+
+TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",
+          "[gate-layout-editing]")
+{
+    gate_level_layout<cartesian_layout> original{{8, 8}};
+    const auto                          a = original.create_pi("a", {0, 0});
+    const auto                          b = original.create_pi("b", {1, 0});
+    kitty::dynamic_truth_table          parity{5};
+    kitty::create_from_hex_string(parity, "96696996");
+    const auto gate = original.create_node({a}, parity, {2, 2});
+    original.connect(b, {gate, 4});
+    auto copy = original;
+    copy.disconnect({gate, 0});
+    CHECK(original.source({gate, 0}) == a);
+    CHECK_FALSE(copy.source({gate, 0}).has_value());
+    auto moved = std::move(copy);
+    CHECK(moved.input_count(gate) == 5);
+    CHECK_FALSE(moved.source({gate, 3}).has_value());
+    CHECK(moved.source({gate, 4}) == b);
+    moved.remove(gate);
+    CHECK(moved.fanout_size(a) == 0);
+    CHECK(moved.fanout_size(b) == 0);
+    const auto replacement = moved.create_node({b}, parity, {2, 2});
+    CHECK_FALSE(moved.contains(gate));
+    CHECK(moved.source({replacement, 0}) == b);
+    CHECK_FALSE(moved.source({replacement, 4}).has_value());
+    moved.remove(replacement);
+    const auto wire = moved.create_buf(a, {2, 2});
+    CHECK(moved.input_count(wire) == 1);
+    CHECK(moved.source({wire, 0}) == a);
+}
+
+TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-layout-editing]")
+{
+    require_allocation_failure_support();
+    const bool reuse = GENERATE(false, true);
+    for (std::size_t failure = 0;; ++failure)
+    {
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
+        gate_level_layout<cartesian_layout> lyt{{8, 8}};
+        const auto                          a = lyt.create_pi("a", {0, 0});
+        kitty::dynamic_truth_table          parity{5};
+        kitty::create_from_hex_string(parity, "96696996");
+        lyt.remove(lyt.create_node({}, parity, {2, 2}));
+        if (!reuse)
+        {
+            lyt.create_pi("extra", {3, 3});
+        }
+        const auto initial_size = lyt.size();
+        bool       created{};
+        allocation_budget = failure;
+        try
+        {
+            lyt.create_node({a, a, a, a, a}, parity, {2, 2});
+            created = true;
+        }
+        catch (const std::bad_alloc&)
+        {}
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+        allocation_budget.reset();
+        if (created)
+        {
+            break;
+        }
+        CHECK(lyt.size() == initial_size);
+        CHECK_FALSE(lyt.find_object({2, 2}).has_value());
+        CHECK(lyt.fanout_size(a) == 0);
+        const auto recovered = lyt.create_node({a}, parity, {2, 2});
+        CHECK(lyt.source({recovered, 0}) == a);
+        CHECK_FALSE(lyt.source({recovered, 4}).has_value());
+    }
 }
 
 TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
