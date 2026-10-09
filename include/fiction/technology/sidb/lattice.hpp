@@ -191,7 +191,7 @@ struct lattice_site
  * The site that a gate-library grid coordinate refers to. SiDB gate libraries describe gates on a grid whose rows are
  * single SiDB rows, so row `y` becomes unit cell `y / 2`, basis site `y mod 2`.
  *
- * @tparam Coordinate Grid coordinate type, e.g., `layouts::coords::offset` or `layouts::coords::cube`.
+ * @tparam Coordinate Grid coordinate type, e.g., `layouts::layout_base::coordinate`.
  * @param c Grid coordinate.
  * @return The site of `c`.
  * @throws std::out_of_range if the row exceeds the range of lattice sites.

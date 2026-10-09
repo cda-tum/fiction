@@ -17,6 +17,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -40,7 +41,7 @@ namespace pyfiction
 namespace detail
 {
 /**
- * Register one concrete topology.
+ * Register the layout class.
  * @tparam Lyt Concrete layout.
  * @param m Python module.
  * @param name Python class name.
@@ -57,13 +58,17 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
      * hexagonal layout, which we do not expose in pyfiction.
      */
     py::class_<Lyt>(m, name, DOC(fiction_shifted_cartesian_layout_overridden))
-        .def(py::init<>(), DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
-        .def(py::init<const fiction::aspect_ratio<Lyt>&>(), py::arg("dimension"),
+        .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
              DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
+        .def(py::init<fiction::layouts::arrangement, const fiction::aspect_ratio<Lyt>&>(), py::arg("arrangement"),
+             py::arg("dimension"), DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
         .def(
-            "coord",
-            [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z) { return layout.coord(x, y, z); },
-            py::arg("x"), py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_cartesian_layout_coord))
+            "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
+            DOC(fiction_layouts_hexagonal_layout_get_arrangement))
+        .def(
+            "coord", [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z)
+            { return layout.coord(coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, py::arg("x"),
+            py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_cartesian_layout_coord))
         .def(
             "x", [](const Lyt& lyt) { return lyt.x(); }, DOC(fiction_layouts_cartesian_layout_x))
         .def(
@@ -73,133 +78,128 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
         .def(
             "area", [](const Lyt& lyt) { return lyt.area(); }, DOC(fiction_layouts_cartesian_layout_area))
         .def(
-            "resize", [](Lyt& lyt, const py_offset_coordinate& dimension) { lyt.resize(dimension); },
-            py::arg("dimension"), DOC(fiction_layouts_cartesian_layout_resize))
+            "resize", [](Lyt& lyt, const py_coordinate& dimension) { lyt.resize(dimension); }, py::arg("dimension"),
+            DOC(fiction_layouts_cartesian_layout_resize))
         .def(
-            "north", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.north(c); }, py::arg("c"),
+            "north", [](const Lyt& lyt, const py_coordinate& c) { return lyt.north(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_north))
         .def(
-            "north_east", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.north_east(c); }, py::arg("c"),
+            "north_east", [](const Lyt& lyt, const py_coordinate& c) { return lyt.north_east(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_north_east))
         .def(
-            "east", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.east(c); }, py::arg("c"),
+            "east", [](const Lyt& lyt, const py_coordinate& c) { return lyt.east(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_east))
         .def(
-            "south_east", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.south_east(c); }, py::arg("c"),
+            "south_east", [](const Lyt& lyt, const py_coordinate& c) { return lyt.south_east(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_south_east))
         .def(
-            "south", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.south(c); }, py::arg("c"),
+            "south", [](const Lyt& lyt, const py_coordinate& c) { return lyt.south(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_south))
         .def(
-            "south_west", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.south_west(c); }, py::arg("c"),
+            "south_west", [](const Lyt& lyt, const py_coordinate& c) { return lyt.south_west(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_south_west))
         .def(
-            "west", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.west(c); }, py::arg("c"),
+            "west", [](const Lyt& lyt, const py_coordinate& c) { return lyt.west(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_west))
         .def(
-            "north_west", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.north_west(c); }, py::arg("c"),
+            "north_west", [](const Lyt& lyt, const py_coordinate& c) { return lyt.north_west(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_north_west))
         .def(
-            "above", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.above(c); }, py::arg("c"),
+            "above", [](const Lyt& lyt, const py_coordinate& c) { return lyt.above(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_above))
         .def(
-            "below", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.below(c); }, py::arg("c"),
+            "below", [](const Lyt& lyt, const py_coordinate& c) { return lyt.below(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_below))
 
         .def(
-            "is_north_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
-            { return lyt.is_north_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
-            DOC(fiction_layouts_cartesian_layout_is_north_of))
+            "is_north_of",
+            [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2) { return lyt.is_north_of(c1, c2); },
+            py::arg("c1"), py::arg("c2"), DOC(fiction_layouts_cartesian_layout_is_north_of))
         .def(
-            "is_east_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
-            { return lyt.is_east_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
-            DOC(fiction_layouts_cartesian_layout_is_east_of))
+            "is_east_of",
+            [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2) { return lyt.is_east_of(c1, c2); },
+            py::arg("c1"), py::arg("c2"), DOC(fiction_layouts_cartesian_layout_is_east_of))
         .def(
-            "is_south_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
-            { return lyt.is_south_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
-            DOC(fiction_layouts_cartesian_layout_is_south_of))
+            "is_south_of",
+            [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2) { return lyt.is_south_of(c1, c2); },
+            py::arg("c1"), py::arg("c2"), DOC(fiction_layouts_cartesian_layout_is_south_of))
         .def(
-            "is_west_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
-            { return lyt.is_west_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
-            DOC(fiction_layouts_cartesian_layout_is_west_of))
+            "is_west_of",
+            [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2) { return lyt.is_west_of(c1, c2); },
+            py::arg("c1"), py::arg("c2"), DOC(fiction_layouts_cartesian_layout_is_west_of))
         .def(
-            "is_adjacent_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
-            { return lyt.is_adjacent_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
-            DOC(fiction_layouts_cartesian_layout_is_adjacent_of))
+            "is_adjacent_of",
+            [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2) { return lyt.is_adjacent_of(c1, c2); },
+            py::arg("c1"), py::arg("c2"), DOC(fiction_layouts_cartesian_layout_is_adjacent_of))
         .def(
-            "is_adjacent_elevation_of",
-            [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
+            "is_adjacent_elevation_of", [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2)
             { return lyt.is_adjacent_elevation_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
             DOC(fiction_layouts_cartesian_layout_is_adjacent_elevation_of))
         .def(
-            "is_above", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
-            { return lyt.is_above(c1, c2); }, py::arg("c1"), py::arg("c2"),
-            DOC(fiction_layouts_cartesian_layout_is_above))
+            "is_above",
+            [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2) { return lyt.is_above(c1, c2); },
+            py::arg("c1"), py::arg("c2"), DOC(fiction_layouts_cartesian_layout_is_above))
         .def(
-            "is_below", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
-            { return lyt.is_below(c1, c2); }, py::arg("c1"), py::arg("c2"),
-            DOC(fiction_layouts_cartesian_layout_is_below))
+            "is_below",
+            [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2) { return lyt.is_below(c1, c2); },
+            py::arg("c1"), py::arg("c2"), DOC(fiction_layouts_cartesian_layout_is_below))
         .def(
-            "is_northwards_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
+            "is_northwards_of", [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2)
             { return lyt.is_northwards_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
             DOC(fiction_layouts_cartesian_layout_is_northwards_of))
         .def(
-            "is_eastwards_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
+            "is_eastwards_of", [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2)
             { return lyt.is_eastwards_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
             DOC(fiction_layouts_cartesian_layout_is_eastwards_of))
         .def(
-            "is_southwards_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
+            "is_southwards_of", [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2)
             { return lyt.is_southwards_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
             DOC(fiction_layouts_cartesian_layout_is_southwards_of))
         .def(
-            "is_westwards_of", [](const Lyt& lyt, const py_offset_coordinate& c1, const py_offset_coordinate& c2)
+            "is_westwards_of", [](const Lyt& lyt, const py_coordinate& c1, const py_coordinate& c2)
             { return lyt.is_westwards_of(c1, c2); }, py::arg("c1"), py::arg("c2"),
             DOC(fiction_layouts_cartesian_layout_is_westwards_of))
 
         .def(
             "is_at_northern_border",
-            [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.is_at_northern_border(c); }, py::arg("c"),
+            [](const Lyt& lyt, const py_coordinate& c) { return lyt.is_at_northern_border(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_is_at_northern_border))
         .def(
-            "is_at_eastern_border",
-            [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.is_at_eastern_border(c); }, py::arg("c"),
-            DOC(fiction_layouts_cartesian_layout_is_at_eastern_border))
+            "is_at_eastern_border", [](const Lyt& lyt, const py_coordinate& c) { return lyt.is_at_eastern_border(c); },
+            py::arg("c"), DOC(fiction_layouts_cartesian_layout_is_at_eastern_border))
         .def(
             "is_at_southern_border",
-            [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.is_at_southern_border(c); }, py::arg("c"),
+            [](const Lyt& lyt, const py_coordinate& c) { return lyt.is_at_southern_border(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_is_at_southern_border))
         .def(
-            "is_at_western_border",
-            [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.is_at_western_border(c); }, py::arg("c"),
-            DOC(fiction_layouts_cartesian_layout_is_at_western_border))
+            "is_at_western_border", [](const Lyt& lyt, const py_coordinate& c) { return lyt.is_at_western_border(c); },
+            py::arg("c"), DOC(fiction_layouts_cartesian_layout_is_at_western_border))
         .def(
-            "is_at_any_border", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.is_at_any_border(c); },
+            "is_at_any_border", [](const Lyt& lyt, const py_coordinate& c) { return lyt.is_at_any_border(c); },
             py::arg("c"), DOC(fiction_layouts_cartesian_layout_is_at_any_border))
 
         .def(
-            "northern_border_of",
-            [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.northern_border_of(c); }, py::arg("c"),
-            DOC(fiction_layouts_cartesian_layout_northern_border_of))
+            "northern_border_of", [](const Lyt& lyt, const py_coordinate& c) { return lyt.northern_border_of(c); },
+            py::arg("c"), DOC(fiction_layouts_cartesian_layout_northern_border_of))
         .def(
-            "eastern_border_of", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.eastern_border_of(c); },
+            "eastern_border_of", [](const Lyt& lyt, const py_coordinate& c) { return lyt.eastern_border_of(c); },
             py::arg("c"), DOC(fiction_layouts_cartesian_layout_eastern_border_of))
         .def(
-            "southern_border_of",
-            [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.southern_border_of(c); }, py::arg("c"),
-            DOC(fiction_layouts_cartesian_layout_southern_border_of))
+            "southern_border_of", [](const Lyt& lyt, const py_coordinate& c) { return lyt.southern_border_of(c); },
+            py::arg("c"), DOC(fiction_layouts_cartesian_layout_southern_border_of))
         .def(
-            "western_border_of", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.western_border_of(c); },
+            "western_border_of", [](const Lyt& lyt, const py_coordinate& c) { return lyt.western_border_of(c); },
             py::arg("c"), DOC(fiction_layouts_cartesian_layout_western_border_of))
 
         .def(
-            "is_ground_layer", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.is_ground_layer(c); },
+            "is_ground_layer", [](const Lyt& lyt, const py_coordinate& c) { return lyt.is_ground_layer(c); },
             py::arg("c"), DOC(fiction_layouts_cartesian_layout_is_ground_layer))
         .def(
-            "is_crossing_layer", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.is_crossing_layer(c); },
+            "is_crossing_layer", [](const Lyt& lyt, const py_coordinate& c) { return lyt.is_crossing_layer(c); },
             py::arg("c"), DOC(fiction_layouts_cartesian_layout_is_crossing_layer))
 
         .def(
-            "is_within_bounds", [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.is_within_bounds(c); },
+            "is_within_bounds", [](const Lyt& lyt, const py_coordinate& c) { return lyt.is_within_bounds(c); },
             py::arg("c"), DOC(fiction_layouts_cartesian_layout_is_within_bounds))
 
         .def(
@@ -207,7 +207,7 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             [](const Lyt& lyt)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.area() * (lyt.z() + 1));
+                coords.reserve(lyt.area() * (static_cast<uint64_t>(lyt.z()) + 1u));
                 lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                 return coords;
             },
@@ -223,13 +223,12 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             },
             DOC(fiction_layouts_cartesian_layout_ground_coordinates))
         .def(
-            "adjacent_coordinates",
-            [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.adjacent_coordinates(c); }, py::arg("c"),
-            DOC(fiction_layouts_cartesian_layout_adjacent_coordinates))
+            "adjacent_coordinates", [](const Lyt& lyt, const py_coordinate& c) { return lyt.adjacent_coordinates(c); },
+            py::arg("c"), DOC(fiction_layouts_cartesian_layout_adjacent_coordinates))
         .def(
             "adjacent_opposite_coordinates",
-            [](const Lyt& lyt, const py_offset_coordinate& c) { return lyt.adjacent_opposite_coordinates(c); },
-            py::arg("c"), DOC(fiction_layouts_cartesian_layout_adjacent_opposite_coordinates))
+            [](const Lyt& lyt, const py_coordinate& c) { return lyt.adjacent_opposite_coordinates(c); }, py::arg("c"),
+            DOC(fiction_layouts_cartesian_layout_adjacent_opposite_coordinates))
 
         .def(
             "__repr__",
@@ -247,15 +246,12 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
 }  // namespace detail
 
 /**
- * Register supported shifted_cartesian topologies.
+ * Register the shifted Cartesian layout.
  * @param m Python module.
  */
 void shifted_cartesian_layout(nanobind::module_& m)
 {
     detail::shifted_cartesian_layout<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout");
-    detail::shifted_cartesian_layout<py_odd_row_cartesian_layout>(m, "odd_row_cartesian_layout");
-    detail::shifted_cartesian_layout<py_even_row_cartesian_layout>(m, "even_row_cartesian_layout");
-    detail::shifted_cartesian_layout<py_even_column_cartesian_layout>(m, "even_column_cartesian_layout");
 }
 
 }  // namespace pyfiction

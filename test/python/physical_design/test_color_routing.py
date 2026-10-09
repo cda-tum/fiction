@@ -10,8 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout
-from mnt.pyfiction.layouts.coords import offset_coordinate
+from mnt.pyfiction.layouts import arrangement, cartesian_gate_layout, coordinate, hexagonal_gate_layout
 from mnt.pyfiction.physical_design import color_routing, color_routing_params
 
 
@@ -19,17 +18,19 @@ from mnt.pyfiction.physical_design import color_routing, color_routing_params
     "make_lyt",
     [
         pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-        pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"
+        ),
     ],
 )
 def test_routing(make_lyt):
     lyt = make_lyt()
-    x1 = lyt.create_pi("x1", offset_coordinate(0, 0))
-    x2 = lyt.create_pi("x2", offset_coordinate(0, 1))
+    x1 = lyt.create_pi("x1", coordinate(0, 0))
+    x2 = lyt.create_pi("x2", coordinate(0, 1))
 
-    a = lyt.create_and(x1, x2, offset_coordinate(2, 2))
+    a = lyt.create_and(x1, x2, coordinate(2, 2))
 
-    lyt.create_po(a, "f1", offset_coordinate(4, 4))
+    lyt.create_po(a, "f1", coordinate(4, 4))
 
     success = color_routing(lyt, [((0, 0), (2, 2)), ((0, 1), (2, 2)), ((2, 2), (4, 4))])
 

@@ -24,6 +24,7 @@
 #include <fmt/format.h>
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <ostream>
 #include <string>
@@ -222,7 +223,9 @@ class write_qca_layout_impl
 
     void write_cell_layers()
     {
-        utils::progress_reporter progress{ps.on_progress, "writing rows", (lyt.y() + 1) * (lyt.z() + 1)};
+        utils::progress_reporter progress{ps.on_progress, "writing rows",
+                                          static_cast<std::size_t>(lyt.y() + 1) *
+                                              static_cast<std::size_t>(lyt.z() + 1)};
         // for each layer
         for (decltype(lyt.z()) z = 0; z <= lyt.z(); ++z)
         {

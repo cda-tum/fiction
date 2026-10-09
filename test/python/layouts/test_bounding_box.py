@@ -13,7 +13,12 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.inml import inml_layout
-from mnt.pyfiction.layouts import cartesian_gate_layout, hexagonal_gate_layout, shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import (
+    arrangement,
+    cartesian_gate_layout,
+    hexagonal_gate_layout,
+    shifted_cartesian_gate_layout,
+)
 from mnt.pyfiction.networks.io import read_technology_network
 from mnt.pyfiction.physical_design import orthogonal, orthogonal_params
 from mnt.pyfiction.qca import qca_layout
@@ -27,9 +32,13 @@ if TYPE_CHECKING:
     [
         pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 0), "2DDWave", "Layout"),
+            id="shifted_cartesian_gate_layout",
         ),
-        pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "2DDWave", "Layout"),
+            id="hexagonal_gate_layout",
+        ),
     ],
 )
 def test_bounding_box_around_an_empty_gate_level_layout(make_layout):

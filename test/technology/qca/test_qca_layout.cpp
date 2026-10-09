@@ -17,7 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/technology/qca/layout.hpp>
 
 #include <stdexcept>

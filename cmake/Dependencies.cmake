@@ -118,10 +118,8 @@ FetchContent_MakeAvailable(tinyxml2)
 
 # fmt
 #
-# mockturtle bundles fmt 11.0.2 and creates a header-only `fmt` target unless
-# one exists. That copy does not compile with clang 20, so fiction fetches a
-# release and defines the target first; mockturtle and lorina then link this
-# one.
+# fiction supplies fmt explicitly so its headers are available in both the build
+# tree and the installed package.
 set(FMT_VERSION
     12.2.0
     CACHE STRING "fmt version")
@@ -152,19 +150,15 @@ target_compile_definitions(fmt INTERFACE FMT_HEADER_ONLY)
 # submodule directories empty, so a tarball build fails on `#include
 # <parallel_hashmap/phmap.h>`. Do not convert this to a `URL` without first
 # arranging for that header to resolve.
-set(MOCKTURTLE_EXAMPLES
-    OFF
-    CACHE BOOL "" FORCE)
-set(MOCKTURTLE_EXPERIMENTS
-    OFF
-    CACHE BOOL "" FORCE)
-set(MOCKTURTLE_TEST
-    OFF
-    CACHE BOOL "" FORCE)
+#
+# mockturtle builds neither its examples, tests nor experiments when it is not
+# the top-level project. It does not install itself either, and _fiction_ needs
+# it to: an installed `libfiction` re-exports mockturtle's headers.
+set(MOCKTURTLE_INSTALL ON)
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG 1f1a752e677acafb2ae60ba48e8f2ca16ca9c439 # Head of the mnt branch
+  GIT_TAG 42638d2b26be7977adcba18cfd0d2fb68590013e # mnt
 )
 FetchContent_MakeAvailable(mockturtle)
 

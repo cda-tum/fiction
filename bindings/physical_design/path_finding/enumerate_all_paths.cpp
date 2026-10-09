@@ -48,7 +48,7 @@ void enumerate_all_paths_impl(nanobind::module_& m)
         "enumerate_all_paths",
         [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
            const fiction::physical_design::path_finding::enumerate_all_paths_params& params,
-           const fiction::layouts::obstructions<fiction::coordinate<Lyt>>&           obstructions)
+           const fiction::layouts::obstructions&                                     obstructions)
         {
             const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<
                 fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, params,
@@ -66,7 +66,7 @@ void enumerate_all_paths_impl(nanobind::module_& m)
         },
         py::arg("layout"), py::arg("source"), py::arg("target"),
         py::arg("params")       = fiction::physical_design::path_finding::enumerate_all_paths_params{},
-        py::arg("obstructions") = fiction::layouts::obstructions<fiction::coordinate<Lyt>>{},
+        py::arg("obstructions") = fiction::layouts::obstructions{},
         DOC(fiction_physical_design_path_finding_enumerate_all_paths));
 }
 

@@ -36,54 +36,6 @@ def write_dot_layout(
     clock_colors: bool = False,
     indexes: bool = False,
     on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_dot_layout(
-    layout: mnt.pyfiction.layouts.odd_row_cartesian_gate_layout,
-    filename: str,
-    clock_colors: bool = False,
-    indexes: bool = False,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_dot_layout(
-    layout: mnt.pyfiction.layouts.even_row_cartesian_gate_layout,
-    filename: str,
-    clock_colors: bool = False,
-    indexes: bool = False,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_dot_layout(
-    layout: mnt.pyfiction.layouts.even_column_cartesian_gate_layout,
-    filename: str,
-    clock_colors: bool = False,
-    indexes: bool = False,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_dot_layout(
-    layout: mnt.pyfiction.layouts.odd_row_hex_gate_layout,
-    filename: str,
-    clock_colors: bool = False,
-    indexes: bool = False,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_dot_layout(
-    layout: mnt.pyfiction.layouts.odd_column_hex_gate_layout,
-    filename: str,
-    clock_colors: bool = False,
-    indexes: bool = False,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_dot_layout(
-    layout: mnt.pyfiction.layouts.even_column_hex_gate_layout,
-    filename: str,
-    clock_colors: bool = False,
-    indexes: bool = False,
-    on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:
     """
     Writes layout in DOT format into output stream
@@ -116,42 +68,6 @@ def write_fgl_layout(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     filename: str,
     on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_fgl_layout(
-    layout: mnt.pyfiction.layouts.odd_row_cartesian_gate_layout,
-    filename: str,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_fgl_layout(
-    layout: mnt.pyfiction.layouts.even_row_cartesian_gate_layout,
-    filename: str,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_fgl_layout(
-    layout: mnt.pyfiction.layouts.even_column_cartesian_gate_layout,
-    filename: str,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_fgl_layout(
-    layout: mnt.pyfiction.layouts.odd_row_hex_gate_layout,
-    filename: str,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_fgl_layout(
-    layout: mnt.pyfiction.layouts.odd_column_hex_gate_layout,
-    filename: str,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> None: ...
-@overload
-def write_fgl_layout(
-    layout: mnt.pyfiction.layouts.even_column_hex_gate_layout,
-    filename: str,
-    on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:
     """
     Writes an FGL layout to a file.
@@ -166,6 +82,10 @@ def write_fgl_layout(
 
     Template Args:
         Lyt: Layout.
+
+    Raises:
+        std::invalid_argument: If a node is unplaced or placed on a tile
+                               with a negative coordinate.
     """
 
 class fgl_parsing_error(RuntimeError): ...
@@ -201,100 +121,6 @@ def read_shifted_cartesian_fgl_layout(
     """
 
 def read_hexagonal_fgl_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.layouts.hexagonal_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
-
-def read_odd_row_cartesian_fgl_layout(
-    filename: str, layout_name: str = ""
-) -> mnt.pyfiction.layouts.odd_row_cartesian_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
-
-def read_even_row_cartesian_fgl_layout(
-    filename: str, layout_name: str = ""
-) -> mnt.pyfiction.layouts.even_row_cartesian_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
-
-def read_even_column_cartesian_fgl_layout(
-    filename: str, layout_name: str = ""
-) -> mnt.pyfiction.layouts.even_column_cartesian_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
-
-def read_odd_row_hex_fgl_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.layouts.odd_row_hex_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
-
-def read_odd_column_hex_fgl_layout(
-    filename: str, layout_name: str = ""
-) -> mnt.pyfiction.layouts.odd_column_hex_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
-
-def read_even_column_hex_fgl_layout(
-    filename: str, layout_name: str = ""
-) -> mnt.pyfiction.layouts.even_column_hex_gate_layout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 

@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -327,33 +325,12 @@ struct is_shifted_cartesian_layout : std::false_type
 template <class Lyt>
 struct is_shifted_cartesian_layout<
     Lyt, std::enable_if_t<is_coordinate_layout_v<Lyt> && has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
-                          std::void_t<typename Lyt::base_type, typename Lyt::cartesian_arrangement, aspect_ratio<Lyt>,
+                          std::void_t<typename Lyt::base_type, typename Lyt::is_shifted_cartesian, aspect_ratio<Lyt>,
                                       coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 
 template <class Lyt>
 inline constexpr bool is_shifted_cartesian_layout_v = is_shifted_cartesian_layout<Lyt>::value;
-#pragma endregion
-
-#pragma region shifted cartesian orientation and arrangement
-template <typename Lyt>
-constexpr bool has_horizontally_shifted_cartesian_orientation_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, layouts::horizontal_shift_cartesian>;
-template <typename Lyt>
-constexpr bool has_vertically_shifted_cartesian_orientation_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, layouts::vertical_shift_cartesian>;
-template <typename Lyt>
-constexpr bool has_odd_row_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::odd_row_cartesian>;
-template <typename Lyt>
-constexpr bool has_even_row_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::even_row_cartesian>;
-template <typename Lyt>
-constexpr bool has_odd_column_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::odd_column_cartesian>;
-template <typename Lyt>
-constexpr bool has_even_column_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::even_column_cartesian>;
 #pragma endregion
 
 #pragma region is_hexagonal_layout
@@ -362,37 +339,15 @@ struct is_hexagonal_layout : std::false_type
 {};
 
 template <class Lyt>
-struct is_hexagonal_layout<Lyt,
-                           std::enable_if_t<!is_shifted_cartesian_layout_v<Lyt> && is_coordinate_layout_v<Lyt> &&
-                                                has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
-                                            std::void_t<typename Lyt::base_type, typename Lyt::hex_arrangement,
-                                                        aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>>
-        : std::true_type
+struct is_hexagonal_layout<
+    Lyt, std::enable_if_t<!is_shifted_cartesian_layout_v<Lyt> && is_coordinate_layout_v<Lyt> &&
+                              has_ordinal_operations_v<Lyt> && Lyt::max_fanin_size == 5u,
+                          std::void_t<typename Lyt::base_type, decltype(std::declval<Lyt>().get_arrangement()),
+                                      aspect_ratio<Lyt>, coordinate<Lyt>, typename Lyt::storage>>> : std::true_type
 {};
 
 template <class Lyt>
 inline constexpr bool is_hexagonal_layout_v = is_hexagonal_layout<Lyt>::value;
-#pragma endregion
-
-#pragma region hexagonal orientation and arrangement
-template <typename Lyt>
-inline constexpr const bool has_pointy_top_hex_orientation_v =
-    std::is_same_v<typename Lyt::hex_arrangement::orientation, layouts::pointy_top_hex>;
-template <typename Lyt>
-inline constexpr const bool has_flat_top_hex_orientation_v =
-    std::is_same_v<typename Lyt::hex_arrangement::orientation, layouts::flat_top_hex>;
-template <typename Lyt>
-inline constexpr const bool has_odd_row_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, layouts::odd_row_hex>;
-template <typename Lyt>
-inline constexpr const bool has_even_row_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, layouts::even_row_hex>;
-template <typename Lyt>
-inline constexpr const bool has_odd_column_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, layouts::odd_column_hex>;
-template <typename Lyt>
-inline constexpr const bool has_even_column_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, layouts::even_column_hex>;
 #pragma endregion
 
 /**

@@ -19,9 +19,9 @@ The same data works with bare coordinate grids. Search data contains no layout o
 **Header:** `fiction/layouts/obstructions.hpp`
 
 ```cpp
-using grid = fiction::layouts::cartesian_layout<>;
+using grid = fiction::layouts::cartesian_layout;
 grid lyt{{3, 3}};
-fiction::layouts::obstructions<grid::coordinate> blocked;
+fiction::layouts::obstructions blocked;
 blocked.obstruct_coordinate({1, 1});
 using path = fiction::physical_design::layout_coordinate_path<grid>;
 auto paths = fiction::physical_design::path_finding::yen_k_shortest_paths<path>(

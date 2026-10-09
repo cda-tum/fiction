@@ -19,7 +19,6 @@
 #pragma once
 
 #include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
@@ -108,45 +107,16 @@ inline constexpr auto ntk_type_name = get_ntk_type_name<Ntk>();
 /**
  * FCN gate-level layouts.
  */
-using cart_gate_clk_lyt     = layouts::gate_level_layout<layouts::cartesian_layout<layouts::coords::offset>>;
+using cart_gate_clk_lyt     = layouts::gate_level_layout<layouts::cartesian_layout>;
 using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
-using cart_odd_row_gate_clk_lyt =
-    layouts::gate_level_layout<layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_row_cartesian>>;
-using cart_odd_row_gate_clk_lyt_ptr = std::shared_ptr<cart_odd_row_gate_clk_lyt>;
+using shifted_cart_gate_clk_lyt     = layouts::gate_level_layout<layouts::shifted_cartesian_layout>;
+using shifted_cart_gate_clk_lyt_ptr = std::shared_ptr<shifted_cart_gate_clk_lyt>;
 
-using cart_even_row_gate_clk_lyt =
-    layouts::gate_level_layout<layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::even_row_cartesian>>;
-using cart_even_row_gate_clk_lyt_ptr = std::shared_ptr<cart_even_row_gate_clk_lyt>;
+using hex_gate_clk_lyt     = layouts::gate_level_layout<layouts::hexagonal_layout>;
+using hex_gate_clk_lyt_ptr = std::shared_ptr<hex_gate_clk_lyt>;
 
-using cart_odd_col_gate_clk_lyt = layouts::gate_level_layout<
-    layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_column_cartesian>>;
-using cart_odd_col_gate_clk_lyt_ptr = std::shared_ptr<cart_odd_col_gate_clk_lyt>;
-
-using cart_even_col_gate_clk_lyt = layouts::gate_level_layout<
-    layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::even_column_cartesian>>;
-using cart_even_col_gate_clk_lyt_ptr = std::shared_ptr<cart_even_col_gate_clk_lyt>;
-
-using hex_odd_row_gate_clk_lyt =
-    layouts::gate_level_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>;
-using hex_odd_row_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_row_gate_clk_lyt>;
-
-using hex_even_row_gate_clk_lyt =
-    layouts::gate_level_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>;
-using hex_even_row_gate_clk_lyt_ptr = std::shared_ptr<hex_even_row_gate_clk_lyt>;
-
-using hex_odd_col_gate_clk_lyt =
-    layouts::gate_level_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>;
-using hex_odd_col_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_col_gate_clk_lyt>;
-
-using hex_even_col_gate_clk_lyt =
-    layouts::gate_level_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>;
-using hex_even_col_gate_clk_lyt_ptr = std::shared_ptr<hex_even_col_gate_clk_lyt>;
-
-using gate_layout_t =
-    std::variant<cart_gate_clk_lyt_ptr, cart_odd_row_gate_clk_lyt_ptr, cart_even_row_gate_clk_lyt_ptr,
-                 cart_odd_col_gate_clk_lyt_ptr, cart_even_col_gate_clk_lyt_ptr, hex_odd_row_gate_clk_lyt_ptr,
-                 hex_even_row_gate_clk_lyt_ptr, hex_odd_col_gate_clk_lyt_ptr, hex_even_col_gate_clk_lyt_ptr>;
+using gate_layout_t = std::variant<cart_gate_clk_lyt_ptr, shifted_cart_gate_clk_lyt_ptr, hex_gate_clk_lyt_ptr>;
 
 /**
  * Every `*_ptr` alias points at the type its name says (`aig_ptr` at `aig_nt`, and so on). The
@@ -158,13 +128,7 @@ static_assert(std::is_same_v<xag_ptr::element_type, xag_nt>);
 static_assert(std::is_same_v<mig_ptr::element_type, mig_nt>);
 static_assert(std::is_same_v<tec_ptr::element_type, tec_nt>);
 static_assert(std::is_same_v<cart_gate_clk_lyt_ptr::element_type, cart_gate_clk_lyt>);
-static_assert(std::is_same_v<cart_odd_row_gate_clk_lyt_ptr::element_type, cart_odd_row_gate_clk_lyt>);
-static_assert(std::is_same_v<cart_even_row_gate_clk_lyt_ptr::element_type, cart_even_row_gate_clk_lyt>);
-static_assert(std::is_same_v<cart_odd_col_gate_clk_lyt_ptr::element_type, cart_odd_col_gate_clk_lyt>);
-static_assert(std::is_same_v<cart_even_col_gate_clk_lyt_ptr::element_type, cart_even_col_gate_clk_lyt>);
-static_assert(std::is_same_v<hex_odd_row_gate_clk_lyt_ptr::element_type, hex_odd_row_gate_clk_lyt>);
-static_assert(std::is_same_v<hex_even_row_gate_clk_lyt_ptr::element_type, hex_even_row_gate_clk_lyt>);
-static_assert(std::is_same_v<hex_odd_col_gate_clk_lyt_ptr::element_type, hex_odd_col_gate_clk_lyt>);
-static_assert(std::is_same_v<hex_even_col_gate_clk_lyt_ptr::element_type, hex_even_col_gate_clk_lyt>);
+static_assert(std::is_same_v<shifted_cart_gate_clk_lyt_ptr::element_type, shifted_cart_gate_clk_lyt>);
+static_assert(std::is_same_v<hex_gate_clk_lyt_ptr::element_type, hex_gate_clk_lyt>);
 
 }  // namespace fiction

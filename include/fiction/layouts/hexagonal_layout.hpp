@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Hexagonal grid layout in the four pointy- and flat-top offset orientations.
+ * @brief Hexagonal grid layout in the four pointy- and flat-top offset arrangements.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)
@@ -18,7 +18,8 @@
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/layout_base.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 
@@ -28,9 +29,9 @@
 #include <concepts>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <ranges>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -38,35 +39,11 @@ namespace fiction::layouts
 {
 
 /**
- * \verbatim
-     / \
-   /     \
-  |       |
-  |       |
-   \     /
-     \ /
-  \endverbatim
- */
-struct pointy_top_hex
-{
-    using orientation = pointy_top_hex;
-};
-
-/**
- * \verbatim
-     _____
-    /     \
-   /       \
-   \       /
-    \_____/
-  \endverbatim
- */
-struct flat_top_hex
-{
-    using orientation = flat_top_hex;
-};
-
-/**
+ * A layout type that utilizes offset coordinates to represent a hexagonal grid. Its faces are organized in an offset
+ * coordinate system as provided. The arrangement fixed at construction selects which rows or columns are shifted. Row
+ * arrangements yield pointy-top hexagons, column arrangements flat-top hexagons. The four arrangements look as follows.
+ *
+ * `arrangement::ODD_ROW`:
  * \verbatim
          / \     / \     / \
        /     \ /     \ /     \
@@ -83,10 +60,8 @@ struct flat_top_hex
        \     / \     / \     /
          \ /     \ /     \ /
   \endverbatim
- */
-struct odd_row_hex : pointy_top_hex
-{};
-/**
+ *
+ * `arrangement::EVEN_ROW`:
  * \verbatim
          / \     / \     / \
        /     \ /     \ /     \
@@ -103,10 +78,8 @@ struct odd_row_hex : pointy_top_hex
        \     / \     / \     /
          \ /     \ /     \ /
   \endverbatim
- */
-struct even_row_hex : pointy_top_hex
-{};
-/**
+ *
+ * `arrangement::ODD_COLUMN`:
  * \verbatim
      _____         _____
     /     \       /     \
@@ -122,11 +95,8 @@ struct even_row_hex : pointy_top_hex
    \       /     \       /
     \_____/       \_____/
   \endverbatim
- */
-struct odd_column_hex : flat_top_hex
-{};
-
-/**
+ *
+ * `arrangement::EVEN_COLUMN`:
  * \verbatim
             _____         _____
            /     \       /     \
@@ -142,46 +112,106 @@ struct odd_column_hex : flat_top_hex
           \       /     \       /
            \_____/       \_____/
   \endverbatim
- */
-struct even_column_hex : flat_top_hex
-{};
-
-/**
- * A layout type that utilizes offset coordinates to represent a hexagonal grid. Its faces are organized in an offset
- * coordinate system as provided. Hexagons can be in the pointy_top_hex or flat_top_hex orientation. Based on that, two
- * respectively possible coordinate systems emerge accordingly: odd_row_hex and even_row_hex for pointy tops and
- * odd_column_hex and even_column_hex for flat tops. All are sketched in ASCII above.
  *
  * Other representations would be using cube or axial coordinates for instance, but since we want the layouts to be
  * rectangular-ish, offset coordinates make the most sense here.
  *
  * https://www.redblobgames.com/grids/hexagons/ is a wonderful resource on the topic.
  *
- * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
- * @tparam HexagonalCoordinateSystem One of the following: odd_row_hex, even_row_hex, odd_column_hex, even_column_hex.
- * @tparam CubeCoordinateType Internally, cube coordinates are needed for certain algorithms or calculations.
  */
-template <typename OffsetCoordinateType = coords::offset, typename HexagonalCoordinateSystem = even_row_hex,
-          typename CubeCoordinateType = coords::cube>
-    requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
-             std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
-             std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
-             std::same_as<HexagonalCoordinateSystem, even_column_hex>
-class hexagonal_layout
+class hexagonal_layout : public layout_base
 {
   public:
 #pragma region Types and constructors
 
-    using coordinate   = OffsetCoordinateType;
-    using aspect_ratio = OffsetCoordinateType;
+    using layout_base::aspect_ratio;
+    using layout_base::coordinate;
 
-    using cube_coordinate = CubeCoordinateType;
+    /**
+     * Cube coordinates identify faces of the hexagonal grid with three signed axes that sum to zero. The layout uses
+     * them internally for neighbor calculations. A wonderful resource on the topic is
+     * https://www.redblobgames.com/grids/hexagons/#coordinates-cube
+     */
+    struct cube_coordinate
+    {
+        /**
+         * x coordinate.
+         */
+        int64_t x;
+        /**
+         * y coordinate.
+         */
+        int64_t y;
+        /**
+         * z coordinate.
+         */
+        int64_t z;
+        /**
+         * Creates a cube coordinate at the origin.
+         */
+        constexpr cube_coordinate() noexcept : x{0}, y{0}, z{0} {}
+        /**
+         * Creates a cube coordinate from its three axes.
+         *
+         * @param cube_x x coordinate.
+         * @param cube_y y coordinate.
+         * @param cube_z z coordinate.
+         */
+        constexpr cube_coordinate(const int64_t cube_x, const int64_t cube_y, const int64_t cube_z) noexcept :
+                x{cube_x},
+                y{cube_y},
+                z{cube_z}
+        {}
+        /**
+         * Compares against another cube coordinate for equality.
+         *
+         * @param other Right-hand side coordinate.
+         * @return `true` iff all axes are equal.
+         */
+        constexpr bool operator==(const cube_coordinate& other) const noexcept
+        {
+            return x == other.x && y == other.y && z == other.z;
+        }
+        /**
+         * Adds another cube coordinate axis by axis.
+         *
+         * @param other Right-hand side coordinate.
+         * @return The sum of both coordinates.
+         */
+        [[nodiscard]] constexpr cube_coordinate operator+(const cube_coordinate& other) const noexcept
+        {
+            return {x + other.x, y + other.y, z + other.z};
+        }
+    };
 
+    /**
+     * State that all copies of a layout share.
+     */
     struct hexagonal_layout_storage
     {
-        explicit hexagonal_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
+        /**
+         * Creates the storage of a layout.
+         *
+         * @param ar Highest possible position in the layout.
+         * @param a Arrangement of the shifted rows or columns.
+         */
+        hexagonal_layout_storage(const aspect_ratio& ar, const layouts::arrangement a) noexcept :
+                dimension{ar},
+                shift{a}
+        {}
 
+        /**
+         * Highest possible position in the layout.
+         */
         aspect_ratio dimension;
+        /**
+         * Whether a gate-level layout shares these dimensions and limits the z extent to 1.
+         */
+        bool two_layers_only{false};
+        /**
+         * Arrangement of the shifted rows or columns.
+         */
+        layouts::arrangement shift;
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -189,18 +219,20 @@ class hexagonal_layout
 
     using base_type = hexagonal_layout;
 
-    using hex_arrangement = HexagonalCoordinateSystem;
-
     using storage = std::shared_ptr<hexagonal_layout_storage>;
 
     /**
      * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
-     * in the even_column_hex ASCII layout representation above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the
-     * layout has exactly one coordinate.
+     * in the `arrangement::EVEN_COLUMN` ASCII layout representation above `ar = (3,2)`. Consequently, with
+     * `ar = (0,0)`, the layout has exactly one coordinate.
      *
+     * @param a Arrangement of the shifted rows or columns. It cannot change after construction.
      * @param ar Highest possible position in the layout.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
      */
-    explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)} {}
+    explicit hexagonal_layout(const layouts::arrangement a, const aspect_ratio& ar = {0, 0}) :
+            strg{std::make_shared<hexagonal_layout_storage>(checked(ar), a)}
+    {}
     /**
      * Constructor that takes ownership of an existing storage, so that the new layout shares the coordinates of the
      * one the storage came from.
@@ -218,9 +250,18 @@ class hexagonal_layout
         return hexagonal_layout(std::make_shared<hexagonal_layout_storage>(*strg));
     }
     /**
+     * Returns the arrangement of the shifted rows or columns.
+     *
+     * @return Arrangement fixed at construction.
+     */
+    [[nodiscard]] layouts::arrangement get_arrangement() const noexcept
+    {
+        return strg->shift;
+    }
+    /**
      * Creates and returns a coordinate in the layout from the given x-, y-, and z-values.
      *
-     * @note This function is equivalent to calling `OffsetCoordinateType(x, y, z)`.
+     * @note This function is equivalent to calling `coordinate(x, y, z)`.
      *
      * @tparam X x-type.
      * @tparam Y y-type.
@@ -228,12 +269,13 @@ class hexagonal_layout
      * @param x x-value.
      * @param y y-value.
      * @param z z-value.
-     * @return A coordinate in the layout of type `OffsetCoordinateType`.
+     * @return A coordinate in the layout of type `coordinate`.
+     * @throws std::overflow_error If an axis is outside the signed 32-bit range.
      */
-    template <typename X, typename Y, typename Z = uint64_t>
-    constexpr OffsetCoordinateType coord(const X x, const Y y, const Z z = 0ul) const noexcept
+    template <std::integral X, std::integral Y, std::integral Z = uint64_t>
+    constexpr coordinate coord(const X x, const Y y, const Z z = 0ul) const
     {
-        return OffsetCoordinateType(x, y, z);
+        return coordinate(x, y, z);
     }
 
 #pragma endregion
@@ -244,7 +286,7 @@ class hexagonal_layout
      *
      * @return x-dimension.
      */
-    [[nodiscard]] uint64_t x() const noexcept
+    [[nodiscard]] int32_t x() const noexcept
     {
         return strg->dimension.x;
     }
@@ -253,7 +295,7 @@ class hexagonal_layout
      *
      * @return y-dimension.
      */
-    [[nodiscard]] uint64_t y() const noexcept
+    [[nodiscard]] int32_t y() const noexcept
     {
         return strg->dimension.y;
     }
@@ -262,7 +304,7 @@ class hexagonal_layout
      *
      * @return z-dimension.
      */
-    [[nodiscard]] uint64_t z() const noexcept
+    [[nodiscard]] int32_t z() const noexcept
     {
         return strg->dimension.z;
     }
@@ -273,30 +315,35 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return fiction::layouts::coords::area_of(strg->dimension);
+        return fiction::layouts::area_of(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
      *
      * @param ar New aspect ratio.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
+     * @throws std::out_of_range If shared gate geometry limits the z extent to 1 and `ar.z` exceeds 1.
      */
-    void resize(const aspect_ratio& ar) noexcept
+    void resize(const aspect_ratio& ar)
     {
-        strg->dimension = ar;
+        strg->dimension = checked(ar, strg->two_layers_only);
     }
 
 #pragma endregion
 
 #pragma region row / column detection
+    // The neighbor and border queries below do not read the layout, but every layout type exposes them as members: the
+    // generic algorithms and `is_coordinate_layout_v` call them on a layout instance.
+    // NOLINTBEGIN(readability-convert-member-functions-to-static)
     /**
      * Checks if the given coordinate is located in a row with an odd index.
      *
      * @param c Coordinate to check.
      * @return `true` iff `c` is located in an odd row.
      */
-    [[nodiscard]] bool is_in_odd_row(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_in_odd_row(const coordinate& c) const noexcept
     {
-        return c.y % 2 == 1;
+        return c.y % 2 != 0;
     }
     /**
      * Checks if the given coordinate is located in a row with an even index.
@@ -304,7 +351,7 @@ class hexagonal_layout
      * @param c Coordinate to check.
      * @return `true` iff `c` is located in an even row.
      */
-    [[nodiscard]] bool is_in_even_row(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_in_even_row(const coordinate& c) const noexcept
     {
         return c.y % 2 == 0;
     }
@@ -314,9 +361,9 @@ class hexagonal_layout
      * @param c Coordinate to check.
      * @return `true` iff `c` is located in an odd column.
      */
-    [[nodiscard]] bool is_in_odd_column(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_in_odd_column(const coordinate& c) const noexcept
     {
-        return c.x % 2 == 1;
+        return c.x % 2 != 0;
     }
     /**
      * Checks if the given coordinate is located in a column with an even index.
@@ -324,7 +371,7 @@ class hexagonal_layout
      * @param c Coordinate to check.
      * @return `true` iff `c` is located in an even column.
      */
-    [[nodiscard]] bool is_in_even_column(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_in_even_column(const coordinate& c) const noexcept
     {
         return c.x % 2 == 0;
     }
@@ -339,9 +386,9 @@ class hexagonal_layout
      * @param c Coordinate whose northern counterpart is desired.
      * @return Coordinate adjacent and north of `c`.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr coordinate north(const coordinate& c) const noexcept
     {
-        if (c.y == 0ull)
+        if (c.y <= 0)
         {
             return c;
         }
@@ -353,18 +400,21 @@ class hexagonal_layout
     }
     /**
      * Returns the coordinate that is located in north-eastern direction of a given coordinate `c`. Depending on the
-     * hexagonal orientation of the layout, the dimension values of the returned coordinate may differ.
+     * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose north-eastern counterpart is desired.
-     * @return Coordinate directly north-eastern of `c`.
+     * @return Coordinate directly north-eastern of `c`; `c` itself if the neighbor lies outside of the layout.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType north_east(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate north_east(const coordinate& c) const noexcept
     {
-        auto ne = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, 0, -1});
+        if (!c.is_valid())
+        {
+            return c;
+        }
 
-        ne.z = c.z;
+        const auto ne = bounded_offset(offset_axes(to_cube_coordinate(c) + cube_coordinate{+1, 0, -1}), c.z);
 
-        return is_within_bounds(ne) ? ne : c;
+        return ne.is_valid() ? ne : c;
     }
     /**
      * Returns the coordinate that is directly adjacent in eastern direction of a given coordinate `c`, i.e., the face
@@ -373,15 +423,16 @@ class hexagonal_layout
      * @param c Coordinate whose eastern counterpart is desired.
      * @return Coordinate adjacent and east of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType east(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate east(const coordinate& c) const noexcept
     {
         auto ec = c;
 
-        if (c.x > x())
+        if (c.x < 0 || c.x > x())
         {
-            ec.d = 1;
+            return coordinate{};
         }
-        else if (c.x < x())
+
+        if (c.x < x())
         {
             ++ec.x;
         }
@@ -390,29 +441,24 @@ class hexagonal_layout
     }
     /**
      * Returns the coordinate that is located in south-eastern direction of a given coordinate `c`. Depending on the
-     * hexagonal orientation of the layout, the dimension values of the returned coordinate may differ.
+     * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose south-eastern counterpart is desired.
-     * @return Coordinate directly south-eastern of `c`.
+     * @return Coordinate directly south-eastern of `c`; `c` itself if the neighbor lies outside of the layout.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType south_east(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate south_east(const coordinate& c) const noexcept
     {
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
+        if (!c.is_valid())
         {
-            auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, -1, +1});
-
-            se.z = c.z;
-
-            return is_within_bounds(se) ? se : c;
+            return c;
         }
-        else
-        {
-            auto se = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{+1, -1, 0});
 
-            se.z = c.z;
+        const auto step =
+            is_row_arrangement(get_arrangement()) ? cube_coordinate{0, -1, +1} : cube_coordinate{+1, -1, 0};
 
-            return is_within_bounds(se) ? se : c;
-        }
+        const auto se = bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
+
+        return se.is_valid() ? se : c;
     }
     /**
      * Returns the coordinate that is directly adjacent in southern direction of a given coordinate `c`, i.e., the face
@@ -421,15 +467,16 @@ class hexagonal_layout
      * @param c Coordinate whose southern counterpart is desired.
      * @return Coordinate adjacent and south of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType south(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate south(const coordinate& c) const noexcept
     {
         auto sc = c;
 
-        if (c.y > y())
+        if (c.y < 0 || c.y > y())
         {
-            sc.d = 1;
+            return coordinate{};
         }
-        else if (c.y < y())
+
+        if (c.y < y())
         {
             ++sc.y;
         }
@@ -438,18 +485,21 @@ class hexagonal_layout
     }
     /**
      * Returns the coordinate that is located in south-western direction of a given coordinate `c`. Depending on the
-     * hexagonal orientation of the layout, the dimension values of the returned coordinate may differ.
+     * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose south-western counterpart is desired.
-     * @return Coordinate directly south-western of `c`.
+     * @return Coordinate directly south-western of `c`; `c` itself if the neighbor lies outside of the layout.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType south_west(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate south_west(const coordinate& c) const noexcept
     {
-        auto sw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, 0, +1});
+        if (!c.is_valid())
+        {
+            return c;
+        }
 
-        sw.z = c.z;
+        const auto sw = bounded_offset(offset_axes(to_cube_coordinate(c) + cube_coordinate{-1, 0, +1}), c.z);
 
-        return is_within_bounds(sw) ? sw : c;
+        return sw.is_valid() ? sw : c;
     }
     /**
      * Returns the coordinate that is directly adjacent in western direction of a given coordinate `c`, i.e., the face
@@ -458,9 +508,9 @@ class hexagonal_layout
      * @param c Coordinate whose western counterpart is desired.
      * @return Coordinate adjacent and west of `c`.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr coordinate west(const coordinate& c) const noexcept
     {
-        if (c.x == 0ull)
+        if (c.x <= 0)
         {
             return c;
         }
@@ -472,29 +522,24 @@ class hexagonal_layout
     }
     /**
      * Returns the coordinate that is located in north-western direction of a given coordinate `c`. Depending on the
-     * hexagonal orientation of the layout, the dimension values of the returned coordinate may differ.
+     * arrangement of the layout, the dimension values of the returned coordinate may differ.
      *
      * @param c Coordinate whose north-western counterpart is desired.
-     * @return Coordinate directly north-western of `c`.
+     * @return Coordinate directly north-western of `c`; `c` itself if the neighbor lies outside of the layout.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate north_west(const coordinate& c) const noexcept
     {
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
+        if (!c.is_valid())
         {
-            auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{0, +1, -1});
-
-            nw.z = c.z;
-
-            return is_within_bounds(nw) ? nw : c;
+            return c;
         }
-        else
-        {
-            auto nw = to_offset_coordinate(to_cube_coordinate(c) + CubeCoordinateType{-1, +1, 0});
 
-            nw.z = c.z;
+        const auto step =
+            is_row_arrangement(get_arrangement()) ? cube_coordinate{0, +1, -1} : cube_coordinate{-1, +1, 0};
 
-            return is_within_bounds(nw) ? nw : c;
-        }
+        const auto nw = bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
+
+        return nw.is_valid() ? nw : c;
     }
     /**
      * Returns the coordinate that is directly above a given coordinate `c`, i.e., the face whose z-dimension is higher
@@ -503,15 +548,16 @@ class hexagonal_layout
      * @param c Coordinate whose above counterpart is desired.
      * @return Coordinate directly above `c`.
      */
-    [[nodiscard]] OffsetCoordinateType above(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate above(const coordinate& c) const noexcept
     {
         auto ac = c;
 
-        if (c.z > z())
+        if (c.z < 0 || c.z > z())
         {
-            ac.d = 1;
+            return coordinate{};
         }
-        else if (c.z < z())
+
+        if (c.z < z())
         {
             ++ac.z;
         }
@@ -525,9 +571,9 @@ class hexagonal_layout
      * @param c Coordinate whose below counterpart is desired.
      * @return Coordinate directly below `c`.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType below(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr coordinate below(const coordinate& c) const noexcept
     {
-        if (c.z == 0ull)
+        if (c.z <= 0)
         {
             return c;
         }
@@ -544,8 +590,7 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly north of `c1`.
      */
-    [[nodiscard]] constexpr bool is_north_of(const OffsetCoordinateType& c1,
-                                             const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_north_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return c1 != c2 && north(c1) == c2;
     }
@@ -556,9 +601,9 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly east of `c1`.
      */
-    [[nodiscard]] bool is_east_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_east_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && east(c1) == c2;
+        return c2.is_valid() && c1 != c2 && east(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly south of coordinate `c1`.
@@ -567,9 +612,9 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly south of `c1`.
      */
-    [[nodiscard]] bool is_south_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_south_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && south(c1) == c2;
+        return c2.is_valid() && c1 != c2 && south(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly west of coordinate `c1`.
@@ -578,8 +623,7 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly west of `c1`.
      */
-    [[nodiscard]] constexpr bool is_west_of(const OffsetCoordinateType& c1,
-                                            const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_west_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return c1 != c2 && west(c1) == c2;
     }
@@ -590,9 +634,9 @@ class hexagonal_layout
      * @param c1 Base coordinate.
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly adjacent to `c1` in one of the six different ordinal directions possible for
-     * the layout's hexagonal orientation.
+     * the layout's arrangement.
      */
-    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         bool is_adjacent = false;
 
@@ -615,8 +659,7 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is either adjacent of `c1` or `c1`'s elevations.
      */
-    [[nodiscard]] bool is_adjacent_elevation_of(const OffsetCoordinateType& c1,
-                                                const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_elevation_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
     }
@@ -627,9 +670,9 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly above `c1`.
      */
-    [[nodiscard]] bool is_above(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_above(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && above(c1) == c2;
+        return c2.is_valid() && c1 != c2 && above(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
@@ -638,7 +681,7 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly below `c1`.
      */
-    [[nodiscard]] constexpr bool is_below(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_below(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return c1 != c2 && below(c1) == c2;
     }
@@ -649,8 +692,7 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere north of `c1`.
      */
-    [[nodiscard]] constexpr bool is_northwards_of(const OffsetCoordinateType& c1,
-                                                  const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_northwards_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y > c2.y) && (c1.x == c2.x);
     }
@@ -661,8 +703,7 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere east of `c1`.
      */
-    [[nodiscard]] constexpr bool is_eastwards_of(const OffsetCoordinateType& c1,
-                                                 const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_eastwards_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
     }
@@ -673,8 +714,7 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere south of `c1`.
      */
-    [[nodiscard]] constexpr bool is_southwards_of(const OffsetCoordinateType& c1,
-                                                  const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_southwards_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
     }
@@ -685,8 +725,7 @@ class hexagonal_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere west of `c1`.
      */
-    [[nodiscard]] constexpr bool is_westwards_of(const OffsetCoordinateType& c1,
-                                                 const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_westwards_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
     }
@@ -696,9 +735,9 @@ class hexagonal_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's northern border.
      */
-    [[nodiscard]] constexpr bool is_at_northern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_at_northern_border(const coordinate& c) const noexcept
     {
-        return c.y == 0ull;
+        return c.y == 0;
     }
     /**
      * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
@@ -706,7 +745,7 @@ class hexagonal_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's northern border.
      */
-    [[nodiscard]] bool is_at_eastern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_eastern_border(const coordinate& c) const noexcept
     {
         return c.x == x();
     }
@@ -716,7 +755,7 @@ class hexagonal_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's southern border.
      */
-    [[nodiscard]] bool is_at_southern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_southern_border(const coordinate& c) const noexcept
     {
         return c.y == y();
     }
@@ -726,9 +765,9 @@ class hexagonal_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's western border.
      */
-    [[nodiscard]] constexpr bool is_at_western_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_at_western_border(const coordinate& c) const noexcept
     {
-        return c.x == 0ull;
+        return c.x == 0;
     }
     /**
      * Returns whether the given coordinate is located at any of the layout's borders where x or y are either minimal or
@@ -737,7 +776,7 @@ class hexagonal_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at any of the layout's borders.
      */
-    [[nodiscard]] bool is_at_any_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_any_border(const coordinate& c) const noexcept
     {
         return is_at_northern_border(c) || is_at_eastern_border(c) || is_at_southern_border(c) ||
                is_at_western_border(c);
@@ -749,9 +788,9 @@ class hexagonal_layout
      * @param c Coordinate whose border counterpart is desired.
      * @return The northern border equivalent of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType northern_border_of(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate northern_border_of(const coordinate& c) const noexcept
     {
-        return {c.x, 0ull, c.z};
+        return {c.x, 0, c.z};
     }
     /**
      * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
@@ -760,7 +799,7 @@ class hexagonal_layout
      * @param c Coordinate whose border counterpart is desired.
      * @return The eastern border equivalent of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType eastern_border_of(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate eastern_border_of(const coordinate& c) const noexcept
     {
         return {x(), c.y, c.z};
     }
@@ -771,7 +810,7 @@ class hexagonal_layout
      * @param c Coordinate whose border counterpart is desired.
      * @return The southern border equivalent of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType southern_border_of(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate southern_border_of(const coordinate& c) const noexcept
     {
         return {c.x, y(), c.z};
     }
@@ -782,9 +821,9 @@ class hexagonal_layout
      * @param c Coordinate whose border counterpart is desired.
      * @return The western border equivalent of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType western_border_of(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate western_border_of(const coordinate& c) const noexcept
     {
-        return {0ull, c.y, c.z};
+        return {0, c.y, c.z};
     }
     /**
      * Returns whether the given coordinate is located in the ground layer where z is minimal.
@@ -792,9 +831,9 @@ class hexagonal_layout
      * @param c Coordinate to check for elevation.
      * @return `true` iff `c` is in ground layer.
      */
-    [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_ground_layer(const coordinate& c) const noexcept
     {
-        return c.z == 0ull;
+        return c.z == 0;
     }
     /**
      * Returns whether the given coordinate is located in a crossing layer where z is not minimal.
@@ -802,19 +841,20 @@ class hexagonal_layout
      * @param c Coordinate to check for elevation.
      * @return `true` iff `c` is in a crossing layer.
      */
-    [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_crossing_layer(const coordinate& c) const noexcept
     {
         return c.z > 0;
     }
+    // NOLINTEND(readability-convert-member-functions-to-static)
     /**
      * Returns whether the given coordinate is located within the layout bounds.
      *
      * @param c Coordinate to check for boundary.
      * @return `true` iff `c` is located within the layout bounds.
      */
-    [[nodiscard]] constexpr bool is_within_bounds(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_within_bounds(const coordinate& c) const noexcept
     {
-        return c.x <= x() && c.y <= y() && c.z <= z();
+        return c.x >= 0 && c.x <= x() && c.y >= 0 && c.y <= y() && c.z >= 0 && c.z <= z();
     }
 
 #pragma endregion
@@ -832,11 +872,10 @@ class hexagonal_layout
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate is used as
      * a default.
      */
-    [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
+    [[nodiscard]] auto coordinates(const coordinate& start = {}, const coordinate& stop = {}) const
     {
-        return std::ranges::subrange{
-            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
+        return std::ranges::subrange{coordinate_iterator{strg->dimension, !start.is_valid() ? coordinate{0, 0} : start},
+                                     coordinate_iterator{strg->dimension, !stop.is_valid() ? coordinate{} : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -848,13 +887,11 @@ class hexagonal_layout
      * @param stop Last coordinate (exclusive) to include in the range of all coordinates.
      */
     template <typename Fn>
-    void foreach_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
-                            const OffsetCoordinateType& stop = {}) const
+    void foreach_coordinate(Fn&& fn, const coordinate& start = {}, const coordinate& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop},
-            std::forward<Fn>(fn));
+            coordinate_iterator{strg->dimension, !start.is_valid() ? coordinate{0, 0} : start},
+            coordinate_iterator{strg->dimension, !stop.is_valid() ? coordinate{} : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -865,16 +902,14 @@ class hexagonal_layout
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate in the
      * ground layer is used as a default.
      */
-    [[nodiscard]] auto ground_coordinates(const OffsetCoordinateType& start = {},
-                                          const OffsetCoordinateType& stop  = {}) const
+    [[nodiscard]] auto ground_coordinates(const coordinate& start = {}, const coordinate& stop = {}) const
     {
-        assert(start.z == 0 && stop.z == 0);
+        assert((!start.is_valid() || start.z == 0) && (!stop.is_valid() || stop.z == 0));
 
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        return std::ranges::subrange{
-            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
+        return std::ranges::subrange{coordinate_iterator{ground_layer, !start.is_valid() ? coordinate{0, 0} : start},
+                                     coordinate_iterator{ground_layer, !stop.is_valid() ? coordinate{} : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -886,17 +921,15 @@ class hexagonal_layout
      * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
      */
     template <typename Fn>
-    void foreach_ground_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
-                                   const OffsetCoordinateType& stop = {}) const
+    void foreach_ground_coordinate(Fn&& fn, const coordinate& start = {}, const coordinate& stop = {}) const
     {
-        assert(start.z == 0 && stop.z == 0);
+        assert((!start.is_valid() || start.z == 0) && (!stop.is_valid() || stop.z == 0));
 
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop},
-            std::forward<Fn>(fn));
+            coordinate_iterator{ground_layer, !start.is_valid() ? coordinate{0, 0} : start},
+            coordinate_iterator{ground_layer, !stop.is_valid() ? coordinate{} : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal
@@ -909,9 +942,9 @@ class hexagonal_layout
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of `c`'s adjacent coordinates.
      */
-    auto adjacent_coordinates(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] auto adjacent_coordinates(const coordinate& c) const noexcept
     {
-        std::vector<OffsetCoordinateType> cnt{};
+        std::vector<coordinate> cnt{};
         cnt.reserve(max_fanin_size + 1);  // reserve memory
 
         foreach_adjacent_coordinate(c, [&cnt](const auto& ac) { cnt.push_back(ac); });
@@ -930,25 +963,23 @@ class hexagonal_layout
      * @param fn Functor to apply to each of `c`'s adjacent coordinates.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate(const coordinate& c, Fn&& fn) const
     {
+        if (!c.is_valid())
+        {
+            return;
+        }
+
         // six possible directions in cube coordinates
-        static constexpr const std::array<CubeCoordinateType, 6> cube_directions{
+        static constexpr const std::array<cube_coordinate, 6> cube_directions{
             {{+1, -1, 0}, {+1, 0, -1}, {0, +1, -1}, {-1, +1, 0}, {-1, 0, +1}, {0, -1, +1}}};
 
         // for each direction
         std::ranges::for_each(cube_directions,
                               [this, &c, &fn](const auto& dir)
                               {
-                                  // convert given coordinate to the cube system, add direction, and convert back to
-                                  // offset
-                                  auto neighbor = to_offset_coordinate(to_cube_coordinate(c) + dir);
-                                  // since cube coordinates don't carry the layer information, it has to be manually
-                                  // added
-                                  neighbor.z = c.z;
-
-                                  // add neighboring coordinate if there was no over-/underflow
-                                  if (is_within_bounds(neighbor))
+                                  auto neighbor = bounded_offset(offset_axes(to_cube_coordinate(c) + dir), c.z);
+                                  if (neighbor.is_valid())
                                   {
                                       std::invoke(std::forward<Fn>(fn), std::move(neighbor));
                                   }
@@ -956,11 +987,12 @@ class hexagonal_layout
     }
     /**
      * Returns a container that contains all coordinates pairs of opposing adjacent coordinates with
-     * respect to a given one. In this hexagonal layout, the container content depends on the hexagonal orientation.
+     * respect to a given one. In this hexagonal layout, the container content depends on the arrangement.
      *
-     * In case of a pointy_top_hex orientation, the container will contain (`east(c)`, `west(c)`), (`north_east(c)`,
-     * `south_west(c)`), (`north_west(c)`, `south_east(c)`). In case of a flat_top_hex orientation, the container will
-     * contain (`north(c)`, `south(c)`), (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`) instead.
+     * In case of a row arrangement (pointy-top), the container will contain (`east(c)`, `west(c)`), (`north_east(c)`,
+     * `south_west(c)`), (`north_west(c)`, `south_east(c)`). In case of a column arrangement (flat-top), the container
+     * will contain (`north(c)`, `south(c)`), (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
+     * instead.
      *
      * This function comes in handy when straight lines on the layout are to be examined.
      *
@@ -969,9 +1001,9 @@ class hexagonal_layout
      * @param c Coordinate whose opposite ones are desired.
      * @return A container that contains pairs of `c`'s opposing coordinates.
      */
-    auto adjacent_opposite_coordinates(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] auto adjacent_opposite_coordinates(const coordinate& c) const noexcept
     {
-        std::vector<std::pair<OffsetCoordinateType, OffsetCoordinateType>> cnt{};
+        std::vector<std::pair<coordinate, coordinate>> cnt{};
         cnt.reserve((max_fanin_size + 1) / 2);  // reserve memory
 
         foreach_adjacent_opposite_coordinates(c, [&cnt](const auto& cp) { cnt.push_back(cp); });
@@ -980,11 +1012,11 @@ class hexagonal_layout
     }
     /**
      * Applies a function to all opposing coordinate pairs adjacent to a given one. In this hexagonal layout, the
-     * function application depends on the hexagonal orientation.
+     * function application depends on the arrangement.
      *
-     * In case of a pointy_top_hex orientation, the function will apply to (`east(c)`, `west(c)`), (`north_east(c)`,
-     * `south_west(c)`), (`north_west(c)`, `south_east(c)`). In case of a flat_top_hex orientation, the function will
-     * apply to (`north(c)`, `south(c)`), (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
+     * In case of a row arrangement (pointy-top), the function will apply to (`east(c)`, `west(c)`), (`north_east(c)`,
+     * `south_west(c)`), (`north_west(c)`, `south_east(c)`). In case of a column arrangement (flat-top), the function
+     * will apply to (`north(c)`, `south(c)`), (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
      * instead.
      *
      * This function comes in handy when straight lines on the layout are to be examined.
@@ -996,7 +1028,7 @@ class hexagonal_layout
      * @param fn Functor to apply to each of `c`'s opposite adjacent coordinate pairs.
      */
     template <typename Fn>
-    void foreach_adjacent_opposite_coordinates(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_opposite_coordinates(const coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](auto cardinal1, auto cardinal2) noexcept
         {
@@ -1006,11 +1038,11 @@ class hexagonal_layout
             }
         };
 
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
+        if (is_row_arrangement(get_arrangement()))
         {
             apply_if_not_c(east(c), west(c));
         }
-        else  // flat top
+        else  // column arrangement, flat top
         {
             apply_if_not_c(north(c), south(c));
         }
@@ -1021,13 +1053,6 @@ class hexagonal_layout
 
 #pragma endregion
 
-// data types cannot properly be converted to bit field types
-#pragma GCC diagnostic push
-#ifndef __clang__
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif
-#pragma GCC diagnostic ignored "-Wconversion"
-
 #pragma region coordinates
     /**
      * Converts an offset coordinate to a cube coordinate.
@@ -1035,74 +1060,127 @@ class hexagonal_layout
      * This implementation is adapted from https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
      *
      * @param offset_coord Offset coordinate to convert.
-     * @return Cube coordinate representing `offset_coord` in the layout's hexagonal orientation.
+     * @return Cube coordinate representing `offset_coord` in the layout's arrangement.
      */
-    [[nodiscard]] constexpr CubeCoordinateType
-    to_cube_coordinate(const OffsetCoordinateType& offset_coord) const noexcept
+    [[nodiscard]] cube_coordinate to_cube_coordinate(const coordinate& offset_coord) const noexcept
     {
-        CubeCoordinateType cube_coord{0, 0, 0};
+        // 64-bit arithmetic keeps the conversion free of overflow for every 32-bit coordinate
+        const int64_t offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
+        const int64_t ox     = offset_coord.x;
+        const int64_t oy     = offset_coord.y;
 
-        constexpr const auto offset = std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
-                                              std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ?
-                                          -1 :
-                                          1;
+        cube_coordinate cube_coord{0, 0, 0};
 
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
+        if (is_row_arrangement(get_arrangement()))
         {
-            cube_coord.x = offset_coord.x -
-                           static_cast<decltype(cube_coord.x)>((offset_coord.y + (offset * (offset_coord.y & 1))) / 2);
-            cube_coord.z = offset_coord.y;
-            cube_coord.y = -cube_coord.x - cube_coord.z;
+            cube_coord.x = ox - half_shifted(oy, offset);
+            cube_coord.z = oy;
         }
-        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
+        else
         {
-            cube_coord.x = offset_coord.x;
-            cube_coord.z = offset_coord.y -
-                           static_cast<decltype(cube_coord.z)>((offset_coord.x + (offset * (offset_coord.x & 1))) / 2);
-            cube_coord.y = -cube_coord.x - cube_coord.z;
+            cube_coord.x = ox;
+            cube_coord.z = oy - half_shifted(ox, offset);
         }
+
+        cube_coord.y = -cube_coord.x - cube_coord.z;
 
         return cube_coord;
     }
     /**
-     * Converts a cube coordinate to an offset coordinate.
+     * Converts a cube coordinate to an offset coordinate. The result lies in the ground layer.
      *
      * This implementation is adapted from https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
      *
      * @param cube_coord Cube coordinate to convert.
-     * @return Offset coordinate representing `cube_coord` in the layout's hexagonal orientation.
+     * @return Offset coordinate representing `cube_coord`, or the invalid coordinate if an axis exceeds 32 bits.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType
-    to_offset_coordinate(const CubeCoordinateType& cube_coord) const noexcept
+    [[nodiscard]] coordinate to_offset_coordinate(const cube_coordinate& cube_coord) const noexcept
     {
-        // the generated coordinate will be in ground layer
-        OffsetCoordinateType offset_coord{0, 0};
-
-        constexpr const auto offset = std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
-                                              std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ?
-                                          -1 :
-                                          1;
-        if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
+        const bool row          = is_row_arrangement(get_arrangement());
+        const auto fixed_axis   = row ? cube_coord.z : cube_coord.x;
+        const auto shifted_axis = row ? cube_coord.x : cube_coord.z;
+        // The shift can cancel at most half of the unchanged 32-bit axis.
+        if (!std::in_range<int32_t>(fixed_axis) ||
+            shifted_axis < 2 * static_cast<int64_t>(std::numeric_limits<int32_t>::min()) ||
+            shifted_axis > 2 * static_cast<int64_t>(std::numeric_limits<int32_t>::max()))
         {
-            offset_coord.x = static_cast<decltype(offset_coord.x)>(
-                cube_coord.x + static_cast<int64_t>((cube_coord.z + (offset * (cube_coord.z & 1))) / 2));
-            offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
+            return {};
         }
-        else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
+        const auto [x, y] = offset_axes(cube_coord);
+        if (!std::in_range<int32_t>(x) || !std::in_range<int32_t>(y))
         {
-            offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
-            offset_coord.y = static_cast<decltype(offset_coord.y)>(
-                cube_coord.z + static_cast<int64_t>((cube_coord.x + (offset * (cube_coord.x & 1))) / 2));
+            return {};
         }
-
-        return offset_coord;
+        return {static_cast<int32_t>(x), static_cast<int32_t>(y)};
     }
 
 #pragma endregion
 
-#pragma GCC diagnostic pop
+  protected:
+    /**
+     * Limits the shared geometry to the two layers represented by gate-level signals.
+     *
+     * @throws std::out_of_range If the z extent exceeds 1.
+     */
+    void restrict_to_two_layers()
+    {
+        static_cast<void>(checked(strg->dimension, true));
+        strg->two_layers_only = true;
+    }
 
   private:
+    /**
+     * Halves an axis value after moving an odd value by `offset`, which is the shift between neighboring rows or
+     * columns in offset coordinates.
+     *
+     * @param value Axis value.
+     * @param offset Shift of odd values, -1 for odd and +1 for even arrangements.
+     * @return `(value + offset) / 2` for an odd value and `value / 2` for an even one.
+     */
+    [[nodiscard]] static constexpr int64_t half_shifted(const int64_t value, const int64_t offset) noexcept
+    {
+        return (value + (value % 2 != 0 ? offset : 0)) / 2;
+    }
+    /**
+     * Converts cube coordinates to offset axes without narrowing.
+     *
+     * @param cube_coord Cube coordinate.
+     * @return Signed 64-bit x and y offset axes.
+     */
+    [[nodiscard]] std::pair<int64_t, int64_t> offset_axes(const cube_coordinate& cube_coord) const noexcept
+    {
+        const int64_t offset = is_odd_arrangement(get_arrangement()) ? -1 : 1;
+        auto          x      = cube_coord.x;
+        auto          y      = cube_coord.z;
+        if (is_row_arrangement(get_arrangement()))
+        {
+            x += half_shifted(y, offset);
+        }
+        else
+        {
+            y += half_shifted(x, offset);
+        }
+        return {x, y};
+    }
+    /**
+     * Checks layout bounds before narrowing offset axes.
+     *
+     * @param axes Signed 64-bit offset axes.
+     * @param layer Coordinate layer.
+     * @return Coordinate in the layout, or the invalid coordinate.
+     */
+    [[nodiscard]] coordinate bounded_offset(const std::pair<int64_t, int64_t>& axes, const int32_t layer) const noexcept
+    {
+        const auto [nx, ny] = axes;
+        if (nx < 0 || nx > x() || ny < 0 || ny > y() || layer < 0 || layer > z())
+        {
+            return {};
+        }
+        return {static_cast<int32_t>(nx), static_cast<int32_t>(ny), layer};
+    }
+    /**
+     * Shared storage for the layout dimensions and arrangement.
+     */
     storage strg;
 };
 

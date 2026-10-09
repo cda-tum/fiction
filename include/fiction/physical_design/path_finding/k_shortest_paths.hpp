@@ -51,8 +51,7 @@ class yen_k_shortest_paths_impl
 {
   public:
     yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const uint32_t k,
-                              const yen_k_shortest_paths_params&            p,
-                              const layouts::obstructions<coordinate<Lyt>>& extra) :
+                              const yen_k_shortest_paths_params& p, const layouts::obstructions& extra) :
             layout{lyt},
             initial_obstructions{extra},
             search_obstructions{extra},
@@ -73,7 +72,7 @@ class yen_k_shortest_paths_impl
      */
     [[nodiscard]] path_collection<Path> run() noexcept
     {
-        assert(!objective.source.is_dead() && !objective.target.is_dead() &&
+        assert(objective.source.is_valid() && objective.target.is_valid() &&
                "Neither source nor target coordinate can be dead");
 
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
@@ -166,9 +165,9 @@ class yen_k_shortest_paths_impl
      */
     const Lyt& layout;
     /** @brief Caller constraints retained across spur searches. */
-    const layouts::obstructions<coordinate<Lyt>>& initial_obstructions;
+    const layouts::obstructions& initial_obstructions;
     /** @brief Independent constraints for the current spur search. */
-    layouts::obstructions<coordinate<Lyt>> search_obstructions;
+    layouts::obstructions search_obstructions;
     /**
      * Source and target coordinates.
      */
@@ -238,10 +237,10 @@ class yen_k_shortest_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout<>>;
- * using path = layout_coordinate_path<cartesian_layout<>>;
+ * using clk_lyt = gate_level_layout<cartesian_layout>;
+ * using path = layout_coordinate_path<cartesian_layout>;
  * clk_lyt layout = ...;
- * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target}, k);
+ * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
  * @endcode
  *
  * The algorithm was originally described in \"An algorithm for finding shortest routes from all source nodes to a given
@@ -258,10 +257,10 @@ class yen_k_shortest_paths_impl
  * `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path>
-yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective, const uint32_t k,
-                     const yen_k_shortest_paths_params&            params       = {},
-                     const layouts::obstructions<coordinate<Lyt>>& obstructions = {}) noexcept
+[[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
+                                                         const uint32_t                     k,
+                                                         const yen_k_shortest_paths_params& params       = {},
+                                                         const layouts::obstructions&       obstructions = {}) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 

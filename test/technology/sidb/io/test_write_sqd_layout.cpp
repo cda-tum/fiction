@@ -19,7 +19,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
@@ -119,9 +119,10 @@ TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
 
 TEST_CASE("Write Bestagon SQD layout", "[sqd]")
 {
-    using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, even_row_hex>>;
+    using gate_layout  = gate_level_layout<hexagonal_layout>;
+    constexpr auto arr = arrangement::EVEN_ROW;
 
-    auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
+    auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>(arr);
     g_layout.set_layout_name("Bestagon");
 
     const auto lyt = apply_gate_library<bestagon_library>(g_layout);

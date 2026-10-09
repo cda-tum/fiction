@@ -16,13 +16,14 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -35,6 +36,9 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
+
+#include <optional>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -79,74 +83,58 @@ void check_stats(const orthogonal_physical_design_stats& st) noexcept
 }
 
 template <typename Lyt, typename Ntk>
-void check_ortho_equiv(const Ntk& ntk)
+void check_ortho_equiv(const Ntk& ntk, const std::optional<arrangement> a = std::nullopt)
 {
-    orthogonal_physical_design_stats stats{};
+    orthogonal_physical_design_stats  stats{};
+    orthogonal_physical_design_params ps{};
+    ps.layout_arrangement = a;
 
-    auto layout = orthogonal<Lyt>(ntk, {}, &stats);
+    auto layout = orthogonal<Lyt>(ntk, ps, &stats);
 
     check_stats(stats);
     check_eq(ntk, layout);
 }
 
 template <typename Lyt>
-void check_ortho_equiv_all()
+void check_ortho_equiv_all(const std::optional<arrangement> a = std::nullopt)
 {
-    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
-    check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
-    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
-    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>());
-    check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>(), a);
 
     // constant input network
-    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(), a);
 
     // multi-output network
-    check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>(), a);
 }
 
 TEST_CASE("Layout equivalence", "[algorithms]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
         check_ortho_equiv_all<gate_layout>();
     }
     SECTION("Hexagonal layouts")
     {
-        SECTION("odd row")
-        {
-            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, odd_row_hex>>;
+        using gate_layout = gate_level_layout<hexagonal_layout>;
 
-            check_ortho_equiv_all<gate_layout>();
-        }
-        SECTION("even row")
-        {
-            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, even_row_hex>>;
+        const auto a =
+            GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-            check_ortho_equiv_all<gate_layout>();
-        }
-        SECTION("odd column")
-        {
-            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, odd_column_hex>>;
-
-            check_ortho_equiv_all<gate_layout>();
-        }
-        SECTION("even column")
-        {
-            using gate_layout = gate_level_layout<hexagonal_layout<coords::offset, even_column_hex>>;
-
-            check_ortho_equiv_all<gate_layout>();
-        }
+        check_ortho_equiv_all<gate_layout>(a);
     }
 }
 
 TEST_CASE("Gate library application", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto check = [](const auto& ntk)
     {
@@ -171,7 +159,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
 TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
     maj.set_network_name("maj");
@@ -192,7 +180,7 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 
 TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto ntk = blueprints::mux21_network<technology_network>();
 
@@ -206,4 +194,21 @@ TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 
     CHECK(rec.is_consistent("placing gates"));
     CHECK(rec.final_count("placing gates") > 0);
+}
+
+TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layouts", "[orthogonal]")
+{
+    using gate_layout = gate_level_layout<hexagonal_layout>;
+
+    CHECK_THROWS_AS(orthogonal<gate_layout>(blueprints::and_or_network<technology_network>()), std::invalid_argument);
+}
+
+TEST_CASE("Orthogonal physical design of a network without primary inputs", "[orthogonal]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    technology_network ntk{};
+    ntk.create_po(ntk.get_constant(false));
+
+    CHECK_NOTHROW(orthogonal<gate_layout>(ntk));
 }

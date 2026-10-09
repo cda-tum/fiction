@@ -16,10 +16,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.fiction.cli.stores import CellEntry, describe
-from mnt.fiction.cli.topologies import FGL_READERS
-from mnt.pyfiction import layouts, physical_design
+from mnt.fiction.cli.topologies import FGL_READERS, make_gate_layout
+from mnt.pyfiction import physical_design
 from mnt.pyfiction.inml import inml_layout, inml_magnet_type
-from mnt.pyfiction.layouts import shifted_cartesian_gate_layout
+from mnt.pyfiction.layouts import arrangement, shifted_cartesian_gate_layout
 from mnt.pyfiction.layouts.io import write_fgl_layout
 from mnt.pyfiction.networks import aig_network, mig_network, set_name, simulate_outputs, technology_network, xag_network
 from mnt.pyfiction.qca import qca_layout
@@ -151,7 +151,7 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
     if topology == "hexagonal":
         shell.ok("hex")
     if topology == "shifted_cartesian":
-        layout = shifted_cartesian_gate_layout((1, 0), "2DDWave", "wire")
+        layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (1, 0), "2DDWave", "wire")
         source = layout.create_pi("a", (0, 0))
         layout.create_po(source, "f", (1, 0))
         shell.session.gate_layouts.add(layout)
@@ -335,6 +335,15 @@ def test_implicit_gate_layout_filename(mux21_shell: Shell, tmp_path: Path, monke
     assert (tmp_path / "mux21.fgl").is_file()
 
 
+@pytest.mark.parametrize("command", ["read", "read_fgl"])
+def test_read_fgl_rejects_another_arrangement(shell: Shell, tmp_path: Path, command: str) -> None:
+    """A topology mismatch leaves the gate layout store empty."""
+    path = tmp_path / "odd_column.fgl"
+    write_fgl_layout(make_gate_layout("odd_column_cartesian", (0, 0)), str(path))
+    assert "not an even_column_cartesian layout" in shell.fails(f'{command} "{path}" --topology even_column_cartesian')
+    assert len(shell.session.gate_layouts) == 0
+
+
 def test_read_fgl_round_trips_a_gate_layout(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
     """read_fgl loads a layout written by `write_fgl`, under the topology the flag names."""
     shell.ok(f'read_verilog "{resource("mux21.v")}"')
@@ -371,14 +380,8 @@ def test_conflicting_writer_options_do_not_touch_files(shell: Shell, tmp_path: P
 @pytest.mark.parametrize("topology", list(FGL_READERS))
 @pytest.mark.parametrize("phases", [3, 4])
 def test_all_topologies_round_trip_small_fixture(shell: Shell, tmp_path: Path, topology: str, phases: int) -> None:
-    native = {
-        "cartesian": "cartesian",
-        "shifted_cartesian": "shifted_cartesian",
-        "hexagonal": "hexagonal",
-        "odd_column_cartesian": "shifted_cartesian",
-        "even_row_hex": "hexagonal",
-    }.get(topology, topology)
-    layout = getattr(layouts, f"{native}_gate_layout")((2, 1), f"2DDWave{phases}", topology)
+    layout = make_gate_layout(topology, (2, 1), f"2DDWave{phases}")
+    layout.set_layout_name(topology)
     source = layout.create_pi("a", (0, 0))
     layout.create_po(source, "f", (1, 0))
     path = tmp_path / f"{topology}.fgl"

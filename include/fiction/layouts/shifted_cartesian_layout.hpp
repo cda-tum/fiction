@@ -10,14 +10,14 @@
 
 /**
  * @file
- * @brief Cartesian layout with shifted rows or columns in four offset orientations.
+ * @brief Cartesian layout with shifted rows or columns in four offset arrangements.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 
 #include <type_traits>
@@ -26,39 +26,12 @@ namespace fiction::layouts
 {
 
 /**
- * \verbatim
-  +-------+
-  |       |
-  |       |
-  |       |
-  +---+---+---+
-      |       |
-      |       |
-      |       |
-      +-------+
-  \endverbatim
- */
-struct horizontal_shift_cartesian
-{
-    using orientation = horizontal_shift_cartesian;
-};
-
-/**
- * \verbatim
-  +-------+
-  |       |
-  |       +-------+
-  |       |       |
-  +-------+       |
-          |       |
-          +-------+
-  \endverbatim
- */
-struct vertical_shift_cartesian
-{
-    using orientation = vertical_shift_cartesian;
-};
-/**
+ * A layout type that utilizes offset coordinates to represent a Cartesian layout with shifted coordinates. Its faces
+ * are organized in an offset coordinate system as provided. The arrangement fixed at construction selects which rows or
+ * columns are shifted. Row arrangements shift horizontally, column arrangements vertically. The four arrangements look
+ * as follows.
+ *
+ * `arrangement::ODD_ROW`:
  * \verbatim
   +-------+-------+-------+
   |       |       |       |
@@ -74,10 +47,8 @@ struct vertical_shift_cartesian
   |       |       |       |
   +-------+-------+-------+
   \endverbatim
- */
-struct odd_row_cartesian : horizontal_shift_cartesian
-{};
-/**
+ *
+ * `arrangement::EVEN_ROW`:
  * \verbatim
       +-------+-------+-------+
       |       |       |       |
@@ -92,11 +63,9 @@ struct odd_row_cartesian : horizontal_shift_cartesian
       | (0,2) | (1,2) | (2,2) |
       |       |       |       |
       +-------+-------+-------+
- \endverbatim
-*/
-struct even_row_cartesian : horizontal_shift_cartesian
-{};
-/**
+  \endverbatim
+ *
+ * `arrangement::ODD_COLUMN`:
  * \verbatim
    +-------+       +-------+
    |       |       |       |
@@ -111,11 +80,9 @@ struct even_row_cartesian : horizontal_shift_cartesian
    | (0,2) +-------+ (2,2) +-------+
    |       |       |       |
    +-------+       +-------+
- \endverbatim
-*/
-struct odd_column_cartesian : vertical_shift_cartesian
-{};
-/**
+  \endverbatim
+ *
+ * `arrangement::EVEN_COLUMN`:
  * \verbatim
           +-------+       +-------+
           |       |       |       |
@@ -130,69 +97,32 @@ struct odd_column_cartesian : vertical_shift_cartesian
   +-------+ (1,2) +-------+ (3,2) |
           |       |       |       |
           +-------+       +-------+
-\endverbatim
-*/
-struct even_column_cartesian : vertical_shift_cartesian
-{};
-
-/**
- * A layout type that utilizes offset coordinates to represent a Cartesian layout with shifted coordinates. Its faces
- * are organizes in an offset coordinate system as provided. These can either be the horizontal_shift_cartesian or
- * vertical_shift_cartesian orientation. Based on that, two respectively possible coordinate systems emerge accordingly:
- * odd_row_cartesian and even_row_cartesian for horizontal shifts and odd_column_cartesian and even_column_cartesian for
- * vertical shifts. All are sketched in ASCII above.
+  \endverbatim
  *
- * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
- * @tparam ShiftedCartesianCoordinateSystem One of the following: odd_row_cartesian, even_row_cartesian,
- * odd_column_cartesian, even_column_cartesian.
  */
-template <typename OffsetCoordinateType             = coords::offset,
-          typename ShiftedCartesianCoordinateSystem = even_row_cartesian>
-class shifted_cartesian_layout
-        : public hexagonal_layout<
-              OffsetCoordinateType,
-              std::conditional_t<
-                  std::is_same_v<ShiftedCartesianCoordinateSystem, odd_row_cartesian>, odd_row_hex,
-                  std::conditional_t<
-                      std::is_same_v<ShiftedCartesianCoordinateSystem, even_row_cartesian>, even_row_hex,
-                      std::conditional_t<
-                          std::is_same_v<ShiftedCartesianCoordinateSystem, odd_column_cartesian>, odd_column_hex,
-                          std::conditional_t<std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
-                                             even_column_hex, void>>>>,
-              coords::cube>
+class shifted_cartesian_layout : public hexagonal_layout
 {
   private:
-    using HexagonalLayout = hexagonal_layout<
-        OffsetCoordinateType,
-        std::conditional_t<
-            std::is_same_v<ShiftedCartesianCoordinateSystem, odd_row_cartesian>, odd_row_hex,
-            std::conditional_t<
-                std::is_same_v<ShiftedCartesianCoordinateSystem, even_row_cartesian>, even_row_hex,
-                std::conditional_t<
-                    std::is_same_v<ShiftedCartesianCoordinateSystem, odd_column_cartesian>, odd_column_hex,
-                    std::conditional_t<std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
-                                       even_column_hex, void>>>>,
-        coords::cube>;
+    using HexagonalLayout = hexagonal_layout;
 
   public:
-    using cartesian_arrangement = ShiftedCartesianCoordinateSystem;
+    /**
+     * Marks the layout as shifted Cartesian, which distinguishes it from the hexagonal layout it shares its neighbor
+     * geometry with.
+     */
+    using is_shifted_cartesian = std::true_type;
+
     /**
      * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
-     * in the even_column_cartesian ASCII layout representation above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the
-     * layout has exactly one coordinate.
+     * in the `arrangement::EVEN_COLUMN` ASCII layout representation above `ar = (3,2)`. Consequently, with
+     * `ar = (0,0)`, the layout has exactly one coordinate.
      *
+     * @param a Arrangement of the shifted rows or columns. It cannot change after construction.
      * @param ar Highest possible position in the layout.
      */
-    explicit shifted_cartesian_layout(const typename HexagonalLayout::aspect_ratio& ar = {}) : HexagonalLayout(ar)
-    {
-        static_assert(
-            std::is_same_v<ShiftedCartesianCoordinateSystem, odd_row_cartesian> ||
-                std::is_same_v<ShiftedCartesianCoordinateSystem, even_row_cartesian> ||
-                std::is_same_v<ShiftedCartesianCoordinateSystem, odd_column_cartesian> ||
-                std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
-            "ShiftedCartesianCoordinateSystem has to be one of the following: odd_row_cartesian, even_row_cartesian, "
-            "odd_column_cartesian, even_column_cartesian");
-    }
+    explicit shifted_cartesian_layout(const arrangement a, const HexagonalLayout::aspect_ratio& ar = {}) :
+            HexagonalLayout(a, ar)
+    {}
 
     // NOLINTNEXTLINE(*-explicit-constructor, *-explicit-conversions)
     shifted_cartesian_layout(const HexagonalLayout& lyt) : HexagonalLayout(lyt) {}
@@ -201,7 +131,6 @@ class shifted_cartesian_layout
     // intentionally hide members of HexagonalLayout
     using HexagonalLayout::to_cube_coordinate;
     using HexagonalLayout::to_offset_coordinate;
-    using typename HexagonalLayout::hex_arrangement;
 };
 
 }  // namespace fiction::layouts

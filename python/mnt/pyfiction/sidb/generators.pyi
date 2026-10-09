@@ -359,7 +359,7 @@ def on_the_fly_sidb_circuit_design(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout, params: on_the_fly_sidb_circuit_design_params = ...
 ) -> mnt.pyfiction.sidb.sidb_layout:
     """
-    Design an SiDB circuit from a placed and routed hexagonal gate-level layout.
+    Design an SiDB circuit from a placed and routed pointy-top hexagonal gate-level layout.
 
     The layout and parameters are copied before releasing the GIL. The input layout is not modified.
     This function does not perform placement and routing or accept a defective surface.
@@ -367,7 +367,7 @@ def on_the_fly_sidb_circuit_design(
     use a separate process when an exact cutoff is required. A timeout never returns a partial circuit.
 
     Args:
-        layout: A hexagonal gate-level layout with supported Bestagon port orientations.
+        layout: A pointy-top hexagonal gate-level layout with a row arrangement and supported Bestagon port orientations.
         params: Circuit and individual-gate design parameters.
 
     Returns:
@@ -376,5 +376,5 @@ def on_the_fly_sidb_circuit_design(
     Raises:
         TimeoutError: The circuit or an individual gate exceeds its timeout.
         RuntimeError: A gate cannot be designed with the supplied parameters.
-        ValueError: A gate type or orientation is unsupported, or gate parameters are invalid.
+        ValueError: Gate mapping uses a column arrangement, a gate type or orientation is unsupported, or gate parameters are invalid.
     """

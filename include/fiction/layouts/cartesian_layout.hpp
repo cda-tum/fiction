@@ -18,12 +18,13 @@
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/layout_base.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -35,7 +36,7 @@ namespace fiction::layouts
 {
 
 /**
- * A layout type that utilizes offset coordinates to represent a Cartesian grid. Its faces are organized in the
+ * A layout type that utilizes signed offset coordinates to represent a Cartesian grid. Its faces are organized in the
  * following way:
  *
  * \verbatim
@@ -54,22 +55,24 @@ namespace fiction::layouts
    +-------+-------+-------+-------+
    \endverbatim
  *
- * @tparam OffsetCoordinateType The coordinate implementation to be used.
  */
-template <typename OffsetCoordinateType = coords::offset>
-class cartesian_layout
+class cartesian_layout : public layout_base
 {
   public:
 #pragma region Types and constructors
 
-    using coordinate   = OffsetCoordinateType;
-    using aspect_ratio = OffsetCoordinateType;
+    using layout_base::aspect_ratio;
+    using layout_base::coordinate;
 
     struct cartesian_layout_storage
     {
         explicit cartesian_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
 
         aspect_ratio dimension;
+        /**
+         * Whether a gate-level layout shares these dimensions and limits the z extent to 1.
+         */
+        bool two_layers_only{false};
     };
 
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
@@ -84,8 +87,11 @@ class cartesian_layout
      * in the ASCII layout above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one coordinate.
      *
      * @param ar Highest possible position in the layout.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
      */
-    explicit cartesian_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<cartesian_layout_storage>(ar)} {}
+    explicit cartesian_layout(const aspect_ratio& ar = {0, 0}) :
+            strg{std::make_shared<cartesian_layout_storage>(checked(ar))}
+    {}
     /**
      * Copy constructor from another layout's storage.
      *
@@ -104,7 +110,7 @@ class cartesian_layout
     /**
      * Creates and returns a coordinate in the layout from the given x-, y-, and z-values.
      *
-     * @note This function is equivalent to calling `OffsetCoordinateType(x, y, z)`.
+     * @note This function is equivalent to calling `coordinate(x, y, z)`.
      *
      * @tparam X x-type.
      * @tparam Y y-type.
@@ -112,12 +118,13 @@ class cartesian_layout
      * @param x x-value.
      * @param y y-value.
      * @param z z-value.
-     * @return A coordinate in the layout of type `OffsetCoordinateType`.
+     * @return A coordinate in the layout of type `coordinate`.
+     * @throws std::overflow_error If an axis is outside the signed 32-bit range.
      */
-    template <typename X, typename Y, typename Z = uint64_t>
-    constexpr OffsetCoordinateType coord(const X x, const Y y, const Z z = 0ul) const noexcept
+    template <std::integral X, std::integral Y, std::integral Z = uint64_t>
+    constexpr coordinate coord(const X x, const Y y, const Z z = 0ul) const
     {
-        return OffsetCoordinateType(x, y, z);
+        return coordinate(x, y, z);
     }
 
 #pragma endregion
@@ -157,21 +164,26 @@ class cartesian_layout
      */
     [[nodiscard]] auto area() const noexcept
     {
-        return fiction::layouts::coords::area_of(strg->dimension);
+        return fiction::layouts::area_of(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
      *
      * @param ar New aspect ratio.
+     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
+     * @throws std::out_of_range If shared gate geometry limits the z extent to 1 and `ar.z` exceeds 1.
      */
-    void resize(const aspect_ratio& ar) noexcept
+    void resize(const aspect_ratio& ar)
     {
-        strg->dimension = ar;
+        strg->dimension = checked(ar, strg->two_layers_only);
     }
 
 #pragma endregion
 
 #pragma region Cardinal operations
+    // The neighbor and border queries below do not read the layout, but every layout type exposes them as members: the
+    // generic algorithms and `is_coordinate_layout_v` call them on a layout instance.
+    // NOLINTBEGIN(readability-convert-member-functions-to-static)
     /**
      * Returns the coordinate that is directly adjacent in northern direction of a given coordinate `c`, i.e., the face
      * whose y-dimension is lower by 1. If `c`'s y-dimension is already at minimum, `c` is returned instead.
@@ -179,9 +191,9 @@ class cartesian_layout
      * @param c Coordinate whose northern counterpart is desired.
      * @return Coordinate adjacent and north of `c`.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr coordinate north(const coordinate& c) const noexcept
     {
-        if (c.y == 0ull)
+        if (c.y <= 0)
         {
             return c;
         }
@@ -199,9 +211,9 @@ class cartesian_layout
      * @param c Coordinate whose north-eastern counterpart is desired.
      * @return Coordinate directly north-eastern of `c`.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType north_east(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate north_east(const coordinate& c) const noexcept
     {
-        if (c.x == x() || c.y == 0ull)
+        if (c.x == x() || c.y <= 0)
         {
             return c;
         }
@@ -219,15 +231,16 @@ class cartesian_layout
      * @param c Coordinate whose eastern counterpart is desired.
      * @return Coordinate adjacent and east of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType east(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate east(const coordinate& c) const noexcept
     {
         auto ec = c;
 
-        if (c.x > x())
+        if (c.x < 0 || c.x > x())
         {
-            ec.d = 1;
+            return coordinate{};
         }
-        else if (c.x < x())
+
+        if (c.x < x())
         {
             ++ec.x;
         }
@@ -242,15 +255,16 @@ class cartesian_layout
      * @param c Coordinate whose south-eastern counterpart is desired.
      * @return Coordinate directly south-eastern of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType south_east(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate south_east(const coordinate& c) const noexcept
     {
         auto sec = c;
 
-        if (c.x > x() || c.y > y())
+        if (c.x < 0 || c.x > x() || c.y < 0 || c.y > y())
         {
-            sec.d = 1;
+            return coordinate{};
         }
-        else if (c.x < x() && c.y < y())
+
+        if (c.x < x() && c.y < y())
         {
             ++sec.x;
             ++sec.y;
@@ -265,15 +279,16 @@ class cartesian_layout
      * @param c Coordinate whose southern counterpart is desired.
      * @return Coordinate adjacent and south of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType south(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate south(const coordinate& c) const noexcept
     {
         auto sc = c;
 
-        if (c.y > y())
+        if (c.y < 0 || c.y > y())
         {
-            sc.d = 1;
+            return coordinate{};
         }
-        else if (c.y < y())
+
+        if (c.y < y())
         {
             ++sc.y;
         }
@@ -288,15 +303,16 @@ class cartesian_layout
      * @param c Coordinate whose south-western counterpart is desired.
      * @return Coordinate directly south-western of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType south_west(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate south_west(const coordinate& c) const noexcept
     {
         auto swc = c;
 
-        if (c.y > y())
+        if (c.y < 0 || c.y > y())
         {
-            swc.d = 1;
+            return coordinate{};
         }
-        else if (c.x > 0ull && c.y < y())
+
+        if (c.x > 0 && c.y < y())
         {
             --swc.x;
             ++swc.y;
@@ -311,9 +327,9 @@ class cartesian_layout
      * @param c Coordinate whose western counterpart is desired.
      * @return Coordinate adjacent and west of `c`.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr coordinate west(const coordinate& c) const noexcept
     {
-        if (c.x == 0ull)
+        if (c.x <= 0)
         {
             return c;
         }
@@ -331,9 +347,9 @@ class cartesian_layout
      * @param c Coordinate whose north-western counterpart is desired.
      * @return Coordinate directly north-western of `c`.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr coordinate north_west(const coordinate& c) const noexcept
     {
-        if (c.x == 0ull || c.y == 0ull)
+        if (c.x <= 0 || c.y <= 0)
         {
             return c;
         }
@@ -351,15 +367,16 @@ class cartesian_layout
      * @param c Coordinate whose above counterpart is desired.
      * @return Coordinate directly above `c`.
      */
-    [[nodiscard]] OffsetCoordinateType above(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate above(const coordinate& c) const noexcept
     {
         auto ac = c;
 
-        if (c.z > z())
+        if (c.z < 0 || c.z > z())
         {
-            ac.d = 1;
+            return coordinate{};
         }
-        else if (c.z < z())
+
+        if (c.z < z())
         {
             ++ac.z;
         }
@@ -373,9 +390,9 @@ class cartesian_layout
      * @param c Coordinate whose below counterpart is desired.
      * @return Coordinate directly below `c`.
      */
-    [[nodiscard]] constexpr OffsetCoordinateType below(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr coordinate below(const coordinate& c) const noexcept
     {
-        if (c.z == 0ull)
+        if (c.z <= 0)
         {
             return c;
         }
@@ -392,8 +409,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly north of `c1`.
      */
-    [[nodiscard]] constexpr bool is_north_of(const OffsetCoordinateType& c1,
-                                             const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_north_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return c1 != c2 && north(c1) == c2;
     }
@@ -404,9 +420,9 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly east of `c1`.
      */
-    [[nodiscard]] bool is_east_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_east_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && east(c1) == c2;
+        return c2.is_valid() && c1 != c2 && east(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly south of coordinate `c1`.
@@ -415,9 +431,9 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly south of `c1`.
      */
-    [[nodiscard]] bool is_south_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_south_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && south(c1) == c2;
+        return c2.is_valid() && c1 != c2 && south(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly west of coordinate `c1`.
@@ -426,8 +442,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly west of `c1`.
      */
-    [[nodiscard]] constexpr bool is_west_of(const OffsetCoordinateType& c1,
-                                            const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_west_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return c1 != c2 && west(c1) == c2;
     }
@@ -438,7 +453,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is either directly north, east, south, or west of `c1`.
      */
-    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2);
     }
@@ -450,8 +465,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is either directly north, east, south, or west of `c1` or `c1`'s elevations.
      */
-    [[nodiscard]] bool is_adjacent_elevation_of(const OffsetCoordinateType& c1,
-                                                const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_adjacent_elevation_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
     }
@@ -462,9 +476,9 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly above `c1`.
      */
-    [[nodiscard]] bool is_above(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] bool is_above(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && above(c1) == c2;
+        return c2.is_valid() && c1 != c2 && above(c1) == c2;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
@@ -473,7 +487,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly below `c1`.
      */
-    [[nodiscard]] constexpr bool is_below(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_below(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return c1 != c2 && below(c1) == c2;
     }
@@ -484,8 +498,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere north of `c1`.
      */
-    [[nodiscard]] constexpr bool is_northwards_of(const OffsetCoordinateType& c1,
-                                                  const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_northwards_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y > c2.y) && (c1.x == c2.x);
     }
@@ -496,8 +509,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere east of `c1`.
      */
-    [[nodiscard]] constexpr bool is_eastwards_of(const OffsetCoordinateType& c1,
-                                                 const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_eastwards_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x < c2.x);
     }
@@ -508,8 +520,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere south of `c1`.
      */
-    [[nodiscard]] constexpr bool is_southwards_of(const OffsetCoordinateType& c1,
-                                                  const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_southwards_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y < c2.y) && (c1.x == c2.x);
     }
@@ -520,8 +531,7 @@ class cartesian_layout
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is somewhere west of `c1`.
      */
-    [[nodiscard]] constexpr bool is_westwards_of(const OffsetCoordinateType& c1,
-                                                 const OffsetCoordinateType& c2) const noexcept
+    [[nodiscard]] constexpr bool is_westwards_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
         return (c1.z == c2.z) && (c1.y == c2.y) && (c1.x > c2.x);
     }
@@ -531,9 +541,9 @@ class cartesian_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's northern border.
      */
-    [[nodiscard]] constexpr bool is_at_northern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_at_northern_border(const coordinate& c) const noexcept
     {
-        return c.y == 0ull;
+        return c.y == 0;
     }
     /**
      * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
@@ -541,7 +551,7 @@ class cartesian_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's northern border.
      */
-    [[nodiscard]] bool is_at_eastern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_eastern_border(const coordinate& c) const noexcept
     {
         return c.x == x();
     }
@@ -551,7 +561,7 @@ class cartesian_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's southern border.
      */
-    [[nodiscard]] bool is_at_southern_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_southern_border(const coordinate& c) const noexcept
     {
         return c.y == y();
     }
@@ -561,9 +571,9 @@ class cartesian_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's western border.
      */
-    [[nodiscard]] constexpr bool is_at_western_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_at_western_border(const coordinate& c) const noexcept
     {
-        return c.x == 0ull;
+        return c.x == 0;
     }
     /**
      * Returns whether the given coordinate is located at any of the layout's borders where x or y are either minimal or
@@ -572,7 +582,7 @@ class cartesian_layout
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at any of the layout's borders.
      */
-    [[nodiscard]] bool is_at_any_border(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] bool is_at_any_border(const coordinate& c) const noexcept
     {
         return is_at_northern_border(c) || is_at_eastern_border(c) || is_at_southern_border(c) ||
                is_at_western_border(c);
@@ -584,9 +594,9 @@ class cartesian_layout
      * @param c Coordinate whose border counterpart is desired.
      * @return The northern border equivalent of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType northern_border_of(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate northern_border_of(const coordinate& c) const noexcept
     {
-        return {c.x, 0ull, c.z};
+        return {c.x, 0, c.z};
     }
     /**
      * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
@@ -595,7 +605,7 @@ class cartesian_layout
      * @param c Coordinate whose border counterpart is desired.
      * @return The eastern border equivalent of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType eastern_border_of(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate eastern_border_of(const coordinate& c) const noexcept
     {
         return {x(), c.y, c.z};
     }
@@ -606,7 +616,7 @@ class cartesian_layout
      * @param c Coordinate whose border counterpart is desired.
      * @return The southern border equivalent of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType southern_border_of(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate southern_border_of(const coordinate& c) const noexcept
     {
         return {c.x, y(), c.z};
     }
@@ -617,9 +627,9 @@ class cartesian_layout
      * @param c Coordinate whose border counterpart is desired.
      * @return The western border equivalent of `c`.
      */
-    [[nodiscard]] OffsetCoordinateType western_border_of(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] coordinate western_border_of(const coordinate& c) const noexcept
     {
-        return {0ull, c.y, c.z};
+        return {0, c.y, c.z};
     }
     /**
      * Returns whether the given coordinate is located in the ground layer where z is minimal.
@@ -627,7 +637,7 @@ class cartesian_layout
      * @param c Coordinate to check for elevation.
      * @return `true` iff `c` is in ground layer.
      */
-    [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_ground_layer(const coordinate& c) const noexcept
     {
         return c.z == decltype(c.z){0};
     }
@@ -637,19 +647,20 @@ class cartesian_layout
      * @param c Coordinate to check for elevation.
      * @return `true` iff `c` is in a crossing layer.
      */
-    [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_crossing_layer(const coordinate& c) const noexcept
     {
         return c.z > decltype(c.z){0};
     }
+    // NOLINTEND(readability-convert-member-functions-to-static)
     /**
      * Returns whether the given coordinate is located within the layout bounds.
      *
      * @param c Coordinate to check for boundary.
      * @return `true` iff `c` is located within the layout bounds.
      */
-    [[nodiscard]] constexpr bool is_within_bounds(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] constexpr bool is_within_bounds(const coordinate& c) const noexcept
     {
-        return c.x <= x() && c.y <= y() && c.z <= z();
+        return c.x >= 0 && c.x <= x() && c.y >= 0 && c.y <= y() && c.z >= 0 && c.z <= z();
     }
 
 #pragma endregion
@@ -667,11 +678,10 @@ class cartesian_layout
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate is used as
      * a default.
      */
-    [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
+    [[nodiscard]] auto coordinates(const coordinate& start = {}, const coordinate& stop = {}) const
     {
-        return std::ranges::subrange{
-            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
+        return std::ranges::subrange{coordinate_iterator{strg->dimension, !start.is_valid() ? coordinate{0, 0} : start},
+                                     coordinate_iterator{strg->dimension, !stop.is_valid() ? coordinate{} : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -683,13 +693,11 @@ class cartesian_layout
      * @param stop Last coordinate (exclusive) to include in the range of all coordinates.
      */
     template <typename Fn>
-    void foreach_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
-                            const OffsetCoordinateType& stop = {}) const
+    void foreach_coordinate(Fn&& fn, const coordinate& start = {}, const coordinate& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop},
-            std::forward<Fn>(fn));
+            coordinate_iterator{strg->dimension, !start.is_valid() ? coordinate{0, 0} : start},
+            coordinate_iterator{strg->dimension, !stop.is_valid() ? coordinate{} : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -700,16 +708,14 @@ class cartesian_layout
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate in the
      * ground layer is used as a default.
      */
-    [[nodiscard]] auto ground_coordinates(const OffsetCoordinateType& start = {},
-                                          const OffsetCoordinateType& stop  = {}) const
+    [[nodiscard]] auto ground_coordinates(const coordinate& start = {}, const coordinate& stop = {}) const
     {
-        assert(start.z == 0 && stop.z == 0);
+        assert((!start.is_valid() || start.z == 0) && (!stop.is_valid() || stop.z == 0));
 
         const auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        return std::ranges::subrange{
-            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
+        return std::ranges::subrange{coordinate_iterator{ground_layer, !start.is_valid() ? coordinate{0, 0} : start},
+                                     coordinate_iterator{ground_layer, !stop.is_valid() ? coordinate{} : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -721,17 +727,15 @@ class cartesian_layout
      * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
      */
     template <typename Fn>
-    void foreach_ground_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
-                                   const OffsetCoordinateType& stop = {}) const
+    void foreach_ground_coordinate(Fn&& fn, const coordinate& start = {}, const coordinate& stop = {}) const
     {
-        assert(start.z == 0 && stop.z == 0);
+        assert((!start.is_valid() || start.z == 0) && (!stop.is_valid() || stop.z == 0));
 
         const auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop},
-            std::forward<Fn>(fn));
+            coordinate_iterator{ground_layer, !start.is_valid() ? coordinate{0, 0} : start},
+            coordinate_iterator{ground_layer, !stop.is_valid() ? coordinate{} : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, only cardinal
@@ -744,9 +748,9 @@ class cartesian_layout
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of `c`'s adjacent coordinates.
      */
-    auto adjacent_coordinates(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] auto adjacent_coordinates(const coordinate& c) const noexcept
     {
-        std::vector<OffsetCoordinateType> cnt{};
+        std::vector<coordinate> cnt{};
         cnt.reserve(max_fanin_size + 1);  // reserve memory
 
         foreach_adjacent_coordinate(c, [&cnt](const auto& ac) noexcept { cnt.push_back(ac); });
@@ -764,7 +768,7 @@ class cartesian_layout
      * @param fn Functor to apply to each of `c`'s adjacent coordinates.
      */
     template <typename Fn>
-    void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_coordinate(const coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
         {
@@ -790,9 +794,9 @@ class cartesian_layout
      * @param c Coordinate whose opposite ones are desired.
      * @return A container that contains pairs of `c`'s opposing coordinates.
      */
-    auto adjacent_opposite_coordinates(const OffsetCoordinateType& c) const noexcept
+    [[nodiscard]] auto adjacent_opposite_coordinates(const coordinate& c) const noexcept
     {
-        std::vector<std::pair<OffsetCoordinateType, OffsetCoordinateType>> cnt{};
+        std::vector<std::pair<coordinate, coordinate>> cnt{};
         cnt.reserve((max_fanin_size + 1) / 2);  // reserve memory
 
         foreach_adjacent_opposite_coordinates(c, [&cnt](const auto& cp) noexcept { cnt.push_back(cp); });
@@ -808,7 +812,7 @@ class cartesian_layout
      * @param fn Functor to apply to each of `c`'s opposite adjacent coordinate pairs.
      */
     template <typename Fn>
-    void foreach_adjacent_opposite_coordinates(const OffsetCoordinateType& c, Fn&& fn) const
+    void foreach_adjacent_opposite_coordinates(const coordinate& c, Fn&& fn) const
     {
         const auto apply_if_not_c = [&c, &fn](auto cardinal1, auto cardinal2) noexcept
         {
@@ -823,6 +827,18 @@ class cartesian_layout
     }
 
 #pragma endregion
+
+  protected:
+    /**
+     * Limits the shared geometry to the two layers represented by gate-level signals.
+     *
+     * @throws std::out_of_range If the z extent exceeds 1.
+     */
+    void restrict_to_two_layers()
+    {
+        static_cast<void>(checked(strg->dimension, true));
+        strg->two_layers_only = true;
+    }
 
   private:
     /**

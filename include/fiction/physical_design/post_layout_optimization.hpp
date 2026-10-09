@@ -215,7 +215,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
 
     bool optimizable = true;
 
-    for (uint64_t x = 0; x <= lyt.x(); ++x)
+    for (int32_t x = 0; x <= lyt.x(); ++x)
     {
         if (!(lyt.is_empty_tile({x, lyt.y()}) ||
               (lyt.is_po_tile({x, lyt.y(), 0}) && lyt.is_empty_tile({x + 1, lyt.y() - 1, 0}) && (x < lyt.x()))))
@@ -226,7 +226,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
 
     if (optimizable)
     {
-        for (uint64_t x = 0; x < lyt.x(); ++x)
+        for (int32_t x = 0; x < lyt.x(); ++x)
         {
             if (lyt.is_po_tile({x, lyt.y(), 0}))
             {
@@ -241,7 +241,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
 
     optimizable = true;
 
-    for (uint64_t y = 0; y <= lyt.y(); ++y)
+    for (int32_t y = 0; y <= lyt.y(); ++y)
     {
         if (!(lyt.is_empty_tile({lyt.x(), y}) ||
               (lyt.is_po_tile({lyt.x(), y, 0}) && lyt.is_empty_tile({lyt.x() - 1, y + 1, 0}) && (y < lyt.y()))))
@@ -252,7 +252,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
 
     if (optimizable)
     {
-        for (uint64_t y = 0; y < lyt.y(); ++y)
+        for (int32_t y = 0; y < lyt.y(); ++y)
         {
             if (lyt.is_po_tile({lyt.x(), y, 0}))
             {
@@ -269,7 +269,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
     lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 
     // check for misplaced POs in second last row and move them one row down
-    for (uint64_t x = 0; x < lyt.x(); ++x)
+    for (int32_t x = 0; x < lyt.x(); ++x)
     {
         if (lyt.is_po_tile({x, lyt.y() - 1, 0}))
         {
@@ -292,7 +292,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
     }
 
     // check for misplaced POs in second last column and move them one column to the right
-    for (uint64_t y = 0; y < lyt.y(); ++y)
+    for (int32_t y = 0; y < lyt.y(); ++y)
     {
         if (lyt.is_po_tile({lyt.x() - 1, y, 0}))
         {
@@ -323,8 +323,8 @@ void optimize_output_positions(Lyt& lyt) noexcept
     if (lyt.is_po_tile({lyt.x(), lyt.y(), 0}) && (lyt.num_pos() == 1))
     {
         // check if relocation would save tiles
-        if (lyt.has_western_incoming_signal({lyt.x(), lyt.y(), 0}) &&
-            ((lyt.x() * (lyt.y() + 2)) < ((lyt.x() + 1) * (lyt.y() + 1))))
+        // x * (y + 2) < (x + 1) * (y + 1) holds iff x <= y; the comparison avoids the products
+        if (lyt.has_western_incoming_signal({lyt.x(), lyt.y(), 0}) && (lyt.x() <= lyt.y()))
         {
             // get fanin signal of the PO
             std::vector<mockturtle::signal<Lyt>> signals{};
@@ -339,8 +339,8 @@ void optimize_output_positions(Lyt& lyt) noexcept
             lyt.move_node(lyt.get_node({lyt.x(), lyt.y() - 1}), {lyt.x() - 1, lyt.y(), 0}, signals);
         }
         // check if relocation would save tiles
-        else if (lyt.has_northern_incoming_signal({lyt.x(), lyt.y(), 0}) &&
-                 (((lyt.x() + 2) * lyt.y()) < ((lyt.x() + 1) * (lyt.y() + 1))))
+        // (x + 2) * y < (x + 1) * (y + 1) holds iff y <= x
+        else if (lyt.has_northern_incoming_signal({lyt.x(), lyt.y(), 0}) && (lyt.y() <= lyt.x()))
         {
             // get fanin signal of the PO
             std::vector<mockturtle::signal<Lyt>> signals{};
@@ -460,13 +460,13 @@ class post_layout_optimization_impl
         const mockturtle::stopwatch stop{pst.time_total};
 
         // record initial layout statistics
-        pst.x_size_before        = plyt.x() + 1;
-        pst.y_size_before        = plyt.y() + 1;
+        pst.x_size_before        = static_cast<uint64_t>(plyt.x()) + 1;
+        pst.y_size_before        = static_cast<uint64_t>(plyt.y()) + 1;
         pst.num_wires_before     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
         pst.num_crossings_before = plyt.num_crossings();
 
         // determine the maximum number of gate relocations
-        max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
+        max_gate_relocations = ps.max_gate_relocations.value_or(plyt.area());
 
         // share the layout storage while updating placement
         auto layout = plyt;
@@ -592,8 +592,8 @@ class post_layout_optimization_impl
         layout.resize({final_bounding_box.get_max().x, final_bounding_box.get_max().y, layout.z()});
 
         // update final layout statistics
-        pst.x_size_after = layout.x() + 1;
-        pst.y_size_after = layout.y() + 1;
+        pst.x_size_after = static_cast<uint64_t>(layout.x()) + 1;
+        pst.y_size_after = static_cast<uint64_t>(layout.y()) + 1;
 
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
@@ -608,7 +608,7 @@ class post_layout_optimization_impl
 
   private:
     /** @brief Temporary constraints used while moving gates and routing wires. */
-    layouts::obstructions<coordinate<Lyt>> search_obstructions{};
+    layouts::obstructions search_obstructions{};
 
     /**
      * 2DDWave-clocked Cartesian gate-level layout to optimize.
@@ -821,19 +821,19 @@ class post_layout_optimization_impl
                            });
 
         // add fanins and fanouts if existing
-        if (!fanin1.is_dead())
+        if (fanin1.is_valid())
         {
             ffd.fanins.push_back(fanin1);
         }
-        if (!fanin2.is_dead())
+        if (fanin2.is_valid())
         {
             ffd.fanins.push_back(fanin2);
         }
-        if (!fanout1.is_dead())
+        if (fanout1.is_valid())
         {
             ffd.fanouts.push_back(fanout1);
         }
-        if (!fanout2.is_dead())
+        if (fanout2.is_valid())
         {
             ffd.fanouts.push_back(fanout2);
         }
@@ -1102,8 +1102,8 @@ class post_layout_optimization_impl
                      old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2] =
             get_fanin_and_fanouts(lyt, old_pos);
 
-        uint64_t min_x = 0;
-        uint64_t min_y = 0;
+        int32_t min_x = 0;
+        int32_t min_y = 0;
 
         // determine minimum coordinates for new placements
         if (!fanins.empty())
@@ -1172,11 +1172,11 @@ class post_layout_optimization_impl
         uint64_t num_gate_relocations = 0;
 
         // iterate over layout diagonally
-        for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
+        for (int32_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
         {
-            for (uint64_t x = 0; x < k + 1; ++x)
+            for (int32_t x = 0; x < k + 1; ++x)
             {
-                const uint64_t y = k - x;
+                const int32_t y = k - x;
 
                 if (moved_gate || ((num_gate_relocations >= max_gate_relocations) && !lyt.is_po_tile(current_pos)) ||
                     timeout_limit_reached)
@@ -1189,8 +1189,8 @@ class post_layout_optimization_impl
                 if (lyt.y() >= y && y >= min_y && lyt.x() >= x && x >= min_x && ((x + y) <= max_diagonal) &&
                     (((x + y) < max_diagonal) || (y <= max_y)) &&
                     ((!lyt.is_pi_tile(current_pos)) || (lyt.is_pi_tile(current_pos) && (x == 0 || y == 0))) &&
-                    !(lyt.is_po_tile(current_pos) && (((x < max_non_po.x) && (y < max_non_po.y)) ||
-                                                      ((x + y) == static_cast<uint64_t>(old_pos.x + old_pos.y)))))
+                    !(lyt.is_po_tile(current_pos) &&
+                      (((x < max_non_po.x) && (y < max_non_po.y)) || ((x + y) == old_pos.x + old_pos.y))))
                 {
                     new_pos = tile<Lyt>{x, y};
                     if (!check_new_position(lyt, new_pos, num_gate_relocations, current_pos, fanins, fanouts,

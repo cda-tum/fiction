@@ -49,9 +49,9 @@ so `technology/sidb/model/charge_state.hpp` is tested by
 
   and writes `quickexact(lyt, params)` rather than
   `sidb::simulation::engines::quickexact(lyt, params)`.
-  - `fiction::layouts::coords` and `fiction::layouts::clocking` are never opened: bare
-    `offset`, `cube`, and `scheme` say nothing. Open `fiction::layouts` instead and
-    write `coords::offset` and `clocking::scheme`. `detail` namespaces are never opened.
+  - `fiction::layouts::clocking` is never opened: a bare `scheme` says nothing. Open
+    `fiction::layouts` instead and write `clocking::scheme`. `detail` namespaces are never
+    opened.
   - Opening a namespace can collide with a local alias or variable -- `using lattice = ...`
     against `sidb::lattice`, or a variable named `defect` against `sidb::model::defect`.
     Rename the local one; the compiler names both candidates.

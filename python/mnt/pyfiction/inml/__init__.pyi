@@ -12,7 +12,6 @@ import enum
 from typing import overload
 
 import mnt.pyfiction.layouts
-import mnt.pyfiction.layouts.coords
 from mnt.pyfiction.inml import io as io
 
 class inml_magnet_type(enum.Enum):
@@ -61,12 +60,12 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
     def __init__(self) -> None: ...
     @overload
     def __init__(
-        self, dimension: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+        self, dimension: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> None: ...
     @overload
     def __init__(
         self,
-        dimension: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+        dimension: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
         tile_size_x: int = 1,
@@ -77,7 +76,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
         """
 
     def get_cell_type(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
+        self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]
     ) -> inml_magnet_type:
         """
         The cell type at a position.
@@ -89,9 +88,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             Cell type at `c`, `EMPTY` if no cell is there.
         """
 
-    def is_empty_cell(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> bool:
+    def is_empty_cell(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Whether no cell sits at a position.
 
@@ -103,7 +100,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
         """
 
     def assign_cell_name(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], n: str
+        self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int], n: str
     ) -> None:
         """
         Assigns a name to a cell. The empty string removes the name.
@@ -113,9 +110,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             n: Cell name.
         """
 
-    def get_cell_name(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> str:
+    def get_cell_name(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> str:
         """
         The name of a cell.
 
@@ -174,7 +169,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             Number of output cells.
         """
 
-    def is_pi(self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+    def is_pi(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Whether a cell is a primary input, i.e., of type `INPUT`.
 
@@ -185,7 +180,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             `true` iff `c` holds an input cell.
         """
 
-    def is_po(self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
+    def is_po(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
         Whether a cell is a primary output, i.e., of type `OUTPUT`.
 
@@ -196,18 +191,16 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             `true` iff `c` holds an output cell.
         """
 
-    def cells(self) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]:
+    def cells(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all cells, in unspecified order."""
 
-    def pis(self) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]:
+    def pis(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all input cells, in unspecified order."""
 
-    def pos(self) -> list[mnt.pyfiction.layouts.coords.offset_coordinate]:
+    def pos(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all output cells, in unspecified order."""
 
-    def bounding_box_2d(
-        self,
-    ) -> tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]:
+    def bounding_box_2d(self) -> tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all
@@ -269,20 +262,21 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
         """
 
     def get_clock_zone(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> mnt.pyfiction.layouts.coords.offset_coordinate:
+        self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> mnt.pyfiction.layouts.coordinate:
         """
-        The clock zone that contains a cell: its tile on layer 0.
+        The clock zone that contains a cell: its tile on layer 0. Negative
+        axes use floor division.
 
         Args:
             c: Cell position.
 
         Returns:
-            Clock zone of `c`.
+            Clock zone of `c`, or the invalid clock zone if `c` is invalid.
         """
 
     def assign_clock_number(
-        self, cz: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int], cn: int
+        self, cz: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int], cn: int
     ) -> None:
         """
         Overrides the clock number of a clock zone.
@@ -292,9 +286,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             cn: Clock number.
         """
 
-    def get_clock_number(
-        self, c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> int:
+    def get_clock_number(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
         The clock number of the clock zone that contains a cell.
 
@@ -344,9 +336,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
         """
 
     def assign_cell_type(
-        self,
-        c: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-        ct: inml_magnet_type,
+        self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int], ct: inml_magnet_type
     ) -> None:
         """
         Assigns a cell type to a position. Assigning `EMPTY` removes the cell

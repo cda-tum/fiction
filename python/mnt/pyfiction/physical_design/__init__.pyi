@@ -15,7 +15,6 @@ from typing import overload
 
 import mnt.pyfiction.inml
 import mnt.pyfiction.layouts
-import mnt.pyfiction.layouts.coords
 import mnt.pyfiction.mol_qca
 import mnt.pyfiction.networks
 import mnt.pyfiction.qca
@@ -43,6 +42,16 @@ class exact_params:
 
     @scheme.setter
     def scheme(self, arg: str, /) -> None: ...
+    @property
+    def layout_arrangement(self) -> mnt.pyfiction.layouts.arrangement | None:
+        """
+        Arrangement of the shifted rows or columns of the created layout.
+        Shifted Cartesian and hexagonal layouts require it, Cartesian layouts
+        ignore it.
+        """
+
+    @layout_arrangement.setter
+    def layout_arrangement(self, arg: mnt.pyfiction.layouts.arrangement | None, /) -> None: ...
     @property
     def upper_bound_area(self) -> int:
         """
@@ -271,6 +280,11 @@ def exact_cartesian(
         A gate-level layout of type `Lyt` that implements `ntk` as an FCN
         circuit if one is found under the given parameters;
         `std::nullopt`, otherwise.
+
+    Raises:
+        std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                               hexagonal layout and
+                               `ps.layout_arrangement` is empty.
     """
 
 def exact_shifted_cartesian(
@@ -350,6 +364,11 @@ def exact_shifted_cartesian(
         A gate-level layout of type `Lyt` that implements `ntk` as an FCN
         circuit if one is found under the given parameters;
         `std::nullopt`, otherwise.
+
+    Raises:
+        std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                               hexagonal layout and
+                               `ps.layout_arrangement` is empty.
     """
 
 def exact_hexagonal(
@@ -429,480 +448,11 @@ def exact_hexagonal(
         A gate-level layout of type `Lyt` that implements `ntk` as an FCN
         circuit if one is found under the given parameters;
         `std::nullopt`, otherwise.
-    """
 
-def exact_odd_row_cartesian(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
-) -> mnt.pyfiction.layouts.odd_row_cartesian_gate_layout | None:
-    """
-    An exact placement & routing approach using SMT solving as originally
-    proposed in \\"An Exact Method for Design Exploration of Quantum-dot
-    Cellular Automata\\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
-    and R. Drechsler in DATE 2018. A more extensive description can be
-    found in \\"Design Automation for Field-coupled Nanotechnologies\\" by
-    M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
-    Springer Nature in 2022.
-
-    Via incremental SMT calls, an optimal gate-level layout for a given
-    logic network will be found under constraints. Starting with :math:`n`
-    tiles, where :math:`n` is the number of logic network nodes, each
-    possible layout aspect ratio will be examined by factorization and
-    tested for routability with the SMT solver Z3. When no upper bound is
-    given, this approach will run until it finds a solution to the
-    placement & routing problem instance.
-
-    Note that there a combinations of constraints for which no valid
-    solution under the given parameters exist for the given logic network.
-    Such combinations cannot be detected automatically. It is, thus,
-    recommended to always set a timeout. Recommended settings include the
-    use of I/O pins located at the layout borders for better integration.
-    Most networks are not realizable without crossings enabled. Specifying
-    a regular clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave
-    allows for the strictest constraints and, thereby, finds a solution
-    the quickest. However, for high input degree networks, no valid
-    solution exists when border I/Os are to be used unless global
-    synchronization is disabled. Generally, solutions are found the
-    fastest with the following settings: Crossings enabled, de-
-    synchronization enabled, and 2DDWave clocking given. Multi-threading
-    can sometimes speed up the process, especially for large networks.
-    Note that the more threads are being used, the less information can be
-    shared across the individual solver runs which destroys the benefits
-    of incremental solving and thereby, comparatively, slows down each
-    run.
-
-    The SMT instance works with a single layer of variables even though it
-    is possible to allow crossings in the solution. The reduced number of
-    variables saves a considerable amount of runtime. That's why
-    `layout.foreach_ground_tile()` is used even though the model will be
-    mapped to a 3-dimensional layout afterwards. Generally, the algorithm
-    incorporates quite a few encoding optimizations to be as performant as
-    possible on various layout topologies and clocking schemes.
-
-    The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
-
-    This approach requires the Z3 SMT solver to be installed on the
-    system. Due to this circumstance, it is excluded from (CLI)
-    compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
-    cmake call.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in too large to be handled by the specified clocking
-    scheme.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit if one is found under the given parameters;
-        `std::nullopt`, otherwise.
-    """
-
-def exact_even_row_cartesian(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
-) -> mnt.pyfiction.layouts.even_row_cartesian_gate_layout | None:
-    """
-    An exact placement & routing approach using SMT solving as originally
-    proposed in \\"An Exact Method for Design Exploration of Quantum-dot
-    Cellular Automata\\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
-    and R. Drechsler in DATE 2018. A more extensive description can be
-    found in \\"Design Automation for Field-coupled Nanotechnologies\\" by
-    M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
-    Springer Nature in 2022.
-
-    Via incremental SMT calls, an optimal gate-level layout for a given
-    logic network will be found under constraints. Starting with :math:`n`
-    tiles, where :math:`n` is the number of logic network nodes, each
-    possible layout aspect ratio will be examined by factorization and
-    tested for routability with the SMT solver Z3. When no upper bound is
-    given, this approach will run until it finds a solution to the
-    placement & routing problem instance.
-
-    Note that there a combinations of constraints for which no valid
-    solution under the given parameters exist for the given logic network.
-    Such combinations cannot be detected automatically. It is, thus,
-    recommended to always set a timeout. Recommended settings include the
-    use of I/O pins located at the layout borders for better integration.
-    Most networks are not realizable without crossings enabled. Specifying
-    a regular clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave
-    allows for the strictest constraints and, thereby, finds a solution
-    the quickest. However, for high input degree networks, no valid
-    solution exists when border I/Os are to be used unless global
-    synchronization is disabled. Generally, solutions are found the
-    fastest with the following settings: Crossings enabled, de-
-    synchronization enabled, and 2DDWave clocking given. Multi-threading
-    can sometimes speed up the process, especially for large networks.
-    Note that the more threads are being used, the less information can be
-    shared across the individual solver runs which destroys the benefits
-    of incremental solving and thereby, comparatively, slows down each
-    run.
-
-    The SMT instance works with a single layer of variables even though it
-    is possible to allow crossings in the solution. The reduced number of
-    variables saves a considerable amount of runtime. That's why
-    `layout.foreach_ground_tile()` is used even though the model will be
-    mapped to a 3-dimensional layout afterwards. Generally, the algorithm
-    incorporates quite a few encoding optimizations to be as performant as
-    possible on various layout topologies and clocking schemes.
-
-    The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
-
-    This approach requires the Z3 SMT solver to be installed on the
-    system. Due to this circumstance, it is excluded from (CLI)
-    compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
-    cmake call.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in too large to be handled by the specified clocking
-    scheme.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit if one is found under the given parameters;
-        `std::nullopt`, otherwise.
-    """
-
-def exact_even_column_cartesian(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
-) -> mnt.pyfiction.layouts.even_column_cartesian_gate_layout | None:
-    """
-    An exact placement & routing approach using SMT solving as originally
-    proposed in \\"An Exact Method for Design Exploration of Quantum-dot
-    Cellular Automata\\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
-    and R. Drechsler in DATE 2018. A more extensive description can be
-    found in \\"Design Automation for Field-coupled Nanotechnologies\\" by
-    M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
-    Springer Nature in 2022.
-
-    Via incremental SMT calls, an optimal gate-level layout for a given
-    logic network will be found under constraints. Starting with :math:`n`
-    tiles, where :math:`n` is the number of logic network nodes, each
-    possible layout aspect ratio will be examined by factorization and
-    tested for routability with the SMT solver Z3. When no upper bound is
-    given, this approach will run until it finds a solution to the
-    placement & routing problem instance.
-
-    Note that there a combinations of constraints for which no valid
-    solution under the given parameters exist for the given logic network.
-    Such combinations cannot be detected automatically. It is, thus,
-    recommended to always set a timeout. Recommended settings include the
-    use of I/O pins located at the layout borders for better integration.
-    Most networks are not realizable without crossings enabled. Specifying
-    a regular clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave
-    allows for the strictest constraints and, thereby, finds a solution
-    the quickest. However, for high input degree networks, no valid
-    solution exists when border I/Os are to be used unless global
-    synchronization is disabled. Generally, solutions are found the
-    fastest with the following settings: Crossings enabled, de-
-    synchronization enabled, and 2DDWave clocking given. Multi-threading
-    can sometimes speed up the process, especially for large networks.
-    Note that the more threads are being used, the less information can be
-    shared across the individual solver runs which destroys the benefits
-    of incremental solving and thereby, comparatively, slows down each
-    run.
-
-    The SMT instance works with a single layer of variables even though it
-    is possible to allow crossings in the solution. The reduced number of
-    variables saves a considerable amount of runtime. That's why
-    `layout.foreach_ground_tile()` is used even though the model will be
-    mapped to a 3-dimensional layout afterwards. Generally, the algorithm
-    incorporates quite a few encoding optimizations to be as performant as
-    possible on various layout topologies and clocking schemes.
-
-    The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
-
-    This approach requires the Z3 SMT solver to be installed on the
-    system. Due to this circumstance, it is excluded from (CLI)
-    compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
-    cmake call.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in too large to be handled by the specified clocking
-    scheme.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit if one is found under the given parameters;
-        `std::nullopt`, otherwise.
-    """
-
-def exact_odd_row_hex(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
-) -> mnt.pyfiction.layouts.odd_row_hex_gate_layout | None:
-    """
-    An exact placement & routing approach using SMT solving as originally
-    proposed in \\"An Exact Method for Design Exploration of Quantum-dot
-    Cellular Automata\\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
-    and R. Drechsler in DATE 2018. A more extensive description can be
-    found in \\"Design Automation for Field-coupled Nanotechnologies\\" by
-    M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
-    Springer Nature in 2022.
-
-    Via incremental SMT calls, an optimal gate-level layout for a given
-    logic network will be found under constraints. Starting with :math:`n`
-    tiles, where :math:`n` is the number of logic network nodes, each
-    possible layout aspect ratio will be examined by factorization and
-    tested for routability with the SMT solver Z3. When no upper bound is
-    given, this approach will run until it finds a solution to the
-    placement & routing problem instance.
-
-    Note that there a combinations of constraints for which no valid
-    solution under the given parameters exist for the given logic network.
-    Such combinations cannot be detected automatically. It is, thus,
-    recommended to always set a timeout. Recommended settings include the
-    use of I/O pins located at the layout borders for better integration.
-    Most networks are not realizable without crossings enabled. Specifying
-    a regular clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave
-    allows for the strictest constraints and, thereby, finds a solution
-    the quickest. However, for high input degree networks, no valid
-    solution exists when border I/Os are to be used unless global
-    synchronization is disabled. Generally, solutions are found the
-    fastest with the following settings: Crossings enabled, de-
-    synchronization enabled, and 2DDWave clocking given. Multi-threading
-    can sometimes speed up the process, especially for large networks.
-    Note that the more threads are being used, the less information can be
-    shared across the individual solver runs which destroys the benefits
-    of incremental solving and thereby, comparatively, slows down each
-    run.
-
-    The SMT instance works with a single layer of variables even though it
-    is possible to allow crossings in the solution. The reduced number of
-    variables saves a considerable amount of runtime. That's why
-    `layout.foreach_ground_tile()` is used even though the model will be
-    mapped to a 3-dimensional layout afterwards. Generally, the algorithm
-    incorporates quite a few encoding optimizations to be as performant as
-    possible on various layout topologies and clocking schemes.
-
-    The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
-
-    This approach requires the Z3 SMT solver to be installed on the
-    system. Due to this circumstance, it is excluded from (CLI)
-    compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
-    cmake call.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in too large to be handled by the specified clocking
-    scheme.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit if one is found under the given parameters;
-        `std::nullopt`, otherwise.
-    """
-
-def exact_odd_column_hex(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
-) -> mnt.pyfiction.layouts.odd_column_hex_gate_layout | None:
-    """
-    An exact placement & routing approach using SMT solving as originally
-    proposed in \\"An Exact Method for Design Exploration of Quantum-dot
-    Cellular Automata\\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
-    and R. Drechsler in DATE 2018. A more extensive description can be
-    found in \\"Design Automation for Field-coupled Nanotechnologies\\" by
-    M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
-    Springer Nature in 2022.
-
-    Via incremental SMT calls, an optimal gate-level layout for a given
-    logic network will be found under constraints. Starting with :math:`n`
-    tiles, where :math:`n` is the number of logic network nodes, each
-    possible layout aspect ratio will be examined by factorization and
-    tested for routability with the SMT solver Z3. When no upper bound is
-    given, this approach will run until it finds a solution to the
-    placement & routing problem instance.
-
-    Note that there a combinations of constraints for which no valid
-    solution under the given parameters exist for the given logic network.
-    Such combinations cannot be detected automatically. It is, thus,
-    recommended to always set a timeout. Recommended settings include the
-    use of I/O pins located at the layout borders for better integration.
-    Most networks are not realizable without crossings enabled. Specifying
-    a regular clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave
-    allows for the strictest constraints and, thereby, finds a solution
-    the quickest. However, for high input degree networks, no valid
-    solution exists when border I/Os are to be used unless global
-    synchronization is disabled. Generally, solutions are found the
-    fastest with the following settings: Crossings enabled, de-
-    synchronization enabled, and 2DDWave clocking given. Multi-threading
-    can sometimes speed up the process, especially for large networks.
-    Note that the more threads are being used, the less information can be
-    shared across the individual solver runs which destroys the benefits
-    of incremental solving and thereby, comparatively, slows down each
-    run.
-
-    The SMT instance works with a single layer of variables even though it
-    is possible to allow crossings in the solution. The reduced number of
-    variables saves a considerable amount of runtime. That's why
-    `layout.foreach_ground_tile()` is used even though the model will be
-    mapped to a 3-dimensional layout afterwards. Generally, the algorithm
-    incorporates quite a few encoding optimizations to be as performant as
-    possible on various layout topologies and clocking schemes.
-
-    The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
-
-    This approach requires the Z3 SMT solver to be installed on the
-    system. Due to this circumstance, it is excluded from (CLI)
-    compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
-    cmake call.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in too large to be handled by the specified clocking
-    scheme.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit if one is found under the given parameters;
-        `std::nullopt`, otherwise.
-    """
-
-def exact_even_column_hex(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
-) -> mnt.pyfiction.layouts.even_column_hex_gate_layout | None:
-    """
-    An exact placement & routing approach using SMT solving as originally
-    proposed in \\"An Exact Method for Design Exploration of Quantum-dot
-    Cellular Automata\\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
-    and R. Drechsler in DATE 2018. A more extensive description can be
-    found in \\"Design Automation for Field-coupled Nanotechnologies\\" by
-    M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
-    Springer Nature in 2022.
-
-    Via incremental SMT calls, an optimal gate-level layout for a given
-    logic network will be found under constraints. Starting with :math:`n`
-    tiles, where :math:`n` is the number of logic network nodes, each
-    possible layout aspect ratio will be examined by factorization and
-    tested for routability with the SMT solver Z3. When no upper bound is
-    given, this approach will run until it finds a solution to the
-    placement & routing problem instance.
-
-    Note that there a combinations of constraints for which no valid
-    solution under the given parameters exist for the given logic network.
-    Such combinations cannot be detected automatically. It is, thus,
-    recommended to always set a timeout. Recommended settings include the
-    use of I/O pins located at the layout borders for better integration.
-    Most networks are not realizable without crossings enabled. Specifying
-    a regular clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave
-    allows for the strictest constraints and, thereby, finds a solution
-    the quickest. However, for high input degree networks, no valid
-    solution exists when border I/Os are to be used unless global
-    synchronization is disabled. Generally, solutions are found the
-    fastest with the following settings: Crossings enabled, de-
-    synchronization enabled, and 2DDWave clocking given. Multi-threading
-    can sometimes speed up the process, especially for large networks.
-    Note that the more threads are being used, the less information can be
-    shared across the individual solver runs which destroys the benefits
-    of incremental solving and thereby, comparatively, slows down each
-    run.
-
-    The SMT instance works with a single layer of variables even though it
-    is possible to allow crossings in the solution. The reduced number of
-    variables saves a considerable amount of runtime. That's why
-    `layout.foreach_ground_tile()` is used even though the model will be
-    mapped to a 3-dimensional layout afterwards. Generally, the algorithm
-    incorporates quite a few encoding optimizations to be as performant as
-    possible on various layout topologies and clocking schemes.
-
-    The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
-
-    This approach requires the Z3 SMT solver to be installed on the
-    system. Due to this circumstance, it is excluded from (CLI)
-    compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
-    cmake call.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in too large to be handled by the specified clocking
-    scheme.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit if one is found under the given parameters;
-        `std::nullopt`, otherwise.
+    Raises:
+        std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                               hexagonal layout and
+                               `ps.layout_arrangement` is empty.
     """
 
 class num_clks(enum.Enum):
@@ -926,6 +476,16 @@ class orthogonal_params:
 
     @number_of_clock_phases.setter
     def number_of_clock_phases(self, arg: num_clks, /) -> None: ...
+    @property
+    def layout_arrangement(self) -> mnt.pyfiction.layouts.arrangement | None:
+        """
+        Arrangement of the shifted rows or columns of the created layout.
+        Shifted Cartesian and hexagonal layouts require it, Cartesian layouts
+        ignore it.
+        """
+
+    @layout_arrangement.setter
+    def layout_arrangement(self, arg: mnt.pyfiction.layouts.arrangement | None, /) -> None: ...
     @property
     def on_progress(self, /) -> Callable[[str, int, int], None] | None:
         """Callback that receives the progress of the gate placement."""
@@ -1005,6 +565,11 @@ def orthogonal(
     Returns:
         A gate-level layout of type `Lyt` that implements `ntk` as an FCN
         circuit.
+
+    Raises:
+        std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                               hexagonal layout and
+                               `ps.layout_arrangement` is empty.
     """
 
 def orthogonal_hexagonal(
@@ -1062,177 +627,11 @@ def orthogonal_hexagonal(
     Returns:
         A gate-level layout of type `Lyt` that implements `ntk` as an FCN
         circuit.
-    """
 
-def orthogonal_odd_row_hex(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
-) -> mnt.pyfiction.layouts.odd_row_hex_gate_layout:
-    """
-    A scalable placement & routing approach based on orthogonal graph
-    drawing as originally proposed in \\"Scalable Design for Field-coupled
-    Nanocomputing Circuits\\" by M. Walter, R. Wille, F. Sill Torres, D.
-    Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
-    can be found in \\"Design Automation for Field-coupled
-    Nanotechnologies\\" by M. Walter, R. Wille, F. Sill Torres, and R.
-    Drechsler published by Springer Nature in 2022.
-
-    Via certain restrictions to the degrees of freedom in FCN physical
-    design, this algorithm achieves a polynomial time complexity. However,
-    these restrictions lead to an overall approximation of optimal layout
-    quality within several factors. Therefore, this algorithm produces
-    valid layouts within a short amount of time, its results are far from
-    being optimal in terms of area.
-
-    The imposed restrictions are that the input logic network has to be a
-    3-graph, i.e., cannot have any node exceeding degree 3 (combined input
-    and output), and that the resulting layout is always 2DDWave-clocked.
-
-    This algorithm is based on a modification of \\"Improved orthogonal
-    drawings of 3-graphs\\" by Therese C. Biedl in Canadian Conference on
-    Computational Geometry 1996. Biedl's original algorithm works for
-    undirected graphs only while this modification respects information
-    flow of directed logic networks. To this end, the edge directions of
-    the logic network directly used instead of relabeling the edges
-    according to its DFS tree, ordering the vertices using topological
-    sorting instead of DFS, and adding an extra placement rule for nodes
-    without predecessors.
-
-    The algorithm works in polynomial time :math:`\\mathcal{O}(3|N| + |L|)`
-    where :math:`|N|` is the number of nodes the given network and
-    :math:`|L|` is the resulting layout size given by :math:`x \\cdot y`,
-    which approaches :math:`(\\frac{|N|}{2})^2` asymptotically.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in larger than 2.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit.
-    """
-
-def orthogonal_odd_column_hex(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
-) -> mnt.pyfiction.layouts.odd_column_hex_gate_layout:
-    """
-    A scalable placement & routing approach based on orthogonal graph
-    drawing as originally proposed in \\"Scalable Design for Field-coupled
-    Nanocomputing Circuits\\" by M. Walter, R. Wille, F. Sill Torres, D.
-    Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
-    can be found in \\"Design Automation for Field-coupled
-    Nanotechnologies\\" by M. Walter, R. Wille, F. Sill Torres, and R.
-    Drechsler published by Springer Nature in 2022.
-
-    Via certain restrictions to the degrees of freedom in FCN physical
-    design, this algorithm achieves a polynomial time complexity. However,
-    these restrictions lead to an overall approximation of optimal layout
-    quality within several factors. Therefore, this algorithm produces
-    valid layouts within a short amount of time, its results are far from
-    being optimal in terms of area.
-
-    The imposed restrictions are that the input logic network has to be a
-    3-graph, i.e., cannot have any node exceeding degree 3 (combined input
-    and output), and that the resulting layout is always 2DDWave-clocked.
-
-    This algorithm is based on a modification of \\"Improved orthogonal
-    drawings of 3-graphs\\" by Therese C. Biedl in Canadian Conference on
-    Computational Geometry 1996. Biedl's original algorithm works for
-    undirected graphs only while this modification respects information
-    flow of directed logic networks. To this end, the edge directions of
-    the logic network directly used instead of relabeling the edges
-    according to its DFS tree, ordering the vertices using topological
-    sorting instead of DFS, and adding an extra placement rule for nodes
-    without predecessors.
-
-    The algorithm works in polynomial time :math:`\\mathcal{O}(3|N| + |L|)`
-    where :math:`|N|` is the number of nodes the given network and
-    :math:`|L|` is the resulting layout size given by :math:`x \\cdot y`,
-    which approaches :math:`(\\frac{|N|}{2})^2` asymptotically.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in larger than 2.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit.
-    """
-
-def orthogonal_even_column_hex(
-    network: mnt.pyfiction.networks.technology_network,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
-) -> mnt.pyfiction.layouts.even_column_hex_gate_layout:
-    """
-    A scalable placement & routing approach based on orthogonal graph
-    drawing as originally proposed in \\"Scalable Design for Field-coupled
-    Nanocomputing Circuits\\" by M. Walter, R. Wille, F. Sill Torres, D.
-    Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
-    can be found in \\"Design Automation for Field-coupled
-    Nanotechnologies\\" by M. Walter, R. Wille, F. Sill Torres, and R.
-    Drechsler published by Springer Nature in 2022.
-
-    Via certain restrictions to the degrees of freedom in FCN physical
-    design, this algorithm achieves a polynomial time complexity. However,
-    these restrictions lead to an overall approximation of optimal layout
-    quality within several factors. Therefore, this algorithm produces
-    valid layouts within a short amount of time, its results are far from
-    being optimal in terms of area.
-
-    The imposed restrictions are that the input logic network has to be a
-    3-graph, i.e., cannot have any node exceeding degree 3 (combined input
-    and output), and that the resulting layout is always 2DDWave-clocked.
-
-    This algorithm is based on a modification of \\"Improved orthogonal
-    drawings of 3-graphs\\" by Therese C. Biedl in Canadian Conference on
-    Computational Geometry 1996. Biedl's original algorithm works for
-    undirected graphs only while this modification respects information
-    flow of directed logic networks. To this end, the edge directions of
-    the logic network directly used instead of relabeling the edges
-    according to its DFS tree, ordering the vertices using topological
-    sorting instead of DFS, and adding an extra placement rule for nodes
-    without predecessors.
-
-    The algorithm works in polynomial time :math:`\\mathcal{O}(3|N| + |L|)`
-    where :math:`|N|` is the number of nodes the given network and
-    :math:`|L|` is the resulting layout size given by :math:`x \\cdot y`,
-    which approaches :math:`(\\frac{|N|}{2})^2` asymptotically.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in larger than 2.
-
-    Args:
-        ntk: The network that is to place and route.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit.
+    Raises:
+        std::invalid_argument: If `Lyt` is a shifted Cartesian or
+                               hexagonal layout and
+                               `ps.layout_arrangement` is empty.
     """
 
 class gold_effort_mode(enum.Enum):
@@ -1439,7 +838,7 @@ class graph_oriented_layout_design_params:
         This soft margin can reduce local congestion and increase the
         probability of finding a routable layout at the expense of a
         temporarily larger footprint, which post-layout optimization may later
-        shrink. Defaults to `0`.
+        shrink. Must lie in :math:`[0, 2^{20}]`. Defaults to `0`.
         """
 
     @tiles_to_skip_between_pis.setter
@@ -1562,6 +961,14 @@ def graph_oriented_layout_design(
     Returns:
         The smallest layout yielded by the graph-oriented layout design
         algorithm under the given parameters.
+
+    Raises:
+        networks::high_degree_fanin_exception: If `ntk` has a node with
+                                               more than two fanins.
+        std::invalid_argument: If the cost objective is `CUSTOM` and no
+                               custom cost objective is provided, or if
+                               `ps.tiles_to_skip_between_pis` does not lie
+                               in :math:`[0, 2^{20}]`.
     """
 
 def apply_qca_one_library(
@@ -1805,8 +1212,8 @@ def color_routing(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
@@ -1816,8 +1223,8 @@ def color_routing(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
@@ -1827,8 +1234,8 @@ def color_routing(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     objectives: Sequence[
         tuple[
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-            mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
         ]
     ],
     params: color_routing_params = ...,
@@ -2252,20 +1659,20 @@ def wiring_reduction(
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool: ...
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool: ...
 @overload
 def is_crossable_wire(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    src: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
-    successor: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    src: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+    successor: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> bool:
     """
     Checks whether a given coordinate `successor` hosts a crossable wire
@@ -2298,17 +1705,17 @@ def is_crossable_wire(
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    path: Sequence[mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int]],
+    path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
 ) -> None:
     """
     Establishes a wire routing along the given path in the given layout.
@@ -2332,15 +1739,15 @@ def route_path(
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]]: ...
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coords.offset_coordinate, mnt.pyfiction.layouts.coords.offset_coordinate]]:
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]:
     """
     Extracts all routing objectives from the given layout. To this end,
     all routing paths in the layout are traversed, starting at each PI.
@@ -2403,14 +1810,14 @@ def reserve_input_nodes(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2418,7 +1825,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2428,7 +1835,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2438,14 +1845,14 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2453,7 +1860,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2463,7 +1870,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2473,14 +1880,14 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
 ) -> int: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2488,7 +1895,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,
@@ -2498,7 +1905,7 @@ def place(
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    t: mnt.pyfiction.layouts.coords.offset_coordinate | tuple[int, int] | tuple[int, int, int],
+    t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
     a: int,

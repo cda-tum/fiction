@@ -94,14 +94,10 @@ $ cd fiction
 CMake fetches the third-party libraries during configuration. Only `CMake` and a C++20 compiler are required for
 the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
 
-At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (`libtbb-dev` on Ubuntu) is
-needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
-preferred compiler, see the current implementation state of [P0024R2](https://en.cppreference.com/w/cpp/compiler_support/17).
-
-On Ubuntu, all required and optional dependencies can be installed via:
+On Ubuntu, the build dependencies can be installed via:
 
 ```text
-sudo apt-get install build-essential cmake python3 libtbb-dev
+sudo apt-get install build-essential cmake python3 python3-dev
 ```
 
 ### Building the tests
@@ -165,6 +161,16 @@ target_link_libraries(fanfiction PRIVATE libfiction)
 The command `target_link_libraries` must be called after the respective `add_executable` statement that defines
 `fanfiction`.
 :::
+
+An installed _fiction_ package provides `fiction::libfiction`:
+
+```cmake
+find_package(fiction CONFIG REQUIRED)
+target_link_libraries(fanfiction PRIVATE fiction::libfiction)
+```
+
+_fiction_ installs mockturtle into the same prefix and its package configuration finds it there,
+so no extra `CMAKE_PREFIX_PATH` entry is needed for it.
 
 Then include what you need:
 
@@ -260,8 +266,8 @@ python/mnt/pyfiction/
 The Python module tree mirrors the C++ namespaces: `fiction::sidb::simulation::engines::quickexact` is
 `mnt.pyfiction.sidb.simulation.engines.quickexact`. Each top-level namespace (`layouts`, `networks`, `synthesis`,
 `physical_design`, `verification`, `utils`, `qca`, `mol_qca`, `inml`, `sidb`, `fcn`) is its own extension module.
-Each nested namespace is a submodule of it. For example, import coordinate types with
-`from mnt.pyfiction.layouts.coords import offset_coordinate, cube_coordinate`. The directories under `bindings/`
+Each nested namespace is a submodule of it. For example, import the coordinate type with
+`from mnt.pyfiction.layouts import coordinate`. The directories under `bindings/`
 follow the same tree, so a binding sits in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
 
 Each leaf `.cpp` file defines exactly one binding function named after the file (e.g.

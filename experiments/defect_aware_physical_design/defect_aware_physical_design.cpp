@@ -20,6 +20,7 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>       // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                    // SMT-based physical design of FCN layouts
 #include <fiction/physical_design/surface_analysis.hpp>         // SiDB surface analysis
@@ -70,7 +71,7 @@ using namespace fiction::verification;
 
 int main()  // NOLINT
 {
-    using gate_lyt = hex_even_row_gate_clk_lyt;
+    using gate_lyt = hex_gate_clk_lyt;
 
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
 
@@ -136,18 +137,21 @@ int main()  // NOLINT
         read_surface_defects("../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
     // read_sqd_layout(surface_lattice, surface_data_path);
 
-    const auto lattice_tiling = gate_lyt{{11, 30}};  // our surface data is 12 x 31 Bestagon tiles
-    //    const auto lattice_tiling = gate_lyt{{12, 17}};  // our surface data is 13 x 18 Bestagon tiles
+    const auto lattice_tiling =
+        gate_lyt{arrangement::EVEN_ROW, {11, 30}};  // our surface data is 12 x 31 Bestagon tiles
+    //    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {12, 17}};  // our surface data is 13 x 18
+    //    Bestagon tiles
     const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
     exact_physical_design_params exact_params{};
-    exact_params.scheme        = "ROW4";
-    exact_params.crossings     = true;
-    exact_params.border_io     = false;
-    exact_params.desynchronize = true;
-    exact_params.upper_bound_x = 11;  // 12 x 31 tiles
-    exact_params.upper_bound_y = 30;  // 12 x 31 tiles
+    exact_params.scheme             = "ROW4";
+    exact_params.layout_arrangement = arrangement::EVEN_ROW;
+    exact_params.crossings          = true;
+    exact_params.border_io          = false;
+    exact_params.desynchronize      = true;
+    exact_params.upper_bound_x      = 11;  // 12 x 31 tiles
+    exact_params.upper_bound_y      = 30;  // 12 x 31 tiles
     // exact_params.upper_bound_x = 12;    // 13 x 18 tiles
     // exact_params.upper_bound_y = 17;    // 13 x 18 tiles
     exact_params.timeout = 3'600'000;  // 1h in ms
@@ -215,11 +219,13 @@ int main()  // NOLINT
             // log results
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
                        depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-                       gate_level_layout->x() + 1, gate_level_layout->y() + 1,
-                       (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
-                       gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
-                       mockturtle::to_seconds(exact_stats.time_total), *eq, dot_accurate_layout.num_dots(),
-                       layout_area);
+                       static_cast<uint64_t>(gate_level_layout->x()) + 1,
+                       static_cast<uint64_t>(gate_level_layout->y()) + 1,
+                       (static_cast<uint64_t>(gate_level_layout->x()) + 1) *
+                           (static_cast<uint64_t>(gate_level_layout->y()) + 1),
+                       gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length,
+                       cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total), *eq,
+                       dot_accurate_layout.num_dots(), layout_area);
         }
         else  // no layout was obtained
         {

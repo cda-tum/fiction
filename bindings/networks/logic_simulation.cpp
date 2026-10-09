@@ -104,12 +104,6 @@ void logic_simulation(nanobind::module_& m)
     detail::logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");
     detail::logic_simulation_impl<py_shifted_cartesian_gate_layout>(m, "layout");
     detail::logic_simulation_impl<py_hexagonal_gate_layout>(m, "layout");
-    detail::logic_simulation_impl<py_odd_row_cartesian_gate_layout>(m, "layout");
-    detail::logic_simulation_impl<py_even_row_cartesian_gate_layout>(m, "layout");
-    detail::logic_simulation_impl<py_even_column_cartesian_gate_layout>(m, "layout");
-    detail::logic_simulation_impl<py_odd_row_hex_gate_layout>(m, "layout");
-    detail::logic_simulation_impl<py_odd_column_hex_gate_layout>(m, "layout");
-    detail::logic_simulation_impl<py_even_column_hex_gate_layout>(m, "layout");
 }
 
 }  // namespace pyfiction

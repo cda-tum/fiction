@@ -24,7 +24,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.render import table_rows
 from mnt.fiction.cli.stores import CellEntry, element_name
-from mnt.fiction.cli.topologies import DISPLAY_NAMES, TOPOLOGIES
+from mnt.fiction.cli.topologies import DISPLAY_NAMES, SPECS, make_gate_layout
 from mnt.pyfiction.inml import inml_layout
 from mnt.pyfiction.mol_qca import mol_qca_cell_type, mol_qca_layout
 
@@ -114,11 +114,10 @@ def test_layout_summaries_do_not_compute_timing(mux21_shell: Shell, monkeypatch:
     assert "throughput 1/7" in output
 
 
-@pytest.mark.parametrize("layout_type", TOPOLOGIES)
-def test_layout_topology_display_names(shell: Shell, layout_type: type) -> None:
+@pytest.mark.parametrize("topology", SPECS)
+def test_layout_topology_display_names(shell: Shell, topology: str) -> None:
     """Store and statistics use readable names while JSON retains the canonical topology."""
-    shell.session.gate_layouts.add(layout_type())
-    topology = TOPOLOGIES[layout_type]
+    shell.session.gate_layouts.add(make_gate_layout(topology, (0, 0)))
     for command in ("store -g", "ps -g"):
         assert DISPLAY_NAMES[topology] in shell.ok(command)
         assert topology in str(shell.session.log[-1]["result"])

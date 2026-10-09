@@ -16,14 +16,17 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -40,16 +43,33 @@ using namespace fiction::layouts;
 
 TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     CHECK(is_coordinate_layout_v<gate_layout>);
     CHECK(is_gate_level_layout_v<gate_layout>);
     CHECK(!is_cell_grid_v<gate_layout>);
 }
 
+TEST_CASE("Gate-level layouts keep the arrangement of their coordinate layout", "[gate-level-layout]")
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    const hex_gate_clk_lyt hex{a, {2, 2}, clocking::row(), "hex"};
+
+    CHECK(hex.get_arrangement() == a);
+    CHECK(hex.clone().get_arrangement() == a);
+    CHECK(hex.get_layout_name() == "hex");
+
+    const shifted_cart_gate_clk_lyt shifted{a, {2, 2}};
+
+    CHECK(shifted.get_arrangement() == a);
+    CHECK(shifted.clone().get_arrangement() == a);
+}
+
 TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-level-layout]")
 {
-    using layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using layout = gate_level_layout<cartesian_layout>;
     layout original{{3, 3}, clocking::twoddwave()};
     original.assign_clock_number({1, 1}, 3);
     original.assign_synchronization_element({1, 1}, 2);
@@ -84,12 +104,12 @@ TEST_CASE("Owned gate capabilities share copies and isolate clones", "[gate-leve
 
 TEST_CASE("Gate layout constructed from coordinates supports logic functions", "[gate-level-layout]")
 {
-    const cartesian_layout<coords::offset> coordinates{{2, 2}};
-    gate_level_layout                      layout{coordinates};
-    const auto                             x    = layout.create_pi("x", {0, 0});
-    const auto                             y    = layout.create_pi("y", {1, 0});
-    const auto                             gate = layout.create_and(x, y, {1, 1});
-    kitty::dynamic_truth_table             expected{2};
+    const cartesian_layout     coordinates{{2, 2}};
+    gate_level_layout          layout{coordinates};
+    const auto                 x    = layout.create_pi("x", {0, 0});
+    const auto                 y    = layout.create_pi("y", {1, 0});
+    const auto                 gate = layout.create_and(x, y, {1, 1});
+    kitty::dynamic_truth_table expected{2};
     kitty::create_from_hex_string(expected, "8");
     CHECK(layout.node_function(layout.get_node(gate)) == expected);
     CHECK(layout.size() == 5);
@@ -97,7 +117,7 @@ TEST_CASE("Gate layout constructed from coordinates supports logic functions", "
 
 TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     gate_layout original{gate_layout::aspect_ratio{5, 5, 0}, clocking::twoddwave(), "Original"};
     original.create_pi("x1", {0, 2});
@@ -132,7 +152,7 @@ TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_size_v<gate_layout>);
@@ -165,7 +185,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_size_v<gate_layout>);
@@ -256,7 +276,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_size_v<gate_layout>);
@@ -331,7 +351,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
 
 TEST_CASE("Node names", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -375,7 +395,7 @@ TEST_CASE("Creation of unary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_size_v<gate_layout>);
@@ -429,7 +449,7 @@ TEST_CASE("Creation of binary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_create_pi_v<gate_layout>);
@@ -539,7 +559,7 @@ TEST_CASE("Creation of ternary operations", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::is_network_type_v<gate_layout>);
     REQUIRE(mockturtle::has_create_pi_v<gate_layout>);
@@ -575,7 +595,7 @@ TEST_CASE("compute functions from AND and NOT gates", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -613,7 +633,7 @@ TEST_CASE("create nodes and compute their functions", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -647,7 +667,7 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::has_foreach_node_v<gate_layout>);
     REQUIRE(mockturtle::has_foreach_pi_v<gate_layout>);
@@ -910,7 +930,7 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
 
 TEST_CASE("Iteration disrespecting clocking", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::and_not_gate_layout<gate_layout>();
 
@@ -952,7 +972,7 @@ TEST_CASE("Gate-level layout properties", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::has_size_v<gate_layout>);
     REQUIRE(mockturtle::has_num_pis_v<gate_layout>);
@@ -991,7 +1011,7 @@ TEST_CASE("Gate-level layout properties", "[gate-level-layout]")
 
 TEST_CASE("Functional properties", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::has_is_and_v<gate_layout>);
     REQUIRE(mockturtle::has_is_or_v<gate_layout>);
@@ -1060,7 +1080,7 @@ TEST_CASE("Custom node values", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::has_clear_values_v<gate_layout>);
     REQUIRE(mockturtle::has_value_v<gate_layout>);
@@ -1092,7 +1112,7 @@ TEST_CASE("Visited values", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     REQUIRE(mockturtle::has_clear_visited_v<gate_layout>);
     REQUIRE(mockturtle::has_visited_v<gate_layout>);
@@ -1116,7 +1136,7 @@ TEST_CASE("Visited values", "[gate-level-layout]")
 
 TEST_CASE("Crossings", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -1150,7 +1170,7 @@ TEST_CASE("Crossings", "[gate-level-layout]")
 
 TEST_CASE("Move nodes", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::and_or_gate_layout<gate_layout>();
 
@@ -1259,7 +1279,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
 TEST_CASE("Move crossing", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -1312,7 +1332,7 @@ TEST_CASE("Move crossing", "[gate-level-layout]")
 
 TEST_CASE("Clear tiles", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::and_or_gate_layout<gate_layout>();
 
@@ -1363,7 +1383,7 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
 
 TEST_CASE("Clear crossing", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -1386,7 +1406,7 @@ TEST_CASE("Clear crossing", "[gate-level-layout]")
 
 TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using gate_layout = gate_level_layout<cartesian_layout>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -1425,7 +1445,7 @@ TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")
 
 TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout>;
 
     clk_lyt original{{5, 5, 0}, clocking::twoddwave()};
     original.assign_clock_number({0, 0}, 3);
@@ -1454,7 +1474,7 @@ TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
 
 TEST_CASE("Clock zone assignment", "[clocked-layout]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout>;
 
     clk_lyt layout{clk_lyt::aspect_ratio{1, 1, 0}, clocking::twoddwave()};
 
@@ -1553,7 +1573,7 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
 
 TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout>;
 
     const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
@@ -1581,7 +1601,7 @@ TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 
 TEST_CASE("Clocked layout properties", "[clocked-layout]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout<coords::offset>>;
+    using clk_lyt = gate_level_layout<cartesian_layout>;
 
     SECTION("2DDWave Clocking")
     {
@@ -1631,14 +1651,14 @@ TEST_CASE("Clocked layout properties", "[clocked-layout]")
 
 TEST_CASE("Synchronization element layout traits", "[synchronization-element-layout]")
 {
-    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using se_layout = gate_level_layout<cartesian_layout>;
 
     CHECK(requires(const se_layout& lyt) { lyt.num_se(); });
 }
 
 TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-layout]")
 {
-    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using se_layout = gate_level_layout<cartesian_layout>;
 
     se_layout original{{5, 5, 0}, clocking::twoddwave()};
     original.assign_synchronization_element({0, 0}, 1);
@@ -1668,7 +1688,7 @@ TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-
 
 TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-element-layout]")
 {
-    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using se_layout = gate_level_layout<cartesian_layout>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
@@ -1703,7 +1723,7 @@ TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-el
 
 TEST_CASE("Iteration over synchronization elements", "[synchronization-element-layout]")
 {
-    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using se_layout = gate_level_layout<cartesian_layout>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
@@ -1730,7 +1750,7 @@ TEST_CASE("Iteration over synchronization elements", "[synchronization-element-l
 
 TEST_CASE("Synchronization element layout properties", "[synchronization-element-layout]")
 {
-    using se_layout = gate_level_layout<cartesian_layout<coords::offset>>;
+    using se_layout = gate_level_layout<cartesian_layout>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, clocking::twoddwave()};
 
