@@ -26,6 +26,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -228,7 +229,15 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     {
         assert(!this->is_constant(n) && "node must not be constant");
 
-        return rank_pos.at(n);
+        // thrown explicitly: the map's own `at` does not throw on every toolchain
+        const auto it = rank_pos.find(n);
+
+        if (it == rank_pos.end())
+        {
+            throw std::out_of_range("node has no rank");
+        }
+
+        return it->second;
     }
 
     /**
