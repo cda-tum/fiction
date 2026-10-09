@@ -38,6 +38,7 @@
 #include <mockturtle/traits.hpp>
 
 #include <functional>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -46,6 +47,31 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
+
+namespace
+{
+
+/**
+ * Builds the virtual miter of two networks and checks it with SAT.
+ *
+ * @return The SAT result, or `std::nullopt` if the miter could not be built or SAT gave up.
+ */
+template <typename Spec, typename Impl>
+std::optional<bool> virtual_miter_equivalent(const Spec& spec, const Impl& impl)
+{
+    const auto miter = virtual_miter<technology_network>(spec, impl);
+
+    if (!miter.has_value())
+    {
+        return std::nullopt;
+    }
+
+    mockturtle::equivalence_checking_stats st{};
+
+    return mockturtle::equivalence_checking(*miter, {}, &st);
+}
+
+}  // namespace
 
 TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, mockturtle::mig_network,
                    mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
@@ -253,10 +279,9 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
 
     const auto ntk_r = mutable_rank_view(ntk);
 
-    mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(ntk, ntk_r), {}, &st);
+    const auto maybe_cec_m = virtual_miter_equivalent(ntk, ntk_r);
     REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = *maybe_cec_m;
+    const bool cec_m = maybe_cec_m.value_or(false);
     CHECK(cec_m == 1);
     CHECK(ntk_r.check_validity() == 1);
 }
@@ -293,10 +318,9 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
 
     auto vpi_r = mutable_rank_view(vpi);
 
-    mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
+    const auto maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = *maybe_cec_m;
+    const bool cec_m = maybe_cec_m.value_or(false);
     CHECK(cec_m == 1);
     CHECK(vpi_r.check_validity() == 1);
 }
@@ -321,19 +345,18 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
     // the equivalence is unaffected
     vpi_r.swap(2, 3);
 
-    mockturtle::equivalence_checking_stats st;
-    auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
+    auto maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    bool cec_m = *maybe_cec_m;
+    bool cec_m = maybe_cec_m.value_or(false);
     CHECK(cec_m == 1);
 
     // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in
     // _storage)
     vpi_r.rearrange_pis();
 
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    cec_m = *maybe_cec_m;
+    cec_m = maybe_cec_m.value_or(false);
     CHECK(cec_m == 1);
 }
 

@@ -23,6 +23,7 @@ from mnt.pyfiction.synthesis import (
     is_fanout_substituted,
     network_balancing,
     network_balancing_params,
+    output_order,
     planarization,
     planarization_params,
     planarization_stats,
@@ -139,4 +140,20 @@ def test_fanout_degree(full_adder: technology_network) -> None:
     degree_three = fanout_substitution_params()
     degree_three.degree = 3
     assert is_fanout_substituted(planar, degree_three)
+    assert _equivalent_with_tied_inputs(balanced, planar, original_input)
+
+
+def test_random_output_order_is_equivalent(full_adder: technology_network) -> None:
+    """A seeded random output order gives a reproducible, equivalent planar network."""
+    balanced = _balanced(full_adder)
+
+    params = planarization_params()
+    params.duplication.po_order = output_order.RANDOM_PO_ORDER
+    params.duplication.seed = 7
+
+    planar, original_input = planarization(balanced, params)
+    again, original_input_again = planarization(balanced, params)
+
+    assert planar.size() == again.size()
+    assert original_input == original_input_again
     assert _equivalent_with_tied_inputs(balanced, planar, original_input)

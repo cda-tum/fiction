@@ -659,6 +659,8 @@ static const char *mkd_doc_fiction_has_foreach_adjacent_opposite_coordinates = R
 
 static const char *mkd_doc_fiction_has_foreach_coordinate = R"doc()doc";
 
+static const char *mkd_doc_fiction_has_foreach_pi_unranked = R"doc()doc";
+
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_functional_implementations = R"doc()doc";
@@ -668,6 +670,8 @@ static const char *mkd_doc_fiction_has_get_gate_ports = R"doc()doc";
 static const char *mkd_doc_fiction_has_get_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_real_pi = R"doc()doc";
+
+static const char *mkd_doc_fiction_has_has_level = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_and3 = R"doc()doc";
 
@@ -6756,7 +6760,8 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_barycenters = R"doc(Computes the barycenter of every node in `nodes`: the mean rank
+static const char *mkd_doc_fiction_networks_barycenters =
+R"doc(Computes the barycenter of every node in `nodes`: the mean rank
 position of its non-constant fanins, or 0 for a node without such
 fanins.
 
@@ -6947,7 +6952,8 @@ number of fanins.)doc";
 
 static const char *mkd_doc_fiction_networks_high_degree_fanin_exception_high_degree_fanin_exception = R"doc()doc";
 
-static const char *mkd_doc_fiction_networks_initialize_copy_network_with_virtual_pis = R"doc(Creates an empty network of the same type as `src` with copies of its
+static const char *mkd_doc_fiction_networks_initialize_copy_network_with_virtual_pis =
+R"doc(Creates an empty network of the same type as `src` with copies of its
 constants and primary inputs, virtual primary inputs included, and a
 map from the nodes of `src` to their copies. Primary inputs are
 created in the order that `foreach_pi_unranked` yields when `Ntk`
@@ -7473,7 +7479,24 @@ static const char *mkd_doc_fiction_networks_technology_network_technology_networ
 
 static const char *mkd_doc_fiction_networks_technology_network_technology_network_2 = R"doc()doc";
 
-static const char *mkd_doc_fiction_networks_views = R"doc(Deduction guide for `mutable_rank_view`.
+static const char *mkd_doc_fiction_networks_views =
+R"doc(Deduction guide for bfs_topo_view.
+
+Template Args:
+    T: Logic network type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_views_2 =
+R"doc(Deduction guide for bfs_topo_view from a network and signal.
+
+Template Args:
+    T: Logic network type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_views_3 =
+R"doc(Deduction guide for `mutable_rank_view`.
 
 Template Args:
     T: Network type deduced from the construction context of
@@ -7481,29 +7504,13 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_views_2 = R"doc(Deduction guide for `mutable_rank_view` with two constructor
+static const char *mkd_doc_fiction_networks_views_4 =
+R"doc(Deduction guide for `mutable_rank_view` with two constructor
 arguments.
 
 Template Args:
     T: Network type deduced from the construction context of
        `mutable_rank_view`.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_views_3 = R"doc(Deduction guide for `fiction::networks::views::static_depth_view`.
-
-Template Args:
-    T: Network type deduced from the construction context of
-       `fiction::static_depth_view`.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_views_4 = R"doc(Deduction guide for `fiction::static_depth_view` with two constructor
-arguments
-
-Template Args:
-    T: Network type deduced from the construction context of
-       `fiction::static_depth_view`.
 
 )doc";
 
@@ -28670,6 +28677,26 @@ Template Args:
 Returns:
     The network with virtual primary inputs removed, or the original
     network if unsupported.
+
+)doc";
+
+static const char *mkd_doc_fiction_verification_detail_leaves_by_creation_order =
+R"doc(Leaf signals for copying a network such that the primary input created
+i-th receives `pis[i]`. A ranked network lists its inputs in rank
+order, so its leaves are permuted accordingly; any other network takes
+`pis` as they are.
+
+Args:
+    ntk: Source network.
+    pis: Signals of the destination's primary inputs in creation
+         order.
+
+Template Args:
+    NtkDest: Destination network type.
+    Ntk: Source network type.
+
+Returns:
+    Leaf signals in the order of `ntk.foreach_pi`.
 
 )doc";
 

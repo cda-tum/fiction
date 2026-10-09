@@ -93,19 +93,19 @@ namespace detail
 /**
  * Number of nodes of one XOR crossing gadget, buffers included.
  */
-inline constexpr uint64_t xor_gadget_nodes = 10u;
+inline constexpr uint64_t XOR_GADGET_NODES = 10u;
 /**
  * Number of levels one XOR crossing gadget spans.
  */
-inline constexpr uint64_t xor_gadget_depth = 4u;
+inline constexpr uint64_t XOR_GADGET_DEPTH = 4u;
 /**
  * Number of nodes of one crossing gadget built from AND, OR, and NOT gates, buffers included.
  */
-inline constexpr uint64_t and_or_gadget_nodes = 59u;
+inline constexpr uint64_t AND_OR_GADGET_NODES = 59u;
 /**
  * Number of levels one crossing gadget built from AND, OR, and NOT gates spans.
  */
-inline constexpr uint64_t and_or_gadget_depth = 14u;
+inline constexpr uint64_t AND_OR_GADGET_DEPTH = 14u;
 
 /**
  * Implementation of the crossing gate planarization algorithm.
@@ -287,20 +287,20 @@ class crossing_gate_planarization_impl
      * Levels an input of the XOR gadget is delayed by so that it meets the buffered XOR of both inputs: the XOR and its
      * buffer.
      */
-    static constexpr uint32_t xor_core_delay = 2u;
+    static constexpr uint32_t XOR_CORE_DELAY = 2u;
     /**
      * Levels an input of the AND-OR-NOT XOR is delayed by so that it meets the buffered NAND of both inputs: the NAND,
      * its inverter, and its buffer.
      */
-    static constexpr uint32_t and_or_inner_delay = 3u;
+    static constexpr uint32_t AND_OR_INNER_DELAY = 3u;
     /**
      * Levels an input of the AND-OR-NOT gadget is delayed by so that it meets the buffered AND-OR-NOT XOR of both
      * inputs: the XOR of depth six and its buffer.
      */
-    static constexpr uint32_t and_or_core_delay = 7u;
+    static constexpr uint32_t AND_OR_CORE_DELAY = 7u;
     [[nodiscard]] uint32_t    gadget_depth() const noexcept
     {
-        return static_cast<uint32_t>(ps.xor_gates ? xor_gadget_depth : and_or_gadget_depth);
+        return static_cast<uint32_t>(ps.xor_gates ? XOR_GADGET_DEPTH : AND_OR_GADGET_DEPTH);
     }
     /**
      * Finds the crossings between every pair of adjacent ranks. Edges are swept in rank order of their sources; an
@@ -401,7 +401,8 @@ class crossing_gate_planarization_impl
         {
             const auto placed_before = placed;
 
-            for (std::size_t i = 0; i < st.edges.size(); ++i)
+            std::size_t i = 0;
+            while (i < st.edges.size())
             {
                 if (placed < ordered.size() && st.edges[i] == ordered[placed].left)
                 {
@@ -413,12 +414,14 @@ class crossing_gate_planarization_impl
                     place_gadget(dest, old2new, ordered[placed]);
                     ++placed;
 
+                    // the gadget consumes both edges of the crossing
                     std::swap(st.edges[i], st.edges[i + 1]);
-                    ++i;
+                    i += 2;
                 }
                 else
                 {
                     extend_edge(dest, old2new, st.edges[i]);
+                    ++i;
                 }
             }
 
@@ -490,10 +493,10 @@ class crossing_gate_planarization_impl
         const auto fo_a = dest.create_buf(a);
         const auto fo_b = dest.create_buf(b);
 
-        const auto a_delayed = buffer_chain(dest, fo_a, and_or_inner_delay);
+        const auto a_delayed = buffer_chain(dest, fo_a, AND_OR_INNER_DELAY);
         const auto core      = dest.create_buf(dest.create_not(dest.create_and(fo_a, fo_b)));
         const auto p_a       = dest.create_and(a_delayed, core);
-        const auto b_delayed = buffer_chain(dest, fo_b, and_or_inner_delay);
+        const auto b_delayed = buffer_chain(dest, fo_b, AND_OR_INNER_DELAY);
         const auto p_b       = dest.create_and(b_delayed, core);
 
         return dest.create_or(p_a, p_b);
@@ -516,9 +519,9 @@ class crossing_gate_planarization_impl
 
         if (ps.xor_gates)
         {
-            const auto a_delayed = buffer_chain(dest, a, xor_core_delay);
+            const auto a_delayed = buffer_chain(dest, a, XOR_CORE_DELAY);
             const auto c0        = dest.create_buf(dest.create_xor(a, b));
-            const auto b_delayed = buffer_chain(dest, b, xor_core_delay);
+            const auto b_delayed = buffer_chain(dest, b, XOR_CORE_DELAY);
 
             const auto left_out  = dest.create_xor(a_delayed, c0);  // = b
             const auto right_out = dest.create_xor(c0, b_delayed);  // = a
@@ -528,9 +531,9 @@ class crossing_gate_planarization_impl
         }
         else
         {
-            const auto a_delayed = buffer_chain(dest, a, and_or_core_delay);
+            const auto a_delayed = buffer_chain(dest, a, AND_OR_CORE_DELAY);
             const auto c0        = dest.create_buf(and_or_xor(dest, a, b));
-            const auto b_delayed = buffer_chain(dest, b, and_or_core_delay);
+            const auto b_delayed = buffer_chain(dest, b, AND_OR_CORE_DELAY);
 
             const auto left_out  = and_or_xor(dest, a_delayed, c0);  // = b
             const auto right_out = and_or_xor(dest, c0, b_delayed);  // = a

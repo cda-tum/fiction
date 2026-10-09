@@ -192,7 +192,8 @@ inline std::vector<std::string> all_benchmarks(uint64_t selection = all)
     return result;
 }
 
-std::string benchmark_path(const std::string& benchmark_name, const std::string& benchmark_folder = "../benchmarks")
+inline std::string benchmark_path(const std::string& benchmark_name,
+                                  const std::string& benchmark_folder = "../benchmarks")
 {
     return fmt::format("{}{}/{}.v", EXPERIMENTS_PATH, benchmark_folder, benchmark_name);
 }
@@ -224,7 +225,7 @@ inline std::vector<std::string> iwls93_benchmarks()
         }
     }
 
-    std::sort(result.begin(), result.end());
+    std::ranges::sort(result);
 
     return result;
 }

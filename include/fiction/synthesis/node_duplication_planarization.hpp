@@ -605,13 +605,14 @@ class node_duplication_planarization_impl
                     const double weight = last.shared_weight + (shares ? share : 0.0);
 
                     // shorter path, or equally short with a heavier shared cone
-                    if (delay < cur.delay || (delay == cur.delay && weight > cur.shared_weight))
+                    if (delay < cur.delay || (delay == cur.delay && weight > cur.shared_weight + WEIGHT_TOLERANCE))
                     {
                         cur.predecessor   = last_idx;
                         cur.delay         = delay;
                         cur.shared_weight = weight;
                     }
-                    else if (!shares && delay == cur.delay && weight == cur.shared_weight &&
+                    else if (!shares && delay == cur.delay &&
+                             std::abs(weight - cur.shared_weight) <= WEIGHT_TOLERANCE &&
                              last.predecessor < previous.size() && share_fanin(cur.first_fanin, last.last_fanin))
                     {
                         cur.predecessor = last_idx;
@@ -1012,13 +1013,18 @@ class node_duplication_planarization_impl
         uint64_t num_crossings;
     };
     /**
+     * Tolerance for comparing cone weights, which are sums of the model's weights scaled by powers of `depth_growth`;
+     * ties up to rounding count as equal.
+     */
+    static constexpr double WEIGHT_TOLERANCE = 1e-9;
+    /**
      * Number of nodes one crossing gadget adds.
      *
      * @return Gadget size.
      */
     [[nodiscard]] uint64_t gadget_nodes() const noexcept
     {
-        return ps.xor_gates ? xor_gadget_nodes : and_or_gadget_nodes;
+        return ps.xor_gates ? XOR_GADGET_NODES : AND_OR_GADGET_NODES;
     }
     /**
      * Number of levels one crossing gadget spans.
@@ -1027,7 +1033,7 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] uint64_t gadget_depth() const noexcept
     {
-        return ps.xor_gates ? xor_gadget_depth : and_or_gadget_depth;
+        return ps.xor_gates ? XOR_GADGET_DEPTH : AND_OR_GADGET_DEPTH;
     }
     /**
      * Weighted size of the transitive fanin of a source node, see `duplication_cost_model`.

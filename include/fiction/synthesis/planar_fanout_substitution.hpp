@@ -171,7 +171,7 @@ class planar_fanout_substitution_impl
         while (index >= first_of_next)
         {
             ++level;
-            first_of_next = first_of_next * ps.degree + 1;
+            first_of_next = (first_of_next * ps.degree) + 1;
         }
 
         return level;

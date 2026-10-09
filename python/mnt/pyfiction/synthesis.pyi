@@ -890,6 +890,21 @@ class decision_criterion(enum.Enum):
     weighted cone at the same runtime.
     """
 
+class output_order(enum.Enum):
+    """
+    Order in which the primary outputs are placed in the first level
+    before the algorithm starts.
+    """
+
+    KEEP_PO_ORDER = 0
+    """Keep the primary output order of the input network."""
+
+    RANDOM_PO_ORDER = 1
+    """
+    Shuffle the primary outputs randomly. Different orders can yield
+    different numbers of duplications.
+    """
+
 class duplication_cost_model:
     """
     Weights of the duplication cost model of the hybrid strategy's
@@ -900,8 +915,7 @@ class duplication_cost_model:
     :math:`\\text{depth\\_growth}^{d}` for a duplication on level :math:`d`,
     because duplicates on deep levels are duplicated again by the
     decisions below. The weights are in units of one crossing gadget node.
-    The defaults were determined empirically on the benchmark sets; see
-    `experiments/planarization/cost_model_sweep.cpp`.
+    The defaults were determined empirically on the benchmark sets.
     """
 
     def __init__(self) -> None:
@@ -1000,6 +1014,12 @@ class node_duplication_planarization_params:
 
     @max_duplications.setter
     def max_duplications(self, arg: int, /) -> None: ...
+    @property
+    def po_order(self) -> output_order:
+        """Primary output order used to seed the first level."""
+
+    @po_order.setter
+    def po_order(self, arg: output_order, /) -> None: ...
     @property
     def seed(self) -> int | None:
         """

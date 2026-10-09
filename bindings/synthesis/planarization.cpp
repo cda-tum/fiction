@@ -137,6 +137,13 @@ void planarization(nanobind::module_& m)
         .value("LOOKAHEAD", params::decision_criterion::LOOKAHEAD,
                DOC(fiction_synthesis_node_duplication_planarization_params_decision_criterion_LOOKAHEAD));
 
+    py::enum_<params::output_order>(m, "output_order",
+                                    DOC(fiction_synthesis_node_duplication_planarization_params_output_order))
+        .value("KEEP_PO_ORDER", params::output_order::KEEP_PO_ORDER,
+               DOC(fiction_synthesis_node_duplication_planarization_params_output_order_KEEP_PO_ORDER))
+        .value("RANDOM_PO_ORDER", params::output_order::RANDOM_PO_ORDER,
+               DOC(fiction_synthesis_node_duplication_planarization_params_output_order_RANDOM_PO_ORDER));
+
     py::class_<params::duplication_cost_model>(
         m, "duplication_cost_model",
         DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model))
@@ -163,6 +170,7 @@ void planarization(nanobind::module_& m)
                 DOC(fiction_synthesis_node_duplication_planarization_params_lookahead_budget))
         .def_rw("max_duplications", &params::max_duplications,
                 DOC(fiction_synthesis_node_duplication_planarization_params_max_duplications))
+        .def_rw("po_order", &params::po_order, DOC(fiction_synthesis_node_duplication_planarization_params_po_order))
         .def_rw("seed", &params::seed, DOC(fiction_synthesis_node_duplication_planarization_params_seed));
 
     py::class_<fiction::synthesis::planarization_params>(m, "planarization_params",

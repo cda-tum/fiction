@@ -403,7 +403,8 @@ class planar_rebalancing_impl
 
         std::vector<std::pair<mockturtle::node<Ntk>, mockturtle::signal<Ntk>>> moved{};
 
-        for (std::size_t i = 0; i < current.size(); ++i)
+        std::size_t i = 0;
+        while (i < current.size())
         {
             const auto& e = current[i];
 
@@ -422,19 +423,20 @@ class planar_rebalancing_impl
                     next.push_back({e.source, e.target, e.buffers - 1});
                 }
 
+                ++i;
                 continue;
             }
 
-            // all fanin edges of the target are consecutive in a planar order; skip its other ones
+            // all fanin edges of the target are consecutive in a planar order and are consumed together
             const auto target = e.target;
             const auto fanins = non_constant_fanins(stripped, target);
 
-            if (i + fanins > current.size())
+            if (!consecutive_fanin_edges(current, i, fanins, target))
             {
                 throw std::runtime_error("The fanin edges of a node are not consecutive; the network is not planar");
             }
 
-            i += fanins - 1;
+            i += fanins;
 
             std::vector<mockturtle::signal<Ntk>> children{};
             children.reserve(stripped.fanin_size(target));
@@ -527,6 +529,28 @@ class planar_rebalancing_impl
             });
 
         return level;
+    }
+    /**
+     * Checks that the `fanins` edges from position `first` on all lead to `target` on this level, i.e., that the
+     * node's fanin edges are consecutive as in a planar order.
+     *
+     * @param current Edges of the level.
+     * @param first Position of the first edge of `target`.
+     * @param fanins Number of non-constant fanins of `target`; zero is never consecutive.
+     * @param target Node whose edges are checked.
+     * @return `true` iff the edges are consecutive.
+     */
+    [[nodiscard]] static bool consecutive_fanin_edges(const std::vector<edge>& current, const std::size_t first,
+                                                      const std::size_t fanins, const mockturtle::node<Ntk> target)
+    {
+        if (fanins == 0 || first + fanins > current.size())
+        {
+            return false;
+        }
+
+        return std::all_of(current.cbegin() + static_cast<std::ptrdiff_t>(first),
+                           current.cbegin() + static_cast<std::ptrdiff_t>(first + fanins), [target](const edge& e)
+                           { return e.target == target && e.buffers == 0 && e.source != e.target; });
     }
     /**
      * Number of non-constant fanins of a node.
