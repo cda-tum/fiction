@@ -201,23 +201,23 @@ enum class buffer_connection : uint8_t
  * Largest number of free rows between a node's predecessor and the predecessor's left neighbour that the lookup
  * tables distinguish.
  */
-inline constexpr std::size_t max_gap = 2u;
+inline constexpr std::size_t MAX_GAP = 2u;
 /**
  * Number of `orientation` enumerators.
  */
-inline constexpr std::size_t num_orientations = 4u;
+inline constexpr std::size_t NUM_ORIENTATIONS = 4u;
 /**
  * Number of `allowed_orientation` enumerators.
  */
-inline constexpr std::size_t num_allowed_orientations = 3u;
+inline constexpr std::size_t NUM_ALLOWED_ORIENTATIONS = 3u;
 /**
  * Number of `buffer_connection` enumerators.
  */
-inline constexpr std::size_t num_buffer_connections = 2u;
+inline constexpr std::size_t NUM_BUFFER_CONNECTIONS = 2u;
 /**
  * Number of `fanout_connection` enumerators.
  */
-inline constexpr std::size_t num_fanout_connections = 4u;
+inline constexpr std::size_t NUM_FANOUT_CONNECTIONS = 4u;
 /**
  * One entry of a lookup table: the orientation of the node and the routing lines it needs.
  */
@@ -235,15 +235,15 @@ struct placement_rule
 /**
  * Rules indexed by the orientation of the previous node in the rank.
  */
-using rules_by_previous = std::array<placement_rule, num_orientations>;
+using rules_by_previous = std::array<placement_rule, NUM_ORIENTATIONS>;
 /**
  * Rules indexed by the predecessor gap, then by the previous orientation.
  */
-using rules_by_gap = std::array<rules_by_previous, max_gap + 1>;
+using rules_by_gap = std::array<rules_by_previous, MAX_GAP + 1>;
 /**
  * Rules indexed by the allowed orientation, then by gap and previous orientation.
  */
-using rules_by_allowed = std::array<rules_by_gap, num_allowed_orientations>;
+using rules_by_allowed = std::array<rules_by_gap, NUM_ALLOWED_ORIENTATIONS>;
 /**
  * Shorthand for the orientation enumerators of the tables below.
  */
@@ -252,7 +252,7 @@ using o = orientation;
  * Placement rules for single-fanin nodes that are not fanouts, indexed by `buffer_connection`, `allowed_orientation`,
  * gap, and the orientation of the previous node.
  */
-inline constexpr std::array<rules_by_allowed, num_buffer_connections> buffer_rules = {{
+inline constexpr std::array<rules_by_allowed, NUM_BUFFER_CONNECTIONS> BUFFER_RULES = {{
     // UNCONNECTED
     {{
         // allowed EAST
@@ -300,7 +300,7 @@ inline constexpr std::array<rules_by_allowed, num_buffer_connections> buffer_rul
  * Placement rules for fanout nodes, indexed by `fanout_connection`, `allowed_orientation`, gap, and the orientation
  * of the previous node.
  */
-inline constexpr std::array<rules_by_allowed, num_fanout_connections> fanout_rules = {{
+inline constexpr std::array<rules_by_allowed, NUM_FANOUT_CONNECTIONS> FANOUT_RULES = {{
     // BOTH_SINGLE
     {{
         // allowed EAST
@@ -424,8 +424,8 @@ template <typename Ntk>
 {
     auto fanin_nodes = networks::fanins(ntk, n).fanin_nodes;
 
-    std::sort(fanin_nodes.begin(), fanin_nodes.end(),
-              [&ntk](const auto& a, const auto& b) { return ntk.rank_position(a) < ntk.rank_position(b); });
+    std::ranges::sort(fanin_nodes,
+                      [&ntk](const auto& a, const auto& b) { return ntk.rank_position(a) < ntk.rank_position(b); });
 
     return fanin_nodes;
 }
@@ -442,8 +442,8 @@ template <typename Ntk>
 {
     auto fanout_nodes = ntk.fanout(n);
 
-    std::sort(fanout_nodes.begin(), fanout_nodes.end(),
-              [&ntk](const auto& a, const auto& b) { return ntk.rank_position(a) < ntk.rank_position(b); });
+    std::ranges::sort(fanout_nodes,
+                      [&ntk](const auto& a, const auto& b) { return ntk.rank_position(a) < ntk.rank_position(b); });
 
     return fanout_nodes;
 }
@@ -558,7 +558,7 @@ template <typename Ntk>
 }
 /**
  * Free rows between the leftmost predecessor of a node and that predecessor's left neighbour in the rank below,
- * clamped to `max_gap`: the room available for placing the node.
+ * clamped to `MAX_GAP`: the room available for placing the node.
  *
  * @tparam Ntk Ranked network type.
  * @tparam Lyt Layout type.
@@ -591,7 +591,7 @@ template <typename Ntk, typename Lyt>
     const auto gap =
         rows_between<Lyt>(static_cast<tile<Lyt>>(node2pos[neighbour]), static_cast<tile<Lyt>>(node2pos[pre]));
 
-    return static_cast<std::size_t>(std::min<uint64_t>(gap, max_gap));
+    return static_cast<std::size_t>(std::min<uint64_t>(gap, MAX_GAP));
 }
 /**
  * Orientation of the first node of a level: south in the second variant if the first fanout structure or gate of
@@ -706,7 +706,7 @@ compute_level_variables(const Ntk& ntk, const mockturtle::node_map<mockturtle::s
                 if (i != 0)
                 {
                     const auto& rule =
-                        fanout_rules[index_of(connection)][index_of(allowed)][gap][index_of(vars.orientations[i - 1])];
+                        FANOUT_RULES[index_of(connection)][index_of(allowed)][gap][index_of(vars.orientations[i - 1])];
                     vars.orientations[i] = rule.direction;
                     vars.new_lines[i]    = rule.new_lines;
                 }
@@ -720,7 +720,7 @@ compute_level_variables(const Ntk& ntk, const mockturtle::node_map<mockturtle::s
 
             if (i != 0)
             {
-                const auto& rule     = buffer_rules[index_of(buffer_connection_of(ntk, n))][index_of(allowed)][gap]
+                const auto& rule     = BUFFER_RULES[index_of(buffer_connection_of(ntk, n))][index_of(allowed)][gap]
                                                    [index_of(vars.orientations[i - 1])];
                 vars.orientations[i] = rule.direction;
                 vars.new_lines[i]    = rule.new_lines;
@@ -823,7 +823,7 @@ inline void lift_to_common_diagonal(level_wiring& wiring, const std::vector<std:
     auto& x = wiring.x;
     auto& y = wiring.y;
 
-    const auto max_gate_it  = std::max_element(gate_lines.cbegin(), gate_lines.cend());
+    const auto max_gate_it  = std::ranges::max_element(gate_lines);
     const auto max_gate     = max_gate_it != gate_lines.cend() ? *max_gate_it : uint64_t{0};
     const auto max_gate_idx = max_gate_it != gate_lines.cend() ?
                                   static_cast<std::size_t>(std::distance(gate_lines.cbegin(), max_gate_it)) :
