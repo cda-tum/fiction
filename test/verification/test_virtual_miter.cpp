@@ -243,11 +243,7 @@ TEST_CASE("Virtual miter pairs the inputs of a rank view by creation order", "[v
 
     const mutable_rank_view ranked{vpi};
 
-    const auto miter = virtual_miter<technology_network>(tec, ranked);
-    REQUIRE(miter.has_value());
-
-    mockturtle::equivalence_checking_stats st{};
-    const auto                             cec = mockturtle::equivalence_checking(*miter, {}, &st);
+    const auto cec = virtual_miter_equivalent(tec, ranked);
     REQUIRE(cec.has_value());
-    CHECK(*cec);
+    CHECK(cec.value_or(false));
 }

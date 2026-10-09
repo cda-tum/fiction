@@ -25884,6 +25884,23 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_consecutive_fanin_edges =
+R"doc(Checks that the `fanins` edges from position `first` on all lead to
+`target` on this level, i.e., that the node's fanin edges are
+consecutive as in a planar order.
+
+Args:
+    current: Edges of the level.
+    first: Position of the first edge of `target`.
+    fanins: Number of non-constant fanins of `target`; zero is never
+            consecutive.
+    target: Node whose edges are checked.
+
+Returns:
+    `true` iff the edges are consecutive.
+
+)doc";
+
 static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge =
 R"doc(An edge of the stripped network while buffers are re-inserted along
 it.)doc";
