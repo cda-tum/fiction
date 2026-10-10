@@ -195,7 +195,7 @@ repos:
     rev: v0.0.85
     hooks:
       - id: ty
-        args: [--no-install-project, --group, docs]
+        args: [--no-install-project, --group, docs, --extra, plot]
         priority: 9
 
   # Format configuration files with prettier

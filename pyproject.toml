@@ -82,6 +82,9 @@ email = "benjamin.hien@tum.de"
 name = "Willem Lambooy"
 email = "willem.lambooy@tum.de"
 
+[project.optional-dependencies]
+plot = [ "matplotlib>=3.10.0", "plotly>=6.0.0" ]
+
 [project.urls]
 Source = "https://github.com/cda-tum/fiction"
 Tracker = "https://github.com/cda-tum/fiction/issues"
@@ -90,6 +93,7 @@ Research = "https://www.cda.cit.tum.de/research/fcn/"
 
 [project.scripts]
 fiction = "mnt.fiction.cli.app:main"
+fiction-opdom = "mnt.fiction.opdom:main"
 
 [dependency-groups]
 dev = [
@@ -204,6 +208,7 @@ skip = [ "*-musllinux*", "cp3*t-*" ]
 archs = "auto64"
 build-frontend = "build[uv]"
 test-command = "pytest"
+test-extras = [ "plot" ]
 # The wheel does not ship its own tests, so the suite is copied in next to the installed
 # wheel. `test-sources` keeps the relative path, and copying `pyproject.toml` along with it
 # gives pytest its configuration file, so the wheel runs the same suite under the same
@@ -396,7 +401,13 @@ addopts = [
     "--durations=10",
     "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
 ]
-filterwarnings = [ "error" ]
+# matplotlib 3.10 calls pyparsing's deprecated camelCase APIs. The filters match the warning's origin
+# module, not its wording, so a rephrased message cannot turn them into failures.
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:matplotlib\\._(fontconfig_pattern|mathtext)$",
+    "ignore::DeprecationWarning:pyparsing\\.util$",
+]
 log_level = "INFO"
 markers = [
     "layouts: layout data structures and layout I/O",

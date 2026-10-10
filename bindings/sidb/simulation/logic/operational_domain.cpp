@@ -27,11 +27,14 @@
 #include <fmt/format.h>
 
 #include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <tuple>
 #include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 #include <nanobind/operators.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
@@ -53,6 +56,22 @@ namespace pyfiction
 
 namespace detail
 {
+
+/**
+ * Buffers behind the NumPy arrays of `operational_domain.to_numpy`. The operational flags are bytes because
+ * `std::vector<bool>` has no contiguous storage.
+ */
+struct numpy_buffers
+{
+    /**
+     * Row-major (points, dimensions) parameter values.
+     */
+    std::vector<double> coordinates;
+    /**
+     * One flag per point; 1 marks an operational point.
+     */
+    std::vector<std::uint8_t> operational;
+};
 
 /**
  * Registers the operational domain and critical temperature domain algorithms on `sidb_layout`.
@@ -377,6 +396,43 @@ void operational_domain(nanobind::module_& m)
                                { items.emplace_back(key, std::get<0>(value)); });
                  return items;
              })
+        .def(
+            "to_numpy",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                using fiction::sidb::simulation::logic::operational_status;
+
+                const auto points     = self.size();
+                const auto dimensions = self.get_number_of_dimensions();
+
+                auto buffers = std::make_unique<detail::numpy_buffers>();
+                buffers->coordinates.reserve(points * dimensions);
+                buffers->operational.reserve(points);
+
+                self.for_each(
+                    [&buffers](const auto& key, const auto& value)
+                    {
+                        const auto& parameters = key.get_parameters();
+                        buffers->coordinates.insert(buffers->coordinates.end(), parameters.begin(), parameters.end());
+                        buffers->operational.push_back(std::get<0>(value) == operational_status::OPERATIONAL);
+                    });
+
+                // the capsule owns the buffers from here on; both arrays keep it alive and free it together
+                auto* const       data = buffers.release();
+                const py::capsule owner{data, [](void* p) noexcept
+                                        {
+                                            // the capsule is the owner and runs this when the last array dies
+                                            // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+                                            delete static_cast<detail::numpy_buffers*>(p);
+                                        }};
+
+                return std::make_tuple(
+                    py::ndarray<py::numpy, double, py::ndim<2>>{data->coordinates.data(), {points, dimensions}, owner},
+                    py::ndarray<py::numpy, bool, py::ndim<1>>{data->operational.data(), {points}, owner});
+            },
+            "Returns the domain as NumPy arrays: a float64 array of shape (points, dimensions) holding the sampled "
+            "parameter values in dimension order, and a boolean array of length points that is True where the "
+            "point is operational. Requires NumPy.")
 
         ;
 

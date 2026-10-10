@@ -18,9 +18,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
     Gate mapping, network passes, design-rule checks, and layout writers report counted phases.
+  - Python: `operational_domain.to_numpy()` returns the sampled coordinates and operational flags as NumPy arrays.
 
 - CLI:
 
+  - Added `fiction-opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or
+    interactive plots, including Sketch. Install `mnt-pyfiction[plot]` for plotting support.
   - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
     completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
@@ -617,6 +620,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB-to-cell-level conversion preserves bounds from converted cells.
 
 - Documentation:
+  - Corrected SiDB reader file references and removed an obsolete clocking-scheme overload reference.
   - The documentation session builds Python bindings with the installed Z3 dependency.
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.

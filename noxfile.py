@@ -127,6 +127,8 @@ def _run_tests(
         "sync",
         "--inexact",
         "--no-dev",  # do not auto-install dev dependencies
+        "--extra",
+        "plot",
         "--no-build-isolation-package",
         "mnt-pyfiction",  # build the project without isolation
         *install_args,

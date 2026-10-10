@@ -452,6 +452,49 @@ for filepath in benchmarks/TOY/*.v; do
 done
 ```
 
+### Dedicated command and plots
+
+Install plotting support once with `pip install 'mnt-pyfiction[plot]'` or
+`uv tool install 'mnt-pyfiction[plot]'`. Run `fiction-opdom` or `python -m mnt.fiction.opdom`:
+
+```console
+fiction-opdom gate.sqd --gate xor --plot domain.png --plot domain.html
+fiction-opdom gate.sqd --table 0110 --csv domain.csv
+fiction -c 'read gate.sqd; tt -t 0110; opdom domain.csv --plot domain.html'
+```
+
+The dedicated command requires an SQD file and an explicit specification: `--gate` selects `id`, `not`,
+`and`, `nand`, `or`, `nor`, `xor`, `xnor`, or `maj`; repeated `--table` or `--expression` options specify
+one function per output. Tables use the same binary and hexadecimal conventions as `tt`. Expressions
+use the detected input count, so an expression can leave inputs unused. The shell accepts these options
+as overrides of its active truth table. Every specification must match the detected BDL ports.
+
+Each invocation computes one reconstruction method. Repeat `--plot FILE` to export the same domain
+as PNG, SVG, PDF, or HTML. The dedicated command writes `<input-stem>_opdom.png` in the current directory
+when no output paths are given. `--csv FILE` requests CSV; a CSV-only invocation needs no plotting packages.
+`--show` opens plots after saving. HTML files embed Plotly and work offline, with hover information,
+zoom, pan, 3D rotation, and legend toggles. Both backends draw the returned samples and leave missing
+samples blank. Sketch positives are labeled "Potentially operational".
+
+Both commands expose `--threads`, `--timeout-ms`, `--condition tolerate_kinks|reject_kinks`,
+`--strategy simulation_only|filter_only|filter_then_simulation`, and `--input-encoding distance|absence`.
+BDL detection uses `--bdl-pair-min`, `--bdl-pair-max`, and `--bdl-wire-distance`, all in nm.
+Advanced defaults follow the bindings. `--sketch` selects `filter_only` and requires kink rejection
+and `LOGIC` dots. QuickSim requires base 2 and cannot simulate charged defects. A finite timeout
+bounds the complete computation and is unsupported with ClusterComplete; expiration produces no partial domain.
+
+Plots show a legend and non-operational samples by default. `--no-legend`, `--no-non-operational`, and
+`--no-title` hide them. `--title TEXT` supplies a title. `--operational-color`, `--non-operational-color`,
+`--operational-size`, and `--non-operational-size` control markers; sizes are diameters in points for static
+plots and pixels for HTML. `--width` and `--height` set figure dimensions in inches; HTML uses 96 pixels
+per inch. `--dpi` sets static-image resolution. Defaults are 7×6 inches, 300 DPI, purple operational
+samples, yellow Sketch positives, and gray non-operational samples.
+
+The results table prints computation runtime, evaluated samples, operational/non-operational counts,
+total parameter points, and simulator calls. `--log FILE` records statistics and native parameters as JSON.
+`--quiet` suppresses progress and notices while retaining statistics and errors. Progress uses percentages
+only when the algorithm reports a total.
+
 ### Statistics log
 
 `fiction -l LOG.json ...` writes the statistics of every command to a JSON file when the shell ends — the file

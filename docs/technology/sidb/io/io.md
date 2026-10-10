@@ -10,7 +10,7 @@
 
 **Header:** `fiction/technology/sidb/io/read_sqd_layout.hpp`
 
-```{doxygenfile} fiction/technology/sidb/io/read_sqd_layout.hpp
+```{doxygenfile} read_sqd_layout.hpp
 :sections: func
 ```
 
@@ -45,7 +45,7 @@
 
 **Header:** `fiction/technology/sidb/io/read_surface_defects.hpp`
 
-```{doxygenfile} fiction/technology/sidb/io/read_surface_defects.hpp
+```{doxygenfile} read_surface_defects.hpp
 :sections: func
 ```
 

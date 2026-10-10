@@ -1,0 +1,295 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+"""Static and interactive operational domain plots."""
+
+from __future__ import annotations
+
+import importlib
+from typing import TYPE_CHECKING
+from unittest.mock import patch
+
+import numpy as np
+import pytest
+from mpl_toolkits.mplot3d import Axes3D
+
+from mnt.fiction.cli.registry import REGISTRY
+from mnt.pyfiction.sidb.simulation.logic import operational_domain, operational_status, parameter_point, sweep_parameter
+
+if TYPE_CHECKING:
+    import argparse
+    from collections.abc import Callable
+    from pathlib import Path
+
+    from .conftest import Shell
+
+
+@pytest.fixture(params=[2, 3])
+def domain(request: pytest.FixtureRequest) -> operational_domain:
+    """Two classified points in a domain whose axis order differs from the defaults.
+
+    Returns:
+        The sample domain.
+    """
+    dimensions = [sweep_parameter.LAMBDA_TF, sweep_parameter.EPSILON_R, sweep_parameter.MU_MINUS][: request.param]
+    result = operational_domain(dimensions)
+    result[parameter_point([5.0, 5.6, -0.32][: request.param])] = operational_status.OPERATIONAL
+    result[parameter_point([5.1, 5.7, -0.3][: request.param])] = operational_status.NON_OPERATIONAL
+    return result
+
+
+def options(*flags: str) -> argparse.Namespace:
+    """Parse plot options through the public shell command.
+
+    Args:
+        flags: Extra command arguments.
+
+    Returns:
+        Parsed options.
+    """
+    return REGISTRY["opdom"].parser.parse_args(["domain.csv", "--plot", "domain.png", *flags])
+
+
+def test_static_sample_coordinates_and_axes(domain: operational_domain) -> None:
+    """Static plots preserve point coordinates and selected axis order."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    figure = plotting.matplotlib_figure(domain, options())
+    axis = figure.axes[0]
+    assert "lambda" in axis.get_xlabel().lower()
+    assert "epsilon" in axis.get_ylabel().lower()
+    assert len(axis.collections) == 2
+    legend = axis.get_legend()
+    assert legend is not None
+    assert [text.get_text() for text in legend.get_texts()] == ["Operational", "Non-operational"]
+    if domain.get_number_of_dimensions() == 2:
+        assert np.asarray(axis.collections[0].get_offsets()).tolist() == [[5.0, 5.6]]
+        assert np.asarray(axis.collections[1].get_offsets()).tolist() == [[5.1, 5.7]]
+    else:
+        assert isinstance(axis, Axes3D)
+        assert "mu" in axis.get_zlabel().lower()
+
+
+def test_interactive_samples_and_visibility(domain: operational_domain) -> None:
+    """HTML plots omit hidden samples, label Sketch positives, and hide legends on request."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    figure = plotting.plotly_figure(
+        domain,
+        options(
+            "--sketch",
+            "--no-legend",
+            "--no-non-operational",
+            "--title",
+            "Domain",
+            "--operational-color",
+            "#123456",
+            "--operational-size",
+            "6",
+        ),
+    )
+    assert len(figure.data) == 1
+    assert list(figure.data[0].x) == [5.0]
+    assert list(figure.data[0].y) == [5.6]
+    assert figure.data[0].name == "Potentially operational"
+    assert figure.data[0].marker.color == "#123456"
+    assert figure.data[0].marker.size == 6
+    assert figure.layout.showlegend is False
+    assert figure.layout.title.text == "Domain"
+    if domain.get_number_of_dimensions() == 3:
+        assert list(figure.data[0].z) == [-0.32]
+        assert figure.data[0].type == "scatter3d"
+
+
+def test_static_visibility_and_size(domain: operational_domain) -> None:
+    """Static plots honor the same visibility and figure controls as HTML."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    figure = plotting.matplotlib_figure(
+        domain,
+        options("--no-legend", "--no-non-operational", "--no-title", "--width", "8", "--height", "4", "--dpi", "150"),
+    )
+    assert len(figure.axes[0].collections) == 1
+    assert figure.axes[0].get_legend() is None
+    assert not figure.axes[0].get_title()
+    assert figure.get_size_inches().tolist() == [8, 4]
+    assert figure.dpi == 150
+
+
+@pytest.mark.parametrize("suffix", ["png", "svg", "pdf", "html"])
+def test_opdom_plot_files(xor_gate: Shell, tmp_path: Path, suffix: str) -> None:
+    """A shell computation can export every supported plot format."""
+    path = tmp_path / f"domain.{suffix}"
+    xor_gate.ok(f'opdom "{tmp_path / "domain.csv"}" --plot "{path}" --x-min 5.6 --x-max 5.6 --y-min 5 --y-max 5')
+    data = path.read_bytes()
+    assert data
+    if suffix == "png":
+        assert data.startswith(b"\x89PNG")
+    elif suffix == "pdf":
+        assert data.startswith(b"%PDF")
+    elif suffix == "svg":
+        assert b"<svg" in data
+    else:
+        assert b"Plotly.newPlot" in data
+        assert b"<script src=" not in data
+
+
+def test_entry_points_share_results_and_compute_once(
+    xor_gate: Shell, resource: Callable[[str], str], tmp_path: Path
+) -> None:
+    """CSV and several plots share one computation and agree with the shell."""
+    command = importlib.import_module("mnt.fiction.cli.commands.simulation.opdom")
+    main = importlib.import_module("mnt.fiction.opdom").main
+    sweep = ["--x-min", "5.6", "--x-max", "5.7", "--x-step", "0.1", "--y-min", "5", "--y-max", "5"]
+    shell_csv = tmp_path / "shell.csv"
+    xor_gate.ok(f'opdom "{shell_csv}" ' + " ".join(sweep))
+    csv, png, html = (tmp_path / name for name in ("dedicated.csv", "domain.png", "domain.html"))
+    with patch.object(command, "compute_domain", wraps=command.compute_domain) as compute:
+        assert (
+            main([
+                resource("hex_21_inputsdbp_xor_v1.sqd"),
+                "--gate",
+                "xor",
+                "--csv",
+                str(csv),
+                "--plot",
+                str(png),
+                "--plot",
+                str(html),
+                *sweep,
+            ])
+            == 0
+        )
+        assert compute.call_count == 1
+    assert sorted(csv.read_text(encoding="utf-8").splitlines()) == sorted(
+        shell_csv.read_text(encoding="utf-8").splitlines()
+    )
+    assert png.read_bytes().startswith(b"\x89PNG")
+    assert b"Plotly.newPlot" in html.read_bytes()
+
+
+def test_default_png(resource: Callable[[str], str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The dedicated command defaults to a PNG in the working directory."""
+    main = importlib.import_module("mnt.fiction.opdom").main
+    monkeypatch.chdir(tmp_path)
+    assert (
+        main([
+            resource("hex_21_inputsdbp_xor_v1.sqd"),
+            "--gate",
+            "xor",
+            "--x-min",
+            "5.6",
+            "--x-max",
+            "5.6",
+            "--y-min",
+            "5",
+            "--y-max",
+            "5",
+        ])
+        == 0
+    )
+    assert (tmp_path / "hex_21_inputsdbp_xor_v1_opdom.png").read_bytes().startswith(b"\x89PNG")
+
+
+@pytest.mark.parametrize(
+    "flags",
+    [
+        "--plot bad.txt",
+        "--plot out.png --width 0",
+        "--plot out.html --dpi 0",
+        "--plot out.png --operational-color invalid",
+        "--plot out.html --non-operational-color invalid",
+    ],
+)
+def test_plot_preflight_errors(xor_gate: Shell, tmp_path: Path, flags: str) -> None:
+    """Invalid plot options fail before writing the CSV or starting computation."""
+    path = tmp_path / "domain.csv"
+    xor_gate.fails(f'opdom "{path}" {flags} --x-min 5.6 --x-max 5.6 --y-min 5 --y-max 5')
+    assert not path.exists()
+
+
+@pytest.mark.parametrize("kind", ["directory", "missing_parent", "dangling_link"])
+def test_invalid_plot_destinations(xor_gate: Shell, tmp_path: Path, kind: str) -> None:
+    """Invalid destinations leave the computation's CSV unwritten."""
+    plot = tmp_path / "invalid.png"
+    if kind == "directory":
+        plot.mkdir()
+    elif kind == "missing_parent":
+        plot = tmp_path / "missing" / "invalid.png"
+    else:
+        try:
+            plot.symlink_to(tmp_path / "absent.png")
+        except OSError as error:
+            pytest.skip(f"symbolic links are unavailable: {error}")
+    csv = tmp_path / "domain.csv"
+    xor_gate.fails(f'opdom "{csv}" --plot "{plot}" ')
+    assert not csv.exists()
+
+
+def test_show_and_existing_plot_permissions(
+    domain: operational_domain, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Replacing a plot preserves its mode and opens the viewer only on request."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    path = tmp_path / "domain.png"
+    path.write_bytes(b"old plot")
+    mode = path.stat().st_mode
+    shown: list[Path] = []
+
+    def viewer(saved: Path) -> None:
+        assert saved.read_bytes().startswith(b"\x89PNG")
+        shown.append(saved)
+
+    monkeypatch.setattr(plotting, "open_viewer", viewer)
+    plotting.write_plot(domain, path, options())
+    assert not shown
+    plotting.write_plot(domain, path, options("--show"))
+    assert shown == [path]
+    assert path.stat().st_mode == mode
+
+
+def _fail_after_partial_write(path: Path) -> None:
+    """Stage a partial output, then fail.
+
+    Args:
+        path: The destination.
+
+    Raises:
+        RuntimeError: Always.
+    """
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    with plotting.atomic_output(path) as temporary:
+        temporary.write_text("partial")
+        msg = "write failed"
+        raise RuntimeError(msg)
+
+
+def test_atomic_output_keeps_destination_on_failure(tmp_path: Path) -> None:
+    """A failed write leaves the existing file untouched and no staging directory behind."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    path = tmp_path / "domain.csv"
+    path.write_text("old")
+    with pytest.raises(RuntimeError):
+        _fail_after_partial_write(path)
+    assert path.read_text() == "old"
+    assert list(tmp_path.iterdir()) == [path]
+    with plotting.atomic_output(path) as temporary:
+        temporary.write_text("new")
+    assert path.read_text() == "new"
+
+
+@pytest.mark.parametrize("suffix", [".png", ".html"])
+@pytest.mark.parametrize("status", [operational_status.OPERATIONAL, operational_status.NON_OPERATIONAL])
+def test_plot_with_an_empty_status_series(
+    domain: operational_domain, tmp_path: Path, suffix: str, status: operational_status
+) -> None:
+    """A domain without points of one status still plots in 2D and 3D."""
+    plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
+    uniform = operational_domain([domain.get_dimension(index) for index in range(domain.get_number_of_dimensions())])
+    for point in domain:
+        uniform[point] = status
+    path = tmp_path / f"domain{suffix}"
+    plotting.write_plot(uniform, path, options())
+    assert path.stat().st_size > 0
