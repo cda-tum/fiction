@@ -148,7 +148,7 @@ repos:
 
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.21
+    rev: 0.12.23
     hooks:
       - id: uv-lock
         priority: 0
@@ -192,7 +192,7 @@ repos:
   # shell imports without compiling the extension, and the `docs` group resolves the imports of
   # `docs/conf.py` and its Sphinx extension
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.84
+    rev: v0.0.85
     hooks:
       - id: ty
         args: [--no-install-project, --group, docs]
