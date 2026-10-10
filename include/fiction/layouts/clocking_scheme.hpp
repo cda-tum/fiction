@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <functional>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -113,6 +114,29 @@ class scheme
             cells.insert(cells.cend(), row.cbegin(), row.cend());
         }
     }
+    /** @brief Copies the complete clocking scheme. */
+    scheme(const scheme&) = default;
+    /** @brief Moves the clocking scheme. */
+    scheme(scheme&&) noexcept = default;
+    /**
+     * @brief Replaces the scheme with an independent copy. Copy failure preserves this scheme.
+     * @param other Scheme to copy.
+     * @return This scheme.
+     * @throws std::bad_alloc If allocation fails.
+     */
+    scheme& operator=(const scheme& other)
+    {
+        if (this != &other)
+        {
+            auto copy = other;
+            *this     = std::move(copy);
+        }
+        return *this;
+    }
+    /** @brief Moves the clocking scheme. @return This scheme. */
+    scheme& operator=(scheme&&) noexcept = default;
+    /** @brief Releases owned clocking state. */
+    ~scheme() = default;
     /**
      * Returns the clock number of the tile at \f$(x, y)\f$: its overridden clock number if one exists, and the
      * repeated cutout entry otherwise.
@@ -139,8 +163,9 @@ class scheme
      * @param x x-coordinate of the tile.
      * @param y y-coordinate of the tile.
      * @param cn Clock number to assign. The scheme stores `cn % num_clocks()`.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void override_clock_number(const int64_t x, const int64_t y, const clock_number cn) noexcept
+    void override_clock_number(const int64_t x, const int64_t y, const clock_number cn)
     {
         overrides[{x, y}] = static_cast<clock_number>(cn % phases);
     }
@@ -196,6 +221,21 @@ class scheme
      * @return `true` iff both schemes are equal.
      */
     [[nodiscard]] bool operator==(const scheme& other) const = default;
+
+    /**
+     * Visits manually overridden clock numbers.
+     * @tparam Fn Callable accepting x, y, and clock number.
+     * @param fn Callback for each override.
+     */
+    template <typename Fn>
+    void foreach_override(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
+    {
+        for (const auto& [position, number] : overrides)
+        {
+            std::invoke(fn, position.first, position.second, number);
+        }
+    }
 
   private:
     /**

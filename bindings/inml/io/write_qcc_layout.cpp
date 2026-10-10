@@ -39,8 +39,9 @@ void write_qcc_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::inml::io::write_qcc_layout_params>(m, "write_qcc_layout_params",
-                                                           DOC(fiction_inml_io_write_qcc_layout_params))
+    py::class_<fiction::inml::io::write_qcc_layout_params>(
+        m, "write_qcc_layout_params", pyfiction::progress_type_slots<fiction::inml::io::write_qcc_layout_params>(),
+        DOC(fiction_inml_io_write_qcc_layout_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::inml::io::write_qcc_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
                 pyfiction::CALLBACK_SETTER, "Receives serialization progress.")

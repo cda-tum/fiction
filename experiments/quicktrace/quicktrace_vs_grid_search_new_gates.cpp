@@ -29,7 +29,9 @@
 #include <fmt/format.h>
 
 #include <array>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
 #include <string>
 #include <utility>
@@ -44,7 +46,9 @@ using namespace fiction::sidb::simulation::defects;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 
-int main()  // NOLINT
+/** @brief Runs the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     experiments::experiment<std::string, std::size_t, std::size_t> simulation_exp{"Benchmark", "Gate Name", "samples",
                                                                                   "wrong output of quicktrace"};
@@ -116,4 +120,11 @@ int main()  // NOLINT
         simulation_exp(gate, exhaustive_design.size(), counter_for_wrong_output_of_quicktrace);
     }
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

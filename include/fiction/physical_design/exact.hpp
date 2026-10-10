@@ -22,6 +22,7 @@
 
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
@@ -102,7 +103,7 @@ struct exact_physical_design_params
      *
      * @note If `upper_bound_area` and (either) `upper_bound_x` or `upper_bound_y` are set, the imposed search space
      * restrictions are cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x == 4`, all aspect ratios with
-     * an x-dimension of more than 4 *and* a total area of more than 20 will be skipped.
+     * a width of more than 4 *and* a total area of more than 20 will be skipped.
      */
     uint16_t upper_bound_area = std::numeric_limits<uint16_t>::max();
     /**
@@ -233,9 +234,9 @@ class exact_impl
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
         // NOLINTNEXTLINE(*-prefer-member-initializer)
-        ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{
+        ari = aspect_ratio_iterator<typename Lyt::extent>{
             ps.fixed_size ? std::min(static_cast<uint64_t>(ps.upper_bound_area),
-                                     static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y)) :
+                                     static_cast<uint64_t>(ps.upper_bound_x) * ps.upper_bound_y) :
                             static_cast<uint64_t>(lower_bound)};
     }
 
@@ -281,7 +282,7 @@ class exact_impl
      * Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
      */
     utils::progress_reporter progress;
-    /** @brief Serializes the active candidate dimensions of each solver worker. */
+    /** @brief Serializes the active candidate extents of each solver worker. */
     utils::worker_progress_reporter worker_progress;
     /**
      * The utilized clocking scheme.
@@ -298,15 +299,15 @@ class exact_impl
     /**
      * Iterator for the factorization of possible aspect ratios.
      */
-    aspect_ratio_iterator<typename Lyt::aspect_ratio> ari{0};
+    aspect_ratio_iterator<typename Lyt::extent> ari{0};
     /**
-     * Aspect ratio of found result. Only needed for the asynchronous case.
+     * Extent of the found result. Only needed for the asynchronous case.
      */
-    std::optional<typename Lyt::aspect_ratio> result_aspect_ratio;
+    std::optional<typename Lyt::extent> result_extent;
     /**
      * Restricts access to the aspect-ratio iterator, result, and worker context records.
      */
-    std::mutex ari_mutex{}, rar_mutex{};
+    std::mutex ari_mutex{}, result_extent_mutex{};
 
     using ctx_ptr      = std::shared_ptr<z3::context>;
     using solver_ptr   = std::shared_ptr<z3::solver>;
@@ -344,14 +345,15 @@ class exact_impl
          * more UNSAT instances can be skipped without losing the optimality guarantee. This function should never be
          * overly restrictive!
          *
-         * @param ar Aspect ratio to evaluate.
-         * @return `true` if ar can safely be skipped because it is UNSAT anyway.
+         * @param ex Layout extent to evaluate.
+         * @return `true` if `ex` can safely be skipped because it is UNSAT anyway.
          */
-        [[nodiscard]] bool skippable(const typename Lyt::aspect_ratio& ar) const noexcept
+        [[nodiscard]] bool skippable(const typename Lyt::extent& ex) const noexcept
         {
             // skip aspect ratios that extend beyond the specified upper bounds
-            if ((ar.x + 1) * (ar.y + 1) > params.upper_bound_area || ar.x >= params.upper_bound_x ||
-                ar.y >= params.upper_bound_y)
+            if (layouts::area_of(ex) > params.upper_bound_area ||
+                (static_cast<int64_t>(ex.width) - 1) >= params.upper_bound_x ||
+                (static_cast<int64_t>(ex.height) - 1) >= params.upper_bound_y)
             {
                 return true;
             }
@@ -359,7 +361,9 @@ class exact_impl
             if (!layout.is_regularly_clocked())
             {
                 // rotated aspect ratios don't need to be explored
-                if (ar.x != ar.y && ar.x == layout.y() && ar.y == layout.x())
+                if ((static_cast<int64_t>(ex.width) - 1) != (static_cast<int64_t>(ex.height) - 1) &&
+                    (static_cast<int64_t>(ex.width) - 1) == (static_cast<int64_t>(layout.height()) - 1) &&
+                    (static_cast<int64_t>(ex.height) - 1) == (static_cast<int64_t>(layout.width()) - 1))
                 {
                     return true;
                 }
@@ -368,12 +372,13 @@ class exact_impl
             else if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR_NAME))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
-                if (ar.x < static_cast<int32_t>(depth_ntk.depth()))
+                if ((static_cast<int64_t>(ex.width) - 1) < static_cast<int32_t>(depth_ntk.depth()))
                 {
                     return true;
                 }
                 // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
-                if (params.border_io && ar.y < static_cast<int32_t>(std::max(network.num_pis(), network.num_pos())) - 1)
+                if (params.border_io && (static_cast<int64_t>(ex.height) - 1) <
+                                            static_cast<int32_t>(std::max(network.num_pis(), network.num_pos())) - 1)
                 {
                     return true;
                 }
@@ -382,12 +387,13 @@ class exact_impl
             else if (layout.is_clocking_scheme(layouts::clocking::ROW_NAME))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
-                if (ar.y < static_cast<int32_t>(depth_ntk.depth()))
+                if ((static_cast<int64_t>(ex.height) - 1) < static_cast<int32_t>(depth_ntk.depth()))
                 {
                     return true;
                 }
                 // if border I/Os are enforced, skip all aspect ratios that are too narrow for hosting all I/Os
-                if (params.border_io && ar.x < static_cast<int32_t>(std::max(network.num_pis(), network.num_pos())) - 1)
+                if (params.border_io && (static_cast<int64_t>(ex.width) - 1) <
+                                            static_cast<int32_t>(std::max(network.num_pis(), network.num_pos())) - 1)
                 {
                     return true;
                 }
@@ -399,12 +405,12 @@ class exact_impl
          * Resizes the layout and creates a new solver checkpoint from where on the next incremental instance can be
          * generated.
          *
-         * @param ar Current aspect ratio to work on.
+         * @param ex Current layout extent.
          */
-        void update(const typename Lyt::aspect_ratio& ar) noexcept
+        void update(const typename Lyt::extent& ex) noexcept
         {
-            layout.resize({ar.x, ar.y, params.crossings ? 1 : 0});
-            check_point = std::make_shared<solver_check_point>(fetch_solver(ar));
+            layout.resize({ex.width, ex.height, params.crossings ? 2 : 1});
+            check_point = std::make_shared<solver_check_point>(fetch_solver(ex));
             ++lc;
             solver = check_point->state->solver;
         }
@@ -452,13 +458,14 @@ class exact_impl
             return false;
         }
         /**
-         * Stores the current solver state in the solver tree with aspect ratio ar as key.
+         * Stores the current solver state in the solver tree with extent ex as key.
          *
-         * @param ar Key to storing the current solver state.
+         * @param ex Key to storing the current solver state.
          */
-        void store_solver_state(const typename Lyt::aspect_ratio& ar) noexcept
+        void store_solver_state(const typename Lyt::extent& ex) noexcept
         {
-            solver_tree[ar] = check_point->state;
+            solver_tree[{(static_cast<int64_t>(ex.width) - 1), (static_cast<int64_t>(ex.height) - 1)}] =
+                check_point->state;
         }
         /**
          * Returns a statistics object from the current solver state.
@@ -522,7 +529,7 @@ class exact_impl
          * updated. Additionally, a container for assumptions, i.e., assertions that are only valid in this and only
          * this run, is needed. All of that is packaged in a solver check point.
          */
-        struct solver_check_point  // NOLINT: assumptions cannot be default-initialized
+        struct solver_check_point  // NOLINT(cppcoreguidelines-pro-type-member-init): assumptions require a Z3 context.
         {
             /**
              * Solver and watched literals.
@@ -596,7 +603,7 @@ class exact_impl
          * strategy using factorizations is kept and several solvers are employed that can be reused at a later point.
          * In the example, the 4 x 4 solver would be stored and revisited when 4 x 5 is to be explored.
          */
-        std::unordered_map<typename Lyt::aspect_ratio, state_ptr> solver_tree{};
+        std::unordered_map<tile<Lyt>, state_ptr> solver_tree{};
         /**
          * Current solver checkpoint extracted from the solver tree.
          */
@@ -624,17 +631,17 @@ class exact_impl
             return ctx->bool_const(fmt::format("lit_s_{}", lc).c_str());
         }
         /**
-         * Accesses the solver tree and looks for a solver state that is associated with an aspect ratio smaller by 1
-         * row or column than given aspect ratio. The found one is returned together with the tiles that are new to this
+         * Accesses the solver tree and looks for a solver state that is associated with an extent smaller by one
+         * row or column than the given extent. The found one is returned together with the tiles that are new to this
          * solver.
          *
          * If no such solver could be found, a new solver is created from the context given.
          *
-         * @param ar aspect ratio of size x * y.
-         * @return Solver state associated with an aspect ratio of size x - 1 * y or x * y - 1 and, additionally, the
+         * @param ex Layout extent with width x and height y.
+         * @return Solver state associated with an extent of size (x - 1) * y or x * (y - 1) and, additionally, the
          * tiles new to the solver. If no such solver is available, a new one is created.
          */
-        [[nodiscard]] solver_check_point fetch_solver(const typename Lyt::aspect_ratio& ar)
+        [[nodiscard]] solver_check_point fetch_solver(const typename Lyt::extent& ex)
         {
             const auto create_assumptions = [this](const solver_state& state) -> z3::expr_vector
             {
@@ -646,14 +653,17 @@ class exact_impl
             };
 
             // does a solver state for a layout of aspect ratio of size x - 1 * y exist?
-            if (const auto it_x = solver_tree.find({ar.x - 1, ar.y}); it_x != solver_tree.end())
+            if (const auto it_x =
+                    solver_tree.find({(static_cast<int64_t>(ex.width) - 1) - 1, (static_cast<int64_t>(ex.height) - 1)});
+                it_x != solver_tree.end())
             {
                 // gather additional y-tiles and updated tiles
                 std::unordered_set<typename Lyt::tile> added_tiles{}, updated_tiles{};
-                for (decltype(ar.y) y = 0; y <= ar.y; ++y)
+                for (decltype((static_cast<int64_t>(ex.height) - 1)) y = 0; y <= (static_cast<int64_t>(ex.height) - 1);
+                     ++y)
                 {
-                    added_tiles.emplace(ar.x, y);
-                    updated_tiles.emplace(ar.x - 1, y);
+                    added_tiles.emplace((static_cast<int64_t>(ex.width) - 1), y);
+                    updated_tiles.emplace((static_cast<int64_t>(ex.width) - 1) - 1, y);
                 }
 
                 // deep-copy solver state
@@ -670,14 +680,17 @@ class exact_impl
                         create_assumptions(new_state)};
             }
             // does a solver state for a layout of aspect ratio of size x * y - 1 exist?
-            if (const auto it_y = solver_tree.find({ar.x, ar.y - 1}); it_y != solver_tree.end())
+            if (const auto it_y =
+                    solver_tree.find({(static_cast<int64_t>(ex.width) - 1), (static_cast<int64_t>(ex.height) - 1) - 1});
+                it_y != solver_tree.end())
             {
                 // gather additional x-tiles
                 std::unordered_set<typename Lyt::tile> added_tiles{}, updated_tiles{};
-                for (decltype(ar.x) x = 0; x <= ar.x; ++x)
+                for (decltype((static_cast<int64_t>(ex.width) - 1)) x = 0; x <= (static_cast<int64_t>(ex.width) - 1);
+                     ++x)
                 {
-                    added_tiles.emplace(x, ar.y);
-                    updated_tiles.emplace(x, ar.y - 1);
+                    added_tiles.emplace(x, (static_cast<int64_t>(ex.height) - 1));
+                    updated_tiles.emplace(x, (static_cast<int64_t>(ex.height) - 1) - 1);
                 }
 
                 // deep-copy solver state
@@ -696,9 +709,10 @@ class exact_impl
             // no existing solver state; create a new one
             // all tiles are additional ones
             std::unordered_set<typename Lyt::tile> added_tiles{};
-            for (decltype(ar.y) y = 0; y <= ar.y; ++y)
+            for (decltype((static_cast<int64_t>(ex.height) - 1)) y = 0; y <= (static_cast<int64_t>(ex.height) - 1); ++y)
             {
-                for (decltype(ar.x) x = 0; x <= ar.x; ++x)
+                for (decltype((static_cast<int64_t>(ex.width) - 1)) x = 0; x <= (static_cast<int64_t>(ex.width) - 1);
+                     ++x)
                 {
                     added_tiles.emplace(x, y);
                 }
@@ -1918,9 +1932,12 @@ class exact_impl
 
                                 // cannot be placed with too little distance to western border
                                 for (int32_t column = 0;
-                                     column < std::min(static_cast<decltype(layout.y())>(l), layout.x()); ++column)
+                                     column <
+                                     std::min(static_cast<decltype((static_cast<int64_t>(layout.height()) - 1))>(l),
+                                              (static_cast<int64_t>(layout.width()) - 1));
+                                     ++column)
                                 {
-                                    for (int32_t row = 0; row <= layout.y(); ++row)
+                                    for (int32_t row = 0; row <= (static_cast<int64_t>(layout.height()) - 1); ++row)
                                     {
                                         if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
@@ -1940,9 +1957,10 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to eastern border
-                                for (int32_t column = std::max(layout.x() - il + 1, 0); column < layout.x(); ++column)
+                                for (int64_t column = std::max(static_cast<int64_t>(layout.width()) - il, int64_t{0});
+                                     column < (static_cast<int64_t>(layout.width()) - 1); ++column)
                                 {
-                                    for (int32_t row = 0; row <= layout.y(); ++row)
+                                    for (int32_t row = 0; row <= (static_cast<int64_t>(layout.height()) - 1); ++row)
                                     {
                                         const auto t = typename Lyt::tile{column, row};
 
@@ -1981,10 +1999,14 @@ class exact_impl
                                 const auto il = static_cast<int32_t>(inv_levels[network.node_to_index(n)]);
 
                                 // cannot be placed with too little distance to northern border
-                                for (int32_t row = 0; row < std::min(static_cast<decltype(layout.y())>(l), layout.y());
+                                for (int32_t row = 0;
+                                     row <
+                                     std::min(static_cast<decltype((static_cast<int64_t>(layout.height()) - 1))>(l),
+                                              (static_cast<int64_t>(layout.height()) - 1));
                                      ++row)
                                 {
-                                    for (int32_t column = 0; column <= layout.x(); ++column)
+                                    for (int32_t column = 0; column <= (static_cast<int64_t>(layout.width()) - 1);
+                                         ++column)
                                     {
                                         if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
@@ -2004,9 +2026,11 @@ class exact_impl
                                 }
 
                                 // cannot be placed with too little distance to southern border
-                                for (int32_t row = std::max(layout.y() - il + 1, 0); row < layout.y(); ++row)
+                                for (int64_t row = std::max(static_cast<int64_t>(layout.height()) - il, int64_t{0});
+                                     row < (static_cast<int64_t>(layout.height()) - 1); ++row)
                                 {
-                                    for (int32_t column = 0; column <= layout.x(); ++column)
+                                    for (int32_t column = 0; column <= (static_cast<int64_t>(layout.width()) - 1);
+                                         ++column)
                                     {
                                         const auto t = typename Lyt::tile{column, row};
 
@@ -2057,7 +2081,9 @@ class exact_impl
                                                                             { solver->add(!(get_te(t, e))); });
                                         }
                                         // cannot be placed with too little distance to south-east corner
-                                        if (layout.x() - t.x + layout.y() - t.y < il)
+                                        if ((static_cast<int64_t>(layout.width()) - 1) - t.x +
+                                                (static_cast<int64_t>(layout.height()) - 1) - t.y <
+                                            il)
                                         {
                                             // use assumptions here because the south-east corner moves away in the
                                             // following iterations
@@ -2362,9 +2388,9 @@ class exact_impl
                                     [this, &fon](const auto& t)
                                     {
                                         // if fo gets placed here, its predecessor must be on the north-western tile
-                                        if (const auto nw = layout.north_west(t); nw != t)
+                                        if (const auto nw = layout.north_west(t); nw)
                                         {
-                                            solver->add(z3::implies(get_tn(t, fon), get_tc(nw, t)));
+                                            solver->add(z3::implies(get_tn(t, fon), get_tc(*nw, t)));
 
                                             // additionally, no crossing can precede a fan-out
                                             z3::expr_vector wv{*ctx};
@@ -2373,7 +2399,7 @@ class exact_impl
                                                                    {
                                                                        if (!skip_const_or_io_edge(e))
                                                                        {
-                                                                           wv.push_back(get_te(nw, e));
+                                                                           wv.push_back(get_te(*nw, e));
                                                                        }
                                                                    });
 
@@ -2427,7 +2453,7 @@ class exact_impl
                             layout.foreach_ground_tile(
                                 [this, &n1](const auto& t)
                                 {
-                                    if (auto ne = layout.north_east(t); ne == t)
+                                    if (auto ne = layout.north_east(t); !ne)
                                     {
                                         // no north-eastern tile, do not place v1 here
                                         check_point->assumptions.push_back(!(get_tn(t, n1)));
@@ -2441,18 +2467,18 @@ class exact_impl
                                                                {
                                                                    if (!skip_const_or_io_edge(e))
                                                                    {
-                                                                       wv.push_back(get_te(ne, e));
+                                                                       wv.push_back(get_te(*ne, e));
                                                                    }
                                                                });
 
                                         solver->add(z3::implies(get_tn(t, n1), z3::atmost(wv, 1u)));
                                     }
-                                    if (auto se = layout.south_east(t); se != t)
+                                    if (auto se = layout.south_east(t); se)
                                     {
                                         // south-eastern tile exists, do not route a connection here
-                                        if (is_added_tile(se))
+                                        if (is_added_tile(*se))
                                         {
-                                            solver->add(z3::implies(get_tn(t, n1), !(get_tc(t, se))));
+                                            solver->add(z3::implies(get_tn(t, n1), !(get_tc(t, *se))));
                                         }
                                     }
                                 });
@@ -2473,11 +2499,13 @@ class exact_impl
 
                 for (const auto& i : port.inp)
                 {
-                    iop.push_back(!(get_tc(layouts::port_direction_to_coordinate(layout, t, i), t)));
+                    const auto adjacent = layouts::port_direction_to_coordinate(layout, t, i);
+                    iop.push_back(adjacent ? !get_tc(*adjacent, t) : ctx->bool_val(true));
                 }
                 for (const auto& o : port.out)
                 {
-                    iop.push_back(!(get_tc(t, layouts::port_direction_to_coordinate(layout, t, o))));
+                    const auto adjacent = layouts::port_direction_to_coordinate(layout, t, o);
+                    iop.push_back(adjacent ? !get_tc(t, *adjacent) : ctx->bool_val(true));
                 }
 
                 return iop;
@@ -2774,7 +2802,7 @@ class exact_impl
                         // signal lookup for e's source node
                         node2pos[e.source].update_branch(
                             e.target, layout.create_buf(node2pos[e.source][e.target],
-                                                        layout.is_empty_tile(at) ? at : layout.above(at)));
+                                                        layout.is_empty_tile(at) ? at : layout.above(at).value()));
 
                         // recursion call
                         route(at, e, model);
@@ -2799,7 +2827,7 @@ class exact_impl
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular clocking
             // must be made
 
-            const auto pis = reserve_input_nodes(layout, network);
+            mockturtle::node_map<typename Lyt::object_id, topology_ntk_t> pis{network};
 
             // network is topologically sorted, therefore, foreach_node ensures conflict-free traversal
             network.foreach_node(
@@ -2814,11 +2842,12 @@ class exact_impl
                                 // was node n placed on tile t according to the model?
                                 if (model.eval(get_tn(t, n)).bool_value() == Z3_L_TRUE)
                                 {
-                                    mockturtle::signal<Lyt> lyt_signal;
+                                    typename Lyt::object_id lyt_signal;
 
                                     if (network.is_pi(n))
                                     {
-                                        lyt_signal = layout.move_node(pis[n], t);
+                                        lyt_signal = place(layout, t, network, n);
+                                        pis[n]     = lyt_signal;
                                     }
                                     else if (network.is_po(n))
                                     {
@@ -2889,6 +2918,11 @@ class exact_impl
                     });
             }
 
+            std::vector<typename Lyt::object_id> input_order{};
+            input_order.reserve(network.num_pis());
+            network.foreach_pi([&](const auto& pi) { input_order.push_back(pis[pi]); });
+            layout.set_input_order(input_order);
+
             // restore possibly set signal names
             networks::restore_names(network, layout, node2pos);
         }
@@ -2914,7 +2948,7 @@ class exact_impl
         handler.set_timeout(time_left);
     }
     /**
-     * @brief Shares worker solvers and aspect ratios under `rar_mutex`.
+     * @brief Shares worker solvers and extents under `result_extent_mutex`.
      *
      * A worker with a result interrupts solvers exploring layouts of equal or greater area.
      */
@@ -2929,9 +2963,9 @@ class exact_impl
          */
         solver_ptr solver;
         /**
-         * @brief Currently examined layout aspect ratio.
+         * @brief Currently examined layout extent.
          */
-        typename Lyt::aspect_ratio worker_aspect_ratio;
+        typename Lyt::extent worker_extent;
     };
     /**
      * Thread function for the asynchronous solving strategy. It registers its own context in the given list of
@@ -2959,20 +2993,20 @@ class exact_impl
         const topology_ntk_t worker_topology{mockturtle::fanout_view{worker_ntk}};
         smt_handler          handler{ctx, layout, worker_topology, ps, black_list};
         {
-            const std::scoped_lock guard{rar_mutex};
+            const std::scoped_lock guard{result_extent_mutex};
             (*ti_list)[t_num].ctx = ctx;
         }
 
         while (true)
         {
-            typename Lyt::aspect_ratio ar;
+            typename Lyt::extent ex;
 
             // mutually exclusive access to the aspect ratio iterator
             {
                 const std::scoped_lock guard{ari_mutex};
 
                 ++ari;
-                ar = *ari;  // operations ++ and * are split to prevent a vector copy construction
+                ex = *ari;  // operations ++ and * are split to prevent a vector copy construction
 
                 // log the examination of a new aspect ratio
                 pst.num_aspect_ratios++;
@@ -2980,25 +3014,27 @@ class exact_impl
 
             progress.advance();
 
-            if ((ar.x + 1) * (ar.y + 1) > ps.upper_bound_area || (ar.x >= ps.upper_bound_x && ar.y >= ps.upper_bound_y))
+            if (layouts::area_of(ex) > ps.upper_bound_area ||
+                ((static_cast<int64_t>(ex.width) - 1) >= ps.upper_bound_x &&
+                 (static_cast<int64_t>(ex.height) - 1) >= ps.upper_bound_y))
             {
                 return std::nullopt;
             }
 
-            if (handler.skippable(ar))
+            if (handler.skippable(ex))
             {
                 continue;
             }
 
             // mutually exclusive access to the result aspect ratio
             {
-                const std::scoped_lock guard{rar_mutex};
+                const std::scoped_lock guard{result_extent_mutex};
 
                 // a result is available already
-                if (result_aspect_ratio)
+                if (result_extent)
                 {
                     // stop working if its area is smaller or equal to the one currently at hand
-                    if (layouts::area_of(*result_aspect_ratio) <= layouts::area_of(ar))
+                    if (layouts::area_of(*result_extent) <= layouts::area_of(ex))
                     {
                         return std::nullopt;
                     }
@@ -3007,13 +3043,14 @@ class exact_impl
 
             // update aspect ratio in the thread_info list and the handler
             {
-                const std::scoped_lock guard{rar_mutex};
-                (*ti_list)[t_num].worker_aspect_ratio = ar;
+                const std::scoped_lock guard{result_extent_mutex};
+                (*ti_list)[t_num].worker_extent = ex;
             }
-            worker_progress.update(t_num, fmt::format("worker {}: {} × {}", t_num + 1, ar.x + 1, ar.y + 1), 0, 0, true);
-            handler.update(ar);
+            worker_progress.update(t_num, fmt::format("worker {}: {} × {}", t_num + 1, ex.width, ex.height), 0, 0,
+                                   true);
+            handler.update(ex);
             {
-                const std::scoped_lock guard{rar_mutex};
+                const std::scoped_lock guard{result_extent_mutex};
                 (*ti_list)[t_num].solver = handler.current_solver();
             }
 
@@ -3023,20 +3060,20 @@ class exact_impl
 
                 if (handler.is_satisfiable())  // found a layout
                 {
-                    // mutually exclusive access to the result_aspect_ratio
+                    // mutually exclusive access to the result_extent
                     {
-                        const std::scoped_lock guard{rar_mutex};
+                        const std::scoped_lock guard{result_extent_mutex};
 
-                        // update the result_aspect_ratio if there is none
-                        if (!result_aspect_ratio)
+                        // update the result_extent if there is none
+                        if (!result_extent)
                         {
-                            result_aspect_ratio = ar;
+                            result_extent = ex;
                         }
                         else  // or if the own one is smaller
                         {
-                            if (layouts::area_of(*result_aspect_ratio) > layouts::area_of(ar))
+                            if (layouts::area_of(*result_extent) > layouts::area_of(ex))
                             {
-                                result_aspect_ratio = ar;
+                                result_extent = ex;
                             }
                             else
                             {
@@ -3047,11 +3084,11 @@ class exact_impl
 
                     // interrupt other threads that are working on higher aspect ratios
                     {
-                        const std::scoped_lock guard{rar_mutex};
+                        const std::scoped_lock guard{result_extent_mutex};
                         for (const auto& ti : *ti_list)
                         {
                             if (ti.solver && ti.ctx != ctx &&
-                                layouts::area_of(ar) <= layouts::area_of(ti.worker_aspect_ratio))
+                                layouts::area_of(ex) <= layouts::area_of(ti.worker_extent))
                             {
                                 // Context-wide interruption also cancels model evaluation inside noexcept traversals.
                                 Z3_solver_interrupt(*ti.ctx, *ti.solver);
@@ -3067,7 +3104,7 @@ class exact_impl
                 // was hardly ever triggered and if it was, it impacted performance negatively because no solver
                 // state could be stored that could positively influence performance of later SMT calls
 
-                handler.store_solver_state(ar);
+                handler.store_solver_state(ex);
             }
             catch (const z3::exception&)  // timed out or interrupted
             {
@@ -3101,8 +3138,8 @@ class exact_impl
                 fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list, started);
             }
 
-            // wait for every task to finish running. This is the join that makes the unguarded `result_aspect_ratio`
-            // read below safe: a running task may still write it under `rar_mutex`
+            // wait for every task to finish running. This is the join that makes the unguarded `result_extent`
+            // read below safe: a running task may still write it under `result_extent_mutex`
             for (auto& f : fut)
             {
                 f.wait();
@@ -3116,24 +3153,24 @@ class exact_impl
             {
                 const auto l = f.get();
 
-                if (!result_aspect_ratio || !l.has_value())
+                if (!result_extent || !l.has_value())
                 {
                     continue;
                 }
 
                 // in case multiple returned, get the actual winner
-                if (l->x() == result_aspect_ratio->x && l->y() == result_aspect_ratio->y)
+                if (l->width() == result_extent->width && l->height() == result_extent->height)
                 {
                     layout = *l;
                 }
             }
         }
 
-        if (result_aspect_ratio.has_value())
+        if (result_extent.has_value())
         {
             // statistical information
-            pst.x_size        = static_cast<uint64_t>(layout.x()) + 1;
-            pst.y_size        = static_cast<uint64_t>(layout.y()) + 1;
+            pst.x_size        = layout.width();
+            pst.y_size        = layout.height();
             pst.num_gates     = layout.num_gates();
             pst.num_wires     = layout.num_wires();
             pst.num_crossings = layout.num_crossings();
@@ -3156,23 +3193,23 @@ class exact_impl
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
         const auto upper_bound = std::min(static_cast<uint64_t>(ps.upper_bound_area),
-                                          static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y));
+                                          static_cast<uint64_t>(ps.upper_bound_x) * ps.upper_bound_y);
 
         for (; ari <= upper_bound; ++ari)  // <= to prevent overflow
         {
-            auto ar = *ari;
+            auto ex = *ari;
 
             // log the examination of a new aspect ratio
             pst.num_aspect_ratios++;
             progress.advance();
 
-            if (handler.skippable(ar))
+            if (handler.skippable(ex))
             {
                 continue;
             }
 
-            worker_progress.update(0, fmt::format("examining layout: {} × {}", ar.x + 1, ar.y + 1), 0, 0, true);
-            handler.update(ar);
+            worker_progress.update(0, fmt::format("examining layout: {} × {}", ex.width, ex.height), 0, 0, true);
+            handler.update(ex);
 
             try
             {
@@ -3182,8 +3219,8 @@ class exact_impl
                 if (sat)
                 {
                     // statistical information
-                    pst.x_size        = static_cast<uint64_t>(layout.x()) + 1;
-                    pst.y_size        = static_cast<uint64_t>(layout.y()) + 1;
+                    pst.x_size        = layout.width();
+                    pst.y_size        = layout.height();
                     pst.num_gates     = layout.num_gates();
                     pst.num_wires     = layout.num_wires();
                     pst.num_crossings = layout.num_crossings();
@@ -3191,7 +3228,7 @@ class exact_impl
                     return layout;
                 }
 
-                handler.store_solver_state(ar);
+                handler.store_solver_state(ex);
 
                 update_timeout(handler, pst.time_total);
             }

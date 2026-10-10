@@ -39,10 +39,10 @@ TEST_CASE("QCA layout construction", "[qca-layout]")
     CHECK_THROWS_AS((layout{{2, 2}, "", 0, 1}), std::invalid_argument);
     CHECK_THROWS_AS((layout{{2, 2}, clocking::twoddwave(), "", 1, 0}), std::invalid_argument);
 
-    const layout lyt{{4, 4, 1}, clocking::use(), "crossing", 5, 5};
+    const layout lyt{{5, 5, 2}, clocking::use(), "crossing", 5, 5};
 
-    CHECK(lyt.x() == 4);
-    CHECK(lyt.z() == 1);
+    CHECK(lyt.width() == 5);
+    CHECK(lyt.layers() == 2);
     CHECK(lyt.get_layout_name() == "crossing");
     CHECK(lyt.is_clocking_scheme(clocking::USE_NAME));
     CHECK(lyt.get_tile_size_x() == 5);
@@ -51,7 +51,7 @@ TEST_CASE("QCA layout construction", "[qca-layout]")
 
 TEST_CASE("QCA cell modes on the crossing layer", "[qca-layout]")
 {
-    layout lyt{{4, 4, 1}, "crossover"};
+    layout lyt{{5, 5, 2}, "crossover"};
 
     lyt.assign_cell_type({2, 2, 0}, cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 1}, cell_type::NORMAL);
@@ -81,7 +81,7 @@ TEST_CASE("QCA cell modes on the crossing layer", "[qca-layout]")
 
 TEST_CASE("QCA synchronization elements belong to clock zones", "[qca-layout]")
 {
-    layout original{{5, 5, 1}, clocking::twoddwave(), "cells", 2, 2};
+    layout original{{6, 6, 2}, clocking::twoddwave(), "cells", 2, 2};
 
     original.assign_synchronization_element({1, 1}, 2);
 

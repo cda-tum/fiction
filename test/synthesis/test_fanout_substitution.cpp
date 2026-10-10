@@ -16,6 +16,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -24,19 +25,30 @@
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
+#include <limits>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
 
+/**
+ * @brief Checks fanout substitution size and Boolean behavior.
+ * @tparam Ntk Source logic network type.
+ * @param ntk Source logic network.
+ * @param ps Fanout substitution parameters.
+ * @param size Expected destination size.
+ */
 template <typename Ntk>
-void substitute(const Ntk& ntk, const fanout_substitution_params ps, const uint32_t size)
+void substitute(const Ntk& ntk, const fanout_substitution_params& ps, const uint32_t size)
 {
     const auto substituted = fanout_substitution<technology_network>(ntk, ps);
 
@@ -184,4 +196,61 @@ TEST_CASE("Consistent fanout substitution after balancing", "[fanout-substitutio
     CHECK(is_fanout_substituted(substituted_tec));
     auto balanced_tec = network_balancing<technology_network>(substituted_tec);
     CHECK(is_fanout_substituted(balanced_tec));
+}
+
+TEST_CASE("Repeated inputs respect fanout degrees below the source threshold", "[fanout-substitution]")
+{
+    using strategy                    = fanout_substitution_params::substitution_strategy;
+    const auto                 choice = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
+    technology_network         original{};
+    const auto                 a = original.create_pi();
+    kitty::dynamic_truth_table parity{5};
+    kitty::create_from_hex_string(parity, "96696996");
+    original.create_po(original.create_node({a, a, a, a, a}, parity));
+    const fanout_substitution_params ps{.strategy = choice, .degree = 2, .threshold = 3, .seed = 42};
+    const auto                       substituted = fanout_substitution<technology_network>(original, ps);
+    CHECK(is_fanout_substituted(substituted, ps));
+    check_eq(original, substituted);
+}
+
+TEST_CASE("Fanout substitution rejects degrees and thresholds that cannot branch", "[fanout-substitution]")
+{
+    const auto params = GENERATE(fanout_substitution_params{.degree = 0}, fanout_substitution_params{.degree = 1},
+                                 fanout_substitution_params{.threshold = 0});
+    CHECK_THROWS_AS(fanout_substitution<technology_network>(technology_network{}, params), std::invalid_argument);
+}
+
+TEST_CASE("Fanout substitution preserves uint32 parameter bounds", "[fanout-substitution]")
+{
+    using strategy            = fanout_substitution_params::substitution_strategy;
+    const auto         choice = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
+    technology_network original{};
+    const auto         a = original.create_pi();
+    const auto         b = original.create_pi();
+    original.create_po(original.create_and(a, b));
+    original.create_po(original.create_or(a, b));
+    original.create_po(original.create_xor(a, b));
+    fanout_substitution_params params{.strategy = choice, .seed = 42};
+    if (GENERATE(false, true))
+    {
+        params.threshold = std::numeric_limits<uint32_t>::max();
+    }
+    else
+    {
+        params.degree = std::numeric_limits<uint32_t>::max();
+    }
+    const auto substituted = fanout_substitution<technology_network>(original, params);
+    CHECK(is_fanout_substituted(substituted, params));
+    CHECK(substituted.num_gates() == original.num_gates() + (params.threshold == 1 ? 2 : 0));
+    check_eq(original, substituted);
+}
+
+TEST_CASE("Fanout substitution preserves logic when the destination elides buffers", "[fanout-substitution]")
+{
+    using strategy                            = fanout_substitution_params::substitution_strategy;
+    const auto                       choice   = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
+    const auto                       original = blueprints::multi_output_and_network<mockturtle::aig_network>();
+    const fanout_substitution_params params{.strategy = choice, .seed = 42};
+    const auto                       substituted = fanout_substitution<mockturtle::aig_network>(original, params);
+    check_eq(original, substituted);
 }

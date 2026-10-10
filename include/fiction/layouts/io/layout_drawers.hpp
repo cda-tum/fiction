@@ -18,7 +18,6 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/networks/io/dot_drawers.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
@@ -26,11 +25,12 @@
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
-#include <mockturtle/traits.hpp>
+#include <kitty/bit_operations.hpp>
 
+#include <algorithm>
 #include <array>
-#include <cstddef>
 #include <cstdint>
+#include <iomanip>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -46,13 +46,26 @@ namespace fiction::layouts::io
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
-class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawer<Lyt, DrawIndexes>
+class simple_gate_layout_tile_drawer
 {
   public:
-    [[nodiscard]] virtual std::vector<std::string> additional_graph_attributes(const Lyt& /*lyt*/) const noexcept
+    /** @brief Creates a stateless drawer. */
+    simple_gate_layout_tile_drawer() = default;
+    /** @brief Copies the stateless drawer. */
+    simple_gate_layout_tile_drawer(const simple_gate_layout_tile_drawer&) = default;
+    /** @brief Moves the stateless drawer. */
+    simple_gate_layout_tile_drawer(simple_gate_layout_tile_drawer&&) noexcept = default;
+    /** @brief Copies the stateless drawer. @return This drawer. */
+    simple_gate_layout_tile_drawer& operator=(const simple_gate_layout_tile_drawer&) = default;
+    /** @brief Moves the stateless drawer. @return This drawer. */
+    simple_gate_layout_tile_drawer& operator=(simple_gate_layout_tile_drawer&&) noexcept = default;
+    /** @brief Destroy the drawer. */
+    virtual ~simple_gate_layout_tile_drawer() = default;
+    /** @brief Return graph attributes. */
+    [[nodiscard]] virtual std::vector<std::string> additional_graph_attributes(const Lyt& /*lyt*/) const
     {
         // 'concentrate' merges edges, so it would be great to have since the layout topology in dot relies on invisible
         // edges, which, however, still consume area as other edges are routed around them to avoid collisions. In
@@ -68,12 +81,20 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
         }
     }
 
-    [[nodiscard]] virtual std::string tile_id(const tile<Lyt>& t) const noexcept
+    /**
+     * @brief Return a DOT identifier for the planar tile position.
+     * @param t Tile coordinate.
+     * @return Identifier with signed axes encoded as letters and digits.
+     */
+    [[nodiscard]] virtual std::string tile_id(const tile<Lyt>& t) const
     {
-        return fmt::format("x{}y{}", t.x, t.y);
+        auto id = fmt::format("x{}y{}", t.x, t.y);
+        std::replace(id.begin(), id.end(), '-', 'n');
+        return id;
     }
 
-    [[nodiscard]] virtual std::vector<std::string> additional_node_attributes(const Lyt& /*lyt*/) const noexcept
+    /** @brief Returns Graphviz attributes of the tile vertices. */
+    [[nodiscard]] virtual std::vector<std::string> additional_tile_attributes(const Lyt& /*lyt*/) const
     {
         if constexpr (DrawIndexes)
         {
@@ -85,50 +106,40 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
         }
     }
 
-    [[nodiscard]] virtual std::string tile_label(const Lyt& lyt, const tile<Lyt>& t) const noexcept
+    /** @brief Return the gate label. */
+    [[nodiscard]] virtual std::string tile_label(const Lyt& lyt, const tile<Lyt>& t) const
     {
-        if (lyt.is_empty_tile(t))
+        /** @brief Occupant at the tile position. */
+        const auto occupant = lyt.find_object(t);
+        if (!occupant)
         {
             return "";
         }
 
-        if (lyt.is_pi_tile(t) || lyt.is_po_tile(t))
+        /** @brief Identity of the occupied tile. */
+        const auto id = *occupant;
+        if (lyt.is_pi(id) || lyt.is_po(id))
         {
-            if constexpr (mockturtle::has_get_name_v<Lyt> && mockturtle::has_has_name_v<Lyt>)
+            if (lyt.has_name(id))
             {
-                if (const auto n = lyt.get_node(t); lyt.has_name(n))
-                {
-                    return lyt.get_name(n);
-                }
+                return lyt.get_name(id);
             }
-            else
-            {
-                if (lyt.is_pi_tile(t))
-                {
-                    return "PI";
-                }
-
-                if (lyt.is_po_tile(t))
-                {
-                    return "PO";
-                }
-            }
+            return lyt.is_pi(id) ? "PI" : "PO";
         }
-
-        if constexpr (has_is_buf_v<Lyt>)
+        if (const auto above = lyt.above(t); above && lyt.is_wire(id) && lyt.is_wire_tile(*above))
         {
-            // crossing case
-            if (const auto at = lyt.above(t);
-                (t != at) && (lyt.is_buf(lyt.get_node(t)) && lyt.is_buf(lyt.get_node(at))))
-            {
-                return "+";
-            }
+            return "+";
         }
-
-        return networks::io::technology_dot_drawer<Lyt, DrawIndexes>::node_label(lyt, lyt.get_node(t));
+        const auto label = gate_description(lyt, id).first;
+        if constexpr (DrawIndexes)
+        {
+            return fmt::format("{}:{}: {}", id.index, id.generation, label);
+        }
+        return std::string{label};
     }
 
-    [[nodiscard]] virtual std::string tile_fillcolor(const Lyt& lyt, const tile<Lyt>& t) const noexcept
+    /** @brief Return the tile color. */
+    [[nodiscard]] virtual std::string tile_fillcolor(const Lyt& lyt, const tile<Lyt>& t) const
     {
         if constexpr (ClockColors)
         {
@@ -143,32 +154,108 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
         }
         else
         {
-            if (lyt.is_empty_tile(t))
+            /** @brief Occupant at the tile position. */
+            const auto occupant = lyt.find_object(t);
+            if (!occupant)
             {
                 return "white";
             }
 
-            if (lyt.is_pi_tile(t) || lyt.is_po_tile(t))
+            if (lyt.is_pi(*occupant) || lyt.is_po(*occupant))
             {
                 return "snow2";
             }
 
-            return networks::io::technology_dot_drawer<Lyt, DrawIndexes>::node_fillcolor(lyt, lyt.get_node(t));
+            return std::string{gate_description(lyt, *occupant).second};
         }
     }
 
+  private:
+    /**
+     * @brief Return the label and fill color for a placed object.
+     * @param lyt Layout containing the object.
+     * @param id Object to describe.
+     * @return Gate label and fill color.
+     */
+    [[nodiscard]] static std::pair<std::string_view, std::string_view>
+    gate_description(const Lyt& lyt, const typename Lyt::object_id id)
+    {
+        if (lyt.is_fanout(id))
+        {
+            return {"F", "navajowhite2"};
+        }
+        if (lyt.is_buf(id))
+        {
+            return {"BUF", "palegoldenrod"};
+        }
+        if (lyt.is_inv(id))
+        {
+            return {"INV", "paleturquoise"};
+        }
+        if (lyt.is_and(id))
+        {
+            return {"AND", "lightcoral"};
+        }
+        if (lyt.is_nand(id))
+        {
+            return {"NAND", "lightcoral"};
+        }
+        if (lyt.is_or(id))
+        {
+            return {"OR", "palegreen2"};
+        }
+        if (lyt.is_nor(id))
+        {
+            return {"NOR", "palegreen2"};
+        }
+        if (lyt.is_xor(id))
+        {
+            return {"XOR", "lightskyblue"};
+        }
+        if (lyt.is_xnor(id))
+        {
+            return {"XNOR", "lightskyblue"};
+        }
+        if (lyt.is_lt(id))
+        {
+            return {"LT", "seagreen1"};
+        }
+        if (lyt.is_le(id))
+        {
+            return {"LE", "seagreen4"};
+        }
+        if (lyt.is_gt(id))
+        {
+            return {"GT", "firebrick1"};
+        }
+        if (lyt.is_ge(id))
+        {
+            return {"GE", "firebrick4"};
+        }
+        if (lyt.is_maj(id))
+        {
+            return {"MAJ", "lightsalmon"};
+        }
+        if (const auto function = lyt.object_function(id); function.num_vars() == 0)
+        {
+            return {kitty::get_bit(function, 0) ? "1" : "0", "white"};
+        }
+        return {"?", "white"};
+    }
+
   protected:
-    [[nodiscard]] std::vector<std::vector<std::string>> rows(const Lyt& lyt) const noexcept
+    /** @brief List tile labels by row. */
+    [[nodiscard]] std::vector<std::vector<std::string>> rows(const Lyt& lyt) const
     {
         std::vector<std::vector<std::string>> rows{};
-        rows.reserve(static_cast<std::size_t>(lyt.y()) + 1);
+        rows.reserve(lyt.height());
 
-        for (int32_t y = 0; y <= lyt.y(); ++y)
+        for (int64_t y = 0; y < lyt.height(); ++y)
         {
             std::vector<std::string> row{};
-            row.reserve(static_cast<std::size_t>(lyt.x()) + 1);
+            row.reserve(lyt.width());
 
-            for (int32_t x = 0; x <= lyt.x(); ++x)
+            for (int64_t x = 0; x < lyt.width(); ++x)
             {
                 row.emplace_back(tile_id({x, y}));
             }
@@ -179,17 +266,18 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
         return rows;
     }
 
-    [[nodiscard]] std::vector<std::vector<std::string>> columns(const Lyt& lyt) const noexcept
+    /** @brief List tile labels by column. */
+    [[nodiscard]] std::vector<std::vector<std::string>> columns(const Lyt& lyt) const
     {
         std::vector<std::vector<std::string>> columns{};
-        columns.reserve(static_cast<std::size_t>(lyt.x()) + 1);
+        columns.reserve(lyt.width());
 
-        for (int32_t x = 0; x <= lyt.x(); ++x)
+        for (int64_t x = 0; x < lyt.width(); ++x)
         {
             std::vector<std::string> col{};
-            col.reserve(static_cast<std::size_t>(lyt.y()) + 1);
+            col.reserve(lyt.height());
 
-            for (int32_t y = 0; y <= lyt.y(); ++y)
+            for (int64_t y = 0; y < lyt.height(); ++y)
             {
                 col.emplace_back(tile_id({x, y}));
             }
@@ -200,12 +288,14 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
         return columns;
     }
 
-    [[nodiscard]] static std::string same_rank(const std::vector<std::string>& rank) noexcept
+    /** @brief Format a rank constraint. */
+    [[nodiscard]] static std::string same_rank(const std::vector<std::string>& rank)
     {
         return fmt::format("rank = same {{ {} }};\n", fmt::join(rank, " -> "));
     }
 
-    [[nodiscard]] static std::string edge(const std::string_view& src, const std::string_view& tgt) noexcept
+    /** @brief Format an edge. */
+    [[nodiscard]] static std::string edge(const std::string_view& src, const std::string_view& tgt)
     {
         return fmt::format("{} -> {};\n", src, tgt);
     }
@@ -215,13 +305,14 @@ class simple_gate_layout_tile_drawer : public networks::io::technology_dot_drawe
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] std::vector<std::string> additional_graph_attributes(const Lyt& lyt) const noexcept override
+    /** @brief Return graph attributes. */
+    [[nodiscard]] std::vector<std::string> additional_graph_attributes(const Lyt& lyt) const override
     {
         auto graph_attributes = base_drawer::additional_graph_attributes(lyt);
 
@@ -239,16 +330,18 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
         return graph_attributes;
     }
 
-    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const noexcept override
+    /** @brief Returns Graphviz attributes of the tile vertices. */
+    [[nodiscard]] std::vector<std::string> additional_tile_attributes(const Lyt& lyt) const override
     {
-        auto node_attributes = base_drawer::additional_node_attributes(lyt);
+        auto tile_attributes = base_drawer::additional_tile_attributes(lyt);
 
-        node_attributes.emplace_back("shape=square");
+        tile_attributes.emplace_back("shape=square");
 
-        return node_attributes;
+        return tile_attributes;
     }
 
-    [[nodiscard]] std::string enforce_topology(const Lyt& lyt) const noexcept
+    /** @brief Format the grid topology. */
+    [[nodiscard]] std::string enforce_topology(const Lyt& lyt) const
     {
         std::stringstream topology{};
 
@@ -277,6 +370,7 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
     }
 
   private:
+    /** @brief Define the drawer configuration. */
     using base_drawer = simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
 namespace detail
@@ -289,13 +383,14 @@ namespace detail
  *
  * @tparam Lyt Gate-level layout type with shifted rows or columns.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors, bool DrawIndexes>
 class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] std::vector<std::string> additional_graph_attributes(const Lyt& lyt) const noexcept override
+    /** @brief Return graph attributes. */
+    [[nodiscard]] std::vector<std::string> additional_graph_attributes(const Lyt& lyt) const override
     {
         auto graph_attributes = base_drawer::additional_graph_attributes(lyt);
 
@@ -306,6 +401,7 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
         return graph_attributes;
     }
 
+    /** @brief Format the grid topology. */
     [[nodiscard]] std::string enforce_topology(const Lyt& lyt) const
     {
         std::stringstream topology{};
@@ -324,7 +420,7 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
 
         const auto    a     = lyt.get_arrangement();
         const auto    rows  = is_row_arrangement(a);
-        const int32_t first = is_odd_arrangement(a) ? 1 : 0;
+        const int64_t first = is_odd_arrangement(a) ? 1 : 0;
 
         for (const auto& line : rows ? base_drawer::rows(lyt) : base_drawer::columns(lyt))
         {
@@ -332,7 +428,7 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
         }
 
         // shift every other row or column
-        for (auto i = first; i <= (rows ? lyt.y() : lyt.x()); i += 2)
+        for (auto i = first; i < (rows ? lyt.height() : lyt.width()); i += 2)
         {
             shift_line(lyt, i, rows, topology);
         }
@@ -376,7 +472,7 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
      *
      * @return Separation of the ranks.
      */
-    [[nodiscard]] virtual std::string_view rank_separation() const noexcept = 0;
+    [[nodiscard]] virtual std::string_view rank_separation() const = 0;
 
   private:
     /**
@@ -385,7 +481,7 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
      * @param i Index of the row or column.
      * @return Node name.
      */
-    [[nodiscard]] static std::string invisible_node(const int32_t i) noexcept
+    [[nodiscard]] static std::string invisible_node(const int64_t i)
     {
         return fmt::format("invis{}", i);
     }
@@ -398,9 +494,9 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
      * @param is_row Whether `index` names a row. Otherwise, it names a column.
      * @param stream Stream to write the DOT statements to.
      */
-    void shift_line(const Lyt& lyt, const int32_t index, const bool is_row, std::stringstream& stream) const noexcept
+    void shift_line(const Lyt& lyt, const int64_t index, const bool is_row, std::stringstream& stream) const
     {
-        const auto line_tile = [is_row](const int32_t i) { return is_row ? tile<Lyt>{0, i} : tile<Lyt>{i, 0}; };
+        const auto line_tile = [is_row](const int64_t i) { return is_row ? tile<Lyt>{0, i} : tile<Lyt>{i, 0}; };
 
         stream << base_drawer::same_rank(
             std::vector<std::string>{invisible_node(index), base_drawer::tile_id(line_tile(index))});
@@ -412,7 +508,7 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
         }
 
         // the next row or column could be out of bounds and needs to be checked for
-        if (index < (is_row ? lyt.y() : lyt.x()))
+        if (index + 1 < (is_row ? lyt.height() : lyt.width()))
         {
             stream << base_drawer::edge(invisible_node(index), base_drawer::tile_id(line_tile(index + 1)));
         }
@@ -426,29 +522,32 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
  *
  * @tparam Lyt Shifted Cartesian gate-level layout type.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_shifted_cartesian_drawer
         : public detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const noexcept override
+    /** @brief Returns Graphviz attributes of the tile vertices. */
+    [[nodiscard]] std::vector<std::string> additional_tile_attributes(const Lyt& lyt) const override
     {
-        auto node_attributes = shifted_drawer::additional_node_attributes(lyt);
+        auto tile_attributes = shifted_drawer::additional_tile_attributes(lyt);
 
-        node_attributes.emplace_back("shape=square");
+        tile_attributes.emplace_back("shape=square");
 
-        return node_attributes;
+        return tile_attributes;
     }
 
   protected:
-    [[nodiscard]] std::string_view rank_separation() const noexcept override
+    /** @brief Define the drawer configuration. */
+    [[nodiscard]] std::string_view rank_separation() const override
     {
         return DrawIndexes ? "0.5" : "0.25";
     }
 
   private:
+    /** @brief Define the drawer configuration. */
     using shifted_drawer = detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
 /**
@@ -456,90 +555,84 @@ class gate_layout_shifted_cartesian_drawer
  *
  * @tparam Lyt Hexagonal gate-level layout type.
  * @tparam ClockColors Flag to toggle the drawing of clock colors instead of gate type colors.
- * @tparam DrawIndexes Flag to toggle the drawing of node indices.
+ * @tparam DrawIndexes Flag to toggle the drawing of object indices.
  */
 template <typename Lyt, bool ClockColors = false, bool DrawIndexes = false>
 class gate_layout_hexagonal_drawer : public detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>
 {
   public:
-    [[nodiscard]] std::vector<std::string> additional_node_attributes(const Lyt& lyt) const noexcept override
+    /** @brief Returns Graphviz attributes of the tile vertices. */
+    [[nodiscard]] std::vector<std::string> additional_tile_attributes(const Lyt& lyt) const override
     {
-        auto node_attributes = shifted_drawer::additional_node_attributes(lyt);
+        auto tile_attributes = shifted_drawer::additional_tile_attributes(lyt);
 
-        node_attributes.emplace_back("shape=hexagon");
+        tile_attributes.emplace_back("shape=hexagon");
 
         if (is_row_arrangement(lyt.get_arrangement()))
         {
             // pointy top hexagons are rotated by 30°
-            node_attributes.emplace_back("orientation=30");
+            tile_attributes.emplace_back("orientation=30");
         }
 
-        return node_attributes;
+        return tile_attributes;
     }
 
   protected:
     // hexagon visuals benefit from halved rank separation because they are interlaced
-    [[nodiscard]] std::string_view rank_separation() const noexcept override
+    /** @brief Define the drawer configuration. */
+    [[nodiscard]] std::string_view rank_separation() const override
     {
         return DrawIndexes ? "0.25" : "0.125";
     }
 
   private:
+    /** @brief Define the drawer configuration. */
     using shifted_drawer = detail::gate_layout_shifted_tile_drawer<Lyt, ClockColors, DrawIndexes>;
 };
-/*! \brief Writes layout in DOT format into output stream
+/**
+ * Writes a layout in DOT format into an output stream. Terminal names use quoted DOT strings.
  *
- * An overloaded variant exists that writes the layout into a file.
- *
- * **Required network functions:**
- * - is_pi
- * - foreach_node
- * - foreach_fanin
- *
- * \param lyt Layout
+ * @tparam Lyt Gate-level layout type.
+ * @tparam Drawer DOT drawer type.
+ * @param lyt Layout.
+ * @param os Output stream.
+ * @param drawer Formats the layout's tiles and topology.
  * @param on_progress Receives completed drawing work.
- * \param os Output stream
  */
 template <class Lyt, class Drawer>
 void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {},
                       utils::progress_callback on_progress = {})
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(mockturtle::has_is_pi_v<Lyt>, "Lyt does not implement the is_pi function");
-    static_assert(mockturtle::has_foreach_node_v<Lyt>, "Lyt does not implement the foreach_node function");
-    static_assert(mockturtle::has_foreach_fanin_v<Lyt>, "Lyt does not implement the foreach_fanin function");
 
     std::stringstream nodes{}, edges{}, topology{};
 
-    auto node_attributes = drawer.additional_node_attributes(lyt);
-    node_attributes.emplace_back("style=filled");
+    auto tile_attributes = drawer.additional_tile_attributes(lyt);
+    tile_attributes.emplace_back("style=filled");
 
-    nodes << fmt::format("node [{}];\n", fmt::join(node_attributes, ", "));
+    nodes << fmt::format("node [{}];\n", fmt::join(tile_attributes, ", "));
 
-    utils::progress_reporter tiles_progress{std::move(on_progress), "drawing tiles",
-                                            (static_cast<std::size_t>(lyt.x()) + 1) *
-                                                (static_cast<std::size_t>(lyt.y()) + 1)};
+    utils::progress_reporter tiles_progress{std::move(on_progress), "drawing tiles", lyt.area()};
     // draw tiles
     lyt.foreach_ground_tile(
         [&lyt, &drawer, &nodes, &tiles_progress](const auto& t)
         {
-            nodes << fmt::format("{} [label=\"{}\", fillcolor={}];\n", drawer.tile_id(t), drawer.tile_label(lyt, t),
-                                 drawer.tile_fillcolor(lyt, t));
+            nodes << drawer.tile_id(t) << " [label=" << std::quoted(drawer.tile_label(lyt, t))
+                  << fmt::format(", fillcolor={}];\n", drawer.tile_fillcolor(lyt, t));
             tiles_progress.advance();
         });
 
     edges << "edge [constraint=false];\n";
 
     // draw connections
-    lyt.foreach_node(
+    lyt.foreach_object(
         [&lyt, &drawer, &edges](const auto& n)
         {
             lyt.foreach_fanin(n,
                               [&lyt, &drawer, &edges, &n](const auto& f)
                               {
-                                  edges << fmt::format("{} -> {} [style={}];\n",
-                                                       drawer.tile_id(static_cast<tile<Lyt>>(f)),
-                                                       drawer.tile_id(lyt.get_tile(n)), drawer.signal_style(lyt, f));
+                                  edges << fmt::format("{} -> {} [style={}];\n", drawer.tile_id(lyt.get_tile(f)),
+                                                       drawer.tile_id(lyt.get_tile(n)), "solid");
                               });
         });
 
@@ -554,11 +647,6 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
        << topology.rdbuf() << "}\n";
 }
 /*! \brief Writes layout in DOT format into a file
- *
- * **Required network functions:**
- * - is_pi
- * - foreach_node
- * - foreach_fanin
  *
  * \param lyt Layout
  * @param on_progress Receives completed drawing work.

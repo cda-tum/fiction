@@ -4,15 +4,19 @@
 
 Every layout (Cartesian, shifted Cartesian, and hexagonal) derives from `layout_base`, which defines the one coordinate
 type that all of them share. A coordinate is an offset from a fixed point (origin) with three signed 32-bit axes. The
-default-constructed coordinate is invalid, and so is every coordinate whose x axis is `-2147483648`. Layouts
-return an invalid coordinate for neighbors that lie outside of them, and gate-level layouts return it for the tile of a
-node that is not placed.
-Each layout exposes the type as `coordinate`, gate-level layouts in C++ also as `tile`, and its aspect ratio as
-`aspect_ratio`. An aspect ratio is the highest coordinate that still belongs to a layout, not a size.
+default-constructed coordinate is the origin. Every signed 32-bit value is representable, including
+`-2147483648`. Neighbor operations return `std::optional<coordinate>` in C++ and a coordinate or
+`None` in Python. Absence means that the neighbor lies outside the frame or cannot be represented.
 
-Gate-level layouts identify tiles by a 64-bit signal. It holds x and y as 31-bit signed values and z as one bit, so the
-x and y extents of gate-level layouts are limited to $2^{30} - 1$ and z to 1. Every other layout limits each extent to
-$2^{30} - 1$, so that coordinate arithmetic stays within 32 bits.
+Each layout exposes the coordinate type as `coordinate`, and gate-level layouts also as `tile`.
+The frame is an `extent{width, height, layers}` with nonnegative counts. It contains coordinates
+whose axes lie in `[0, width)`, `[0, height)`, and `[0, layers)`. Two axes describe one layer;
+the default extent is empty. Each count can reach $2^{31}$, so the final included coordinate
+still fits a signed 32-bit axis. `width()`, `height()`, and `layers()` return counts;
+`get_extent()` returns the extent and `last_coordinate()` returns the optional final coordinate.
+
+Gate-level layouts store object identity separately from placement coordinates. An editing object
+may lie outside the frame; physical design-rule checks validate frame membership.
 
 ::::{tab-set}
 :sync-group: language
@@ -28,6 +32,10 @@ $2^{30} - 1$, so that coordinate arithmetic stays within 32 bits.
 
 ```
 
+```{doxygenstruct} fiction::layouts::layout_base::extent
+
+```
+
 :::
 
 :::{tab-item} Python
@@ -35,6 +43,9 @@ $2^{30} - 1$, so that coordinate arithmetic stays within 32 bits.
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.layouts.coordinate
+   :members:
+
+.. autoclass:: mnt.pyfiction.layouts.Extent
    :members:
 ```
 
@@ -58,11 +69,11 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 :::{tab-item} C++
 :sync: cpp
 
-```{doxygenfunction} fiction::layouts::area_of(const CoordinateType& coord) noexcept
+```{doxygenfunction} fiction::layouts::area_of
 
 ```
 
-```{doxygenfunction} fiction::layouts::volume_of(const CoordinateType& coord) noexcept
+```{doxygenfunction} fiction::layouts::volume_of
 
 ```
 

@@ -40,7 +40,8 @@ void quicksim(nanobind::module_& m)
 
     using fiction::sidb::simulation::engines::quicksim_params;
 
-    py::class_<quicksim_params>(m, "quicksim_params", DOC(fiction_sidb_simulation_engines_quicksim_params))
+    py::class_<quicksim_params>(m, "quicksim_params", pyfiction::progress_type_slots<quicksim_params>(),
+                                DOC(fiction_sidb_simulation_engines_quicksim_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &quicksim_params::sim_params,
                 DOC(fiction_sidb_simulation_engines_quicksim_params_sim_params))

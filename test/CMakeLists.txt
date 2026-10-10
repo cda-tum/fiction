@@ -43,6 +43,15 @@ list(FILTER FILENAMES EXCLUDE REGEX "^benchmark/")
 # test/package/run.py.
 list(FILTER FILENAMES EXCLUDE REGEX "^package/")
 
+# These tests include utils/allocation_failure.hpp and own global new/delete. A
+# second allocator replacement conflicts with their fault injection.
+set(ALLOCATION_FAILURE_TESTS
+    test_layout test_clocking_state test_gate_level_layout test_routing_utils
+    test_determine_clocking test_cell_writer_allocation_failure)
+get_target_property(ALLOCATION_FAILURE_LIBRARIES libfiction
+                    INTERFACE_LINK_LIBRARIES)
+list(FILTER ALLOCATION_FAILURE_LIBRARIES EXCLUDE REGEX "jemalloc")
+
 # Test files carry the test_ prefix in their own name, so the target and the
 # CTest name are both just the base name -- nothing is synthesized here.
 foreach(FILE IN LISTS FILENAMES)
@@ -51,15 +60,20 @@ foreach(FILE IN LISTS FILENAMES)
 
   target_link_libraries(${TEST_NAME} PRIVATE libfiction_test)
 
-  if(TEST_NAME STREQUAL "test_layout")
-    # This test replaces global new/delete to inject allocation failures. Link
-    # its header dependencies directly so jemalloc cannot supply a second
-    # replacement.
-    target_link_libraries(${TEST_NAME} PRIVATE fiction::fiction_options
-                                               fiction::fiction_warnings fmt)
+  if(TEST_NAME IN_LIST ALLOCATION_FAILURE_TESTS)
+    # Preserve all header dependencies except jemalloc's allocation operators.
+    # Copy the property so imported dependencies keep their directory scopes.
+    set_property(
+      TARGET ${TEST_NAME}
+      APPEND
+      PROPERTY LINK_LIBRARIES "${ALLOCATION_FAILURE_LIBRARIES}")
     target_include_directories(
       ${TEST_NAME}
       PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_include_directories(
+      ${TEST_NAME} SYSTEM
+      PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>
+    )
     target_compile_options(
       ${TEST_NAME}
       PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_COMPILE_OPTIONS>)
@@ -75,9 +89,15 @@ foreach(FILE IN LISTS FILENAMES)
   # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
   target_compile_definitions(${TEST_NAME} PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
-  if(TARGET libfiction_test_pch AND NOT TEST_NAME STREQUAL "test_layout")
+  # The shared PCH carrier inherits libfiction's allocator dependencies.
+  if(TARGET libfiction_test_pch AND NOT TEST_NAME IN_LIST
+                                    ALLOCATION_FAILURE_TESTS)
     target_precompile_headers(${TEST_NAME} REUSE_FROM libfiction_test_pch)
   endif()
 
   add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME}) # group tests by file
+  if(TEST_NAME IN_LIST ALLOCATION_FAILURE_TESTS)
+    # Catch2 returns 4 when every test case skips the unsupported configuration.
+    set_tests_properties(${TEST_NAME} PROPERTIES SKIP_RETURN_CODE 4)
+  endif()
 endforeach()

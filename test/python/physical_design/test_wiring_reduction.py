@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from mnt.pyfiction.networks import technology_network
 
 
-def test_wiring_reduction_default(mux21):
+def test_wiring_reduction_default(mux21: technology_network) -> None:
     layout = orthogonal(mux21)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
@@ -29,7 +29,7 @@ def test_wiring_reduction_default(mux21):
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-def test_wiring_reduction_with_parameters(mux21):
+def test_wiring_reduction_with_parameters(mux21: technology_network) -> None:
     layout = orthogonal(mux21)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
@@ -52,10 +52,10 @@ def test_wiring_reduction_with_stats(mux21: technology_network) -> None:
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
-    assert stats.x_size_before == before.x() + 1
-    assert stats.y_size_before == before.y() + 1
-    assert stats.x_size_after == layout.x() + 1
-    assert stats.y_size_after == layout.y() + 1
+    assert stats.x_size_before == before.width()
+    assert stats.y_size_before == before.height()
+    assert stats.x_size_after == layout.width()
+    assert stats.y_size_after == layout.height()
     wires_before = before.num_wires() - before.num_pis() - before.num_pos()
     wires_after = layout.num_wires() - layout.num_pis() - layout.num_pos()
     assert stats.num_wires_before == wires_before
@@ -81,10 +81,10 @@ def test_wiring_reduction_with_stats_and_parameters(mux21: technology_network) -
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
-    assert stats.x_size_before == before.x() + 1
-    assert stats.y_size_before == before.y() + 1
-    assert stats.x_size_after == layout.x() + 1
-    assert stats.y_size_after == layout.y() + 1
+    assert stats.x_size_before == before.width()
+    assert stats.y_size_before == before.height()
+    assert stats.x_size_after == layout.width()
+    assert stats.y_size_after == layout.height()
     wires_before = before.num_wires() - before.num_pis() - before.num_pos()
     wires_after = layout.num_wires() - layout.num_pis() - layout.num_pos()
     assert stats.num_wires_before == wires_before

@@ -168,6 +168,20 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
   public:
     explicit on_the_fly_gate_library() = delete;
     /**
+     * @brief Returns whether an object's function has an on-the-fly Bestagon implementation.
+     * @tparam GateLyt Gate-level layout type.
+     * @param lyt Layout that owns the object.
+     * @param object Object to inspect.
+     * @return Whether the object implements identity, INV, or a supported binary function.
+     */
+    template <typename GateLyt>
+    [[nodiscard]] static bool is_supported_gate_type(const GateLyt& lyt, const typename GateLyt::object_id object)
+    {
+        return lyt.is_buf(object) || lyt.is_inv(object) || lyt.is_and(object) || lyt.is_or(object) ||
+               lyt.is_nand(object) || lyt.is_nor(object) || lyt.is_xor(object) || lyt.is_xnor(object) ||
+               lyt.is_ge(object) || lyt.is_le(object) || lyt.is_gt(object) || lyt.is_lt(object);
+    }
+    /**
      * @brief Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
      * information from the stored grid into account to design the correct gate representation for that tile. In
      * case there is no possible SiDB design, the function throws `gate_design_exception`.
@@ -195,8 +209,17 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
         auto params               = parameters;
         params.design_gate_params = simulation::logic::detail::checked_parameters(params.design_gate_params);
 
-        const auto n = lyt.get_node(t);
-        const auto f = lyt.node_function(n);
+        const auto object = lyt.find_object(t);
+        if (!object)
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+        const auto n = *object;
+        if (!is_supported_gate_type(lyt, n))
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+        const auto f = lyt.object_function(n);
         const auto p = skeleton_bestagon_library::determine_port_routing(lyt, t);
 
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
@@ -215,125 +238,11 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
 
         try
         {
-            if constexpr (fiction::has_is_fanout_v<GateLyt>)
+            if (lyt.is_fanout(n))
             {
-                if (lyt.is_fanout(n))
+                if (p.out.size() == 2)
                 {
-                    if (lyt.fanout_size(n) == 2)
-                    {
-                        const auto skeleton = cell_list_to_layout(ONE_IN_TWO_OUT_MAP.at(p));
-
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
-
-                            return design_gate<GateLyt>(skeleton_with_defects, synthesis::create_fan_out_tt(), params,
-                                                        p, t);
-                        }
-
-                        return design_gate<GateLyt>(skeleton, synthesis::create_fan_out_tt(), params, p, t);
-                    }
-                }
-            }
-            if constexpr (fiction::has_is_buf_v<GateLyt>)
-            {
-                if (lyt.is_buf(n))
-                {
-                    if (lyt.is_ground_layer(t))
-                    {
-                        // crossing case
-                        if (const auto at = lyt.above(t); (t != at) && lyt.is_wire_tile(at))
-                        {
-                            // two possible options: actual crossover and (parallel) hourglass wire
-                            const auto pa = skeleton_bestagon_library::determine_port_routing(lyt, at);
-
-                            const auto skeleton = cell_list_to_layout(TWO_IN_TWO_OUT);
-
-                            if (auto cell_list = TWO_IN_TWO_OUT_MAP.at({p, pa}); cell_list == DOUBLE_WIRE)
-                            {
-                                if (defect_surface.has_value())
-                                {
-                                    const auto skeleton_with_defects = add_defect_to_skeleton(
-                                        defect_surface.value(), skeleton, params.influence_radius_charged_defects,
-                                        center_cell, absolute_cell);
-
-                                    if (is_predefined_bestagon_gate_applicable(
-                                            cell_list_to_layout(DOUBLE_WIRE), skeleton_with_defects,
-                                            synthesis::create_double_wire_tt(), params))
-                                    {
-                                        return DOUBLE_WIRE;
-                                    }
-
-                                    return design_gate<GateLyt>(skeleton_with_defects,
-                                                                synthesis::create_double_wire_tt(), complex_gate_param,
-                                                                p, t);
-                                }
-
-                                if (params.using_predefined_crossing_and_double_wire_if_possible ==
-                                    Params::complex_gate_design_policy::USING_PREDEFINED)
-                                {
-                                    return DOUBLE_WIRE;
-                                }
-
-                                return design_gate<GateLyt>(skeleton, synthesis::create_double_wire_tt(),
-                                                            complex_gate_param, p, t);
-                            }
-
-                            if (defect_surface.has_value())
-                            {
-                                const auto skeleton_with_defects = add_defect_to_skeleton(
-                                    defect_surface.value(), skeleton, params.influence_radius_charged_defects,
-                                    center_cell, absolute_cell);
-
-                                if (is_predefined_bestagon_gate_applicable(
-                                        cell_list_to_layout(CROSSING), skeleton_with_defects,
-                                        synthesis::create_crossing_wire_tt(), params))
-                                {
-                                    return CROSSING;
-                                }
-
-                                return design_gate<GateLyt>(skeleton_with_defects, synthesis::create_crossing_wire_tt(),
-                                                            complex_gate_param, p, t);
-                            }
-
-                            if (params.using_predefined_crossing_and_double_wire_if_possible ==
-                                Params::complex_gate_design_policy::USING_PREDEFINED)
-                            {
-                                return CROSSING;
-                            }
-
-                            return design_gate<GateLyt>(skeleton, synthesis::create_crossing_wire_tt(),
-                                                        complex_gate_param, p, t);
-                        }
-
-                        const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
-                        if (cell_list == EMPTY_GATE)
-                        {
-                            return EMPTY_GATE;
-                        }
-
-                        const auto skeleton = cell_list_to_layout(cell_list);
-
-                        if (defect_surface.has_value())
-                        {
-                            const auto skeleton_with_defects = add_defect_to_skeleton(
-                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
-                                absolute_cell);
-                            return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
-                        }
-
-                        return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
-                    }
-                    return EMPTY_GATE;
-                }
-            }
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
-            {
-                if (lyt.is_inv(n))
-                {
-                    const auto skeleton = cell_list_to_layout(ONE_IN_ONE_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(ONE_IN_TWO_OUT_MAP.at(p));
 
                     if (defect_surface.has_value())
                     {
@@ -341,59 +250,106 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
+                        return design_gate<GateLyt>(skeleton_with_defects, synthesis::create_fan_out_tt(), params, p,
+                                                    t);
+                    }
+
+                    return design_gate<GateLyt>(skeleton, synthesis::create_fan_out_tt(), params, p, t);
+                }
+            }
+
+            if (lyt.is_buf(n))
+            {
+                if (lyt.is_ground_layer(t))
+                {
+                    // crossing case
+                    if (const auto at = lyt.above(t); at && lyt.is_wire_tile(*at))
+                    {
+                        // two possible options: actual crossover and (parallel) hourglass wire
+                        const auto pa = skeleton_bestagon_library::determine_port_routing(lyt, *at);
+
+                        const auto skeleton = cell_list_to_layout(TWO_IN_TWO_OUT);
+
+                        if (auto cell_list = TWO_IN_TWO_OUT_MAP.at({p, pa}); cell_list == DOUBLE_WIRE)
+                        {
+                            if (defect_surface.has_value())
+                            {
+                                const auto skeleton_with_defects = add_defect_to_skeleton(
+                                    defect_surface.value(), skeleton, params.influence_radius_charged_defects,
+                                    center_cell, absolute_cell);
+
+                                if (is_predefined_bestagon_gate_applicable(cell_list_to_layout(DOUBLE_WIRE),
+                                                                           skeleton_with_defects,
+                                                                           synthesis::create_double_wire_tt(), params))
+                                {
+                                    return DOUBLE_WIRE;
+                                }
+
+                                return design_gate<GateLyt>(skeleton_with_defects, synthesis::create_double_wire_tt(),
+                                                            complex_gate_param, p, t);
+                            }
+
+                            if (params.using_predefined_crossing_and_double_wire_if_possible ==
+                                Params::complex_gate_design_policy::USING_PREDEFINED)
+                            {
+                                return DOUBLE_WIRE;
+                            }
+
+                            return design_gate<GateLyt>(skeleton, synthesis::create_double_wire_tt(),
+                                                        complex_gate_param, p, t);
+                        }
+
+                        if (defect_surface.has_value())
+                        {
+                            const auto skeleton_with_defects = add_defect_to_skeleton(
+                                defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
+                                absolute_cell);
+
+                            if (is_predefined_bestagon_gate_applicable(cell_list_to_layout(CROSSING),
+                                                                       skeleton_with_defects,
+                                                                       synthesis::create_crossing_wire_tt(), params))
+                            {
+                                return CROSSING;
+                            }
+
+                            return design_gate<GateLyt>(skeleton_with_defects, synthesis::create_crossing_wire_tt(),
+                                                        complex_gate_param, p, t);
+                        }
+
+                        if (params.using_predefined_crossing_and_double_wire_if_possible ==
+                            Params::complex_gate_design_policy::USING_PREDEFINED)
+                        {
+                            return CROSSING;
+                        }
+
+                        return design_gate<GateLyt>(skeleton, synthesis::create_crossing_wire_tt(), complex_gate_param,
+                                                    p, t);
+                    }
+
+                    const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
+                    if (cell_list == EMPTY_GATE)
+                    {
+                        return EMPTY_GATE;
+                    }
+
+                    const auto skeleton = cell_list_to_layout(cell_list);
+
+                    if (defect_surface.has_value())
+                    {
+                        const auto skeleton_with_defects =
+                            add_defect_to_skeleton(defect_surface.value(), skeleton,
+                                                   params.influence_radius_charged_defects, center_cell, absolute_cell);
                         return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
                     return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
                 }
+                return EMPTY_GATE;
             }
-            /**
-             * @brief Whether the node implements a supported binary gate.
-             */
-            bool is_supported_binary_gate{};
-            if constexpr (mockturtle::has_is_and_v<GateLyt>)
+
+            if (lyt.is_inv(n))
             {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_and(n);
-            }
-            if constexpr (mockturtle::has_is_or_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_or(n);
-            }
-            if constexpr (fiction::has_is_nand_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_nand(n);
-            }
-            if constexpr (fiction::has_is_nor_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_nor(n);
-            }
-            if constexpr (mockturtle::has_is_xor_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_xor(n);
-            }
-            if constexpr (fiction::has_is_xnor_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_xnor(n);
-            }
-            if constexpr (fiction::has_is_ge_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_ge(n);
-            }
-            if constexpr (fiction::has_is_le_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_le(n);
-            }
-            if constexpr (fiction::has_is_gt_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_gt(n);
-            }
-            if constexpr (fiction::has_is_lt_v<GateLyt>)
-            {
-                is_supported_binary_gate = is_supported_binary_gate || lyt.is_lt(n);
-            }
-            if (is_supported_binary_gate)
-            {
-                const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
+                const auto skeleton = cell_list_to_layout(ONE_IN_ONE_OUT_MAP.at(p));
 
                 if (defect_surface.has_value())
                 {
@@ -406,14 +362,25 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
 
                 return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
             }
+
+            const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
+
+            if (defect_surface.has_value())
+            {
+                const auto skeleton_with_defects =
+                    add_defect_to_skeleton(defect_surface.value(), skeleton, params.influence_radius_charged_defects,
+                                           center_cell, absolute_cell);
+
+                return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+            }
+
+            return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
         }
 
         catch (const std::out_of_range&)
         {
             throw fcn::unsupported_gate_orientation_exception(t, p);
         }
-
-        throw fcn::unsupported_gate_type_exception(t);
     }
 
   private:

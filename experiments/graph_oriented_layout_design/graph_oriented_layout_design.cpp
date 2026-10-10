@@ -31,7 +31,9 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
 #include <string>
 
@@ -55,7 +57,9 @@ Ntk read_ntk(const std::string& name)
     return network;
 }
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
 
@@ -112,8 +116,8 @@ int main()  // NOLINT
             // calculate bounding box
             const auto bounding_box = bounding_box_2d(*gate_level_layout);
 
-            const auto width  = static_cast<uint64_t>(bounding_box.get_x_size()) + 1;
-            const auto height = static_cast<uint64_t>(bounding_box.get_y_size()) + 1;
+            const auto width  = bounding_box.get_x_size();
+            const auto height = bounding_box.get_y_size();
             const auto area   = width * height;
 
             // log results
@@ -128,4 +132,11 @@ int main()  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

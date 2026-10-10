@@ -28,7 +28,6 @@
 #include <optional>
 #include <random>
 #include <stdexcept>
-#include <utility>
 
 namespace fiction::layouts
 {
@@ -57,24 +56,24 @@ void require_arrangement([[maybe_unused]] const std::optional<arrangement>& a)
  *
  * @tparam Lyt Gate-level layout type.
  * @param a Arrangement of the shifted rows or columns. Shifted Cartesian and hexagonal layouts require it.
- * @param ar Highest possible position in the layout.
+ * @param ex Axis sizes of the layout.
  * @param scheme Clocking scheme to apply to the layout.
  * @return Empty layout.
  * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `a` is empty.
  */
 template <typename Lyt>
 [[nodiscard]] Lyt make_gate_level_layout([[maybe_unused]] const std::optional<arrangement>& a,
-                                         const typename Lyt::aspect_ratio& ar, const clocking::scheme& scheme)
+                                         const typename Lyt::extent& ex, const clocking::scheme& scheme)
 {
     require_arrangement<Lyt>(a);
 
     if constexpr (is_cartesian_layout_v<Lyt>)
     {
-        return Lyt{ar, scheme};
+        return Lyt{ex, scheme};
     }
     else
     {
-        return Lyt{*a, ar, scheme};
+        return Lyt{*a, ex, scheme};
     }
 }
 
@@ -173,11 +172,11 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
  * @param lyt Coordinate layout.
  * @param c Coordinate to consider.
  * @param port Port direction.
- * @return Absolute coordinate specified by a coordinate `c` in layout `lyt` and a port direction.
+ * @return Adjacent coordinate, or no coordinate when the neighbor lies outside the layout.
  */
 template <typename Lyt>
-[[nodiscard]] coordinate<Lyt> port_direction_to_coordinate(const Lyt& lyt, const coordinate<Lyt>& c,
-                                                           const fcn::port_direction& port) noexcept
+[[nodiscard]] std::optional<coordinate<Lyt>> port_direction_to_coordinate(const Lyt& lyt, const coordinate<Lyt>& c,
+                                                                          const fcn::port_direction& port) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
@@ -227,7 +226,7 @@ template <typename Lyt>
 /**
  * Returns a copy of the given cell grid layout whose cells are shifted towards the origin, so that the smallest
  * occupied x- and y-coordinates become 0. Cell types, names, and, where the layout has them, cell modes move with their
- * cells; layers, the layout name, and the clocking stay unchanged. The dimensions shrink by the shift.
+ * cells; layers, the layout name, and the clocking stay unchanged. The extent shrinks by the shift.
  *
  * @tparam Lyt Cell grid layout type, e.g., `qca::layout`, `mol_qca::layout`, or `inml::layout`.
  * @param lyt The layout to normalize.
@@ -243,8 +242,8 @@ template <typename Lyt>
         return lyt;
     }
 
-    auto x_offset = lyt.x();
-    auto y_offset = lyt.y();
+    int64_t x_offset = lyt.width();
+    int64_t y_offset = lyt.height();
 
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
@@ -260,7 +259,8 @@ template <typename Lyt>
 
     lyt.foreach_cell([&normalized](const auto& c) { normalized.assign_cell_type(c, Lyt::cell_type::EMPTY); });
 
-    normalized.resize({lyt.x() - x_offset, lyt.y() - y_offset, lyt.z()});
+    normalized.resize(
+        {static_cast<int64_t>(lyt.width()) - x_offset, static_cast<int64_t>(lyt.height()) - y_offset, lyt.layers()});
 
     lyt.foreach_cell(
         [&normalized, &lyt, x_offset, y_offset](const auto& c)
@@ -279,28 +279,27 @@ template <typename Lyt>
     return normalized;
 }
 /**
- * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
- * top left corner and the bottom right corner of the spanned region.
+ * Generates a random coordinate with each axis inside the inclusive region spanned by two coordinates.
  *
- * @tparam CoordinateType The coordinate implementation to be used.
- * @param coordinate1 Top left Coordinate.
- * @param coordinate2 Bottom right Coordinate (coordinate order is not important, automatically swapped if
- * necessary).
- * @return Randomly generated coordinate.
+ * @tparam CoordinateType Coordinate type to generate.
+ * @param coordinate1 One corner of the region.
+ * @param coordinate2 Opposite corner of the region; axes may appear in either order.
+ * @return Random coordinate between the corresponding corner axes.
  */
 template <typename CoordinateType>
-CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coordinate2) noexcept
+CoordinateType random_coordinate(const CoordinateType coordinate1, const CoordinateType coordinate2) noexcept
 {
+    /** Pseudorandom generator seeded from the platform's random device. */
     static std::mt19937_64 generator(std::random_device{}());
-
-    if (coordinate1 > coordinate2)
-    {
-        std::swap(coordinate1, coordinate2);
-    }
-
-    std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
-    std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
-    std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
+    /** Inclusive column distribution. */
+    std::uniform_int_distribution<> dist_x(std::min(coordinate1.x, coordinate2.x),
+                                           std::max(coordinate1.x, coordinate2.x));
+    /** Inclusive row distribution. */
+    std::uniform_int_distribution<> dist_y(std::min(coordinate1.y, coordinate2.y),
+                                           std::max(coordinate1.y, coordinate2.y));
+    /** Inclusive layer distribution. */
+    std::uniform_int_distribution<> dist_z(std::min(coordinate1.z, coordinate2.z),
+                                           std::max(coordinate1.z, coordinate2.z));
 
     return {dist_x(generator), dist_y(generator), dist_z(generator)};
 }

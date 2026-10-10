@@ -31,6 +31,7 @@
 #include <fiction/technology/qca/layout.hpp>                   // QCA cell-level layouts
 #include <fiction/technology/qca/qca_one_library.hpp>          // a pre-defined QCA gate library
 #include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
+#include <fiction/verification/critical_path_length_and_throughput.hpp>
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/common.hpp>                                   // parser return codes
@@ -42,7 +43,11 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 #include <mockturtle/views/names_view.hpp>                     // to assign names to network signals
 
-#include <cstdlib>     // exit codes
+#include <algorithm>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>  // exit codes
+#include <exception>
 #include <filesystem>  // filesystem access
 #include <iostream>    // output
 #include <string>      // strings
@@ -69,21 +74,24 @@ void print_network_properties(const Ntk& ntk)
               << '\n';
 }
 
+/** @brief Print gate-layout dimensions and physical path depth. @tparam Lyt Gate layout. @param lyt Layout. */
 template <typename Lyt>
 void print_gate_layout_properties(const Lyt& lyt)
 {
     // determine depth
-    const mockturtle::depth_view<Lyt> depth_lyt{lyt};
+    const auto path_length = fiction::verification::critical_path_length_and_throughput(lyt).critical_path_length;
+    const auto path_depth  = std::max(uint64_t{1}, path_length) - 1;
 
     // print statistics
     std::cout << fmt::format(
                      "[i] Gate-level layout:     aspect ratio = {} × {}, inputs = {}, outputs = {}, gates = {}, "
                      "wires = {}, critical path = {}",
-                     lyt.x() + 1, lyt.y() + 1, lyt.num_pis(), lyt.num_pos(), lyt.num_gates(), lyt.num_wires(),
-                     depth_lyt.depth())
+                     lyt.width(), lyt.height(), lyt.num_pis(), lyt.num_pos(), lyt.num_gates(), lyt.num_wires(),
+                     path_depth)
               << '\n';
 }
 
+/** @brief Print QCA dimensions, terminal counts, and area. @param cell_lyt Cell layout. */
 void print_cell_layout_properties(const qca::layout& cell_lyt)
 {
     area_stats st{};
@@ -94,12 +102,15 @@ void print_cell_layout_properties(const qca::layout& cell_lyt)
     std::cout
         << fmt::format(
                "[i] Cell-level QCA layout: aspect ratio = {} × {}, inputs = {}, outputs = {}, cells = {}, area = {}nm²",
-               cell_lyt.x() + 1, cell_lyt.y() + 1, cell_lyt.num_pis(), cell_lyt.num_pos(), cell_lyt.num_cells(),
+               cell_lyt.width(), cell_lyt.height(), cell_lyt.num_pis(), cell_lyt.num_pos(), cell_lyt.num_cells(),
                st.area)
         << '\n';
 }
 
-int main(int argc, char* argv[])  // NOLINT
+/** @brief Run layout synthesis and export. @param argc Argument count. @param argv Arguments. @return EXIT_SUCCESS on
+ * success, EXIT_FAILURE on error. */
+int main(int argc, char* argv[])
+try
 {
     // check arguments
     if (argc == 1)
@@ -113,7 +124,8 @@ int main(int argc, char* argv[])  // NOLINT
     /**************************************************************/
 
     // convert input to a file path
-    std::filesystem::path file_path{argv[1]};  // NOLINT: pointer arithmetic is okay here
+    const std::filesystem::path file_path{
+        argv[1]};  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic): argc validates argv[1].
 
     // check if file path exists
     if (!std::filesystem::exists(file_path))
@@ -297,13 +309,23 @@ int main(int argc, char* argv[])  // NOLINT
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
 
 #else  // FICTION_Z3_SOLVER
 
+#include <algorithm>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code\n";
 

@@ -21,6 +21,8 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/layout_base.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>       // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                    // SMT-based physical design of FCN layouts
 #include <fiction/physical_design/surface_analysis.hpp>         // SiDB surface analysis
@@ -33,7 +35,8 @@
 #include <fiction/types.hpp>                                    // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
-#include <fmt/format.h>                                        // output formatting
+#include <fmt/format.h>  // output formatting
+#include <lorina/common.hpp>
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
 #include <lorina/verilog.hpp>                                  // Verilog file parsing
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
@@ -49,16 +52,19 @@
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
-#include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::io;
@@ -69,18 +75,13 @@ using namespace fiction::verification;
 // NOTE: You can find the surface data in the following repository:
 // https://github.com/cda-tum/sidb-defect-aware-physical-design
 
-int main()  // NOLINT
+/** @brief Run the published circuit-design experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     using gate_lyt = hex_gate_clk_lyt;
 
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
-
-    // Fabricated surface 1: 740 x 545 dimers = 740 x 1090 DB positions = 12 x 31 Bestagon tiles
-    // static const std::string surface_data_path =
-    // fmt::format("{}/defect_aware_physical_design/full_scan_area/defects_full70.sqd", EXPERIMENTS_PATH);
-    // Fabricated surface 2: 830 x 326 dimers = 830 x 652 DB positions = 13 x 18 Bestagon tiles
-    //    static const std::string surface_data_path =
-    //        fmt::format("{}/defect_aware_physical_design/full_scan_area/defects_full56_Oct.sqd", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool,
@@ -127,20 +128,19 @@ int main()  // NOLINT
     // parameters for technology mapping
     const mockturtle::map_params map_params{};
 
-    [[maybe_unused]] const auto read_genlib_result =
-        lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
-    assert(read_genlib_result == lorina::return_code::success);
+    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+    if (read_genlib_result != lorina::return_code::success)
+    {
+        throw std::runtime_error{"Failed to read GENLIB library."};
+    }
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // read surface scan lattice data
     const auto surface_lattice =
         read_surface_defects("../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
-    // read_sqd_layout(surface_lattice, surface_data_path);
 
     const auto lattice_tiling =
-        gate_lyt{arrangement::EVEN_ROW, {11, 30}};  // our surface data is 12 x 31 Bestagon tiles
-    //    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {12, 17}};  // our surface data is 13 x 18
-    //    Bestagon tiles
+        gate_lyt{arrangement::EVEN_ROW, {12, 31}};  // our surface data is 12 x 31 Bestagon tiles
     const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
@@ -150,11 +150,9 @@ int main()  // NOLINT
     exact_params.crossings          = true;
     exact_params.border_io          = false;
     exact_params.desynchronize      = true;
-    exact_params.upper_bound_x      = 11;  // 12 x 31 tiles
-    exact_params.upper_bound_y      = 30;  // 12 x 31 tiles
-    // exact_params.upper_bound_x = 12;    // 13 x 18 tiles
-    // exact_params.upper_bound_y = 17;    // 13 x 18 tiles
-    exact_params.timeout = 3'600'000;  // 1h in ms
+    exact_params.upper_bound_x      = 11;         // 12 x 31 tiles
+    exact_params.upper_bound_y      = 30;         // 12 x 31 tiles
+    exact_params.timeout            = 3'600'000;  // 1h in ms
     exact_physical_design_stats exact_stats{};
 
     constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
@@ -167,9 +165,12 @@ int main()  // NOLINT
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        [[maybe_unused]] const auto read_verilog_result =
+        const auto read_verilog_result =
             lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
-        assert(read_verilog_result == lorina::return_code::success);
+        if (read_verilog_result != lorina::return_code::success)
+        {
+            throw std::runtime_error{"Failed to read Verilog benchmark."};
+        }
 
         // compute depth
         const mockturtle::depth_view depth_xag{xag};
@@ -191,7 +192,8 @@ int main()  // NOLINT
         if (gate_level_layout.has_value())
         {
             // check equivalence
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *gate_level_layout);
+            const auto miter =
+                mockturtle::miter<mockturtle::klut_network>(mapped_network, extract_layout_network(*gate_level_layout));
             if (!miter.has_value())
             {
                 continue;
@@ -219,13 +221,11 @@ int main()  // NOLINT
             // log results
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
                        depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-                       static_cast<uint64_t>(gate_level_layout->x()) + 1,
-                       static_cast<uint64_t>(gate_level_layout->y()) + 1,
-                       (static_cast<uint64_t>(gate_level_layout->x()) + 1) *
-                           (static_cast<uint64_t>(gate_level_layout->y()) + 1),
-                       gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length,
-                       cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total), *eq,
-                       dot_accurate_layout.num_dots(), layout_area);
+                       gate_level_layout->width(), gate_level_layout->height(),
+                       area_of(gate_level_layout->get_extent()), gate_level_layout->num_gates(),
+                       gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
+                       mockturtle::to_seconds(exact_stats.time_total), *eq, dot_accurate_layout.num_dots(),
+                       layout_area);
         }
         else  // no layout was obtained
         {
@@ -241,13 +241,21 @@ int main()  // NOLINT
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
 
 #else  // FICTION_Z3_SOLVER
 
 #include <cstdlib>
 #include <iostream>
 
-int main()  // NOLINT
+/** @brief Report the unavailable Z3 solver. */
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
 

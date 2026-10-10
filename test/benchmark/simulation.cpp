@@ -287,12 +287,14 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 #if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 {
-    // number of non-terminating segments of a diagonal wire
+    /** @brief Create a diagonal wire with the given number of non-terminating segments. */
     const auto create_diagonal_wire_with_n_non_terminating_segments = [](const uint64_t n)
     {
-        hex_gate_clk_lyt lyt{arrangement::ODD_ROW, {(n + 1) / 2, n + 1}};
+        /** @brief Frame containing every wire segment and terminal. */
+        hex_gate_clk_lyt lyt{arrangement::ODD_ROW, {((n + 1) / 2) + 1, n + 2}};
 
-        uint64_t signal = lyt.create_pi("a", {0, 0});
+        /** @brief Output port of the most recent wire segment. */
+        auto signal = lyt.create_pi("a", {0, 0});
 
         for (uint64_t i = 1; i < n + 1; i++)
         {
@@ -300,6 +302,9 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         }
 
         lyt.create_po(signal, "o", {(n + 1) / 2, n + 1});
+
+        CHECK(lyt.num_wires() == n + 2);
+        lyt.foreach_object([&lyt](const auto id) { CHECK(lyt.is_within_bounds(lyt.get_tile(id))); });
 
         return lyt;
     };

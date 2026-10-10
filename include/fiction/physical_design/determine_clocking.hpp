@@ -22,16 +22,17 @@
 #include <bill/sat/interface/common.hpp>
 #include <bill/sat/interface/types.hpp>
 #include <bill/sat/solver.hpp>  // NOLINT(misc-include-cleaner): umbrella header pulling in the solver backends
-#include <bill/sat/tseytin.hpp>
 #include <fmt/format.h>
-#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <algorithm>
-#include <functional>
+#include <cstddef>
+#include <cstdint>
 #include <iostream>
+#include <optional>
 #include <ostream>
+#include <stdexcept>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -71,281 +72,183 @@ struct determine_clocking_stats
 namespace detail
 {
 
+/**
+ * @brief Encodes declared connections as clock-zone constraints.
+ * @tparam Lyt Gate-level layout type.
+ * @tparam SolverType SAT backend.
+ */
 template <typename Lyt, bill::solvers SolverType = bill::solvers::ghack>
 class sat_clocking_handler
 {
   public:
-    /**
-     * Default constructor.
-     */
+    /** @brief Creates variables for occupied clock zones. @param lyt Validated layout. */
     explicit sat_clocking_handler(Lyt& lyt) : layout{lyt}, number_of_clocks{layout.num_clocks()}
     {
-        // for each non-empty tile
-        layout.foreach_node(
-            [this](const auto& n)
+        layout.foreach_object(
+            [this](const auto id)
             {
-                // skip constants
-                if (layout.is_constant(n))
+                const auto zone = clock_zone(id);
+                if (variables.contains({zone, 0}))
                 {
                     return;
                 }
-
-                const auto t = layout.get_tile(n);
-
-                // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk < number_of_clocks; ++clk)
+                clock_zones.push_back(zone);
+                for (typename Lyt::clock_number_t clk{}; clk < number_of_clocks; ++clk)
                 {
-                    variables[{t, clk}] = solver.add_variable();
+                    variables.emplace(tile_clock_number{zone, clk}, solver.add_variable());
                 }
             });
     }
     /**
-     * Determines clock numbers for the layout.
-     *
-     * Constructs a SAT instance and passes it to a solver to find a valid clocking scheme.
-     *
-     * @return `true` iff a valid clocking scheme could be found.
+     * @brief Solves clock constraints and commits a complete clocking value on success.
+     * @return Whether the constraints are satisfiable.
      */
-    bool determine_clocks() noexcept
+    bool determine_clocks()
     {
         at_least_one_clock_number_per_tile();
         at_most_one_clock_number_per_tile();
         exclude_clock_assignments_that_violate_information_flow();
-        ensure_same_clock_number_on_crossing_tiles();
         symmetry_breaking();
-
-        // pass to the solver
-        if (const auto sat_result = solver.solve(); sat_result == bill::result::states::satisfiable)
+        if (solver.solve() == bill::result::states::satisfiable)
         {
-            // extract model and assign clock numbers
             assign_clock_numbers(solver.get_model().model());
             return true;
         }
-
-        // SAT instance was not satisfiable
         return false;
     }
 
   private:
-    /**
-     * The layout to clock.
-     */
+    /** @brief Layout receiving the completed clock assignment. */
     Lyt& layout;
-    /**
-     * Number of clocks in layout's clocking scheme.
-     */
-    const Lyt::clock_number_t number_of_clocks;
-    /**
-     * The solver used to find a solution to the clocking problem.
-     */
+    /** @brief Number of phases in the stored scheme. */
+    const typename Lyt::clock_number_t number_of_clocks;
+    /** @brief SAT backend. */
     bill::solver<SolverType> solver{};
-    /**
-     * Alias for a tile-clock number pair.
-     */
+    /** @brief Clock-zone and phase key. */
     using tile_clock_number = std::pair<tile<Lyt>, typename Lyt::clock_number_t>;
-    /**
-     * Stores all variables.
-     */
+    /** @brief Variables for every occupied clock zone and phase. */
     std::unordered_map<tile_clock_number, bill::var_type> variables{};
+    /** @brief Distinct occupied clock zones, shared across all layers. */
+    std::vector<tile<Lyt>> clock_zones{};
 
-    /**
-     * Adds constraints to the solver that enforce the assignment of at least one clock number per tile.
-     */
-    void at_least_one_clock_number_per_tile() noexcept
+    /** @brief Returns the zero-layer clock-zone coordinate. @param id Placed object. @return Clock zone. */
+    [[nodiscard]] tile<Lyt> clock_zone(const typename Lyt::object_id id) const
     {
-        // for each non-empty tile
-        layout.foreach_node(
-            [this](const auto& n)
-            {
-                if (layout.is_constant(n))
-                {
-                    return;
-                }
-
-                const auto t = layout.get_tile(n);
-
-                std::vector<bill::var_type> tc{};
-                tc.reserve(number_of_clocks);
-
-                // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk < number_of_clocks; ++clk)
-                {
-                    tc.push_back(variables[{t, clk}]);
-                }
-
-                bill::at_least_one(tc, solver);
-            });
+        const auto t = layout.get_tile(id);
+        return {t.x, t.y, 0};
     }
-    /**
-     * Adds constraints to the solver that enforce the assignment of at most one clock number per tile.
-     */
-    void at_most_one_clock_number_per_tile() noexcept
+    /** @brief Requires one phase in each occupied clock zone. */
+    void at_least_one_clock_number_per_tile()
     {
-        // for each pair of clock numbers
-        for (typename Lyt::clock_number_t c1 = 0; c1 < number_of_clocks; ++c1)
+        for (const auto& zone : clock_zones)
         {
-            // use an optimization here: c2 > c1 instead of c2 != c1 to save half the clauses
-            for (typename Lyt::clock_number_t c2 = c1 + 1; c2 < number_of_clocks; ++c2)
+            std::vector<bill::var_type> phases{};
+            phases.reserve(number_of_clocks);
+            for (typename Lyt::clock_number_t clk{}; clk < number_of_clocks; ++clk)
             {
-                // for each non-empty tile
-                layout.foreach_node(
-                    [this, &c1, &c2](const auto& n)
-                    {
-                        if (layout.is_constant(n))
-                        {
-                            return;
-                        }
-
-                        const auto t = layout.get_tile(n);
-
-                        // not tile has clock 1 OR not tile has clock 2
-                        solver.add_clause({{bill::lit_type{variables[{t, c1}], bill::negative_polarity},
-                                            bill::lit_type{variables[{t, c2}], bill::negative_polarity}}});
-                    });
+                phases.push_back(variables.at({zone, clk}));
+            }
+            bill::at_least_one(phases, solver);
+        }
+    }
+    /** @brief Excludes multiple phases in one occupied clock zone. */
+    void at_most_one_clock_number_per_tile()
+    {
+        for (const auto& zone : clock_zones)
+        {
+            for (typename Lyt::clock_number_t first{}; first < number_of_clocks; ++first)
+            {
+                for (typename Lyt::clock_number_t second = first + 1; second < number_of_clocks; ++second)
+                {
+                    solver.add_clause({{bill::lit_type{variables.at({zone, first}), bill::negative_polarity},
+                                        bill::lit_type{variables.at({zone, second}), bill::negative_polarity}}});
+                }
             }
         }
     }
-    /**
-     * Adds constraints to the solver that exclude the assignment of non-adjacently clocked tiles.
-     */
-    void exclude_clock_assignments_that_violate_information_flow() noexcept
+    /** @brief Requires every declared source to precede its destination by one phase. */
+    void exclude_clock_assignments_that_violate_information_flow()
     {
-        // for each non-empty tile
-        layout.foreach_node(
-            [this](const auto& n)
+        layout.foreach_object(
+            [this](const auto id)
             {
-                if (layout.is_constant(n))
-                {
-                    return;
-                }
-
-                const auto t1 = layout.get_tile(n);
-
-                // for each of t's predecessors (disregarding clocking)
-                const auto incoming_tiles = layout.template incoming_data_flow<false>(t1);
-                std::ranges::for_each(
-                    incoming_tiles,
-                    [this, &t1](const auto& t2)
+                const auto destination = clock_zone(id);
+                layout.foreach_fanin(
+                    id,
+                    [this, &destination](const auto source)
                     {
-                        // for each combination of possible clock numbers
-                        for (typename Lyt::clock_number_t c1 = 0; c1 < number_of_clocks; ++c1)
+                        const auto predecessor = clock_zone(source);
+                        for (typename Lyt::clock_number_t dst{}; dst < number_of_clocks; ++dst)
                         {
-                            for (typename Lyt::clock_number_t c2 = 0; c2 < number_of_clocks; ++c2)
+                            for (typename Lyt::clock_number_t src{}; src < number_of_clocks; ++src)
                             {
-                                // if c2 is not c1's incoming clock number
-                                if (!(static_cast<Lyt::clock_number_t>((c2 + typename Lyt::clock_number_t{1}) %
-                                                                       number_of_clocks) == c1))
+                                if (static_cast<typename Lyt::clock_number_t>((src + 1) % number_of_clocks) != dst)
                                 {
-                                    // not tile t1 has clock c1 OR not tile t2 has clock c2
-                                    solver.add_clause({{bill::lit_type{variables[{t1, c1}], bill::negative_polarity},
-                                                        bill::lit_type{variables[{t2, c2}], bill::negative_polarity}}});
+                                    solver.add_clause(
+                                        {{bill::lit_type{variables.at({destination, dst}), bill::negative_polarity},
+                                          bill::lit_type{variables.at({predecessor, src}), bill::negative_polarity}}});
                                 }
                             }
                         }
                     });
             });
     }
-    /**
-     * Adds constraints to the solver that ensure the assignment of the same clock number to crossing tiles.
-     */
-    void ensure_same_clock_number_on_crossing_tiles() noexcept
+    /** @brief Fixes the phase rotation along the first PI's first-sink chain. */
+    void symmetry_breaking()
     {
-        // for each crossing wire
-        layout.foreach_wire(
-            [this](const auto& w)
-            {
-                const auto t = layout.get_tile(w);
-
-                if (layout.is_ground_layer(t))
-                {
-                    return;
-                }
-
-                // fetch corresponding tile in ground layer
-                const auto ground_t = layout.below(t);
-
-                // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk < number_of_clocks; ++clk)
-                {
-                    // ensure that the clock number of both tiles is identical
-                    solver.add_clause(
-                        bill::add_tseytin_equals(solver, variables[{t, clk}], variables[{ground_t, clk}]));
-                }
-            });
-    }
-    /**
-     * Adds constraints to the solver that help to speed up the solving process by breaking symmetries in the solution
-     * space.
-     */
-    void symmetry_breaking() noexcept
-    {
-        const std::function<void(const mockturtle::node<Lyt>& n)> recurse =
-            [this, &recurse, clk = 0](const auto& n) mutable
+        if (layout.num_pis() == 0)
         {
-            const auto t = layout.get_tile(n);
-
-            // pre-assign tile t to clock number clk
-            solver.add_clause(variables[{t, clk++ % number_of_clocks}]);
-
-            layout.foreach_fanout(n,
-                                  [&recurse](auto const& fon)
-                                  {
-                                      recurse(fon);
-
-                                      return false;  // terminate after one iteration
-                                  });
-        };
-
-        // only for the first PI
-        layout.foreach_pi(
-            [&recurse](const auto& pi)
-            {
-                recurse(pi);
-
-                return false;  // terminate after one iteration
-            });
+            return;
+        }
+        std::optional<typename Lyt::object_id>      current{layout.pi_at(0)};
+        std::unordered_set<typename Lyt::object_id> visited{};
+        typename Lyt::clock_number_t                clk{};
+        while (current && visited.insert(*current).second)
+        {
+            solver.add_clause(variables.at({clock_zone(*current), clk}));
+            std::optional<typename Lyt::object_id> next{};
+            layout.foreach_sink(*current,
+                                [&next](const auto destination)
+                                {
+                                    next = destination.object;
+                                    return false;
+                                });
+            current = next;
+            clk     = static_cast<typename Lyt::clock_number_t>((clk + 1) % number_of_clocks);
+        }
     }
-    /**
-     * Assigns clock numbers to the layout based on the provided model.
-     *
-     * @param model The model to extract the clocking scheme from.
-     */
-    void assign_clock_numbers(const bill::result::model_type& model) noexcept
+    /** @brief Prepares and commits model phases without partial layout updates. @param model SAT assignment. */
+    void assign_clock_numbers(const bill::result::model_type& model)
     {
-        // for each non-empty tile
-        layout.foreach_node(
-            [this, &model](const auto& n)
+        auto scheme = layout.get_clocking_scheme();
+        for (const auto& zone : clock_zones)
+        {
+            for (typename Lyt::clock_number_t clk{}; clk < number_of_clocks; ++clk)
             {
-                if (layout.is_constant(n))
+                if (model.at(variables.at({zone, clk})) == bill::lbool_type::true_)
                 {
-                    return;
+                    scheme.override_clock_number(zone.x, zone.y, clk);
+                    break;
                 }
-
-                const auto t = layout.get_tile(n);
-
-                // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk < number_of_clocks; ++clk)
-                {
-                    // if tile t is clocked with clock number clk
-                    if (model.at(variables.at({t, clk})) == bill::lbool_type::true_)
-                    {
-                        layout.assign_clock_number(t, clk);
-                    }
-                }
-            });
+            }
+        }
+        layout.replace_clocking_scheme(scheme);
     }
 };
 
+/** @brief Validates topology and dispatches clock assignment. @tparam Lyt Gate-level layout type. */
 template <typename Lyt>
 class determine_clocking_impl
 {
   public:
+    /** @brief Creates a clock-assignment operation. @param lyt Layout. @param p Parameters. @param st Statistics. */
     determine_clocking_impl(Lyt& lyt, const determine_clocking_params& p, determine_clocking_stats& st) :
             layout{lyt},
             params{p},
             stats{st}
     {}
 
+    /** @brief Validates and solves the layout. @return Whether a clock assignment exists. */
     bool run()
     {
         // measure run time
@@ -355,6 +258,8 @@ class determine_clocking_impl
         {
             return true;
         }
+
+        validate_layout();
 
         switch (params.sat_engine)
         {
@@ -388,6 +293,55 @@ class determine_clocking_impl
     }
 
   private:
+    /** @brief Rejects missing inputs, nonadjacent connections, cycles, and objects outside the frame. */
+    void validate_layout() const
+    {
+        std::unordered_map<typename Lyt::object_id, uint32_t> remaining_inputs{};
+        std::vector<typename Lyt::object_id>                  ready{};
+        ready.reserve(layout.size());
+        layout.foreach_object(
+            [&](const auto id)
+            {
+                const auto t = layout.get_tile(id);
+                if (!layout.is_within_bounds(t))
+                {
+                    throw std::invalid_argument("Clock assignment requires every object inside the layout frame");
+                }
+                const auto arity = layout.input_count(id);
+                remaining_inputs.emplace(id, arity);
+                if (arity == 0)
+                {
+                    ready.push_back(id);
+                }
+                for (uint32_t input{}; input < arity; ++input)
+                {
+                    const auto source = layout.source({id, input});
+                    if (!source)
+                    {
+                        throw std::invalid_argument("Clock assignment requires every input to be connected");
+                    }
+                    if (!layout.is_adjacent_elevation_of(t, layout.get_tile(*source)))
+                    {
+                        throw std::invalid_argument("Clock assignment requires adjacent connected objects");
+                    }
+                }
+            });
+        for (std::size_t next{}; next < ready.size(); ++next)
+        {
+            layout.foreach_sink(ready[next],
+                                [&](const auto sink)
+                                {
+                                    if (--remaining_inputs.at(sink.object) == 0)
+                                    {
+                                        ready.push_back(sink.object);
+                                    }
+                                });
+        }
+        if (ready.size() != layout.size())
+        {
+            throw std::invalid_argument("Clock assignment requires acyclic connections");
+        }
+    }
     /**
      * The layout to assign clock numbers to.
      */
@@ -407,10 +361,14 @@ class determine_clocking_impl
 /**
  * Determines clock numbers for the given (unclocked) gate-level layout. This algorithm parses the layout's gate and
  * wire connections, disregarding any existing clocking information, and constructs a SAT instance to find a valid clock
- * number assignment under which the information flow is respected. It then assigns these clock numbers as an irregular
- * clock map to the given layout via the `assign_clock_number` function, overriding any existing clocking scheme.
+ * number assignment under which the information flow is respected. On success, occupied clock zones use the solved
+ * phases. The stored clocking scheme retains its name and phase count.
  *
- * If no valid clock number assignment exists for `lyt`, this function returns `false` and does not modify `lyt`.
+ * All objects must lie inside the frame, every input must be connected to an adjacent source, and connections must
+ * be acyclic. Existing clock assignments need not respect those connections. Clock zones span all layers.
+ *
+ * If no valid clock number assignment exists for `lyt`, this function returns `false`. Failure preserves the layout
+ * and its clocking scheme. A successful assignment preserves synchronization delays and unoccupied clock overrides.
  *
  * This algorithm was proposed in \"Ending the Tyranny of the Clock: SAT-based Clock Number Assignment for Field-coupled
  * Nanotechnologies\" by M. Walter, J. Drewniok, and R. Wille in IEEE NANO 2024
@@ -421,6 +379,8 @@ class determine_clocking_impl
  * @param params Parameters.
  * @param stats Statistics.
  * @return `true` iff `lyt` could be successfully clocked via a valid clock number assignment.
+ * @throws std::invalid_argument If placement or declared connections violate the required topology.
+ * @throws std::bad_alloc If allocation fails.
  */
 template <typename Lyt>
 bool determine_clocking(Lyt& lyt, const determine_clocking_params& params = {},

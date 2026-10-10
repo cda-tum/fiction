@@ -29,6 +29,7 @@
 #include <fiction/layouts/io/print_layout.hpp>
 
 #include <sstream>
+#include <string>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -39,7 +40,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    const gate_layout layout{gate_layout::aspect_ratio{2, 2}, clocking::open(clocking::num_clks::FOUR)};
+    const gate_layout layout{gate_layout::extent{3, 3}, clocking::open(clocking::num_clks::FOUR)};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -60,7 +61,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open(clocking::num_clks::FOUR)};
+    gate_layout layout{gate_layout::extent{4, 2, 1}, clocking::open(clocking::num_clks::FOUR)};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
@@ -96,7 +97,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
         constexpr const char* layout_print = "        \n"
                                              "O←&←I ▢ \n"
                                              "  ↑     \n"
-                                             "▢ F→¬→O \n"
+                                             "▢ I→¬→O \n"
                                              "\n";
 
         std::stringstream print_stream{};
@@ -104,6 +105,31 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
         print_gate_level_layout(print_stream, layout, false, false);
 
         CHECK(print_stream.str() == layout_print);
+    }
+}
+
+TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    gate_layout layout{gate_layout::extent{2, 1, 1}, clocking::open(clocking::num_clks::FOUR)};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    layout.create_po(x1, "f1", {1, 0});
+
+    SECTION("Nodes to tiles")
+    {
+        std::stringstream print_stream{};
+        print_object_to_tile_assignments(layout, print_stream);
+
+        CHECK(print_stream.str().find("	   0:1 @ ") != std::string::npos);
+    }
+    SECTION("Tiles to nodes")
+    {
+        std::stringstream print_stream{};
+        print_tile_to_object_assignments(layout, print_stream);
+
+        CHECK(print_stream.str().find("	   0:1 @ ") != std::string::npos);
     }
 }
 
@@ -132,7 +158,7 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = qca::layout;
 
-    const cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
+    const cell_layout layout{cell_layout::extent{3, 3}, "Empty"};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -153,7 +179,7 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = qca::layout;
 
-    cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
+    cell_layout layout{cell_layout::extent{5, 5}, "AND"};
 
     layout.assign_cell_type({0, 2}, qca::cell_type::INPUT);
     layout.assign_cell_type({2, 4}, qca::cell_type::INPUT);
@@ -187,7 +213,7 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = qca::layout;
 
-    cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
+    cell_layout layout{cell_layout::extent{5, 5, 2}, "Crossover"};
 
     layout.assign_cell_type({0, 2, 0}, qca::cell_type::INPUT);
     layout.assign_cell_type({2, 0, 0}, qca::cell_type::INPUT);
@@ -225,7 +251,7 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 
 TEST_CASE("Print molQCA layout with clock phases", "[print-cell-level-layout]")
 {
-    mol_qca::layout layout{{3, 0}, "wire"};
+    mol_qca::layout layout{{4, 1}, "wire"};
 
     layout.assign_cell_type({0, 0}, mol_qca::cell_type::INPUT);
     layout.assign_cell_type({1, 0}, mol_qca::cell_type::NORMAL1);

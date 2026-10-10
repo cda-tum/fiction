@@ -19,19 +19,13 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/io/write_fgl_layout.hpp>
-#include <fiction/networks/name_utils.hpp>  // NOLINT(misc-include-cleaner): Required by write_fgl_layout.hpp.
 #include <fiction/utils/progress.hpp>
 
 #include <string_view>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
-#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts the filename argument.
 
 namespace pyfiction
 {
@@ -39,21 +33,21 @@ namespace pyfiction
 namespace detail
 {
 
+/** @brief Register a layout type's FGL writer. @tparam Lyt Layout type. @param m Layout I/O module. */
 template <typename Lyt>
 void write_fgl_layout(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "write_fgl_layout",
         [](const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
-        { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename, on_progress); }, py::arg("layout"),
-        py::arg("filename"), py::arg("on_progress").none() = py::none(), DOC(fiction_layouts_io_write_fgl_layout_2),
-        py::call_guard<py::gil_scoped_release>());
+        { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename, on_progress); }, nanobind::arg("layout"),
+        nanobind::arg("filename"), nanobind::arg("on_progress").none() = nanobind::none(),
+        DOC(fiction_layouts_io_write_fgl_layout_2), nanobind::call_guard<nanobind::gil_scoped_release>());
 }
 
 }  // namespace detail
 
+/** @brief Register FGL writers for supported layout topologies. @param m Layout I/O module. */
 void write_fgl_layout(nanobind::module_& m)
 {
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);

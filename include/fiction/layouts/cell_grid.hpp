@@ -58,24 +58,20 @@ class cell_grid : public cartesian_layout
     /**
      * Creates an empty grid.
      *
-     * @param ar Highest cell position in the grid.
+     * @param size Half-open axis sizes of the grid.
      * @param name Layout name.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain.
      */
-    explicit cell_grid(const aspect_ratio& ar = {}, std::string name = "") :
-            cartesian_layout(ar),
+    explicit cell_grid(const extent& size = {}, std::string name = "") :
+            cartesian_layout(size),
             layout_name{std::move(name)}
     {}
     /**
-     * Copies a grid, including its dimensions.
+     * Copies a grid, including its extent.
      *
      * @param other Grid to copy.
      */
-    cell_grid(const cell_grid& other) :
-            cartesian_layout(other.clone()),
-            layout_name{other.layout_name},
-            cell_types{other.cell_types},
-            cell_names{other.cell_names}
-    {}
+    cell_grid(const cell_grid& other) = default;
     /**
      * Moves a grid.
      *
@@ -83,20 +79,12 @@ class cell_grid : public cartesian_layout
      */
     cell_grid(cell_grid&& other) noexcept = default;
     /**
-     * Copies a grid, including its dimensions.
+     * Copies a grid, including its extent.
      *
      * @param other Grid to copy.
      * @return This grid.
      */
-    cell_grid& operator=(const cell_grid& other)
-    {
-        if (this != &other)
-        {
-            *this = cell_grid{other};
-        }
-
-        return *this;
-    }
+    cell_grid& operator=(const cell_grid& other) = default;
     /**
      * Moves a grid.
      *
@@ -109,14 +97,14 @@ class cell_grid : public cartesian_layout
      */
     ~cell_grid() = default;
     /**
-     * Compares two grids: same dimensions, name, cell types, and cell names.
+     * Compares two grids: same extent, name, cell types, and cell names.
      *
      * @param other Right-hand side grid.
      * @return `true` iff both grids are identical.
      */
     [[nodiscard]] bool operator==(const cell_grid& other) const noexcept
     {
-        return x() == other.x() && y() == other.y() && z() == other.z() && layout_name == other.layout_name &&
+        return get_extent() == other.get_extent() && layout_name == other.layout_name &&
                cell_types == other.cell_types && cell_names == other.cell_names;
     }
     /**

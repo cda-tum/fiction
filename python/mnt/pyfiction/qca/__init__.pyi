@@ -56,7 +56,7 @@ class qca_cell_mode(enum.Enum):
 class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     """
     A QCA layout: QCA cells on a Cartesian grid with a ground layer (`z =
-    0`) and a crossing layer (`z = 1`). Cells carry a type, a mode, and,
+    0`) and crossing layers (`z > 0`). Cells carry a type, a mode, and,
     for inputs and outputs, a name. Clock zones are tiles of cells, and
     each clock zone can be a synchronization element that extends its Hold
     phase. The layout has value semantics; copies are independent.
@@ -65,20 +65,18 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(
-        self, dimension: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> None: ...
+    def __init__(self, extent: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int]) -> None: ...
     @overload
     def __init__(
         self,
-        dimension: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+        extent: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
         tile_size_x: int = 1,
         tile_size_y: int = 1,
     ) -> None:
         """
-        Creates an empty layout of the given dimension, clocked by the predefined scheme of the given name, with clock zones of the given tile size. Raises ValueError for an unknown scheme or a zero tile size.
+        Creates an empty layout of the given extent, clocked by the predefined scheme of the given name, with clock zones of the given tile size. Raises ValueError for an unknown scheme or a zero tile size.
         """
 
     def get_cell_type(
@@ -206,7 +204,9 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     def pos(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all output cells, in unspecified order."""
 
-    def bounding_box_2d(self) -> tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]:
+    def bounding_box_2d(
+        self,
+    ) -> tuple[mnt.pyfiction.layouts.coordinate | None, mnt.pyfiction.layouts.coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all
@@ -278,7 +278,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             c: Cell position.
 
         Returns:
-            Clock zone of `c`, or the invalid clock zone if `c` is invalid.
+            Clock zone of `c`.
         """
 
     def assign_clock_number(
@@ -290,6 +290,9 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         Args:
             cz: Clock zone.
             cn: Clock number.
+
+        Raises:
+            std::bad_alloc: If allocation fails.
         """
 
     def get_clock_number(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
@@ -387,6 +390,9 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             cz: Clock zone.
             se: Number of full clock cycles to extend the Hold phase of `cz`
                 by; 0 turns `cz` back into a normal clock zone.
+
+        Raises:
+            std::bad_alloc: If allocation fails.
         """
 
     def is_synchronization_element(

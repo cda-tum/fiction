@@ -25,6 +25,7 @@
 using namespace fiction;
 using namespace fiction::layouts;
 
+/** Checks shifted Cartesian traits. */
 template <typename Lyt>
 void check_common_traits()
 {
@@ -78,11 +79,11 @@ TEST_CASE("Deep copy shifted Cartesian layout", "[shifted-cartesian-layout]")
 
     copy.resize({10, 10, 1});
 
-    CHECK(original.x() == 5);
-    CHECK(original.y() == 5);
-    CHECK(original.z() == 0);
+    CHECK(original.width() == 5);
+    CHECK(original.height() == 5);
+    CHECK(original.layers() == 0);
 
-    CHECK(copy.x() == 10);
-    CHECK(copy.y() == 10);
-    CHECK(copy.z() == 1);
+    CHECK(copy.width() == 10);
+    CHECK(copy.height() == 10);
+    CHECK(copy.layers() == 1);
 }

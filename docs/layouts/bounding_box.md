@@ -1,5 +1,9 @@
 # Bounding Box
 
+The bounding box encloses occupied coordinates, including objects outside an editing layout's
+frame. Empty layouts have no minimum or maximum coordinate: getters return optional values in
+C++ and `None` in Python. Width and height are inclusive coordinate counts.
+
 ::::{tab-set}
 :sync-group: language
 

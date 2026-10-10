@@ -54,7 +54,7 @@ reporters must synchronize access to shared state, including Python callbacks th
 Parallel algorithms accept an optional `on_worker_progress` callback. Its arguments are the stable logical
 worker ID, fixed worker count, description, completed count, total (`0` for unknown), and active state.
 Descriptions can change without changing the worker ID. `gold` uses search-space graph IDs across rounds;
-`exact` describes dimensions in tiles. A candidate's placed-node count describes that candidate, not the
+`exact` describes candidate extents in tiles. A candidate's placed-node count describes that candidate, not the
 fraction of the search completed.
 
 ```python

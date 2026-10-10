@@ -171,7 +171,12 @@ class write_qll_layout_impl
         }
     }();
 
-    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pis() const noexcept
+    /**
+     * @brief Returns primary input cells ordered by y, then x.
+     * @return Sorted input cells.
+     * @throws std::bad_alloc If allocating the cell list fails.
+     */
+    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pis() const
     {
         std::vector<typename Lyt::cell> pi_list{};
         lyt.foreach_pi([&pi_list](const auto& pi) { pi_list.push_back(pi); });
@@ -181,7 +186,12 @@ class write_qll_layout_impl
         return pi_list;
     }
 
-    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pos() const noexcept
+    /**
+     * @brief Returns primary output cells ordered by y, then x.
+     * @return Sorted output cells.
+     * @throws std::bad_alloc If allocating the cell list fails.
+     */
+    [[nodiscard]] std::vector<typename Lyt::cell> sorted_pos() const
     {
         std::vector<typename Lyt::cell> po_list{};
         lyt.foreach_po([&po_list](const auto& po) { po_list.push_back(po); });
@@ -191,16 +201,29 @@ class write_qll_layout_impl
         return po_list;
     }
 
+    /**
+     * @brief Returns the cell axis relative to the occupied bounding box.
+     * @param c Occupied cell.
+     * @return Relative axis.
+     */
     [[nodiscard]] auto bb_x(const typename Lyt::cell& c) const noexcept
     {
-        return static_cast<decltype(c.x)>(c.x - bb.get_min().x);
+        return static_cast<uint64_t>(static_cast<int64_t>(c.x) - bb.get_min().value_or(typename Lyt::cell{}).x);
     }
 
+    /**
+     * @brief Returns the cell axis relative to the occupied bounding box.
+     * @param c Occupied cell.
+     * @return Relative axis.
+     */
     [[nodiscard]] auto bb_y(const typename Lyt::cell& c) const noexcept
     {
-        return static_cast<decltype(c.y)>(c.y - bb.get_min().y);
+        return static_cast<uint64_t>(static_cast<int64_t>(c.y) - bb.get_min().value_or(typename Lyt::cell{}).y);
     }
 
+    /**
+     * @brief Checks whether each I/O cell lies on its designated horizontal border.
+     */
     [[nodiscard]] bool has_border_io_pins() const noexcept
     {
         auto all_border_pins = true;
@@ -220,7 +243,7 @@ class write_qll_layout_impl
         lyt.foreach_po(
             [this, &all_border_pins](const auto& po)
             {
-                if (bb_x(po) != lyt.x())
+                if (bb_x(po) != (lyt.width() == 0 ? 0 : lyt.width() - 1))
                 {
                     all_border_pins = false;
                     return false;  // break iteration
@@ -247,6 +270,9 @@ class write_qll_layout_impl
         }
     }
 
+    /**
+     * @brief Writes format settings and layout extent as maximum indices.
+     */
     void write_header()
     {
         os << fmt::format(qll::VERSION_HEADER, FICTION_VERSION, FICTION_REPO);
@@ -258,7 +284,9 @@ class write_qll_layout_impl
 
         os << fmt::format(qll::OPEN_SETTINGS, tech_name);
 
-        os << fmt::format(qll::GENERAL_SETTINGS, lyt.x(), lyt.y(), (lyt.z() > 0 ? "true" : "false"), num_clocks());
+        os << fmt::format(qll::GENERAL_SETTINGS, (lyt.width() == 0 ? 0 : lyt.width() - 1),
+                          (lyt.height() == 0 ? 0 : lyt.height() - 1),
+                          ((lyt.layers() == 0 ? 0 : lyt.layers() - 1) > 0 ? "true" : "false"), num_clocks());
 
         if constexpr (std::is_same_v<Lyt, inml::layout>)
         {
@@ -304,19 +332,23 @@ class write_qll_layout_impl
         }
     }
 
+    /**
+     * @brief Writes occupied cells within the half-open geometry.
+     */
     void write_layout()
     {
-        utils::progress_reporter progress{
-            on_progress, "writing rows", static_cast<std::size_t>(lyt.y() + 1) * static_cast<std::size_t>(lyt.z() + 1)};
+        utils::progress_reporter               progress{on_progress, "writing rows",
+                                                        static_cast<std::size_t>(lyt.height()) *
+                                                            static_cast<std::size_t>(lyt.layers())};
         std::unordered_set<typename Lyt::cell> skip{};
 
         os << qll::OPEN_LAYOUT;
 
-        for (decltype(lyt.z()) layer = 0; layer <= lyt.z(); ++layer)
+        for (uint32_t layer = 0; layer < lyt.layers(); ++layer)
         {
-            for (decltype(lyt.y()) row = 0; row <= lyt.y(); ++row)
+            for (uint32_t row = 0; row < lyt.height(); ++row)
             {
-                for (decltype(lyt.x()) col = 0; col <= lyt.x(); ++col)
+                for (uint32_t col = 0; col < lyt.width(); ++col)
                 {
                     const auto c    = typename Lyt::cell{col, row, layer};
                     const auto type = lyt.get_cell_type(c);
@@ -359,7 +391,8 @@ class write_qll_layout_impl
                         // write normal cell
                         if (type == qca::cell_type::NORMAL)
                         {
-                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                              static_cast<int64_t>(c.z) * 2);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
@@ -367,14 +400,15 @@ class write_qll_layout_impl
                         else if (qca::is_constant(type))
                         {
                             const auto const_name = (type == qca::cell_type::CONST_0) ? "const0" : "const1";
-                            os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
+                            os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c),
+                                              static_cast<int64_t>(c.z) * 2);
                         }
 
                         // write via cell
-                        if (mode == qca::cell_mode::VERTICAL && c.z != lyt.z())
+                        if (mode == qca::cell_mode::VERTICAL && static_cast<int64_t>(c.z) + 1 < lyt.layers())
                         {
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
-                                              (c.z * 2) + 1);
+                                              (static_cast<int64_t>(c.z) * 2) + 1);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
@@ -388,7 +422,8 @@ class write_qll_layout_impl
                             // each regular molQCA cell names its own clock phase
                             const auto phase = mol_qca::clock_number(type);
 
-                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                              static_cast<int64_t>(c.z) * 2);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
@@ -396,7 +431,8 @@ class write_qll_layout_impl
                         else if (mol_qca::is_constant(type))
                         {
                             const auto const_name = (type == mol_qca::cell_type::CONST_0) ? "const0" : "const1";
-                            os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
+                            os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c),
+                                              static_cast<int64_t>(c.z) * 2);
                         }
                     }
                 }

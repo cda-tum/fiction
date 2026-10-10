@@ -59,8 +59,10 @@ void hexagonalization(nanobind::module_& m)
         .value("EXTEND_PLANAR", fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR));
 
-    py::class_<fiction::physical_design::hexagonalization_params>(m, "hexagonalization_params",
-                                                                  DOC(fiction_physical_design_hexagonalization_params))
+    py::class_<fiction::physical_design::hexagonalization_params>(
+        m, "hexagonalization_params",
+        pyfiction::progress_type_slots<fiction::physical_design::hexagonalization_params>(),
+        DOC(fiction_physical_design_hexagonalization_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("input_pin_extension", &fiction::physical_design::hexagonalization_params::input_pin_extension,
                 DOC(fiction_physical_design_hexagonalization_params_input_pin_extension))

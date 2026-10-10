@@ -77,17 +77,18 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     def __init__(self) -> None: ...
     @overload
     def __init__(
-        self,
-        dimension: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-        layout_name: str = "",
+        self, extent: mnt.pyfiction.layouts.Extent | tuple[int, int] | tuple[int, int, int], layout_name: str = ""
     ) -> None:
         """
         Creates an empty layout.
 
         Args:
-            ar: Highest cell position; its z-coordinate is ignored because the
-                layout is planar.
+            extent: Half-open cell sizes; a nonzero layer count selects one
+                  layer.
             name: Layout name.
+
+        Raises:
+            std::invalid_argument: If a size exceeds the coordinate domain.
         """
 
     def get_cell_type(
@@ -215,7 +216,9 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
     def pos(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all output cells, in unspecified order."""
 
-    def bounding_box_2d(self) -> tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]:
+    def bounding_box_2d(
+        self,
+    ) -> tuple[mnt.pyfiction.layouts.coordinate | None, mnt.pyfiction.layouts.coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all

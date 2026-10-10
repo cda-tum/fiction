@@ -22,7 +22,6 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 
@@ -318,7 +317,7 @@ TEST_CASE("A* distance", "[distance]")
 
         SECTION("coordinate path distance")
         {
-            const lyt layout{{9, 4, 1}};
+            const lyt layout{lyt::extent{10, 5, 2}};
 
             SECTION("Default distance type (uint64_t)")
             {
@@ -341,7 +340,7 @@ TEST_CASE("A* distance", "[distance]")
 
             SECTION("2DDWave")
             {
-                const clk_lyt layout{{9, 4, 1}, clocking::twoddwave()};
+                const clk_lyt layout{clk_lyt::extent{10, 5, 2}, clocking::twoddwave()};
 
                 SECTION("Default distance type (uint64_t)")
                 {
@@ -390,7 +389,7 @@ TEST_CASE("A* distance functor", "[distance]")
 
         SECTION("coordinate path distance")
         {
-            const lyt layout{{9, 4, 1}};
+            const lyt layout{lyt::extent{10, 5, 2}};
 
             const a_star_distance_functor<lyt> distance{};
 
@@ -412,7 +411,7 @@ TEST_CASE("A* distance functor", "[distance]")
 
             SECTION("2DDWave")
             {
-                const clk_lyt layout{{9, 4, 1}, clocking::twoddwave()};
+                const clk_lyt layout{clk_lyt::extent{10, 5, 2}, clocking::twoddwave()};
 
                 SECTION("Default distance type (uint64_t)")
                 {

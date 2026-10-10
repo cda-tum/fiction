@@ -16,7 +16,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/physical_design/generate_edge_intersection_graph.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/stl/stl_utils.hpp>
@@ -48,6 +47,8 @@ TEST_CASE("Test find_first_two_of with array input", "[find_first_two_of]")
     static constexpr const std::array a1{0, 1, 1, 2, 3, 3};
     static constexpr const std::array a2{1, 2, 3, 3};
 
+    /** @brief First matching adjacent pair in the array. */
+    // NOLINTNEXTLINE(readability-qualified-auto): MSVC Debug uses checked array iterators instead of pointers.
     auto it = find_first_two_of(std::begin(a1), std::end(a1), std::begin(a2), std::end(a2));
     CHECK(*it == 1);
     CHECK(*(std::next(it, 1)) == 2);
@@ -89,4 +90,19 @@ TEST_CASE("Test find_first_two_of with layout_coordinate_paths", "[first_first_t
 
     CHECK(it3 == p1.begin());
     CHECK(it4 == std::next(p2.begin(), 1));
+}
+
+/** @brief Ranges without a pair have no shared two-element subsequence. */
+TEST_CASE("find_first_two_of rejects ranges shorter than a pair", "[find_first_two_of]")
+{
+    /** @brief Candidate two-element subsequence. */
+    const std::vector<int> pair{1, 2};
+    for (const auto& short_range : {std::vector<int>{}, std::vector<int>{1}})
+    {
+        CHECK(find_first_two_of(short_range.cbegin(), short_range.cend(), pair.cbegin(), pair.cend()) ==
+              short_range.cend());
+        CHECK(find_first_two_of(pair.cbegin(), pair.cend(), short_range.cbegin(), short_range.cend()) == pair.cend());
+        CHECK(find_first_two_of(short_range.cbegin(), short_range.cend(), short_range.cbegin(), short_range.cend()) ==
+              short_range.cend());
+    }
 }

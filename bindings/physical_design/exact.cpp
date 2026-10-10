@@ -54,7 +54,8 @@ void exact(nanobind::module_& m)
                DOC(fiction_physical_design_technology_constraints_TOPOLINANO));
 
     py::class_<fiction::physical_design::exact_physical_design_params>(
-        m, "exact_params", DOC(fiction_physical_design_exact_physical_design_params))
+        m, "exact_params", pyfiction::progress_type_slots<fiction::physical_design::exact_physical_design_params>(),
+        DOC(fiction_physical_design_exact_physical_design_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("scheme", &fiction::physical_design::exact_physical_design_params::scheme,
                 DOC(fiction_physical_design_exact_physical_design_params_scheme))

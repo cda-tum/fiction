@@ -41,6 +41,9 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+
 #include <algorithm>
 #include <any>
 #include <cstdint>
@@ -164,11 +167,24 @@ TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", 
 
 TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]")
 {
-    hex_gate_clk_lyt gate_lyt{arrangement::EVEN_ROW, {2, 2}};
-    gate_lyt.create_nand({}, {}, {0, 0});
-    gate_lyt.create_nand({}, {}, {2, 2});
+    hex_gate_clk_lyt gate_lyt{arrangement::EVEN_ROW, {3, 3}};
+    /** @brief NAND function with two declared input slots. */
+    kitty::dynamic_truth_table nand_function{2};
+    kitty::create_from_hex_string(nand_function, "7");
+    gate_lyt.create_gate({}, nand_function, {0, 0});
+    gate_lyt.create_gate({}, nand_function, {2, 2});
 
-    const auto cell_lyt = (apply_gate_library<bestagon_library>(gate_lyt));
+    REQUIRE(gate_lyt.num_gates() == 2);
+    gate_lyt.foreach_gate(
+        [&gate_lyt](const auto id)
+        {
+            REQUIRE(gate_lyt.is_nand(id));
+            REQUIRE(gate_lyt.input_count(id) == 2);
+            CHECK_FALSE(gate_lyt.source({id, 0}).has_value());
+            CHECK_FALSE(gate_lyt.source({id, 1}).has_value());
+        });
+
+    const auto cell_lyt = apply_gate_library<bestagon_library>(gate_lyt);
 
     clustercomplete_params params{.sim_params = simulation_parameters{2}};
 

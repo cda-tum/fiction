@@ -53,9 +53,8 @@ class csv_writer
      */
     explicit csv_writer(std::ostream& os) : stream{os} {}
     /**
-     * Writes a single line of values to the output stream separated by a DELIMITER. No delimiter placed after the last
-     * value. Note that no escape checks are performed. Upon receiving no arguments, only a newline is written. This
-     * function uses template recursion to process the variadic parameters.
+     * Writes one line of delimiter-separated values without a trailing delimiter or flushing the stream.
+     * The writer does not escape values. With no arguments, the writer emits a newline.
      *
      * @tparam T The type of the first argument.
      * @tparam Ts Types of the rest of the variadic parameter pack.
@@ -72,7 +71,7 @@ class csv_writer
         }
         else
         {
-            stream << std::forward<T>(arg) << std::endl;
+            stream << std::forward<T>(arg) << '\n';
         }
     }
     /**
@@ -84,7 +83,7 @@ class csv_writer
     template <typename... Ts>
     void write_line()
     {
-        stream << std::endl;
+        stream << '\n';
     }
 
   private:

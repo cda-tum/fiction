@@ -20,7 +20,9 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>              // Cartesian grids
+#include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
+#include <fiction/layouts/layout_base.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>           // technology-mapped network type
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
@@ -49,8 +51,9 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
 #include <cstdint>
-#include <cstdio>  // NOLINT(misc-include-cleaner): provides the stderr macro, which include-cleaner does not attribute
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -65,7 +68,9 @@ using namespace fiction::sidb::io;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
-int main()  // NOLINT
+/** @brief Run the published circuit-design experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     using gate_lyt = hex_gate_clk_lyt;
 
@@ -169,7 +174,8 @@ int main()  // NOLINT
         if (gate_level_layout.has_value())
         {
             // check equivalence
-            const auto miter = mockturtle::miter<technology_network>(mapped_network, *gate_level_layout);
+            const auto miter =
+                mockturtle::miter<technology_network>(mapped_network, extract_layout_network(*gate_level_layout));
             if (!miter.has_value())
             {
                 fmt::print(stderr, "[e] could not construct an equivalence miter for {}\n", benchmark);
@@ -199,13 +205,11 @@ int main()  // NOLINT
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
                          cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
-                         depth_mapped_network.depth(), static_cast<uint64_t>(gate_level_layout->x()) + 1,
-                         static_cast<uint64_t>(gate_level_layout->y()) + 1,
-                         (static_cast<uint64_t>(gate_level_layout->x()) + 1) *
-                             (static_cast<uint64_t>(gate_level_layout->y()) + 1),
-                         gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length,
-                         cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total), *eq,
-                         cell_level_layout.num_dots(), area_stats.area);
+                         depth_mapped_network.depth(), gate_level_layout->width(), gate_level_layout->height(),
+                         area_of(gate_level_layout->get_extent()), gate_level_layout->num_gates(),
+                         gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
+                         mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_dots(),
+                         area_stats.area);
         }
         else  // no layout was obtained
         {
@@ -222,13 +226,21 @@ int main()  // NOLINT
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
 
 #else  // FICTION_Z3_SOLVER
 
 #include <cstdlib>
 #include <iostream>
 
-int main()  // NOLINT
+/** @brief Report the unavailable Z3 solver. */
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
 

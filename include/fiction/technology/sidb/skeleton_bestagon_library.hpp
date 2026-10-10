@@ -137,6 +137,11 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
             throw std::invalid_argument("GateLyt must be a pointy-top hexagonal layout");
         }
 
+        if (!lyt.find_object(t))
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+
         fcn::port_list<fcn::port_direction> p{};
 
         // determine incoming connector ports
@@ -162,7 +167,8 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
         // gates without connector ports
 
         // 1-input functions
-        if (const auto n = lyt.get_node(t); lyt.is_pi(n) || lyt.is_po(n) || lyt.is_buf(n) || lyt.is_inv(n))
+        if (const auto n = lyt.find_object(t);
+            n && (lyt.is_pi(*n) || lyt.is_po(*n) || lyt.is_buf(*n) || lyt.is_inv(*n)))
         {
             if (lyt.has_no_incoming_signal(t))
             {

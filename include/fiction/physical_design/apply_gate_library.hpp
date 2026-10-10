@@ -26,10 +26,9 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
-#include <mockturtle/traits.hpp>
-
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <type_traits>
 #include <utility>
@@ -46,20 +45,25 @@ namespace fiction::physical_design
 {
 
 /**
- * The highest cell position of the Cartesian cell grid that a gate library's tiles span when applied to a gate-level
+ * The axis sizes of the Cartesian cell grid that a gate library's tiles span when applied to a gate-level
  * layout, respecting tilings in which even and odd rows or columns do not line up. `apply_gate_library` sizes QCA,
  * molQCA, and iNML layouts this way.
  *
  * @tparam GateLibrary Gate library whose tile size is used.
  * @tparam GateLyt Gate-level layout type.
  * @param gate_lyt Gate-level layout.
- * @return Highest cell position of the grid, including the layer count of `gate_lyt`.
+ * @return Axis sizes of the grid, including the layer count of `gate_lyt`.
  * @throws std::overflow_error If an extent is outside the signed 32-bit coordinate range.
  */
 template <typename GateLibrary, typename GateLyt>
-[[nodiscard]] layouts::layout_base::coordinate cell_grid_extent(const GateLyt& gate_lyt)
+[[nodiscard]] layouts::layout_base::extent cell_grid_extent(const GateLyt& gate_lyt)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+
+    if (gate_lyt.width() == 0 || gate_lyt.height() == 0 || gate_lyt.layers() == 0)
+    {
+        return {};
+    }
 
     using cell_t = layouts::layout_base::coordinate;
 
@@ -71,15 +75,17 @@ template <typename GateLibrary, typename GateLyt>
 
     const cell_t max_rel_coord = {GateLibrary::gate_x_size() - 1, GateLibrary::gate_y_size() - 1};
 
-    const cell_t first_odd_tile = {gate_lyt.x() != 0 ? 1 : 0, gate_lyt.y() != 0 ? 1 : 0};
+    const cell_t first_odd_tile = {(gate_lyt.width() - 1) != 0 ? 1 : 0, (gate_lyt.height() - 1) != 0 ? 1 : 0};
 
-    const auto max_coord_even_x = rel_to_abs_cell_pos(gate_lyt, {0, gate_lyt.y()}, max_rel_coord);
-    const auto max_coord_odd_x  = rel_to_abs_cell_pos(gate_lyt, {first_odd_tile.x, gate_lyt.y()}, max_rel_coord);
-    const auto max_coord_even_y = rel_to_abs_cell_pos(gate_lyt, {gate_lyt.x(), 0}, max_rel_coord);
-    const auto max_coord_odd_y  = rel_to_abs_cell_pos(gate_lyt, {gate_lyt.x(), first_odd_tile.y}, max_rel_coord);
+    const auto max_coord_even_x = rel_to_abs_cell_pos(gate_lyt, {0, (gate_lyt.height() - 1)}, max_rel_coord);
+    const auto max_coord_odd_x =
+        rel_to_abs_cell_pos(gate_lyt, {first_odd_tile.x, (gate_lyt.height() - 1)}, max_rel_coord);
+    const auto max_coord_even_y = rel_to_abs_cell_pos(gate_lyt, {(gate_lyt.width() - 1), 0}, max_rel_coord);
+    const auto max_coord_odd_y =
+        rel_to_abs_cell_pos(gate_lyt, {(gate_lyt.width() - 1), first_odd_tile.y}, max_rel_coord);
 
-    return {std::max(max_coord_even_y.x, max_coord_odd_y.x), std::max(max_coord_even_x.y, max_coord_odd_x.y),
-            gate_lyt.z()};
+    return {static_cast<int64_t>(std::max(max_coord_even_y.x, max_coord_odd_y.x)) + 1,
+            static_cast<int64_t>(std::max(max_coord_even_x.y, max_coord_odd_x.y)) + 1, gate_lyt.layers()};
 }
 
 namespace detail
@@ -157,7 +163,7 @@ class apply_gate_library_impl
     /**
      * Gate-level layout.
      */
-    GateLyt gate_lyt;
+    const GateLyt& gate_lyt;
     /**
      * Produced layout.
      */
@@ -194,20 +200,20 @@ class apply_gate_library_impl
         }
     }
     /**
-     * @brief Counts nonconstant nodes using the mapping traversal, or skips the scan without a callback.
-     * @return Number of nodes mapped to cell implementations.
+     * @brief Counts live objects, or skips the scan without a callback.
+     * @return Number of objects mapped to cell implementations.
      */
     [[nodiscard]] std::size_t mapping_count() const
     {
         std::size_t count{};
         if (on_progress)
         {
-            gate_lyt.foreach_node([&](const auto& n) { count += !gate_lyt.is_constant(n); });
+            count = gate_lyt.size();
         }
         return count;
     }
     /**
-     * @brief Places the implementation of every nonconstant node in its tile.
+     * @brief Places the implementation of every object in its tile.
      * @tparam SetUpGate Callable on `(const GateLyt&, const tile<GateLyt>&)` returning a gate.
      * @param set_up_gate Returns the implementation of a tile.
      */
@@ -215,33 +221,30 @@ class apply_gate_library_impl
     void map_gates(const SetUpGate& set_up_gate)
     {
         utils::progress_reporter progress{on_progress, "mapping gates", mapping_count()};
-        gate_lyt.foreach_node(
+        gate_lyt.foreach_object(
             [&, this](const auto& n)
             {
-                if (!gate_lyt.is_constant(n))
-                {
-                    const auto t = gate_lyt.get_tile(n);
+                const auto t = gate_lyt.get_tile(n);
 
-                    // retrieve the top-leftmost cell in tile t
-                    const auto c = layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
-                                                                               GateLibrary::gate_y_size()>(
+                // retrieve the top-leftmost cell in tile t
+                const auto c =
+                    layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size()>(
                         gate_lyt, t, cell_t{0, 0});
 
-                    assign_gate(c, set_up_gate(gate_lyt, t), n);
-                    progress.advance();
-                }
+                assign_gate(c, set_up_gate(gate_lyt, t), n);
+                progress.advance();
             });
     }
     /**
-     * Assigns a gate implementation to the cells of its tile. Input and output cells of a cell grid receive the node
+     * Assigns a gate implementation to the cells of its tile. Input and output cells of a cell grid receive the object
      * name. If the layout has synchronization elements, the tile's synchronization delay goes to the clock zone that
      * contains the tile; a ground wire and a crossing wire share one clock zone, which keeps the larger delay.
      *
      * @param c Top-left cell of the tile where the gate is placed.
      * @param g Gate implementation.
-     * @param n Corresponding node in the gate-level layout.
+     * @param n Corresponding object in the gate-level layout.
      */
-    void assign_gate(const cell_t& c, const typename GateLibrary::gate& g, const mockturtle::node<GateLyt>& n)
+    void assign_gate(const cell_t& c, const typename GateLibrary::gate& g, const typename GateLyt::object_id& n)
     {
         if constexpr (requires(cell_lyt_t& l, const cell_t& p) {
                           l.assign_synchronization_element(l.get_clock_zone(p), 1u);
@@ -297,7 +300,7 @@ class apply_gate_library_impl
  * A cell grid spans the gate-level layout; if it has tile-based clocking, its clock zones are the library's tiles and
  * follow the gate-level clocking, and, if it has synchronization elements, each clock zone receives the
  * synchronization delay of its gate tile. The delay therefore also covers cells that are added to the zone later,
- * e.g., via cells. Input and output cells carry the names of their nodes. An SiDB layout lies on the H-Si(100)-2x1
+ * e.g., via cells. Input and output cells carry the names of their objects. An SiDB layout lies on the H-Si(100)-2x1
  * lattice.
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
@@ -306,7 +309,7 @@ class apply_gate_library_impl
  * @tparam GateLibrary Type of the gate library to apply.
  * @tparam GateLyt Type of the gate-level layout to apply the library to.
  * @param lyt The gate-level layout.
- * @param on_progress Optional callback reporting completed nonconstant gate mappings.
+ * @param on_progress Optional callback reporting completed object mappings.
  * @return A layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename GateLibrary, typename GateLyt>
@@ -314,8 +317,6 @@ template <typename GateLibrary, typename GateLyt>
                                                               utils::progress_callback on_progress = {})
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
-    static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
-    static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
 
     detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, std::move(on_progress)};
 
@@ -337,8 +338,6 @@ template <typename GateLibrary, typename GateLyt>
                                                                    const sidb::layout& defect_surface)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
-    static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
-    static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
     static_assert(std::is_same_v<typename GateLibrary::layout, sidb::layout>, "GateLibrary must produce SiDB layouts");
 
     detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, {}, defect_surface.get_lattice()};
@@ -367,8 +366,6 @@ template <typename GateLibrary, typename GateLyt, typename Params>
 [[nodiscard]] typename GateLibrary::layout apply_parameterized_gate_library(const GateLyt& lyt, const Params& params)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
-    static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
-    static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
 
     detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt};
 
@@ -394,8 +391,6 @@ template <typename GateLibrary, typename GateLyt, typename Params>
                                                                                  const sidb::layout& defect_surface)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
-    static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
-    static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
     static_assert(std::is_same_v<typename GateLibrary::layout, sidb::layout>, "GateLibrary must produce SiDB layouts");
 
     detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, {}, defect_surface.get_lattice()};

@@ -36,7 +36,10 @@ Template Args:
 
 Raises:
     std::ios_base::failure: If creating, writing, closing, or
-                            replacing the file fails.
+                            replacing the file fails, or the
+                            serialization callback raises
+                            std::filesystem::filesystem_error.
+    Any: other exception raised by the serialization callback.
 
 )doc";
 
@@ -345,13 +348,31 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl = R"doc()
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb_x = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb_x =
+R"doc(Returns the cell axis relative to the occupied bounding box.
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb_y = R"doc()doc";
+Args:
+    c: Occupied cell.
+
+Returns:
+    Relative axis.
+
+)doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb_y =
+R"doc(Returns the cell axis relative to the occupied bounding box.
+
+Args:
+    c: Occupied cell.
+
+Returns:
+    Relative axis.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_cell_id = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_has_border_io_pins = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_has_border_io_pins = R"doc(Checks whether each I/O cell lies on its designated horizontal border.)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_lyt = R"doc()doc";
 
@@ -372,17 +393,35 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_run = R"d
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pi_list = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pis = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pis =
+R"doc(Returns primary input cells ordered by y, then x.
+
+Returns:
+    Sorted input cells.
+
+Raises:
+    std::bad_alloc: If allocating the cell list fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_po_list = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pos = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pos =
+R"doc(Returns primary output cells ordered by y, then x.
+
+Returns:
+    Sorted output cells.
+
+Raises:
+    std::bad_alloc: If allocating the cell list fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_components = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_header = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_header = R"doc(Writes format settings and layout extent as maximum indices.)doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_layout = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_layout = R"doc(Writes occupied cells within the half-open geometry.)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_pins = R"doc()doc";
 
@@ -774,11 +813,15 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_generate_layout_id_hash = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_generate_layout_id_hash =
+R"doc(Computes the MagCAD component identifier from occupied bounds and
+pins.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_get_pin_data = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_has_border_io_pins = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_has_border_io_pins = R"doc(Checks whether each I/O cell lies on its designated horizontal border.)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_lyt = R"doc()doc";
 
@@ -792,19 +835,37 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_run = R"
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pi_list = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pis = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pis =
+R"doc(Returns primary input cells ordered by y, then x.
+
+Returns:
+    Sorted input cells.
+
+Raises:
+    std::bad_alloc: If allocating the cell list fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_po_list = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pos = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pos =
+R"doc(Returns primary output cells ordered by y, then x.
+
+Returns:
+    Sorted output cells.
+
+Raises:
+    std::bad_alloc: If allocating the cell list fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_components = R"doc()doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_entity = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_header = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_header = R"doc(Writes format settings and layout extent as maximum indices.)doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_layout = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_layout = R"doc(Writes occupied cells within the half-open geometry.)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_qcc_layout_impl =
 R"doc(Stores the layout and serialization parameters.
@@ -864,14 +925,15 @@ static const char *mkd_doc_fiction_inml_layout_layout =
 R"doc(Creates an empty layout with open clocking.
 
 Args:
-    ar: Highest magnet position; its z-coordinate is ignored because
-        the layout is planar.
+    size: Half-open magnet sizes; a nonzero layer count selects one
+          layer.
     name: Layout name.
     tile_size_x: Clock-zone width in magnets.
     tile_size_y: Clock-zone height in magnets.
 
 Raises:
-    std::invalid_argument: if either clock-zone dimension is zero.
+    std::invalid_argument: If a size exceeds the coordinate domain or
+                           a clock-zone size is zero.
 
 )doc";
 
@@ -879,15 +941,16 @@ static const char *mkd_doc_fiction_inml_layout_layout_2 =
 R"doc(Creates an empty layout clocked by the given scheme.
 
 Args:
-    ar: Highest magnet position; its z-coordinate is ignored because
-        the layout is planar.
+    size: Half-open magnet sizes; a nonzero layer count selects one
+          layer.
     scheme: Clocking scheme over clock zones.
     name: Layout name.
     tile_size_x: Clock-zone width in magnets.
     tile_size_y: Clock-zone height in magnets.
 
 Raises:
-    std::invalid_argument: if either clock-zone dimension is zero.
+    std::invalid_argument: If a size exceeds the coordinate domain or
+                           a clock-zone size is zero.
 
 )doc";
 
@@ -947,7 +1010,20 @@ one empty row in most tiles (except for MAJ which needs to be handled
 differently as this library is not uniform otherwise). Theoretically,
 it allows for multiple wires in the same tile.)doc";
 
-static const char *mkd_doc_fiction_inml_topolinano_library_determine_port_routing = R"doc()doc";
+static const char *mkd_doc_fiction_inml_topolinano_library_determine_port_routing =
+R"doc(Routes the physical connector ports of an occupied tile.
+
+Args:
+    lyt: Layout.
+    t: Occupied tile.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    Physical connector ports.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library_has_and_or_maj_fanin =
 R"doc(Checks whether the given node has an AND, OR, or MAJ fanin node.
@@ -1031,17 +1107,13 @@ static const char *mkd_doc_fiction_is_shifted_cartesian_layout = R"doc()doc";
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_area_of =
-R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)`.
+R"doc(Computes width times height.
 
 Args:
-    coord: Coordinate.
-
-Template Args:
-    CoordinateType: Coordinate type.
+    size: Axis sizes.
 
 Returns:
-    Area of coord.
+    Area.
 
 )doc";
 
@@ -1058,95 +1130,49 @@ static const char *mkd_doc_fiction_layouts_arrangement_ODD_COLUMN = R"doc(Odd co
 static const char *mkd_doc_fiction_layouts_arrangement_ODD_ROW = R"doc(Odd rows are shifted.)doc";
 
 static const char *mkd_doc_fiction_layouts_bounding_box_2d =
-R"doc(A 2D bounding box object that computes a minimum-sized box around all
-non-empty coordinates in a given layout. Layouts can be of arbitrary
-size and, thus, may be larger than their contained elements.
-Sometimes, it might be necessary to know exactly which space the
-associated layout internals occupy. A bounding box computes
-coordinates that span a minimum-sized rectangle that encloses all non-
-empty layout coordinates.
-
-The bounding box does not automatically updated when the layout
-changes. Call `update_bounding_box()` to recompute it.
+R"doc(Cached two-dimensional bounds of every occupied coordinate, including
+positions outside the geometry.
 
 Template Args:
-    Lyt: Gate-level or cell-level layout type.)doc";
+    Lyt: Gate-level layout or cell grid.)doc";
 
 static const char *mkd_doc_fiction_layouts_bounding_box_2d_bounding_box_2d =
-R"doc(Standard constructor that computes an initial bounding box.
-
-Args:
-    lyt: Gate-level or cell-level layout whose bounding box is
-         desired.
+R"doc(Computes occupied bounds. @param lyt Layout whose occupied positions
+are enclosed.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_max =
-R"doc(Returns the maximum corner of the bounding box.
-
-In a `cartesian_layout` object, this location represents the most
-south-eastern coordinate of the bounding box enclosing every non-empty
-coordinate.
-
-Returns:
-    The maximum enclosing coordinate in the associated layout.
+R"doc(Returns the maximum occupied corner, or no coordinate for an empty
+layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_min =
-R"doc(Returns the minimum corner of the bounding box.
-
-In a `cartesian_layout` object, this location represents the most
-north-western coordinate of the bounding box enclosing every non-empty
-coordinate.
-
-Returns:
-    The minimum enclosing coordinate in the associated layout.
+R"doc(Returns the minimum occupied corner, or no coordinate for an empty
+layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_x_size =
-R"doc(Returns the horizontal size of the bounding box in layout coordinates.
+static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_x_size = R"doc(Counts occupied bounding columns; zero for an empty layout.)doc";
 
-Returns:
-    Bounding box size along the x-axis.
+static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_y_size = R"doc(Counts occupied bounding rows; zero for an empty layout.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_2d_layout = R"doc(Layout observed when bounds are recomputed.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_y_size =
-R"doc(Returns the vertical size of the bounding box in layout coordinates.
+static const char *mkd_doc_fiction_layouts_bounding_box_2d_max = R"doc(Maximum occupied corner.)doc";
 
-Returns:
-    Bounding box size along the y-axis.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_is_empty_coordinate =
-R"doc(Checks if a given coordinate is empty in the layout.
-
-Args:
-    c: The coordinate to check.
-
-Returns:
-    True if the coordinate is empty, false otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_layout = R"doc(The layout whose bounding box is being computed.)doc";
-
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_max = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_min = R"doc(The minimum and maximum coordinates of the bounding box.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_2d_min = R"doc(Minimum occupied corner.)doc";
 
 static const char *mkd_doc_fiction_layouts_bounding_box_2d_update_bounding_box =
-R"doc(The bounding box is not automatically updated when the layout changes.
-This function recomputes the bounding box.
+R"doc(Recomputes bounds from live occupied coordinates. Empty layouts have
+no bounds.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_x_size = R"doc(The horizontal size of the bounding box in layout coordinates.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_2d_x_size = R"doc(Number of bounding columns.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_2d_y_size = R"doc(Number of bounding rows.)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout =
 R"doc( A layout type that utilizes signed offset coordinates to represent a
@@ -1170,15 +1196,14 @@ R"doc( A layout type that utilizes signed offset coordinates to represent a
 ```)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_above =
-R"doc(Returns the coordinate that is directly above a given coordinate `c`,
-i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
-is already at maximum, `c` is returned instead.
+R"doc(Returns the above neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose above counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly above `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
@@ -1219,64 +1244,65 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_area =
-R"doc(Returns the layout's number of faces depending on the coordinate type.
-
-Returns:
-    Area of layout.
+R"doc(Returns:
+    Width times height.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_below =
-R"doc(Returns the coordinate that is directly below a given coordinate `c`,
-i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
-is already at minimum, `c` is returned instead.
+R"doc(Returns the below neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose below counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly below `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_bounded_neighbor =
+R"doc(Computes a Cartesian step with wide arithmetic and checks both
+positions against the geometry.
+
+Args:
+    c: Base coordinate.
+    dx: x step.
+    dy: y step.
+    dz: z step.
+
+Returns:
+    Neighbor, or no value outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout =
-R"doc(Standard constructor. The given aspect ratio points to the highest
-possible coordinate in the layout. That means in the ASCII layout
-above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has
-exactly one coordinate.
+R"doc(Creates geometry with half-open, zero-origin bounds. The default
+extent is empty.
 
 Args:
-    ar: Highest possible position in the layout.
+    size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative or larger
-                           than :math:`2^{30} - 1`.
+    std::invalid_argument: If a size exceeds the coordinate domain.
 
 )doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_2 =
-R"doc(Copy constructor from another layout's storage.
-
-Args:
-    s: Storage of another cartesian_layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_dimension = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_two_layers_only =
-R"doc(Whether a gate-level layout shares these dimensions and limits the z
-extent to 1.)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_clone =
-R"doc(Clones the layout returning a deep copy.
+R"doc(Returns:
+    Independent copy of the geometry.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_contains_coordinate =
+R"doc(Returns whether the given coordinate is located within the layout
+bounds.
+
+Args:
+    c: Coordinate to check for boundary.
 
 Returns:
-    Deep copy of the layout.
+    `true` iff `c` is located within the layout bounds.
 
 )doc";
 
@@ -1329,28 +1355,26 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_east =
-R"doc(Returns the coordinate that is directly adjacent in eastern direction
-of a given coordinate `c`, i.e., the face whose x-dimension is higher
-by 1. If `c`'s x-dimension is already at maximum, `c` is returned
-instead.
+R"doc(Returns the east neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose eastern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate adjacent and east of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_eastern_border_of =
-R"doc(Returns the coordinate with the same y and z values as a given
-coordinate but that is located at the layout's eastern border.
+R"doc(Projects a coordinate to the eastern border.
 
 Args:
-    c: Coordinate whose border counterpart is desired.
+    c: Coordinate to project.
 
 Returns:
-    The eastern border equivalent of `c`.
+    Projection, or no value if the projection lies outside the
+    geometry.
 
 )doc";
 
@@ -1365,7 +1389,8 @@ Thereby, at most 4 coordinates are touched.
 
 Args:
     c: Coordinate whose adjacent ones are desired.
-    fn: Functor to apply to each of `c`'s adjacent coordinates.
+    fn: Functor invoked as an lvalue for each of `c`'s adjacent
+        coordinates.
 
 Template Args:
     Fn: Functor type.
@@ -1379,8 +1404,8 @@ given one. In this Cartesian layout, the function will be applied to
 
 Args:
     c: Coordinate whose opposite adjacent ones are desired.
-    fn: Functor to apply to each of `c`'s opposite adjacent coordinate
-        pairs.
+    fn: Functor invoked as an lvalue for each of `c`'s opposite
+        adjacent coordinate pairs.
 
 Template Args:
     Fn: Functor type.
@@ -1421,12 +1446,21 @@ Template Args:
     Fn: Functor type that has to comply with the restrictions imposed
         by `mockturtle::foreach_element`.
 
+Raises:
+    std::invalid_argument: If a range bound lies outside layer zero.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_get_extent =
+R"doc(Returns:
+    Independent value of the layout extent.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_ground_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout's ground
 layer between `start` and `stop`. The iteration order is the same as
-for the coordinates function but without the z dimension.
+for the coordinates function but without the z axis.
 
 Args:
     start: First coordinate to include in the range of all ground
@@ -1438,6 +1472,15 @@ Returns:
     An iterator range from `start` to `stop`. If they are not
     provided, the first/last coordinate in the ground layer is used as
     a default.
+
+Raises:
+    std::invalid_argument: If a range bound lies outside layer zero.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_height =
+R"doc(Returns:
+    Number of coordinates along y.
 
 )doc";
 
@@ -1682,202 +1725,168 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_is_within_bounds =
-R"doc(Returns whether the given coordinate is located within the layout
-bounds.
-
-Args:
-    c: Coordinate to check for boundary.
-
-Returns:
-    `true` iff `c` is located within the layout bounds.
+R"doc(Args:
+    c: Coordinate. @return Whether the geometry contains the
+       coordinate.
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cartesian_layout_last_coordinate =
+R"doc(Returns:
+    Last coordinate in iteration order, or no value for empty
+    geometry.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_layers =
+R"doc(Returns:
+    Number of layers.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_layout_extent = R"doc(Independent axis sizes.)doc";
+
 static const char *mkd_doc_fiction_layouts_cartesian_layout_north =
-R"doc(Returns the coordinate that is directly adjacent in northern direction
-of a given coordinate `c`, i.e., the face whose y-dimension is lower
-by 1. If `c`'s y-dimension is already at minimum, `c` is returned
-instead.
+R"doc(Returns the north neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose northern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate adjacent and north of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_north_east =
-R"doc(Returns the coordinate that is located in north-eastern direction of a
-given coordinate `c`, i.e., the face whose x-dimension is higher by 1
-and whose y-dimension is lower by 1. If `c`'s x-dimension is already
-at maximum or `c`'s y-dimension is already at minimum, `c` is returned
-instead.
+R"doc(Returns the north-east neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose north-eastern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly north-eastern of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_north_west =
-R"doc(Returns the coordinate that is located in north-western direction of a
-given coordinate `c`, i.e., the face whose x-dimension and y-dimension
-are lower by 1. If `c`'s x-dimension or y-dimension are already at
-minimum, `c` is returned instead.
+R"doc(Returns the north-west neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose north-western counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly north-western of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_northern_border_of =
-R"doc(Returns the coordinate with the same x and z values as a given
-coordinate but that is located at the layout's northern border.
+R"doc(Projects a coordinate to the northern border.
 
 Args:
-    c: Coordinate whose border counterpart is desired.
+    c: Coordinate to project.
 
 Returns:
-    The northern border equivalent of `c`.
+    Projection, or no value if the projection lies outside the
+    geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_resize =
-R"doc(Updates the layout's dimensions, effectively resizing it.
+R"doc(Changes the geometry's axis sizes.
 
 Args:
-    ar: New aspect ratio.
+    size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative or larger
-                           than :math:`2^{30} - 1`.
-    std::out_of_range: If shared gate geometry limits the z extent to
-                       1 and `ar.z` exceeds 1.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_restrict_to_two_layers =
-R"doc(Limits the shared geometry to the two layers represented by gate-level
-signals.
-
-Raises:
-    std::out_of_range: If the z extent exceeds 1.
+    std::invalid_argument: If a size exceeds the coordinate domain.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_south =
-R"doc(Returns the coordinate that is directly adjacent in southern direction
-of a given coordinate `c`, i.e., the face whose y-dimension is higher
-by 1. If `c`'s y-dimension is already at maximum, `c` is returned
-instead.
+R"doc(Returns the south neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose southern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate adjacent and south of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_south_east =
-R"doc(Returns the coordinate that is located in south-eastern direction of a
-given coordinate `c`, i.e., the face whose x-dimension and y-dimension
-are higher by 1. If `c`'s x-dimension or y-dimension are already at
-maximum, `c` is returned instead.
+R"doc(Returns the south-east neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose south-eastern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly south-eastern of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_south_west =
-R"doc(Returns the coordinate that is located in south-western direction of a
-given coordinate `c`, i.e., the face whose x-dimension is lower by 1
-and whose y-dimension is higher by 1. If `c`'s x-dimension is already
-at minimum or `c`'s y-dimension is already at maximum, `c` is returned
-instead.
+R"doc(Returns the south-west neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose south-western counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly south-western of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_southern_border_of =
-R"doc(Returns the coordinate with the same x and z values as a given
-coordinate but that is located at the layout's southern border.
+R"doc(Projects a coordinate to the southern border.
 
 Args:
-    c: Coordinate whose border counterpart is desired.
+    c: Coordinate to project.
 
 Returns:
-    The southern border equivalent of `c`.
+    Projection, or no value if the projection lies outside the
+    geometry.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_strg = R"doc(Shared storage for the Cartesian layout dimensions.)doc";
+static const char *mkd_doc_fiction_layouts_cartesian_layout_volume =
+R"doc(Returns:
+    Volume. @throws std::overflow_error If the volume exceeds
+    `uint64_t`.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_west =
-R"doc(Returns the coordinate that is directly adjacent in western direction
-of a given coordinate `c`, i.e., the face whose x-dimension is lower
-by 1. If `c`'s x-dimension is already at minimum, `c` is returned
-instead.
+R"doc(Returns the west neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose western counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate adjacent and west of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_western_border_of =
-R"doc(Returns the coordinate with the same y and z values as a given
-coordinate but that is located at the layout's western border.
+R"doc(Projects a coordinate to the western border.
 
 Args:
-    c: Coordinate whose border counterpart is desired.
+    c: Coordinate to project.
 
 Returns:
-    The western border equivalent of `c`.
+    Projection, or no value if the projection lies outside the
+    geometry.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_x =
-R"doc(Returns the layout's x-dimension, i.e., returns the biggest x-value
-that still belongs to the layout.
-
-Returns:
-    x-dimension.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_y =
-R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
-that still belongs to the layout.
-
-Returns:
-    y-dimension.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_z =
-R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
-that still belongs to the layout.
-
-Returns:
-    z-dimension.
+static const char *mkd_doc_fiction_layouts_cartesian_layout_width =
+R"doc(Returns:
+    Number of coordinates along x.
 
 )doc";
 
@@ -1923,13 +1932,16 @@ static const char *mkd_doc_fiction_layouts_cell_grid_cell_grid =
 R"doc(Creates an empty grid.
 
 Args:
-    ar: Highest cell position in the grid.
+    size: Half-open axis sizes of the grid.
     name: Layout name.
+
+Raises:
+    std::invalid_argument: If a size exceeds the coordinate domain.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_cell_grid_2 =
-R"doc(Copies a grid, including its dimensions.
+R"doc(Copies a grid, including its extent.
 
 Args:
     other: Grid to copy.
@@ -2104,7 +2116,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_operator_assign =
-R"doc(Copies a grid, including its dimensions.
+R"doc(Copies a grid, including its extent.
 
 Args:
     other: Grid to copy.
@@ -2126,7 +2138,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_operator_eq =
-R"doc(Compares two grids: same dimensions, name, cell types, and cell names.
+R"doc(Compares two grids: same extent, name, cell types, and cell names.
 
 Args:
     other: Right-hand side grid.
@@ -2330,6 +2342,17 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_clocking_scheme_foreach_override =
+R"doc(Visits manually overridden clock numbers.
+
+Args:
+    fn: Callback for each override.
+
+Template Args:
+    Fn: Callable accepting x, y, and clock number.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_clocking_scheme_height = R"doc(Cutout height.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_in_degree = R"doc(Maximum in-degree.)doc";
@@ -2376,6 +2399,23 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_clocking_scheme_operator_assign =
+R"doc(Replaces the scheme with an independent copy. Copy failure preserves
+this scheme.
+
+Args:
+    other: Scheme to copy.
+
+Returns:
+    This scheme.
+
+Raises:
+    std::bad_alloc: If allocation fails.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_operator_assign_2 = R"doc(Moves the clocking scheme. @return This scheme.)doc";
+
 static const char *mkd_doc_fiction_layouts_clocking_scheme_operator_call =
 R"doc(Returns the clock number of the tile at :math:`(x, y)`: its overridden
 clock number if one exists, and the repeated cutout entry otherwise.
@@ -2412,6 +2452,9 @@ Args:
     y: y-coordinate of the tile.
     cn: Clock number to assign. The scheme stores `cn % num_clocks()`.
 
+Raises:
+    std::bad_alloc: If allocation fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_overrides = R"doc(Overridden clock numbers by tile position.)doc";
@@ -2446,6 +2489,10 @@ Raises:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_2 = R"doc(Copies the complete clocking scheme.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_3 = R"doc(Moves the clocking scheme.)doc";
+
 static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_name = R"doc(Canonical name.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_width = R"doc(Cutout width.)doc";
@@ -2476,6 +2523,9 @@ Args:
     cz: Clock zone to override.
     cn: New clock number for `cz`.
 
+Raises:
+    std::bad_alloc: If allocation fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_assign_synchronization_element =
@@ -2486,9 +2536,23 @@ Args:
     se: Number of full clock cycles to extend `cz`'s Hold phase by. If
         this value is 0, `cz` is turned back into a normal clock zone.
 
+Raises:
+    std::bad_alloc: If allocation fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_clocking = R"doc(Scheme and manually overridden clock numbers.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_foreach_synchronization_element =
+R"doc(Visits zones with a nonzero synchronization delay.
+
+Args:
+    fn: Callback for each synchronization element.
+
+Template Args:
+    Fn: Callable accepting a clock zone and delay.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_get_clock_number =
 R"doc(Returns the clock number of a clock zone. A clock zone spans every
@@ -2504,6 +2568,8 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_clocking_state_get_clocking_scheme =
 R"doc(Returns a read-only reference to the stored clocking scheme object.
+Assignment or moving from the state replaces the referenced contents;
+the reference stays attached to the state that supplied it.
 
 Returns:
     A reference valid for the lifetime of this state.
@@ -2602,15 +2668,40 @@ Synchronization element count.
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_clocking_state_operator_assign =
+R"doc(Replaces this state with an independent copy. Copy failure preserves
+this state.
+
+Args:
+    other: State to copy.
+
+Returns:
+    This state.
+
+Raises:
+    std::bad_alloc: If allocation fails.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_operator_assign_2 = R"doc(Moves the scheme and synchronization delays. @return This state.)doc";
+
 static const char *mkd_doc_fiction_layouts_clocking_state_replace_clocking_scheme =
-R"doc(Replaces the stored clocking scheme with the provided one.
+R"doc(Replaces the stored clocking scheme with the provided one. Copy
+failure preserves the stored scheme.
 
 Args:
     scheme: New clocking scheme.
 
+Raises:
+    std::bad_alloc: If allocation fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_state = R"doc(Creates state with the given scheme. @param s Initial scheme.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_state_2 = R"doc(Copies the scheme and synchronization delays independently.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_state_state_3 = R"doc(Moves the scheme and synchronization delays.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_synchronization = R"doc(Nonzero synchronization delays indexed by coordinate.)doc";
 
@@ -2666,86 +2757,20 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_detail_abs_axis =
-R"doc(Absolute value of one coordinate axis. It widens first, so that
-`INT32_MIN` does not overflow.
-
-Args:
-    axis: Axis value.
-
-Returns:
-    :math:`|axis|`.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_gate_level_layout =
-R"doc(A gate-level FCN layout owns gates, clocking, synchronization delays,
-and persistent obstructions. Clock zones are tiles in the coordinate
-geometry supplied by `CoordinateLayout`. The gate_level_layout class
-fulfills the requirements of a `mockturtle` logic network so that it
-can be used in many of `mockturtle`'s algorithms. Since a layout has
-to assign fixed positions to its gates (logic nodes), most generative
-member functions like `create_pi`, `create_po`, `create_and`, etc.
-require additional coordinate parameters. Consequently, `mockturtle`'s
-algorithms cannot be used to generate gate_level_layout networks. To
-make the class compliant with the API anyways, these member functions
-have their parameters defaulted but they are, in fact required to
-create meaningful layouts.
+R"doc(Placed FCN objects, ordered ports, clocking, and obstructions.
 
-The following notion is utilized in this implementation:
-- a node `n` is an index representing the `n`th created gate. All
-  properties of said gate, e.g., its type and
-position, are stored independently and can be requested from the
-layout. An empty layout has 2 nodes, namely `const0` and `const1` as
-required by `mockturtle`. At the moment, they are not used for
-anything meaningful but could be.
-
-- a signal is an unsigned integer representation of a `tile`, i.e., a
-  coordinate in the layout. It can be seen as a
-pointer to a position. Consequently, the utilized coordinates need to
-be convertible to `uint64_t`.
-
-- the creation of PIs and POs creates nodes (the latter in contrast to
-  other `mockturtle` networks) that have a
-position on the layout.
-
-- the creation of buffers (`create_buf`) creates nodes as well. A
-  buffer with more than one output is a fanout such
-that `is_fanout` will return `true` on it. However, it is also still a
-buffer (`is_buf` returns `true` as well). Buffers and wires are used
-interchangeably.
-
-- each node has an associated gate function. PIs, POs, and buffers
-  compute the identity function.
-
-- signals (pointers to tiles) cannot be inverting. Thereby, inverter
-  nodes (gates) have to be created that can be
-checked for via is_inv.
-
-- each `create_...` function requires a tile parameter that determines
-  its placement. If the provided tile is
-invalid, the location will not be stored and the node will not count
-towards number of gates or wires. A valid tile must have a signal,
-i.e., x and y in :math:`[-2^{30}, 2^{30} - 1]` and z in :math:`\{0,
-1\}`; otherwise, the function throws `std::out_of_range` and leaves
-the layout unchanged.
-
-- a node can be overwritten by creating another node on its location.
-  This can, however, lead to unwanted effects and
-should be avoided.
-
-- nodes can be moved via the `move_node` function. This function can
-  also be used to update their children, i.e.,
-incoming signals.
-
-Most implementation details regarding `mockturtle`-specific functions
-are borrowed from `mockturtle/networks/klut.hpp`. Therefore,
-`mockturtle` API functions are only sporadically documented where
-their behavior might differ. Information on their functionality can be
-found in `mockturtle`'s docs.
+Objects have stable identities independent of their coordinates.
+Connections describe declared topology; physical validation checks
+adjacency, clocking, and geometry separately. Copies own independent
+state. Visitors may edit coordinates, names, and capabilities. Object
+and terminal visitors must not create or remove objects, change
+terminal order, or replace the layout during traversal. Connection
+visitors must also preserve the traversed input or sink connections,
+as specified on each visitor.
 
 Template Args:
-    CoordinateLayout: Coordinate geometry used for gate placement.)doc";
+    CoordinateLayout: Coordinate geometry used for placement.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_adjacent_opposite_tiles =
 R"doc(Returns pairs of opposite adjacent tiles.
@@ -2769,6 +2794,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_allocate_edge = R"doc(Allocates an edge from the free list or grows storage.)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_clock_number =
 R"doc(Overrides the clock number of a tile in the stored scheme. The clock
 number applies to every layer of the tile, so the z-coordinate of `cz`
@@ -2780,8 +2807,6 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_node = R"doc()doc";
-
 static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_synchronization_element =
 R"doc(Assigns a synchronization element to the provided clock zone.
 
@@ -2792,36 +2817,17 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_check_tile =
-R"doc(Checks that a tile has a signal. An invalid tile stands for an
-unplaced node and passes.
-
-Args:
-    t: Tile to check.
-
-Raises:
-    std::out_of_range: If `t` is valid but its x or y value lies
-                       outside of :math:`[-2^{30}, 2^{30} - 1]` or its
-                       z value is neither 0 nor 1.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_check_placement =
+R"doc(Rejects occupied placement before any object mutation. Coordinates
+outside the extent are valid during editing.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_extent =
-R"doc(Returns an aspect ratio after checking that all tiles within it have a
-signal.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_input = R"doc(Validates an input endpoint and returns its connection index.)doc";
 
-Args:
-    ar: Aspect ratio to check.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_object = R"doc(Validates an object identity.)doc";
 
-Returns:
-    `ar`.
-
-Raises:
-    std::out_of_range: If the x or y value of `ar` is larger than
-                       :math:`2^{30} - 1` or its z value is larger
-                       than 1.
-
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_object_2 = R"doc(Validates an object identity.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_connection =
 R"doc(Clears the obstruction status of the connection from coordinate `src`
@@ -2855,137 +2861,77 @@ R"doc(Clears all obstructed coordinates that were manually marked via
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_tile =
-R"doc(Removes all assigned nodes from the given tile and marks them as dead.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_tile = R"doc(Removes the occupant of a coordinate if present.)doc";
 
-Args:
-    t: Tile whose nodes are to be removed.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_clocking_state = R"doc(Clocking overrides and synchronization.)doc";
 
-Note:
-    This function does not reduce the number of nodes in the layout
-    nor does it reduce the number of PIs that are being returned via
-    `num_pis()` even if the tile to clear is an input tile. However,
-    the number of POs is reduced if the tile to clear is an output
-    tile. While this seems counter-intuitive and inconsistent, it is
-    in line with mockturtle's understanding of nodes and primary
-    outputs.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_values = R"doc(Resets the custom value of every node in the layout to 0.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_visited = R"doc(Resets the visited flag of every node in the layout to 0.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clone =
-R"doc(Clones the layout returning a deep copy.
-
-Returns:
-    Deep copy of the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_compute = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_compute_2 = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_clone = R"doc(Returns an independent value copy.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_connect =
-R"doc(Connects the given signal `s` to the given node `n` as a child. The
-new child `s` is appended at the end of `n`'s list of children. Thus,
-if the order of children is important, `move_node()` should be used
-instead. Otherwise, this function has a smaller overhead and is to be
-preferred.
+R"doc(Connects an output to an ordered input, replacing the input's existing
+source.
 
-Args:
-    s: New incoming signal to `n`.
-    n: Node that should add `s` as its child.
-
-Returns:
-    Signal pointing to `n`.
+Port and identity checks precede mutation. Adjacency, clocking, and
+geometry need not be valid during editing.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_constant_value = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_contains = R"doc(Returns whether this identity names a live object.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_and = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_and = R"doc(Creates a AND gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_buf = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_buf = R"doc(Creates a wire driven by `a`.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_ge = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_buf_2 = R"doc(Creates a wire with its input disconnected.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_gt = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_gate =
+R"doc(Creates a gate with an ordered truth table and initial input
+connections.
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_le = R"doc()doc";
+Unspecified trailing inputs remain disconnected. Constant functions
+require an explicit placed object.
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_lt = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_maj = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nand = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_node_from_literal =
-R"doc(Creates a new node with the given `children` and cached truth table
-`literal`, assigns it to tile `t`, and notifies all `on_add` event
-listeners.
-
-Args:
-    children: Fanin signals of the new node.
-    literal: Cached truth table literal representing the new node's
-             function.
-    t: Tile to assign the new node to.
-
-Returns:
-    Signal representing tile `t`, now hosting the newly created node.
+Raises:
+    std::invalid_argument: If placement is occupied, or children
+                           exceed the function arity.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nor = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_ge = R"doc(Creates a GE gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_not = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_gt = R"doc(Creates a GT gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_or = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_le = R"doc(Creates a LE gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_lt = R"doc(Creates a LT gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_maj = R"doc(Creates a majority gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nand = R"doc(Creates a NAND gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nor = R"doc(Creates a NOR gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_not = R"doc(Creates a NOT gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_object = R"doc(Creates a validated object and its initial ordered connections.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_or = R"doc(Creates a OR gate.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_create_pi =
-R"doc(Creates a primary input on tile `t`.
-
-Args:
-    name: Name of the PI. If empty, the name is `pi<i>`, where `i` is
-          the number of PIs before the new one.
-    t: Tile to place the PI on. An invalid tile leaves the PI
-       unplaced.
-
-Returns:
-    Signal pointing to `t`.
-
-Raises:
-    std::out_of_range: If `t` is valid but has no signal encoding.
+R"doc(Creates a primary input at `t`. Occupied coordinates reject without
+mutation.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po =
-R"doc(Creates a primary output on tile `t` that is driven by signal `s`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po = R"doc(Creates a primary output driven by `s` at `t`.)doc";
 
-Args:
-    s: Signal that drives the PO.
-    name: Name of the PO. If empty, the name is `po<i>`, where `i` is
-          the number of POs before the new one.
-    t: Tile to place the PO on. An invalid tile leaves the PO
-       unplaced.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po_2 = R"doc(Creates a primary output with its input disconnected.)doc";
 
-Returns:
-    Signal pointing to `t`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_terminal = R"doc(Creates a named output terminal.)doc";
 
-Raises:
-    std::out_of_range: If `t` is valid but has no signal encoding.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xnor = R"doc(Creates a XNOR gate.)doc";
 
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xnor = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xor = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_decr_value = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xor = R"doc(Creates a XOR gate.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_degree =
 R"doc(Returns the number of distinct incoming or outgoing neighboring clock
@@ -2999,41 +2945,31 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_events = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_disconnect = R"doc(Disconnects one input without changing the indices of other inputs.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_evnts = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record =
+R"doc(Mutable connection with constant-time removal from the source's sink
+list.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_fanin_size =
-R"doc(Returns the number of incoming, adjacently placed, and properly
-clocked signals to the given node.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_destination = R"doc(Destination object slot.)doc";
 
-Args:
-    n: Node to check.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_input = R"doc(Destination input index.)doc";
 
-Template Args:
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanins.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_next = R"doc(Next sink edge, or next free edge when disconnected.)doc";
 
-Returns:
-    Number of fanins to `n`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_previous = R"doc(Previous sink edge.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_source = R"doc(Source object slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_fanout_size =
-R"doc(Returns the number of outgoing, adjacently placed, and properly
-clocked signals of the given node.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_edges = R"doc(Reusable contiguous connection storage.)doc";
 
-Args:
-    n: Node to check.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_ensure_functions = R"doc(Initializes elementary functions when a moved-from layout is reused.)doc";
 
-Template Args:
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanouts.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_fanin_size = R"doc(Counts connected input slots, irrespective of physical legality.)doc";
 
-Returns:
-    Number of fanouts to `n`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_fanout_size = R"doc(Counts sink input ports, including multiple ports on one object.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_find_object = R"doc(Finds the object at a coordinate; empty coordinates have no identity.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_adjacent_opposite_tiles =
 R"doc(Applies a function to each pair of opposite adjacent tiles.
@@ -3059,64 +2995,26 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_ci =
-R"doc(Applies a function to all combinational input nodes (including dead
-ones) in the layout. Alias for `foreach_pi`.
-
-Args:
-    fn: Functor to apply to each combinational input node.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_transform`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_co =
-R"doc(Applies a function to all combinational output signals (including
-those that point to dead nodes) in the layout. Alias for `foreach_po`.
-
-Args:
-    fn: Functor to apply to each combinational output signal.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_transform`.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_fanin =
-R"doc(Applies a function to all nodes that are incoming to a given one.
-Thereby, only incoming clocked zones (+/- one layer to include
-crossings) are being considered whose data flow connections are
-respectively established. That is, the given function is applied to
-all nodes that are connected to the one assigned to `t` as fanins on
-neighboring tiles.
+R"doc(Visits declared sources in input-index order. Disconnected inputs
+retain their indices.
 
-Args:
-    n: Node whose fanins are desired.
-    fn: Functor to apply to each of `n`'s fanins.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_transform`.
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanins.
+Callbacks must not remove the traversed object or change its input
+connections.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_fanout = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_fanout =
+R"doc(Visits destination objects once per connected input port in
+unspecified order.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_gate =
-R"doc(Applies a function to all gates (excluding dead ones) in the layout.
-Uses `is_gate` to check whether a node is a gate.
+R"doc(Visits logic gates.
 
-Args:
-    fn: Functor to apply to each gate that is not dead.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_if`.
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
 
 )doc";
 
@@ -3126,7 +3024,7 @@ R"doc(Applies a function to each ground-layer tile in the coordinate range.
 Args:
     fn: Functor applied to each tile.
     start: First tile.
-    stop: Exclusive end tile; an invalid tile selects the layout end.
+    stop: Exclusive end tile; absence selects the layout end.
 
 Template Args:
     Fn: Functor type.
@@ -3134,7 +3032,8 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_incoming_clocked_zone =
-R"doc(Applies a function to all incoming clock zones of a given one.
+R"doc(Applies a function as an lvalue to all incoming clock zones of a given
+one.
 
 Args:
     cz: Base clock zone.
@@ -3145,20 +3044,43 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_node =
-R"doc(Applies a function to all nodes (excluding dead ones) in the layout.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_object =
+R"doc(Visits live objects. Callbacks may accept an object and enumeration
+index and return false to stop.
+
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
+
+Traversal scans retained storage slots, including removed objects.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_obstructed_connection =
+R"doc(Visits manual directed-connection obstructions without implicit
+physical connections.
 
 Args:
-    fn: Functor to apply to each node that is not dead.
+    fn: Callback for each manual obstruction.
 
 Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_if`.
+    Fn: Callable accepting source and target coordinates.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_obstructed_coordinate =
+R"doc(Visits manual coordinate obstructions without implicit occupancy.
+
+Args:
+    fn: Callback for each manual obstruction.
+
+Template Args:
+    Fn: Callable accepting one coordinate.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_outgoing_clocked_zone =
-R"doc(Applies a function to all outgoing clock zones of a given one.
+R"doc(Applies a function as an lvalue to all outgoing clock zones of a given
+one.
 
 Args:
     cz: Base clock zone.
@@ -3170,33 +3092,42 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_pi =
-R"doc(Applies a function to all primary input nodes (including dead ones) in
-the layout.
+R"doc(Visits primary inputs in declared interface order.
 
-Args:
-    fn: Functor to apply to each primary input node.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_transform`.
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_po =
-R"doc(Applies a function to all primary output signals (including those that
-point to dead nodes) in the layout. Note the difference to
-`foreach_pi` in the signature of `fn`. This function applies to all
-POs as signals whereas `foreach_pi` applies to all PIs as nodes. This
-is with respect to `mockturtle`'s API.
+R"doc(Visits primary outputs in declared interface order.
 
-Args:
-    fn: Functor to apply to each primary output signal.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_transform`.
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_sink =
+R"doc(Visits sink input ports of an output, irrespective of physical
+legality.
+
+Sink order is unspecified. Callbacks must not remove the source object
+or change its sink connections.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_synchronization_element =
+R"doc(Visits zones with a nonzero synchronization delay.
+
+Args:
+    fn: Callback for each synchronization element.
+
+Template Args:
+    Fn: Callable accepting a clock zone and delay.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_terminal = R"doc(Visits interface objects in their declared order.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_tile =
 R"doc(Applies a function to each tile in the coordinate range.
@@ -3204,7 +3135,7 @@ R"doc(Applies a function to each tile in the coordinate range.
 Args:
     fn: Functor applied to each tile.
     start: First tile.
-    stop: Exclusive end tile; an invalid tile selects the layout end.
+    stop: Exclusive end tile; absence selects the layout end.
 
 Template Args:
     Fn: Functor type.
@@ -3212,137 +3143,40 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_wire =
-R"doc(Applies a function to all wires (excluding dead ones) in the layout.
-Uses `is_wire` to check whether a node is a wire.
+R"doc(Visits identity objects, including terminals.
 
-Args:
-    fn: Functor to apply to each wire that is not dead.
-
-Template Args:
-    Fn: Functor type that has to comply with the restrictions imposed
-        by `mockturtle::foreach_element_if`.
+Callbacks must not create or remove objects, change terminal order, or
+replace the layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout =
-R"doc(Standard constructor. Creates a named gate-level layout of the given
-aspect ratio. To this end, it calls `CoordinateLayout`'s standard
-constructor.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_free_edge = R"doc(First reusable connection slot.)doc";
 
-Args:
-    ar: Highest possible position in the layout.
-    name: Layout name.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_free_object = R"doc(First reusable object slot.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_functions = R"doc(Deduplicated cold truth-table payloads.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_2 =
-R"doc(Standard constructor. Creates a gate-level layout of the given aspect
-ratio and clocks it via the given clocking scheme. To this end, it
-calls `CoordinateLayout`'s standard constructor.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout = R"doc(Creates an empty layout with the given geometry and name.)doc";
 
-Args:
-    ar: Highest possible position in the layout.
-    scheme: Clocking scheme to apply to this layout.
-    name: Layout name.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_2 = R"doc(Creates an empty layout with the given geometry, clocking, and name.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_3 = R"doc(Creates an empty layout with shifted rows or columns.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_3 =
-R"doc(Standard constructor for coordinate layouts with shifted rows or
-columns. Creates a named gate-level layout of the given arrangement
-and aspect ratio. To this end, it calls `CoordinateLayout`'s standard
-constructor.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_4 = R"doc(Creates an empty layout with shifted rows or columns and clocking.)doc";
 
-Args:
-    a: Arrangement of the shifted rows or columns.
-    ar: Highest possible position in the layout.
-    name: Layout name.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_4 =
-R"doc(Standard constructor for coordinate layouts with shifted rows or
-columns. Creates a gate-level layout of the given arrangement and
-aspect ratio and clocks it via the given clocking scheme. To this end,
-it calls `CoordinateLayout`'s standard constructor.
-
-Args:
-    a: Arrangement of the shifted rows or columns.
-    ar: Highest possible position in the layout.
-    scheme: Clocking scheme to apply to this layout.
-    name: Layout name.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_5 =
-R"doc(Copy constructor from another layout's storage.
-
-Args:
-    s: Storage of another gate_level_layout.
-
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_5 = R"doc(Creates an empty layout with an independent copy of the geometry.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_6 =
-R"doc(Copy constructor from another layout's storage.
-
-Args:
-    s: Storage of another gate_level_layout.
-    e: Event storage of another gate_level_layout.
+R"doc(Copies geometry, identities, connections, and owned capabilities
+independently.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_7 =
-R"doc(Copy constructor from another `CoordinateLayout`. All geometry aliases
-retain the two-layer extent limit of gate-level signals.
-
-Args:
-    lyt: Coordinate layout.
-
-Raises:
-    std::out_of_range: If the extent of `lyt` exceeds the range that
-                       gate-level signals can represent, i.e., if its
-                       x or y value is larger than :math:`2^{30} - 1`
-                       or its z value is larger than 1.
+R"doc(Moves owned state and leaves an empty reusable source with its
+original geometry.
 
 )doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_clocking = R"doc(Scheme, clock overrides, and synchronization delays.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_const0 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_const1 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_fn_cache = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_layout_name = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_node_names = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_node_tile_map = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_num_crossings = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_num_gates = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_num_wires = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_obstructions = R"doc(Persistent manually assigned obstructions.)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_tile_node_map = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_data_trav_id = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_node =
-R"doc(gate-level layout node
-
-`data[0].h1`: Internal (data-flow independent) fan-out size (MSB
-indicates dead nodes) `data[0].h2`: Application-specific value
-`data[1].h1`: Function literal in truth table cache `data[2].h2`:
-Visited flags)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_storage_node_operator_eq = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clock_number =
 R"doc(Returns the clock number of a tile. Every layer of a tile has the same
@@ -3357,49 +3191,23 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clocking_scheme =
-R"doc(Returns a copy of the stored clocking scheme object.
+R"doc(Returns a read-only reference to the stored clocking scheme object.
+Clock overrides and scheme replacements update the referenced object.
+Assignment or moving from the layout replaces the referenced contents;
+the reference stays attached to the layout that supplied it.
 
 Returns:
-    A copy of the stored clocking scheme object.
+    A reference valid for the lifetime of this layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_constant = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_get_input_name = R"doc(Returns the input name at an interface index.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_input_name = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_get_layout_name = R"doc(Returns the layout name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_layout_name = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_get_name = R"doc(Returns an object's name, or an empty string for an unnamed object.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_name = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_name_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_node =
-R"doc(Fetches the node that is placed onto a tile pointed to by a given
-signal. If no node is placed there, the `const0` node is returned.
-
-Args:
-    s: Pointer to a tile.
-
-Returns:
-    Node at position `t` where `s` points at `t`; or 0 if no node is
-    placed at `t`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_node_2 =
-R"doc(Fetches the node that is placed onto the provided tile If no node is
-placed there, the `const0` node is returned.
-
-Args:
-    t: Tile in the layout.
-
-Returns:
-    Node at position `t`; or 0 if no node is placed at `t`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_output_name = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_get_output_name = R"doc(Returns the output name at an interface index.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_synchronization_element =
 R"doc(Returns the Hold phase extension in clock cycles of clock zone `cz`.
@@ -3414,15 +3222,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_tile =
-R"doc(The inverse function of `get_node`. Fetches the tile that the provided
-node is placed on. Returns the invalid tile if the node is not placed.
-
-Args:
-    n: Node whose location is desired.
-
-Returns:
-    Tile at which `n` is placed or the invalid tile if `n` is not
-    placed.
+R"doc(Returns the object's coordinate. @throws std::invalid_argument If the
+identity is stale.
 
 )doc";
 
@@ -3431,7 +3232,7 @@ R"doc(Returns ground-layer tiles in the coordinate range.
 
 Args:
     start: First tile.
-    stop: Exclusive end tile; an invalid tile selects the layout end.
+    stop: Exclusive end tile; absence selects the layout end.
 
 Returns:
     Tile range.
@@ -3470,11 +3271,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_input_name = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_has_input_name = R"doc(Returns whether an input has a name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_name = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_name_2 = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_has_name = R"doc(Returns whether an object has a name.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_has_no_incoming_signal =
 R"doc(Checks whether the given tile has no incoming tiles.
@@ -3603,29 +3402,25 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_has_opposite_incoming_and_outgoing_signals =
-R"doc(Checks whether the given tile `t` has its incoming and outgoing
-signals on opposite sides of the tile. For this purpose, the function
-relies on `foreach_adjacent_opposite_coordinates` of the underlying
-`CoordinateLayout`.
+R"doc(Checks whether incoming and outgoing signals lie on opposite sides of
+`t`.
 
-This function is very helpful for many gate libraries to check for
-(non-)straight gates, which might look different.
+Uses `foreach_adjacent_opposite_coordinates` of the underlying
+coordinate layout.
 
 Args:
     t: Base tile.
 
 Template Args:
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanins and
-                     fanouts.
+    RespectClocking: Whether signal queries respect the clocking
+                     scheme.
 
 Returns:
-    `true` iff `t` has incoming and outgoing signals on opposite
-    sides.
+    Whether `t` has incoming and outgoing signals on opposite sides.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_output_name = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_has_output_name = R"doc(Returns whether an output has a name.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_has_south_eastern_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in south-eastern
@@ -3755,6 +3550,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_identity = R"doc(Reconstructs a live slot's identity.)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_in_degree =
 R"doc(Returns the number of incoming clock zones to the given one.
 
@@ -3779,64 +3576,32 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_incoming_data_flow =
-R"doc(Returns a container that contains all tiles that feed information to
-the given one. Thereby, only incoming clocked zones (+/- one layer to
-include crossings) are being considered whose data flow connections
-are respectively established. That is, the returned container contains
-all tiles that host nodes that are connected to the one assigned to
-`t` as fanins.
-
-Args:
-    t: Tile whose incoming data flow ones are desired.
-
-Template Args:
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanins.
-
-Returns:
-    A container that contains all of `t`'s incoming data flow tiles.
+R"doc(Returns coordinates of declared sources; optionally filters physical
+clocking and adjacency.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_incr_trav_id = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_incr_value = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_index_to_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_initialize_truth_table_cache =
-R"doc(Populates the truth table cache with the constant and elementary
-functions used by the fundamental gate creation functions
-(`create_not`, `create_and`, etc.).
+static const char *mkd_doc_fiction_layouts_gate_level_layout_initialize_functions =
+R"doc(Interns the elementary gate functions without allocating layout
+objects.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_and = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_count = R"doc(Returns the number of input slots, including disconnected slots.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_buf =
-R"doc(Returns whether `n` computes the identity function.
-
-Args:
-    n: Node to check.
-
-Returns:
-    `true` iff `n` computes the identity.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_edges =
+R"doc(Returns an object's ordered connection indices, including disconnected
+slots.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_child =
-R"doc(Check whether `s` is among the fanin signals of `n`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_input_edges_2 = R"doc(Returns an object's mutable ordered connection indices.)doc";
 
-Args:
-    n: Node to be checked.
-    s: Signal to look for among `n`'s children.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_inputs = R"doc(Declared primary input order.)doc";
 
-Returns:
-    `true` iff `s` is a child of `n`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_and = R"doc(Returns whether the object computes AND.)doc";
 
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_ci = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_buf = R"doc(Returns whether an object computes the identity function.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_clocking_scheme =
 R"doc(Compares the stored clocking scheme against the provided name.
@@ -3851,114 +3616,23 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_co = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_empty = R"doc(Returns whether the layout has no objects.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_combinational = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_empty_tile = R"doc(Returns whether a coordinate has no occupant.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_complemented =
-R"doc(Necessary function in the `mockturtle` API. However, in this layout
-type, signals cannot be complemented.
-
-Args:
-    s: Signal to check.
-
-Returns:
-    `false`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_constant = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_dead =
-R"doc(Checks whether a node (not its assigned tile) is dead. Nodes can be
-dead for a variety of reasons. For instance if they are dangling (see
-the `mockturtle` API). In this layout type, nodes are also marked dead
-when they are not assigned to a tile (which is considered equivalent
-to dangling).
-
-Args:
-    n: Node to check for liveliness.
-
-Returns:
-    `true` iff `n` is dead.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_empty =
-R"doc(Checks whether there are no gates or wires assigned to the layout's
-coordinates.
-
-Returns:
-    `true` iff the layout is empty.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_empty_tile =
-R"doc(Returns whether `t` does not have a node assigned to it.
-
-Args:
-    t: Tile to check.
-
-Returns:
-    `true` iff `t` is an empty tile.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_fanout =
-R"doc(Returns whether `n` is a wire and has multiple outputs, thereby,
-acting as a fanout gate. Note that a fanout will return `true` for
-both `is_wire` and `is_fanout`.
-
-Args:
-    n: Node to check.
-
-Returns:
-    `true` iff `n` is a fanout gate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_function =
-R"doc(Returns whether `n`ode `n` computes a function. That is, this function
-returns `true` iff `n` is not a constant.
-
-Args:
-    n: Node to check.
-
-Returns:
-    `true` iff `n` is not a constant.
-
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_fanout = R"doc(Returns whether an identity object drives more than one input port.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gate =
-R"doc(Returns whether a given node is a gate in accordance with
-`mockturtle`'s definition, i.e., whether it not a constant and not a
-PI. Thereby, any wire/buffer (including POs) is a gate if this
-function is used to check for it. This poses an inconsistency but is
-required to comply with certain `mockturtle` algorithms.
-
-Args:
-    n: Node to check.
-
-Returns:
-    `true` iff `n` is neither a constant nor a PI.
+R"doc(Returns whether an object is a logic gate rather than a wire or
+terminal.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gate_tile =
-R"doc(Returns whether the node assigned to `t` fulfills `is_gate` (in
-accordance with `mockturtle`'s definition of gates).
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gate_tile = R"doc(Returns whether the coordinate hosts a gate.)doc";
 
-Args:
-    t: Tile to check.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_ge = R"doc(Returns whether the object computes GE.)doc";
 
-Returns:
-    `true` iff `t` hosts a node that is a neither a constant nor a PI.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_ge = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gt = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gt = R"doc(Returns whether the object computes GT.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_incoming_clocked =
 R"doc(Evaluates whether clock zone `cz2` feeds information to clock zone
@@ -3975,44 +3649,19 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_incoming_signal =
-R"doc(Checks whether signal `s` is incoming to tile `t`. That is, whether
-tile `t` hosts a node that has a fanin assigned to the tile that
-signal `s` points to.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_incoming_signal = R"doc(Checks for a physical incoming connection from the given x/y location.)doc";
 
-Args:
-    t: Base tile.
-    s: Signal pointing to a potential incoming tile to `t`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_inv = R"doc(Returns whether the object computes INV.)doc";
 
-Template Args:
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanins.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_le = R"doc(Returns whether the object computes LE.)doc";
 
-Returns:
-    `true` iff `s` is incoming to `t`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_lt = R"doc(Returns whether the object computes LT.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_maj = R"doc(Returns whether the object computes MAJ.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_inv =
-R"doc(Returns whether `n` computes the binary inversion (NOT gate).
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_nand = R"doc(Returns whether the object computes NAND.)doc";
 
-Args:
-    n: Node to check.
-
-Returns:
-    `true` iff `n` is a NOT gate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_le = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_lt = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_maj = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_nand = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_nor = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_nor = R"doc(Returns whether the object computes NOR.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_obstructed_connection =
 R"doc(Checks if the given coordinate-coordinate connection is obstructed of
@@ -4038,7 +3687,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_or = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_or = R"doc(Returns whether the object computes OR.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_outgoing_clocked =
 R"doc(Evaluates whether clock zone `cz2` accepts information from clock zone
@@ -4055,67 +3704,15 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_outgoing_signal =
-R"doc(Checks whether signal `s` is outgoing from tile `t`. That is, whether
-tile `t` hosts a node that has a fanout assigned to the tile that
-signal `s` points to.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_outgoing_signal = R"doc(Checks for a physical outgoing connection to the given x/y location.)doc";
 
-Args:
-    t: Base tile.
-    s: Signal pointing to a potential outgoing tile of `t`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_pi = R"doc(Returns whether an object is a primary input.)doc";
 
-Template Args:
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanouts.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_pi_tile = R"doc(Returns whether the coordinate hosts a pi.)doc";
 
-Returns:
-    `true` iff `s` is outgoing from `t`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_po = R"doc(Returns whether an object is a primary output.)doc";
 
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_pi =
-R"doc(Check whether `n` is a primary input.
-
-Args:
-    n: Node to be checked.
-
-Returns:
-    `true` iff `n` is a PI.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_pi_tile =
-R"doc(Check whether tile `t` hosts a primary input.
-
-Args:
-    t: Tile to be checked.
-
-Returns:
-    `true` iff the node located at tile `t` is a PI.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_po =
-R"doc(Check whether `n` is a primary output.
-
-Args:
-    n: Node to be checked.
-
-Returns:
-    `true` iff `n` is a PO.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_po_tile =
-R"doc(Check whether tile `t` hosts a primary output.
-
-Args:
-    t: Tile to be checked.
-
-Returns:
-    `true` iff the node located at tile `t` is a PO.
-
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_po_tile = R"doc(Returns whether the coordinate hosts a po.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_regularly_clocked =
 R"doc(Returns whether the layout is clocked by a regular clocking scheme
@@ -4138,60 +3735,21 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire = R"doc(Equivalent to `is_buf`.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire = R"doc(Returns whether an object computes the identity function.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire_tile =
-R"doc(Returns whether the node assigned to `t` fulfills `is_wire`.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire_tile = R"doc(Returns whether the coordinate hosts a wire.)doc";
 
-Args:
-    t: Tile to check.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_xnor = R"doc(Returns whether the object computes XNOR.)doc";
 
-Returns:
-    `true` iff `t` hosts a node that computes the identity.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_xor = R"doc(Returns whether the object computes XOR.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_layout_name = R"doc(Layout name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_xnor = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_live_count = R"doc(Live object count.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_xor = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_move_object = R"doc(Moves an object without changing its identity or connections.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_kill_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_make_signal =
-R"doc(Invokes the same behavior as `get_tile(n)` but additionally casts the
-return value to a signal. That is, this function returns the signal
-representation of the tile that the node `n` is assigned to.
-
-Args:
-    n: Node whose signal is desired.
-
-Returns:
-    Signal that points to `n`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_move_node =
-R"doc(Moves a given node to a new position and also updates its children,
-i.e., incoming signals.
-
-Args:
-    n: Node to move.
-    t: Tile to move `n` to.
-    new_children: New incoming signals to `n`.
-
-Returns:
-    Signal pointing to `n`'s new tile.
-
-Raises:
-    std::out_of_range: If `t` has no signal encoding.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_node_function = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_node_to_index = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_cis = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_names = R"doc(Sparse cold names.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_clocks =
 R"doc(Returns the number of clock phases in the layout. Each clock cycle is
@@ -4203,33 +3761,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_cos = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_crossings = R"doc(Counts crossing-layer wires above occupied ground-layer tiles.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_crossings =
-R"doc(Returns the number of placed nodes in the layout that compute the
-identity function and cross other nodes.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_gates = R"doc(Counts non-identity objects.)doc";
 
-Returns:
-    Number of crossings in the layout.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_pis = R"doc(Counts primary inputs.)doc";
 
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_gates =
-R"doc(Returns the number of placed nodes in the layout that do not compute
-the identity function.
-
-Returns:
-    Number of gates in the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_latches = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_pis = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_pos = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_registers = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_pos = R"doc(Counts primary outputs.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_se =
 R"doc(Counts zones with a nonzero Hold-phase extension. @return
@@ -4237,14 +3775,43 @@ Synchronization element count.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_wires =
-R"doc(Returns the number of placed nodes in the layout that compute the
-identity function including PIs and POs.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_wires = R"doc(Counts identity objects, including terminals.)doc";
 
-Returns:
-    Number of wires in the layout.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_function = R"doc(Returns the truth table in logical input-index order.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind =
+R"doc(Object role; removed slots have no coordinate or connections visible
+through the API.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_GATE = R"doc(Logic gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_PI = R"doc(Primary input terminal.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_PO = R"doc(Primary output terminal.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_REMOVED = R"doc(Removed object slot.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_WIRE = R"doc(Identity wire.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record = R"doc(Hot object data. Names and truth-table payloads are stored separately.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_first_sink = R"doc(First reverse connection, or next free object when removed.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_function = R"doc(Interned truth-table literal.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_generation = R"doc(Generation checked by object handles.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_input_count = R"doc(Number of input ports, including disconnected ports.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_inputs = R"doc(Inline input-index to connection mapping for every built-in gate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_kind = R"doc(Physical role.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_position = R"doc(Assigned coordinate.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_sink_count = R"doc(Number of connected sink input ports.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_objects = R"doc(Reusable object slots.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_obstruct_connection =
 R"doc(Marks the connection from coordinate `src` to coordinate `tgt` as
@@ -4267,6 +3834,14 @@ Args:
     c: clock_zone to obstruct.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_obstruction_state = R"doc(Persistent manual obstructions.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_occupancy = R"doc(Coordinate lookup independent of identities and connections.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_operator_assign = R"doc(Replaces this layout with an independent value copy.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_operator_assign_2 = R"doc(Moves owned state and leaves an empty reusable source.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_out_degree =
 R"doc(Returns the number of outgoing clock zones from the given one.
@@ -4292,28 +3867,22 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_outgoing_data_flow =
-R"doc(Returns a container that contains all tiles that accept information
-from the given one. Thereby, only outgoing clocked zones (+/- one
-layer to include crossings) are being considered whose data flow
-connections are respectively established. That is, the returned
-container contains all tiles that host nodes that are connected to the
-one assigned to `t` as fanouts.
-
-Args:
-    t: Tile whose outgoing data flow ones are desired.
-
-Template Args:
-    RespectClocking: Flag to indicate that the underlying clocking is
-                     to be respected when evaluating fanouts.
-
-Returns:
-    A container that contains all of `t`'s outgoing data flow tiles.
+R"doc(Returns coordinates of declared sinks; optionally filters physical
+clocking and adjacency.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_pi_at = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_outputs = R"doc(Declared primary output order.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_po_at = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_pi_at = R"doc(Returns a primary input in declared interface order.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_po_at = R"doc(Returns a primary output in declared interface order.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_remove =
+R"doc(Removes an object and disconnects all inputs and sinks. Stale
+identities reject.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_replace_clocking_scheme =
 R"doc(Replaces the stored clocking scheme with the provided one.
@@ -4323,66 +3892,55 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_resize =
-R"doc(Updates the layout's dimensions, effectively resizing it.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_set_input_name = R"doc(Sets the input name at an interface index.)doc";
 
-Args:
-    ar: New aspect ratio.
-
-Raises:
-    std::invalid_argument: If an axis of `ar` is negative.
-    std::out_of_range: If `ar` exceeds the range that gate-level
-                       signals can represent, i.e., if its x or y
-                       value is larger than :math:`2^{30} - 1` or its
-                       z value is larger than 1.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_set_input_order =
+R"doc(Sets the complete input permutation. Invalid orders reject without
+mutation.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_revive_node = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_set_layout_name = R"doc(Sets the layout name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_input_name = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_set_name = R"doc(Sets an object's name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_layout_name = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_set_output_name = R"doc(Sets the output name at an interface index.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_name = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_name_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_output_name = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_value = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_visited = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_gate_level_layout_size =
-R"doc(Does NOT return the layout dimensions but the number of nodes
-(including constants and dead ones) in accordance with the
-`mockturtle` API.
-
-Returns:
-    Number of all nodes.
+static const char *mkd_doc_fiction_layouts_gate_level_layout_set_output_order =
+R"doc(Sets the complete output permutation. Invalid orders reject without
+mutation.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_strg = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_set_terminal_order = R"doc(Validates a terminal permutation before applying it.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_size = R"doc(Counts live objects.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_source = R"doc(Returns the declared source of an input, or no source if disconnected.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_spilled_inputs =
+R"doc(Input-index to connection mapping for objects with more than three
+inputs.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_swap_owned_state = R"doc(Swaps owned state without changing geometry.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_tiles =
 R"doc(Returns the tiles in the coordinate range.
 
 Args:
     start: First tile.
-    stop: Exclusive end tile; an invalid tile selects the layout end.
+    stop: Exclusive end tile; absence selects the layout end.
 
 Returns:
     Tile range.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_trav_id = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_unlink_edge = R"doc(Removes a connection from both endpoints and recycles the edge slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_value = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_visit = R"doc(Visits a value with an optional enumeration index and early stopping.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_visited = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_wire_count = R"doc(Live identity-function count.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout =
 R"doc( A layout type that utilizes offset coordinates to represent a
@@ -4486,15 +4044,14 @@ _____/ (1,0) \_____/ (3,0) \
  on the topic.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_above =
-R"doc(Returns the coordinate that is directly above a given coordinate `c`,
-i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
-is already at maximum, `c` is returned instead.
+R"doc(Returns the above neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose above counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly above `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
@@ -4541,23 +4098,35 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_area =
-R"doc(Returns the layout's number of faces depending on the coordinate type.
-
-Returns:
-    Area of layout.
+R"doc(Returns:
+    Width times height.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_below =
-R"doc(Returns the coordinate that is directly below a given coordinate `c`,
-i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
-is already at minimum, `c` is returned instead.
+R"doc(Returns the below neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose below counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly below `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_bounded_neighbor =
+R"doc(Computes a Cartesian step with wide arithmetic and checks both
+positions against the geometry.
+
+Args:
+    c: Base coordinate.
+    dx: x step.
+    dy: y step.
+    dz: z step.
+
+Returns:
+    Neighbor, or no value outside the geometry.
 
 )doc";
 
@@ -4569,15 +4138,25 @@ Args:
     layer: Coordinate layer.
 
 Returns:
-    Coordinate in the layout, or the invalid coordinate.
+    Coordinate in the layout, or no value.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_clone =
-R"doc(Clones the layout returning a deep copy.
+R"doc(Returns:
+    Independent copy of the geometry.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_contains_coordinate =
+R"doc(Returns whether the given coordinate is located within the layout
+bounds.
+
+Args:
+    c: Coordinate to check for boundary.
 
 Returns:
-    Deep copy of the layout.
+    `true` iff `c` is located within the layout bounds.
 
 )doc";
 
@@ -4676,28 +4255,26 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_y = 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_cube_coordinate_z = R"doc(z coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_east =
-R"doc(Returns the coordinate that is directly adjacent in eastern direction
-of a given coordinate `c`, i.e., the face whose x-dimension is higher
-by 1. If `c`'s x-dimension is already at maximum, `c` is returned
-instead.
+R"doc(Returns the east neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose eastern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate adjacent and east of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_eastern_border_of =
-R"doc(Returns the coordinate with the same y and z values as a given
-coordinate but that is located at the layout's eastern border.
+R"doc(Projects a coordinate to the eastern border.
 
 Args:
-    c: Coordinate whose border counterpart is desired.
+    c: Coordinate to project.
 
 Returns:
-    The eastern border equivalent of `c`.
+    Projection, or no value if the projection lies outside the
+    geometry.
 
 )doc";
 
@@ -4712,7 +4289,8 @@ Thereby, at most 6 coordinates are touched.
 
 Args:
     c: Coordinate whose adjacent ones are desired.
-    fn: Functor to apply to each of `c`'s adjacent coordinates.
+    fn: Functor invoked as an lvalue for each of `c`'s adjacent
+        coordinates.
 
 Template Args:
     Fn: Functor type.
@@ -4738,8 +4316,8 @@ Coordinates outside of the layout bounds are not being considered.
 
 Args:
     c: Coordinate whose opposite adjacent ones are desired.
-    fn: Functor to apply to each of `c`'s opposite adjacent coordinate
-        pairs.
+    fn: Functor invoked as an lvalue for each of `c`'s opposite
+        adjacent coordinate pairs.
 
 Template Args:
     Fn: Functor type.
@@ -4780,6 +4358,9 @@ Template Args:
     Fn: Functor type that has to comply with the restrictions imposed
         by `mockturtle::foreach_element`.
 
+Raises:
+    std::invalid_argument: If a range bound lies outside layer zero.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_get_arrangement =
@@ -4790,10 +4371,16 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_get_extent =
+R"doc(Returns:
+    Independent value of the layout extent.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_ground_coordinates =
 R"doc(Returns a range of all coordinates accessible in the layout's ground
 layer between `start` and `stop`. The iteration order is the same as
-for the coordinates function but without the z dimension.
+for the coordinates function but without the z axis.
 
 Args:
     start: First coordinate to include in the range of all ground
@@ -4805,6 +4392,9 @@ Returns:
     An iterator range from `start` to `stop`. If they are not
     provided, the first/last coordinate in the ground layer is used as
     a default.
+
+Raises:
+    std::invalid_argument: If a range bound lies outside layer zero.
 
 )doc";
 
@@ -4823,51 +4413,24 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_height =
+R"doc(Returns:
+    Number of coordinates along y.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout =
-R"doc(Standard constructor. The given aspect ratio points to the highest
-possible coordinate in the layout. That means in the
-`arrangement::EVEN_COLUMN` ASCII layout representation above `ar =
-(3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one
-coordinate.
+R"doc(Creates geometry with half-open, zero-origin bounds. The default
+extent is empty.
 
 Args:
-    a: Arrangement of the shifted rows or columns. It cannot change
-       after construction.
-    ar: Highest possible position in the layout.
+    a: Arrangement of shifted rows or columns.
+    size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative or larger
-                           than :math:`2^{30} - 1`.
+    std::invalid_argument: If a size exceeds the coordinate domain.
 
 )doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_2 =
-R"doc(Constructor that takes ownership of an existing storage, so that the
-new layout shares the coordinates of the one the storage came from.
-
-Args:
-    s: Storage to adopt.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage = R"doc(State that all copies of a layout share.)doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_dimension = R"doc(Highest possible position in the layout.)doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_hexagonal_layout_storage =
-R"doc(Creates the storage of a layout.
-
-Args:
-    ar: Highest possible position in the layout.
-    a: Arrangement of the shifted rows or columns.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_shift = R"doc(Arrangement of the shifted rows or columns.)doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_hexagonal_layout_storage_two_layers_only =
-R"doc(Whether a gate-level layout shares these dimensions and limits the z
-extent to 1.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_above =
 R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
@@ -5156,68 +4719,72 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_within_bounds =
-R"doc(Returns whether the given coordinate is located within the layout
-bounds.
-
-Args:
-    c: Coordinate to check for boundary.
-
-Returns:
-    `true` iff `c` is located within the layout bounds.
+R"doc(Args:
+    c: Coordinate. @return Whether the geometry contains the
+       coordinate.
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_last_coordinate =
+R"doc(Returns:
+    Last coordinate in iteration order, or no value for empty
+    geometry.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_layers =
+R"doc(Returns:
+    Number of layers.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_layout_extent = R"doc(Independent axis sizes.)doc";
+
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_north =
-R"doc(Returns the coordinate that is directly adjacent in northern direction
-of a given coordinate `c`, i.e., the face whose y-dimension is lower
-by 1. If `c`'s y-dimension is already at minimum, `c` is returned
-instead.
+R"doc(Returns the north neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose northern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate adjacent and north of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_north_east =
-R"doc(Returns the coordinate that is located in north-eastern direction of a
-given coordinate `c`. Depending on the arrangement of the layout, the
-dimension values of the returned coordinate may differ.
+R"doc(Returns the north-east neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose north-eastern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly north-eastern of `c`; `c` itself if the
-    neighbor lies outside of the layout.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_north_west =
-R"doc(Returns the coordinate that is located in north-western direction of a
-given coordinate `c`. Depending on the arrangement of the layout, the
-dimension values of the returned coordinate may differ.
+R"doc(Returns the north-west neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose north-western counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly north-western of `c`; `c` itself if the
-    neighbor lies outside of the layout.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_northern_border_of =
-R"doc(Returns the coordinate with the same x and z values as a given
-coordinate but that is located at the layout's northern border.
+R"doc(Projects a coordinate to the northern border.
 
 Args:
-    c: Coordinate whose border counterpart is desired.
+    c: Coordinate to project.
 
 Returns:
-    The northern border equivalent of `c`.
+    Projection, or no value if the projection lies outside the
+    geometry.
 
 )doc";
 
@@ -5233,83 +4800,65 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_resize =
-R"doc(Updates the layout's dimensions, effectively resizing it.
+R"doc(Changes the geometry's axis sizes.
 
 Args:
-    ar: New aspect ratio.
+    size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative or larger
-                           than :math:`2^{30} - 1`.
-    std::out_of_range: If shared gate geometry limits the z extent to
-                       1 and `ar.z` exceeds 1.
+    std::invalid_argument: If a size exceeds the coordinate domain.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_restrict_to_two_layers =
-R"doc(Limits the shared geometry to the two layers represented by gate-level
-signals.
-
-Raises:
-    std::out_of_range: If the z extent exceeds 1.
-
-)doc";
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_shift = R"doc(Arrangement of shifted rows or columns.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_south =
-R"doc(Returns the coordinate that is directly adjacent in southern direction
-of a given coordinate `c`, i.e., the face whose y-dimension is higher
-by 1. If `c`'s y-dimension is already at maximum, `c` is returned
-instead.
+R"doc(Returns the south neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose southern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate adjacent and south of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_south_east =
-R"doc(Returns the coordinate that is located in south-eastern direction of a
-given coordinate `c`. Depending on the arrangement of the layout, the
-dimension values of the returned coordinate may differ.
+R"doc(Returns the south-east neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose south-eastern counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly south-eastern of `c`; `c` itself if the
-    neighbor lies outside of the layout.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_south_west =
-R"doc(Returns the coordinate that is located in south-western direction of a
-given coordinate `c`. Depending on the arrangement of the layout, the
-dimension values of the returned coordinate may differ.
+R"doc(Returns the south-west neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose south-western counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate directly south-western of `c`; `c` itself if the
-    neighbor lies outside of the layout.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_southern_border_of =
-R"doc(Returns the coordinate with the same x and z values as a given
-coordinate but that is located at the layout's southern border.
+R"doc(Projects a coordinate to the southern border.
 
 Args:
-    c: Coordinate whose border counterpart is desired.
+    c: Coordinate to project.
 
 Returns:
-    The southern border equivalent of `c`.
+    Projection, or no value if the projection lies outside the
+    geometry.
 
 )doc";
-
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_strg = R"doc(Shared storage for the layout dimensions and arrangement.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_to_cube_coordinate =
 R"doc(Converts an offset coordinate to a cube coordinate.
@@ -5337,61 +4886,86 @@ Args:
     cube_coord: Cube coordinate to convert.
 
 Returns:
-    Offset coordinate representing `cube_coord`, or the invalid
-    coordinate if an axis exceeds 32 bits.
+    Offset coordinate representing `cube_coord`, or no value if an
+    axis exceeds 32 bits.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_volume =
+R"doc(Returns:
+    Volume. @throws std::overflow_error If the volume exceeds
+    `uint64_t`.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_west =
-R"doc(Returns the coordinate that is directly adjacent in western direction
-of a given coordinate `c`, i.e., the face whose x-dimension is lower
-by 1. If `c`'s x-dimension is already at minimum, `c` is returned
-instead.
+R"doc(Returns the west neighbor when both coordinates lie inside the
+geometry.
 
 Args:
-    c: Coordinate whose western counterpart is desired.
+    c: Base coordinate.
 
 Returns:
-    Coordinate adjacent and west of `c`.
+    Neighbor, or no value at a boundary or outside the geometry.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_western_border_of =
-R"doc(Returns the coordinate with the same y and z values as a given
-coordinate but that is located at the layout's western border.
+R"doc(Projects a coordinate to the western border.
 
 Args:
-    c: Coordinate whose border counterpart is desired.
+    c: Coordinate to project.
 
 Returns:
-    The western border equivalent of `c`.
+    Projection, or no value if the projection lies outside the
+    geometry.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_x =
-R"doc(Returns the layout's x-dimension, i.e., returns the biggest x-value
-that still belongs to the layout.
-
-Returns:
-    x-dimension.
+static const char *mkd_doc_fiction_layouts_hexagonal_layout_width =
+R"doc(Returns:
+    Number of coordinates along x.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_y =
-R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
-that still belongs to the layout.
+static const char *mkd_doc_fiction_layouts_io_detail_fgl_clocking_name =
+R"doc(Return the FGL scheme name, including a three-phase suffix where
+needed.
+
+Args:
+    scheme: Clocking scheme.
 
 Returns:
-    y-dimension.
+    Scheme name.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_hexagonal_layout_z =
-R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
-that still belongs to the layout.
+static const char *mkd_doc_fiction_layouts_io_detail_fgl_validate_layout =
+R"doc(Validate every object and metadata entry for finished FGL version 2.
 
-Returns:
-    z-dimension.
+Args:
+    lyt: Layout to validate.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Raises:
+    std::invalid_argument: If the layout is incomplete, cyclic,
+                           physically invalid, uses an unsupported
+                           scheme, or contains illegal XML text
+                           controls.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_fgl_validate_xml_text =
+R"doc(Reject XML 1.0 control characters in a name.
+
+Args:
+    value: Layout or object name.
+
+Raises:
+    std::invalid_argument: If the name contains an illegal control
+                           character.
 
 )doc";
 
@@ -5399,10 +4973,10 @@ static const char *mkd_doc_fiction_layouts_io_detail_fgl_xml_text =
 R"doc(Escape user-provided text for an XML element.
 
 Args:
-    value: Layout or port name.
+    value: Layout or object name.
 
 Returns:
-    XML text preserving the original label when parsed.
+    XML text preserving the original name when parsed.
 
 )doc";
 
@@ -5416,11 +4990,11 @@ Template Args:
     Lyt: Gate-level layout type with shifted rows or columns.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_additional_graph_attributes = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_additional_graph_attributes = R"doc(Return graph attributes.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_enforce_topology = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_enforce_topology = R"doc(Format the grid topology.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_gate_layout_shifted_tile_drawer_invisible_node =
 R"doc(Returns the name of the invisible node that shifts a row or column.
@@ -5453,11 +5027,15 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl = R"doc(Parse a layout atomically. @tparam Lyt Gate-level layout type.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_expected_arrangement = R"doc(Required arrangement when reading into an existing layout.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage =
 R"doc(Represents a gate in a fcn layout, storing its unique ID, type, name,
 location, and incoming connections.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_arity = R"doc(Declared function arity in version 2.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_compare_by_id =
 R"doc(Static member function to compare gate_storage objects by their IDs.
@@ -5471,13 +5049,15 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_connections = R"doc(Serialized source IDs and destination input indices.)doc";
+
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_id = R"doc(Unique identifier for the gate.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_incoming = R"doc(List of incoming connections to the gate.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_loc = R"doc(Location of the gate represented its x-, y- and z-coordinate.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_name = R"doc(Name of the gate (for inputs and outputs).)doc";
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_name = R"doc(Object label.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_gate_storage_type =
 R"doc(Type of the gate, can be an alias (AND, OR, PI, ..) or the implemented
@@ -5506,11 +5086,14 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_number =
-R"doc(Read a nonnegative integer without truncation or trailing characters.
+R"doc(Read an integer without truncation or trailing characters.
 
 Args:
     parent: XML element containing the number.
     name: Child element name.
+
+Template Args:
+    Integer: Checked integer storage type; unsigned by default.
 
 Returns:
     Parsed integer.
@@ -5529,6 +5112,10 @@ Args:
     element: XML element containing x, y, and optionally z.
     with_z: Whether the z child is required.
 
+Template Args:
+    Integer: Axis storage type; unsigned for placed objects, signed
+             for manual obstructions.
+
 Returns:
     Losslessly represented coordinate.
 
@@ -5537,13 +5124,29 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_read_value =
+R"doc(Parse an XML element's integer text.
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_target =
-R"doc(The layout to read into. It holds the target layout given by the
-caller or is created from the file.)doc";
+Args:
+    child: Numeric element.
 
-static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl = R"doc()doc";
+Template Args:
+    Integer: Checked integer storage type; unsigned by default.
+
+Returns:
+    Parsed value.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_run =
+R"doc(Parse legacy maximum-index extents or version-2 extent counts. @return
+Parsed layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_target = R"doc(Scratch layout created from the file.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl = R"doc(Serialize a finished layout. @tparam Lyt Gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_lyt = R"doc(The layout to be written.)doc";
 
@@ -5551,7 +5154,7 @@ static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_on_pr
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_os = R"doc(The output stream to which the gate-level layout is written.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_run = R"doc(Validate the finished layout and serialize FGL version 2.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_write_fgl_layout_impl =
 R"doc(Creates a writer with optional serialization progress.
@@ -5582,13 +5185,13 @@ Template Args:
     Lyt: Cartesian gate-level layout type.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_additional_graph_attributes = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_additional_graph_attributes = R"doc(Return graph attributes.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_additional_node_attributes = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_additional_tile_attributes = R"doc(Returns Graphviz attributes of the tile vertices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_enforce_topology = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_cartesian_drawer_enforce_topology = R"doc(Format the grid topology.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer =
 R"doc(An extended gate-level layout DOT drawer for hexagonal layouts.
@@ -5597,11 +5200,11 @@ Template Args:
     Lyt: Hexagonal gate-level layout type.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_additional_node_attributes = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_additional_tile_attributes = R"doc(Returns Graphviz attributes of the tile vertices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_rank_separation = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_hexagonal_drawer_rank_separation = R"doc(Define the drawer configuration.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer =
 R"doc(An extended gate-level layout DOT drawer for shifted Cartesian
@@ -5611,11 +5214,11 @@ Template Args:
     Lyt: Shifted Cartesian gate-level layout type.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_additional_node_attributes = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_additional_tile_attributes = R"doc(Returns Graphviz attributes of the tile vertices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_rank_separation = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_drawer_rank_separation = R"doc(Define the drawer configuration.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_print_cell_level_layout =
 R"doc(Writes a simplified 2D representation of a cell grid layout, i.e., a
@@ -5671,9 +5274,9 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_print_node_to_tile_assignments =
-R"doc(Prints every node of a gate-level layout with the tile it occupies and
-the tiles of its fanins and fanouts. This is a debugging aid; the
+static const char *mkd_doc_fiction_layouts_io_print_object_to_tile_assignments =
+R"doc(Prints every object of a gate-level layout with the tile it occupies
+and the tiles of its fanins and fanouts. This is a debugging aid; the
 output format is not stable.
 
 Args:
@@ -5685,9 +5288,9 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_print_tile_to_node_assignments =
-R"doc(Prints every tile of a gate-level layout with the node it holds, if
-any, and the tiles of that node's fanins and fanouts. This is a
+static const char *mkd_doc_fiction_layouts_io_print_tile_to_object_assignments =
+R"doc(Prints every tile of a gate-level layout with the object it holds, if
+any, and the tiles of that object's fanins and fanouts. This is a
 debugging aid; the output format is not stable.
 
 Args:
@@ -5700,8 +5303,11 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout =
-R"doc(Reads a gate-level layout from an FGL file provided as an input
-stream.
+R"doc(Reads legacy maximum-index extents or version-2 extent counts,
+declared interface order, and manual obstructions. Version 2 requires
+a complete, acyclic, physically valid layout. Validation finishes
+before assigning a target. The target layout changes only after a
+successful read.
 
 May throw an `fgl_parsing_error` if the FGL file is malformed.
 
@@ -5715,8 +5321,11 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout_2 =
-R"doc(Reads a gate-level layout from an FGL file provided as an input
-stream.
+R"doc(Reads legacy maximum-index extents or version-2 extent counts,
+declared interface order, and manual obstructions. Version 2 requires
+a complete, acyclic, physically valid layout. Validation finishes
+before assigning a target. The target layout changes only after a
+successful read.
 
 May throw an `fgl_parsing_error` if the FGL file is malformed.
 
@@ -5770,46 +5379,75 @@ Template Args:
     Lyt: Gate-level layout type.
     ClockColors: Flag to toggle the drawing of clock colors instead of
                  gate type colors.
-    DrawIndexes: Flag to toggle the drawing of node indices.)doc";
+    DrawIndexes: Flag to toggle the drawing of object indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_additional_graph_attributes = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_additional_graph_attributes = R"doc(Return graph attributes.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_additional_node_attributes = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_additional_tile_attributes = R"doc(Returns Graphviz attributes of the tile vertices.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_columns = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_columns = R"doc(List tile labels by column.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_edge = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_edge = R"doc(Format an edge.)doc";
 
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_rows = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_same_rank = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_fillcolor = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_id = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_label = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_dot_layout =
-R"doc(Writes layout in DOT format into output stream
-
-An overloaded variant exists that writes the layout into a file.
-
-**Required network functions:**
-- is_pi - foreach_node - foreach_fanin
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_gate_description =
+R"doc(Return the label and fill color for a placed object.
 
 Args:
-    lyt: Layout
+    lyt: Layout containing the object.
+    id: Object to describe.
+
+Returns:
+    Gate label and fill color.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_operator_assign = R"doc(Copies the stateless drawer. @return This drawer.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_operator_assign_2 = R"doc(Moves the stateless drawer. @return This drawer.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_rows = R"doc(List tile labels by row.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_same_rank = R"doc(Format a rank constraint.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_simple_gate_layout_tile_drawer = R"doc(Creates a stateless drawer.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_simple_gate_layout_tile_drawer_2 = R"doc(Copies the stateless drawer.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_simple_gate_layout_tile_drawer_3 = R"doc(Moves the stateless drawer.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_fillcolor = R"doc(Return the tile color.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_id =
+R"doc(Return a DOT identifier for the planar tile position.
+
+Args:
+    t: Tile coordinate.
+
+Returns:
+    Identifier with signed axes encoded as letters and digits.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_label = R"doc(Return the gate label.)doc";
+
+static const char *mkd_doc_fiction_layouts_io_write_dot_layout =
+R"doc(Writes a layout in DOT format into an output stream. Terminal names
+use quoted DOT strings.
+
+Args:
+    lyt: Layout.
+    os: Output stream.
+    drawer: Formats the layout's tiles and topology.
     on_progress: Receives completed drawing work.
-    os: Output stream
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Drawer: DOT drawer type.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_write_dot_layout_2 =
 R"doc(Writes layout in DOT format into a file
-
-**Required network functions:**
-- is_pi - foreach_node - foreach_fanin
 
 Args:
     lyt: Layout
@@ -5819,7 +5457,17 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_write_fgl_layout =
-R"doc(Writes an FGL layout to a file.
+R"doc(Writes a finished layout in FGL version 2 with extent counts and
+declared interface order.
+
+Version 2 stores width, height, and layer counts, explicit PI/PO
+order, and indexed source references. The file includes every placed
+object, including complete dangling cones. Clock overrides and
+synchronization elements and manual coordinate and directed-connection
+obstructions remain sparse. The format supports the standard named
+clocking schemes and their overrides. Names preserve XML whitespace
+and exclude illegal XML 1.0 controls. Validation finishes before the
+output stream changes.
 
 This overload uses an output stream to write into.
 
@@ -5832,13 +5480,16 @@ Template Args:
     Lyt: Layout.
 
 Raises:
-    std::invalid_argument: If a node is unplaced or placed on a tile
-                           with a negative coordinate.
+    std::invalid_argument: If the layout is incomplete, cyclic,
+                           physically invalid, uses an unsupported
+                           scheme, or contains illegal XML text
+                           controls.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_write_fgl_layout_2 =
-R"doc(Writes an FGL layout to a file.
+R"doc(Writes a finished layout in FGL version 2 with extent counts and
+declared interface order.
 
 This overload uses a file name to create and write into.
 
@@ -5852,8 +5503,10 @@ Template Args:
     Lyt: Layout.
 
 Raises:
-    std::invalid_argument: If a node is unplaced or placed on a tile
-                           with a negative coordinate.
+    std::invalid_argument: If the layout is incomplete, cyclic,
+                           physically invalid, uses an unsupported
+                           scheme, or contains illegal XML text
+                           controls.
 
 )doc";
 
@@ -5886,24 +5539,17 @@ every layout topology (Cartesian, shifted Cartesian, and hexagonal)
 exposes under the same API.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_checked =
-R"doc(Returns an aspect ratio after checking that it describes a layout. An
-invalid aspect ratio describes the layout with exactly one coordinate.
-The upper limit keeps the coordinate arithmetic of every layout within
-`int32_t`.
+R"doc(Validates extent values, including public axes edited after
+construction.
 
 Args:
-    ar: Aspect ratio to check.
-    two_layers_only: Whether shared gate geometry limits the z extent
-                     to 1.
+    size: Sizes to check.
 
 Returns:
-    `ar`, or (0, 0, 0) if `ar` is invalid.
+    Checked extent.
 
 Raises:
-    std::invalid_argument: If an axis of `ar` is negative or larger
-                           than :math:`2^{30} - 1`.
-    std::out_of_range: If `two_layers_only` is set and the z extent
-                       exceeds 1.
+    std::invalid_argument: If a size exceeds `INT32_MAX + 1`.
 
 )doc";
 
@@ -5912,15 +5558,8 @@ R"doc(Signed coordinates.
 
 A coordinate defines a location relative to a fixed point (origin).
 Each axis is a signed 32-bit integer. The default-constructed
-coordinate is invalid; it has all axes set to `INVALID_AXIS` and
-stands for "no coordinate", e.g., a neighbor outside of a layout or
-the tile of a node that is not placed. A coordinate is invalid iff its
-x axis is `INVALID_AXIS`; no other axis of a coordinate should have
-this value.
-
-Gate-level layouts pack a coordinate into a 64-bit signal with
-`explicit operator uint64_t`. This encoding holds 31-bit signed x and
-y values and a single z bit.)doc";
+coordinate is the origin. Every signed 32-bit axis value identifies a
+position.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_checked_axis =
 R"doc(Converts an integral axis without narrowing.
@@ -5940,15 +5579,16 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate = R"doc(Default constructor. Creates the invalid coordinate.)doc";
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate = R"doc(Default constructor. Creates the origin.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate_2 =
-R"doc(Standard constructor. Creates a coordinate at (x_, y_, z_).
+R"doc(Standard constructor. Creates a coordinate at (coordinate_x,
+coordinate_y, coordinate_z).
 
 Args:
-    x_: x position.
-    y_: y position.
-    z_: z position.
+    coordinate_x: x position.
+    coordinate_y: y position.
+    coordinate_z: z position.
 
 Template Args:
     X: Type of x.
@@ -5962,11 +5602,12 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate_3 =
-R"doc(Standard constructor. Creates a coordinate at (x_, y_, 0).
+R"doc(Standard constructor. Creates a coordinate at (coordinate_x,
+coordinate_y, 0).
 
 Args:
-    x_: x position.
-    y_: y position.
+    coordinate_x: x position.
+    coordinate_y: y position.
 
 Template Args:
     X: Type of x.
@@ -5978,99 +5619,49 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_coordinate_4 =
-R"doc(Standard constructor. Instantiates a coordinate from the 64-bit
-encoding of a gate-level signal, where the positions are encoded in
-the following four parts (from MSB to LSB):
- - 1 bit for the invalid indicator - 1 bit for the z position - 31 bit
-   for the y position in two's complement - 31 bit for the x position
-   in two's complement
-
-A set invalid indicator yields the invalid coordinate.
-
-Args:
-    t: Unsigned 64-bit integer to instantiate the coordinate from.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_fits_signal =
-R"doc(Returns whether the coordinate fits the 64-bit signal encoding, i.e.,
-x and y are 31-bit signed values and z is either 0 or 1.
-
-Returns:
-    `true` iff the signal encoding of the coordinate can be decoded to
-    the coordinate itself.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_is_valid =
-R"doc(Returns whether the coordinate is valid, i.e., whether its x axis
-differs from `INVALID_AXIS`.
-
-Returns:
-    `true` iff the coordinate is valid.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator =
-R"doc(An iterator type that allows to enumerate coordinates in order within
-a boundary.)doc";
+R"doc(Forward iterator over half-open, zero-origin bounds. The end state is
+separate from coordinate values.)doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_bound =
-R"doc(Boundary within to enumerate. Not `const`:
-`std::input_or_output_iterator` requires `iterator` to be
-`std::movable`, which in turn requires it to be assignable.)doc";
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_bound = R"doc(Half-open bounds.)doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_coordinate_iterator =
-R"doc(Default constructor. Required so that iterator satisfies
-`std::semiregular`, which in turn is required for it to serve as its
-own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
-
-)doc";
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_coordinate_iterator = R"doc(Creates an end iterator.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_coordinate_iterator_2 =
-R"doc(Standard constructor. Initializes the iterator with a starting
-position and the boundary within to enumerate.
-
-With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following
-order would be enumerated:
-
-- (0, 0, 0) - (1, 0, 0) - (0, 1, 0) - (1, 1, 0) - (0, 2, 0) - (1, 2,
-  0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 1) - (1, 1, 1) - (0, 2, 1) - (1,
-  2, 1)
-
-iterator is compatible with the STL forward_iterator category. Does
-not iterate over negative coordinates.
+R"doc(Creates an iterator at a position, or the end when no position is
+given. Negative axes clamp to zero. An axis beyond its size wraps to
+zero and advances the next axis once.
 
 Args:
-    dimension: Boundary within to enumerate. Iteration wraps at its
-               limits.
-    start: Starting coordinate to enumerate first.
+    size: Half-open bounds.
+    start: First coordinate, or the end state.
+
+Raises:
+    std::invalid_argument: If a size exceeds the coordinate domain.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_current = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_current = R"doc(Current coordinate value.)doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_eq = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_ended = R"doc(Whether this iterator denotes the end.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_eq = R"doc(Compares iterator positions, including the explicit end state.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_inc =
-R"doc(Increments the iterator, while keeping it within the boundary. Also
-defined on iterators that are out of bounds.
-
-Returns:
-    Reference to the incremented iterator.
+R"doc(Advances the iterator. End iterators remain at the end. @return This
+iterator.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_inc_2 = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_inc_2 = R"doc(Advances the iterator. @return Its value before advancing.)doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_le = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_lt =
+R"doc(Orders positions in iteration order, with the end after every live
+position.
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_lt = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_mul = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_ne = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_layout_base_coordinate_iterator_operator_mul = R"doc(Reads a live iterator. @return Current coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_eq =
 R"doc(Compares against another coordinate for equality, axis by axis.
@@ -6146,27 +5737,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_operator_unsigned_long =
-R"doc(Allows explicit conversion to `uint64_t`, the encoding of gate-level
-signals. See the constructor for the encoding. For non-negative x and
-y, it equals the concatenation of the bits `0`, `z`, `y`, and `x`. An
-invalid coordinate encodes as `0x8000000000000000`. Coordinates
-outside of the representable range (x and y in :math:`[-2^{30}, 2^{30}
-- 1]`, z in :math:`\{0, 1\}`) lose their higher bits.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_sign_extend_31 =
-R"doc(Sign-extends a 31-bit two's complement value.
-
-Args:
-    v: Value with its 31 low bits set.
-
-Returns:
-    The represented signed value.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_str =
 R"doc(Returns a string representation of the coordinate of the form `"(x, y,
 z)"`.
@@ -6176,27 +5746,87 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_layout_base_coordinate_wrap =
-R"doc(Wraps the coordinate with respect to the given aspect ratio by
-iterating over the dimensions in the order x, y, z. For any dimension
-of the coordinate that is strictly larger than the associated
-dimension of the aspect ratio, this dimension will be wrapped to zero,
-and the next dimension is increased. The resulting coordinate becomes
-invalid if it is not contained in the aspect ratio after iterating. An
-example use case of this function is the coordinate iterator, which
-implements iterator advancing by first incrementing the x dimension,
-then wrapping the coordinate to the boundary within to enumerate.
-
-Args:
-    aspect_ratio: Aspect ratio to wrap the coordinate to.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_x = R"doc(x coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_y = R"doc(y coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_layout_base_coordinate_z = R"doc(z coordinate.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_extent =
+R"doc(Nonnegative axis sizes of a zero-origin layout. Each size is at most
+`INT32_MAX + 1`, so every contained coordinate fits the signed
+coordinate domain. A zero size on any axis makes the geometry empty.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_extent_checked_size =
+R"doc(Checks one size against the coordinate domain.
+
+Args:
+    value: Size to check.
+
+Template Args:
+    Axis: Size type.
+
+Returns:
+    Checked size.
+
+Raises:
+    std::invalid_argument: If the size is negative or exceeds
+                           `INT32_MAX + 1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_extent_extent = R"doc(Creates an empty extent.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_extent_extent_2 =
+R"doc(Creates an extent from axis sizes. Two axis sizes describe one layer.
+
+Args:
+    w: Width.
+    h: Height.
+    l: Number of layers.
+
+Template Args:
+    W: Width type.
+    H: Height type.
+    L: Layer count type.
+
+Raises:
+    std::invalid_argument: If a size is negative or exceeds `INT32_MAX
+                           + 1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_extent_height = R"doc(Height in coordinates.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_extent_layers = R"doc(Number of layers.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_extent_operator_eq = R"doc(Compares all axis sizes.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_base_extent_width = R"doc(Width in coordinates.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_input_port = R"doc(Input endpoint. Its index is the truth-table argument index.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_input_port_index = R"doc(Truth-table argument index.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_input_port_object = R"doc(Destination object.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_input_port_operator_le = R"doc(Compares input endpoints.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_object_id =
+R"doc(Layout-local object identity. A removed object's generation cannot
+identify its replacement.
+
+Copies preserve identities; use an identity only with the layout that
+supplied it or its copy. Generations detect slot reuse within that
+contents lifetime, not IDs from unrelated layouts. Whole-layout
+assignment invalidates destination handles. Callers must not use
+transferred IDs with a moved-from layout after its reuse.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_object_id_generation = R"doc(Slot generation; zero does not identify a live object.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_object_id_index = R"doc(Storage slot.)doc";
+
+static const char *mkd_doc_fiction_layouts_layout_object_id_operator_le = R"doc(Compares object identities.)doc";
 
 static const char *mkd_doc_fiction_layouts_make_gate_level_layout =
 R"doc(Creates an empty gate-level layout of type `Lyt`. Cartesian layouts
@@ -6205,7 +5835,7 @@ ignore the arrangement.
 Args:
     a: Arrangement of the shifted rows or columns. Shifted Cartesian
        and hexagonal layouts require it.
-    ar: Highest possible position in the layout.
+    ex: Axis sizes of the layout.
     scheme: Clocking scheme to apply to the layout.
 
 Template Args:
@@ -6225,7 +5855,7 @@ R"doc(Returns a copy of the given cell grid layout whose cells are shifted
 towards the origin, so that the smallest occupied x- and y-coordinates
 become 0. Cell types, names, and, where the layout has them, cell
 modes move with their cells; layers, the layout name, and the clocking
-stay unchanged. The dimensions shrink by the shift.
+stay unchanged. The extent shrinks by the shift.
 
 Args:
     lyt: The layout to normalize.
@@ -6294,6 +5924,29 @@ R"doc(Clears all obstructed coordinates that were manually marked via
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_obstructions_foreach_obstructed_connection =
+R"doc(Visits explicitly obstructed directed connections in unspecified
+order.
+
+Args:
+    fn: Callback for each manual obstruction.
+
+Template Args:
+    Fn: Callable accepting source and target coordinates.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_obstructions_foreach_obstructed_coordinate =
+R"doc(Visits explicitly obstructed coordinates in unspecified order.
+
+Args:
+    fn: Callback for each manual obstruction.
+
+Template Args:
+    Fn: Callable accepting one coordinate.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_obstructions_is_obstructed_connection =
 R"doc(Checks if the given coordinate-coordinate connection is obstructed of
 some sort.
@@ -6326,6 +5979,9 @@ Args:
     src: Source coordinate.
     tgt: Target coordinate.
 
+Raises:
+    std::bad_alloc: If allocation fails.
+
 Note:
     Coordinates marked this way will not be crossed with wires by path
     finding algorithms.
@@ -6338,13 +5994,20 @@ R"doc(Marks the given coordinate as obstructed.
 Args:
     c: Coordinate to obstruct.
 
+Raises:
+    std::bad_alloc: If allocation fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_obstructions_obstructed_connections = R"doc(Explicitly blocked directed connections.)doc";
 
 static const char *mkd_doc_fiction_layouts_obstructions_obstructed_coordinates = R"doc(Explicitly blocked positions.)doc";
 
-static const char *mkd_doc_fiction_layouts_operator_lshift = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_operator_lshift =
+R"doc(Writes a coordinate. @param os Stream. @param t Coordinate. @return
+Stream.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_port_direction_to_coordinate =
 R"doc(Port directions address coordinates relative to each other by
@@ -6363,26 +6026,25 @@ Template Args:
     Lyt: Coordinate layout type.
 
 Returns:
-    Absolute coordinate specified by a coordinate `c` in layout `lyt`
-    and a port direction.
+    Adjacent coordinate, or no coordinate when the neighbor lies
+    outside the layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_random_coordinate =
-R"doc(Generates a random coordinate within the region spanned by two given
-coordinates. The two given coordinates form the top left corner and
-the bottom right corner of the spanned region.
+R"doc(Generates a random coordinate with each axis inside the inclusive
+region spanned by two coordinates.
 
 Args:
-    coordinate1: Top left Coordinate.
-    coordinate2: Bottom right Coordinate (coordinate order is not
-                 important, automatically swapped if necessary).
+    coordinate1: One corner of the region.
+    coordinate2: Opposite corner of the region; axes may appear in
+                 either order.
 
 Template Args:
-    CoordinateType: The coordinate implementation to be used.
+    CoordinateType: Coordinate type to generate.
 
 Returns:
-    Randomly generated coordinate.
+    Random coordinate between the corresponding corner axes.
 
 )doc";
 
@@ -6519,20 +6181,23 @@ R"doc( A layout type that utilizes offset coordinates to represent a
 ```)doc";
 
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout =
-R"doc(Standard constructor. The given aspect ratio points to the highest
-possible coordinate in the layout. That means in the
-`arrangement::EVEN_COLUMN` ASCII layout representation above `ar =
-(3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one
-coordinate.
+R"doc(Creates geometry with half-open, zero-origin bounds. The default
+extent is empty.
 
 Args:
-    a: Arrangement of the shifted rows or columns. It cannot change
-       after construction.
-    ar: Highest possible position in the layout.
+    a: Arrangement of shifted rows or columns.
+    size: Axis sizes.
+
+Raises:
+    std::invalid_argument: If a size exceeds the coordinate domain.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout_2 = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout_2 =
+R"doc(Args:
+    lyt: Hexagonal geometry to copy.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_tile_clocking =
 R"doc(Clock zones of a cell grid. A clock zone is a tile, i.e., a region of
@@ -6554,6 +6219,9 @@ R"doc(Overrides the clock number of a clock zone.
 Args:
     cz: Clock zone.
     cn: Clock number.
+
+Raises:
+    std::bad_alloc: If allocation fails.
 
 )doc";
 
@@ -6594,7 +6262,7 @@ Args:
     c: Cell position.
 
 Returns:
-    Clock zone of `c`, or the invalid clock zone if `c` is invalid.
+    Clock zone of `c`.
 
 )doc";
 
@@ -6603,6 +6271,9 @@ R"doc(A copy of the clocking scheme.
 
 Returns:
     Clocking scheme.
+
+Raises:
+    std::bad_alloc: If allocation fails.
 
 )doc";
 
@@ -6668,6 +6339,9 @@ R"doc(Replaces the clocking scheme.
 Args:
     scheme: New clocking scheme over clock zones.
 
+Raises:
+    std::bad_alloc: If allocation fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_tile_clocking_set_tile_size_x =
@@ -6721,17 +6395,16 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_volume_of =
-R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)`.
+R"doc(Computes width times height times layers with checked multiplication.
 
 Args:
-    coord: Coordinate.
-
-Template Args:
-    CoordinateType: Coordinate type.
+    size: Axis sizes.
 
 Returns:
-    Volume of coord.
+    Volume.
+
+Raises:
+    std::overflow_error: If the volume exceeds `uint64_t`.
 
 )doc";
 
@@ -6882,14 +6555,17 @@ static const char *mkd_doc_fiction_mol_qca_layout_layout =
 R"doc(Creates an empty layout.
 
 Args:
-    ar: Highest cell position; its z-coordinate is ignored because the
-        layout is planar.
+    size: Half-open cell sizes; a nonzero layer count selects one
+          layer.
     name: Layout name.
+
+Raises:
+    std::invalid_argument: If a size exceeds the coordinate domain.
 
 )doc";
 
 static const char *mkd_doc_fiction_mol_qca_layout_operator_eq =
-R"doc(Compares two layouts: same dimensions, cells, and names.
+R"doc(Compares two layouts: same extent, cells, and names.
 
 Args:
     other: Right-hand side layout.
@@ -6993,6 +6669,73 @@ Args:
 
 Returns:
     A vector of all possible edge paths leading from terminals to `v`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_detail_interface_input_names =
+R"doc(Reads primary input names in declared order from a layout or network.
+
+Args:
+    ntk: Interface owner.
+
+Template Args:
+    NtkOrLyt: Network or placed object layout.
+
+Returns:
+    Names, with empty strings for unnamed primary inputs.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_detail_interface_output_names =
+R"doc(Reads primary output names in declared order from a layout or network.
+
+Args:
+    ntk: Interface owner.
+
+Template Args:
+    NtkOrLyt: Network or placed object layout.
+
+Returns:
+    Names, with empty strings for unnamed primary outputs.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_detail_match_interface_names =
+R"doc(Matches equal names that occur once on each side, then matches
+remaining positions in declared order.
+
+Args:
+    left: Left interface names.
+    right: Right interface names with the same count.
+
+Returns:
+    Right index for each left index.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_extract_layout_network =
+R"doc(Extracts the logic required by the layout's primary outputs.
+
+Every primary input appears in declared interface order, including
+unused inputs. Output order, terminal names, and truth-table input
+indices are preserved. Wires and primary output objects forward their
+input. Dangling objects do not enter the network. Placement,
+adjacency, and clocking do not affect extraction. Traversal uses an
+explicit stack.
+
+Args:
+    lyt: Layout to extract without mutation.
+
+Template Args:
+    Lyt: Placed object layout with ordered input ports and declared
+         primary interfaces.
+
+Returns:
+    Independent named LUT network.
+
+Raises:
+    std::invalid_argument: If an output dependency has a missing input
+                           or a cycle.
 
 )doc";
 
@@ -7171,6 +6914,12 @@ number of fanins.)doc";
 
 static const char *mkd_doc_fiction_networks_high_degree_fanin_exception_high_degree_fanin_exception = R"doc()doc";
 
+static const char *mkd_doc_fiction_networks_interface_matching = R"doc(Complete permutations from the left interface to the right interface.)doc";
+
+static const char *mkd_doc_fiction_networks_interface_matching_inputs = R"doc(Right primary input index for each left primary input index.)doc";
+
+static const char *mkd_doc_fiction_networks_interface_matching_outputs = R"doc(Right primary output index for each left primary output index.)doc";
+
 static const char *mkd_doc_fiction_networks_inverse_levels =
 R"doc(A clumsy implementation that returns the inverse level of each node in
 a given network. Its behavior is similar to `mockturtle::depth_view`
@@ -7227,7 +6976,8 @@ static const char *mkd_doc_fiction_networks_io_edge_color_view_drawer_signal_sty
 
 static const char *mkd_doc_fiction_networks_io_network_reader =
 R"doc(Helper class to read directories of mockturtle networks of certain
-types.
+types. BLIF input permits empty and whitespace-only lines, comments,
+and continued declarations.
 
 Template Args:
     NtkPtr: Pointer type to a logic network.)doc";
@@ -7334,6 +7084,33 @@ Raises:
 
 )doc";
 
+static const char *mkd_doc_fiction_networks_match_interfaces =
+R"doc(Matches primary inputs and outputs by unique nonempty names, then by
+remaining declared positions.
+
+A name matches only when it occurs once in each corresponding
+interface. Empty, duplicate, and unmatched names fall back to the
+remaining positions in declared order. Every terminal receives exactly
+one match.
+
+Args:
+    left: Left interface owner.
+    right: Right interface owner.
+
+Template Args:
+    Left: Network or placed object layout.
+    Right: Network or placed object layout.
+
+Returns:
+    Complete permutations from left terminal indices to right terminal
+    indices.
+
+Raises:
+    std::invalid_argument: If the primary input counts or primary
+                           output counts differ.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_num_constant_fanins =
 R"doc(Computes the number of constant fanin nodes of some network node `n`.
 
@@ -7351,8 +7128,7 @@ Returns:
 
 static const char *mkd_doc_fiction_networks_restore_input_names =
 R"doc(Assigns input names from one network to another. Matching inputs are
-identified by their index. Since gate-level layout's are network types
-as well, this function naturally works for them, too.
+identified by their index.
 
 Args:
     ntk_src: Source logic network whose input names are to be
@@ -7362,7 +7138,7 @@ Args:
 
 Template Args:
     NtkSrc: Source network type.
-    NtkDest: Target network type.
+    NtkDest: Target network or gate-level layout type.
 
 )doc";
 
@@ -7380,7 +7156,7 @@ Args:
 
 Template Args:
     NtkSrc: Source network type.
-    NtkDest: Target network type.
+    NtkDest: Target network or gate-level layout type.
 
 )doc";
 
@@ -7400,7 +7176,7 @@ Args:
 
 Template Args:
     NtkSrc: Source network type.
-    NtkDest: Target network type.
+    NtkDest: Target network or gate-level layout type.
     T: Mapping type to identify signals by. Currently,
        `mockturtle::signal<NtkDest>` and
        `branching_signal_container<NtkDest, NtkSrc, fanout_size>` are
@@ -7429,8 +7205,7 @@ Template Args:
 
 static const char *mkd_doc_fiction_networks_restore_output_names =
 R"doc(Assigns output names from one network to another. Matching outputs are
-identified by their order. Since gate-level layout's are network types
-as well, this function naturally works for them, too.
+identified by their order.
 
 Args:
     ntk_src: Source logic network whose output names are to be
@@ -7440,15 +7215,15 @@ Args:
 
 Template Args:
     NtkSrc: Source network type.
-    NtkDest: Target network type.
+    NtkDest: Target network or gate-level layout type.
 
 )doc";
 
 static const char *mkd_doc_fiction_networks_restore_signal_names =
-R"doc(Assigns all signal names from one network to another. For this
-purpose, a mapping between signals is needed in terms of a
-`mockturtle::node_map`. Since gate-level layout's are network types as
-well, this function naturally works for them, too.
+R"doc(Transfers signal names from a logic network to a network or placed
+layout using a `mockturtle::node_map`. Skips absent native target
+endpoints. Complemented signal names transfer when used by gates or
+POs.
 
 Args:
     ntk_src: Source logic network whose signal names are to be
@@ -7458,8 +7233,9 @@ Args:
     old2new: Mapping of signals from `ntk_src` to `ntk_dest`.
 
 Template Args:
-    NtkSrc: Source network type.
-    NtkDest: Target network type.
+    NtkSrc: Source logic network type.
+    NtkDest: Target network or gate-level layout type.
+    Signal: Target signal or layout output port type.
 
 )doc";
 
@@ -7478,8 +7254,8 @@ Args:
              branching_signal_container.
 
 Template Args:
-    NtkSrc: Source network type.
-    NtkDest: Target network type.
+    NtkSrc: Source logic network type.
+    NtkDest: Target network or gate-level layout type.
     fanout_size: Maximum fanout size in the network.
 
 )doc";
@@ -8108,7 +7884,7 @@ clocking, its clock zones are the library's tiles and follow the gate-
 level clocking, and, if it has synchronization elements, each clock
 zone receives the synchronization delay of its gate tile. The delay
 therefore also covers cells that are added to the zone later, e.g.,
-via cells. Input and output cells carry the names of their nodes. An
+via cells. Input and output cells carry the names of their objects. An
 SiDB layout lies on the H-Si(100)-2x1 lattice.
 
 May pass through, and thereby throw, an
@@ -8117,8 +7893,8 @@ May pass through, and thereby throw, an
 
 Args:
     lyt: The gate-level layout.
-    on_progress: Optional callback reporting completed nonconstant
-                 gate mappings.
+    on_progress: Optional callback reporting completed object
+                 mappings.
 
 Template Args:
     GateLibrary: Type of the gate library to apply.
@@ -8211,18 +7987,16 @@ Template Args:
 static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_aspect_ratio_iterator =
 R"doc(Standard constructor. Takes a starting value and computes an initial
 factorization. The value `n` represents the amount of faces in the
-desired aspect ratios. For example, :math:`n = 1` will yield aspect
-ratios with exactly :math:`1` face, i.e. :math:`1 \times 1` which is
-equal to `layout_base::coordinate{0, 0}`. If :math:`n = 2`, the aspect
-ratios :math:`1 \times 2` and :math:`2 \times 1` will result, which
-are equal to `layout_base::coordinate{0, 1}` and
-`layout_base::coordinate{1, 0}`. Both examples with `AspectRatio ==
-layout_base::coordinate`.
+desired aspect ratios. For example, :math:`n = 1` yields the size-
+based extent `1 x 1`. A starting value of `2` yields extents `1 x 2`
+and `2 x 1`.
 
 Args:
     n: Starting value of the aspect ratio iteration.
 
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_factor_index = R"doc(Index of the current factor.)doc";
 
 static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_factorize =
 R"doc(Factorizes the current `num` into all possible factors :math:`(x, y)`
@@ -8233,8 +8007,6 @@ with :math:`x \cdot y = num`. The result is stored as a vector of
 
 static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_factors = R"doc(Factors of num.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_it = R"doc(Iterator pointing to current factor.)doc";
-
 static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_next =
 R"doc(Computes the next possible `num` where a factorization :math:`(x, y)`
 with :math:`x \cdot y = num` exists.
@@ -8243,9 +8015,9 @@ with :math:`x \cdot y = num` exists.
 
 static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_num = R"doc(Number to factorize into dimensions.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_eq = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_eq = R"doc(Compare iterator positions.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_eq_2 = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_eq_2 = R"doc(Compare iterator positions.)doc";
 
 static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_inc =
 R"doc(Lets the iterator point to the next dimension of the current
@@ -8272,19 +8044,19 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_le = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_le = R"doc(Compare iterator positions.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_le_2 = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_le_2 = R"doc(Compare iterator positions.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_lt = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_lt = R"doc(Compare iterator positions.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_lt_2 = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_lt_2 = R"doc(Compare iterator positions.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_mul = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_mul = R"doc(Return the current extent.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_ne = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_ne = R"doc(Compare iterator positions.)doc";
 
-static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_ne_2 = R"doc(Compare iterator positions.)doc";
 
 static const char *mkd_doc_fiction_physical_design_branching_signal_container =
 R"doc(A container class to help identify layout locations of branching nodes
@@ -8304,11 +8076,11 @@ static const char *mkd_doc_fiction_physical_design_branching_signal_container_br
 
 static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal = R"doc(Branch type.)doc";
 
-static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_branching_signal = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_branching_signal = R"doc(Associates a network destination with a layout output port.)doc";
 
-static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_lyt_signal = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_lyt_signal = R"doc(Output port at the end of the route.)doc";
 
-static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_ntk_node = R"doc(Destination network node.)doc";
 
 static const char *mkd_doc_fiction_physical_design_branching_signal_container_operator_array =
 R"doc(Accesses the branching container to find the location of a given node
@@ -8336,10 +8108,10 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_cell_grid_extent =
-R"doc(The highest cell position of the Cartesian cell grid that a gate
-library's tiles span when applied to a gate-level layout, respecting
-tilings in which even and odd rows or columns do not line up.
-`apply_gate_library` sizes QCA, molQCA, and iNML layouts this way.
+R"doc(The axis sizes of the Cartesian cell grid that a gate library's tiles
+span when applied to a gate-level layout, respecting tilings in which
+even and odd rows or columns do not line up. `apply_gate_library`
+sizes QCA, molQCA, and iNML layouts this way.
 
 Args:
     gate_lyt: Gate-level layout.
@@ -8349,8 +8121,7 @@ Template Args:
     GateLyt: Gate-level layout type.
 
 Returns:
-    Highest cell position of the grid, including the layer count of
-    `gate_lyt`.
+    Axis sizes of the grid, including the layer count of `gate_lyt`.
 
 Raises:
     std::overflow_error: If an extent is outside the signed 32-bit
@@ -8359,15 +8130,14 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_clear_routing =
-R"doc(Removes the entire wire routing from the passed layout. This involves
-deleting all wire segments that have been placed on any tile as well
-as removing stored connections (children pointers) from all gates.
+R"doc(Removes routing wires and disconnects retained objects while
+preserving identities and input indices.
 
 Args:
-    lyt: The layout whose routing is to be deleted.
+    lyt: Layout to edit.
 
 Template Args:
-    Lyt: Gate-level Layout type.
+    Lyt: Gate-level layout type.
 
 )doc";
 
@@ -8414,8 +8184,8 @@ layout.
 
 Args:
     lyt: A gate-level layout to route.
-    objectives: The routing objectives as source-target pairs to
-                fulfill.
+    objectives: The routing objectives as source coordinates and
+                indexed destination inputs to fulfill.
     ps: Parameters.
     pst: Statistics.
 
@@ -8474,69 +8244,6 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_adjust_tile =
-R"doc(This function adjusts the tile and gates in the layout after deleting
-wires. It shifts gates to fill the empty coordinates and adjusts the
-layout according to the provided offset matrix.
-
-Args:
-    lyt: The 2DDWave-clocked layout whose wiring is to be reduced.
-    layout_copy: Copy of the original layout for reference.
-    wiring_reduction_lyt: The `wiring_reduction_layout`.
-    x: X-index of the tile to adjust.
-    y: Y-index of the tile to adjust.
-    z: Z-index of the tile to adjust.
-    offset_mtrx: The offset matrix used for adjusting the layout.
-
-Template Args:
-    Lyt: Type of the Cartesian gate-level layout.
-    LytCpy: Type of the copy of the original layout for reference.
-    WiringReductionLyt: Type of the `wiring_reduction_layout`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_adjust_tile_horizontal_search_dir =
-R"doc(This function adjusts the tile and gates in the layout after deleting
-wires, specifically when traversing in the horizontal search
-direction. It updates the signals and coordinates accordingly based on
-the offset matrix.
-
-Args:
-    lyt: The 2DDWave-clocked layout whose wiring is to be reduced.
-    layout_copy: Copy of the original layout for reference.
-    fanin: Reference to the tile representing the fanin signal.
-    offset_mtrx: The offset matrix used for adjusting the layout.
-    old_coord: The old coordinates before adjustment.
-    offset: The offset value used for adjusting the layout.
-    signals: Vector to store signals for the adjusted coordinates.
-
-Template Args:
-    Lyt: Type of the Cartesian gate-level layout.
-    LytCpy: Type of the copy of the original layout for reference.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_adjust_tile_vertical_search_dir =
-R"doc(This function adjusts the tile and gates in the layout after deleting
-wires, specifically when traversing in the vertical search direction.
-It updates the signals and coordinates accordingly based on the offset
-matrix.
-
-Args:
-    lyt: The 2DDWave-clocked layout whose wiring is to be reduced.
-    layout_copy: Copy of the original layout for reference.
-    fanin: Reference to the tile representing the fanin signal.
-    offset_mtrx: The offset matrix used for adjusting the layout.
-    old_coord: The old coordinates before adjustment.
-    offset: The offset value used for adjusting the layout.
-    signals: Vector to store signals for the adjusted coordinates.
-
-Template Args:
-    Lyt: Type of the Cartesian gate-level layout.
-    LytCpy: Type of the copy of the original layout for reference.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl =
@@ -8551,7 +8258,7 @@ Args:
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_assign_gate =
 R"doc(Assigns a gate implementation to the cells of its tile. Input and
-output cells of a cell grid receive the node name. If the layout has
+output cells of a cell grid receive the object name. If the layout has
 synchronization elements, the tile's synchronization delay goes to the
 clock zone that contains the tile; a ground wire and a crossing wire
 share one clock zone, which keeps the larger delay.
@@ -8559,7 +8266,7 @@ share one clock zone, which keeps the larger delay.
 Args:
     c: Top-left cell of the tile where the gate is placed.
     g: Gate implementation.
-    n: Corresponding node in the gate-level layout.
+    n: Corresponding object in the gate-level layout.
 
 )doc";
 
@@ -8583,7 +8290,7 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_gate_lyt = R"doc(Gate-level layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_map_gates =
-R"doc(Places the implementation of every nonconstant node in its tile.
+R"doc(Places the implementation of every object in its tile.
 
 Args:
     set_up_gate: Returns the implementation of a tile.
@@ -8595,11 +8302,10 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_mapping_count =
-R"doc(Counts nonconstant nodes using the mapping traversal, or skips the
-scan without a callback.
+R"doc(Counts live objects, or skips the scan without a callback.
 
 Returns:
-    Number of nodes mapped to cell implementations.
+    Number of objects mapped to cell implementations.
 
 )doc";
 
@@ -8659,18 +8365,12 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_check_and_optimize_po_positions =
-R"doc(Utility function that checks and optimizes PO positions after each
-gate relocation iteration. This function moves POs that are not
-optimally positioned (e.g., in second rightmost or second bottom
-positions) to the optimal border positions by inserting buffer gates
-where the POs were.
-
-Args:
-    lyt: Gate-level layout.
-    moved_gates: Moved gates counter to decrement if PO is moved.
+R"doc(Extends outputs one tile to the nearest border while preserving their
+logical inputs.
 
 Template Args:
-    Lyt: Cartesian gate-level layout type.
+    Lyt: Layout type. @param lyt Layout. @param moved_gates Relocation
+         count to adjust.
 
 )doc";
 
@@ -8841,35 +8541,57 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_delete_wires =
-R"doc(This function deletes wires from the provided
-`wiring_reduction_layout` based on the specified coordinates and
-offset matrix. It clears the tiles in the to-delete list, shifts all
-gates to fill the empty coordinates, and resizes the layout to an
-optimized size by calculating the bounding box.
+R"doc(Removes selected wires, bypasses their declared inputs, and shifts
+surviving object coordinates.
+
+The copy is committed after all reconnections and moves succeed.
+Logical input indices and disconnected slots remain unchanged.
+Temporary negative coordinates prevent occupied-target conflicts
+during bulk movement.
 
 Args:
-    lyt: The 2DDWave-clocked layout whose wiring is to be reduced.
-    wiring_reduction_layout: The `wiring_reduction_layout`.
-    to_delete: The to-delete list representing coordinates of wires to
-               be deleted. each specific coordinate.
+    lyt: Layout to edit.
+    wiring_reduction_layout: Search layout containing the cut
+                             direction.
+    to_delete: Coordinates selected by the cut search.
 
 Template Args:
     Lyt: Cartesian gate-level layout type.
-    WiringReductionLyt: Type of the `wiring_reduction_layout`.
+    WiringReductionLyt: Wiring-reduction search layout type.
+
+Raises:
+    std::invalid_argument: If a cut selects a retained object or a
+                           cyclic wire chain.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl =
+R"doc(Validates topology and dispatches clock assignment. @tparam Lyt Gate-
+level layout type.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl_determine_clocking_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl_determine_clocking_impl =
+R"doc(Creates a clock-assignment operation. @param lyt Layout. @param p
+Parameters. @param st Statistics.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl_layout = R"doc(The layout to assign clock numbers to.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl_params = R"doc(Parameters.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl_run =
+R"doc(Validates and solves the layout. @return Whether a clock assignment
+exists.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl_stats = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_determine_clocking_impl_validate_layout =
+R"doc(Rejects missing inputs, nonadjacent connections, cycles, and objects
+outside the frame.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_determine_layout_size = R"doc()doc";
 
@@ -8967,9 +8689,9 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_ps = R"doc(
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_pst = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_rar_mutex = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_result_extent = R"doc(Extent of the found result. Only needed for the asynchronous case.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_result_aspect_ratio = R"doc(Aspect ratio of found result. Only needed for the asynchronous case.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_result_extent_mutex = R"doc()doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_run = R"doc()doc";
 
@@ -9184,20 +8906,20 @@ paths transitively.
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_fetch_solver =
 R"doc(Accesses the solver tree and looks for a solver state that is
-associated with an aspect ratio smaller by 1 row or column than given
-aspect ratio. The found one is returned together with the tiles that
-are new to this solver.
+associated with an extent smaller by one row or column than the given
+extent. The found one is returned together with the tiles that are new
+to this solver.
 
 If no such solver could be found, a new solver is created from the
 context given.
 
 Args:
-    ar: aspect ratio of size x * y.
+    ex: Layout extent with width x and height y.
 
 Returns:
-    Solver state associated with an aspect ratio of size x - 1 * y or
-    x * y - 1 and, additionally, the tiles new to the solver. If no
-    such solver is available, a new one is created.
+    Solver state associated with an extent of size (x - 1) * y or x *
+    (y - 1) and, additionally, the tiles new to the solver. If no such
+    solver is available, a new one is created.
 
 )doc";
 
@@ -9620,10 +9342,10 @@ optimality guarantee. This function should never be overly
 restrictive!
 
 Args:
-    ar: Aspect ratio to evaluate.
+    ex: Layout extent to evaluate.
 
 Returns:
-    `true` if ar can safely be skipped because it is UNSAT anyway.
+    `true` if `ex` can safely be skipped because it is UNSAT anyway.
 
 )doc";
 
@@ -9694,11 +9416,11 @@ be reused at a later point. In the example, the 4 x 4 solver would be
 stored and revisited when 4 x 5 is to be explored.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_store_solver_state =
-R"doc(Stores the current solver state in the solver tree with aspect ratio
-ar as key.
+R"doc(Stores the current solver state in the solver tree with extent ex as
+key.
 
 Args:
-    ar: Key to storing the current solver state.
+    ex: Key to storing the current solver state.
 
 )doc";
 
@@ -9726,7 +9448,7 @@ R"doc(Resizes the layout and creates a new solver checkpoint from where on
 the next incremental instance can be generated.
 
 Args:
-    ar: Current aspect ratio to work on.
+    ex: Current layout extent.
 
 )doc";
 
@@ -9738,7 +9460,7 @@ free. Symmetry breaking constraints.
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info =
-R"doc(Shares worker solvers and aspect ratios under `rar_mutex`.
+R"doc(Shares worker solvers and extents under `result_extent_mutex`.
 
 A worker with a result interrupts solvers exploring layouts of equal
 or greater area.)doc";
@@ -9747,7 +9469,7 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_solver = R"doc(Current solver, kept alive while other workers may interrupt it.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_worker_aspect_ratio = R"doc(Currently examined layout aspect ratio.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_worker_extent = R"doc(Currently examined layout extent.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_update_timeout =
 R"doc(Calculates the time left for solving by subtracting the time passed
@@ -9759,56 +9481,52 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_worker_progress = R"doc(Serializes the active candidate dimensions of each solver worker.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_worker_progress = R"doc(Serializes the active candidate extents of each solver worker.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data =
-R"doc(This struct stores information about the fan-in and fan-out
-connections of a gate in a layout. These fan-in and fan-outs are the
-preceding and succeeding gates in the logic network. It contains
-vectors for fan-ins, fan-outs, and temporary coordinates to clear
-before routing. Additionally, it includes layout coordinate paths for
-routing signals between the gate and its fan-in/fan-out connections.
+static const char *mkd_doc_fiction_physical_design_detail_extend_output_position =
+R"doc(Moves an output and inserts a wire at its former coordinate,
+preserving its identity.
 
 Template Args:
-    Lyt: Cartesian gate-level layout type.)doc";
+    Lyt: Layout type. @param lyt Layout. @param id Output identity.
+         @param target New coordinate.
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_fanins =
-R"doc(This vector holds the layout coordinates of all fan-in connections to
-the gate.)doc";
+)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_fanouts =
-R"doc(This vector holds the layout coordinates of all fan-out connections
-from the gate.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data =
+R"doc(Routes adjacent to a gate, with the logical destination of each route.
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_route_fanin_1_to_gate =
-R"doc(This layout_coordinate_path object represents the path for routing
-signals from the first fan-in to the gate within the layout.)doc";
+Template Args:
+    Lyt: Gate-level layout type.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_route_fanin_2_to_gate =
-R"doc(This layout_coordinate_path object represents the path for routing
-signals from the second fan-in to the gate within the layout.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_destinations = R"doc(Explicit input endpoints corresponding to routes.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_route_gate_to_fanout_1 =
-R"doc(This layout_coordinate_path object represents the path for routing
-signals from the gate to the first fan-out within the layout.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_fanins = R"doc(Retained source coordinates in logical input order.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_route_gate_to_fanout_2 =
-R"doc(This layout_coordinate_path object represents the path for routing
-signals from the gate to the second fan-out within the layout.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_fanouts = R"doc(Retained destination coordinates.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_to_clear =
-R"doc(During the gate relocation process, this vector holds temporary layout
-coordinates that need to be cleared or reset.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_routes = R"doc(Original routes, inputs first and then outputs.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_to_clear = R"doc(Intermediate wire coordinates to remove.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fit_occupied_geometry =
+R"doc(Fits zero-origin geometry to occupied objects. Empty layouts receive
+empty geometry.
+
+Template Args:
+    Lyt: Layout type. @param lyt Layout to resize.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl =
+R"doc(Construct candidate paths and their intersection graph.
+
+Template Args:
+    Lyt: Gate layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_all_paths =
-R"doc(Stores a collection of all annotated paths
-(labeled_layout_coordinate_lookup_path objects) computed thus far to
-find intersections with new ones. The edge intersection graph stores
-plain paths without the extra set and label. Therefore, after the
-generate_edge_intersection_graph function terminates, the extra memory
-overhead is being released again.)doc";
+R"doc(Stores labeled paths to find intersections with each new objective.
+The graph stores plain paths.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_connect_clique =
 R"doc(Given a collection of paths belonging to the same objective, this
@@ -9819,6 +9537,9 @@ graph).
 Args:
     objective_paths: Collection of paths belonging to the same
                      objective.
+
+Raises:
+    std::bad_alloc: If storage allocation fails.
 
 )doc";
 
@@ -9833,11 +9554,23 @@ Args:
     objective_paths: Collection of paths belonging to the same
                      objective.
 
+Raises:
+    std::bad_alloc: If storage allocation fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_edge_id = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_generate_edge_intersection_graph_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_generate_edge_intersection_graph_impl =
+R"doc(Set the layout, objectives, parameters, and statistics.
+
+Args:
+    lyt: Gate layout.
+    obj: Routing objectives.
+    p: Parameters.
+    st: Statistics.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_graph = R"doc(The edge intersection graph to be created.)doc";
 
@@ -9853,30 +9586,18 @@ the statistics.
 Args:
     objective_paths: Collection of paths belonging to the same
                      objective.
+    objective_index: Index of the routing objective.
+
+Raises:
+    std::bad_alloc: If storage allocation fails.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path =
-R"doc(Extends the layout_coordinate_path to additionally to the vector
-representation of the path also hold a set that allows fast lookup
-needed to find intersections (O(log n)). Additionally, a label is
-assigned to each path to identify it in the edge intersection graph.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path = R"doc(A coordinate path with its graph vertex label.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_append =
-R"doc(Overwrites the append function to additionally store the given
-coordinate in a set.
-
-Args:
-    c: Coordinate to append to the path.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_has_intersection_with =
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_has_intersection_with =
 R"doc(Given another path, this function checks if they are not disjoint,
 i.e., it looks for at least one coordinate that both paths share.
-
-If, at some point, the set approach is not to be used anymore,
-std::find_first_of offers the same functionality on any kind of range.
 
 Args:
     other: The other path.
@@ -9890,7 +9611,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_has_overlap_with =
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_has_overlap_with =
 R"doc(Like has_intersection_with but allows paths to share crossings, i.e.,
 single-tile intersections.
 
@@ -9909,11 +9630,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_label = R"doc(Label to identify the path in the edge intersection graph.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_path_elements =
-R"doc(Uniquely identify path elements in a set to make them searchable in
-O(1).)doc";
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_label = R"doc(Label to identify the path in the edge intersection graph.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_layout = R"doc(Reference to the layout.)doc";
 
@@ -9925,7 +9642,7 @@ static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersec
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_pst = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_run = R"doc(Generate the graph. @return Candidate paths and their intersections.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_get_offset =
 R"doc(Utility function to calculate the shift that has to be added to any
@@ -10027,7 +9744,14 @@ R"doc(The current best solution with respect to the number of wire segments,
 initialized to the maximum possible value. This value will be updated
 as better solutions are found.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_calculate_cost = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_calculate_cost =
+R"doc(Evaluates a partial or completed layout under one cost objective.
+
+Args:
+    layout: Layout. @param cost_function Objective. @return Layout
+            cost; empty bounds have zero area.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_calculate_num_search_space_graphs =
 R"doc(Determines the number of search space graphs to generate based on the
@@ -10060,6 +9784,10 @@ Returns:
     A path from `src` to `dest` if one exists.
 
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_constant_output_count =
+R"doc(Number of constant outputs; every search graph preserves this source
+interface.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_custom_cost_objective = R"doc(Custom cost objective.)doc";
 
@@ -10307,10 +10035,20 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_prepare_constant_outputs =
+R"doc(Reserves border tiles for explicit constant gates before placing any
+output.
+
+Args:
+    layout: Layout. @param ssg Search graph. @param place_info
+            Candidate placement state.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_print_placement_info =
 R"doc(Outputs placement information, including the current runtime, the
 number of evaluated paths in the search space graphs and the layout
-dimensions.
+extent.
 
 Args:
     lyt: Current layout.
@@ -10417,9 +10155,18 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl =
+R"doc(Maps placed objects and ordered ports to a hexagonal layout.
 
-static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_hexagonalization_impl = R"doc()doc";
+Template Args:
+    HexLyt: Hexagonal destination layout. @tparam CartLyt Cartesian
+            source layout.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_hexagonalization_impl =
+R"doc(Initializes a conversion. @param lyt Source layout. @param p
+Parameters. @param st Statistics.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_layout = R"doc(The 2DDWave-clocked layout to hexagonalize.)doc";
 
@@ -10427,7 +10174,11 @@ static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_
 
 static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_pst = R"doc(Hexagonalization statistics.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_run =
+R"doc(Converts objects and reroutes extended interface pins. @return
+Hexagonal layout.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_is_east_south_colored = R"doc()doc";
 
@@ -10480,14 +10231,11 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_optimize_output_positions =
-R"doc(Utility function that moves outputs from the last row to the previous
-row, and from the last column to the previous column, if possible.
-
-Args:
-    lyt: Gate-level layout.
+R"doc(Shrinks empty final rows and columns while keeping outputs accessible
+at the border.
 
 Template Args:
-    Lyt: Cartesian gate-level layout type.
+    Lyt: Cartesian layout type. @param lyt Layout to optimize.
 
 )doc";
 
@@ -10575,96 +10323,61 @@ generation for one vertex.
 Template Args:
     Lyt: The type of the layout.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_node = R"doc(The index of the current node being placed.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_placement_info_constant_output_margin =
+R"doc(Whether space for constant outputs has been reserved in this rebuilt
+candidate.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_po = R"doc(The index of the current primary output.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_node = R"doc(Index of the current network node being placed.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_placement_info_node2pos = R"doc(Mapping of nodes to their positions in the layout.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_placement_info_current_po = R"doc(Index of the current primary output.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_placement_info_pi2node = R"doc(Mapping of primary input nodes to layout nodes.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_placement_info_node2pos = R"doc(Mapping of logic-network nodes to their current routed output ports.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_placement_info_pi2node =
+R"doc(Original placed primary-input identities, independent of routed output
+ports.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_add_fanin_to_route =
-R"doc(This helper function is used to add a fanin coordinate to the
-appropriate route based on whether it belongs to the the route from
-the first or second fanin to the gate.
+static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl =
+R"doc(Relocates retained objects and reroutes their explicit logical input
+endpoints.
 
-Args:
-    fanin: The fanin coordinate to be added to the route.
-    is_first_fanin: A boolean indicating whether this is part of the
-                    route from the first fanin to the gate.
-    ffd: Reference to the fanin_fanout_data structure containing the
-         routes.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_add_fanout_to_route =
-R"doc(This helper function is used to add a fanout coordinate to the
-appropriate route based on whether it belongs to the the route from
-the gate to the first or second fanout.
-
-Args:
-    fanout: The fanout coordinate to be added to the route.
-    is_first_fanout: A boolean indicating whether it belongs to the
-                     route from the gate to the first fanout.
-    ffd: Reference to the fanin_fanout_data structure containing the
-         routes.
-
-)doc";
+Template Args:
+    Lyt: Cartesian gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_check_new_position =
-R"doc(Attempts to relocate a gate to a new position within the layout and
-updates routing connections accordingly.
+R"doc(Attempts a placement and restores every route to its explicit
+destination input.
 
 Args:
-    lyt: Gate-level layout being optimized.
-    new_pos: The target tile position to which the gate is to be
-             relocated.
-    num_gate_relocations: Reference to a counter tracking the number
-                          of gate relocations performed.
-    current_pos: Reference to the current position of the gate being
-                 relocated. This will be updated upon successful
-                 relocation.
-    fanins: Vector containing the tile positions of all fan-in
-            connections to the gate.
-    fanouts: Vector containing the tile positions of all fan-out
-             connections from the gate.
-    moved_gate: Reference to a boolean flag that will be set to `true`
-                if the gate is successfully moved.
-    old_pos: The original tile position of the gate before the
-             relocation attempt.
-
-Returns:
-    `true` if the gate was successfully relocated to `new_pos` and all
-    routing paths were established. `false` if the relocation resulted
-    in no movement (i.e., `new_pos` is the same as `old_pos`).
+    lyt: Layout. @param candidate Placement to try. @param attempts
+         Attempt count.
+    current: Current gate coordinate. @param data Adjacent routes.
+             @param moved Successful movement flag.
+    original: Original coordinate. @return Whether another candidate
+              may be tried.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_fix_wires =
-R"doc(Utility function to move wires that cross over empty tiles down one
-layer. This can happen if the wiring of a gate is deleted.
+R"doc(Moves crossing wires onto empty ground positions; topology follows
+their identities.
 
 Args:
-    lyt: Gate-level layout.
-    deleted_coords: Tiles that got deleted.
+    lyt: Layout. @param deleted_coords Positions cleared by rerouting.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_get_fanin_and_fanouts =
-R"doc(Utility function to trace back fanins and fanouts of a gate. Based on
-the gate to be moved, this function returns the location of the fanins
-and fanouts, as well as the wiring in between them. Additionally, all
-wire tiles between fanins and the gate, as well as between the gate
-and fanouts are collected for deletion.
+R"doc(Collects retained endpoints and wire routes without compacting logical
+input indices.
 
 Args:
-    lyt: Gate-level layout.
-    op: coordinate of the gate to be moved.
+    lyt: Layout. @param position Gate coordinate. @return Routes
+         adjacent to the gate.
 
-Returns:
-    fanin and fanout gates, wires to be deleted and old routing paths.
+Raises:
+    std::invalid_argument: If an intermediate wire is disconnected or
+                           cyclic.
 
 )doc";
 
@@ -10684,23 +10397,12 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_improve_gate_location =
-R"doc(Utility function that moves gates to new coordinates and checks if
-routing is possible. This includes:
-
-- removing the old wiring between fanins, the gate and fanouts -
-  updating the incoming signals - determining coordinates that would
-  improve the layout - testing all those coordinates by moving the
-  gate to each one and checking if a new wiring can be found - if a
-  new coordinate is found and wiring is possible, it is applied and
-  incoming signals are updated - if no better coordinate is found, the
-  old wiring is restored
+R"doc(Relocates a gate toward the origin and reroutes without changing
+identities or input numbering.
 
 Args:
-    lyt: Gate-level layout.
-    old_pos: Old position of the gate to be moved.
-
-Returns:
-    `true` if the gate was moved successfully, `false` otherwise.
+    lyt: Layout. @param original Original coordinate. @return Whether
+         the gate moved.
 
 )doc";
 
@@ -10710,42 +10412,27 @@ static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimizati
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_plyt = R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_post_layout_optimization_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_post_layout_optimization_impl =
+R"doc(Initializes relocation search. @param lyt Layout. @param p Parameters.
+@param st Statistics.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_ps = R"doc(Post-layout optimization parameters.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_pst = R"doc(Statistics about the post-layout optimization process.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_restore_original_wiring =
-R"doc(Restores the original wiring if relocation of a gate fails.
-
-This function moves the gate back to its original position and
-reinstates the previous wiring paths between the gate and its fan-
-in/fan-out connections. It also updates the search obstructions
-accordingly.
+R"doc(Moves the gate back and recreates its original routing with ordered
+input endpoints.
 
 Args:
-    lyt: Gate-level layout.
-    old_path_from_fanin_1_to_gate: The original routing path from the
-                                   first fan-in to the gate (if
-                                   exists).
-    old_path_from_fanin_2_to_gate: The original routing path from the
-                                   second fan-in to the gate (if
-                                   exists).
-    old_path_from_gate_to_fanout_1: The original routing path from the
-                                    gate to the first fan-out (if
-                                    exists).
-    old_path_from_gate_to_fanout_2: The original routing path from the
-                                    gate to the second fan-out (if
-                                    exists).
-    current_pos: Current position of the gate after relocation
-                 attempt.
-    old_pos: Original position of the gate before relocation attempt.
-    fanouts: Vector of fanout tiles connected to the gate.
+    lyt: Layout. @param current Current coordinate. @param original
+         Original coordinate. @param data Routes.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_run = R"doc(Optimizes placement and wiring until convergence or timeout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_search_obstructions = R"doc(Temporary constraints used while moving gates and routing wires.)doc";
 
@@ -10832,41 +10519,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_routing_objective_with_fanin_update_information =
-R"doc(Encapsulates a routing objective with fanin update information.
-
-This struct specifies a routing objective by defining the source and
-target coordinates, and it includes a flag that indicates whether the
-primary input was the first fanin for the corresponding fanout and the
-fanout gate is asymmetric (e.g., greater than). If the flag is set to
-true, the fanin signals need to be reordered.
-
-Template Args:
-    HexLyt: The type of the hexagonal layout.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_routing_objective_with_fanin_update_information_routing_objective_with_fanin_update_information =
-R"doc(Constructs a routing objective with fanin update information.
-
-Initializes the base routing objective with the given source and
-target coordinates, and sets the update flag based on the provided
-parameter.
-
-Args:
-    src: The source coordinate of the routing objective.
-    tgt: The target coordinate of the routing objective.
-    update: (Optional) A flag that, if true, indicates that the
-            primary input was the first fanin and the fanout gate is
-            asymmetric, which means that the fanin signals need to be
-            reordered. Defaults to false.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_routing_objective_with_fanin_update_information_update_first_fanin =
-R"doc(Flag indicating whether the primary input was the first fanin and the
-fanout gate is asymmetric.
-
-If this flag is true, the fanin signals need to be reordered.)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_routing_successor =
 R"doc(Resolves the coordinate that a path search enters when it steps from
 `current` to the adjacent coordinate `successor`. The search returns
@@ -10891,66 +10543,61 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler =
+R"doc(Encodes declared connections as clock-zone constraints.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    SolverType: SAT backend.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_assign_clock_numbers =
-R"doc(Assigns clock numbers to the layout based on the provided model.
-
-Args:
-    model: The model to extract the clocking scheme from.
+R"doc(Prepares and commits model phases without partial layout updates.
+@param model SAT assignment.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_at_least_one_clock_number_per_tile =
-R"doc(Adds constraints to the solver that enforce the assignment of at least
-one clock number per tile.
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_at_least_one_clock_number_per_tile = R"doc(Requires one phase in each occupied clock zone.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_at_most_one_clock_number_per_tile = R"doc(Excludes multiple phases in one occupied clock zone.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_clock_zone =
+R"doc(Returns the zero-layer clock-zone coordinate. @param id Placed object.
+@return Clock zone.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_at_most_one_clock_number_per_tile =
-R"doc(Adds constraints to the solver that enforce the assignment of at most
-one clock number per tile.
-
-)doc";
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_clock_zones = R"doc(Distinct occupied clock zones, shared across all layers.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_determine_clocks =
-R"doc(Determines clock numbers for the layout.
-
-Constructs a SAT instance and passes it to a solver to find a valid
-clocking scheme.
+R"doc(Solves clock constraints and commits a complete clocking value on
+success.
 
 Returns:
-    `true` iff a valid clocking scheme could be found.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_ensure_same_clock_number_on_crossing_tiles =
-R"doc(Adds constraints to the solver that ensure the assignment of the same
-clock number to crossing tiles.
+    Whether the constraints are satisfiable.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_exclude_clock_assignments_that_violate_information_flow =
-R"doc(Adds constraints to the solver that exclude the assignment of non-
-adjacently clocked tiles.
+R"doc(Requires every declared source to precede its destination by one
+phase.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_layout = R"doc(The layout to clock.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_layout = R"doc(Layout receiving the completed clock assignment.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_number_of_clocks = R"doc(Number of clocks in layout's clocking scheme.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_number_of_clocks = R"doc(Number of phases in the stored scheme.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_sat_clocking_handler = R"doc(Default constructor.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_solver = R"doc(The solver used to find a solution to the clocking problem.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_symmetry_breaking =
-R"doc(Adds constraints to the solver that help to speed up the solving
-process by breaking symmetries in the solution space.
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_sat_clocking_handler =
+R"doc(Creates variables for occupied clock zones. @param lyt Validated
+layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_variables = R"doc(Stores all variables.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_solver = R"doc(SAT backend.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_symmetry_breaking = R"doc(Fixes the phase rotation along the first PI's first-sink chain.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_sat_clocking_handler_variables = R"doc(Variables for every occupied clock zone and phase.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_search_direction =
 R"doc(The two search directions: horizontal (from left to right) and
@@ -11041,7 +10688,7 @@ static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_order =
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_update_topo = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_update_topo = R"doc(Orders dependencies and includes every declared primary input.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
@@ -11050,10 +10697,11 @@ wiring_reduction_layout.
 This function updates the to-delete list by appending coordinates from
 the given possible path in a wiring_reduction_layout. It considers
 coordinates that are not at the leftmost (`x == 0`) or rightmost (`x
-== lyt.x()`) positions for left to right, or at the top (`y == 0`) or
-bottom (`y == lyt.y()`) positions for top to bottom and shifts them to
-get the corresponding coordinates on the original layout. The
-coordinates are then obstructed in both layers (0 and 1).
+== (static_cast<int32_t>(lyt.width()) - 1)`) positions for left to
+right, or at the top (`y == 0`) or bottom (`y ==
+(static_cast<int32_t>(lyt.height()) - 1)`) positions for top to bottom
+and shifts them to get the corresponding coordinates on the original
+layout. The coordinates are then obstructed in both layers (0 and 1).
 
 Args:
     lyt: The `wiring_reduction_layout` to be updated.
@@ -11071,7 +10719,12 @@ static const char *mkd_doc_fiction_physical_design_detail_wire_east = R"doc()doc
 
 static const char *mkd_doc_fiction_physical_design_detail_wire_south = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl =
+R"doc(Searches horizontal and vertical wire cuts and edits the caller's
+layout.
+
+Template Args:
+    Lyt: Cartesian gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_plyt = R"doc(The 2DDWave-clocked layout whose wiring is to be reduced.)doc";
 
@@ -11079,13 +10732,17 @@ static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_pst = R"doc(Statistics about the wiring_reduction process.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_run = R"doc(Runs wire-cut searches until convergence or timeout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_start = R"doc(Start time.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_timeout_limit_reached = R"doc(Timeout limit reached.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_wiring_reduction_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_wiring_reduction_impl =
+R"doc(Initializes a wiring-cut search. @param lyt Layout. @param p
+Parameters. @param st Statistics.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout =
 R"doc(Represents a layout used for wiring reduction derived from the
@@ -11095,6 +10752,20 @@ This class provides functionality for a wiring reduction layout based
 on a Cartesian coordinate system. It inherits from the
 `cartesian_layout` class and extends it with specific behavior for
 finding excess wiring.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_apply_if_not_coordinate =
+R"doc(Calls the visitor for an existing coordinate distinct from the
+reference coordinate.
+
+Args:
+    c: Reference coordinate.
+    cardinal: Optional neighbor coordinate.
+    fn: Visitor called as an lvalue.
+
+Template Args:
+    Fn: Reusable visitor type.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_foreach_adjacent_coordinate =
 R"doc(Iterates over adjacent coordinates of a given coordinate and applies a
@@ -11240,12 +10911,10 @@ R"doc(Constraints of this wiring-cut search, passed to path searches on this
 layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_layout_wiring_reduction_layout =
-R"doc(This constructor initializes the `wiring_reduction_layout` with an
-optional aspect ratio.
+R"doc(Constructs a search grid with a zero-origin, half-open extent.
 
 Args:
-    ar: The aspect ratio for the layout. Defaults to an empty aspect
-        ratio if not provided.
+    ex: Search-grid extent. Defaults to an empty extent.
     direction: The search direction to be used. Defaults to HORIZONTAL
                if not provided.
 
@@ -11256,13 +10925,19 @@ R"doc(Determines clock numbers for the given (unclocked) gate-level layout.
 This algorithm parses the layout's gate and wire connections,
 disregarding any existing clocking information, and constructs a SAT
 instance to find a valid clock number assignment under which the
-information flow is respected. It then assigns these clock numbers as
-an irregular clock map to the given layout via the
-`assign_clock_number` function, overriding any existing clocking
-scheme.
+information flow is respected. On success, occupied clock zones use
+the solved phases. The stored clocking scheme retains its name and
+phase count.
+
+All objects must lie inside the frame, every input must be connected
+to an adjacent source, and connections must be acyclic. Existing clock
+assignments need not respect those connections. Clock zones span all
+layers.
 
 If no valid clock number assignment exists for `lyt`, this function
-returns `false` and does not modify `lyt`.
+returns `false`. Failure preserves the layout and its clocking scheme.
+A successful assignment preserves synchronization delays and
+unoccupied clock overrides.
 
 This algorithm was proposed in \"Ending the Tyranny of the Clock: SAT-
 based Clock Number Assignment for Field-coupled Nanotechnologies\" by
@@ -11280,6 +10955,11 @@ Template Args:
 Returns:
     `true` iff `lyt` could be successfully clocked via a valid clock
     number assignment.
+
+Raises:
+    std::invalid_argument: If placement or declared connections
+                           violate the required topology.
+    std::bad_alloc: If allocation fails.
 
 )doc";
 
@@ -11446,8 +11126,8 @@ Note:
     If `upper_bound_area` and (either) `upper_bound_x` or
     `upper_bound_y` are set, the imposed search space restrictions are
     cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x
-    == 4`, all aspect ratios with an x-dimension of more than 4 *and*
-    a total area of more than 20 will be skipped.)doc";
+    == 4`, all aspect ratios with a width of more than 4 *and* a total
+    area of more than 20 will be skipped.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_x = R"doc(Number of tiles to use as an upper bound in x direction.)doc";
 
@@ -11502,28 +11182,25 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_extract_routing_objectives =
-R"doc(Extracts all routing objectives from the given layout. To this end,
-all routing paths in the layout are traversed, starting at each PI.
-Whenever the next regular node (non-IO, non-constant, non-wire) is
-encountered, this connection is added to the list of all objectives.
+R"doc(Extracts connections between retained gates, fanouts, and terminals
+with destination input indices.
 
-For example, let a layout have connections from `(0,0)` to `(2,3)` via
-a cascade of wires and a direct connection from `(2,2)` to `(2,3)`.
-The list of routing objectives extracted from that layout would
-contain `{(0,0), (2,3)}` and `{(2,2), (2,3)}`.
-
-In other words, if all wires were removed from the layout and all
-connections ripped-up, an equivalent layout could be recreated from
-the list of routing objectives.
+Intermediate single-sink wires are followed through declared topology.
+Missing inputs produce no objective; disconnected input slots keep
+their indices. Cycles of intermediate wires reject.
 
 Args:
-    lyt: Layout whose routing objectives are to be extracted.
+    lyt: Layout to inspect.
 
 Template Args:
     Lyt: Gate-level layout type.
 
 Returns:
-    List of all routing objectives in the given layout.
+    Routing objectives that preserve logical input numbering.
+
+Raises:
+    std::invalid_argument: If an intermediate wire chain contains a
+                           cycle.
 
 )doc";
 
@@ -11540,8 +11217,7 @@ clocked.
 
 Args:
     lyt: The layout to generate the edge intersection graph for.
-    objectives: A list of routing objectives given as source-target
-                pairs.
+    objectives: Source coordinates and indexed destination inputs.
     ps: Parameters.
     pst: Statistics.
 
@@ -11580,6 +11256,8 @@ static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_gr
 static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_number_of_unroutable_objectives =
 R"doc(For each routing objective that cannot be fulfilled in the given
 layout, this counter is incremented.)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_objective_indices = R"doc(Routing objective index for each vertex ID.)doc";
 
 static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_time_total = R"doc(Runtime measurement.)doc";
 
@@ -11835,6 +11513,12 @@ Template Args:
 Returns:
     Hexagonal representation of the Cartesian layout.
 
+Raises:
+    std::invalid_argument: If clocking or placed geometry does not
+                           satisfy the input contract.
+    std::overflow_error: If the transformed coordinates exceed the
+                         signed coordinate range.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_hexagonalization_io_pin_routing_error =
@@ -11932,7 +11616,11 @@ R"doc(A path in a layout defined as an ordered sequence of coordinates.
 Template Args:
     Lyt: Coordinate layout type.)doc";
 
-static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_append = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_append =
+R"doc(Appends a coordinate. @param c Coordinate to append. @throws
+std::bad_alloc If storage allocation fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_source = R"doc()doc";
 
@@ -12053,7 +11741,11 @@ R"doc(An ordered collection of multiple paths in a layout.
 Template Args:
     Path: Path type.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_collection_add = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_collection_add =
+R"doc(Adds a path. @param p Path to add. @throws std::bad_alloc If storage
+allocation fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_collection_contains =
 R"doc(Checks whether a given path is contained in the collection.
@@ -13053,7 +12745,11 @@ R"doc(A set of multiple paths in a layout.
 Template Args:
     Path: Path type.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_set_add = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_set_add =
+R"doc(Adds a path. @param p Path to add. @throws std::bad_alloc If storage
+allocation fails.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_set_contains = R"doc()doc";
 
@@ -13071,7 +12767,7 @@ Template Args:
     Ntk: Logic network type.
 
 Returns:
-    Signal pointing to the placed gate in `lyt`.
+    Output port pointing to the placed gate in `lyt`.
 
 )doc";
 
@@ -13090,7 +12786,7 @@ Template Args:
     Ntk: Logic network type.
 
 Returns:
-    Signal pointing to the placed gate in `lyt`.
+    Output port pointing to the placed gate in `lyt`.
 
 )doc";
 
@@ -13113,7 +12809,7 @@ Template Args:
     Ntk: Logic network type.
 
 Returns:
-    Signal pointing to the placed gate in `lyt`.
+    Output port pointing to the placed gate in `lyt`.
 
 )doc";
 
@@ -13134,7 +12830,7 @@ Template Args:
     Ntk: Logic network type.
 
 Returns:
-    Signal pointing to the placed gate in `lyt`.
+    Output port pointing to the placed gate in `lyt`.
 
 )doc";
 
@@ -13149,9 +12845,8 @@ Args:
     t: Tile in `lyt` to place the gate onto.
     ntk: Network whose node is to be placed.
     n: Node in `ntk` to place onto `t` in `lyt`.
-    node2pos: Mapping from network nodes to layout signals, i.e., a
-              pointer to their position in the layout. The map is used
-              to fetch location of the fanins. The
+    node2pos: Mapping from network nodes to layout output ports. The
+              map is used to fetch location of the fanins. The
               `mockturtle::node_map` is not updated by this function.
 
 Template Args:
@@ -13159,7 +12854,7 @@ Template Args:
     Ntk: Logic network type.
 
 Returns:
-    Signal to the newly placed gate in `lyt`.
+    Output port of the newly placed gate in `lyt`.
 
 )doc";
 
@@ -13175,17 +12870,17 @@ Args:
     t: Tile in `lyt` to place the gate onto.
     ntk: Network whose node is to be placed.
     n: Node in `ntk` to place onto `t` in `lyt`.
-    node2pos: Mapping from network nodes to layout signals, i.e., a
-              pointer to their position in the layout via branches.
-              The map is used to fetch location of the fanins. The
-              `mockturtle::node_map` is not updated by this function.
+    node2pos: Mapping from network nodes to layout output ports via
+              branches. The map is used to fetch location of the
+              fanins. The `mockturtle::node_map` is not updated by
+              this function.
 
 Template Args:
     Lyt: Gate-level layout type.
     Ntk: Logic network type.
 
 Returns:
-    Signal to the newly placed gate in `lyt`.
+    Output port of the newly placed gate in `lyt`.
 
 )doc";
 
@@ -13224,9 +12919,21 @@ Args:
 Template Args:
     Lyt: Cartesian gate-level layout type.
 
+Raises:
+    std::invalid_argument: If clocking or occupied geometry is
+                           invalid.
+    std::overflow_error: If the extent leaves no room for signed
+                         routing coordinates.
+
 Note:
     This function requires the gate-level layout to be 2DDWave-
     clocked!
+
+Note:
+    Exceptions may leave a partially edited layout. Object identities,
+    occupancy, and connection storage remain structurally valid;
+    logical equivalence and physical validity are not guaranteed after
+    failure.
 
 )doc";
 
@@ -13287,56 +12994,41 @@ static const char *mkd_doc_fiction_physical_design_post_layout_optimization_stat
 
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization_stats_y_size_before = R"doc(Layout height before the post-layout optimization process.)doc";
 
-static const char *mkd_doc_fiction_physical_design_reserve_input_nodes =
-R"doc(Reserve primary input nodes in a layout in the same order as they
-appear in a network. This is a useful function to call first when a
-layout is to be created from a network. The primary input nodes then
-exist in the layout, but are not placed anywhere and also do not have
-names. They are just registered to preserve their order.
-
-This function can be seen as an equivalent to
-`mockturtle::initialize_copy_network`, but for layouts.
-
-Args:
-    lyt: Gate-level layout where primary input nodes are to be
-         reserved.
-    ntk: Network whose primary inputs are to be reserved in `lyt`.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-
-Returns:
-    A `mockturtle::node_map` that maps from network nodes to layout
-    nodes to be able to address the created nodes.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_route_path =
-R"doc(Establishes a wire routing along the given path in the given layout.
-To this end, the given path's source and target coordinates are
-assumed to be populated by other gates or wires that the new path
-shall connect to.
+R"doc(Routes a path to one explicit logical input without changing other
+input slots.
 
-If `path` contains a tile that is allocated already, it will instead
-switch to the crossing layer. If path contains exactly source and
-target, no wires are created, but the source and target are connected.
+Occupied intermediate ground coordinates use their free crossing
+layer. Endpoints and all intermediate placements are checked before
+mutation. A failed allocation removes newly created wires.
 
 Args:
-    lyt: Gate-level layout in which a wire path is to be established.
-    path: Path to route wires along.
+    lyt: Layout to edit.
+    path: Path containing at least its occupied source and target
+          coordinates.
+    destination: Ordered destination input.
 
 Template Args:
     Lyt: Gate-level layout type.
-    Path: Path type.
+    Path: Coordinate path type.
+
+Raises:
+    std::invalid_argument: If an endpoint or intermediate placement is
+                           unavailable.
+    std::out_of_range: If the destination input index is invalid.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_routing_objective =
-R"doc(Routing objectives are source-target pairs.
+R"doc(Routing objectives identify a geometric source and an ordered
+destination input.
 
 Template Args:
     Lyt: Layout type whose coordinates are to be used.)doc";
+
+static const char *mkd_doc_fiction_physical_design_routing_objective_input_index =
+R"doc(Logical input index at the target; geometric searches ignore this
+field.)doc";
 
 static const char *mkd_doc_fiction_physical_design_routing_objective_operator_eq =
 R"doc(Equality operator.
@@ -13352,9 +13044,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_routing_objective_source = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_routing_objective_source = R"doc(Source coordinate.)doc";
 
-static const char *mkd_doc_fiction_physical_design_routing_objective_target = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_routing_objective_target = R"doc(Target coordinate.)doc";
 
 static const char *mkd_doc_fiction_physical_design_surface_analysis =
 R"doc(Analyzes a defective SiDB surface for a gate-level layout: for every
@@ -13437,6 +13129,12 @@ Args:
 
 Template Args:
     Lyt: Cartesian gate-level layout type.
+
+Raises:
+    std::invalid_argument: If clocking or occupied geometry is
+                           invalid.
+    std::overflow_error: If the extent leaves no room for signed
+                         routing coordinates.
 
 )doc";
 
@@ -13701,7 +13399,7 @@ Returns:
 
 static const char *mkd_doc_fiction_qca_layout =
 R"doc(A QCA layout: QCA cells on a Cartesian grid with a ground layer (`z =
-0`) and a crossing layer (`z = 1`). Cells carry a type, a mode, and,
+0`) and crossing layers (`z > 0`). Cells carry a type, a mode, and,
 for inputs and outputs, a name. Clock zones are tiles of cells, and
 each clock zone can be a synchronization element that extends its Hold
 phase. The layout has value semantics; copies are independent.)doc";
@@ -13732,6 +13430,9 @@ Args:
     cz: Clock zone.
     se: Number of full clock cycles to extend the Hold phase of `cz`
         by; 0 turns `cz` back into a normal clock zone.
+
+Raises:
+    std::bad_alloc: If allocation fails.
 
 )doc";
 
@@ -13775,13 +13476,15 @@ static const char *mkd_doc_fiction_qca_layout_layout =
 R"doc(Creates an empty layout with open clocking.
 
 Args:
-    ar: Highest cell position; `ar.z = 1` enables the crossing layer.
+    size: Half-open cell sizes; layers beyond the ground layer hold
+          crossing cells.
     name: Layout name.
     tile_size_x: Clock-zone width in cells.
     tile_size_y: Clock-zone height in cells.
 
 Raises:
-    std::invalid_argument: if either clock-zone dimension is zero.
+    std::invalid_argument: If a size exceeds the coordinate domain or
+                           a clock-zone size is zero.
 
 )doc";
 
@@ -13789,14 +13492,16 @@ static const char *mkd_doc_fiction_qca_layout_layout_2 =
 R"doc(Creates an empty layout clocked by the given scheme.
 
 Args:
-    ar: Highest cell position; `ar.z = 1` enables the crossing layer.
+    size: Half-open cell sizes; layers beyond the ground layer hold
+          crossing cells.
     scheme: Clocking scheme over clock zones.
     name: Layout name.
     tile_size_x: Clock-zone width in cells.
     tile_size_y: Clock-zone height in cells.
 
 Raises:
-    std::invalid_argument: if either clock-zone dimension is zero.
+    std::invalid_argument: If a size exceeds the coordinate domain or
+                           a clock-zone size is zero.
 
 )doc";
 
@@ -13831,12 +13536,27 @@ original QCA ONE by also theoretically allowing multiple wires in the
 same tile. Furthermore, it can be used for a range of clocking
 schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_qca_one_library_determine_port_routing = R"doc()doc";
+static const char *mkd_doc_fiction_qca_qca_one_library_determine_port_routing =
+R"doc(Routes the physical connector ports of an occupied tile.
+
+Args:
+    lyt: Layout.
+    t: Occupied tile.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    Physical connector ports.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_qca_one_library_post_layout_optimization =
 R"doc(Post-layout optimization that turns the ends of crossing wires into
 vias: a crossing-layer cell with at most one neighbor gets the via
-mode, and a via cell is added below it on the ground layer.
+mode, and a via cell is added below it on the ground layer. The
+optimization visits occupied cells inside the frame and ignores empty
+positions.
 
 Args:
     lyt: The QCA layout that has been created via application of
@@ -14622,8 +14342,8 @@ static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design =
 R"doc(Designs a lattice-based SiDB circuit for a placed and routed pointy-
 top hexagonal gate-level layout.
 
-For each gate, the SiDB gate design algorithm designs the
-corresponding SiDB implementation.
+The function validates every gate type before designing the SiDB
+implementations.
 
 Args:
     gate_lyt: Pointy-top hexagonal gate-level layout.
@@ -14640,6 +14360,8 @@ Returns:
 Raises:
     std::invalid_argument: if gate mapping uses a column arrangement
                            instead of a row arrangement.
+    fcn::unsupported_gate_type_exception: if any object has an
+                                          unsupported function.
     unsuccessful_gate_design_error: if a gate cannot be designed.
     utils::timeout_error: if the shared circuit budget or an
                           individual gate budget expires. No partial
@@ -16310,6 +16032,23 @@ Args:
 
 Returns:
     `true` if the predefined gate can be used.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_is_supported_gate_type =
+R"doc(Returns whether an object's function has an on-the-fly Bestagon
+implementation.
+
+Args:
+    lyt: Layout that owns the object.
+    object: Object to inspect.
+
+Template Args:
+    GateLyt: Gate-level layout type.
+
+Returns:
+    Whether the object implements identity, INV, or a supported binary
+    function.
 
 )doc";
 
@@ -25119,7 +24858,15 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_generate_fanout_tree = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_generate_fanout_tree =
+R"doc(Creates enough fanout branches to meet the source's output threshold.
+
+Args:
+    substituted: Partially constructed destination network.
+    n: Original source node.
+    old2new: Mapping from original nodes to destination signals.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_generate_random_tree =
 R"doc(RANDOM strategy: insert buffers at randomly chosen positions in the
@@ -25135,7 +24882,19 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_get_fanout = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_get_fanout =
+R"doc(Selects an output branch with capacity without changing the original
+source signal.
+
+Args:
+    substituted: Partially constructed destination network.
+    n: Original source node.
+    child: Original source signal in the destination network.
+
+Returns:
+    The source signal or an available fanout branch.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_ntk_topo = R"doc(Topological view of the converted network.)doc";
 
@@ -25292,17 +25051,17 @@ static const char *mkd_doc_fiction_synthesis_fanout_substitution =
 R"doc(Substitutes high-output degrees in a logic network with fanout nodes
 that compute the identity function. For this purpose, `create_buf` is
 utilized. Therefore, `NtkDest` should support identity nodes. If it
-does not, no new nodes will in fact be created. In either case, the
-returned network will be logically equivalent to the input one.
+does not, no new nodes will in fact be created. A destination that
+elides buffer nodes may exceed the requested fanout degrees. The
+returned network is logically equivalent to the input network.
 
-The process is rather naive with two possible strategies to pick from:
-breath-first and depth-first. The former creates partially balanced
-fanout trees while the latter leads to fanout chains. Further
-parameterization includes thresholds for the maximum number of output
-each node and fanout is allowed to have.
+The algorithm builds breadth-first, depth-first, or random fanout
+trees. Parameters set the maximum output degrees of ordinary nodes and
+fanout nodes.
 
 The returned network is newly created from scratch because its type
-`NtkDest` may differ from `NtkSrc`.
+`NtkDest` may differ from `NtkSrc`. Repeated nonconstant inputs use
+distinct routing branches when `NtkDest` preserves buffer nodes.
 
 Args:
     ntk_src: The input logic network.
@@ -25316,6 +25075,10 @@ Returns:
     A fanout-substituted logic network of type `NtkDest` that is
     logically equivalent to `ntk_src`.
 
+Raises:
+    std::invalid_argument: If `ps.degree` is less than two or
+                           `ps.threshold` is zero.
+
 Note:
     The physical design algorithms natively provided in fiction do not
     require their input networks to be fanout-substituted. If that is
@@ -25327,7 +25090,7 @@ Note:
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params = R"doc(Parameters for the fanout substitution algorithm.)doc";
 
-static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node.)doc";
+static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_degree = R"doc(Maximum output degree of each fan-out node. Must be at least two.)doc";
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
@@ -25351,7 +25114,7 @@ fanout tree.)doc";
 
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before
-substitution applies.)doc";
+substitution applies. Must be at least one.)doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader =
 R"doc(Simple reader to parse truth tables from files. The files must be
@@ -25597,6 +25360,9 @@ would clash with the function above.
 Args:
     node: Node ID to convert between graph structures.
 
+Template Args:
+    GraphProxy: Graph type used to distinguish the vertex ID overload.
+
 Returns:
     Corresponding node ID in the Brian Crites graph.
 
@@ -25640,7 +25406,7 @@ static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run = 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run_brian_crites_engine = R"doc()doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_translate_to_brian_crites_graph =
-R"doc(Translates the given graph to a equivalent Brian Crites graph data
+R"doc(Translates the given graph to an equivalent Brian Crites graph data
 structure.
 
 Args:
@@ -26174,11 +25940,9 @@ Args:
 static const char *mkd_doc_fiction_utils_io_csv_writer_stream = R"doc(Output stream to write to.)doc";
 
 static const char *mkd_doc_fiction_utils_io_csv_writer_write_line =
-R"doc(Writes a single line of values to the output stream separated by a
-DELIMITER. No delimiter placed after the last value. Note that no
-escape checks are performed. Upon receiving no arguments, only a
-newline is written. This function uses template recursion to process
-the variadic parameters.
+R"doc(Writes one line of delimiter-separated values without a trailing
+delimiter or flushing the stream. The writer does not escape values.
+With no arguments, the writer emits a newline.
 
 Args:
     arg: First argument to write to the stream.
@@ -26952,7 +26716,8 @@ Template Args:
 Returns:
     Iterator in the range `[first, last)` to the first position of the
     first 2-element sub-sequence shared between the two ranges, or
-    `last` if no such shared sub-sequence exists.
+    `last` if either range has fewer than two elements or no shared
+    sub-sequence exists.
 
 )doc";
 
@@ -27144,10 +26909,11 @@ static const char *mkd_doc_fiction_utils_worker_progress_scope_worker_progress_s
 static const char *mkd_doc_fiction_verification_count_gate_types =
 R"doc(Gives a detailed listing of all gate types present in the provided
 network (or layout). This function can distinguish most gate types
-available as atomic building blocks and can easily be extended to
-support more gate types. The given network (or layout) has to
-implement a function to test whether a node is of the respective gate
-type.
+available as atomic building blocks. Primary terminals and network
+constants do not enter the counts. Placed wires count as fanout
+objects when they drive multiple inputs, or as buffers otherwise. The
+given network (or layout) has to implement a function to test whether
+a node is of the respective gate type.
 
 Args:
     ntk: The network (or layout).
@@ -27158,55 +26924,59 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats = R"doc(Counts of logic gate types, excluding primary terminals.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_and2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_and2 = R"doc(Number of and2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_and3 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_and3 = R"doc(Number of and3 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_and_xor = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_and_xor = R"doc(Number of and_xor objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_buf = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_buf = R"doc(Number of buf objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_dot = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_dot = R"doc(Number of dot objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_fanout = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_fanout = R"doc(Number of fanout objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_gamble = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_gamble = R"doc(Number of gamble objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_ge2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_ge2 = R"doc(Number of ge2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_gt2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_gt2 = R"doc(Number of gt2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_inv = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_inv = R"doc(Number of inv objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_le2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_le2 = R"doc(Number of le2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_lt2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_lt2 = R"doc(Number of lt2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_maj3 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_maj3 = R"doc(Number of maj3 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_mux = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_mux = R"doc(Number of mux objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_nand2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_nand2 = R"doc(Number of nand2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_nor2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_nor2 = R"doc(Number of nor2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_onehot = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_onehot = R"doc(Number of onehot objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_or2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_or2 = R"doc(Number of or2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_or_and = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_or_and = R"doc(Number of or_and objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_other = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_other = R"doc(Number of other objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_xnor2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_xnor2 = R"doc(Number of xnor2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_xor2 = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_xor2 = R"doc(Number of xor2 objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_xor_and = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_xor_and = R"doc(Number of xor_and objects.)doc";
 
-static const char *mkd_doc_fiction_verification_count_gate_types_stats_report = R"doc()doc";
+static const char *mkd_doc_fiction_verification_count_gate_types_stats_report =
+R"doc(Prints gate counts. @param out Output stream. @param detailed Whether
+to print every gate type.
+
+)doc";
 
 static const char *mkd_doc_fiction_verification_cp_and_tp = R"doc(Critical path length and throughput storage struct.)doc";
 
@@ -27220,8 +26990,11 @@ static const char *mkd_doc_fiction_verification_critical_path_length_and_through
 R"doc(Computes the critical path length (CP) length and the throughput (TP)
 of a gate-level layout.
 
-The critical path length is defined as the longest path from any PI to
-any PO in tiles.
+The critical path length counts every placed object on the longest
+path to any PO, including wires and terminals. Traversal follows
+declared input ports, independent of physical adjacency and clocking
+legality. Only output dependencies enter the analysis. Explicit placed
+zero-input functions act as path sources.
 
 The throughput is defined as :math:`\frac{1}{x}` where :math:`x` is
 the highest path length difference between any sets of paths that lead
@@ -27243,8 +27016,8 @@ Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO
 M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
 Springer Nature in 2022.
 
-The complexity of this function is :math:`\mathcal{O}(|T|)` where
-:math:`T` is the set of all occupied tiles in `lyt`.
+The complexity is :math:`\mathcal{O}(|V| + |E|)` for objects and
+connections in the output dependency cones.
 
 Args:
     lyt: The gate-level layout whose CP and TP are desired.
@@ -27255,55 +27028,86 @@ Template Args:
 Returns:
     A struct containing the CP and TP.
 
+Raises:
+    std::invalid_argument: If an output dependency has a disconnected
+                           input or a cycle.
+
 )doc";
 
-static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl = R"doc()doc";
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl =
+R"doc(Counts supported gate predicates through public node or object
+iteration. @tparam Ntk Network or layout.)doc";
 
-static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_gate_types_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_ntk = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_pst = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_critical_path_length_and_throughput_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_delay_cache = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_lyt = R"doc(Gate-level layout.)doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info_delay = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info_diff = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info_length = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info_path_info = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info_path_info_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_result = R"doc(Result storage.)doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_signal_delay =
-R"doc(Evaluates an output's incoming paths without consuming the native call
-stack.
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_gate =
+R"doc(Counts one gate or wire through the predicates its operand supports.
 
 Args:
-    t: Output tile whose path information is needed.
+    n: Gate or wire to classify.
+
+Template Args:
+    Node: Network node or native layout object identity.
 
 Returns:
-    Length, delay, and delay difference of the dominant path.
+    `true` to continue iteration.
 
 )doc";
 
-static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl = R"doc()doc";
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_count_gate_types_impl =
+R"doc(Stores the operand and statistics without copying. @param src Network
+or layout. @param st Counts.
+
+)doc";
+
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_ntk = R"doc(Operand whose gates are counted.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_pst = R"doc(Classification counts.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_count_gate_types_impl_run = R"doc(Classifies every logic gate or wire object.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl =
+R"doc(Evaluates declared output dependencies with an explicit traversal
+stack.
+
+Template Args:
+    Lyt: Placed object layout type.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_cache =
+R"doc(An empty entry marks an active dependency; a value marks a completed
+dependency.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_critical_path_length_and_throughput_impl = R"doc(Stores the layout without copying it. @param src Layout to analyze.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_frame = R"doc(Suspended traversal of an object's ordered inputs.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_frame_input = R"doc(Next input index to visit.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_frame_object = R"doc(Object under traversal.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_lyt = R"doc(Source layout; analysis never mutates layout state.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info = R"doc(Completed path length and arrival phase.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info_delay = R"doc(Latest arrival phase, including the source's clock number.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_path_info_length = R"doc(Number of placed objects on the longest path.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_pending = R"doc(Explicit traversal stack independent of native call stack size.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_critical_path_length_and_throughput_impl_run =
+R"doc(Computes physical path length and throughput. @return Path length and
+throughput denominator.
+
+)doc";
+
+static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl =
+R"doc(Compares logical interfaces and physical layout timing. @tparam Spec
+Specification. @tparam Impl Implementation.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_compare_logic =
+R"doc(Compares aligned logical interfaces and retains physical throughput.
+@return Equivalence type.
+
+)doc";
 
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_equivalence_checking_impl =
 R"doc(Standard constructor.
@@ -27311,28 +27115,47 @@ R"doc(Standard constructor.
 Args:
     specification: Logical specification of intended functionality.
     implementation: Implementation of specified functionality.
-    p: Parameters.
     st: Statistics.
 
 )doc";
 
-static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_has_drvs = R"doc()doc";
+static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_has_drvs =
+R"doc(Checks physical legality without printing a report. @tparam NtkOrLyt
+Layout type. @param ntk_or_lyt Layout. @param stats DRV statistics.
+@return Whether a DRV exists.
+
+)doc";
 
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_impl = R"doc(Implementation.)doc";
 
-static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_pst = R"doc()doc";
+static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_logical_network =
+R"doc(Provides a logical network for a layout or an existing network.
 
-static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_run = R"doc()doc";
+Args:
+    source: Comparison operand.
+
+Template Args:
+    NtkOrLyt: Network or layout type.
+
+Returns:
+    Extracted network value or const reference to the existing
+    network.
+
+)doc";
+
+static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_pst = R"doc(Result statistics.)doc";
+
+static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_run =
+R"doc(Checks design rules, aligned logic, and throughput. @return Physical
+equivalence type.
+
+)doc";
 
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_spec = R"doc(Specification.)doc";
 
 static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl =
-R"doc(Forward declaration for the friend declaration in `gate_level_layout`.
-Including `verification/design_rule_violations.hpp` here instead would
-pull `nlohmann/json.hpp` and three `fmt` headers into every
-translation unit that touches a gate-level layout.)doc";
-
-static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_2 = R"doc()doc";
+R"doc(Checks live object placement, connections, clocking, and interfaces.
+@tparam Lyt Gate layout type.)doc";
 
 static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_border_io_check =
 R"doc(Checks if all PI/POs are located at the layout's borders.
@@ -27372,14 +27195,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_empty_io_check =
-R"doc(Checks if no PI/PO is assigned to an empty tile.
-
-Returns:
-    Check summary as a one liner.
-
-)doc";
-
 static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_gate_level_drvs_impl =
 R"doc(Stores the layout, parameters, and statistics.
 
@@ -27397,16 +27212,6 @@ Returns:
     Check summary as a one liner.
 
 )doc";
-
-static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_io_pin_check =
-R"doc(Checks if all PI/POs are designated pins.
-
-Returns:
-    Check summary as a one liner.
-
-)doc";
-
-static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_log_node = R"doc()doc";
 
 static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_log_tile =
 R"doc(Logs information about the given tile in the given report. Nodes are
@@ -27438,11 +27243,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_placed_dead_nodes_check =
-R"doc(Checks for nodes that are placed but dead.
+static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_outside_extent_check =
+R"doc(Checks containment of all live object placements.
 
 Returns:
-    Check summary as a one liner.
+    Check summary.
 
 )doc";
 
@@ -27456,11 +27261,11 @@ properties are checked.
 
  Design breaking:
   - Non-adjacent connections - Missing connections - Wires crossing
-    operations - Non-consecutive clocking of connected tiles - I/O
-    assigned to empty tiles
+    operations - Non-consecutive clocking of connected tiles - Objects
+    outside the extent
 
  Warning:
-  - Unplaced (alive) nodes - Non-wire I/O - Non-border I/O
+  - Non-border I/O
 
 )doc";
 
@@ -27476,14 +27281,6 @@ Args:
 
 Returns:
     Formatted summary message.
-
-)doc";
-
-static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_unplaced_nodes_check =
-R"doc(Checks for nodes that are not placed but still alive.
-
-Returns:
-    Check summary as a one liner.
 
 )doc";
 
@@ -27503,23 +27300,27 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_verification_eq_type = R"doc(The different equivalence types possible.)doc";
+static const char *mkd_doc_fiction_verification_eq_type = R"doc(Equivalence classification for logic and layout throughput.)doc";
 
-static const char *mkd_doc_fiction_verification_eq_type_NO = R"doc(`Spec` and `Impl` are logically not equivalent OR `Impl` has DRVs.)doc";
+static const char *mkd_doc_fiction_verification_eq_type_NO =
+R"doc(`Spec` and `Impl` differ logically, contain required topology defects,
+or either layout has DRVs.)doc";
 
 static const char *mkd_doc_fiction_verification_eq_type_STRONG =
-R"doc(`Spec` and `Impl` are logically equivalent AND `Impl` has a throughput
-of :math:`\frac{1}{1}`.)doc";
+R"doc(`Spec` and `Impl` are logically equivalent and have equal throughput
+denominators.)doc";
 
 static const char *mkd_doc_fiction_verification_eq_type_WEAK =
-R"doc(`Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput
-of :math:`\frac{1}{x}` with :math:`x > 1`.)doc";
+R"doc(`Spec` and `Impl` are logically equivalent and have different
+throughput denominators.)doc";
 
 static const char *mkd_doc_fiction_verification_equivalence_checking =
 R"doc(Performs SAT-based equivalence checking between a specification of
-type `Spec` and an implementation of type `Impl`. Both `Spec` and
-`Impl` need to be network types (that is, gate-level layouts can be
-utilized as well).
+type `Spec` and an implementation of type `Impl`. Each operand is a
+logic network or a placed gate-level layout. Layout logic is extracted
+before SAT checking. Interfaces match by names unique on both sides,
+then by remaining declared positions. Unequal interface sizes, missing
+required inputs, and required dependency cycles return `NO`.
 
 This implementation enables the comparison of two logic networks, a
 logic network and a gate-level layout or two gate-level layouts. Since
@@ -27532,14 +27333,11 @@ Thereby, three different types of equivalences arise:
 - `NO` equivalence: Spec and Impl are not logically equivalent or one
   of them is a gate-level layout that contains
 DRVs and, thus, cannot be checked for equivalence.
-- `WEAK` equivalence: Spec and Impl are logically equivalent but
-  either one of them is a gate-level layout with TP of
-:math:`\frac{1}{x}` with :math:`x > 1` or both of them are gate-level
-layouts with TP of :math:`\frac{1}{x}` and :math:`\frac{1}{y}`,
-respectively, where :math:`x \neq y`.
-- `STRONG` equivalence: Spec and Impl are logically equivalent and all
-  involved gate-level layouts have TP of
-:math:`\frac{1}{1}`.
+- `WEAK` equivalence: Spec and Impl are logically equivalent and have
+  different throughput denominators. - `STRONG` equivalence: Spec and
+  Impl are logically equivalent and have equal throughput
+  denominators.
+Logic networks have throughput denominator one.
 
 This approach was first proposed in \"Verification for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
@@ -27559,7 +27357,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_verification_equivalence_checking_stats = R"doc()doc";
+static const char *mkd_doc_fiction_verification_equivalence_checking_stats = R"doc(Physical equivalence result, throughput, and diagnostics.)doc";
 
 static const char *mkd_doc_fiction_verification_equivalence_checking_stats_counter_example = R"doc(Stores a possible counter example.)doc";
 
@@ -27587,25 +27385,19 @@ static const char *mkd_doc_fiction_verification_gate_level_drv_params_clocked_da
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_crossing_gates = R"doc(Check for wires that are crossing gates.)doc";
 
-static const char *mkd_doc_fiction_verification_gate_level_drv_params_empty_io = R"doc(Check if the I/Os are assigned to empty tiles.)doc";
-
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_has_io = R"doc(Check if the layout has I/Os.)doc";
-
-static const char *mkd_doc_fiction_verification_gate_level_drv_params_io_pins = R"doc(Check if the I/Os are assigned to wire segments.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_missing_connections = R"doc(Check for nodes without connections.)doc";
 
-static const char *mkd_doc_fiction_verification_gate_level_drv_params_non_adjacent_connections = R"doc()doc";
+static const char *mkd_doc_fiction_verification_gate_level_drv_params_non_adjacent_connections = R"doc(Check for nodes that are connected to non-adjacent ones.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params_out = R"doc(Stream to write the report into.)doc";
 
-static const char *mkd_doc_fiction_verification_gate_level_drv_params_placed_dead_nodes = R"doc(Check for placed but dead nodes.)doc";
+static const char *mkd_doc_fiction_verification_gate_level_drv_params_outside_extent = R"doc(Check that every live object lies within the zero-origin extent.)doc";
 
-static const char *mkd_doc_fiction_verification_gate_level_drv_params_unplaced_nodes = R"doc(Check for nodes without locations.)doc";
-
-static const char *mkd_doc_fiction_verification_gate_level_drv_stats = R"doc()doc";
+static const char *mkd_doc_fiction_verification_gate_level_drv_stats = R"doc(Design rule report and issue counts.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_stats_drvs = R"doc(Number of design rule violations.)doc";
 
@@ -27627,9 +27419,10 @@ also warn for instances that are not per se errors but defy best
 practices of layout generation, e.g., I/Os not being placed at the
 layout borders.
 
-For this function to work, `detail::gate_level_drvs_impl` need to be
-declared as a `friend class` to the layout type that is going to be
-examined.
+The checker inspects every live object through public ordered ports,
+including placements outside the extent. Unplaced objects, placed dead
+objects, empty terminals, and gate terminals cannot occur in the
+placed-object API and have no corresponding checks.
 
 Args:
     lyt: The gate-level layout that is to be examined for DRVs and
@@ -27675,19 +27468,27 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fmt_formatter = R"doc()doc";
+static const char *mkd_doc_fmt_formatter = R"doc(Formats a coordinate.)doc";
 
 static const char *mkd_doc_fmt_formatter_2 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_3 = R"doc()doc";
 
-static const char *mkd_doc_fmt_formatter_format = R"doc()doc";
+static const char *mkd_doc_fmt_formatter_format =
+R"doc(Formats a coordinate. @param c Coordinate. @param ctx Format context.
+@return Output iterator.
+
+)doc";
 
 static const char *mkd_doc_fmt_formatter_format_2 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_format_3 = R"doc()doc";
 
-static const char *mkd_doc_fmt_formatter_parse = R"doc()doc";
+static const char *mkd_doc_fmt_formatter_parse =
+R"doc(Parses coordinate formatting. @param ctx Parse context. @return Parse
+position.
+
+)doc";
 
 static const char *mkd_doc_fmt_formatter_parse_2 = R"doc()doc";
 
@@ -27747,29 +27548,37 @@ static const char *mkd_doc_mockturtle_edge_source = R"doc()doc";
 
 static const char *mkd_doc_mockturtle_edge_target = R"doc()doc";
 
-static const char *mkd_doc_std_hash = R"doc()doc";
+static const char *mkd_doc_std_hash = R"doc(Hashes both parts of an object identity.)doc";
 
-static const char *mkd_doc_std_hash_2 = R"doc()doc";
+static const char *mkd_doc_std_hash_2 = R"doc(Hashes every bit of all three coordinate axes.)doc";
 
 static const char *mkd_doc_std_hash_3 = R"doc()doc";
 
-static const char *mkd_doc_std_hash_4 = R"doc(Hash for charge distributions, over the charge states.)doc";
+static const char *mkd_doc_std_hash_4 = R"doc()doc";
 
-static const char *mkd_doc_std_hash_5 = R"doc(Hash for lattice sites.)doc";
+static const char *mkd_doc_std_hash_5 = R"doc(Hash for charge distributions, over the charge states.)doc";
 
-static const char *mkd_doc_std_hash_6 = R"doc(Hash for SiDB layouts, over the SiDBs and their dot tags.)doc";
+static const char *mkd_doc_std_hash_6 = R"doc(Hash for lattice sites.)doc";
 
-static const char *mkd_doc_std_hash_7 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
+static const char *mkd_doc_std_hash_7 = R"doc(Hash for SiDB layouts, over the SiDBs and their dot tags.)doc";
 
-static const char *mkd_doc_std_hash_8 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
+static const char *mkd_doc_std_hash_8 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
-static const char *mkd_doc_std_hash_operator_call = R"doc()doc";
+static const char *mkd_doc_std_hash_9 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
 
-static const char *mkd_doc_std_hash_operator_call_2 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call = R"doc(Returns the identity's hash.)doc";
+
+static const char *mkd_doc_std_hash_operator_call_2 =
+R"doc(Args:
+    c: Coordinate. @return Hash value.
+
+)doc";
 
 static const char *mkd_doc_std_hash_operator_call_3 = R"doc()doc";
 
-static const char *mkd_doc_std_hash_operator_call_4 =
+static const char *mkd_doc_std_hash_operator_call_4 = R"doc()doc";
+
+static const char *mkd_doc_std_hash_operator_call_5 =
 R"doc(Computes a hash from the ordered charge states.
 
 Args:
@@ -27780,7 +27589,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_5 =
+static const char *mkd_doc_std_hash_operator_call_6 =
 R"doc(Args:
     s: Site to hash.
 
@@ -27789,7 +27598,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_6 =
+static const char *mkd_doc_std_hash_operator_call_7 =
 R"doc(Args:
     lyt: Layout to hash.
 
@@ -27798,7 +27607,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_7 =
+static const char *mkd_doc_std_hash_operator_call_8 =
 R"doc(Computes the hash value of a given SiDB defect.
 
 Every member that `fiction::defect`'s equality operator compares
@@ -27812,7 +27621,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_8 =
+static const char *mkd_doc_std_hash_operator_call_9 =
 R"doc(Mixes the quantized parameter values across the hash bits for
 partitioned processing.
 

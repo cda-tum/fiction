@@ -40,6 +40,11 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Registers the number of adjacent coordinates for a geometry.
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
 void num_adjacent_coordinates(nanobind::module_& m)
 {
@@ -49,6 +54,11 @@ void num_adjacent_coordinates(nanobind::module_& m)
           DOC(fiction_layouts_num_adjacent_coordinates));
 }
 
+/**
+ * @brief Registers occupied coordinate normalization for a cell layout.
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
 void normalize_layout_coordinates(nanobind::module_& m)
 {
@@ -58,6 +68,11 @@ void normalize_layout_coordinates(nanobind::module_& m)
           DOC(fiction_layouts_normalize_layout_coordinates));
 }
 
+/**
+ * @brief Registers signed random coordinate generation.
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
 void random_coordinate(nanobind::module_& m)
 {
@@ -69,6 +84,10 @@ void random_coordinate(nanobind::module_& m)
 
 }  // namespace detail
 
+/**
+ * @brief Registers layout coordinate utilities.
+ * @param m Python module.
+ */
 void layout_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

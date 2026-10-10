@@ -29,6 +29,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -393,7 +394,7 @@ class write_qca_layout_svg_impl
             // a ground cell below a crossing-layer cell draws the crossing; a crossing-layer cell draws it only where
             // the ground below is empty, since nothing else would show it
             else if (const auto ac = lyt.above(c), bc = lyt.below(c);
-                     ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && lyt.is_empty_cell(bc)))
+                     (ac && !lyt.is_empty_cell(*ac)) || (bc && lyt.is_empty_cell(*bc)))
             {
                 cell_description = svg::CROSS;
             }
@@ -441,8 +442,7 @@ class write_qca_layout_svg_impl
     {
         std::stringstream cell_descriptions{};
 
-        utils::progress_reporter progress{ps.on_progress, "rendering cell positions",
-                                          lyt.area() * static_cast<std::size_t>(lyt.z() + 1)};
+        utils::progress_reporter progress{ps.on_progress, "rendering cell positions", lyt.volume()};
         lyt.foreach_cell_position(
             [this, &cell_descriptions, &progress](const auto& c)
             {
@@ -462,9 +462,9 @@ class write_qca_layout_svg_impl
             });
 
         const double viewbox_x =
-            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.x() + 1) * svg::CELL_DISTANCE);
+            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.width()) * svg::CELL_DISTANCE);
         const double viewbox_y =
-            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.y() + 1) * svg::CELL_DISTANCE);
+            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.height()) * svg::CELL_DISTANCE);
 
         os << fmt::format(fcn::io::detail::svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
                           cell_descriptions.str());
@@ -490,8 +490,7 @@ class write_qca_layout_svg_impl
         static constexpr const std::array<const char*, 4> text_colors{
             {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
-        utils::progress_reporter progress{ps.on_progress, "rendering cell positions",
-                                          lyt.area() * static_cast<std::size_t>(lyt.z() + 1)};
+        utils::progress_reporter progress{ps.on_progress, "rendering cell positions", lyt.volume()};
         lyt.foreach_cell_position(
             [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_tile, &progress](const auto& c)
             {
@@ -574,10 +573,12 @@ class write_qca_layout_svg_impl
             latch_assembly.advance();
         }
 
-        const qca::layout::cell length = {(lyt.x() / lyt.get_tile_size_x()) + 1, (lyt.y() / lyt.get_tile_size_y()) + 1};
-
-        const double viewbox_x = (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (length.x * svg::TILE_DISTANCE);
-        const double viewbox_y = (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (length.y * svg::TILE_DISTANCE);
+        const auto   width  = (static_cast<uint64_t>(lyt.width()) + lyt.get_tile_size_x() - 1) / lyt.get_tile_size_x();
+        const auto   height = (static_cast<uint64_t>(lyt.height()) + lyt.get_tile_size_y() - 1) / lyt.get_tile_size_y();
+        const double viewbox_x =
+            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(width) * svg::TILE_DISTANCE);
+        const double viewbox_y =
+            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(height) * svg::TILE_DISTANCE);
 
         os << fmt::format(fcn::io::detail::svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
                           tile_descriptions.str());

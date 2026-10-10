@@ -16,79 +16,26 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "utils/allocation_failure.hpp"
+
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 
 #include <cstddef>
 #include <cstdint>
-#include <cstdlib>
 #include <functional>
 #include <limits>
 #include <new>
-#include <optional>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::test;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 
-namespace
-{
-/**
- * Number of successful allocations before the test injects a failure; unset disables injection.
- */
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables): Test allocation control.
-thread_local std::optional<std::size_t> allocation_budget{};
-}  // namespace
-/**
- * Allocates memory and injects a failure when the test allocation budget is exhausted.
- *
- * @param size Requested byte count.
- * @return Allocated memory.
- * @throws std::bad_alloc if allocation fails or the test exhausts its budget.
- */
-void* operator new(const std::size_t size)
-{
-    if (allocation_budget.has_value())
-    {
-        if (*allocation_budget == 0)
-        {
-            allocation_budget.reset();
-            throw std::bad_alloc{};
-        }
-        --*allocation_budget;
-    }
-    // The global new replacement must use malloc to avoid recursion.
-    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
-    if (auto* const memory = std::malloc(size == 0 ? 1 : size))
-    {
-        return memory;
-    }
-    throw std::bad_alloc{};
-}
-/**
- * Releases memory allocated by the test's global allocation replacement.
- *
- * @param memory Memory to release.
- */
-void operator delete(void* const memory) noexcept
-{
-    // Matches malloc in the global new replacement.
-    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
-    std::free(memory);
-}
-/**
- * Releases a sized allocation through the matching global deallocator.
- *
- * @param memory Memory to release.
- */
-void operator delete(void* const memory, std::size_t) noexcept
-{
-    ::operator delete(memory);
-}
 namespace
 {
 /**
@@ -100,8 +47,10 @@ namespace
  */
 layout check_allocation_failures(const layout& original, const std::function<void(layout&)>& update)
 {
+    require_allocation_failure_support();
     for (std::size_t failure = 0;; ++failure)
     {
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
         auto candidate = original;
         try
         {

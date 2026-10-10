@@ -14,7 +14,7 @@ from mnt.pyfiction.layouts import arrangement, hexagonal_layout
 
 
 def test_coordinate_iteration():
-    layout = hexagonal_layout(arrangement.EVEN_ROW, (9, 9, 1))
+    layout = hexagonal_layout(arrangement.EVEN_ROW, (10, 10, 2))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)

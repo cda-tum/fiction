@@ -10,9 +10,12 @@
 
 from __future__ import annotations
 
+import contextlib
+import gc
 import re
 import sys
 import threading
+import weakref
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -36,10 +39,12 @@ from mnt.pyfiction.physical_design import (
 )
 from mnt.pyfiction.qca import io as qca_io
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.generators import on_the_fly_sidb_circuit_design_params, sidb_on_the_fly_gate_library_params
 from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sidb_layout_svg_params, write_sqd_layout
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based, critical_temperature_params
 from mnt.pyfiction.sidb.simulation.engines import clustercomplete, clustercomplete_params
+from mnt.pyfiction.sidb.simulation.logic import operational_domain_ratio_params
 from mnt.pyfiction.synthesis import (
     create_not_tt,
     fanout_substitution,
@@ -350,3 +355,97 @@ def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path)
     write_qcc_layout(layout, str(after), params)
     assert before.read_bytes() == after.read_bytes()
     assert reports[-1][1] == reports[-1][2] > 0
+
+
+@pytest.mark.parametrize("kind", ["balance", "exact", "worker", "both"])
+@pytest.mark.parametrize("raises", [False, True])
+def test_progress_callback_cycles_are_collected(kind: str, *, raises: bool) -> None:
+    """Parameter callbacks and exception tracebacks do not keep unreachable objects alive."""
+
+    def make_cycle() -> weakref.ReferenceType[Any]:
+        """Return a weak reference after the native callback retains its parameter owner."""
+        params: Any = network_balancing_params() if kind == "balance" else exact_params()
+        error = RuntimeError("callback failed")
+
+        def callback(*_report: object) -> None:
+            """Retain the callback owner and optionally an exception traceback."""
+            assert params is not None
+            if raises:
+                raise error
+
+        if kind in {"worker", "both"}:
+            params.on_worker_progress = callback
+        if kind != "worker":
+            params.on_progress = callback
+        with contextlib.suppress(RuntimeError):
+            callback()
+        return weakref.ref(callback)
+
+    callback_ref = make_cycle()
+    gc.collect()
+    assert callback_ref() is None
+
+
+def test_uninitialized_progress_parameters_are_collected() -> None:
+    """Garbage collection accepts a parameter instance before its constructor runs."""
+    params = exact_params.__new__(exact_params)
+    gc.collect()
+    del params
+    gc.collect()
+
+
+@pytest.mark.parametrize("kind", ["library", "circuit", "ratio", "ratio_worker"])
+def test_nested_progress_callback_owner_cycles_are_collected(kind: str) -> None:
+    """Owning parameters expose callbacks copied into nested parameter values to GC."""
+
+    def make_cycle() -> weakref.ReferenceType[Any]:
+        """Return a callback weak reference after its closure retains the nested owner."""
+        params: Any = (
+            sidb_on_the_fly_gate_library_params()
+            if kind == "library"
+            else on_the_fly_sidb_circuit_design_params()
+            if kind == "circuit"
+            else operational_domain_ratio_params()
+        )
+
+        def callback(*_report: object) -> None:
+            """Retain the parameter object that owns this callback."""
+            assert params is not None
+
+        if kind == "library":
+            params.design_gate_params.on_progress = callback
+        elif kind == "circuit":
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress = callback
+        elif kind == "ratio":
+            params.op_domain_params.on_progress = callback
+        else:
+            params.op_domain_params.on_worker_progress = callback
+        return weakref.ref(callback)
+
+    callback_ref = make_cycle()
+    gc.collect()
+    assert callback_ref() is None
+
+
+def test_borrowed_progress_parameters_preserve_live_owner_callback() -> None:
+    """Collecting a borrowed child does not release a live parent's callback."""
+    params = sidb_on_the_fly_gate_library_params()
+
+    def install_callback() -> weakref.ReferenceType[Any]:
+        """Return a weak reference to a callback that retains the borrowed parameter view."""
+        child = params.design_gate_params
+
+        def callback(*_report: object) -> None:
+            """Use the borrowed child while its owner remains live."""
+            assert child is not None
+
+        child.on_progress = callback
+        return weakref.ref(callback)
+
+    callback_ref = install_callback()
+    gc.collect()
+    callback = params.design_gate_params.on_progress
+    assert callback is not None
+    assert callback is callback_ref()
+    callback("probe", 0, 1)
+    params.design_gate_params.on_progress = None

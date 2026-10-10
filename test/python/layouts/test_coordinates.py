@@ -8,20 +8,26 @@
 
 from __future__ import annotations
 
+import copy
 import operator
+from typing import TYPE_CHECKING
 
 import pytest
 
 from mnt.pyfiction.layouts import (
+    Extent,
+    area,
     arrangement,
-    cartesian_gate_layout,
     cartesian_layout,
     coordinate,
-    hexagonal_gate_layout,
     hexagonal_layout,
     shifted_cartesian_layout,
     stacked_cartesian_layout,
+    volume,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def test_construction_from_a_tuple():
@@ -50,22 +56,14 @@ def test_axes_are_writable():
     assert t == coordinate(-3, -4, 1)
 
 
-@pytest.mark.parametrize("axes", [(-1, -2, 0), (-(2**31) + 1, 2**31 - 1, 5), (0, -5, -1)])
+@pytest.mark.parametrize("axes", [(-1, -2, 0), (-(2**31), 2**31 - 1, 5), (0, -5, -1)])
 def test_negative_axes_round_trip(axes):
     x, y, z = axes
     for c in (coordinate(x, y, z), coordinate(axes)):
         assert (c.x, c.y, c.z) == axes
-        assert c.is_valid()
 
 
-def test_default_coordinate_is_invalid():
-    assert not coordinate().is_valid()
-    assert coordinate((0, 0, 0)).is_valid()
-    assert coordinate() != coordinate((0, 0, 0))
-    assert coordinate() == coordinate()
-
-
-@pytest.mark.parametrize("axis", [2**31, -(2**31), -(2**31) - 1, 2**40])
+@pytest.mark.parametrize("axis", [2**31, -(2**31) - 1, 2**40])
 def test_axes_outside_of_the_int32_range_raise(axis):
     with pytest.raises(OverflowError):
         coordinate(axis, 0, 0)
@@ -113,30 +111,18 @@ def test_repr():
 def test_stacked_cartesian_layout_is_an_alias_of_cartesian_layout():
     assert stacked_cartesian_layout is cartesian_layout
 
-    stacked = cartesian_layout((2, 2, 3))
+    stacked = cartesian_layout((3, 3, 4))
 
     assert stacked.above((0, 0, 0)) == coordinate(0, 0, 1)
-    assert stacked.above((0, 0, 3)) == stacked.above((0, 0, 3))
-    assert not stacked.above((0, 0, 4)).is_valid()
+    assert stacked.above((0, 0, 3)) is None
+    assert stacked.above((0, 0, 4)) is None
 
 
 def test_layouts_reject_negative_extents():
-    with pytest.raises(ValueError, match="negative"):
+    with pytest.raises((ValueError, TypeError)):
         cartesian_layout((-1, 0))
-    with pytest.raises(ValueError, match="negative"):
+    with pytest.raises((ValueError, TypeError)):
         cartesian_layout((1, 1)).resize((0, -2))
-
-
-def test_gate_layouts_reject_extents_beyond_the_signal_range():
-    with pytest.raises(IndexError):
-        cartesian_gate_layout((2, 2, 2))
-    with pytest.raises(IndexError):
-        cartesian_gate_layout((2**30, 0))
-    with pytest.raises(IndexError):
-        hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 2))
-
-    cartesian_gate_layout((2, 2, 1))
-    cartesian_gate_layout((2**30 - 1, 0))
 
 
 @pytest.mark.parametrize("axis", [2**31, 2**40])
@@ -161,18 +147,142 @@ def test_layout_coord_rejects_axes_outside_of_the_int32_range(make_layout, axis)
     assert lyt.coord(1, 2) == coordinate(1, 2, 0)
 
 
-def test_setting_an_axis_of_the_invalid_coordinate_raises():
-    c = coordinate()
-
-    with pytest.raises(ValueError, match="invalid coordinate"):
-        c.x = 0
-
-    assert not c.is_valid()
-
-
 def test_tuples_outside_of_the_int32_range_do_not_convert_to_coordinates():
     lyt = cartesian_layout((2, 2))
 
     # nanobind drops the OverflowError of the implicit tuple conversion and reports a signature mismatch
     with pytest.raises((TypeError, OverflowError)):
         lyt.north((2**31, 0))
+
+
+def test_default_coordinate_is_origin() -> None:
+    assert coordinate() == coordinate((0, 0, 0))
+    c = coordinate()
+    c.x = -(2**31)
+    assert c.x == -(2**31)
+
+
+def test_default_geometry_is_empty() -> None:
+    layout = cartesian_layout()
+    assert layout.coordinates() == []
+    assert layout.last_coordinate() is None
+    assert layout.north((0, 0)) is None
+
+
+def test_extent_tuple_conversion_and_checked_axes() -> None:
+    size = Extent(extent=(2, 3))
+    assert Extent(extent=size) == size
+    assert (size.width, size.height, size.layers) == (2, 3, 1)
+    assert cartesian_layout(size).get_extent() == Extent((2, 3, 1))
+    assert cartesian_layout((2, 3, 0)).coordinates() == []
+    assert cartesian_layout((2**31, 1)).last_coordinate() == coordinate(2**31 - 1, 0, 0)
+    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
+        size.width = 2**31 + 1
+    assert size.width == 2
+
+
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(lambda: cartesian_layout(extent=(2, 3)), id="cartesian"),
+        pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, extent=(2, 3)), id="hexagonal"),
+        pytest.param(lambda: shifted_cartesian_layout(arrangement.EVEN_ROW, extent=(2, 3)), id="shifted_cartesian"),
+    ],
+)
+def test_geometry_copies_have_independent_sizes(
+    make_layout: Callable[[], cartesian_layout | hexagonal_layout | shifted_cartesian_layout],
+) -> None:
+    layout = make_layout()
+    duplicate = copy.copy(layout)
+    duplicate.resize(extent=(4, 5))
+    assert layout.width() == 2
+    assert duplicate.width() == 4
+    deep = copy.deepcopy(layout)
+    deep.resize(extent=(6, 7))
+    assert layout.height() == 3
+    assert deep.height() == 7
+
+
+@pytest.mark.parametrize("value", [-1, 2**31 + 1])
+def test_extent_rejects_sizes_outside_the_coordinate_domain(value: int) -> None:
+    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
+        Extent(value, 1)
+    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
+        Extent((1, value, 1))
+    size = Extent(2, 3)
+    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
+        size.layers = value
+    assert size.layers == 1
+
+
+def test_sizes_and_coordinates_have_distinct_meanings() -> None:
+    assert area(extent=(2, 3)) == 6
+    assert volume(extent=(2, 3)) == 6
+    assert volume((2, 3, 0)) == 0
+    with pytest.raises(TypeError):
+        cartesian_layout(coordinate(2, 3))  # ty: ignore[invalid-argument-type]  # deliberately a coordinate
+    with pytest.raises(OverflowError):
+        volume(Extent(2**31, 2**31, 4))
+    layout = cartesian_layout((2, 3))
+    size = layout.get_extent()
+    size.width = 4
+    assert layout.width() == 2
+
+
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(lambda: cartesian_layout((2**31, 2**31, 0)), id="cartesian"),
+        pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, (2**31, 2**31, 0)), id="hexagonal"),
+        pytest.param(lambda: shifted_cartesian_layout(arrangement.EVEN_ROW, (2**31, 2**31, 0)), id="shifted_cartesian"),
+    ],
+)
+def test_zero_layers_skip_coordinate_allocation(
+    make_layout: Callable[[], cartesian_layout | hexagonal_layout | shifted_cartesian_layout],
+) -> None:
+    layout = make_layout()
+    assert layout.coordinates() == []
+    assert layout.ground_coordinates() == []
+
+
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(cartesian_layout, id="cartesian"),
+        pytest.param(lambda size: hexagonal_layout(arrangement.EVEN_ROW, size), id="hexagonal"),
+        pytest.param(lambda size: shifted_cartesian_layout(arrangement.EVEN_ROW, size), id="shifted_cartesian"),
+    ],
+)
+def test_coordinate_ranges_accept_optional_bounds(
+    make_layout: Callable[[tuple[int, int, int]], cartesian_layout | hexagonal_layout | shifted_cartesian_layout],
+) -> None:
+    layout = make_layout((4, 3, 2))
+    assert layout.coordinates(start=(1, 1), stop=(3, 1)) == [coordinate(1, 1), coordinate(2, 1)]
+    assert layout.ground_coordinates(start=(1, 1), stop=(0, 2)) == [
+        coordinate(1, 1),
+        coordinate(2, 1),
+        coordinate(3, 1),
+    ]
+    assert layout.coordinates(start=(3, 1), stop=(1, 1)) == []
+    assert len(layout.coordinates(start=None, stop=None)) == 24
+    with pytest.raises(ValueError, match="layer zero"):
+        layout.ground_coordinates(stop=(0, 0, 1))
+    huge = make_layout((2**31, 2**31, 4))
+    assert huge.coordinates(stop=(2, 0)) == [coordinate(0, 0), coordinate(1, 0)]
+    assert huge.ground_coordinates(stop=(2, 0)) == [coordinate(0, 0), coordinate(1, 0)]
+
+
+def test_extent_argument_docstrings_name_the_keyword() -> None:
+    for api in (
+        area,
+        volume,
+        cartesian_layout.__init__,
+        cartesian_layout.resize,
+        hexagonal_layout.__init__,
+        hexagonal_layout.resize,
+        shifted_cartesian_layout.__init__,
+        shifted_cartesian_layout.resize,
+    ):
+        assert api.__doc__ is not None
+        assert "\n    extent:" in api.__doc__
+        assert "\n    size:" not in api.__doc__

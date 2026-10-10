@@ -19,6 +19,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/clocking_scheme.hpp>
+
 #if (FICTION_Z3_SOLVER)
 
 #include "utils/blueprints/network_blueprints.hpp"
@@ -399,23 +401,23 @@ void check_without_gate_library(const Ntk& ntk, const exact_physical_design_para
     check_tp(layout, 1);
 }
 
+/**
+ * @brief Checks whether each inverter has opposite incoming and outgoing signals.
+ * @tparam Lyt Native gate-level layout type.
+ * @param lyt Layout to inspect.
+ * @return Whether every inverter is straight.
+ */
 template <typename Lyt>
-bool has_straight_inverters(const Lyt& lyt) noexcept
+bool has_straight_inverters(const Lyt& lyt)
 {
     bool only_straight_inverters = true;
     lyt.foreach_gate(
         [&lyt, &only_straight_inverters](const auto& g)
         {
-            if constexpr (has_is_inv_v<Lyt>)
+            if (lyt.is_inv(g) && !lyt.has_opposite_incoming_and_outgoing_signals(lyt.get_tile(g)))
             {
-                if (lyt.is_inv(g))
-                {
-                    if (!lyt.has_opposite_incoming_and_outgoing_signals(lyt.get_tile(g)))
-                    {
-                        only_straight_inverters = false;
-                        return false;  // break loop
-                    }
-                }
+                only_straight_inverters = false;
+                return false;  // break loop
             }
 
             return true;  // continue
@@ -425,6 +427,17 @@ bool has_straight_inverters(const Lyt& lyt) noexcept
 }
 
 }  // namespace
+
+TEST_CASE("Straight inverter validation", "[exact]")
+{
+    cart_gate_clk_lyt lyt{cart_gate_clk_lyt::extent{3, 2, 1}, clocking::twoddwave()};
+    const auto        input    = lyt.create_pi("a", {0, 0});
+    const auto        inverter = lyt.create_not(input, {1, 0});
+    const auto        output   = lyt.create_po(inverter, "f", {2, 0});
+    CHECK(has_straight_inverters(lyt));
+    lyt.move_object(output, {1, 1});
+    CHECK_FALSE(has_straight_inverters(lyt));
+}
 
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
@@ -513,10 +526,16 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
-            CHECK(!lyt.is_and(lyt.get_node({2, 2})));
-            CHECK(!lyt.is_wire(lyt.get_node({2, 2})));
-            CHECK(!lyt.is_or(lyt.get_node({1, 2})));
-            CHECK(!lyt.is_wire(lyt.get_node({2, 0})));
+            /** @brief Object at the position blacklisted for AND gates and wires. */
+            const auto shared_object = lyt.find_object({2, 2});
+            /** @brief Object at the position blacklisted for OR gates. */
+            const auto or_object = lyt.find_object({1, 2});
+            /** @brief Object at the second position blacklisted for wires. */
+            const auto wire_object = lyt.find_object({2, 0});
+            CHECK((!shared_object.has_value() || !lyt.is_and(*shared_object)));
+            CHECK((!shared_object.has_value() || !lyt.is_wire(*shared_object)));
+            CHECK((!or_object.has_value() || !lyt.is_or(*or_object)));
+            CHECK((!wire_object.has_value() || !lyt.is_wire(*wire_object)));
         }
         SECTION("With port info")
         {
@@ -541,15 +560,17 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
-            CHECK((!lyt.is_and(lyt.get_node({2, 2})) ||
+            /** @brief Object whose type-specific port pattern is blacklisted. */
+            const auto object = lyt.find_object({2, 2});
+            CHECK((!object.has_value() || !lyt.is_and(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
 
-            CHECK((!lyt.is_or(lyt.get_node({2, 2})) ||
+            CHECK((!object.has_value() || !lyt.is_or(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
 
-            CHECK((!lyt.is_wire(lyt.get_node({2, 2})) ||
+            CHECK((!object.has_value() || !lyt.is_wire(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
         }
     }
@@ -791,7 +812,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 
         if (layout)
         {
-            CHECK(layout->y() <= 3);
+            CHECK(layout->height() <= 4);
         }
 
         upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail

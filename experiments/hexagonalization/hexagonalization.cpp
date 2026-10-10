@@ -30,8 +30,10 @@
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
-#include <fmt/format.h>                                        // output formatting
-#include <lorina/genlib.hpp>                                   // Genlib file parsing
+#include <fmt/format.h>  // output formatting
+#include <lorina/common.hpp>
+#include <lorina/genlib.hpp>  // Genlib file parsing
+#include <lorina/verilog.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
@@ -42,10 +44,12 @@
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
 #include <mockturtle/views/depth_view.hpp>
 
-#include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -57,7 +61,9 @@ using namespace fiction::sidb;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
     using hex_lyt  = hex_gate_clk_lyt;
@@ -111,8 +117,11 @@ int main()  // NOLINT
     // parameters for technology mapping
     const mockturtle::map_params map_params{};
 
-    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});  // NOLINT
-    assert(read_genlib_result == lorina::return_code::success);
+    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+    if (read_genlib_result != lorina::return_code::success)
+    {
+        throw std::runtime_error{"Failed to read GENLIB library."};
+    }
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // stats for ortho
@@ -130,10 +139,12 @@ int main()  // NOLINT
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        const auto read_verilog_result =                                          // NOLINT
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark),  // NOLINT
-                                 mockturtle::verilog_reader(xag));                // NOLINT
-        assert(read_verilog_result == lorina::return_code::success);
+        const auto read_verilog_result =
+            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
+        if (read_verilog_result != lorina::return_code::success)
+        {
+            throw std::runtime_error{"Failed to read Verilog benchmark."};
+        }
 
         // compute depth
         const mockturtle::depth_view depth_xag{xag};
@@ -179,21 +190,25 @@ int main()  // NOLINT
         area(cartesian_layout{cell_grid_extent<bestagon_library>(hex_layout)}, area_params<layout>{}, &area_stats);
 
         // log results
-        hexagonalization_exp(
-            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
-            depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-            static_cast<uint64_t>(gate_level_layout.x()) + 1, static_cast<uint64_t>(gate_level_layout.y()) + 1,
-            (static_cast<uint64_t>(gate_level_layout.x()) + 1) * (static_cast<uint64_t>(gate_level_layout.y()) + 1),
-            static_cast<uint64_t>(hex_layout.x()) + 1, static_cast<uint64_t>(hex_layout.y()) + 1,
-            (static_cast<uint64_t>(hex_layout.x()) + 1) * (static_cast<uint64_t>(hex_layout.y()) + 1),
-            gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
-            mockturtle::to_seconds(orthogonal_stats.time_total),
-            mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result, cell_level_layout.num_dots(),
-            area_stats.area);
+        hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
+                             cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
+                             depth_mapped_network.depth(), gate_level_layout.width(), gate_level_layout.height(),
+                             gate_level_layout.area(), hex_layout.width(), hex_layout.height(), hex_layout.area(),
+                             gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
+                             cp_tp.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
+                             mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result,
+                             cell_level_layout.num_dots(), area_stats.area);
 
         hexagonalization_exp.save();
         hexagonalization_exp.table();
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

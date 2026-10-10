@@ -16,241 +16,164 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/traits.hpp>
 
 #include <fmt/format.h>
 
+#include <concepts>
 #include <cstdint>
-#include <map>
+#include <limits>
+#include <memory>
+#include <optional>
 #include <sstream>
+#include <stdexcept>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
 
-#pragma GCC diagnostic push
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif
-#pragma GCC diagnostic ignored "-Wconversion"
-
-TEST_CASE("Signed offset coordinates", "[coordinates]")
+TEST_CASE("Every signed coordinate is a value", "[coordinates][size-contract]")
 {
     using coordinate = layout_base::coordinate;
+    CHECK(coordinate{} == coordinate{0, 0, 0});
+    CHECK(coordinate{std::numeric_limits<int32_t>::min(), 0, 0} != coordinate{});
+    CHECK(coordinate{-3, 0} < coordinate{-2, 0});
+    CHECK(coordinate{5, -1} < coordinate{-5, 0});
+    CHECK(coordinate{5, 5, -1} < coordinate{-5, -5, 0});
+    CHECK(coordinate{1, 2} == coordinate{1, 2, 0});
+    CHECK(coordinate{1, 2} != coordinate{2, 1});
+    CHECK(coordinate{1, 2} <= coordinate{1, 2});
+    CHECK(coordinate{1, 2} >= coordinate{1, 2});
+    CHECK(coordinate{1, 2} > coordinate{0, 2});
+    CHECK_THROWS_AS((coordinate{uint64_t{2147483648}, 0}), std::overflow_error);
+    CHECK_THROWS_AS((coordinate{0, int64_t{-2147483649}}), std::overflow_error);
+    CHECK_THROWS_AS((coordinate{0, 0, std::numeric_limits<uint64_t>::max()}), std::overflow_error);
+    CHECK(coordinate{std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()} ==
+          coordinate{-2147483648ll, 2147483647ll});
+    std::ostringstream stream{};
+    stream << coordinate{-3, 2, 7};
+    CHECK(stream.str() == "(-3,2,7)");
+    CHECK(fmt::format("{}", coordinate{-3, 2, 7}) == "(-3,2,7)");
+    /** @brief Distinct signed positions used to check coordinate hashing. */
+    const std::unordered_set<coordinate> positions{{0, 0, 0}, {0, 0, 2}, {-2147483648ll, 0, 0}, {2147483647, 0, 0}};
+    CHECK(positions.size() == 4);
+}
 
-    auto td = coordinate{};
-    CHECK(!td.is_valid());
+TEST_CASE("Extent sizes validate the coordinate domain", "[coordinates][size-contract]")
+{
+    using extent = layout_base::extent;
+    CHECK(extent{} == extent{0, 0, 0});
+    CHECK(extent{2, 3}.layers == 1);
+    CHECK_THROWS_AS((extent{-1, 2}), std::invalid_argument);
+    CHECK_THROWS_AS((extent{1, -1}), std::invalid_argument);
+    CHECK_THROWS_AS((extent{1, 1, -1}), std::invalid_argument);
+    CHECK_THROWS_AS((extent{uint64_t{2147483649}, 1}), std::invalid_argument);
+    CHECK_THROWS_AS((extent{1, std::numeric_limits<uint64_t>::max()}), std::invalid_argument);
+    CHECK(area_of(extent{2, 3, 4}) == 6);
+    CHECK(volume_of(extent{2, 3, 4}) == 24);
+    CHECK(area_of(extent{}) == 0);
+    CHECK(volume_of(extent{2, 3, 0}) == 0);
+    CHECK(area_of(extent{2147483648ull, 2147483648ull}) == 4611686018427387904ull);
+    CHECK_THROWS_AS(volume_of(extent{2147483648ull, 2147483648ull, 4}), std::overflow_error);
+    CHECK(volume_of(extent{2147483648ull, 2147483648ull, 3}) == 13835058055282163712ull);
+    auto edited  = extent{};
+    edited.width = std::numeric_limits<uint32_t>::max();
+    CHECK_THROWS_AS(cartesian_layout{edited}, std::invalid_argument);
+}
 
-    auto t0 = coordinate{0, 0, 0};
-    CHECK(t0.is_valid());
+TEST_CASE("Coordinate iteration uses an explicit end", "[coordinates][size-contract]")
+{
+    using coordinate = layout_base::coordinate;
+    using iterator   = layout_base::coordinate_iterator;
+    const cartesian_layout  layout{{2, 2, 2}};
+    std::vector<coordinate> actual{};
+    layout.foreach_coordinate([&actual](const auto c) { actual.push_back(c); }, coordinate{1, 0}, coordinate{1, 1, 1});
+    CHECK(actual == std::vector<coordinate>{{1, 0, 0}, {0, 1, 0}, {1, 1, 0}, {0, 0, 1}, {1, 0, 1}, {0, 1, 1}});
+    CHECK(layout.coordinates(coordinate{}, coordinate{}).empty());
+    CHECK(layout.coordinates(coordinate{1, 1}, coordinate{0, 0}).empty());
+    CHECK(layout.coordinates(coordinate{-1, -1, -1}).begin() == layout.coordinates().begin());
+    CHECK(layout.coordinates(coordinate{0, 0, 9}).empty());
+    CHECK(layout.coordinates(std::nullopt, coordinate{2, 0}).end() ==
+          layout.coordinates(std::nullopt, coordinate{0, 1}).end());
+    CHECK_THROWS_AS(layout.ground_coordinates(coordinate{0, 0, 1}), std::invalid_argument);
+    auto last = iterator{layout.get_extent(), layout.last_coordinate()};
+    REQUIRE(last != iterator{});
+    CHECK(*last == coordinate{1, 1, 1});
+    ++last;
+    CHECK(last == iterator{});
+    ++last;
+    CHECK(last == iterator{});
+    const cartesian_layout wide{{2147483648ull, 1, 1}};
+    auto                   edge = wide.coordinates(coordinate{2147483647, 0}).begin();
+    CHECK(*edge == coordinate{2147483647, 0});
+    ++edge;
+    CHECK(edge == wide.coordinates().end());
+}
 
-    CHECK(t0 != td);
-    CHECK(td == coordinate{});
-
-    auto t1 = coordinate{1, 2, 0};
-    auto t2 = coordinate{1, 2};
-
-    CHECK(t0 < t1);
-    CHECK(t1 > t0);
-    CHECK(t1 >= t0);
-    CHECK(t0 <= t1);
-    CHECK(t1 == t2);
-    CHECK(t2 == t1);
-
-    t1.x++;
-
-    CHECK(t1 != t2);
-    CHECK(t1 > t2);
-    CHECK(t1 >= t2);
-    CHECK(t2 < t1);
-    CHECK(t2 <= t1);
-
-    auto t3 = coordinate{0, 0, 1};
-
-    CHECK(t1 < t3);
-    CHECK(t2 < t3);
-
-    SECTION("Negative axes")
+/** @brief Adjacent traversals invoke move-only visitors as lvalues. */
+TEMPLATE_TEST_CASE("Geometry invokes temporary and lvalue visitors as lvalues", "[coordinates][visitors]",
+                   cartesian_layout, hexagonal_layout)
+{
+    /** @brief Geometry with an interior coordinate. */
+    const auto layout = []
     {
-        const coordinate n{-1, -2, 0};
-
-        CHECK(n.is_valid());
-        CHECK(n.x == -1);
-        CHECK(n.y == -2);
-        CHECK(n < t0);
-        CHECK(coordinate{-3, 0, 0} < coordinate{-2, 0, 0});
-        CHECK(coordinate{5, -1, 0} < coordinate{-5, 0, 0});
-        CHECK(coordinate{5, 5, -1} < coordinate{-5, -5, 0});
-    }
-    SECTION("Signal encoding")
-    {
-        const std::map<uint64_t, coordinate> coordinate_repr{
-            {0x8000000000000000, coordinate{}},          {0x0000000000000000, coordinate{0, 0, 0}},
-            {0x4000000000000000, coordinate{0, 0, 1}},   {0x4000000080000001, coordinate{1, 1, 1}},
-            {0x0000000000000002, coordinate{2, 0, 0}},   {0x1fffffffbfffffff, coordinate{1073741823, 1073741823, 0}},
-            {0x3fffffffffffffff, coordinate{-1, -1, 0}}, {0x5fffffffc0000000, coordinate{-1073741824, 1073741823, 1}}};
-
-        for (auto [repr, coord] : coordinate_repr)
+        if constexpr (std::same_as<TestType, cartesian_layout>)
         {
-            CHECK(static_cast<coordinate>(repr) == coord);
-            CHECK(repr == static_cast<uint64_t>(coord));
-            CHECK(coordinate{repr} == coord);
-            CHECK(coordinate{coord} == coord);
-            CHECK(coordinate{static_cast<uint64_t>(coord)} == coord);
+            return TestType{{3, 3}};
         }
-
-        // the invalid coordinate ignores all further bits of its encoding
-        CHECK(coordinate{0xffffffffffffffff} == coordinate{});
-    }
-    SECTION("Range of the signal encoding")
-    {
-        CHECK(coordinate{0, 0, 0}.fits_signal());
-        CHECK(coordinate{1073741823, 1073741823, 1}.fits_signal());
-        CHECK(coordinate{-1073741824, -1073741824, 0}.fits_signal());
-
-        CHECK(!coordinate{1073741824, 0, 0}.fits_signal());
-        CHECK(!coordinate{0, 1073741824, 0}.fits_signal());
-        CHECK(!coordinate{-1073741825, 0, 0}.fits_signal());
-        CHECK(!coordinate{0, 0, 2}.fits_signal());
-        CHECK(!coordinate{0, 0, -1}.fits_signal());
-    }
-    SECTION("Hash")
-    {
-        const auto h = [](const coordinate& c) { return std::hash<coordinate>{}(c); };
-
-        CHECK(h({5, 7, 1}) == h({5, 7, 1}));
-        CHECK(h({}) == h({}));
-
-        CHECK(h({3, 4, 0}) != h({3, 4, 1}));
-        CHECK(h({3, 4, 0}) != h({4, 3, 0}));
-    }
-    SECTION("A coordinate is invalid iff its x axis has the invalid value")
-    {
-        constexpr auto invalid_axis = layout_base::coordinate::INVALID_AXIS;
-
-        CHECK(!coordinate{}.is_valid());
-        CHECK(!coordinate{invalid_axis, 5, 0}.is_valid());
-        CHECK(coordinate{-2147483647, 0, 0}.is_valid());
-        CHECK(static_cast<uint64_t>(coordinate{invalid_axis, 5, 0}) == static_cast<uint64_t>(coordinate{}));
-    }
-    SECTION("Area and volume of extreme coordinates")
-    {
-        CHECK(area_of(coordinate{-3, 2}) == 12);
-        CHECK(volume_of(coordinate{-3, 2, -1}) == 24);
-        // |INT32_MIN| does not wrap
-        CHECK(area_of(coordinate{layout_base::coordinate::INVALID_AXIS, 0, 0}) == 2147483649ull);
-        CHECK(volume_of(coordinate{0, 0, layout_base::coordinate::INVALID_AXIS}) == 2147483649ull);
-    }
-
-    std::ostringstream os{};
-    os << coordinate{3, 2, 1};
-    CHECK(os.str() == "(3,2,1)");
-    CHECK(coordinate{-3, 2, 1}.str() == "(-3,2,1)");
-}
-
-TEST_CASE("Coordinate iteration", "[coordinates]")
-{
-    using coord_t = layout_base::coordinate;
-    using lyt_t   = cartesian_layout;
-
-    std::vector<coord_t> coord_vector{};
-    coord_vector.reserve(7);
-
-    const lyt_t lyt{{1, 1, 1}};
-
-    const auto fill_coord_vector = [&v = coord_vector](const auto& c) { v.emplace_back(c); };
-
-    SECTION("With bounds")
-    {
-        lyt.foreach_coordinate(fill_coord_vector, {1, 0, 0}, {1, 1, 1});
-
-        REQUIRE(coord_vector.size() == 6);
-
-        CHECK(coord_vector[0] == coord_t{1, 0, 0});
-
-        CHECK(coord_vector[1] == coord_t{0, 1, 0});
-        CHECK(coord_vector[2] == coord_t{1, 1, 0});
-        CHECK(coord_vector[3] == coord_t{0, 0, 1});
-        CHECK(coord_vector[4] == coord_t{1, 0, 1});
-
-        CHECK(coord_vector[5] == coord_t{0, 1, 1});
-    }
-    SECTION("Without bounds")
-    {
-        coord_vector.clear();
-        coord_vector.reserve(8);
-
-        lyt.foreach_coordinate(fill_coord_vector);
-
-        CHECK(coord_vector.size() == 8);
-
-        CHECK(coord_vector.front().str() == fmt::format("{}", coord_t{0, 0, 0}));
-        CHECK(coord_vector.back().str() == fmt::format("{}", coord_t{1, 1, 1}));
-    }
-    SECTION("With non-dead out of bounds end bound")
-    {
-        std::vector<coord_t> good_bound_coord_vector{};
-
-        const auto fill_good_bound_coord_vector = [&v = good_bound_coord_vector](const auto& c) { v.emplace_back(c); };
-
-        const auto test_bounds_equal = [&](const auto& c_lyt, const coord_t& bad_bound, const coord_t& good_bound)
+        else
         {
-            coord_vector.clear();
-            coord_vector.reserve(8);
-
-            good_bound_coord_vector.clear();
-            good_bound_coord_vector.reserve(8);
-
-            c_lyt.foreach_coordinate(fill_coord_vector, {}, bad_bound);
-            c_lyt.foreach_coordinate(fill_good_bound_coord_vector, {}, good_bound);
-
-            CHECK(coord_vector.size() == good_bound_coord_vector.size());
-            CHECK(coord_vector.back() == good_bound_coord_vector.back());
-        };
-
-        test_bounds_equal(lyt, {9, 9, 9}, {});
-        test_bounds_equal(lyt, {0, 2, 1}, {});
-
-        test_bounds_equal(lyt, {0, 0, 9}, {});
-
-        test_bounds_equal(lyt, {2, 0, 0}, {0, 1, 0});
-        test_bounds_equal(lyt, {2, 0, 1}, {0, 1, 1});
-        test_bounds_equal(lyt, {2, 1, 0}, {0, 0, 1});
-        test_bounds_equal(lyt, {0, 2, 0}, {0, 0, 1});
-
-        test_bounds_equal(lyt_t{aspect_ratio<lyt_t>{0, 1, 0}}, {0, 1, 1}, {});
-
-        test_bounds_equal(lyt_t{aspect_ratio<lyt_t>{0, 0, 0}}, {9, 9, 9}, {});
+            return TestType{arrangement::ODD_ROW, {3, 3}};
+        }
+    }();
+    /** @brief Move-only visitor callable only through an lvalue. */
+    struct visitor
+    {
+        /** @brief Owned invocation count. */
+        std::unique_ptr<uint32_t> count;
+        /** @brief Observed invocation count. */
+        uint32_t& observed;
+        /** @brief Records one adjacent coordinate. */
+        void operator()(const layout_base::coordinate&) &
+        {
+            observed = ++*count;
+        }
+        /** @brief Rejects consuming invocation for a coordinate. */
+        void operator()(const layout_base::coordinate&) && = delete;
+        /** @brief Records one opposite adjacent pair. */
+        void operator()(const std::pair<layout_base::coordinate, layout_base::coordinate>&) &
+        {
+            observed = ++*count;
+        }
+        /** @brief Rejects consuming invocation for a pair. */
+        void operator()(const std::pair<layout_base::coordinate, layout_base::coordinate>&) && = delete;
+    };
+    /** @brief Invocation count published by the visitor. */
+    uint32_t observed{};
+    SECTION("Temporary visitor")
+    {
+        layout.foreach_adjacent_coordinate({1, 1}, visitor{std::make_unique<uint32_t>(0), observed});
+        CHECK(observed == layout.adjacent_coordinates({1, 1}).size());
+        layout.foreach_adjacent_opposite_coordinates({1, 1}, visitor{std::make_unique<uint32_t>(0), observed});
+        CHECK(observed == layout.adjacent_opposite_coordinates({1, 1}).size());
     }
-}
-
-TEST_CASE("Computing area and volume of offset coordinates", "[coordinates]")
-{
-    CHECK(area_of(layout_base::coordinate{1, 1, 1}) == 4);
-    CHECK(volume_of(layout_base::coordinate{1, 1, 1}) == 8);
-
-    CHECK(area_of(layout_base::coordinate{-1, -1, -1}) == 4);
-    CHECK(volume_of(layout_base::coordinate{-1, -1, -1}) == 8);
-}
-
-#pragma GCC diagnostic pop
-
-TEST_CASE("Incrementing the end of an enumeration keeps it at the end", "[coordinates]")
-{
-    using coord_t = layout_base::coordinate;
-
-    layout_base::coordinate_iterator it{coord_t{2, 2, 0}, coord_t{2, 2, 0}};
-
-    CHECK((*it).is_valid());
-
-    ++it;
-    CHECK(!(*it).is_valid());
-
-    ++it;
-    CHECK(!(*it).is_valid());
-    CHECK(it == layout_base::coordinate_iterator{coord_t{2, 2, 0}, coord_t{}});
+    SECTION("Lvalue visitor")
+    {
+        /** @brief Visitor for individual coordinates. */
+        visitor coordinates{std::make_unique<uint32_t>(0), observed};
+        layout.foreach_adjacent_coordinate({1, 1}, coordinates);
+        CHECK(observed == layout.adjacent_coordinates({1, 1}).size());
+        /** @brief Visitor for coordinate pairs. */
+        visitor pairs{std::make_unique<uint32_t>(0), observed};
+        layout.foreach_adjacent_opposite_coordinates({1, 1}, pairs);
+        CHECK(observed == layout.adjacent_opposite_coordinates({1, 1}).size());
+    }
 }

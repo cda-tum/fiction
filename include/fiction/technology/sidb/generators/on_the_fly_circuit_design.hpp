@@ -277,7 +277,7 @@ template <typename Ntk, typename GateLyt>
 /**
  * @brief Designs a lattice-based SiDB circuit for a placed and routed pointy-top hexagonal gate-level layout.
  *
- * For each gate, the SiDB gate design algorithm designs the corresponding SiDB implementation.
+ * The function validates every gate type before designing the SiDB implementations.
  *
  * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
  * @param gate_lyt Pointy-top hexagonal gate-level layout.
@@ -285,6 +285,7 @@ template <typename Ntk, typename GateLyt>
  * `on_the_fly_circuit_design_params` object.
  * @return Layout representing the designed SiDB circuit.
  * @throws std::invalid_argument if gate mapping uses a column arrangement instead of a row arrangement.
+ * @throws fcn::unsupported_gate_type_exception if any object has an unsupported function.
  * @throws unsuccessful_gate_design_error if a gate cannot be designed.
  * @throws utils::timeout_error if the shared circuit budget or an individual gate budget expires. No partial circuit
  * is returned. Deadline checks are cooperative and do not interrupt allocation or cell placement.
@@ -299,6 +300,14 @@ template <typename GateLyt>
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
     deadline             = utils::make_deadline(params.timeout, deadline);
     utils::check_deadline(deadline);
+    gate_lyt.foreach_object(
+        [&](const auto object)
+        {
+            if (!sidb::on_the_fly_gate_library::is_supported_gate_type(gate_lyt, object))
+            {
+                throw fcn::unsupported_gate_type_exception(gate_lyt.get_tile(object));
+            }
+        });
     try
     {
         return physical_design::apply_parameterized_gate_library<sidb::on_the_fly_gate_library>(gate_lyt,

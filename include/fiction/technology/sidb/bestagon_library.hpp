@@ -67,91 +67,77 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt must be a hexagonal layout");
 
-        const auto p = skeleton_bestagon_library::determine_port_routing(lyt, t);
-        const auto n = lyt.get_node(t);
+        const auto p      = skeleton_bestagon_library::determine_port_routing(lyt, t);
+        const auto object = lyt.find_object(t);
+        if (!object)
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+        const auto n = *object;
 
         try
         {
-            if constexpr (fiction::has_is_fanout_v<GateLyt>)
+            if (lyt.is_fanout(n))
             {
-                if (lyt.is_fanout(n))
+                if (p.out.size() == 2)
                 {
-                    if (lyt.fanout_size(n) == 2)
+                    return FANOUT_MAP.at(p);
+                }
+            }
+
+            if (lyt.is_buf(n))
+            {
+                if (lyt.is_ground_layer(t))
+                {
+                    // crossing case
+                    if (const auto at = lyt.above(t); at && lyt.is_wire_tile(*at))
                     {
-                        return FANOUT_MAP.at(p);
+                        // two possible options: actual crossover and (parallel) hourglass wire
+                        const auto pa = skeleton_bestagon_library::determine_port_routing(lyt, *at);
+
+                        return CROSSING_MAP.at({p, pa});
                     }
-                }
-            }
-            if constexpr (fiction::has_is_buf_v<GateLyt>)
-            {
-                if (lyt.is_buf(n))
-                {
-                    if (lyt.is_ground_layer(t))
-                    {
-                        // crossing case
-                        if (const auto at = lyt.above(t); (t != at) && lyt.is_wire_tile(at))
-                        {
-                            // two possible options: actual crossover and (parallel) hourglass wire
-                            const auto pa = skeleton_bestagon_library::determine_port_routing(lyt, at);
+                    // regular wire: look-up in the wire_map
 
-                            return CROSSING_MAP.at({p, pa});
-                        }
-                        // regular wire: look-up in the wire_map
+                    return WIRE_MAP.at(p);
+                }
 
-                        return WIRE_MAP.at(p);
-                    }
+                return EMPTY_GATE;
+            }
 
-                    return EMPTY_GATE;
-                }
-            }
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
+            if (lyt.is_inv(n))
             {
-                if (lyt.is_inv(n))
-                {
-                    return INVERTER_MAP.at(p);
-                }
+                return INVERTER_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_and_v<GateLyt>)
+
+            if (lyt.is_and(n))
             {
-                if (lyt.is_and(n))
-                {
-                    return CONJUNCTION_MAP.at(p);
-                }
+                return CONJUNCTION_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_or_v<GateLyt>)
+
+            if (lyt.is_or(n))
             {
-                if (lyt.is_or(n))
-                {
-                    return DISJUNCTION_MAP.at(p);
-                }
+                return DISJUNCTION_MAP.at(p);
             }
-            if constexpr (fiction::has_is_nand_v<GateLyt>)
+
+            if (lyt.is_nand(n))
             {
-                if (lyt.is_nand(n))
-                {
-                    return NEGATED_CONJUNCTION_MAP.at(p);
-                }
+                return NEGATED_CONJUNCTION_MAP.at(p);
             }
-            if constexpr (fiction::has_is_nor_v<GateLyt>)
+
+            if (lyt.is_nor(n))
             {
-                if (lyt.is_nor(n))
-                {
-                    return NEGATED_DISJUNCTION_MAP.at(p);
-                }
+                return NEGATED_DISJUNCTION_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_xor_v<GateLyt>)
+
+            if (lyt.is_xor(n))
             {
-                if (lyt.is_xor(n))
-                {
-                    return EXCLUSIVE_DISJUNCTION_MAP.at(p);
-                }
+                return EXCLUSIVE_DISJUNCTION_MAP.at(p);
             }
-            if constexpr (fiction::has_is_xnor_v<GateLyt>)
+
+            if (lyt.is_xnor(n))
             {
-                if (lyt.is_xnor(n))
-                {
-                    return NEGATED_EXCLUSIVE_DISJUNCTION_MAP.at(p);
-                }
+                return NEGATED_EXCLUSIVE_DISJUNCTION_MAP.at(p);
             }
         }
         catch (const std::out_of_range&)

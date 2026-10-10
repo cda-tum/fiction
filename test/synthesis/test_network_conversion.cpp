@@ -22,6 +22,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
@@ -38,6 +39,7 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <array>
+#include <string>
 #include <vector>
 
 using namespace fiction;
@@ -187,13 +189,14 @@ TEST_CASE("Layout conversion", "[network-conversion]")
 {
     SECTION("Gate layout to X")
     {
+        /** @brief Placed layout whose logic enters network conversion through extraction. */
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
+        REQUIRE_FALSE(mockturtle::is_network_type_v<gate_layout>);
 
         const auto layout = blueprints::xor_maj_gate_layout<gate_layout>();
 
-        to_x(layout);
+        to_x(extract_layout_network(layout));
     }
 }
 

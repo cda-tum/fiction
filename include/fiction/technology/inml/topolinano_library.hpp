@@ -25,11 +25,11 @@
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
-#include <mockturtle/traits.hpp>
 #include <phmap.h>
 
 #include <algorithm>
 #include <cstdint>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -73,75 +73,67 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
             return EMPTY_GATE;
         }
 
-        const auto n = lyt.get_node(t);
+        const auto object = lyt.find_object(t);
+        if (!object)
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+        const auto n = *object;
 
-        if constexpr (fiction::has_is_fanout_v<GateLyt>)
+        if (lyt.is_fanout(n))
         {
-            if (lyt.is_fanout(n))
-            {
-                return COUPLER;
-            }
+            return COUPLER;
         }
-        if constexpr (mockturtle::has_is_and_v<GateLyt>)
+
+        if (lyt.is_and(n))
         {
-            if (lyt.is_and(n))
-            {
-                return CONJUNCTION;
-            }
+            return CONJUNCTION;
         }
-        if constexpr (mockturtle::has_is_or_v<GateLyt>)
+
+        if (lyt.is_or(n))
         {
-            if (lyt.is_or(n))
-            {
-                return DISJUNCTION;
-            }
+            return DISJUNCTION;
         }
-        if constexpr (mockturtle::has_is_maj_v<GateLyt>)
+
+        if (lyt.is_maj(n))
         {
-            if (lyt.is_maj(n))
-            {
-                return MAJORITY;
-            }
+            return MAJORITY;
         }
 
         const auto p = determine_port_routing(lyt, t);
 
         try
         {
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
+
+            if (lyt.is_inv(n))
             {
-                if (lyt.is_inv(n))
-                {
-                    return INVERTER_MAP.at(p);
-                }
+                return INVERTER_MAP.at(p);
             }
-            if constexpr (fiction::has_is_buf_v<GateLyt>)
+
+            if (lyt.is_buf(n))
             {
-                if (lyt.is_buf(n))
+                // crossing case
+                if (const auto a = lyt.above(t); a && lyt.is_wire_tile(*a))
                 {
-                    // crossing case
-                    if (const auto a = lyt.above(t); t != a && lyt.is_wire_tile(a))
-                    {
-                        return CROSSWIRE;
-                    }
-
-                    auto wire = WIRE_MAP.at(p);
-
-                    if (lyt.is_pi(n))
-                    {
-                        const auto inp_mark_pos = p.inp.empty() ? opposite(*p.out.begin()) : *p.inp.begin();
-
-                        wire = mark_cell(wire, inp_mark_pos, inml::magnet_type::INPUT);
-                    }
-                    if (lyt.is_po(n))
-                    {
-                        const auto out_mark_pos = p.out.empty() ? opposite(*p.inp.begin()) : *p.out.begin();
-
-                        wire = mark_cell(wire, out_mark_pos, inml::magnet_type::OUTPUT);
-                    }
-
-                    return wire;
+                    return CROSSWIRE;
                 }
+
+                auto wire = WIRE_MAP.at(p);
+
+                if (lyt.is_pi(n))
+                {
+                    const auto inp_mark_pos = p.inp.empty() ? opposite(*p.out.begin()) : *p.inp.begin();
+
+                    wire = mark_cell(wire, inp_mark_pos, inml::magnet_type::INPUT);
+                }
+                if (lyt.is_po(n))
+                {
+                    const auto out_mark_pos = p.out.empty() ? opposite(*p.inp.begin()) : *p.out.begin();
+
+                    wire = mark_cell(wire, out_mark_pos, inml::magnet_type::OUTPUT);
+                }
+
+                return wire;
             }
         }
         catch (const std::out_of_range&)
@@ -175,20 +167,26 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
             {
                 // if sequence starts with a PI or there are normal cells south of first and last hump cell, this is an
                 // upper hump
-                if (const auto inp = lyt.get_cell_type(hump.front()), out = lyt.get_cell_type(hump.back()),
-                    fts = lyt.get_cell_type(lyt.south(hump.front())), bts = lyt.get_cell_type(lyt.south(hump.back()));
-                    (inp == inml::magnet_type::INPUT || fts == inml::magnet_type::NORMAL) &&
-                    (bts == inml::magnet_type::NORMAL || out == inml::magnet_type::OUTPUT ||
-                     bts == inml::magnet_type::INVERTER_MAGNET))
+                const auto inp = lyt.get_cell_type(hump.front()), out = lyt.get_cell_type(hump.back());
+                if (const auto front = lyt.south(hump.front()), back = lyt.south(hump.back());
+                    front && back &&
+                    (inp == inml::magnet_type::INPUT || lyt.get_cell_type(*front) == inml::magnet_type::NORMAL) &&
+                    (lyt.get_cell_type(*back) == inml::magnet_type::NORMAL || out == inml::magnet_type::OUTPUT ||
+                     lyt.get_cell_type(*back) == inml::magnet_type::INVERTER_MAGNET))
                 {
                     // hump found, check if there is enough space below for merging
                     if (std::all_of(hump.begin() + 1, hump.end() - 1,
-                                    [&lyt](const auto hc) { return lyt.is_empty_cell(lyt.south(lyt.south(hc))); }))
+                                    [&lyt](const auto hc)
+                                    {
+                                        const auto neighbor = lyt.south(hc);
+                                        const auto beyond   = neighbor ? lyt.south(*neighbor) : std::nullopt;
+                                        return beyond && lyt.is_empty_cell(*beyond);
+                                    }))
                     {
                         // merge it down
                         for (const auto& hc : hump)
                         {
-                            const auto s = lyt.south(hc);
+                            const auto s = *lyt.south(hc);
                             if (lyt.get_cell_type(s) != inml::magnet_type::INVERTER_MAGNET)
                             {
                                 lyt.assign_cell_type(s, lyt.get_cell_type(hc));
@@ -202,19 +200,26 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                     }
                 }
                 // if there are normal cells north of first and last hump cell, this is a lower hump
-                else if (const auto ftn = lyt.get_cell_type(lyt.north(hump.front())),
-                         btn            = lyt.get_cell_type(lyt.north(hump.back()));
-                         (inp == inml::magnet_type::INPUT || ftn == inml::magnet_type::NORMAL) &&
-                         (btn == inml::magnet_type::NORMAL || out == inml::magnet_type::OUTPUT))
+                else if (const auto north_front = lyt.north(hump.front()), north_back = lyt.north(hump.back());
+                         north_front && north_back &&
+                         (inp == inml::magnet_type::INPUT ||
+                          lyt.get_cell_type(*north_front) == inml::magnet_type::NORMAL) &&
+                         (lyt.get_cell_type(*north_back) == inml::magnet_type::NORMAL ||
+                          out == inml::magnet_type::OUTPUT))
                 {
                     // hump found, check if there is enough space above for merging
                     if (std::all_of(hump.begin() + 1, hump.end() - 1,
-                                    [&lyt](const auto hc) { return lyt.is_empty_cell(lyt.north(lyt.north(hc))); }))
+                                    [&lyt](const auto hc)
+                                    {
+                                        const auto neighbor = lyt.north(hc);
+                                        const auto beyond   = neighbor ? lyt.north(*neighbor) : std::nullopt;
+                                        return beyond && lyt.is_empty_cell(*beyond);
+                                    }))
                     {
                         // merge it up
                         for (const auto& hc : hump)
                         {
-                            const auto n = lyt.north(hc);
+                            const auto n = *lyt.north(hc);
                             lyt.assign_cell_type(n, lyt.get_cell_type(hc));
                             lyt.assign_cell_name(n, lyt.get_cell_name(hc));
                             lyt.assign_cell_type(hc, inml::magnet_type::EMPTY);
@@ -235,11 +240,11 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
 
             improvement_found = false;
 
-            for (decltype(lyt.y()) row = 0; row <= lyt.y(); ++row)
+            for (uint32_t row = 0; row < lyt.height(); ++row)
             {
                 std::vector<inml::layout::cell> hump{};
 
-                for (decltype(lyt.x()) column = 0; column <= lyt.x(); ++column)
+                for (uint32_t column = 0; column < lyt.width(); ++column)
                 {
                     // simple state machine for identifying humps and removing them
                     switch (const auto c = inml::layout::cell{column, row}; st)
@@ -328,39 +333,33 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @return `true` iff `n` has an AND, OR, or MAJ fanin node.
      */
     template <typename Lyt>
-    [[nodiscard]] static bool has_and_or_maj_fanin(const Lyt& lyt, const mockturtle::node<Lyt>& n) noexcept
+    [[nodiscard]] static bool has_and_or_maj_fanin(const Lyt& lyt, const typename Lyt::object_id n) noexcept
     {
         auto pre_and_or_maj = false;
 
         lyt.foreach_fanin(n,
                           [&lyt, &pre_and_or_maj](const auto& fi)
                           {
-                              const auto fin = lyt.get_node(fi);
+                              const auto fin = fi;
 
-                              if constexpr (mockturtle::has_is_and_v<Lyt>)
+                              if (lyt.is_and(fin))
                               {
-                                  if (lyt.is_and(fin))
-                                  {
-                                      pre_and_or_maj = true;
-                                      return false;  // exit function
-                                  }
+                                  pre_and_or_maj = true;
+                                  return false;  // exit function
                               }
-                              if constexpr (mockturtle::has_is_or_v<Lyt>)
+
+                              if (lyt.is_or(fin))
                               {
-                                  if (lyt.is_or(fin))
-                                  {
-                                      pre_and_or_maj = true;
-                                      return false;  // exit function
-                                  }
+                                  pre_and_or_maj = true;
+                                  return false;  // exit function
                               }
-                              if constexpr (mockturtle::has_is_maj_v<Lyt>)
+
+                              if (lyt.is_maj(fin))
                               {
-                                  if (lyt.is_maj(fin))
-                                  {
-                                      pre_and_or_maj = true;
-                                      return false;  // exit function
-                                  }
+                                  pre_and_or_maj = true;
+                                  return false;  // exit function
                               }
+
                               return true;  // continue iteration
                           });
 
@@ -375,42 +374,46 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @return `true` iff `n` has a fanout node as fanout.
      */
     template <typename Lyt>
-    [[nodiscard]] static bool has_fanout_fanout(const Lyt& lyt, const mockturtle::node<Lyt>& n) noexcept
+    [[nodiscard]] static bool has_fanout_fanout(const Lyt& lyt, const typename Lyt::object_id n) noexcept
     {
         auto fanout_fanout = false;
 
         lyt.foreach_fanout(n,
                            [&lyt, &fanout_fanout](const auto& fon)
                            {
-                               if constexpr (fiction::has_is_fanout_v<Lyt>)
+                               if (lyt.is_fanout(fon))
                                {
-                                   if (lyt.is_fanout(fon))
-                                   {
-                                       fanout_fanout = true;
-                                       return false;  // exit function
-                                   }
+                                   fanout_fanout = true;
+                                   return false;  // exit function
                                }
+
                                return true;  // continue iteration
                            });
 
         return fanout_fanout;
     }
 
+    /**
+     * Routes the physical connector ports of an occupied tile.
+     * @tparam Lyt Gate-level layout type.
+     * @param lyt Layout.
+     * @param t Occupied tile.
+     * @return Physical connector ports.
+     */
     template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
-        static_assert(fiction::has_is_inv_v<Lyt>, "Lyt must implement the is_inv function");
-        static_assert(fiction::has_is_po_v<Lyt>, "Lyt must implement the is_po function");
-        static_assert(mockturtle::has_is_pi_v<Lyt>, "Lyt must implement the is_pi function");
-        static_assert(mockturtle::has_is_and_v<Lyt>, "Lyt must implement the is_and function");
-        static_assert(mockturtle::has_is_or_v<Lyt>, "Lyt must implement the is_or function");
-        static_assert(mockturtle::has_is_maj_v<Lyt>, "Lyt must implement the is_maj function");
-
         fcn::port_list<fcn::port_position> p{};
 
-        const auto n = lyt.get_node(t);
+        const auto object = lyt.find_object(t);
+        if (!object)
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+        const auto n = *object;
 
-        // NOLINTBEGIN(*-branch-clone)
+        // Different physical directions share connector positions in the ToPoliNano gate blocks.
+        // NOLINTBEGIN(bugprone-branch-clone)
 
         // wires within the circuit
         if (lyt.is_buf(n) && !lyt.is_pi(n) && !lyt.is_po(n))
@@ -449,7 +452,9 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
             if (lyt.has_northern_outgoing_signal(t))
             {
                 // special case: if northern tile is MAJ, output port is at (1,0)
-                if (lyt.is_maj(lyt.get_node(lyt.north(t))))
+                const auto north           = lyt.north(t);
+                const auto northern_object = north ? lyt.find_object(*north) : std::nullopt;
+                if (northern_object && lyt.is_maj(*northern_object))
                 {
                     p.out.emplace(1u, 0u);
                 }
@@ -576,7 +581,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
             }
         }
 
-        // NOLINTEND(*-branch-clone)
+        // NOLINTEND(bugprone-branch-clone)
 
         return p;
     }

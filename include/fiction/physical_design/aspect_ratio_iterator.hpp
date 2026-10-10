@@ -17,8 +17,10 @@
 #pragma once
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <tuple>
 #include <vector>
 
 namespace fiction::physical_design
@@ -38,16 +40,12 @@ class aspect_ratio_iterator
   public:
     /**
      * Standard constructor. Takes a starting value and computes an initial factorization.
-     * The value `n` represents the amount of faces in the desired aspect ratios. For example, \f$n = 1\f$ will
-     * yield aspect ratios with exactly \f$1\f$ face, i.e. \f$1 \times 1\f$ which is equal to
-     * `layout_base::coordinate{0, 0}`. If
-     * \f$n = 2\f$, the aspect ratios \f$1 \times 2\f$ and \f$2 \times 1\f$ will result, which are equal to
-     * `layout_base::coordinate{0, 1}` and `layout_base::coordinate{1, 0}`. Both examples with `AspectRatio ==
-     * layout_base::coordinate`.
+     * The value `n` represents the amount of faces in the desired aspect ratios. For example, \f$n = 1\f$
+     * yields the size-based extent `1 x 1`. A starting value of `2` yields extents `1 x 2` and `2 x 1`.
      *
      * @param n Starting value of the aspect ratio iteration.
      */
-    explicit aspect_ratio_iterator([[maybe_unused]] uint64_t n = 0ul) noexcept : num{n != 0ul ? n - 1 : 0ul}
+    explicit aspect_ratio_iterator([[maybe_unused]] uint64_t n = 0ul) : num{n != 0ul ? n - 1 : 0ul}
     {
         next();
     }
@@ -59,12 +57,12 @@ class aspect_ratio_iterator
      *
      * @return Reference to this.
      */
-    aspect_ratio_iterator& operator++() noexcept
+    aspect_ratio_iterator& operator++()
     {
-        ++it;
+        ++factor_index;
 
         // end of factors: compute next ones
-        if (it == factors.end())
+        if (factor_index == factors.size())
         {
             next();
         }
@@ -79,7 +77,7 @@ class aspect_ratio_iterator
      *
      * @return Resulting iterator.
      */
-    aspect_ratio_iterator operator++(int) noexcept
+    aspect_ratio_iterator operator++(int)
     {
         auto result{*this};
 
@@ -88,49 +86,58 @@ class aspect_ratio_iterator
         return result;
     }
 
+    /** @brief Return the current extent. */
     [[nodiscard]] AspectRatio operator*() const
     {
-        return *it;
+        return factors[factor_index];
     }
 
-    [[nodiscard]] bool operator==(const uint64_t m) const noexcept
+    /** @brief Compare iterator positions. */
+    [[nodiscard]] bool operator==(const uint64_t m) const
     {
         return num == m;
     }
 
+    /** @brief Compare iterator positions. */
     [[nodiscard]] bool operator==(const aspect_ratio_iterator& other) const
     {
-        return (num == other.num) && (*it == *(other.it));
+        return (num == other.num) && (factor_index == other.factor_index);
     }
 
-    [[nodiscard]] bool operator!=(const uint64_t m) const noexcept
+    /** @brief Compare iterator positions. */
+    [[nodiscard]] bool operator!=(const uint64_t m) const
     {
         return num != m;
     }
 
+    /** @brief Compare iterator positions. */
     [[nodiscard]] bool operator!=(const aspect_ratio_iterator& other) const
     {
         return !(*this == other);
     }
 
-    [[nodiscard]] bool operator<(const uint64_t m) const noexcept
+    /** @brief Compare iterator positions. */
+    [[nodiscard]] bool operator<(const uint64_t m) const
     {
         return num < m;
     }
 
+    /** @brief Compare iterator positions. */
     [[nodiscard]] bool operator<(const aspect_ratio_iterator& other) const
     {
-        return (num < other.num) || (num == other.num && *it < *(other.it));
+        return std::tie(num, factor_index) < std::tie(other.num, other.factor_index);
     }
 
-    [[nodiscard]] bool operator<=(const uint64_t m) const noexcept
+    /** @brief Compare iterator positions. */
+    [[nodiscard]] bool operator<=(const uint64_t m) const
     {
         return num <= m;
     }
 
+    /** @brief Compare iterator positions. */
     [[nodiscard]] bool operator<=(const aspect_ratio_iterator& other) const
     {
-        return (num <= other.num) || (num == other.num && *it <= *(other.it));
+        return std::tie(num, factor_index) <= std::tie(other.num, other.factor_index);
     }
 
   private:
@@ -143,15 +150,15 @@ class aspect_ratio_iterator
      */
     std::vector<AspectRatio> factors;
     /**
-     * Iterator pointing to current factor.
+     * Index of the current factor.
      */
-    typename std::vector<AspectRatio>::iterator it;
+    std::size_t factor_index{};
 
     /**
      * Factorizes the current `num` into all possible factors \f$(x, y)\f$ with \f$x \cdot y = num\f$. The result is
      * stored as a vector of `AspectRatio` objects in the attribute factors.
      */
-    void factorize() noexcept
+    void factorize()
     {
         factors.clear();
 
@@ -159,8 +166,8 @@ class aspect_ratio_iterator
         {
             if (num % i == 0)
             {
-                const auto x = i - 1;
-                const auto y = (num / i) - 1;
+                const auto x = i;
+                const auto y = num / i;
 
                 factors.emplace_back(x, y);
                 if (x != y)
@@ -170,13 +177,12 @@ class aspect_ratio_iterator
             }
         }
 
-        // let it point to the first element of the sequence
-        it = factors.begin();
+        factor_index = 0;
     }
     /**
      * Computes the next possible `num` where a factorization \f$(x, y)\f$ with \f$x \cdot y = num\f$ exists.
      */
-    void next() noexcept
+    void next()
     {
         ++num;
         factorize();

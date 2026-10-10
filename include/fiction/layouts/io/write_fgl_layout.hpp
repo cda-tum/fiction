@@ -18,8 +18,7 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/networks/name_utils.hpp"
+#include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
@@ -29,14 +28,11 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <kitty/print.hpp>
-#include <mockturtle/views/topo_view.hpp>
 #include <tinyxml2.h>
 
-#include <cstddef>
 #include <cstdint>
 #include <ctime>
 #include <ostream>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -52,67 +48,88 @@ namespace fgl
 
 /**
  * @brief Escape user-provided text for an XML element.
- * @param value Layout or port name.
- * @return XML text preserving the original label when parsed.
+ * @param value Layout or object name.
+ * @return XML text preserving the original name when parsed.
  */
 inline std::string xml_text(const std::string& value)
 {
     tinyxml2::XMLPrinter printer{};
     printer.PushText(value.c_str());
-    return printer.CStr();
+    std::string text{printer.CStr()};
+    for (auto position = text.find('\r'); position != std::string::npos; position = text.find('\r', position + 5))
+    {
+        text.replace(position, 1, "&#13;");
+    }
+    return text;
 }
 
-inline constexpr const char* FGL_HEADER       = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-inline constexpr const char* OPEN_FGL         = "<fgl>\n";
-inline constexpr const char* CLOSE_FGL        = "</fgl>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* FGL_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* OPEN_FGL = "<fgl version=\"2\">\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* CLOSE_FGL = "</fgl>\n";
+/** @brief FGL XML fragment. */
 inline constexpr const char* FICTION_METADATA = "  <fiction>\n"
                                                 "    <fiction_version>{}</fiction_version>\n"
                                                 "    <available_at>{}</available_at>\n"
                                                 "    <date>{}</date>\n"
                                                 "  </fiction>\n";
 
-inline constexpr const char* OPEN_LAYOUT_METADATA  = "  <layout>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* OPEN_LAYOUT_METADATA = "  <layout>\n";
+/** @brief FGL XML fragment. */
 inline constexpr const char* CLOSE_LAYOUT_METADATA = "  </layout>\n";
-inline constexpr const char* LAYOUT_METADATA       = "    <name>{}</name>\n"
-                                                     "    <topology>{}</topology>\n"
-                                                     "    <size>\n"
-                                                     "      <x>{}</x>\n"
-                                                     "      <y>{}</y>\n"
-                                                     "      <z>{}</z>\n"
-                                                     "    </size>\n";
-inline constexpr const char* OPEN_CLOCKING         = "    <clocking>\n";
-inline constexpr const char* CLOSE_CLOCKING        = "    </clocking>\n";
-inline constexpr const char* CLOCKING_SCHEME_NAME  = "      <name>{}{}</name>\n";
-inline constexpr const char* OPEN_CLOCK_ZONES      = "      <zones>\n";
-inline constexpr const char* CLOSE_CLOCK_ZONES     = "      </zones>\n";
-inline constexpr const char* CLOCK_ZONE            = "        <zone>\n"
-                                                     "          <x>{}</x>\n"
-                                                     "          <y>{}</y>\n"
-                                                     "          <clock>{}</clock>\n"
-                                                     "        </zone>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* LAYOUT_METADATA = "    <name>{}</name>\n"
+                                               "    <topology>{}</topology>\n"
+                                               "    <size>\n"
+                                               "      <x>{}</x>\n"
+                                               "      <y>{}</y>\n"
+                                               "      <z>{}</z>\n"
+                                               "    </size>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* OPEN_CLOCKING = "    <clocking>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* CLOSE_CLOCKING = "    </clocking>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* CLOCKING_SCHEME_NAME = "      <name>{}</name>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* OPEN_CLOCK_ZONES = "      <zones>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* CLOSE_CLOCK_ZONES = "      </zones>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* CLOCK_ZONE = "        <zone>\n"
+                                          "          <x>{}</x>\n"
+                                          "          <y>{}</y>\n"
+                                          "          <clock>{}</clock>\n"
+                                          "        </zone>\n";
 
-inline constexpr const char* OPEN_GATES     = "  <gates>\n";
-inline constexpr const char* CLOSE_GATES    = "  </gates>\n";
-inline constexpr const char* OPEN_GATE      = "    <gate>\n";
-inline constexpr const char* CLOSE_GATE     = "    </gate>\n";
-inline constexpr const char* GATE           = "      <id>{}</id>\n"
-                                              "      <type>{}</type>\n"
-                                              "      <name>{}</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>{}</x>\n"
-                                              "        <y>{}</y>\n"
-                                              "        <z>{}</z>\n"
-                                              "      </loc>\n";
-inline constexpr const char* OPEN_INCOMING  = "      <incoming>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* OPEN_GATES = "  <gates>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* CLOSE_GATES = "  </gates>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* OPEN_GATE = "    <gate>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* CLOSE_GATE = "    </gate>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* GATE = "      <id>{}</id>\n"
+                                    "      <type>{}</type>\n"
+                                    "      <name>{}</name>\n"
+                                    "      <loc>\n"
+                                    "        <x>{}</x>\n"
+                                    "        <y>{}</y>\n"
+                                    "        <z>{}</z>\n"
+                                    "      </loc>\n";
+/** @brief FGL XML fragment. */
+inline constexpr const char* OPEN_INCOMING = "      <incoming>\n";
+/** @brief FGL XML fragment. */
 inline constexpr const char* CLOSE_INCOMING = "      </incoming>\n";
-inline constexpr const char* SIGNAL         = "        <signal>\n"
-                                              "          <x>{}</x>\n"
-                                              "          <y>{}</y>\n"
-                                              "          <z>{}</z>\n"
-                                              "        </signal>\n";
 
 }  // namespace fgl
 
+/** @brief Serialize a finished layout. @tparam Lyt Gate-level layout type. */
 template <typename Lyt>
 class write_fgl_layout_impl
 {
@@ -129,19 +146,10 @@ class write_fgl_layout_impl
             on_progress{std::move(callback)}
     {}
 
+    /** @brief Validate the finished layout and serialize FGL version 2. */
     void run()
     {
-        // the reader accepts only placed nodes on non-negative tiles
-        lyt.foreach_node(
-            [this](const auto& n)
-            {
-                if (const auto t = lyt.get_tile(n);
-                    !lyt.is_constant(n) && (!t.is_valid() || t.x < 0 || t.y < 0 || t.z < 0))
-                {
-                    throw std::invalid_argument(
-                        fmt::format("Node {} is not placed on a tile with non-negative coordinates", n));
-                }
-            });
+        fgl::validate_layout(lyt);
 
         // metadata
         os << fgl::FGL_HEADER << fgl::OPEN_FGL;
@@ -150,7 +158,7 @@ class write_fgl_layout_impl
         os << fmt::format(fgl::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fgl::OPEN_LAYOUT_METADATA;
-        const std::string layout_name{networks::get_name(lyt)};
+        const std::string layout_name{lyt.get_layout_name()};
 
         // check if topology matches Lyt
         std::string topology{};
@@ -167,204 +175,94 @@ class write_fgl_layout_impl
             topology = fmt::format("{}_hex", layouts::to_string(lyt.get_arrangement()));
         }
 
-        os << fmt::format(fgl::LAYOUT_METADATA, fgl::xml_text(layout_name), topology, lyt.x(), lyt.y(), lyt.z());
+        os << fmt::format(fgl::LAYOUT_METADATA, fgl::xml_text(layout_name), topology, lyt.width(), lyt.height(),
+                          lyt.layers());
 
         os << fgl::OPEN_CLOCKING;
-        const auto clocking_scheme = lyt.get_clocking_scheme();
-        // three-phase variants of four-phase schemes share their base name; BANCS has three phases only
-        os << fmt::format(
-            fgl::CLOCKING_SCHEME_NAME, clocking_scheme.name(),
-            clocking_scheme.num_clocks() == 3u && clocking_scheme.name() != layouts::clocking::BANCS_NAME ? "3" : "");
+        const auto& clocking_scheme = lyt.get_clocking_scheme();
+        os << fmt::format(fgl::CLOCKING_SCHEME_NAME, fgl::clocking_name(clocking_scheme));
 
-        // if clocking scheme is irregular, overwrite clock zones
-        if (!clocking_scheme.is_regular())
-        {
-            os << fgl::OPEN_CLOCK_ZONES;
-            utils::progress_reporter clocks{on_progress, "writing clock columns",
-                                            static_cast<std::size_t>(lyt.x()) + 1};
-            for (int32_t x = 0; x <= lyt.x(); ++x)
+        os << fgl::OPEN_CLOCK_ZONES;
+        utils::progress_reporter clocks{on_progress, "writing clock overrides"};
+        clocking_scheme.foreach_override(
+            [this, &clocks](const auto x, const auto y, const auto number)
             {
-                for (int32_t y = 0; y <= lyt.y(); ++y)
-                {
-                    const int clock{clocking_scheme(static_cast<int64_t>(x), static_cast<int64_t>(y))};
-                    os << fmt::format(fgl::CLOCK_ZONE, x, y, clock);
-                }
+                os << fmt::format(fgl::CLOCK_ZONE, x, y, number);
                 clocks.advance();
-            }
-            os << fgl::CLOSE_CLOCK_ZONES;
-        }
+            });
+        os << fgl::CLOSE_CLOCK_ZONES;
 
         if (lyt.num_se() != 0)
         {
             os << "      <synchronization_elements>\n";
-            utils::progress_reporter synchronization{on_progress, "scanning synchronization elements",
-                                                     (static_cast<std::size_t>(lyt.x()) + 1) *
-                                                         (static_cast<std::size_t>(lyt.y()) + 1) *
-                                                         (static_cast<std::size_t>(lyt.z()) + 1)};
-            lyt.foreach_coordinate(
-                [this, &synchronization](const auto& coordinate)
+            utils::progress_reporter synchronization{on_progress, "writing synchronization elements", lyt.num_se()};
+            lyt.foreach_synchronization_element(
+                [this, &synchronization](const auto& coordinate, const auto delay)
                 {
-                    if (const auto delay = lyt.get_synchronization_element(coordinate); delay != 0)
-                    {
-                        os << fmt::format("        <element><x>{}</x><y>{}</y><z>{}</z><delay>{}</delay></element>\n",
-                                          coordinate.x, coordinate.y, coordinate.z, delay);
-                    }
+                    os << fmt::format("        <element><x>{}</x><y>{}</y><z>{}</z><delay>{}</delay></element>\n",
+                                      coordinate.x, coordinate.y, coordinate.z, delay);
                     synchronization.advance();
                 });
             os << "      </synchronization_elements>\n";
         }
 
         os << fgl::CLOSE_CLOCKING;
-        os << fgl::CLOSE_LAYOUT_METADATA;
-
-        os << fgl::OPEN_GATES;
-
-        // create topological ordering
-        mockturtle::topo_view layout_topo{lyt};
-        uint32_t              gate_id = 0;
-
-        utils::progress_reporter progress{on_progress, "writing gates",
-                                          layout_topo.num_pis() + layout_topo.num_gates()};
-        // inputs
-        layout_topo.foreach_pi(
-            [&gate_id, this, &progress](const auto& gate)
+        os << "    <inputs>\n";
+        lyt.foreach_pi([this](const auto id) { os << fmt::format("      <id>{}</id>\n", id.index); });
+        os << "    </inputs>\n    <outputs>\n";
+        lyt.foreach_po([this](const auto id) { os << fmt::format("      <id>{}</id>\n", id.index); });
+        os << "    </outputs>\n";
+        os << "    <obstructions>\n      <coordinates>\n";
+        lyt.foreach_obstructed_coordinate(
+            [this](const auto& c)
+            { os << fmt::format("        <coordinate><x>{}</x><y>{}</y><z>{}</z></coordinate>\n", c.x, c.y, c.z); });
+        os << "      </coordinates>\n      <connections>\n";
+        lyt.foreach_obstructed_connection(
+            [this](const auto& source, const auto& target)
             {
-                const auto coord = lyt.get_tile(gate);
-                os << fgl::OPEN_GATE;
-                os << fmt::format(fgl::GATE, gate_id, "PI", fgl::xml_text(lyt.get_name(gate)), coord.x, coord.y,
-                                  coord.z);
-                os << fgl::CLOSE_GATE;
-                gate_id++;
-                progress.advance();
+                os << fmt::format("        <connection><source><x>{}</x><y>{}</y><z>{}</z></source>"
+                                  "<target><x>{}</x><y>{}</y><z>{}</z></target></connection>\n",
+                                  source.x, source.y, source.z, target.x, target.y, target.z);
             });
-
-        // gates
-        layout_topo.foreach_gate(
-            [&gate_id, this, &progress](const auto& gate)
+        os << "      </connections>\n    </obstructions>\n";
+        os << fgl::CLOSE_LAYOUT_METADATA;
+        os << fgl::OPEN_GATES;
+        utils::progress_reporter progress{on_progress, "writing gates", lyt.size()};
+        lyt.foreach_object(
+            [this, &progress](const auto id)
             {
+                const auto coordinate = lyt.get_tile(id);
+                /** @brief Serialized gate type or truth-table hexadecimal text. */
+                std::string type{};
+                if (lyt.is_pi(id))
+                {
+                    type = "PI";
+                }
+                else if (lyt.is_po(id))
+                {
+                    type = "PO";
+                }
+                else if (lyt.is_buf(id))
+                {
+                    type = "BUF";
+                }
+                else
+                {
+                    type = kitty::to_hex(lyt.object_function(id));
+                }
                 os << fgl::OPEN_GATE;
-                const auto coord = lyt.get_tile(gate);
-                if (const auto signals = lyt.incoming_data_flow(coord); signals.size() == 1)
+                os << fmt::format(fgl::GATE, id.index, type, fgl::xml_text(lyt.get_name(id)), coordinate.x,
+                                  coordinate.y, coordinate.z);
+                os << fmt::format("      <arity>{}</arity>\n", lyt.input_count(id));
+                os << fgl::OPEN_INCOMING;
+                for (uint32_t input = 0; input < lyt.input_count(id); ++input)
                 {
-                    const auto incoming_signal = signals[0];
-
-                    if (lyt.is_po(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "PO", fgl::xml_text(lyt.get_name(gate)), coord.x, coord.y,
-                                          coord.z);
-                    }
-                    else if (lyt.is_wire(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "BUF", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_inv(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "INV", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_function(gate))
-                    {
-                        const auto node_fun = lyt.node_function(gate);
-
-                        os << fmt::format(fgl::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
-                    }
-
-                    os << fgl::OPEN_INCOMING;
-                    os << fmt::format(fgl::SIGNAL, incoming_signal.x, incoming_signal.y, incoming_signal.z);
-                    os << fgl::CLOSE_INCOMING;
+                    const auto source = *lyt.source({id, input});
+                    os << fmt::format(
+                        "        <signal><source>{}</source><index>{}</index><input>{}</input></signal>\n",
+                        source.index, 0, input);
                 }
-                else if (signals.size() == 2)
-                {
-                    const auto incoming_signal_a = signals[0];
-                    const auto incoming_signal_b = signals[1];
-
-                    if (lyt.is_and(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "AND", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_nand(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "NAND", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_or(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "OR", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_nor(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "NOR", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_xor(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "XOR", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_xnor(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "XNOR", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_lt(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "LT", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_gt(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "GT", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_le(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "LE", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_ge(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "GE", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_function(gate))
-                    {
-                        const auto node_fun = lyt.node_function(gate);
-
-                        os << fmt::format(fgl::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
-                    }
-                    os << fgl::OPEN_INCOMING;
-                    os << fmt::format(fgl::SIGNAL, incoming_signal_a.x, incoming_signal_a.y, incoming_signal_a.z);
-                    os << fmt::format(fgl::SIGNAL, incoming_signal_b.x, incoming_signal_b.y, incoming_signal_b.z);
-                    os << fgl::CLOSE_INCOMING;
-                }
-                else if (signals.size() == 3)
-                {
-                    const auto incoming_signal_a = signals[0];
-                    const auto incoming_signal_b = signals[1];
-                    const auto incoming_signal_c = signals[2];
-
-                    if (lyt.is_maj(gate))
-                    {
-                        os << fmt::format(fgl::GATE, gate_id, "MAJ", "", coord.x, coord.y, coord.z);
-                    }
-                    else if (lyt.is_function(gate))
-                    {
-                        const auto node_fun = lyt.node_function(gate);
-
-                        os << fmt::format(fgl::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
-                    }
-                    os << fgl::OPEN_INCOMING;
-                    os << fmt::format(fgl::SIGNAL, incoming_signal_a.x, incoming_signal_a.y, incoming_signal_a.z);
-                    os << fmt::format(fgl::SIGNAL, incoming_signal_b.x, incoming_signal_b.y, incoming_signal_b.z);
-                    os << fmt::format(fgl::SIGNAL, incoming_signal_c.x, incoming_signal_c.y, incoming_signal_c.z);
-                    os << fgl::CLOSE_INCOMING;
-                }
-                else if (lyt.is_function(gate))
-                {
-                    const auto node_fun = lyt.node_function(gate);
-
-                    os << fmt::format(fgl::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
-
-                    os << fgl::OPEN_INCOMING;
-                    for (const auto& sig : signals)
-                    {
-                        os << fmt::format(fgl::SIGNAL, sig.x, sig.y, sig.z);
-                    }
-                    os << fgl::CLOSE_INCOMING;
-                }
-                os << fgl::CLOSE_GATE;
-                gate_id++;
+                os << fgl::CLOSE_INCOMING << fgl::CLOSE_GATE;
                 progress.advance();
             });
 
@@ -376,7 +274,7 @@ class write_fgl_layout_impl
     /**
      * The layout to be written.
      */
-    Lyt lyt;
+    const Lyt& lyt;
     /**
      * The output stream to which the gate-level layout is written.
      */
@@ -388,7 +286,13 @@ class write_fgl_layout_impl
 }  // namespace detail
 
 /**
- * Writes an FGL layout to a file.
+ * Writes a finished layout in FGL version 2 with extent counts and declared interface order.
+ *
+ * Version 2 stores width, height, and layer counts, explicit PI/PO order, and indexed source references.
+ * The file includes every placed object, including complete dangling cones. Clock overrides and synchronization
+ * elements and manual coordinate and directed-connection obstructions remain sparse. The format supports the standard
+ * named clocking schemes and their overrides. Names preserve XML whitespace and exclude illegal XML 1.0 controls.
+ * Validation finishes before the output stream changes.
  *
  * This overload uses an output stream to write into.
  *
@@ -396,7 +300,8 @@ class write_fgl_layout_impl
  * @param lyt The layout to be written.
  * @param on_progress Receives completed serialization work.
  * @param os The output stream to write into.
- * @throws std::invalid_argument If a node is unplaced or placed on a tile with a negative coordinate.
+ * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
+ * contains illegal XML text controls.
  */
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
@@ -408,7 +313,7 @@ void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback
     p.run();
 }
 /**
- * Writes an FGL layout to a file.
+ * Writes a finished layout in FGL version 2 with extent counts and declared interface order.
  *
  * This overload uses a file name to create and write into.
  *
@@ -416,7 +321,8 @@ void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback
  * @param lyt The layout to be written.
  * @param on_progress Receives completed serialization work.
  * @param filename The file name to create and write into. Should preferably use the .fgl extension.
- * @throws std::invalid_argument If a node is unplaced or placed on a tile with a negative coordinate.
+ * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
+ * contains illegal XML text controls.
  */
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})

@@ -20,6 +20,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
@@ -32,6 +33,7 @@
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
+#include <lorina/common.hpp>
 #include <lorina/verilog.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -43,14 +45,17 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/depth_view.hpp>
 
-#include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::sidb::generators;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
@@ -64,7 +69,9 @@ using namespace fiction::synthesis;
 // J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2024
 // (https://ieeexplore.ieee.org/abstract/document/10628962).
 
-int main()  // NOLINT
+/** @brief Run the published circuit-design experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     using gate_lyt = hex_gate_clk_lyt;
 
@@ -111,7 +118,7 @@ int main()  // NOLINT
             }
         });
 
-    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {11, 30}};
+    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {12, 31}};
 
     experiments::experiment<std::string, double, uint64_t, bool, uint64_t> sidb_circuits_with_defects{
         "sidb_circuits_with_defects", "benchmark", "runtime", "number of aspect ratios", "equivalent", "#SiDBs"};
@@ -127,9 +134,12 @@ int main()  // NOLINT
         fmt::print("[attempts] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        [[maybe_unused]] const auto read_verilog_result =
+        const auto read_verilog_result =
             lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
-        assert(read_verilog_result == lorina::return_code::success);
+        if (read_verilog_result != lorina::return_code::success)
+        {
+            throw std::runtime_error{"Failed to read Verilog benchmark."};
+        }
 
         // compute depth
         const mockturtle::depth_view depth_xag{xag};
@@ -180,7 +190,8 @@ int main()  // NOLINT
                 continue;
             }
 
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *st.gate_layout);
+            const auto miter =
+                mockturtle::miter<mockturtle::klut_network>(mapped_network, extract_layout_network(*st.gate_layout));
 
             if (!miter.has_value())
             {
@@ -211,13 +222,21 @@ int main()  // NOLINT
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
 
 #else  // FICTION_Z3_SOLVER
 
 #include <cstdlib>
 #include <iostream>
 
-int main()  // NOLINT
+/** @brief Report the unavailable Z3 solver. */
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
 

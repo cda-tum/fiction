@@ -22,6 +22,7 @@
 #include <fiction/traits.hpp>
 
 #include <cstdint>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -57,11 +58,12 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
      * @note All functions had to be redefined, because in the regular C++ version, this layout extends a specific
      * hexagonal layout, which we do not expose in pyfiction.
      */
-    py::class_<Lyt>(m, name, DOC(fiction_shifted_cartesian_layout_overridden))
+    py::class_<Lyt>(m, name, SHIFTED_CARTESIAN_LAYOUT_DOC)
         .def(py::init<fiction::layouts::arrangement>(), py::arg("arrangement"),
-             DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
-        .def(py::init<fiction::layouts::arrangement, const fiction::aspect_ratio<Lyt>&>(), py::arg("arrangement"),
-             py::arg("dimension"), DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout))
+             extent_doc(DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout)).c_str())
+        .def(py::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), py::arg("arrangement"),
+             py::arg("extent"),
+             extent_doc(DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout)).c_str())
         .def(
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
@@ -70,16 +72,26 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             { return layout.coord(coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, py::arg("x"),
             py::arg("y"), py::arg("z") = 0l, DOC(fiction_layouts_cartesian_layout_coord))
         .def(
-            "x", [](const Lyt& lyt) { return lyt.x(); }, DOC(fiction_layouts_cartesian_layout_x))
+            "width", [](const Lyt& lyt) { return lyt.width(); }, "Returns the width count.")
         .def(
-            "y", [](const Lyt& lyt) { return lyt.y(); }, DOC(fiction_layouts_cartesian_layout_y))
+            "height", [](const Lyt& lyt) { return lyt.height(); }, "Returns the height count.")
         .def(
-            "z", [](const Lyt& lyt) { return lyt.z(); }, DOC(fiction_layouts_cartesian_layout_z))
+            "layers", [](const Lyt& lyt) { return lyt.layers(); }, "Returns the layers count.")
+        .def(
+            "get_extent", [](const Lyt& lyt) { return lyt.get_extent(); }, "Returns the layout extent.")
+        .def(
+            "last_coordinate", [](const Lyt& lyt) { return lyt.last_coordinate(); },
+            "Returns the last coordinate, or None for empty geometry.")
+        .def(
+            "contains_coordinate", [](const Lyt& lyt, const py_coordinate& c) { return lyt.contains_coordinate(c); },
+            py::arg("c"), "Tests the half-open geometry bounds.")
+        .def(
+            "volume", [](const Lyt& lyt) { return lyt.volume(); }, "Returns the checked volume in coordinates.")
         .def(
             "area", [](const Lyt& lyt) { return lyt.area(); }, DOC(fiction_layouts_cartesian_layout_area))
         .def(
-            "resize", [](Lyt& lyt, const py_coordinate& dimension) { lyt.resize(dimension); }, py::arg("dimension"),
-            DOC(fiction_layouts_cartesian_layout_resize))
+            "resize", [](Lyt& lyt, const py_extent& extent) { lyt.resize(extent); }, py::arg("extent"),
+            extent_doc(DOC(fiction_layouts_cartesian_layout_resize)).c_str())
         .def(
             "north", [](const Lyt& lyt, const py_coordinate& c) { return lyt.north(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_north))
@@ -204,24 +216,34 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
 
         .def(
             "coordinates",
-            [](const Lyt& lyt)
+            [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.area() * (static_cast<uint64_t>(lyt.z()) + 1u));
-                lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
+                if (!start && !stop)
+                {
+                    coords.reserve(lyt.volume());
+                }
+                lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); }, start, stop);
                 return coords;
             },
-            DOC(fiction_layouts_cartesian_layout_coordinates))
+            py::arg("start") = py::none(), py::arg("stop") = py::none(),
+            "Returns coordinates in z/y/x order from the inclusive start to the exclusive stop. None uses the frame "
+            "boundary.")
         .def(
             "ground_coordinates",
-            [](const Lyt& lyt)
+            [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
             {
                 std::vector<fiction::coordinate<Lyt>> coords{};
-                coords.reserve(lyt.area());
-                lyt.foreach_ground_coordinate([&coords](const auto& c) { coords.push_back(c); });
+                if (!start && !stop)
+                {
+                    coords.reserve(lyt.layers() == 0 ? 0 : lyt.area());
+                }
+                lyt.foreach_ground_coordinate([&coords](const auto& c) { coords.push_back(c); }, start, stop);
                 return coords;
             },
-            DOC(fiction_layouts_cartesian_layout_ground_coordinates))
+            py::arg("start") = py::none(), py::arg("stop") = py::none(),
+            "Returns layer-zero coordinates from the inclusive start to the exclusive stop. None uses the frame "
+            "boundary. Bounds outside layer zero raise ValueError.")
         .def(
             "adjacent_coordinates", [](const Lyt& lyt, const py_coordinate& c) { return lyt.adjacent_coordinates(c); },
             py::arg("c"), DOC(fiction_layouts_cartesian_layout_adjacent_coordinates))
@@ -229,6 +251,12 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             "adjacent_opposite_coordinates",
             [](const Lyt& lyt, const py_coordinate& c) { return lyt.adjacent_opposite_coordinates(c); }, py::arg("c"),
             DOC(fiction_layouts_cartesian_layout_adjacent_opposite_coordinates))
+
+        .def(
+            "__copy__", [](const Lyt& lyt) { return Lyt{lyt}; }, "Returns an independent geometry copy.")
+        .def(
+            "__deepcopy__", [](const Lyt& lyt, const py::dict&) { return Lyt{lyt}; }, py::arg("memo"),
+            "Returns an independent geometry copy.")
 
         .def(
             "__repr__",

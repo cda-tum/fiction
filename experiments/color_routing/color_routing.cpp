@@ -29,14 +29,17 @@
 #include <fiction/utils/graph/graph_coloring.hpp>
 #include <fiction/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
 
-#include <fmt/format.h>                      // output formatting
+#include <fmt/format.h>  // output formatting
+#include <lorina/common.hpp>
 #include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
-#include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -53,6 +56,7 @@ using color_routing_experiment =
                             uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, double, double, double, double,
                             bool>;
 
+// Shared statistics feed each placement, routing, and equivalence result row.
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
 static exact_physical_design_stats      exact_stats{};
 static orthogonal_physical_design_stats ortho_stats{};
@@ -60,6 +64,13 @@ static color_routing_stats              routing_stats{};
 static equivalence_checking_stats       equiv_stats{};
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
+/**
+ * @brief Read a Verilog benchmark into a logic network.
+ * @tparam Ntk Logic network type.
+ * @param name Benchmark name.
+ * @return Parsed logic network.
+ * @throws std::runtime_error If the benchmark cannot be parsed.
+ */
 template <typename Ntk>
 Ntk read_ntk(const std::string& name)
 {
@@ -67,13 +78,28 @@ Ntk read_ntk(const std::string& name)
 
     Ntk network{};
 
-    [[maybe_unused]] const auto read_verilog_result =
+    const auto read_verilog_result =
         lorina::read_verilog(fiction_experiments::benchmark_path(name), mockturtle::verilog_reader(network));
-    assert(read_verilog_result == lorina::return_code::success);
+    if (read_verilog_result != lorina::return_code::success)
+    {
+        throw std::runtime_error{"Failed to read Verilog benchmark."};
+    }
 
     return network;
 }
 
+/**
+ * @brief Reroute a layout and record its dimensions, timing, and equivalence.
+ * @tparam Ntk Logic network.
+ * @tparam GateLyt Gate layout.
+ * @tparam Stats Placement statistics.
+ * @param benchmark Benchmark name.
+ * @param ntk Source network.
+ * @param lyt Layout to route.
+ * @param routing_params Routing parameters.
+ * @param stats Placement statistics.
+ * @param exp Experiment table.
+ */
 template <typename Ntk, typename GateLyt, typename Stats>
 void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt,
                       const color_routing_params& routing_params, const Stats& stats, color_routing_experiment& exp)
@@ -97,10 +123,9 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
     }
 
     // log results
-    exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), lyt.get_clocking_scheme().name(),
-        static_cast<uint64_t>(lyt.x()) + 1, static_cast<uint64_t>(lyt.y()) + 1,
-        (static_cast<uint64_t>(lyt.x()) + 1) * (static_cast<uint64_t>(lyt.y()) + 1), lyt.num_gates(), lyt.num_wires(),
-        objectives.size(), routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
+    exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), lyt.get_clocking_scheme().name(), lyt.width(),
+        lyt.height(), lyt.area(), lyt.num_gates(), lyt.num_wires(), objectives.size(),
+        routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
         routing_stats.epg_stats.num_edges, mockturtle::to_seconds(stats.time_total),
         mockturtle::to_seconds(routing_stats.time_total), mockturtle::to_seconds(routing_stats.epg_stats.time_total),
         mockturtle::to_seconds(routing_stats.color_stats.time_total), equiv_stats.eq != eq_type::NO);
@@ -262,7 +287,9 @@ void ortho_mcs()
     }
 }
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     smt_sat_complete();
     ortho_sat_complete();
@@ -270,12 +297,20 @@ int main()  // NOLINT
 
     return EXIT_SUCCESS;
 }
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
 
 #else  // FICTION_Z3_SOLVER
 
 #include <iostream>
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
 {
     std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
 

@@ -26,17 +26,20 @@
 #include <fiction/verification/equivalence_checking.hpp>     // SAT-based equivalence checking
 
 #include <fmt/format.h>  // output formatting
+#include <lorina/common.hpp>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/mapper.hpp>   // technology mapping
 #include <mockturtle/io/genlib_reader.hpp>    // call-backs for the GENLIB format
 #include <mockturtle/utils/stopwatch.hpp>     // time measurements
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
 
-#include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -47,15 +50,23 @@ using namespace fiction::physical_design;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
+/**
+ * @brief Assigns clock zero to every tile in the declared frame.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout whose clock numbers are cleared.
+ * @throws std::bad_alloc If an override cannot be allocated.
+ */
 template <typename Lyt>
-void remove_clocking(Lyt& lyt) noexcept
+void remove_clocking(Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 
@@ -78,9 +89,11 @@ int main()  // NOLINT
 
     std::vector<mockturtle::gate> gates{};
 
-    [[maybe_unused]] const auto read_genlib_result =
-        lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
-    assert(read_genlib_result == lorina::return_code::success);
+    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
+    if (read_genlib_result != lorina::return_code::success)
+    {
+        throw std::runtime_error{"Failed to read GENLIB library."};
+    }
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for technology mapping
@@ -102,9 +115,9 @@ int main()  // NOLINT
         const auto original_layout = orthogonal<gate_lyt>(mapped_network);
 
         // obtain layout characteristics
-        const auto width  = static_cast<uint64_t>(original_layout.x()) + 1;
-        const auto height = static_cast<uint64_t>(original_layout.y()) + 1;
-        const auto area   = width * height;
+        const auto width  = original_layout.width();
+        const auto height = original_layout.height();
+        const auto area   = original_layout.area();
 
         // deep-copy the original layout
         auto newly_clocked_layout = original_layout.clone();
@@ -131,4 +144,16 @@ int main()  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
+catch (...)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed with an unknown exception\n", stderr));
+    return EXIT_FAILURE;
 }

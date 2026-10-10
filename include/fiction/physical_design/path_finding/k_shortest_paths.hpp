@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <stdexcept>
 
 namespace fiction::physical_design::path_finding
 {
@@ -70,13 +71,12 @@ class yen_k_shortest_paths_impl
      *
      * @return A collection of up to k shortest paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run() noexcept
+    [[nodiscard]] path_collection<Path> run()
     {
-        assert(objective.source.is_valid() && objective.target.is_valid() &&
-               "Neither source nor target coordinate can be dead");
-
-        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
-               "Both source and target coordinate have to be within the layout bounds");
+        if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
+        {
+            throw std::invalid_argument("Routing endpoints must lie within the layout extent");
+        }
 
         // if there was no path to begin with, abort
         if (k_shortest_paths.back().empty())
@@ -196,14 +196,14 @@ class yen_k_shortest_paths_impl
      * @param p Path whose costs are to be calculated.
      * @return Costs of path p.
      */
-    static std::size_t path_cost(const Path& p) noexcept
+    static std::size_t path_cost(const Path& p)
     {
         return p.size();
     }
     /**
      * Resets all temporary obstructions to the caller's obstructions.
      */
-    void reset_temporary_obstructions() noexcept
+    void reset_temporary_obstructions()
     {
         // copying costs O(|caller obstructions|) per spur node; undo only the spur's own marks if that ever dominates
         search_obstructions = initial_obstructions;
@@ -257,10 +257,9 @@ class yen_k_shortest_paths_impl
  * `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                                                         const uint32_t                     k,
-                                                         const yen_k_shortest_paths_params& params       = {},
-                                                         const layouts::obstructions&       obstructions = {}) noexcept
+[[nodiscard]] path_collection<Path>
+yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective, const uint32_t k,
+                     const yen_k_shortest_paths_params& params = {}, const layouts::obstructions& obstructions = {})
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 

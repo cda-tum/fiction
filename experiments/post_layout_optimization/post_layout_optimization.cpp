@@ -31,7 +31,9 @@
 #include <mockturtle/utils/stopwatch.hpp>  // runtime measurements
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
 #include <string>
 
@@ -55,7 +57,9 @@ Ntk read_ntk(const std::string& name)
     return *nets.front();
 }
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
 
@@ -102,9 +106,11 @@ int main()  // NOLINT
         // calculate bounding box
         const auto bounding_box_before_optimization = bounding_box_2d(gate_level_layout);
 
-        const auto width_before_optimization = static_cast<uint64_t>(bounding_box_before_optimization.get_x_size()) + 1;
-        const auto height_before_optimization =
-            static_cast<uint64_t>(bounding_box_before_optimization.get_y_size()) + 1;
+        /** @brief Number of occupied bounding columns before optimization. */
+        const auto width_before_optimization = bounding_box_before_optimization.get_x_size();
+        /** @brief Number of occupied bounding rows before optimization. */
+        const auto height_before_optimization = bounding_box_before_optimization.get_y_size();
+        /** @brief Occupied bounding area before optimization. */
         const auto area_before_optimization = width_before_optimization * height_before_optimization;
 
         // perform post-layout optimization
@@ -127,9 +133,12 @@ int main()  // NOLINT
         // calculate bounding box
         const auto bounding_box_after_optimization = bounding_box_2d(gate_level_layout);
 
-        const auto width_after_optimization  = static_cast<uint64_t>(bounding_box_after_optimization.get_x_size()) + 1;
-        const auto height_after_optimization = static_cast<uint64_t>(bounding_box_after_optimization.get_y_size()) + 1;
-        const auto area_after_optimization   = width_after_optimization * height_after_optimization;
+        /** @brief Number of occupied bounding columns after optimization. */
+        const auto width_after_optimization = bounding_box_after_optimization.get_x_size();
+        /** @brief Number of occupied bounding rows after optimization. */
+        const auto height_after_optimization = bounding_box_after_optimization.get_y_size();
+        /** @brief Occupied bounding area after optimization. */
+        const auto area_after_optimization = width_after_optimization * height_after_optimization;
 
         const float improv = 100 * static_cast<float>((area_before_optimization - area_after_optimization)) /
                              static_cast<float>(area_before_optimization);
@@ -147,4 +156,11 @@ int main()  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

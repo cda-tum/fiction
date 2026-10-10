@@ -31,7 +31,9 @@ namespace fiction::detail
  * @tparam Writer Callable accepting an output stream.
  * @param filename Destination file.
  * @param writer Serialization callback.
- * @throws std::ios_base::failure If creating, writing, closing, or replacing the file fails.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the file fails, or the serialization
+ * callback raises std::filesystem::filesystem_error.
+ * @throws Any other exception raised by the serialization callback.
  */
 template <typename Writer>
 void atomic_write(const std::string_view filename, const Writer& writer)
@@ -78,6 +80,7 @@ try
     catch (...)
     {
         std::error_code ignored{};
+        std::filesystem::permissions(directory / destination.filename(), std::filesystem::perms::owner_all, ignored);
         std::filesystem::remove_all(directory, ignored);
         throw;
     }

@@ -27,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
   - Long-running CLI commands show responsive progress. Counted phases use real bars; searches show
-    candidate dimensions on one aggregate row. Quiet mode and redirected output suppress displays.
+    candidate extents on one aggregate row. Quiet mode and redirected output suppress displays.
 
 - Code quality:
 
@@ -108,8 +108,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     signatures of the bindings. The package declares the `Typing :: Typed` classifier.
   - Coordinate stubs accept two- and three-element tuples. Domain iterators and simulation
     parameter dictionaries preserve their element types.
-  - `bdl_wire.port_direction` exposes wire directions and I/O flags; `reserve_input_nodes`
-    returns a Python dictionary of source nodes and reserved layout nodes.
+  - `bdl_wire.port_direction` exposes wire directions and I/O flags.
 
 - Tooling:
 
@@ -125,6 +124,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
     `&a_star_distance<Lyt, Dist>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
+  - QCA ONE via optimization now visits occupied crossing cells instead of scanning the full frame.
   - Avoid redundant progress-callback copies in algorithms and layout writers.
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
   - Avoid helper threads for single-worker sampling and contour exploration.
@@ -202,6 +202,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Gate-level layouts now keep large-arity input storage outside the common object record.
+  - Gate-level layouts now use `create_gate`, `object_function`, `move_object`, and `foreach_object`.
+    Layout assignment printers use object terminology; update callers to these names.
+  - **Breaking:** Gate-level layouts now store placed objects with generation-checked IDs and typed ports. Replace tile-valued signals with object lookup and explicit input connections; copies are independent.
+  - **Breaking:** Layouts expose their frame through `get_extent()` in C++ and Python; Python constructors, `resize`, `area`, and `volume` use the `extent` keyword. Extent values use `ex` rather than `ar`.
+  - **Breaking:** Layout frames now use width, height, and layer counts. Replace maximum coordinates with extent counts; missing neighbors and empty bounds return optional values.
   - **Breaking:** Gate-level layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
   - **Breaking:** QCA, molQCA, and iNML have dedicated layout types, `qca::layout`, `mol_qca::layout`, and
     `inml::layout`, which replace `cell_level_layout`. Each carries only what its technology needs, and copies are
@@ -210,7 +216,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** QCA and iNML layouts address clock zones by tile: all cells of a tile, on every layer, share its
     clock number. `get_clock_zone` returns the clock zone of a cell.
   - Hexagonal clocking factories now reuse immutable cutouts, and tile-clock comparisons avoid copying schemes.
-  - `clocking::state::get_clocking_scheme` now returns a const reference; layout getters still return copies.
+  - `clocking::state::get_clocking_scheme` and gate-level layout getters now return a const reference.
   - Gate-level `assign_clock_number` now clocks every layer of a tile and ignores the `z` coordinate;
     `get_clock_number` returns the same clock number on all layers.
   - **Breaking:** `clocking::scheme` is now a non-template value type over signed `(x, y)` tile positions that can be
@@ -230,10 +236,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     argument instead of a template parameter, and `get_arrangement()` returns it.
   - **Breaking:** Coordinates are signed. `layouts::layout_base::coordinate` with three `int32_t` axes replaces
     `coords::offset` and `coords::cube`, and `cartesian_layout`, `hexagonal_layout`, and `shifted_cartesian_layout`
-    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. The default
-    coordinate is invalid, as is any coordinate whose x axis is `INT32_MIN`, and `is_valid()` replaces `is_dead()` on
-    coordinates. Layouts throw `std::invalid_argument` for extents below 0 or above 2^30 - 1, and
-    gate-level layouts throw `std::out_of_range` for tiles with x or y above 2^30 - 1 or z above 1.
+    derive from `layout_base` and are no longer templates. `coordinates.hpp` and `layouts::coords` are gone. Every
+    `int32_t` coordinate is valid, including `INT32_MIN`; absence uses optional values. Layout extents accept axis
+    counts from 0 through 2^31, and gate-level layouts support multiple layers.
   - **Breaking:** `graph_oriented_layout_design_params::tiles_to_skip_between_pis` is an `int32_t`, and
     `graph_oriented_layout_design` throws `std::invalid_argument` for values outside of [0, 2^20].
 
@@ -245,6 +250,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Python layout docstrings use `extent` for the extent argument.
+  - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
@@ -252,7 +259,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     bound symbol of their sections.
 
 - Experiments:
+  - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
+  - Gate-layout experiments use extent counts and extract logic networks for mockturtle algorithms. The reported dimensions and areas retain their definitions.
   - The Bestagon and hexagonalization experiments compute their unchanged area from the cell-grid extent.
   - Gate-layout experiments use direct capability headers and simpler status reporting.
   - The Bestagon, defect-aware, and on-the-fly experiments pass the even-row arrangement at runtime with unchanged results.
@@ -270,6 +279,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
+  - **Breaking:** FGL writers now emit version 2 with size counts, declared interface order, and numbered input connections. Readers also accept legacy maximum-coordinate sizes; writers reject incomplete or physically invalid layouts before writing.
 
 - **Breaking:** Restructured `include/fiction/` so that the directory a header lives in tells
   you what the header is about, and introduced nested namespaces mirroring that tree
@@ -420,13 +430,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     first argument. One class per family replaces the per-arrangement classes, and `exact` and `orthogonal` parameters
     expose `layout_arrangement`.
 
-  - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` and `offset_volume` become `area` and `volume`, in
-    `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor are gone. `coordinate()` has
-    `x`, `y`, and `z` equal to -2147483648 and `is_valid()` returns `False` for it. Axes must lie in [-2147483647,
-    2147483647]; `coordinate`, `coord`, and the axis setters raise `OverflowError` outside of it, and setting an axis of an invalid coordinate raises
-    `ValueError`. Negative or oversized
-    layout extents raise `ValueError`, and gate-level tiles outside of the signal range raise `IndexError`.
-    `stacked_cartesian_layout` is an alias of `cartesian_layout`.
+  - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` and `offset_volume` become `area_of` and
+    `volume_of`, in `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor
+    are gone. `stacked_cartesian_layout` is an alias of `cartesian_layout`.
+
+  - **Breaking:** `coordinate()` denotes the origin, and coordinates accept the full signed 32-bit range. Layout extents
+    use `Extent(width, height, layers)` counts. Missing neighbors and empty bounds return `None`; `is_valid()` and coordinate
+    sentinels are gone.
 
 ### Removed
 
@@ -443,6 +453,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
     `help --docs`.
+- Algorithms:
+
+  - **Breaking:** `reserve_input_nodes` is gone. Place each primary input with `place` or `create_pi` when its coordinate is known.
 - Code quality:
 
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
@@ -523,6 +536,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Transactional writes now remove read-only temporary files after failed replacement.
+  - Fanout substitution now separates repeated gate inputs into distinct routing branches.
+    The algorithm rejects degrees below two and a zero threshold.
+  - Fanout substitution now handles the full `uint32_t` range for degree and threshold.
+  - Fanout substitution now preserves logic when the destination elides buffer nodes.
+  - DOT drawing progress now reports frame areas beyond the unsigned 32-bit range.
+  - Gate-type counting now compiles for native gate layouts with MSVC.
+  - On-the-fly SiDB circuit design now rejects unsupported gate types before starting gate design.
+  - Random-coordinate sampling now uses independent inclusive bounds for each axis.
+  - Routing conflict graphs now detect overlaps after every path mutation and propagate allocation failures.
+  - Exact placement and GOLD now widen area calculations before multiplication.
+  - Layout optimization now accepts interior terminals and clears crossing obstructions when lowering wires.
+  - Name restoration now preserves unused inputs and gates that drive outputs.
   - Yen's algorithm now returns no paths for a zero limit and preserves valid alternatives at each spur node.
   - Path enumeration now reaches occupied crossing-layer targets under the same constraints as A*.
   - Critical-path analysis now handles long routed paths without overflowing the native stack.
@@ -585,6 +611,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Unreadable scripts report the cause and exit with status 2. Interrupted commands retain a log entry
     and leave the shell usable. Status text accounts for Unicode display widths.
 
+- Code quality:
+  - `find_first_two_of` now returns the end iterator when either range has fewer than two elements.
+
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
   - Docstring generation now loads the libclang development symlink on Ubuntu 26.04.
@@ -594,8 +623,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Cartesian, hexagonal, and gate-layout clocked neighbor visitors now invoke temporary and move-only callbacks
+    as lvalues.
+  - Gate-layout crossings now exclude primary input and output terminals.
+  - Python gate-layout constructors now raise `ValueError` for unknown clocking schemes.
   - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
-  - Gate layout geometry now retains its two-layer limit through shared coordinate aliases and base references.
   - Cell clock zones now use floor division for negative coordinates.
   - Cell layouts reject zero clock-zone dimensions in constructors and setters.
   - Gate layouts constructed from coordinate layouts initialize their logic functions.
@@ -617,6 +649,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB-to-cell-level conversion preserves bounds from converted cells.
 
 - Documentation:
+  - Gate-level layout editing examples now pass the object ID returned by `create_buf`.
+  - API documentation now resolves current declarations without duplicate enum entries.
   - The documentation session builds Python bindings with the installed Z3 dependency.
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Nanobind API documentation now keeps its custom class renderer with Sphinx's deferred registration.
@@ -625,6 +659,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB reader documentation now lists every overload without ambiguous signatures.
 
 - Experiments:
+  - Layout experiments now reject failed GENLIB and Verilog reads in Release builds.
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
   - SiDB sweep initializers now name their fields, and pruning helpers propagate allocation failures.
     Experiment parameters, output columns, and calculations remain unchanged.
@@ -642,6 +677,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - BLIF network readers now accept empty and whitespace-only lines without aborting.
+  - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
+  - Gate-layout DOT output now preserves signed coordinate IDs and quoted terminal names.
+  - FGL version 2 now preserves manual obstructions and XML whitespace in names. Readers reject unfinished or physically invalid layouts; writers reject illegal XML control characters before changing output.
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
   - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
   - QCA SVG output now preserves synchronized cell positions, draws mixed tiles once, and includes partial boundary tiles.
@@ -663,6 +702,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
+    Mutable extents are unhashable.
+  - `LayoutInputPort` now hashes by object identity and input index for set and dictionary keys.
+  - Gate-layout editing methods expose their API contracts in Python docstrings.
+  - Python port collections now reuse input counts and reserve sink storage.
+  - Progress parameters now release unreachable callback cycles owned by parameter values.
+    Borrowed nested parameters preserve callbacks in live owners.
+  - `copy.copy` and `copy.deepcopy` now preserve gate objects and independently copy layout metadata. Layout simulation extracts ordered logic and rejects incomplete output cones.
   - Linux extensions hide C++ implementation symbols while preserving nanobind's shared exception ABI.
   - `physically_valid_parameters` and `operational_domain_ratio` now release the GIL so
     worker progress callbacks can execute without deadlocking.

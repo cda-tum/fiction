@@ -824,12 +824,12 @@ class graph_coloring_impl
                engine == graph_coloring_engine::LMXRLF || engine == graph_coloring_engine::TABUCOL;
     }
     /**
-     * Converts the given node ID of a Brian Crites graph to the corresponding one used in Graph.
+     * @brief Converts the given node ID of a Brian Crites graph to the corresponding one used in Graph.
      *
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in Graph.
      */
-    [[nodiscard]] typename Graph::vertex_id_type convert_node_index(const std::string& node) const noexcept
+    [[nodiscard]] static typename Graph::vertex_id_type convert_node_index(const std::string& node) noexcept
     {
         if constexpr (std::is_same_v<typename Graph::vertex_id_type, std::string>)
         {
@@ -841,21 +841,22 @@ class graph_coloring_impl
         }
     }
     /**
-     * Converts the given node ID of a Graph to the corresponding one used in Brian Crites' graph structure. This
+     * @brief Converts the given node ID of a Graph to the corresponding one used in Brian Crites' graph structure. This
      * function is automatically removed from overload resolution if both graphs use std::string because it would clash
      * with the function above.
      *
+     * @tparam GraphProxy Graph type used to distinguish the vertex ID overload.
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in the Brian Crites graph.
      */
     template <typename GraphProxy = Graph>
         requires(!std::same_as<typename GraphProxy::vertex_id_type, std::string>)
-    [[nodiscard]] std::string convert_node_index(const typename Graph::vertex_id_type& node) const noexcept
+    [[nodiscard]] static std::string convert_node_index(const typename Graph::vertex_id_type& node) noexcept
     {
         return std::to_string(node);
     }
     /**
-     * Translates the given graph to a equivalent Brian Crites graph data structure.
+     * @brief Translates the given graph to an equivalent Brian Crites graph data structure.
      *
      * @param g Graph to translate.
      * @return Translated graph.
@@ -866,7 +867,7 @@ class graph_coloring_impl
 
         // iterate over all vertices of the original graph
         std::ranges::for_each(g.begin_vertices(), g.end_vertices(),
-                              [this, &g, &translated_graph](const auto& v_pair)
+                              [&g, &translated_graph](const auto& v_pair)
                               {
                                   const auto v1 = v_pair.first;
 
@@ -880,7 +881,7 @@ class graph_coloring_impl
                                   {
                                       // iterate over all vertices v2 adjacent to v1
                                       std::ranges::for_each(g.begin_adjacent(v1), g.end_adjacent(v1),
-                                                            [this, &translated_graph, &v1](const auto& v2)
+                                                            [&translated_graph, &v1](const auto& v2)
                                                             {
                                                                 // add an edge in the brian_crites_graph that leads from
                                                                 // v1 to v2
@@ -896,7 +897,7 @@ class graph_coloring_impl
         return translated_graph;
     }
     /**
-     * Translates the given Brian Crites coloring to the corresponding vertex coloring used here.
+     * @brief Translates the given Brian Crites coloring to the corresponding vertex coloring used here.
      *
      * @param bc_coloring Brian Crites coloring to translate.
      * @return Translated vertex coloring.
@@ -910,8 +911,7 @@ class graph_coloring_impl
         std::vector<Color> color_frequency(pst.chromatic_number, Color{0});
 
         std::ranges::for_each(bc_coloring,
-                              [this,  // NOLINT(clang-diagnostic-unused-lambda-capture): false positive
-                               &v_coloring, &color_frequency](const auto& c_pair)
+                              [&v_coloring, &color_frequency](const auto& c_pair)
                               {
                                   // convert color
                                   v_coloring[convert_node_index(c_pair.first)] = static_cast<Color>(c_pair.second);

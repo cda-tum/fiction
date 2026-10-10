@@ -25,13 +25,23 @@
 #include <fiction/physical_design/path_finding/distance_map.hpp>
 
 #include <cstdint>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design::path_finding;
 
+/**
+ * @brief Sums distances between every pair of coordinates in the layout frame.
+ * @tparam Lyt Coordinate layout type.
+ * @tparam Dist Distance type.
+ * @param layout Layout whose coordinates are measured.
+ * @param dist_func Distance calculation.
+ * @return Sum of the measured distances.
+ * @throws std::exception Propagates exceptions from the distance calculation.
+ */
 template <typename Lyt, typename Dist>
-Dist sum_distances(const Lyt& layout, const distance_functor<Lyt, Dist>& dist_func) noexcept
+Dist sum_distances(const Lyt& layout, const distance_functor<Lyt, Dist>& dist_func)
 {
     Dist sum = 0;
     layout.foreach_coordinate(
@@ -49,7 +59,9 @@ TEST_CASE("Benchmark distance maps", "[benchmark]")
     using clk_lyt = gate_level_layout<cartesian_layout>;
     using dist    = uint64_t;
 
-    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use()};
+    /** @brief Six-by-six frame used by the distance measurements. */
+    const clk_lyt layout{clk_lyt::extent{6, 6}, clocking::use()};
+    CHECK(layout.area() == 36);
 
     BENCHMARK("without distance maps")
     {
@@ -78,7 +90,9 @@ TEST_CASE("Benchmark smart distance cache", "[benchmark]")
     using clk_lyt = gate_level_layout<cartesian_layout>;
     using dist    = uint64_t;
 
-    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use()};
+    /** @brief Six-by-six frame used by the distance measurements. */
+    const clk_lyt layout{clk_lyt::extent{6, 6}, clocking::use()};
+    CHECK(layout.area() == 36);
 
     BENCHMARK("smart_distance_cache (cold start)")
     {
@@ -97,4 +111,14 @@ TEST_CASE("Benchmark smart distance cache", "[benchmark]")
     {
         return sum_distances(layout, dist_map_func);
     };
+}
+
+TEST_CASE("Distance summation propagates distance-functor exceptions", "[distance-map]")
+{
+    /** @brief Single-coordinate frame whose distance call must propagate exceptions. */
+    const cartesian_layout layout{{1, 1}};
+    /** @brief Distance function that rejects every calculation. */
+    const distance_functor<cartesian_layout, uint64_t> throwing_distance{
+        [](const auto&, const auto&, const auto&) -> uint64_t { throw std::invalid_argument{"Distance unavailable"}; }};
+    CHECK_THROWS_AS(sum_distances(layout, throwing_distance), std::invalid_argument);
 }

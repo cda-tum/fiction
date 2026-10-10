@@ -255,7 +255,7 @@ def describe_gate_layout(layout: GateLayout, *, timing: bool = False) -> dict[st
         "name": element_name(layout),
         "topology": topology_name(layout),
         "clocking": layout.get_clocking_scheme_name(),
-        "size": {"x": layout.x() + 1, "y": layout.y() + 1, "area": layout.area()},
+        "size": {"x": layout.width(), "y": layout.height(), "area": layout.area()},
         "inputs": layout.num_pis(),
         "outputs": layout.num_pos(),
         "gates": layout.num_gates(),
@@ -297,7 +297,7 @@ def describe_cell_layout(entry: CellEntry) -> dict[str, object]:
                 "y": row_of(south_east) - row_of(north_west) + 1,
             }
     else:
-        description["size"] = {"x": layout.x() + 1, "y": layout.y() + 1, "z": layout.z() + 1, "area": layout.area()}
+        description["size"] = {"x": layout.width(), "y": layout.height(), "z": layout.layers(), "area": layout.area()}
         if not isinstance(layout, mol_qca_layout):
             description["tile"] = {"x": layout.get_tile_size_x(), "y": layout.get_tile_size_y()}
     description["inputs"] = layout.num_pis()

@@ -24,11 +24,10 @@
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
-#include <mockturtle/traits.hpp>
 #include <phmap.h>
 
-#include <iterator>
 #include <stdexcept>
+#include <vector>
 
 namespace fiction::qca
 {
@@ -60,59 +59,51 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
-        const auto n = lyt.get_node(t);
+        const auto object = lyt.find_object(t);
+        if (!object)
+        {
+            throw fcn::unsupported_gate_type_exception(t);
+        }
+        const auto n = *object;
         const auto p = determine_port_routing(lyt, t);
 
         try
         {
-            if constexpr (fiction::has_is_fanout_v<GateLyt>)
+            if (lyt.is_fanout(n))
             {
-                if (lyt.is_fanout(n))
+                if (p.out.size() == 2)
                 {
-                    if (lyt.fanout_size(n) == 2)
-                    {
-                        return FANOUT_MAP.at(p);
-                    }
-                    if (lyt.fanout_size(n) == 3)
-                    {
-                        return FAN_OUT_1_3;
-                    }
+                    return FANOUT_MAP.at(p);
+                }
+                if (p.out.size() == 3)
+                {
+                    return FAN_OUT_1_3;
                 }
             }
-            if constexpr (fiction::has_is_buf_v<GateLyt>)
+
+            if (lyt.is_buf(n))
             {
-                if (lyt.is_buf(n))
-                {
-                    return WIRE_MAP.at(p);
-                }
+                return WIRE_MAP.at(p);
             }
-            if constexpr (fiction::has_is_inv_v<GateLyt>)
+
+            if (lyt.is_inv(n))
             {
-                if (lyt.is_inv(n))
-                {
-                    return INVERTER_MAP.at(p);
-                }
+                return INVERTER_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_and_v<GateLyt>)
+
+            if (lyt.is_and(n))
             {
-                if (lyt.is_and(n))
-                {
-                    return CONJUNCTION_MAP.at(p);
-                }
+                return CONJUNCTION_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_or_v<GateLyt>)
+
+            if (lyt.is_or(n))
             {
-                if (lyt.is_or(n))
-                {
-                    return DISJUNCTION_MAP.at(p);
-                }
+                return DISJUNCTION_MAP.at(p);
             }
-            if constexpr (mockturtle::has_is_maj_v<GateLyt>)
+
+            if (lyt.is_maj(n))
             {
-                if (lyt.is_maj(n))
-                {
-                    return MAJORITY;
-                }
+                return MAJORITY;
             }
         }
         catch (const std::out_of_range&)
@@ -124,39 +115,47 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
     }
     /**
      * Post-layout optimization that turns the ends of crossing wires into vias: a crossing-layer cell with at most one
-     * neighbor gets the via mode, and a via cell is added below it on the ground layer.
+     * neighbor gets the via mode, and a via cell is added below it on the ground layer. The optimization visits
+     * occupied cells inside the frame and ignores empty positions.
      *
      * @param lyt The QCA layout that has been created via application of `set_up_gate`.
      */
     static void post_layout_optimization(qca::layout& lyt)
     {
-        lyt.foreach_cell_position(
-            [&lyt](const auto& c)
+        /** Occupied crossing cells inside the frame, stable while ground vias are inserted. */
+        std::vector<qca::layout::cell> crossing_cells{};
+        lyt.foreach_cell(
+            [&lyt, &crossing_cells](const auto& c)
             {
-                if (lyt.is_crossing_layer(c))
+                if (lyt.contains_coordinate(c) && lyt.is_crossing_layer(c))
                 {
-                    if (!lyt.is_empty_cell(c))
-                    {
-                        // gather adjacent cell positions
-                        auto adjacent_cells = lyt.adjacent_coordinates(c);
-                        // remove all empty cells
-                        std::erase_if(adjacent_cells, [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); });
-                        // if there is at most one neighbor left
-                        if (std::ranges::distance(adjacent_cells) <= 1)
-                        {
-                            // change cell mode to via
-                            lyt.assign_cell_mode(c, qca::cell_mode::VERTICAL);
-                            // create a corresponding via ground cell
-                            const qca::layout::cell ground_via_cell{c.x, c.y, 0};
-                            lyt.assign_cell_type(ground_via_cell, qca::cell_type::NORMAL);
-                            lyt.assign_cell_mode(ground_via_cell, qca::cell_mode::VERTICAL);
-                        }
-                    }
+                    crossing_cells.push_back(c);
                 }
             });
+        for (const auto& c : crossing_cells)
+        {
+            /** Occupied neighbors in the crossing layer. */
+            auto adjacent_cells = lyt.adjacent_coordinates(c);
+            std::erase_if(adjacent_cells, [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); });
+            if (adjacent_cells.size() <= 1)
+            {
+                lyt.assign_cell_mode(c, qca::cell_mode::VERTICAL);
+                /** Ground coordinate beneath the crossing endpoint. */
+                const qca::layout::cell ground_via_cell{c.x, c.y, 0};
+                lyt.assign_cell_type(ground_via_cell, qca::cell_type::NORMAL);
+                lyt.assign_cell_mode(ground_via_cell, qca::cell_mode::VERTICAL);
+            }
+        }
     }
 
   private:
+    /**
+     * Routes the physical connector ports of an occupied tile.
+     * @tparam Lyt Gate-level layout type.
+     * @param lyt Layout.
+     * @param t Occupied tile.
+     * @return Physical connector ports.
+     */
     template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
@@ -199,7 +198,7 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
         }
 
         // has no connector ports
-        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
+        if (const auto n = lyt.find_object(t); n && (!lyt.is_wire(*n) && !lyt.is_inv(*n)))
         {
             if (lyt.has_no_incoming_signal(t))
             {

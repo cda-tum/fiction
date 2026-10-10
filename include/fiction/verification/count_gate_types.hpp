@@ -19,6 +19,7 @@
 
 #include "fiction/traits.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
@@ -28,13 +29,58 @@
 namespace fiction::verification
 {
 
+/** @brief Counts of logic gate types, excluding primary terminals. */
 struct count_gate_types_stats
 {
 
-    uint64_t num_fanout{0}, num_buf{0}, num_inv{0}, num_and2{0}, num_or2{0}, num_nand2{0}, num_nor2{0}, num_xor2{0},
-        num_xnor2{0}, num_lt2{0}, num_gt2{0}, num_le2{0}, num_ge2{0}, num_and3{0}, num_xor_and{0}, num_or_and{0},
-        num_onehot{0}, num_maj3{0}, num_gamble{0}, num_dot{0}, num_mux{0}, num_and_xor{0}, num_other{0};
+    /** @brief Number of fanout objects. */
+    uint64_t num_fanout{};
+    /** @brief Number of buf objects. */
+    uint64_t num_buf{};
+    /** @brief Number of inv objects. */
+    uint64_t num_inv{};
+    /** @brief Number of and2 objects. */
+    uint64_t num_and2{};
+    /** @brief Number of or2 objects. */
+    uint64_t num_or2{};
+    /** @brief Number of nand2 objects. */
+    uint64_t num_nand2{};
+    /** @brief Number of nor2 objects. */
+    uint64_t num_nor2{};
+    /** @brief Number of xor2 objects. */
+    uint64_t num_xor2{};
+    /** @brief Number of xnor2 objects. */
+    uint64_t num_xnor2{};
+    /** @brief Number of lt2 objects. */
+    uint64_t num_lt2{};
+    /** @brief Number of gt2 objects. */
+    uint64_t num_gt2{};
+    /** @brief Number of le2 objects. */
+    uint64_t num_le2{};
+    /** @brief Number of ge2 objects. */
+    uint64_t num_ge2{};
+    /** @brief Number of and3 objects. */
+    uint64_t num_and3{};
+    /** @brief Number of xor_and objects. */
+    uint64_t num_xor_and{};
+    /** @brief Number of or_and objects. */
+    uint64_t num_or_and{};
+    /** @brief Number of onehot objects. */
+    uint64_t num_onehot{};
+    /** @brief Number of maj3 objects. */
+    uint64_t num_maj3{};
+    /** @brief Number of gamble objects. */
+    uint64_t num_gamble{};
+    /** @brief Number of dot objects. */
+    uint64_t num_dot{};
+    /** @brief Number of mux objects. */
+    uint64_t num_mux{};
+    /** @brief Number of and_xor objects. */
+    uint64_t num_and_xor{};
+    /** @brief Number of other objects. */
+    uint64_t num_other{};
 
+    /** @brief Prints gate counts. @param out Output stream. @param detailed Whether to print every gate type. */
     void report(std::ostream& out = std::cout, const bool detailed = false) const
     {
         out << fmt::format("[i] AND2   = {}\n", num_and2);
@@ -83,213 +129,238 @@ struct count_gate_types_stats
 namespace detail
 {
 
+/** @brief Counts supported gate predicates through public node or object iteration. @tparam Ntk Network or layout. */
 template <typename Ntk>
 class count_gate_types_impl
 {
   public:
+    /** @brief Stores the operand and statistics without copying. @param src Network or layout. @param st Counts. */
     count_gate_types_impl(const Ntk& src, count_gate_types_stats& st) : ntk{src}, pst{st} {}
 
+    /** @brief Classifies every logic gate or wire object. */
     void run()
     {
-        ntk.foreach_node(
-            [&, this](const auto& n)
-            {
-                if (!ntk.is_constant(n))
-                {
-                    if constexpr (fiction::has_is_fanout_v<Ntk>)
-                    {
-                        if (ntk.is_fanout(n))
-                        {
-                            ++pst.num_fanout;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_buf_v<Ntk>)
-                    {
-                        if (ntk.is_buf(n))
-                        {
-                            ++pst.num_buf;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_inv_v<Ntk>)
-                    {
-                        if (ntk.is_inv(n))
-                        {
-                            ++pst.num_inv;
-                            return true;
-                        }
-                    }
-                    if constexpr (mockturtle::has_is_and_v<Ntk>)
-                    {
-                        if (ntk.is_and(n))
-                        {
-                            ++pst.num_and2;
-                            return true;
-                        }
-                    }
-                    if constexpr (mockturtle::has_is_or_v<Ntk>)
-                    {
-                        if (ntk.is_or(n))
-                        {
-                            ++pst.num_or2;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_nand_v<Ntk>)
-                    {
-                        if (ntk.is_nand(n))
-                        {
-                            ++pst.num_nand2;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_nor_v<Ntk>)
-                    {
-                        if (ntk.is_nor(n))
-                        {
-                            ++pst.num_nor2;
-                            return true;
-                        }
-                    }
-                    if constexpr (mockturtle::has_is_xor_v<Ntk>)
-                    {
-                        if (ntk.is_xor(n))
-                        {
-                            ++pst.num_xor2;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_xnor_v<Ntk>)
-                    {
-                        if (ntk.is_xnor(n))
-                        {
-                            ++pst.num_xnor2;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_lt_v<Ntk>)
-                    {
-                        if (ntk.is_lt(n))
-                        {
-                            ++pst.num_lt2;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_gt_v<Ntk>)
-                    {
-                        if (ntk.is_gt(n))
-                        {
-                            ++pst.num_gt2;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_le_v<Ntk>)
-                    {
-                        if (ntk.is_le(n))
-                        {
-                            ++pst.num_le2;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_ge_v<Ntk>)
-                    {
-                        if (ntk.is_ge(n))
-                        {
-                            ++pst.num_ge2;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_and3_v<Ntk>)
-                    {
-                        if (ntk.is_and3(n))
-                        {
-                            ++pst.num_and3;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_xor_and_v<Ntk>)
-                    {
-                        if (ntk.is_xor_and(n))
-                        {
-                            ++pst.num_xor_and;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_or_and_v<Ntk>)
-                    {
-                        if (ntk.is_or_and(n))
-                        {
-                            ++pst.num_or_and;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_onehot_v<Ntk>)
-                    {
-                        if (ntk.is_onehot(n))
-                        {
-                            ++pst.num_onehot;
-                            return true;
-                        }
-                    }
-                    if constexpr (mockturtle::has_is_maj_v<Ntk>)
-                    {
-                        if (ntk.is_maj(n))
-                        {
-                            ++pst.num_maj3;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_gamble_v<Ntk>)
-                    {
-                        if (ntk.is_gamble(n))
-                        {
-                            ++pst.num_gamble;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_dot_v<Ntk>)
-                    {
-                        if (ntk.is_dot(n))
-                        {
-                            ++pst.num_dot;
-                            return true;
-                        }
-                    }
-                    if constexpr (mockturtle::has_is_ite_v<Ntk>)
-                    {
-                        if (ntk.is_ite(n))
-                        {
-                            ++pst.num_mux;
-                            return true;
-                        }
-                    }
-                    if constexpr (fiction::has_is_and_xor_v<Ntk>)
-                    {
-                        if (ntk.is_and_xor(n))
-                        {
-                            ++pst.num_and_xor;
-                            return true;
-                        }
-                    }
-                    // TODO more gate types go here
-
-                    // don't count PIs
-                    if (ntk.is_pi(n))
-                    {
-                        return true;
-                    }
-
-                    ++pst.num_other;
-                }
-
-                return true;
-            });
+        const auto count = [this](const auto& id) { return this->count_gate(id); };
+        if constexpr (is_gate_level_layout_v<Ntk>)
+        {
+            ntk.foreach_object(count);
+        }
+        else
+        {
+            ntk.foreach_node(count);
+        }
     }
 
   private:
-    Ntk ntk;
+    /**
+     * @brief Counts one gate or wire through the predicates its operand supports.
+     * @tparam Node Network node or native layout object identity.
+     * @param n Gate or wire to classify.
+     * @return `true` to continue iteration.
+     */
+    template <typename Node>
+    bool count_gate(const Node& n)
+    {
+        if (ntk.is_pi(n))
+        {
+            return true;
+        }
+        if constexpr (is_gate_level_layout_v<Ntk>)
+        {
+            if (ntk.is_po(n))
+            {
+                return true;
+            }
+        }
+        else if (ntk.is_constant(n))
+        {
+            return true;
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_fanout(node); })
+        {
+            if (ntk.is_fanout(n))
+            {
+                ++pst.num_fanout;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_buf(node); })
+        {
+            if (ntk.is_buf(n))
+            {
+                ++pst.num_buf;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_inv(node); })
+        {
+            if (ntk.is_inv(n))
+            {
+                ++pst.num_inv;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_and(node); })
+        {
+            if (ntk.is_and(n))
+            {
+                ++pst.num_and2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_or(node); })
+        {
+            if (ntk.is_or(n))
+            {
+                ++pst.num_or2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_nand(node); })
+        {
+            if (ntk.is_nand(n))
+            {
+                ++pst.num_nand2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_nor(node); })
+        {
+            if (ntk.is_nor(n))
+            {
+                ++pst.num_nor2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_xor(node); })
+        {
+            if (ntk.is_xor(n))
+            {
+                ++pst.num_xor2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_xnor(node); })
+        {
+            if (ntk.is_xnor(n))
+            {
+                ++pst.num_xnor2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_lt(node); })
+        {
+            if (ntk.is_lt(n))
+            {
+                ++pst.num_lt2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_gt(node); })
+        {
+            if (ntk.is_gt(n))
+            {
+                ++pst.num_gt2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_le(node); })
+        {
+            if (ntk.is_le(n))
+            {
+                ++pst.num_le2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_ge(node); })
+        {
+            if (ntk.is_ge(n))
+            {
+                ++pst.num_ge2;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_and3(node); })
+        {
+            if (ntk.is_and3(n))
+            {
+                ++pst.num_and3;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_xor_and(node); })
+        {
+            if (ntk.is_xor_and(n))
+            {
+                ++pst.num_xor_and;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_or_and(node); })
+        {
+            if (ntk.is_or_and(n))
+            {
+                ++pst.num_or_and;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_onehot(node); })
+        {
+            if (ntk.is_onehot(n))
+            {
+                ++pst.num_onehot;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_maj(node); })
+        {
+            if (ntk.is_maj(n))
+            {
+                ++pst.num_maj3;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_gamble(node); })
+        {
+            if (ntk.is_gamble(n))
+            {
+                ++pst.num_gamble;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_dot(node); })
+        {
+            if (ntk.is_dot(n))
+            {
+                ++pst.num_dot;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_ite(node); })
+        {
+            if (ntk.is_ite(n))
+            {
+                ++pst.num_mux;
+                return true;
+            }
+        }
+        if constexpr (requires(const Ntk& network, const Node& node) { network.is_and_xor(node); })
+        {
+            if (ntk.is_and_xor(n))
+            {
+                ++pst.num_and_xor;
+                return true;
+            }
+        }
+        ++pst.num_other;
 
+        return true;
+    }
+
+    /** @brief Operand whose gates are counted. */
+    const Ntk& ntk;
+
+    /** @brief Classification counts. */
     count_gate_types_stats& pst;
 };
 
@@ -297,7 +368,8 @@ class count_gate_types_impl
 
 /**
  * Gives a detailed listing of all gate types present in the provided network (or layout). This function can distinguish
- * most gate types available as atomic building blocks and can easily be extended to support more gate types. The given
+ * most gate types available as atomic building blocks. Primary terminals and network constants do not enter the counts.
+ * Placed wires count as fanout objects when they drive multiple inputs, or as buffers otherwise. The given
  * network (or layout) has to implement a function to test whether a node is of the respective gate type.
  *
  * @tparam Ntk Logic network (or layout) type.
@@ -307,9 +379,8 @@ class count_gate_types_impl
 template <typename Ntk>
 void count_gate_types(const Ntk& ntk, count_gate_types_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node function");
-    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function");
+    static_assert(mockturtle::is_network_type_v<Ntk> || is_gate_level_layout_v<Ntk>,
+                  "Ntk is not a network or gate layout");
 
     count_gate_types_stats        st{};
     detail::count_gate_types_impl p{ntk, st};

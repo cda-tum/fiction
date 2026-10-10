@@ -71,7 +71,7 @@ TEST_CASE("Normalize SVG whitespace without changing UTF-8 text", "[write-qca-la
 
 TEST_CASE("Generate QCA layout in simple SVG mode with constant cells", "[write-qca-layout-svg]")
 {
-    qca::layout layout{{1, 0}, "QCA constant cells"};
+    qca::layout layout{{2, 1}, "QCA constant cells"};
     layout.assign_cell_type({0, 0}, qca::cell_type::CONST_0);
     layout.assign_cell_type({1, 0}, qca::cell_type::CONST_1);
 
@@ -100,7 +100,7 @@ TEST_CASE("Render QCA cell and clock colors in SVG", "[write-qca-layout-svg]")
          {qca::cell_type::CONST_1, uint8_t{0}, "000000"}}));
     CAPTURE(simple, cell_type, clock);
 
-    qca::layout layout{{0, 0}, "QCA cell colors"};
+    qca::layout layout{{1, 1}, "QCA cell colors"};
     layout.assign_cell_type({0, 0}, cell_type);
     layout.assign_clock_number({0, 0}, clock);
 
@@ -122,7 +122,7 @@ TEST_CASE("Render QCA tile clock labels in detailed SVG mode", "[write-qca-layou
     const auto clock  = GENERATE(uint8_t{0}, uint8_t{1}, uint8_t{2}, uint8_t{3});
     CAPTURE(simple, clock);
 
-    qca::layout layout{{4, 4}, "QCA tile", 5, 5};
+    qca::layout layout{{5, 5}, "QCA tile", 5, 5};
     layout.assign_cell_type({2, 2}, qca::cell_type::NORMAL);
     layout.assign_clock_number({0, 0}, clock);
 
@@ -140,7 +140,7 @@ TEST_CASE("Render QCA tile clock labels in detailed SVG mode", "[write-qca-layou
 TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layout-svg]")
 {
     const auto  simple = GENERATE(false, true);
-    qca::layout layout{{0, 0}, "QCA SVG file"};
+    qca::layout layout{{1, 1}, "QCA SVG file"};
     layout.assign_cell_type({0, 0}, qca::cell_type::INPUT);
 
     const write_qca_layout_svg_params params{.simple = simple};
@@ -164,7 +164,7 @@ TEST_CASE("Render synchronized QCA cells in tiled SVG", "[write-qca-layout-svg]"
 {
     const auto  simple = GENERATE(false, true);
     const auto  clock  = GENERATE(uint8_t{0}, uint8_t{3});
-    qca::layout layout{{4, 4}, "Synchronized QCA tile", 5, 5};
+    qca::layout layout{{5, 5}, "Synchronized QCA tile", 5, 5};
     layout.assign_cell_type({2, 2}, qca::cell_type::NORMAL);
     layout.assign_cell_type({1, 2}, qca::cell_type::INPUT);
     layout.assign_clock_number({0, 0}, clock);
@@ -185,7 +185,7 @@ TEST_CASE("Render synchronized QCA cells in tiled SVG", "[write-qca-layout-svg]"
 TEST_CASE("QCA SVG synchronization preserves cell positions", "[write-qca-layout-svg]")
 {
     const auto  simple = GENERATE(false, true);
-    qca::layout layout{{0, 0}, "Synchronized cell"};
+    qca::layout layout{{1, 1}, "Synchronized cell"};
     layout.assign_cell_type({0, 0}, qca::cell_type::NORMAL);
     std::ostringstream before{};
     write_qca_layout_svg(layout, before, {.simple = simple});
@@ -209,11 +209,11 @@ TEST_CASE("QCA SVG synchronization preserves cell positions", "[write-qca-layout
 TEST_CASE("QCA SVG includes partial boundary tiles", "[write-qca-layout-svg]")
 {
     const auto  simple = GENERATE(false, true);
-    qca::layout layout{{0, 0}, "Partial tile", 5, 5};
+    qca::layout layout{{1, 1}, "Partial tile", 5, 5};
     layout.assign_cell_type({0, 0}, qca::cell_type::NORMAL);
     std::ostringstream partial{};
     write_qca_layout_svg(layout, partial, {.simple = simple});
-    layout.resize({4, 4});
+    layout.resize({5, 5});
     std::ostringstream full{};
     write_qca_layout_svg(layout, full, {.simple = simple});
 

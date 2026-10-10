@@ -38,7 +38,7 @@ TEST_CASE("Area computation for different technologies", "[area]")
 {
     SECTION("QCA")
     {
-        const qca::layout lyt{{4, 4}};
+        const qca::layout lyt{{5, 5}};
 
         const auto area_nm2 = area<qca::layout>(lyt, area_params<qca::layout>{});
         CHECK_THAT(area_nm2, Catch::Matchers::WithinAbs(9604.0, 0.0001));
@@ -52,12 +52,12 @@ TEST_CASE("Area computation for different technologies", "[area]")
 
         const bounding_box_2d bb{lyt};
         const auto            area_bb = area<qca::layout>(bb, area_params<qca::layout>{});
-        CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(324.0, 0.0001));
+        CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(0.0, 0.0001));
     }
 
     SECTION("iNML")
     {
-        const inml::layout lyt{{4, 4}};
+        const inml::layout lyt{{5, 5}};
 
         const auto area_nm2 = area<inml::layout>(lyt, area_params<inml::layout>{});
         CHECK_THAT(area_nm2, Catch::Matchers::WithinAbs(174000.0, 0.0001));
@@ -71,12 +71,12 @@ TEST_CASE("Area computation for different technologies", "[area]")
 
         const bounding_box_2d bb{lyt};
         const auto            area_bb = area<inml::layout>(bb, area_params<inml::layout>{});
-        CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(5000.0, 0.0001));
+        CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(0.0, 0.0001));
     }
 
     SECTION("molQCA")
     {
-        const mol_qca::layout lyt{{4, 4}};
+        const mol_qca::layout lyt{{5, 5}};
 
         area_stats stats{};
         CHECK_THAT(area(lyt, {}, &stats), Catch::Matchers::WithinAbs(100.0, 0.0001));
@@ -119,4 +119,18 @@ TEST_CASE("Area computation for different technologies", "[area]")
 
         CHECK_THAT(stats.width, Catch::Matchers::WithinRel(4'294'967'295.0 * sidb::layout::CELL_HSPACE, 0.000001));
     }
+}
+
+TEST_CASE("Empty Cartesian geometry has zero physical area", "[area][size-contract]")
+{
+    area_stats stats{};
+    CHECK(area(qca::layout{}, {}, &stats) == 0.0);
+    CHECK(stats.width == 0.0);
+    CHECK(stats.height == 0.0);
+    const qca::layout empty{{0, 3}};
+    CHECK(area(empty) == 0.0);
+    const qca::layout singleton{{1, 1}};
+    CHECK(area(singleton) == qca::layout::CELL_WIDTH * qca::layout::CELL_HEIGHT);
+    const bounding_box_2d bounds{singleton};
+    CHECK(area(bounds) == 0.0);
 }

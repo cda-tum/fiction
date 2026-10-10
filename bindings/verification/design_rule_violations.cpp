@@ -26,10 +26,9 @@
 #include <utility>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
-#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner): enables return-value conversion
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner): enables return-value conversion
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 
 namespace pyfiction
@@ -38,11 +37,10 @@ namespace pyfiction
 namespace detail
 {
 
+/** @brief Binds object layout design rule checks. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
 void gate_level_drvs_impl(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "gate_level_drvs",
         [](const Lyt& lyt, fiction::verification::gate_level_drv_params params = {}, const bool print_report = false,
@@ -54,7 +52,7 @@ void gate_level_drvs_impl(nanobind::module_& m)
             fiction::verification::gate_level_drv_stats stats{};
 
             {
-                const py::gil_scoped_release release{};
+                const nanobind::gil_scoped_release release{};
                 fiction::verification::gate_level_drvs(lyt, params, &stats);
             }
 
@@ -70,26 +68,28 @@ void gate_level_drvs_impl(nanobind::module_& m)
 
             return {stats.warnings, stats.drvs};
         },
-        py::arg("layout"), py::arg("params") = fiction::verification::gate_level_drv_params{},
-        py::arg("print_report") = false, py::arg("statistics") = nullptr, DOC(fiction_verification_gate_level_drvs));
+        nanobind::arg("layout"), nanobind::arg("params") = fiction::verification::gate_level_drv_params{},
+        nanobind::arg("print_report") = false, nanobind::arg("statistics") = nullptr,
+        DOC(fiction_verification_gate_level_drvs));
 }
 
 }  // namespace detail
 
+/** @brief Registers design rule checks and reports. @param m Python module. */
 void design_rule_violations(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
-    py::class_<fiction::verification::gate_level_drv_params>(m, "gate_level_drv_params",
-                                                             DOC(fiction_verification_gate_level_drv_params))
+    py::class_<fiction::verification::gate_level_drv_params>(
+        m, "gate_level_drv_params", pyfiction::progress_type_slots<fiction::verification::gate_level_drv_params>(),
+        DOC(fiction_verification_gate_level_drv_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::verification::gate_level_drv_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 "Receives completed work and the phase total.")
-        .def_rw("unplaced_nodes", &fiction::verification::gate_level_drv_params::unplaced_nodes,
-                DOC(fiction_verification_gate_level_drv_params_unplaced_nodes))
-        .def_rw("placed_dead_nodes", &fiction::verification::gate_level_drv_params::placed_dead_nodes,
-                DOC(fiction_verification_gate_level_drv_params_placed_dead_nodes))
+
+        .def_rw("outside_extent", &fiction::verification::gate_level_drv_params::outside_extent,
+                "Checks that every live object lies within the layout extent.")
         .def_rw("non_adjacent_connections", &fiction::verification::gate_level_drv_params::non_adjacent_connections,
                 DOC(fiction_verification_gate_level_drv_params_non_adjacent_connections))
         .def_rw("missing_connections", &fiction::verification::gate_level_drv_params::missing_connections,
@@ -100,10 +100,7 @@ void design_rule_violations(nanobind::module_& m)
                 DOC(fiction_verification_gate_level_drv_params_clocked_data_flow))
         .def_rw("has_io", &fiction::verification::gate_level_drv_params::has_io,
                 DOC(fiction_verification_gate_level_drv_params_has_io))
-        .def_rw("empty_io", &fiction::verification::gate_level_drv_params::empty_io,
-                DOC(fiction_verification_gate_level_drv_params_empty_io))
-        .def_rw("io_pins", &fiction::verification::gate_level_drv_params::io_pins,
-                DOC(fiction_verification_gate_level_drv_params_io_pins))
+
         .def_rw("border_io", &fiction::verification::gate_level_drv_params::border_io,
                 DOC(fiction_verification_gate_level_drv_params_border_io))
 

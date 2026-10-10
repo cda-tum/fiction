@@ -18,13 +18,13 @@
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/traits.hpp"
 
-#include <mockturtle/traits.hpp>
-
 #include <algorithm>
 #include <cassert>
-#include <functional>
+#include <cstdint>
 #include <optional>
 #include <set>
+#include <stdexcept>
+#include <unordered_set>
 #include <vector>
 
 namespace fiction::physical_design
@@ -68,14 +68,19 @@ template <typename Lyt>
 }  // namespace detail
 
 /**
- * Routing objectives are source-target pairs.
+ * Routing objectives identify a geometric source and an ordered destination input.
  *
  * @tparam Lyt Layout type whose coordinates are to be used.
  */
 template <typename Lyt>
 struct routing_objective
 {
-    const coordinate<Lyt> source, target;
+    /** @brief Source coordinate. */
+    const coordinate<Lyt> source;
+    /** @brief Target coordinate. */
+    const coordinate<Lyt> target;
+    /** @brief Logical input index at the target; geometric searches ignore this field. */
+    uint32_t input_index{};
     /**
      * Equality operator.
      * @tparam OtherLyt Type of other layout.
@@ -85,7 +90,7 @@ struct routing_objective
     template <typename OtherLyt>
     bool operator==(const routing_objective<OtherLyt>& other) const noexcept
     {
-        return source == other.source && target == other.target;
+        return source == other.source && target == other.target && input_index == other.input_index;
     }
 };
 /**
@@ -97,7 +102,9 @@ template <typename Lyt>
 class layout_coordinate_path : public std::vector<coordinate<Lyt>>
 {
   public:
-    void append(const coordinate<Lyt>& c) noexcept
+    /** @brief Appends a coordinate. @param c Coordinate to append. @throws std::bad_alloc If storage allocation fails.
+     */
+    void append(const coordinate<Lyt>& c)
     {
         this->push_back(c);
     }
@@ -128,7 +135,8 @@ template <typename Path>
 class path_collection : public std::vector<Path>
 {
   public:
-    void add(const Path& p) noexcept
+    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
+    void add(const Path& p)
     {
         this->push_back(p);
     }
@@ -160,7 +168,8 @@ template <typename Path>
 class path_set : public std::set<Path>
 {
   public:
-    void add(const Path& p) noexcept
+    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
+    void add(const Path& p)
     {
         this->insert(p);
     }
@@ -205,10 +214,11 @@ template <typename Lyt>
 
     if constexpr (is_gate_level_layout_v<Lyt>)
     {
-        const auto successor_node = lyt.get_node(successor);
+        const auto successor_node = lyt.find_object(successor);
 
         // one can only cross over wire segments, but not over I/Os
-        if (lyt.is_wire(successor_node) && !lyt.is_pi(successor_node) && !lyt.is_po(successor_node))
+        if (successor_node && lyt.is_wire(*successor_node) && !lyt.is_gate(*successor_node) &&
+            !lyt.is_pi(*successor_node) && !lyt.is_po(*successor_node))
         {
             // if wire has missing connections, it is up to no good (could be a dangling fanout)
             if (lyt.has_no_incoming_signal(successor) || lyt.has_no_outgoing_signal(successor))
@@ -222,8 +232,8 @@ template <typename Lyt>
                 return true;
             }
             // otherwise, decide based on the information flow direction
-            if (const auto below_source_node = lyt.get_node(lyt.below(src));
-                !lyt.is_incoming_signal(successor, lyt.make_signal(below_source_node)))
+            if (const auto below_source = lyt.below(src);
+                below_source && !lyt.is_incoming_signal(successor, *below_source))
             {
                 return true;
             }
@@ -254,21 +264,29 @@ routing_successor(const Lyt& lyt, const coordinate<Lyt>& current, coordinate<Lyt
                   const coordinate<Lyt>& target, const bool crossings, const layouts::obstructions& extra) noexcept
 {
     // return to ground layer to avoid getting stuck in crossing layer
-    successor = lyt.below(successor);
+    if (successor.z != 0)
+    {
+        const auto ground = lyt.below(successor);
+        if (!ground)
+        {
+            return std::nullopt;
+        }
+        successor = *ground;
+    }
 
     if (routing_coordinate_obstructed(lyt, successor, extra) && successor != target)
     {
         // an obstructed successor can only be passed on a free crossing layer above a crossable wire
         const auto above_successor = lyt.above(successor);
 
-        if (!crossings || !(is_crossable_wire(lyt, current, successor) || above_successor == target) ||
-            above_successor == successor ||
-            (routing_coordinate_obstructed(lyt, above_successor, extra) && above_successor != target))
+        if (!above_successor || !crossings ||
+            !(is_crossable_wire(lyt, current, successor) || *above_successor == target) ||
+            (routing_coordinate_obstructed(lyt, *above_successor, extra) && *above_successor != target))
         {
             return std::nullopt;
         }
 
-        successor = above_successor;
+        successor = *above_successor;
     }
 
     if (routing_connection_obstructed(lyt, current, successor, extra))
@@ -281,129 +299,149 @@ routing_successor(const Lyt& lyt, const coordinate<Lyt>& current, coordinate<Lyt
 }  // namespace detail
 
 /**
- * Establishes a wire routing along the given path in the given layout. To this end, the given path's source and target
- * coordinates are assumed to be populated by other gates or wires that the new path shall connect to.
+ * @brief Routes a path to one explicit logical input without changing other input slots.
  *
- * If `path` contains a tile that is allocated already, it will instead switch to the crossing layer. If path contains
- * exactly source and target, no wires are created, but the source and target are connected.
- *
+ * Occupied intermediate ground coordinates use their free crossing layer. Endpoints and all intermediate
+ * placements are checked before mutation. A failed allocation removes newly created wires.
  * @tparam Lyt Gate-level layout type.
- * @tparam Path Path type.
- * @param lyt Gate-level layout in which a wire path is to be established.
- * @param path Path to route wires along.
+ * @tparam Path Coordinate path type.
+ * @param lyt Layout to edit.
+ * @param path Path containing at least its occupied source and target coordinates.
+ * @param destination Ordered destination input.
+ * @throws std::invalid_argument If an endpoint or intermediate placement is unavailable.
+ * @throws std::out_of_range If the destination input index is invalid.
  */
 template <typename Lyt, typename Path>
-void route_path(Lyt& lyt, const Path& path) noexcept
+void route_path(Lyt& lyt, const Path& path, const typename Lyt::input_port destination)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-
-    auto incoming_signal = static_cast<mockturtle::signal<Lyt>>(path.source());
-
-    // exclude source and target
-    std::for_each(
-        path.cbegin() + 1, path.cend() - 1, [&lyt, &incoming_signal](const auto& coord)
-        { incoming_signal = lyt.create_buf(incoming_signal, lyt.is_empty_tile(coord) ? coord : lyt.above(coord)); });
-
-    // establish final connection to target node
-    lyt.connect(incoming_signal, lyt.get_node(path.target()));
-}
-/**
- * Extracts all routing objectives from the given layout. To this end, all routing paths in the layout are traversed,
- * starting at each PI. Whenever the next regular node (non-IO, non-constant, non-wire) is encountered, this connection
- * is added to the list of all objectives.
- *
- * For example, let a layout have connections from `(0,0)` to `(2,3)` via a cascade of wires and a direct connection
- * from `(2,2)` to `(2,3)`. The list of routing objectives extracted from that layout would contain `{(0,0), (2,3)}`
- * and `{(2,2), (2,3)}`.
- *
- * In other words, if all wires were removed from the layout and all connections ripped-up, an equivalent layout could
- * be recreated from the list of routing objectives.
- *
- * @tparam Lyt Gate-level layout type.
- * @param lyt Layout whose routing objectives are to be extracted.
- * @return List of all routing objectives in the given layout.
- */
-template <typename Lyt>
-std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt) noexcept
-{
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-
-    // extracted routing objectives
-    std::vector<routing_objective<Lyt>> objectives{};
-    // list of visited nodes
-    std::vector<bool> visited(lyt.size(), false);
-    // checks if a node is an intermediate routing wire
-    const auto is_connection_wire = [&lyt](const auto& n)
-    { return lyt.is_wire(n) && !lyt.is_fanout(n) && !lyt.is_pi(n) && !lyt.is_po(n); };
-    // recursively traverse the layout paths and gather routing objectives
-    const std::function<void(const tile<Lyt>&, const mockturtle::node<Lyt>&)> recursively_traverse_paths =
-        [&](const auto& recent_gate_tile, const auto& current_node)
+    if (path.size() < 2 || path.target() != lyt.get_tile(destination.object))
     {
-        auto current_gate_tile = recent_gate_tile;
-
-        if (!is_connection_wire(current_node))  // is regular gate, fan-out, or I/O
+        throw std::invalid_argument("A routing path requires matching occupied endpoints");
+    }
+    static_cast<void>(lyt.source(destination));
+    const auto source = lyt.find_object(path.source());
+    if (!source)
+    {
+        throw std::invalid_argument("The routing source is empty");
+    }
+    std::vector<tile<Lyt>> positions{};
+    positions.reserve(path.size() - 2);
+    std::unordered_set<tile<Lyt>> unique{};
+    for (auto it = path.cbegin() + 1; it != path.cend() - 1; ++it)
+    {
+        auto position = *it;
+        if (!lyt.is_empty_tile(position))
         {
-            current_gate_tile = lyt.get_tile(current_node);
-            // objective found
-            objectives.push_back({recent_gate_tile, current_gate_tile});
+            const auto crossing = lyt.above(position);
+            if (!crossing)
+            {
+                throw std::invalid_argument("The crossing layer is unavailable");
+            }
+            position = *crossing;
         }
-
-        // node already visited
-        if (visited[current_node])
+        if (!lyt.is_empty_tile(position) || !unique.insert(position).second)
         {
-            return;
+            throw std::invalid_argument("A routing path contains an occupied or repeated intermediate position");
         }
-        // mark node as visited
-        visited[current_node] = true;
-
-        // recursively traverse successors
-        lyt.foreach_fanout(current_node, [&](const auto& fon) { recursively_traverse_paths(current_gate_tile, fon); });
-    };
-
-    // start recursion at each PI
-    lyt.foreach_pi(
-        [&](const auto& pi)
+        positions.push_back(position);
+    }
+    auto                                 incoming = *source;
+    std::vector<typename Lyt::object_id> created{};
+    created.reserve(positions.size());
+    try
+    {
+        for (const auto& position : positions)
         {
-            const auto pi_tile = lyt.get_tile(pi);
-            lyt.foreach_fanout(pi, [&](const auto& fon) { recursively_traverse_paths(pi_tile, fon); });
-        });
-
-    return objectives;
+            incoming = lyt.create_buf(incoming, position);
+            created.push_back(incoming);
+        }
+        lyt.connect(incoming, destination);
+    }
+    catch (...)
+    {
+        for (const auto id : created)
+        {
+            lyt.remove(id);
+        }
+        throw;
+    }
 }
 /**
- * Removes the entire wire routing from the passed layout. This involves deleting all wire segments that have been
- * placed on any tile as well as removing stored connections (children pointers) from all gates.
+ * @brief Extracts connections between retained gates, fanouts, and terminals with destination input indices.
  *
- * @tparam Lyt Gate-level Layout type.
- * @param lyt The layout whose routing is to be deleted.
+ * Intermediate single-sink wires are followed through declared topology. Missing inputs produce no objective;
+ * disconnected input slots keep their indices. Cycles of intermediate wires reject.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout to inspect.
+ * @return Routing objectives that preserve logical input numbering.
+ * @throws std::invalid_argument If an intermediate wire chain contains a cycle.
  */
 template <typename Lyt>
-void clear_routing(Lyt& lyt) noexcept
+std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(has_is_buf_v<Lyt>, "Lyt does not implement the is_buf function");
-    static_assert(has_is_fanout_v<Lyt>, "Lyt does not implement the is_fanout function");
-    static_assert(mockturtle::has_foreach_node_v<Lyt>, "Lyt does not implement the foreach_node function");
-
-    lyt.foreach_node(
-        [&lyt](const auto& g)
+    const auto intermediate = [&lyt](const auto id)
+    { return lyt.is_wire(id) && !lyt.is_gate(id) && !lyt.is_fanout(id) && !lyt.is_pi(id) && !lyt.is_po(id); };
+    std::vector<routing_objective<Lyt>> objectives{};
+    lyt.foreach_object(
+        [&](const auto id)
         {
-            // skip constants
-            if (lyt.is_constant(g))
+            if (intermediate(id))
             {
                 return;
             }
-
-            const auto t = lyt.get_tile(g);
-
-            if (lyt.is_buf(g) && !lyt.is_fanout(g) && !lyt.is_pi(g) &&
-                !lyt.is_po(g))  // remove all wires that are not fan-outs or primary I/Os
+            lyt.foreach_fanin(id,
+                              [&](const auto port, const auto input)
+                              {
+                                  auto                                        source = port;
+                                  std::unordered_set<typename Lyt::object_id> visited{};
+                                  while (intermediate(source))
+                                  {
+                                      if (!visited.insert(source).second)
+                                      {
+                                          throw std::invalid_argument("A routing wire chain contains a cycle");
+                                      }
+                                      const auto previous = lyt.source({source, 0});
+                                      if (!previous)
+                                      {
+                                          return;
+                                      }
+                                      source = *previous;
+                                  }
+                                  objectives.push_back({lyt.get_tile(source), lyt.get_tile(id), input});
+                              });
+        });
+    return objectives;
+}
+/**
+ * @brief Removes routing wires and disconnects retained objects while preserving identities and input indices.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout to edit.
+ */
+template <typename Lyt>
+void clear_routing(Lyt& lyt)
+{
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    std::vector<typename Lyt::object_id> wires{};
+    lyt.foreach_object(
+        [&](const auto id)
+        {
+            if (lyt.is_wire(id) && !lyt.is_gate(id) && !lyt.is_fanout(id) && !lyt.is_pi(id) && !lyt.is_po(id))
             {
-                lyt.clear_tile(t);
+                wires.push_back(id);
             }
-            else  // delete children pointers of gates by re-placing them
+        });
+    for (const auto id : wires)
+    {
+        lyt.remove(id);
+    }
+    lyt.foreach_object(
+        [&](const auto id)
+        {
+            for (uint32_t input{}; input < lyt.input_count(id); ++input)
             {
-                lyt.move_node(g, t);
+                lyt.disconnect({id, input});
             }
         });
 }

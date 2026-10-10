@@ -20,6 +20,7 @@
 
 #include <phmap.h>
 
+#include <functional>
 #include <utility>
 
 namespace fiction::layouts
@@ -35,8 +36,9 @@ class obstructions
      * Marks the given coordinate as obstructed.
      *
      * @param c Coordinate to obstruct.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void obstruct_coordinate(const layout_base::coordinate& c) noexcept
+    void obstruct_coordinate(const layout_base::coordinate& c)
     {
         obstructed_coordinates.insert(c);
     }
@@ -47,8 +49,9 @@ class obstructions
      *
      * @param src Source coordinate.
      * @param tgt Target coordinate.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void obstruct_connection(const layout_base::coordinate& src, const layout_base::coordinate& tgt) noexcept
+    void obstruct_connection(const layout_base::coordinate& src, const layout_base::coordinate& tgt)
     {
         obstructed_connections.insert({src, tgt});
     }
@@ -108,6 +111,35 @@ class obstructions
                                                 const layout_base::coordinate& tgt) const noexcept
     {
         return obstructed_connections.contains({src, tgt});
+    }
+
+    /**
+     * Visits explicitly obstructed coordinates in unspecified order.
+     * @tparam Fn Callable accepting one coordinate.
+     * @param fn Callback for each manual obstruction.
+     */
+    template <typename Fn>
+    void foreach_obstructed_coordinate(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
+    {
+        for (const auto& coordinate : obstructed_coordinates)
+        {
+            std::invoke(fn, coordinate);
+        }
+    }
+    /**
+     * Visits explicitly obstructed directed connections in unspecified order.
+     * @tparam Fn Callable accepting source and target coordinates.
+     * @param fn Callback for each manual obstruction.
+     */
+    template <typename Fn>
+    void foreach_obstructed_connection(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
+    {
+        for (const auto& [source, target] : obstructed_connections)
+        {
+            std::invoke(fn, source, target);
+        }
     }
 
   private:
