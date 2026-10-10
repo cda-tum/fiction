@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `synthesis::planarization` turns a balanced, ranked network into a planar, balanced, fanout-substituted one
+  - `synthesis::node_duplication_planarization` planarizes a balanced, ranked network by duplicating nodes, breaking
+    ties among equally short H-graph paths by cone weight, with a hybrid strategy that keeps the crossings of a
+    level where crossing gates are cheaper, decided by a budgeted lookahead or by weighted cone sizes
+  - `synthesis::crossing_gate_planarization` replaces the crossings of a balanced, ranked network with XOR or
+    AND-OR-NOT gadgets
+  - `synthesis::network_balancing_params::buffer_constant_outputs` lets a flow that does not place constants keep
+    constant outputs unbuffered when unifying outputs; `is_balanced` then ignores them
+  - `synthesis::planar_fanout_substitution` and `synthesis::planar_rebalancing` substitute fanouts and minimize
+    buffers while keeping ranks and planarity
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `physical_design::cell_grid_extent` returns the extent of the cell grid that a gate library spans on a
     gate-level layout
@@ -39,6 +49,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - `networks::initialize_copy_network_with_virtual_pis` copies the constants and inputs of a network, virtual
+    inputs included, and `networks::barycenters` computes the mean fanin positions of ranked nodes
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores tagged dots and defects without templates
   - `sidb::charge_distribution` assigns one charge state per SiDB and carries its energy;
@@ -59,13 +71,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
 
+- Experiments:
+
+  - `planarization` runs every benchmark set through the planarization pipeline and verifies each result
+
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
     `print_sidb_layout` accept and produce `sidb::layout`; the SQD reader takes the lattice from the file
     instead of a template parameter
 
 - Python bindings:
-
+  - `mnt.pyfiction.synthesis.planarization` planarizes a balanced technology network and reports its virtual inputs
   - The callback members of parameter classes accept `None`, which clears the callback.
   - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.
@@ -558,6 +574,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
   - `convert_network` keeps the inverters of a technology network when the target network
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
+  - `synthesis::delete_virtual_pis` maps outputs driven by a virtual primary input to the real one
+  - `verification::virtual_miter` pairs primary inputs by creation order, so ranked networks whose inputs are
+    reordered or unused compare correctly
+  - `networks::views::mutable_rank_view` skips dangling nodes instead of throwing when initializing ranks
 
 - Build system:
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.

@@ -60,6 +60,8 @@ void network_balancing(nanobind::module_& m)
                 "Receives completed work and the phase total.")
         .def_rw("unify_outputs", &fiction::synthesis::network_balancing_params::unify_outputs,
                 DOC(fiction_synthesis_network_balancing_params_unify_outputs))
+        .def_rw("buffer_constant_outputs", &fiction::synthesis::network_balancing_params::buffer_constant_outputs,
+                DOC(fiction_synthesis_network_balancing_params_buffer_constant_outputs))
 
         ;
 

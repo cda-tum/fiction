@@ -446,6 +446,17 @@ class network_balancing_params:
 
     @unify_outputs.setter
     def unify_outputs(self, arg: bool, /) -> None: ...
+    @property
+    def buffer_constant_outputs(self) -> bool:
+        """
+        Whether primary outputs driven by a constant receive a buffer chain
+        when unifying outputs. Placement flows that do not place constants set
+        this to `false`: such outputs then stay unbuffered, and `is_balanced`
+        ignores them.
+        """
+
+    @buffer_constant_outputs.setter
+    def buffer_constant_outputs(self, arg: bool, /) -> None: ...
 
 def network_balancing(
     network: mnt.pyfiction.networks.technology_network, params: network_balancing_params = ...
@@ -847,3 +858,256 @@ def convert_network(
     | mnt.pyfiction.networks.xag_network
     | mnt.pyfiction.networks.mig_network
 ): ...
+
+class planarization_strategy(enum.Enum):
+    """How a level is made crossing-free."""
+
+    DUPLICATION = 0
+    """Duplicate nodes on every level. The result is planar."""
+
+    HYBRID = 1
+    """
+    Decide per level whether duplicating nodes or keeping the crossings
+    for `crossing_gate_planarization` is cheaper. The result contains
+    crossings on the levels where gadgets are cheaper.
+    """
+
+class decision_criterion(enum.Enum):
+    """How the hybrid strategy estimates the cost of duplicating a level."""
+
+    WEIGHTED_CONE = 0
+    """
+    The weighted size of the duplicated cones, see
+    `duplication_cost_model`.
+    """
+
+    LOOKAHEAD = 1
+    """
+    The number of nodes that duplicating the rest of the network actually
+    creates, measured by running the duplication strategy on the levels
+    below for both options and stopping once one exceeds the other. On the
+    benchmark sets this is never worse and up to 16 % better than the
+    weighted cone at the same runtime.
+    """
+
+class output_order(enum.Enum):
+    """
+    Order in which the primary outputs are placed in the first level
+    before the algorithm starts.
+    """
+
+    KEEP_PO_ORDER = 0
+    """Keep the primary output order of the input network."""
+
+    RANDOM_PO_ORDER = 1
+    """
+    Shuffle the primary outputs randomly. Different orders can yield
+    different numbers of duplications.
+    """
+
+class duplication_cost_model:
+    """
+    Weights of the duplication cost model of the hybrid strategy's
+    `WEIGHTED_CONE` criterion. The cost of duplicating a node is the
+    weighted size of its transitive fanin, since every duplicate drags its
+    whole cone along. A gate weighs `node_weight` and a chain buffer or
+    inverter weighs `buffer_weight`. The sum is scaled by
+    :math:`\\text{depth\\_growth}^{d}` for a duplication on level :math:`d`,
+    because duplicates on deep levels are duplicated again by the
+    decisions below. The weights are in units of one crossing gadget node.
+    The defaults were determined empirically on the benchmark sets.
+    """
+
+    def __init__(self) -> None:
+        """Default constructor."""
+
+    @property
+    def node_weight(self) -> float:
+        """Weight of a gate."""
+
+    @node_weight.setter
+    def node_weight(self, arg: float, /) -> None: ...
+    @property
+    def buffer_weight(self) -> float:
+        """Weight of a buffer or inverter chain node."""
+
+    @buffer_weight.setter
+    def buffer_weight(self, arg: float, /) -> None: ...
+    @property
+    def depth_growth(self) -> float:
+        """
+        Growth of the duplication cost per level on which the duplication
+        happens.
+        """
+
+    @depth_growth.setter
+    def depth_growth(self, arg: float, /) -> None: ...
+
+class node_duplication_planarization_params:
+    """Parameters for the node duplication planarization algorithm."""
+
+    def __init__(self) -> None:
+        """Default constructor."""
+
+    @property
+    def strategy(self) -> planarization_strategy:
+        """Planarization strategy."""
+
+    @strategy.setter
+    def strategy(self, arg: planarization_strategy, /) -> None: ...
+    @property
+    def criterion(self) -> decision_criterion:
+        """Decision criterion of the hybrid strategy."""
+
+    @criterion.setter
+    def criterion(self, arg: decision_criterion, /) -> None: ...
+    @property
+    def xor_gates(self) -> bool:
+        """
+        Whether the subsequent `crossing_gate_planarization` builds its
+        gadgets from XOR gates. Sets the gadget cost of the hybrid strategy.
+        """
+
+    @xor_gates.setter
+    def xor_gates(self, arg: bool, /) -> None: ...
+    @property
+    def max_swaps(self) -> int:
+        """
+        Maximum number of adjacent swaps per level that the hybrid strategy
+        tries after the barycenter ordering to reduce the crossings it costs.
+        `0` keeps the barycenter order.
+        """
+
+    @max_swaps.setter
+    def max_swaps(self, arg: int, /) -> None: ...
+    @property
+    def max_crossings_per_rank(self) -> int:
+        """
+        Levels with more crossings are always duplicated in the hybrid
+        strategy, matching the limit of `crossing_gate_planarization`.
+        """
+
+    @max_crossings_per_rank.setter
+    def max_crossings_per_rank(self, arg: int, /) -> None: ...
+    @property
+    def duplication_cost(self) -> duplication_cost_model:
+        """Duplication cost model of the hybrid strategy."""
+
+    @duplication_cost.setter
+    def duplication_cost(self, arg: duplication_cost_model, /) -> None: ...
+    @property
+    def lookahead_budget(self) -> int:
+        """
+        Nodes a lookahead may create before it is cut off; levels whose both
+        options exceed it fall back to the weighted cone model.
+        """
+
+    @lookahead_budget.setter
+    def lookahead_budget(self, arg: int, /) -> None: ...
+    @property
+    def max_duplications(self) -> int:
+        """
+        Abort with `std::runtime_error` once more nodes than this have been
+        duplicated. Node duplication can grow exponentially with the depth of
+        the network; 0 disables the limit.
+        """
+
+    @max_duplications.setter
+    def max_duplications(self, arg: int, /) -> None: ...
+    @property
+    def po_order(self) -> output_order:
+        """Primary output order used to seed the first level."""
+
+    @po_order.setter
+    def po_order(self, arg: output_order, /) -> None: ...
+    @property
+    def seed(self) -> int | None:
+        """
+        Seed for the random primary output order. A random seed is drawn when
+        none is given.
+        """
+
+    @seed.setter
+    def seed(self, arg: int | None, /) -> None: ...
+
+class planarization_params:
+    """Parameters for the planarization pipeline."""
+
+    def __init__(self) -> None:
+        """Default constructor."""
+
+    @property
+    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
+        """Receives completed work and the phase total."""
+
+    @on_progress.setter
+    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
+    @property
+    def duplication(self) -> node_duplication_planarization_params:
+        """
+        Parameters of the node duplication stage, including the strategy and
+        the gadget type of the crossing gates. The pipeline defaults to the
+        hybrid strategy, which yields the fewest nodes.
+        """
+
+    @duplication.setter
+    def duplication(self, arg: node_duplication_planarization_params, /) -> None: ...
+    @property
+    def fanout_degree(self) -> int:
+        """Maximum output degree of the fanout nodes in the result."""
+
+    @fanout_degree.setter
+    def fanout_degree(self, arg: int, /) -> None: ...
+
+class planarization_stats:
+    """Statistics of the planarization pipeline."""
+
+    def __init__(self) -> None:
+        """Default constructor."""
+
+    @property
+    def time_total(self) -> datetime.timedelta:
+        """Runtime of the whole pipeline."""
+
+    @property
+    def num_duplications(self) -> int:
+        """
+        Number of nodes in the planarized network minus the number of nodes in
+        the input network.
+        """
+
+    @property
+    def num_crossing_levels(self) -> int:
+        """Number of levels on which the hybrid strategy kept the crossings."""
+
+    @property
+    def num_crossings(self) -> int:
+        """Number of crossings replaced by gadgets."""
+
+    @property
+    def num_nodes(self) -> int:
+        """Number of nodes of the result."""
+
+def planarization(
+    network: mnt.pyfiction.networks.technology_network,
+    params: planarization_params = ...,
+    statistics: planarization_stats | None = None,
+) -> tuple[mnt.pyfiction.networks.technology_network, list[int]]:
+    """
+    Planarizes a balanced technology network with unified outputs: node duplication with the chosen
+    strategy, crossing gates for the levels the hybrid strategy left crossed, planar fanout substitution, and planar
+    rebalancing. See `network_balancing` for the precondition.
+
+    Args:
+        network: Balanced technology network with unified outputs.
+        params: Parameters of the pipeline.
+        statistics: Optional statistics object that receives the runtimes and node counts.
+
+    Returns:
+        A pair of the planar, balanced, fanout-substituted network in rank order and, for every input of that
+        network, the index of the input of `network` it stands for. A duplicated input appears several times; tie
+        those inputs together when simulating or checking equivalence.
+
+    Raises:
+        ValueError: If `network` is not balanced with unified outputs, or if a gate has only constant fanins.
+    """

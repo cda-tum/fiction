@@ -82,6 +82,22 @@ class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
 {
   public:
     explicit static_depth_view(Ntk const& ntk, [[maybe_unused]] depth_view_params const& params = {}) : Ntk(ntk) {}
+
+    /**
+     * @return Whether a level is stored for the node: the wrapped network's answer if it offers `has_level`, otherwise
+     * `true`, since a network with a depth interface keeps levels for every node.
+     */
+    [[nodiscard]] bool has_level([[maybe_unused]] typename Ntk::node const& n) const
+    {
+        if constexpr (has_has_level_v<Ntk>)
+        {
+            return Ntk::has_level(n);
+        }
+        else
+        {
+            return true;
+        }
+    }
 };
 
 /**
@@ -274,6 +290,15 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     uint32_t level(node const& n) const
     {
         return levels.at(n);
+    }
+
+    /**
+     * @return Whether a level is stored for the node. A node has no level if it was added after the last call to
+     * `update_levels` without `on_add` being called for it, or if it is dangling.
+     */
+    [[nodiscard]] bool has_level(node const& n) const
+    {
+        return levels.contains(n);
     }
 
     /**

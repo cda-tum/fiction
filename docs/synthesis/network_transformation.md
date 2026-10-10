@@ -159,6 +159,170 @@
 
 ::::
 
+(planarization)=
+
+## Planarization
+
+A ranked logic network is planar if its edges can be drawn between adjacent ranks without crossings. The
+planarization pipeline removes the crossings of a balanced, ranked network by duplicating nodes, by crossing gates
+that swap two signals, or by a per-level choice between the two {cite:p}`nano_2026_3`, then restores
+fanout nodes and the minimum buffering while keeping ranks and planarity. The stages below are also available on
+their own.
+
+`planarization` runs the whole pipeline: node duplication with the chosen strategy, crossing gates for the levels the
+hybrid strategy left crossed, planar fanout substitution, and planar rebalancing. The pipeline defaults to the hybrid
+strategy with the lookahead criterion, which produced the fewest nodes on the benchmark sets.
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/planarization.hpp`
+
+```{doxygenstruct} fiction::synthesis::planarization_params
+:members:
+```
+
+```{doxygenstruct} fiction::synthesis::planarization_stats
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::planarization
+
+```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+The Python function works on a `technology_network` and reports duplicated inputs through an index list instead of
+virtual inputs; see its docstring below.
+
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.synthesis.planarization_params
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.node_duplication_planarization_params
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.planarization_strategy
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.decision_criterion
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.duplication_cost_model
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.planarization_stats
+   :members:
+
+.. autofunction:: mnt.pyfiction.synthesis.planarization
+```
+
+:::
+
+::::
+
+## Node Duplication Planarization
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/node_duplication_planarization.hpp`
+
+```{doxygenstruct} fiction::synthesis::node_duplication_planarization_params
+:members:
+```
+
+```{doxygenstruct} fiction::synthesis::node_duplication_planarization_stats
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::node_duplication_planarization
+
+```
+
+:::
+
+::::
+
+## Crossing Gate Planarization
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/crossing_gate_planarization.hpp`
+
+```{doxygenstruct} fiction::synthesis::crossing_gate_planarization_params
+:members:
+```
+
+```{doxygenstruct} fiction::synthesis::crossing_gate_planarization_stats
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::crossing_gate_planarization
+
+```
+
+:::
+
+::::
+
+## Planar Fanout Substitution
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/planar_fanout_substitution.hpp`
+
+```{doxygenstruct} fiction::synthesis::planar_fanout_substitution_params
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::planar_fanout_substitution
+
+```
+
+:::
+
+::::
+
+## Planar Rebalancing
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/synthesis/planar_rebalancing.hpp`
+
+```{doxygenstruct} fiction::synthesis::planar_rebalancing_params
+:members:
+```
+
+```{doxygenfunction} fiction::synthesis::planar_rebalancing
+
+```
+
+:::
+
+::::
+
 ## Delete Virtual PIs
 
 ::::{tab-set}

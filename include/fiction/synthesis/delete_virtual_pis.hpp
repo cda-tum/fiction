@@ -124,7 +124,15 @@ class delete_virtual_pis_impl
         ntk.foreach_po(
             [this, &ntk_dest, &old2new](const auto& po)
             {
-                const auto tgt_signal = old2new[ntk.get_node(po)];
+                auto po_node = ntk.get_node(po);
+
+                // a primary output can be driven by a virtual primary input directly
+                if (ntk.is_virtual_pi(po_node))
+                {
+                    po_node = ntk.get_real_pi(po_node);
+                }
+
+                const auto tgt_signal = old2new[po_node];
                 const auto tgt_po     = ntk.is_complemented(po) ? ntk_dest.create_not(tgt_signal) : tgt_signal;
 
                 ntk_dest.create_po(tgt_po);

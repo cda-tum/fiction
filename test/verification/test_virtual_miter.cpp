@@ -19,6 +19,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/verification/virtual_miter.hpp>
 
@@ -29,9 +30,37 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/views/dont_care_view.hpp>
 
+#include <optional>
+
 using namespace fiction;
 using namespace fiction::networks;
+using namespace fiction::networks::views;
 using namespace fiction::verification;
+
+namespace
+{
+
+/**
+ * Builds the virtual miter of two networks and checks it with SAT.
+ *
+ * @return The SAT result, or `std::nullopt` if the miter could not be built or SAT gave up.
+ */
+template <typename Spec, typename Impl>
+std::optional<bool> virtual_miter_equivalent(const Spec& spec, const Impl& impl)
+{
+    const auto miter = virtual_miter<technology_network>(spec, impl);
+
+    if (!miter.has_value())
+    {
+        return std::nullopt;
+    }
+
+    mockturtle::equivalence_checking_stats st{};
+
+    return mockturtle::equivalence_checking(*miter, {}, &st);
+}
+
+}  // namespace
 
 TEST_CASE("Virtual miter different num_pis", "[virtual-miter]")
 {
@@ -88,40 +117,39 @@ TEST_CASE("Virtual miter with technology networks", "[virtual-miter]")
     vpi_ntk_2.create_po(o1_v2);
 
     // check for the exodc path 1
-    mockturtle::equivalence_checking_stats st;
-    auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, tec_dc), {}, &st);
+    auto maybe_cec_m = virtual_miter_equivalent(tec, tec_dc);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
     // check for the exodc path 2
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec_dc, tec), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(tec_dc, tec);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
     // check for the handle virtual pi path 1
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(vpi_ntk_1, tec), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(vpi_ntk_1, tec);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
     // check for the handle virtual pi path 2
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_ntk_2), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(tec, vpi_ntk_2);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
     // check for the handle virtual pi path 3
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(vpi_ntk_1, vpi_ntk_2), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(vpi_ntk_1, vpi_ntk_2);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
 }
 
@@ -157,39 +185,65 @@ TEMPLATE_TEST_CASE("Virtual miter with mockturtle networks", "[virtual-miter]", 
     vpi_ntk_2.create_po(o1_v2);
 
     // check for the exodc path 1
-    mockturtle::equivalence_checking_stats st;
-    auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(test_ntk, test_dc), {}, &st);
+    auto maybe_cec_m = virtual_miter_equivalent(test_ntk, test_dc);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
     // check for the exodc path 2
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(test_dc, test_ntk), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(test_dc, test_ntk);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
     // check for the handle virtual pi path 1
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(vpi_ntk_1, test_ntk), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(vpi_ntk_1, test_ntk);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
     // check for the handle virtual pi path 2
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(test_ntk, vpi_ntk_2), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(test_ntk, vpi_ntk_2);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
     // check for the handle virtual pi path 3
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(vpi_ntk_1, vpi_ntk_2), {}, &st);
+    maybe_cec_m = virtual_miter_equivalent(vpi_ntk_1, vpi_ntk_2);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
-        CHECK(*maybe_cec_m == 1);
+        CHECK(maybe_cec_m.value_or(false));
     }
+}
+
+TEST_CASE("Virtual miter pairs the inputs of a rank view by creation order", "[virtual-miter]")
+{
+    // the second input drives nothing, so a rank view lists it after the third one
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    tec.create_pi();
+    const auto x3 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x3));
+    tec.create_po(x3);
+
+    virtual_pi_network<technology_network> vpi{};
+
+    const auto y1 = vpi.create_pi();
+    vpi.create_pi();
+    const auto y3 = vpi.create_pi();
+    const auto v1 = vpi.create_virtual_pi(y1);
+    vpi.create_po(vpi.create_and(v1, y3));
+    vpi.create_po(y3);
+
+    const mutable_rank_view ranked{vpi};
+
+    const auto cec = virtual_miter_equivalent(tec, ranked);
+    REQUIRE(cec.has_value());
+    CHECK(cec.value_or(false));
 }

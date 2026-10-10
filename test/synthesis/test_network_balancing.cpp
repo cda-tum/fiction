@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Tests for `fiction/synthesis/network_balancing.hpp`.
+ * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */
 
@@ -25,6 +26,8 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
+
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -103,4 +106,45 @@ TEST_CASE("Balance a network without primary outputs", "[network-balancing]")
     const auto balanced = network_balancing<technology_network>(ntk, {.unify_outputs = true});
     CHECK(balanced.num_pis() == 1);
     CHECK(balanced.num_pos() == 0);
+}
+
+TEST_CASE("Constant primary outputs are not buffered when unifying outputs", "[network-balancing]")
+{
+    technology_network ntk{};
+
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+    const auto a1 = ntk.create_and(x1, x2);
+    const auto a2 = ntk.create_and(a1, x1);
+    ntk.create_po(a2);
+    ntk.create_po(ntk.get_constant(false));
+
+    // by default, the constant output is buffered up to the output level like any other
+    const auto buffered = network_balancing<technology_network>(ntk, {.unify_outputs = true});
+
+    CHECK(is_balanced(buffered, {.unify_outputs = true}));
+    CHECK(buffered.size() == ntk.size() + 1 + 2);
+
+    const auto balanced =
+        network_balancing<technology_network>(ntk, {.unify_outputs = true, .buffer_constant_outputs = false});
+
+    CHECK(is_balanced(balanced, {.unify_outputs = true, .buffer_constant_outputs = false}));
+    CHECK(!is_balanced(balanced, {.unify_outputs = true}));
+    CHECK(balanced.num_pos() == 2);
+
+    uint32_t constant_pos = 0;
+    balanced.foreach_po(
+        [&balanced, &constant_pos](const auto& po)
+        {
+            if (balanced.is_constant(balanced.get_node(po)))
+            {
+                ++constant_pos;
+            }
+        });
+    CHECK(constant_pos == 1);
+
+    // one buffer balances x1 into a2; the constant output receives none
+    CHECK(balanced.size() == ntk.size() + 1);
+
+    check_eq(ntk, balanced);
 }
