@@ -1149,3 +1149,41 @@ TEST_CASE("Name presence queries do not allocate", "[gate-layout-editing]")
     CHECK_FALSE(layout.has_name(input));
     CHECK_FALSE(layout.has_input_name(0));
 }
+
+TEST_CASE("Failed name assignment preserves name presence", "[gate-layout-editing]")
+{
+    require_allocation_failure_support();
+    /** Long name whose assignment requires string storage. */
+    const std::string name(128, 'a');
+    for (std::size_t failure{};; ++failure)
+    {
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
+        /** Unnamed object with no existing name-map entry. */
+        gate_level_layout<cartesian_layout> layout{{1, 1}};
+        /** Input whose name assignment may fail. */
+        const auto input = layout.create_pi("", {0, 0});
+        /** Whether the name assignment completed. */
+        bool named{};
+        allocation_budget = failure;
+        try
+        {
+            layout.set_name(input, name);
+            named = true;
+        }
+        catch (const std::bad_alloc&)
+        {}
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+        allocation_budget.reset();
+        CHECK(layout.has_name(input) == named);
+        CHECK(layout.has_input_name(0) == named);
+        CHECK(layout.get_name(input) == (named ? name : std::string{}));
+        if (named)
+        {
+            break;
+        }
+    }
+}

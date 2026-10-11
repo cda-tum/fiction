@@ -633,6 +633,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Gate-layout name-presence queries now report empty names consistently after failed assignment.
   - Gate-layout name-presence queries now avoid copying names and allocating memory.
   - Cartesian, hexagonal, and gate-layout clocked neighbor visitors now invoke temporary and move-only callbacks
     as lvalues.

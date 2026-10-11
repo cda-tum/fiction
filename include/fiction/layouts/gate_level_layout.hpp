@@ -839,7 +839,9 @@ class gate_level_layout : public CoordinateLayout
     [[nodiscard]] bool has_name(const object_id id) const
     {
         static_cast<void>(checked_object(id));
-        return names.contains(id);
+        /** @brief Stored name, which may remain empty after failed assignment. */
+        const auto it = names.find(id);
+        return it != names.end() && !it->second.empty();
     }
     /** @brief Returns the input name at an interface index. */
     [[nodiscard]] std::string get_input_name(const uint32_t index) const
