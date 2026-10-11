@@ -93,10 +93,14 @@ template <typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] constexpr Dist squared_euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                         const coordinate<Lyt>& target)
 {
-    /** Absolute differences of signed 32-bit coordinates, widened before subtraction. */
-    const auto x = static_cast<uint64_t>(std::abs(static_cast<int64_t>(source.x) - target.x));
+    /** Signed column difference, widened before subtraction. */
+    const auto dx = static_cast<int64_t>(source.x) - target.x;
+    /** Signed row difference, widened before subtraction. */
+    const auto dy = static_cast<int64_t>(source.y) - target.y;
+    /** Absolute column difference within the unsigned 32-bit range. */
+    const auto x = static_cast<uint64_t>(dx < 0 ? -dx : dx);
     /** Absolute row difference. */
-    const auto y = static_cast<uint64_t>(std::abs(static_cast<int64_t>(source.y) - target.y));
+    const auto y = static_cast<uint64_t>(dy < 0 ? -dy : dy);
     /** Largest result representable by the requested distance type. */
     constexpr auto maximum = static_cast<uint64_t>(std::numeric_limits<Dist>::max());
 

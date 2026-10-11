@@ -541,6 +541,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Squared Euclidean distance remains evaluable at compile time under C++20.
   - Squared Euclidean distance now preserves exact integer results and rejects distance-type overflow.
   - Coordinate normalization now shifts out-of-frame cells to the origin and preserves trailing frame padding.
   - Transactional writes now remove read-only temporary files after failed replacement.
