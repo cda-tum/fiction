@@ -113,7 +113,9 @@ TEST_CASE("Crossing counts survive failed connection allocation", "[gate-layout-
             created = true;
         }
         catch (const std::bad_alloc&)
-        {}
+        {
+            allocation_budget.reset();
+        }
         catch (...)
         {
             allocation_budget.reset();
@@ -1087,7 +1089,9 @@ TEST_CASE("Failed creation preserves object iteration across storage growth", "[
             created = true;
         }
         catch (const std::bad_alloc&)
-        {}
+        {
+            allocation_budget.reset();
+        }
         catch (...)
         {
             allocation_budget.reset();
@@ -1171,7 +1175,9 @@ TEST_CASE("Failed name assignment preserves name presence", "[gate-layout-editin
             named = true;
         }
         catch (const std::bad_alloc&)
-        {}
+        {
+            allocation_budget.reset();
+        }
         catch (...)
         {
             allocation_budget.reset();

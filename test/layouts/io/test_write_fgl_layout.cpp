@@ -563,6 +563,14 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
     /** Restored layout and port names. */
     const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
     CHECK(restored.get_layout_name() == "  ");
-    CHECK(restored.get_name(*restored.find_object({0, 0})) == "  ");
-    CHECK(restored.get_name(*restored.find_object({1, 0})) == "\t");
+    /** Restored terminals whose names must retain whitespace. */
+    const auto restored_input  = restored.find_object({0, 0});
+    const auto restored_output = restored.find_object({1, 0});
+    REQUIRE(restored_input.has_value());
+    REQUIRE(restored_output.has_value());
+    if (restored_input && restored_output)
+    {
+        CHECK(restored.get_name(*restored_input) == "  ");
+        CHECK(restored.get_name(*restored_output) == "\t");
+    }
 }
