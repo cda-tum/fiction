@@ -206,6 +206,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - Gate-level layouts now keep large-arity input storage outside the common object record.
+  - **Breaking:** Clocking scheme `name()` returns a borrowed `std::string_view`. Copy with
+    `std::string{scheme.name()}` when the name must outlive its scheme.
   - Gate-level layouts now use `create_gate`, `object_function`, `move_object`, and `foreach_object`.
     Layout assignment printers use object terminology; update callers to these names.
   - **Breaking:** Gate-level layouts now store placed objects with generation-checked IDs and typed ports. Replace tile-valued signals with object lookup and explicit input connections; copies are independent.

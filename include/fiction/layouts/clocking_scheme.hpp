@@ -185,6 +185,9 @@ class scheme
     /**
      * Name of the clocking scheme.
      *
+     * The view borrows storage from this scheme. Keep the scheme alive and unchanged while using the view,
+     * or copy it with `std::string{scheme.name()}`.
+     *
      * @return The canonical name, e.g., `"2DDWAVE"`, without a phase-count suffix.
      */
     [[nodiscard]] std::string_view name() const noexcept
@@ -286,6 +289,7 @@ class scheme
     /** @brief Returns the explicit cutout or the implicit OPEN cell. */
     [[nodiscard]] std::span<const clock_number> cutout() const noexcept
     {
+        /** @brief Single implicit cell of default OPEN clocking. */
         static constexpr clock_number OPEN_CELL{0};
         return cells.empty() ? std::span<const clock_number>{&OPEN_CELL, 1} : std::span<const clock_number>{cells};
     }
