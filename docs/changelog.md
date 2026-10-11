@@ -677,6 +677,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - Layout experiments now reject failed GENLIB and Verilog reads in Release builds.
+  - Clock-number assignment and color-routing experiments copy clocking names into string columns.
   - Layout experiments preserve their wire-count columns with physical wire counts that exclude terminals.
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
   - SiDB sweep initializers now name their fields, and pruning helpers propagate allocation failures.
