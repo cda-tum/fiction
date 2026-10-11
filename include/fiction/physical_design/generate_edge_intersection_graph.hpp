@@ -198,22 +198,15 @@ class generate_edge_intersection_graph_impl
     {
       public:
         /**
-         * Given another path, this function checks if they are not disjoint, i.e., it looks for at least one coordinate
-         * that both paths share.
+         * @brief Check whether this path shares an interior coordinate of the other path.
          *
          * @tparam Path Type of other path.
          * @param other The other path.
-         * @return `true` iff this path and the given one are not disjoint, i.e., share at least one coordinate.
+         * @return `true` iff this path contains an interior coordinate of the other path.
          */
         template <typename Path>
         bool has_intersection_with(const Path& other) const noexcept
         {
-            // if source and target are identical, an intersection was found
-            if (this->source() == other.source() && this->target() == other.target())
-            {
-                return true;
-            }
-
             if (other.size() <= 2)
             {
                 return false;
@@ -223,10 +216,7 @@ class generate_edge_intersection_graph_impl
                                               std::cend(*this)) != std::cend(other) - 1;
         }
         /**
-         * Like has_intersection_with but allows paths to share crossings, i.e., single-tile intersections.
-         *
-         * Similar to has_intersection_with, this function also returns `true` if source and target are matching in both
-         * paths.
+         * @brief Check for a shared segment, allowing single-tile intersections as crossings.
          *
          * @tparam Path Type of other path.
          * @param other The other path.
@@ -236,13 +226,7 @@ class generate_edge_intersection_graph_impl
         template <typename Path>
         bool has_overlap_with(const Path& other) const noexcept
         {
-            // if source and target are identical, an intersection was found
-            if (this->source() == other.source() && this->target() == other.target())
-            {
-                return true;
-            }
-
-            // else, check if any of the coordinates (including I/Os) form a shared segment in the stored path
+            // Include endpoints when checking for a shared segment.
             return fiction::utils::stl::find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this),
                                                           std::cend(*this)) != std::cend(other);
         }

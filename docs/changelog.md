@@ -547,6 +547,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - On-the-fly SiDB circuit design now rejects unsupported gate types before starting gate design.
   - Random-coordinate sampling now uses independent inclusive bounds for each axis.
   - Routing conflict graphs now detect overlaps after every path mutation and propagate allocation failures.
+  - Color routing now supports disjoint paths from one source to distinct inputs of the same gate.
   - Exact placement and GOLD now widen area calculations before multiplication.
   - Layout optimization now accepts interior terminals and clears crossing obstructions when lowering wires.
   - Name restoration now preserves unused inputs and gates that drive outputs.

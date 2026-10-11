@@ -82,6 +82,31 @@ TEST_CASE("Color routing preserves destination input indices", "[color-routing]"
     CHECK(layout.source({gate, 1}) == b);
 }
 
+TEST_CASE("Color routing connects repeated sources to distinct inputs", "[color-routing]")
+{
+    cart_gate_clk_lyt layout{{2, 2}, clocking::twoddwave()};
+    const auto        a          = layout.create_pi("a", {0, 0});
+    const auto        gate       = layout.create_lt(a, a, {1, 1});
+    const auto        objectives = extract_routing_objectives(layout);
+    clear_routing(layout);
+
+    color_routing_params ps{};
+    SECTION("Without crossings") {}
+    SECTION("With crossings")
+    {
+        ps.crossings = true;
+    }
+
+    REQUIRE(color_routing(layout, objectives, ps));
+    const auto first_source  = layout.source({gate, 0});
+    const auto second_source = layout.source({gate, 1});
+    REQUIRE(first_source.has_value());
+    REQUIRE(second_source.has_value());
+    CHECK(first_source != second_source);
+    CHECK(layout.source({*first_source, 0}) == a);
+    CHECK(layout.source({*second_source, 0}) == a);
+}
+
 TEST_CASE("Two paths wire connections", "[color-routing]")
 {
     auto spec_layout = blueprints::unbalanced_and_layout<cart_gate_clk_lyt>();
