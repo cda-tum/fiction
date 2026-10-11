@@ -126,12 +126,14 @@ Object and terminal visitors permit coordinate, name, and capability edits. Call
 objects, change terminal order, or replace the layout. Connection visitors preserve the traversed object and its
 input or sink connections. Connection callbacks may create or remove unrelated objects if those connections
 remain unchanged. Collect IDs before changing traversed membership or connections. Object traversal scans
-retained storage slots, so its cost depends on the historical slot count.
+one bitmap word per 64 retained slots and visits each live object. Its cost is
+$O(H / 64 + L)$ for $H$ historical slots and $L$ live objects.
 
 The layout stores object records and mutable connections in contiguous reusable pools. Indexed sink lists
 permit constant-time unlinking. Every built-in gate keeps its ordered inputs inline; gates with more than
 three inputs use separate overflow storage. Names and truth-table payloads also live outside object records.
 Removing an object releases its overflow inputs; the object and connection pools retain capacity for reuse.
+The live-object bitmap adds one bit per retained slot without enlarging object records.
 
 Contiguous connection storage does not make each object's sink list contiguous. Reconnecting inputs reuses
 free edge slots, so sink traversal follows indices that can span the pool. This representation supports local

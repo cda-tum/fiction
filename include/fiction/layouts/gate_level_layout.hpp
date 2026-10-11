@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
@@ -166,6 +167,7 @@ class gate_level_layout : public CoordinateLayout
     gate_level_layout(const gate_level_layout& other) :
             CoordinateLayout{static_cast<const CoordinateLayout&>(other).clone()},
             objects{other.objects},
+            live_object_bits{other.live_object_bits},
             spilled_inputs{other.spilled_inputs},
             edges{other.edges},
             occupancy{other.occupancy},
@@ -452,6 +454,7 @@ class gate_level_layout : public CoordinateLayout
         {
             std::erase(outputs, id.index);
         }
+        live_object_bits[id.index / 64u] &= ~(uint64_t{1} << (id.index % 64u));
         --live_count;
         wire_count -= object.function == 2;
         spilled_inputs.erase(id.index);
@@ -666,18 +669,24 @@ class gate_level_layout : public CoordinateLayout
     /**
      * @brief Visits live objects. Callbacks may accept an object and enumeration index and return false to stop.
      * Callbacks must not create or remove objects, change terminal order, or replace the layout.
-     * Traversal scans retained storage slots, including removed objects.
+     * Traversal scans one bitmap word per 64 retained slots and visits each live object.
      */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_object(Fn&& fn) const
     {
         uint32_t index{};
-        for (uint32_t slot{}; slot < objects.size(); ++slot)
+        for (uint32_t word_index{}; word_index < live_object_bits.size(); ++word_index)
         {
-            if (objects[slot].kind != object_kind::REMOVED && !visit(fn, identity(slot), index++))
+            auto word = live_object_bits[word_index];
+            while (word != 0)
             {
-                break;
+                const auto slot = word_index * 64u + static_cast<uint32_t>(std::countr_zero(word));
+                if (!visit(fn, identity(slot), index++))
+                {
+                    return;
+                }
+                word &= word - 1;
             }
         }
     }
@@ -1716,6 +1725,8 @@ class gate_level_layout : public CoordinateLayout
     };
     /** @brief Reusable object slots. */
     std::vector<object_record> objects{};
+    /** @brief Live object membership, with one bit per retained storage slot. */
+    std::vector<uint64_t> live_object_bits{};
     /** @brief Input-index to connection mapping for objects with more than three inputs. */
     phmap::flat_hash_map<uint32_t, std::vector<uint32_t>> spilled_inputs{};
     /** @brief Reusable contiguous connection storage. */
@@ -1760,6 +1771,7 @@ class gate_level_layout : public CoordinateLayout
     {
         using std::swap;
         swap(objects, other.objects);
+        swap(live_object_bits, other.live_object_bits);
         swap(spilled_inputs, other.spilled_inputs);
         swap(edges, other.edges);
         swap(occupancy, other.occupancy);
@@ -1905,6 +1917,10 @@ class gate_level_layout : public CoordinateLayout
         }
         const auto slot   = reuse ? free_object : static_cast<uint32_t>(objects.size());
         const auto before = crossing_at(t);
+        if (slot / 64u >= live_object_bits.size())
+        {
+            live_object_bits.resize(slot / 64u + 1u);
+        }
         if (arity > record.inputs.size())
         {
             spilled_inputs.emplace(slot, std::vector<uint32_t>(arity, NO_INDEX));
@@ -1929,6 +1945,7 @@ class gate_level_layout : public CoordinateLayout
             spilled_inputs.erase(slot);
             throw;
         }
+        live_object_bits[slot / 64u] |= uint64_t{1} << (slot % 64u);
         ++live_count;
         wire_count += static_cast<uint32_t>(function == 2);
         crossing_count = crossing_count - before + crossing_at(t);

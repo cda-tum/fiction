@@ -977,3 +977,106 @@ TEST_CASE("Clocked neighbor visitors accept move-only lvalues and temporaries", 
     lyt.foreach_outgoing_clocked_zone({1, 1}, visitor{.calls = std::make_unique<uint32_t>(0), .observed = outgoing});
     CHECK(outgoing == std::set<layout::coordinate>{{1, 2}, {2, 1}});
 }
+
+TEST_CASE("Object iteration preserves sparse membership through reuse and ownership changes", "[gate-layout-editing]")
+{
+    gate_level_layout<cartesian_layout> lyt{};
+    std::vector<layout_object_id>       objects{};
+    std::set<layout_object_id>          expected{};
+    for (int32_t x{}; x < 130; ++x)
+    {
+        objects.push_back(lyt.create_buf({x, 0}));
+    }
+    for (uint32_t index{}; index < objects.size(); ++index)
+    {
+        if (index == 0 || index == 63 || index == 64 || index == 127 || index == 129)
+        {
+            expected.insert(objects[index]);
+        }
+        else
+        {
+            lyt.remove(objects[index]);
+        }
+    }
+    const auto replacement = lyt.create_buf({1, 0});
+    expected.insert(replacement);
+    /** @brief Checks live membership and contiguous visitor indices without assuming traversal order. */
+    const auto check_membership = [&](const auto& layout)
+    {
+        std::set<layout_object_id> visited{};
+        uint32_t                   count{};
+        layout.foreach_object(
+            [&](const auto id, const auto index)
+            {
+                CHECK(index == count++);
+                visited.insert(id);
+            });
+        CHECK(visited == expected);
+        CHECK(count == layout.size());
+        count = 0;
+        layout.foreach_object([&](const auto) { return ++count < 2; });
+        CHECK(count == 2);
+    };
+    check_membership(lyt);
+    auto copied = lyt;
+    check_membership(copied);
+    auto moved = std::move(copied);
+    check_membership(moved);
+    copied = lyt;
+    check_membership(copied);
+    copied = std::move(moved);
+    check_membership(copied);
+    lyt.remove(replacement);
+    CHECK(copied.contains(replacement));
+}
+
+TEST_CASE("Failed creation preserves object iteration across storage growth", "[gate-layout-editing]")
+{
+    require_allocation_failure_support();
+    const auto initial_count = GENERATE(0, 64, 128);
+    for (std::size_t failure{};; ++failure)
+    {
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
+        gate_level_layout<cartesian_layout> lyt{};
+        std::set<layout_object_id>          expected{};
+        for (int32_t x{}; x < initial_count; ++x)
+        {
+            expected.insert(lyt.create_buf({x, 0}));
+        }
+        bool             created{};
+        layout_object_id added{};
+        allocation_budget = failure;
+        try
+        {
+            added   = lyt.create_buf({initial_count, 0});
+            created = true;
+        }
+        catch (const std::bad_alloc&)
+        {}
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+        allocation_budget.reset();
+        if (created)
+        {
+            expected.insert(added);
+        }
+        std::set<layout_object_id> visited{};
+        lyt.foreach_object([&](const auto id) { visited.insert(id); });
+        CHECK(visited == expected);
+        CHECK(lyt.size() == expected.size());
+        if (created)
+        {
+            break;
+        }
+        CHECK_FALSE(lyt.find_object({initial_count, 0}).has_value());
+        const auto recovered = lyt.create_buf({initial_count, 0});
+        CHECK(lyt.contains(recovered));
+        expected.insert(recovered);
+        visited.clear();
+        lyt.foreach_object([&](const auto id) { visited.insert(id); });
+        CHECK(visited == expected);
+    }
+}
