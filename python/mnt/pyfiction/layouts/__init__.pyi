@@ -2538,8 +2538,11 @@ class cartesian_gate_layout(cartesian_layout):
     def is_fanout(self, arg: LayoutObjectId, /) -> bool:
         """Returns whether an identity object drives more than one input port."""
 
-    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+    def is_buf(self, arg: LayoutObjectId, /) -> bool:
         """Returns whether an object computes the identity function."""
+
+    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an object is a physical wire rather than a terminal."""
 
     def set_layout_name(self, name: str) -> None:
         """Sets the layout name."""
@@ -2652,10 +2655,10 @@ class cartesian_gate_layout(cartesian_layout):
         """Counts primary outputs."""
 
     def num_gates(self) -> int:
-        """Counts non-identity objects."""
+        """Counts logic gates, excluding wires and terminals."""
 
     def num_wires(self) -> int:
-        """Counts identity objects, including terminals."""
+        """Counts physical wires, excluding primary inputs and outputs."""
 
     def num_crossings(self) -> int:
         """Counts crossing-layer wires above occupied ground-layer tiles."""
@@ -3498,8 +3501,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def is_fanout(self, arg: LayoutObjectId, /) -> bool:
         """Returns whether an identity object drives more than one input port."""
 
-    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+    def is_buf(self, arg: LayoutObjectId, /) -> bool:
         """Returns whether an object computes the identity function."""
+
+    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an object is a physical wire rather than a terminal."""
 
     def set_layout_name(self, name: str) -> None:
         """Sets the layout name."""
@@ -3612,10 +3618,10 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         """Counts primary outputs."""
 
     def num_gates(self) -> int:
-        """Counts non-identity objects."""
+        """Counts logic gates, excluding wires and terminals."""
 
     def num_wires(self) -> int:
-        """Counts identity objects, including terminals."""
+        """Counts physical wires, excluding primary inputs and outputs."""
 
     def num_crossings(self) -> int:
         """Counts crossing-layer wires above occupied ground-layer tiles."""
@@ -4458,8 +4464,11 @@ class hexagonal_gate_layout(hexagonal_layout):
     def is_fanout(self, arg: LayoutObjectId, /) -> bool:
         """Returns whether an identity object drives more than one input port."""
 
-    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+    def is_buf(self, arg: LayoutObjectId, /) -> bool:
         """Returns whether an object computes the identity function."""
+
+    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+        """Returns whether an object is a physical wire rather than a terminal."""
 
     def set_layout_name(self, name: str) -> None:
         """Sets the layout name."""
@@ -4572,10 +4581,10 @@ class hexagonal_gate_layout(hexagonal_layout):
         """Counts primary outputs."""
 
     def num_gates(self) -> int:
-        """Counts non-identity objects."""
+        """Counts logic gates, excluding wires and terminals."""
 
     def num_wires(self) -> int:
-        """Counts identity objects, including terminals."""
+        """Counts physical wires, excluding primary inputs and outputs."""
 
     def num_crossings(self) -> int:
         """Counts crossing-layer wires above occupied ground-layer tiles."""
@@ -5202,8 +5211,9 @@ def normalize_layout_coordinates(lyt: mnt.pyfiction.inml.inml_layout) -> mnt.pyf
     Returns a copy of the given cell grid layout whose cells are shifted
     towards the origin, so that the smallest occupied x- and y-coordinates
     become 0. Cell types, names, and, where the layout has them, cell
-    modes move with their cells; layers, the layout name, and the clocking
-    stay unchanged. The extent shrinks by the shift.
+    modes move with their cells. Layer coordinates, the layout name, and
+    the clocking stay unchanged. The extent preserves trailing padding and
+    encloses translated x/y coordinates and occupied nonnegative layers.
 
     Args:
         lyt: The layout to normalize.
@@ -5214,6 +5224,10 @@ def normalize_layout_coordinates(lyt: mnt.pyfiction.inml.inml_layout) -> mnt.pyf
 
     Returns:
         Normalized copy of `lyt`.
+
+    Raises:
+        std::invalid_argument: If the normalized extent exceeds the signed
+                               coordinate domain.
     """
 
 def random_coordinate(

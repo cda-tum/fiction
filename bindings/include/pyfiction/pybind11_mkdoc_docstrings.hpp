@@ -2329,6 +2329,8 @@ regularity, and overridden clock numbers are equal.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_cells = R"doc(Cutout entries in row-major order.)doc";
 
+static const char *mkd_doc_fiction_layouts_clocking_scheme_cutout = R"doc(Returns the explicit cutout or the implicit OPEN cell.)doc";
+
 static const char *mkd_doc_fiction_layouts_clocking_scheme_floor_mod =
 R"doc(Modulo that rounds toward negative infinity, so that a cutout repeats
 seamlessly at negative coordinates.
@@ -2384,6 +2386,10 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_name =
 R"doc(Name of the clocking scheme.
+
+The view borrows storage from this scheme. Keep the scheme alive and
+unchanged while using the view, or copy it with
+`std::string{scheme.name()}`.
 
 Returns:
     The canonical name, e.g., `"2DDWAVE"`, without a phase-count
@@ -2463,7 +2469,9 @@ static const char *mkd_doc_fiction_layouts_clocking_scheme_phases = R"doc(Number
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_regular_flag = R"doc(Defines the clocking as regular and well-defined by the cutout.)doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme =
+static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme = R"doc(Creates a four-phase OPEN scheme without allocating storage.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_2 =
 R"doc(Standard constructor.
 
 Args:
@@ -2489,9 +2497,9 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_2 = R"doc(Copies the complete clocking scheme.)doc";
+static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_3 = R"doc(Copies the complete clocking scheme.)doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_3 = R"doc(Moves the clocking scheme.)doc";
+static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_4 = R"doc(Moves the clocking scheme.)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_name = R"doc(Canonical name.)doc";
 
@@ -2933,6 +2941,14 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xnor = R"doc
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xor = R"doc(Creates a XOR gate.)doc";
 
+static const char *mkd_doc_fiction_layouts_gate_level_layout_crossing_contribution =
+R"doc(Returns the crossing formed by this object and the opposite crossing
+layer.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_crossing_count = R"doc(Crossing-layer wires with an occupied ground tile.)doc";
+
 static const char *mkd_doc_fiction_layouts_gate_level_layout_degree =
 R"doc(Returns the number of distinct incoming or outgoing neighboring clock
 zones.
@@ -3051,7 +3067,8 @@ index and return false to stop.
 Callbacks must not create or remove objects, change terminal order, or
 replace the layout.
 
-Traversal scans retained storage slots, including removed objects.
+Traversal scans one bitmap word per 64 retained slots and visits each
+live object.
 
 )doc";
 
@@ -3143,7 +3160,7 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_wire =
-R"doc(Visits identity objects, including terminals.
+R"doc(Visits physical wires, excluding primary inputs and outputs.
 
 Callbacks must not create or remove objects, change terminal order, or
 replace the layout.
@@ -3735,7 +3752,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire = R"doc(Returns whether an object computes the identity function.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire = R"doc(Returns whether an object is a physical wire rather than a terminal.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire_tile = R"doc(Returns whether the coordinate hosts a wire.)doc";
 
@@ -3746,6 +3763,8 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_is_xor = R"doc(Retu
 static const char *mkd_doc_fiction_layouts_gate_level_layout_layout_name = R"doc(Layout name.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_live_count = R"doc(Live object count.)doc";
+
+static const char *mkd_doc_fiction_layouts_gate_level_layout_live_object_bits = R"doc(Live object membership, with one bit per retained storage slot.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_move_object = R"doc(Moves an object without changing its identity or connections.)doc";
 
@@ -3763,7 +3782,7 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_crossings = R"doc(Counts crossing-layer wires above occupied ground-layer tiles.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_gates = R"doc(Counts non-identity objects.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_gates = R"doc(Counts logic gates, excluding wires and terminals.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_pis = R"doc(Counts primary inputs.)doc";
 
@@ -3775,7 +3794,7 @@ Synchronization element count.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_wires = R"doc(Counts identity objects, including terminals.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_num_wires = R"doc(Counts physical wires, excluding primary inputs and outputs.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_function = R"doc(Returns the truth table in logical input-index order.)doc";
 
@@ -3940,7 +3959,7 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_unlink_edge = R"doc
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_visit = R"doc(Visits a value with an optional enumeration index and early stopping.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_wire_count = R"doc(Live identity-function count.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_wire_count = R"doc(Live physical-wire count.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout =
 R"doc( A layout type that utilizes offset coordinates to represent a
@@ -5854,8 +5873,9 @@ static const char *mkd_doc_fiction_layouts_normalize_layout_coordinates =
 R"doc(Returns a copy of the given cell grid layout whose cells are shifted
 towards the origin, so that the smallest occupied x- and y-coordinates
 become 0. Cell types, names, and, where the layout has them, cell
-modes move with their cells; layers, the layout name, and the clocking
-stay unchanged. The extent shrinks by the shift.
+modes move with their cells. Layer coordinates, the layout name, and
+the clocking stay unchanged. The extent preserves trailing padding and
+encloses translated x/y coordinates and occupied nonnegative layers.
 
 Args:
     lyt: The layout to normalize.
@@ -5866,6 +5886,10 @@ Template Args:
 
 Returns:
     Normalized copy of `lyt`.
+
+Raises:
+    std::invalid_argument: If the normalized extent exceeds the signed
+                           coordinate domain.
 
 )doc";
 
@@ -9596,8 +9620,8 @@ Raises:
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path = R"doc(A coordinate path with its graph vertex label.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_has_intersection_with =
-R"doc(Given another path, this function checks if they are not disjoint,
-i.e., it looks for at least one coordinate that both paths share.
+R"doc(Check whether this path shares an interior coordinate of the other
+path.
 
 Args:
     other: The other path.
@@ -9606,17 +9630,14 @@ Template Args:
     Path: Type of other path.
 
 Returns:
-    `true` iff this path and the given one are not disjoint, i.e.,
-    share at least one coordinate.
+    `true` iff this path contains an interior coordinate of the other
+    path.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_has_overlap_with =
-R"doc(Like has_intersection_with but allows paths to share crossings, i.e.,
-single-tile intersections.
-
-Similar to has_intersection_with, this function also returns `true` if
-source and target are matching in both paths.
+R"doc(Check for a shared segment, allowing single-tile intersections as
+crossings.
 
 Args:
     other: The other path.
@@ -12588,6 +12609,10 @@ Template Args:
 
 Returns:
     Squared euclidean distance between `source` and `target`.
+
+Raises:
+    std::overflow_error: If the squared distance is not representable
+                         by `Dist`.
 
 )doc";
 
@@ -27188,7 +27213,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_verification_detail_gate_level_drvs_impl_crossing_gates_check =
-R"doc(Check for wires crossing gates.
+R"doc(Check that crossing-layer objects and the objects below them are
+physical wires.
 
 Returns:
     Check summary as a one liner.

@@ -127,6 +127,10 @@ def squared_euclidean_distance(
 
     Returns:
         Squared euclidean distance between `source` and `target`.
+
+    Raises:
+        std::overflow_error: If the squared distance is not representable
+                             by `Dist`.
     """
 
 @overload
