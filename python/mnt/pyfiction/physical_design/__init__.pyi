@@ -195,11 +195,17 @@ class exact_stats:
     @property
     def y_size(self) -> int: ...
     @property
-    def num_gates(self) -> int: ...
+    def num_gates(self) -> int:
+        """Number of logic gates, excluding primary inputs and outputs."""
+
     @property
-    def num_wires(self) -> int: ...
+    def num_wires(self) -> int:
+        """Number of physical wires, excluding primary inputs and outputs."""
+
     @property
-    def num_crossings(self) -> int: ...
+    def num_crossings(self) -> int:
+        """Number of crossing-layer wires above occupied ground-layer tiles."""
+
     @property
     def num_aspect_ratios(self) -> int: ...
 
@@ -504,11 +510,16 @@ class orthogonal_stats:
     @property
     def y_size(self) -> int: ...
     @property
-    def num_gates(self) -> int: ...
+    def num_gates(self) -> int:
+        """Number of logic gates, excluding primary inputs and outputs."""
+
     @property
-    def num_wires(self) -> int: ...
+    def num_wires(self) -> int:
+        """Number of physical wires, excluding primary inputs and outputs."""
+
     @property
-    def num_crossings(self) -> int: ...
+    def num_crossings(self) -> int:
+        """Number of crossing-layer wires above occupied ground-layer tiles."""
 
 def orthogonal(
     network: mnt.pyfiction.networks.technology_network,
@@ -903,7 +914,7 @@ class graph_oriented_layout_design_stats:
 
     @property
     def num_wires(self) -> int:
-        """Number of wires."""
+        """Number of physical wires, excluding primary inputs and outputs."""
 
     @property
     def num_crossings(self) -> int:
@@ -1375,7 +1386,7 @@ class hexagonalization_stats:
 
     @property
     def num_wires(self) -> int:
-        """Number of wires."""
+        """Number of physical wires, excluding primary inputs and outputs."""
 
     @property
     def num_crossings(self) -> int:

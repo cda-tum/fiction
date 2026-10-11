@@ -1087,6 +1087,10 @@ Returns:
 
 Raises:
     std::invalid_argument: If `lyt` shifts rows instead of columns.
+    fcn::unsupported_gate_type_exception: If a terminal also acts as a
+                                          fanout. Connect the terminal
+                                          to a separate fanout wire
+                                          instead.
 
 )doc";
 
@@ -11158,11 +11162,11 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats =
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_aspect_ratios = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_crossings = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_crossings = R"doc(Number of crossing-layer wires above occupied ground-layer tiles.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_gates = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_gates = R"doc(Number of logic gates, excluding primary inputs and outputs.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_wires = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_wires = R"doc(Number of physical wires, excluding primary inputs and outputs.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_report = R"doc()doc";
 
@@ -11498,7 +11502,7 @@ static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_stats_num_gates = R"doc(Number of gates.)doc";
 
-static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_stats_num_wires = R"doc(Number of wires.)doc";
+static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_stats_num_wires = R"doc(Number of physical wires, excluding primary inputs and outputs.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_stats_report =
 R"doc(Reports the statistics to the given output stream.
@@ -11586,7 +11590,7 @@ static const char *mkd_doc_fiction_physical_design_hexagonalization_stats_num_cr
 
 static const char *mkd_doc_fiction_physical_design_hexagonalization_stats_num_gates = R"doc(Number of gates.)doc";
 
-static const char *mkd_doc_fiction_physical_design_hexagonalization_stats_num_wires = R"doc(Number of wires.)doc";
+static const char *mkd_doc_fiction_physical_design_hexagonalization_stats_num_wires = R"doc(Number of physical wires, excluding primary inputs and outputs.)doc";
 
 static const char *mkd_doc_fiction_physical_design_hexagonalization_stats_report =
 R"doc(Reports the statistics to the given output stream.
@@ -11742,11 +11746,11 @@ static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_pa
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_num_crossings = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_num_crossings = R"doc(Number of crossing-layer wires above occupied ground-layer tiles.)doc";
 
-static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_num_gates = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_num_gates = R"doc(Number of logic gates, excluding primary inputs and outputs.)doc";
 
-static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_num_wires = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_num_wires = R"doc(Number of physical wires, excluding primary inputs and outputs.)doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_report = R"doc()doc";
 
@@ -13608,6 +13612,12 @@ Template Args:
 Returns:
     QCA ONE gate representation of `t` including I/Os, rotation, const
     cells, etc.
+
+Raises:
+    fcn::unsupported_gate_type_exception: If a terminal also acts as a
+                                          fanout. Connect the terminal
+                                          to a separate fanout wire
+                                          instead.
 
 )doc";
 
