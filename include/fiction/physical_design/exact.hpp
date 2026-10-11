@@ -181,7 +181,12 @@ struct exact_physical_design_stats
     mockturtle::stopwatch<>::duration time_total{0};
 
     uint64_t x_size{0ull}, y_size{0ull};
-    uint64_t num_gates{0ull}, num_wires{0ull}, num_crossings{0ull};
+    /** @brief Number of logic gates, excluding primary inputs and outputs. */
+    uint64_t num_gates{0ull};
+    /** @brief Number of physical wires, excluding primary inputs and outputs. */
+    uint64_t num_wires{0ull};
+    /** @brief Number of crossing-layer wires above occupied ground-layer tiles. */
+    uint64_t num_crossings{0ull};
 
     uint32_t num_aspect_ratios{0ul};
 

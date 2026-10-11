@@ -121,7 +121,7 @@ struct hexagonalization_stats
      */
     uint64_t num_gates{0ull};
     /**
-     * Number of wires.
+     * Number of physical wires, excluding primary inputs and outputs.
      */
     uint64_t num_wires{0ull};
     /**
