@@ -418,13 +418,12 @@ class gate_level_layout : public CoordinateLayout
             return id;
         }
         check_placement(t);
-        const auto old_position = object.position;
-        const bool same_column  = old_position.x == t.x && old_position.y == t.y;
-        const auto before       = crossing_at(old_position) + (same_column ? 0u : crossing_at(t));
+        /** @brief Crossing removed from the object's old position after placement succeeds. */
+        const auto before = crossing_contribution(object.position, object.kind);
         occupancy.emplace(t, id.index);
         occupancy.erase(object.position);
         object.position = t;
-        crossing_count  = crossing_count - before + crossing_at(old_position) + (same_column ? 0u : crossing_at(t));
+        crossing_count  = crossing_count - before + crossing_contribution(t, object.kind);
         return id;
     }
     /** @brief Removes an object and disconnects all inputs and sinks. Stale identities reject. */
@@ -442,9 +441,8 @@ class gate_level_layout : public CoordinateLayout
         {
             unlink_edge(object.first_sink);
         }
-        const auto before = crossing_at(object.position);
+        crossing_count -= crossing_contribution(object.position, object.kind);
         occupancy.erase(object.position);
-        crossing_count = crossing_count - before + crossing_at(object.position);
         names.erase(id);
         if (object.kind == object_kind::PI)
         {
@@ -1759,12 +1757,16 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Crossing-layer wires with an occupied ground tile. */
     uint32_t crossing_count{};
 
-    /** @brief Returns the crossing contribution of an XY column. */
-    [[nodiscard]] uint32_t crossing_at(const tile& t) const noexcept
+    /** @brief Returns the crossing formed by this object and the opposite crossing layer. */
+    [[nodiscard]] uint32_t crossing_contribution(const tile& t, const object_kind kind) const noexcept
     {
-        const auto upper = occupancy.find({t.x, t.y, 1});
-        return upper != occupancy.end() && objects[upper->second].kind == object_kind::WIRE &&
-               occupancy.contains({t.x, t.y, 0});
+        if (t.z == 0)
+        {
+            /** @brief Occupant above the edited ground-layer object. */
+            const auto upper = occupancy.find({t.x, t.y, 1});
+            return upper != occupancy.end() && objects[upper->second].kind == object_kind::WIRE;
+        }
+        return t.z == 1 && kind == object_kind::WIRE && occupancy.contains({t.x, t.y, 0});
     }
 
     /** @brief Swaps owned state without changing geometry. */
@@ -1916,8 +1918,7 @@ class gate_level_layout : public CoordinateLayout
         {
             throw std::length_error("Layout object capacity exhausted");
         }
-        const auto slot   = reuse ? free_object : static_cast<uint32_t>(objects.size());
-        const auto before = crossing_at(t);
+        const auto slot = reuse ? free_object : static_cast<uint32_t>(objects.size());
         if (slot / 64u >= live_object_bits.size())
         {
             live_object_bits.resize(slot / 64u + 1u);
@@ -1949,8 +1950,8 @@ class gate_level_layout : public CoordinateLayout
         live_object_bits[slot / 64u] |= uint64_t{1} << (slot % 64u);
         ++live_count;
         wire_count += static_cast<uint32_t>(kind == object_kind::WIRE);
-        crossing_count = crossing_count - before + crossing_at(t);
-        const auto id  = identity(slot);
+        crossing_count += crossing_contribution(t, kind);
+        const auto id = identity(slot);
         try
         {
             for (uint32_t input{}; input < children.size(); ++input)
