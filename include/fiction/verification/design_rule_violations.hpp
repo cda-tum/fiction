@@ -403,7 +403,7 @@ class gate_level_drvs_impl
         return summary("all occupied tiles are properly connected", all_connected, true);
     }
     /**
-     * Check for wires crossing gates.
+     * Check that crossing-layer objects and the objects below them are physical wires.
      *
      * @return Check summary as a one liner.
      */
@@ -415,13 +415,13 @@ class gate_level_drvs_impl
 
         if (!lyt.is_empty())
         {
-            utils::progress_reporter traversal{ps.on_progress, "crossing gates", lyt.num_wires()};
-            lyt.foreach_wire(
+            utils::progress_reporter traversal{ps.on_progress, "crossing gates", lyt.size()};
+            lyt.foreach_object(
                 [this, &crossing_report, &all_wire_crossings, &traversal](const auto& w)
                 {
                     if (const auto t = lyt.get_tile(w); lyt.is_crossing_layer(t))
                     {
-                        if (const auto lower = lyt.below(t); !lower || !lyt.is_wire_tile(*lower))
+                        if (const auto lower = lyt.below(t); !lyt.is_wire(w) || !lower || !lyt.is_wire_tile(*lower))
                         {
                             all_wire_crossings = false;
                             log_tile(t, crossing_report);

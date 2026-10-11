@@ -423,8 +423,7 @@ wiring_reduction_layout create_wiring_reduction_layout(const Lyt& lyt, const int
             auto is_single_wire = [&lyt, &old_coord](const int32_t add_x_offset, const int32_t add_y_offset)
             {
                 const auto id = lyt.find_object({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 0});
-                return id && lyt.is_wire(*id) && !lyt.is_gate(*id) && !lyt.is_pi(*id) && !lyt.is_po(*id) &&
-                       !lyt.is_fanout(*id) &&
+                return id && lyt.is_wire(*id) && !lyt.is_fanout(*id) &&
                        lyt.is_empty_tile({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 1});
             };
 
@@ -450,7 +449,7 @@ wiring_reduction_layout create_wiring_reduction_layout(const Lyt& lyt, const int
                     {new_coord.x - add_x_offset, new_coord.y - add_y_offset, 1});
             };
 
-            if (lyt.is_gate(object) || !lyt.is_wire(object) || lyt.fanout_size(object) != 1 || old_coord.z != 0)
+            if (!lyt.is_wire(object) || lyt.fanout_size(object) != 1 || old_coord.z != 0)
             {
                 obstruct_coordinate(0, 0);
             }
@@ -466,8 +465,7 @@ wiring_reduction_layout create_wiring_reduction_layout(const Lyt& lyt, const int
                 wiring_reduction_lyt.search_obstructions.obstruct_connection(shifted_tile, new_coord);
 
                 // obstruct horizontal/vertical wires, non-wire gates (inv) and fanouts
-                if (!lyt.is_wire(object) || lyt.is_gate(object) || (lyt.fanout_size(object) != 1) ||
-                    (old_coord.z != 0) ||
+                if (!lyt.is_wire(object) || (lyt.fanout_size(object) != 1) || (old_coord.z != 0) ||
                     (lyt.has_western_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}) &&
                      (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)) ||
                     (lyt.has_northern_incoming_signal({old_coord}) && lyt.has_southern_outgoing_signal({old_coord}) &&
@@ -846,7 +844,7 @@ void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
     {
         if (const auto id = lyt.find_object(t))
         {
-            if (!lyt.is_wire(*id) || lyt.is_gate(*id) || lyt.is_pi(*id) || lyt.is_po(*id) || lyt.is_fanout(*id))
+            if (!lyt.is_wire(*id) || lyt.is_fanout(*id))
             {
                 throw std::invalid_argument("A wiring cut selects a retained object");
             }
@@ -941,7 +939,7 @@ class wiring_reduction_impl
         mockturtle::stopwatch stop{pst.time_total};
 
         // record initial layout statistics
-        pst.num_wires_before = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_wires_before = plyt.num_wires();
         pst.x_size_before    = plyt.width();
         pst.y_size_before    = plyt.height();
 
@@ -1053,7 +1051,7 @@ class wiring_reduction_impl
         area_percentage_difference = std::round(area_percentage_difference * 100.0) / 100.0;
 
         pst.area_improvement = area_percentage_difference;
-        pst.num_wires_after  = layout.num_wires() - layout.num_pis() - layout.num_pos();
+        pst.num_wires_after  = layout.num_wires();
 
         double wiring_percentage_difference =
             pst.num_wires_before == 0 ?

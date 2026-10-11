@@ -234,6 +234,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("is_ge", &GateLyt::is_ge, DOC(fiction_layouts_gate_level_layout_is_ge))
         .def("is_maj", &GateLyt::is_maj, DOC(fiction_layouts_gate_level_layout_is_maj))
         .def("is_fanout", &GateLyt::is_fanout, DOC(fiction_layouts_gate_level_layout_is_fanout))
+        .def("is_buf", &GateLyt::is_buf, DOC(fiction_layouts_gate_level_layout_is_buf))
         .def("is_wire", &GateLyt::is_wire, DOC(fiction_layouts_gate_level_layout_is_wire))
 
         .def("set_layout_name", &GateLyt::set_layout_name, py::arg("name"),

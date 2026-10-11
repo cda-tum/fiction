@@ -366,7 +366,7 @@ class post_layout_optimization_impl
         // record initial layout statistics
         pst.x_size_before        = plyt.width();
         pst.y_size_before        = plyt.height();
-        pst.num_wires_before     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_wires_before     = plyt.num_wires();
         pst.num_crossings_before = plyt.num_crossings();
 
         // determine the maximum number of gate relocations
@@ -506,7 +506,7 @@ class post_layout_optimization_impl
                                                     static_cast<double>(area_before) * 100.0;
         pst.area_improvement              = std::round(area_percentage_difference * 100) / 100.0;
 
-        pst.num_wires_after     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_wires_after     = plyt.num_wires();
         pst.num_crossings_after = plyt.num_crossings();
     }
 
@@ -577,8 +577,7 @@ class post_layout_optimization_impl
     {
         fanin_fanout_data<Lyt> data{};
         const auto             gate = *lyt.find_object(position);
-        const auto             wire = [&](const auto id)
-        { return lyt.is_wire(id) && !lyt.is_gate(id) && !lyt.is_pi(id) && !lyt.is_po(id) && lyt.fanout_size(id) == 1; };
+        const auto             wire = [&](const auto id) { return lyt.is_wire(id) && lyt.fanout_size(id) == 1; };
         lyt.foreach_fanin(gate,
                           [&](const auto source, const auto index)
                           {

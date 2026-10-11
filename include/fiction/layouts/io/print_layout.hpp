@@ -65,7 +65,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     // empty layout
-    if (layout.num_gates() == 0ul && layout.num_wires() == 0ul)
+    if (layout.is_empty())
     {
         os << "[i] empty layout\n";
         return;
@@ -141,15 +141,6 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
             {
                 return "+";
             }
-            if (layout.is_pi(n))
-            {
-                return "I";
-            }
-            if (layout.is_po(n))
-            {
-                return "O";
-            }
-
             return "=";
         }
 

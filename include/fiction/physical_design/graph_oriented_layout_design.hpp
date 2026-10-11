@@ -1954,7 +1954,7 @@ class graph_oriented_layout_design_impl
         // output the elapsed time
         std::cout << fmt::format("[i]   Time taken:       {} s {} ms {} µs\n", sec, ms, us);
         std::cout << fmt::format("[i]   Layout extent: {} × {} = {}\n", lyt.width(), lyt.height(), lyt.area());
-        std::cout << fmt::format("[i]   #Wires: {}\n", lyt.num_wires() - lyt.num_pis() - lyt.num_pos());
+        std::cout << fmt::format("[i]   #Wires: {}\n", lyt.num_wires());
         std::cout << fmt::format("[i]   #Crossings: {}\n", lyt.num_crossings());
         std::cout << fmt::format("[i]   ACP: {}\n", lyt.area() * (lyt.num_crossings() + 1));
     }
@@ -2006,7 +2006,7 @@ class graph_oriented_layout_design_impl
         }
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::WIRES)
         {
-            cost = layout.num_wires() - layout.num_pis() - layout.num_pos();
+            cost = layout.num_wires();
         }
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::CROSSINGS)
         {

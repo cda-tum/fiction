@@ -113,6 +113,17 @@ static void check_layout_equiv_all()
     }
 }
 
+TEST_CASE("Wiring reduction counts physical wires without terminals", "[wiring_reduction]")
+{
+    gate_level_layout<cartesian_layout> layout{{2, 1}, clocking::twoddwave()};
+    const auto                          input = layout.create_pi("a", {0, 0});
+    layout.create_po(input, "f", {1, 0});
+    wiring_reduction_stats stats{};
+    wiring_reduction(layout, {}, &stats);
+    CHECK(stats.num_wires_before == 0);
+    CHECK(stats.num_wires_after == 0);
+}
+
 TEST_CASE("Layout equivalence", "[wiring_reduction]")
 {
     SECTION("Cartesian layouts")

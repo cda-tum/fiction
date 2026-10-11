@@ -217,8 +217,7 @@ template <typename Lyt>
         const auto successor_node = lyt.find_object(successor);
 
         // one can only cross over wire segments, but not over I/Os
-        if (successor_node && lyt.is_wire(*successor_node) && !lyt.is_gate(*successor_node) &&
-            !lyt.is_pi(*successor_node) && !lyt.is_po(*successor_node))
+        if (successor_node && lyt.is_wire(*successor_node))
         {
             // if wire has missing connections, it is up to no good (could be a dangling fanout)
             if (lyt.has_no_incoming_signal(successor) || lyt.has_no_outgoing_signal(successor))
@@ -381,8 +380,7 @@ template <typename Lyt>
 std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    const auto intermediate = [&lyt](const auto id)
-    { return lyt.is_wire(id) && !lyt.is_gate(id) && !lyt.is_fanout(id) && !lyt.is_pi(id) && !lyt.is_po(id); };
+    const auto intermediate = [&lyt](const auto id) { return lyt.is_wire(id) && !lyt.is_fanout(id); };
     std::vector<routing_objective<Lyt>> objectives{};
     lyt.foreach_object(
         [&](const auto id)
@@ -427,7 +425,7 @@ void clear_routing(Lyt& lyt)
     lyt.foreach_object(
         [&](const auto id)
         {
-            if (lyt.is_wire(id) && !lyt.is_gate(id) && !lyt.is_fanout(id) && !lyt.is_pi(id) && !lyt.is_po(id))
+            if (lyt.is_wire(id) && !lyt.is_fanout(id))
             {
                 wires.push_back(id);
             }

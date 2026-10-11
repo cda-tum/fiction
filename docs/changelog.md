@@ -636,6 +636,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate-layout crossings now exclude primary input and output terminals.
   - Default OPEN clocking and gate-layout moves now allocate no storage.
   - Gate layouts maintain crossing counts during edits for constant-time queries.
+  - Gate-layout wire predicates, counts, and iteration now exclude terminals. Identity-function queries retain them.
   - Python gate-layout constructors now raise `ValueError` for unknown clocking schemes.
   - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
   - Cell clock zones now use floor division for negative coordinates.
@@ -670,6 +671,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - Layout experiments now reject failed GENLIB and Verilog reads in Release builds.
+  - Layout experiments preserve their wire-count columns with physical wire counts that exclude terminals.
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
   - SiDB sweep initializers now name their fields, and pruning helpers propagate allocation failures.
     Experiment parameters, output columns, and calculations remain unchanged.

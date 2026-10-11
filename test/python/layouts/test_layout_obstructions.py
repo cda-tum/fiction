@@ -165,8 +165,8 @@ def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
     assert a1 in gates
     assert a2 in gates
     wires = layout.wires()
-    assert len(wires) == 9
-    for port in (x1, x2, x3, x4, b1, b2, c, f1, f2):
+    assert len(wires) == 3
+    for port in (b1, b2, c):
         assert port in wires
     for port, position in [
         (x1, coordinate(1, 0)),

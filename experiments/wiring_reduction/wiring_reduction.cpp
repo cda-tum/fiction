@@ -107,7 +107,7 @@ try
         auto       gate_level_layout = orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy       = gate_level_layout.clone();
 
-        auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
+        auto num_wires = gate_level_layout.num_wires();
         //  compute critical path and throughput
         const auto cp_tp_stats = critical_path_length_and_throughput(gate_level_layout);
 
@@ -127,8 +127,7 @@ try
         //  compute critical path and throughput
         const auto cp_tp_stats_after = critical_path_length_and_throughput(gate_level_layout);
 
-        auto num_wires_after =
-            gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
+        auto num_wires_after = gate_level_layout.num_wires();
 
         // check equivalence
         const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);

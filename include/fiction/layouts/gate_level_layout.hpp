@@ -456,7 +456,7 @@ class gate_level_layout : public CoordinateLayout
         }
         live_object_bits[id.index / 64u] &= ~(uint64_t{1} << (id.index % 64u));
         --live_count;
-        wire_count -= object.function == 2;
+        wire_count -= object.kind == object_kind::WIRE;
         spilled_inputs.erase(id.index);
         object.input_count = 0;
         object.kind        = object_kind::REMOVED;
@@ -494,12 +494,12 @@ class gate_level_layout : public CoordinateLayout
     {
         return static_cast<uint32_t>(outputs.size());
     }
-    /** @brief Counts non-identity objects. */
+    /** @brief Counts logic gates, excluding wires and terminals. */
     [[nodiscard]] uint32_t num_gates() const noexcept
     {
-        return live_count - wire_count;
+        return live_count - wire_count - num_pis() - num_pos();
     }
-    /** @brief Counts identity objects, including terminals. */
+    /** @brief Counts physical wires, excluding primary inputs and outputs. */
     [[nodiscard]] uint32_t num_wires() const noexcept
     {
         return wire_count;
@@ -566,15 +566,15 @@ class gate_level_layout : public CoordinateLayout
     {
         return checked_object(id).function == 2;
     }
-    /** @brief Returns whether an object computes the identity function. */
+    /** @brief Returns whether an object is a physical wire rather than a terminal. */
     [[nodiscard]] bool is_wire(const object_id id) const
     {
-        return is_buf(id);
+        return checked_object(id).kind == object_kind::WIRE;
     }
     /** @brief Returns whether an identity object drives more than one input port. */
     [[nodiscard]] bool is_fanout(const object_id id) const
     {
-        return is_wire(id) && fanout_size(id) > 1;
+        return is_buf(id) && fanout_size(id) > 1;
     }
     /** @brief Returns whether the object computes INV. */
     [[nodiscard]] bool is_inv(const object_id id) const
@@ -722,7 +722,7 @@ class gate_level_layout : public CoordinateLayout
         foreach_object([&](const auto id) { return !is_gate(id) || visit(fn, id, index++); });
     }
     /**
-     * @brief Visits identity objects, including terminals.
+     * @brief Visits physical wires, excluding primary inputs and outputs.
      * Callbacks must not create or remove objects, change terminal order, or replace the layout.
      */
     template <typename Fn>
@@ -1754,7 +1754,7 @@ class gate_level_layout : public CoordinateLayout
     uint32_t free_edge{NO_INDEX};
     /** @brief Live object count. */
     uint32_t live_count{};
-    /** @brief Live identity-function count. */
+    /** @brief Live physical-wire count. */
     uint32_t wire_count{};
     /** @brief Crossing-layer wires with an occupied ground tile. */
     uint32_t crossing_count{};
@@ -1948,7 +1948,7 @@ class gate_level_layout : public CoordinateLayout
         }
         live_object_bits[slot / 64u] |= uint64_t{1} << (slot % 64u);
         ++live_count;
-        wire_count += static_cast<uint32_t>(function == 2);
+        wire_count += static_cast<uint32_t>(kind == object_kind::WIRE);
         crossing_count = crossing_count - before + crossing_at(t);
         const auto id  = identity(slot);
         try

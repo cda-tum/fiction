@@ -122,8 +122,7 @@ try
                 const auto height = bounding_box.get_y_size();
                 const auto area   = width * height;
 
-                const auto num_wires =
-                    gate_level_layout->num_wires() - gate_level_layout->num_pis() - gate_level_layout->num_pos();
+                const auto num_wires     = gate_level_layout->num_wires();
                 const auto num_crossings = gate_level_layout->num_crossings();
 
                 // log results

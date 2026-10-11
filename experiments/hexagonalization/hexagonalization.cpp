@@ -190,14 +190,15 @@ try
         area(cartesian_layout{cell_grid_extent<bestagon_library>(hex_layout)}, area_params<layout>{}, &area_stats);
 
         // log results
-        hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
-                             cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
-                             depth_mapped_network.depth(), gate_level_layout.width(), gate_level_layout.height(),
-                             gate_level_layout.area(), hex_layout.width(), hex_layout.height(), hex_layout.area(),
-                             gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
-                             cp_tp.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
-                             mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result,
-                             cell_level_layout.num_dots(), area_stats.area);
+        hexagonalization_exp(
+            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
+            depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout.width(),
+            gate_level_layout.height(), gate_level_layout.area(), hex_layout.width(), hex_layout.height(),
+            hex_layout.area(), gate_level_layout.num_gates(),
+            gate_level_layout.num_wires() + gate_level_layout.num_pis() + gate_level_layout.num_pos(),
+            cp_tp.critical_path_length, cp_tp.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
+            mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result, cell_level_layout.num_dots(),
+            area_stats.area);
 
         hexagonalization_exp.save();
         hexagonalization_exp.table();

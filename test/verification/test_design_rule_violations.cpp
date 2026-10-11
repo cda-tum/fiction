@@ -79,6 +79,23 @@ TEST_CASE("Intact layouts", "[drv]")
     check_for_drvs(blueprints::se_gate_layout<cart_gate_clk_lyt>(), 0, 0);
 }
 
+TEST_CASE("Crossings require physical wires on both layers", "[drv]")
+{
+    cart_gate_clk_lyt lyt{{1, 1, 2}};
+    SECTION("Input below a wire")
+    {
+        lyt.create_pi("a", {0, 0, 0});
+        lyt.create_buf({0, 0, 1});
+    }
+    SECTION("Output above a wire")
+    {
+        const auto wire = lyt.create_buf({0, 0, 0});
+        lyt.create_po(wire, "f", {0, 0, 1});
+    }
+    const auto st = get_drvs(lyt);
+    CHECK(st.report.at("Wires crossing gates").size() == 1);
+}
+
 TEST_CASE("Warnings", "[drv]")
 {
     // PI tile (1,1) is not at a border

@@ -198,7 +198,7 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
         }
 
         // has no connector ports
-        if (const auto n = lyt.find_object(t); n && (!lyt.is_wire(*n) && !lyt.is_inv(*n)))
+        if (const auto n = lyt.find_object(t); n && (!lyt.is_buf(*n) && !lyt.is_inv(*n)))
         {
             if (lyt.has_no_incoming_signal(t))
             {

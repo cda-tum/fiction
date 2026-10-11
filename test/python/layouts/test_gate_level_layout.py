@@ -117,9 +117,13 @@ def test_gate_level_layout_iteration(make_layout: Callable[[], GateLayout]) -> N
     assert a1 in gates
     assert a2 in gates
     wires = layout.wires()
-    assert len(wires) == 9
-    for port in (x1, x2, x3, x4, b1, b2, c, f1, f2):
+    assert len(wires) == layout.num_wires() == 3
+    assert layout.num_gates() == 2
+    for port in (b1, b2, c):
         assert port in wires
+    for port in (x1, x2, x3, x4, f1, f2):
+        assert layout.is_buf(port)
+        assert not layout.is_wire(port)
 
     for port, position in [
         (x1, coordinate(1, 0)),

@@ -59,10 +59,10 @@ TEST_CASE("Crossings count routing wires rather than identity terminals", "[gate
     kitty::dynamic_truth_table identity{1};
     kitty::create_from_hex_string(identity, "2");
     const auto gate = lyt.create_gate({}, identity, {3, 0, 1});
-    CHECK(lyt.is_wire(pi));
-    CHECK(lyt.is_wire(po));
+    CHECK_FALSE(lyt.is_wire(pi));
+    CHECK_FALSE(lyt.is_wire(po));
     CHECK(lyt.is_wire(gate));
-    CHECK(lyt.num_wires() == 8);
+    CHECK(lyt.num_wires() == 6);
     CHECK(lyt.num_crossings() == 2);
 }
 
@@ -127,6 +127,41 @@ TEST_CASE("Crossing counts survive failed connection allocation", "[gate-layout-
             break;
         }
     }
+}
+
+TEST_CASE("Physical wire counts exclude terminals through removal and reuse", "[gate-layout-editing]")
+{
+    gate_level_layout<cartesian_layout> lyt{{5, 1}};
+    const auto                          pi   = lyt.create_pi("a", {0, 0});
+    const auto                          wire = lyt.create_buf(pi, {1, 0});
+    const auto                          po   = lyt.create_po(wire, "f", {2, 0});
+    const auto                          inv  = lyt.create_not(pi, {3, 0});
+
+    CHECK(lyt.is_buf(pi));
+    CHECK(lyt.is_buf(po));
+    CHECK(lyt.is_buf(wire));
+    CHECK(lyt.is_fanout(pi));
+    CHECK_FALSE(lyt.is_wire_tile({0, 0}));
+    CHECK_FALSE(lyt.is_wire_tile({2, 0}));
+    CHECK(lyt.num_wires() == 1);
+    CHECK(lyt.num_gates() == 1);
+    std::vector<gate_level_layout<cartesian_layout>::object_id> wires{};
+    lyt.foreach_wire([&](const auto id) { wires.push_back(id); });
+    CHECK(wires == std::vector{wire});
+
+    lyt.remove(pi);
+    lyt.remove(po);
+    CHECK(lyt.num_wires() == 1);
+    CHECK(lyt.num_gates() == 1);
+    lyt.remove(wire);
+    CHECK(lyt.num_wires() == 0);
+    CHECK(lyt.num_gates() == 1);
+    lyt.create_pi("replacement", {1, 0});
+    CHECK(lyt.num_wires() == 0);
+    CHECK(lyt.num_gates() == 1);
+    lyt.remove(inv);
+    CHECK(lyt.num_gates() == 0);
+    CHECK_FALSE(lyt.is_empty());
 }
 
 TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-layout-editing]")

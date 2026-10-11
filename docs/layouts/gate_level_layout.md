@@ -13,6 +13,10 @@ Coordinates describe positions; IDs describe objects and their single output; an
 names the object and the truth-table argument where a connection enters. Wires and fanouts
 are explicit objects. An empty layout contains no objects or implicit constants.
 
+`is_wire`, `foreach_wire`, and `num_wires` identify physical wire objects and exclude PIs and POs.
+Python's `wires()` returns the same objects. `is_buf` identifies the identity function, including terminals;
+`is_fanout` identifies identity objects that drive more than one input port. `num_gates` excludes wires and terminals.
+
 Use `find_object(tile)` to look up an occupied coordinate and `get_tile(id)` to read an object's
 position. Moving an object preserves its ID and connections. Creation and movement reject an
 occupied coordinate. Removing an object disconnects its destinations without renumbering their

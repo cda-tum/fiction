@@ -113,6 +113,17 @@ static void check_layout_equiv_all()
     }
 }
 
+TEST_CASE("Post-layout optimization counts physical wires without terminals", "[post_layout_optimization]")
+{
+    gate_level_layout<cartesian_layout> layout{{2, 1}, clocking::twoddwave()};
+    const auto                          input = layout.create_pi("a", {0, 0});
+    layout.create_po(input, "f", {1, 0});
+    post_layout_optimization_stats stats{};
+    post_layout_optimization(layout, {}, &stats);
+    CHECK(stats.num_wires_before == 0);
+    CHECK(stats.num_wires_after == 0);
+}
+
 TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 {
     SECTION("Cartesian layouts")

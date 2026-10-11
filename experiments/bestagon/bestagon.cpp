@@ -207,9 +207,9 @@ try
                          cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
                          depth_mapped_network.depth(), gate_level_layout->width(), gate_level_layout->height(),
                          area_of(gate_level_layout->get_extent()), gate_level_layout->num_gates(),
-                         gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
-                         mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_dots(),
-                         area_stats.area);
+                         gate_level_layout->num_wires() + gate_level_layout->num_pis() + gate_level_layout->num_pos(),
+                         cp_tp.critical_path_length, cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total),
+                         *eq, cell_level_layout.num_dots(), area_stats.area);
         }
         else  // no layout was obtained
         {

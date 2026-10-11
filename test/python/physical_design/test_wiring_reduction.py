@@ -56,8 +56,8 @@ def test_wiring_reduction_with_stats(mux21: technology_network) -> None:
     assert stats.y_size_before == before.height()
     assert stats.x_size_after == layout.width()
     assert stats.y_size_after == layout.height()
-    wires_before = before.num_wires() - before.num_pis() - before.num_pos()
-    wires_after = layout.num_wires() - layout.num_pis() - layout.num_pos()
+    wires_before = before.num_wires()
+    wires_after = layout.num_wires()
     assert stats.num_wires_before == wires_before
     assert stats.num_wires_after == wires_after
     assert layout.num_wires() < before.num_wires()
@@ -85,8 +85,8 @@ def test_wiring_reduction_with_stats_and_parameters(mux21: technology_network) -
     assert stats.y_size_before == before.height()
     assert stats.x_size_after == layout.width()
     assert stats.y_size_after == layout.height()
-    wires_before = before.num_wires() - before.num_pis() - before.num_pos()
-    wires_after = layout.num_wires() - layout.num_pis() - layout.num_pos()
+    wires_before = before.num_wires()
+    wires_after = layout.num_wires()
     assert stats.num_wires_before == wires_before
     assert stats.num_wires_after == wires_after
     assert layout.num_wires() < before.num_wires()

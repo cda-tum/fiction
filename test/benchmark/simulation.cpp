@@ -303,7 +303,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
         lyt.create_po(signal, "o", {(n + 1) / 2, n + 1});
 
-        CHECK(lyt.num_wires() == n + 2);
+        CHECK(lyt.num_wires() == n);
         lyt.foreach_object([&lyt](const auto id) { CHECK(lyt.is_within_bounds(lyt.get_tile(id))); });
 
         return lyt;

@@ -57,6 +57,16 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
     CHECK(print_stream.str() == layout_print);
 }
 
+TEST_CASE("Print terminal-only gate-level layout", "[print-gate-level-layout]")
+{
+    gate_level_layout<cartesian_layout> layout{{2, 1}};
+    const auto                          input = layout.create_pi("a", {0, 0});
+    layout.create_po(input, "f", {1, 0});
+    std::stringstream print_stream{};
+    print_gate_level_layout(print_stream, layout, false, false);
+    CHECK(print_stream.str().find("I O") != std::string::npos);
+}
+
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;

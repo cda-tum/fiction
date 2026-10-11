@@ -86,8 +86,8 @@ void print_gate_layout_properties(const Lyt& lyt)
     std::cout << fmt::format(
                      "[i] Gate-level layout:     aspect ratio = {} × {}, inputs = {}, outputs = {}, gates = {}, "
                      "wires = {}, critical path = {}",
-                     lyt.width(), lyt.height(), lyt.num_pis(), lyt.num_pos(), lyt.num_gates(), lyt.num_wires(),
-                     path_depth)
+                     lyt.width(), lyt.height(), lyt.num_pis(), lyt.num_pos(), lyt.num_gates(),
+                     lyt.num_wires() + lyt.num_pis() + lyt.num_pos(), path_depth)
               << '\n';
 }
 
