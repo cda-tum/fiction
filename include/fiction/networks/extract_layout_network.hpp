@@ -17,11 +17,11 @@
 
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/views/names_view.hpp>
+#include <phmap.h>
 
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
-#include <unordered_map>
 #include <vector>
 
 namespace fiction::networks
@@ -57,7 +57,7 @@ template <typename Lyt>
     mockturtle::names_view<mockturtle::klut_network> ntk{};
     ntk.set_network_name(lyt.get_layout_name());
     // An empty optional marks an active dependency; completed dependencies hold their extracted signal.
-    std::unordered_map<object_id, std::optional<signal>> signals{};
+    phmap::flat_hash_map<object_id, std::optional<signal>> signals{};
     lyt.foreach_pi([&](const auto id) { signals.emplace(id, ntk.create_pi(lyt.get_name(id))); });
     std::vector<frame>  stack{};
     std::vector<signal> children{};

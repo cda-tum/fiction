@@ -18,12 +18,13 @@
 
 #include "fiction/traits.hpp"
 
+#include <phmap.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <optional>
 #include <stdexcept>
-#include <unordered_map>
 #include <vector>
 
 namespace fiction::verification
@@ -137,7 +138,7 @@ class critical_path_length_and_throughput_impl
         uint32_t input{};
     };
     /** @brief An empty entry marks an active dependency; a value marks a completed dependency. */
-    std::unordered_map<typename Lyt::object_id, std::optional<path_info>> cache{};
+    phmap::flat_hash_map<typename Lyt::object_id, std::optional<path_info>> cache{};
     /** @brief Explicit traversal stack independent of native call stack size. */
     std::vector<frame> pending{};
 };
