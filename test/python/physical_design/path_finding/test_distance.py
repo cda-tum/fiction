@@ -121,3 +121,14 @@ def test_chebyshev(make_lyt: Callable[[], Layout]) -> None:
     assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 2
     assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 3
     assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 4
+
+
+@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
+def test_squared_euclidean_range(make_lyt: Callable[[], Layout]) -> None:
+    """Preserve exact integral distances and reject an overflowing sum."""
+    lyt = make_lyt()
+    assert (
+        squared_euclidean_distance(lyt, coordinate(-2147483647, 0), coordinate(2147483647, 0)) == 18446744056529682436
+    )
+    with pytest.raises(OverflowError):
+        squared_euclidean_distance(lyt, coordinate(-2147483647, -2147483647), coordinate(2147483647, 2147483647))

@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <stdexcept>
 
 namespace fiction::physical_design::path_finding
 {
@@ -85,16 +86,25 @@ template <typename Lyt, typename Dist = double>
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return Squared euclidean distance between `source` and `target`.
+ * @throws std::overflow_error If the squared distance is not representable by `Dist`.
  */
 template <typename Lyt, typename Dist = uint64_t>
     requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
 [[nodiscard]] constexpr Dist squared_euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
-                                                        const coordinate<Lyt>& target) noexcept
+                                                        const coordinate<Lyt>& target)
 {
-    const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
-    const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
+    /** Absolute differences of signed 32-bit coordinates, widened before subtraction. */
+    const auto x = static_cast<uint64_t>(std::abs(static_cast<int64_t>(source.x) - target.x));
+    /** Absolute row difference. */
+    const auto y = static_cast<uint64_t>(std::abs(static_cast<int64_t>(source.y) - target.y));
+    /** Largest result representable by the requested distance type. */
+    constexpr auto maximum = static_cast<uint64_t>(std::numeric_limits<Dist>::max());
 
-    return static_cast<Dist>((x * x) + (y * y));
+    if ((x != 0 && x > maximum / x) || (y != 0 && y > maximum / y) || y * y > maximum - x * x)
+    {
+        throw std::overflow_error("Squared Euclidean distance exceeds the distance type range");
+    }
+    return static_cast<Dist>(x * x + y * y);
 }
 /**
  * The 2DDWave distance \f$D\f$ between two layout coordinates \f$s = (x_1, y_1)\f$ and \f$t = (x_2, y_2)\f$ given
