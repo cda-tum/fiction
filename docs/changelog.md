@@ -123,6 +123,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Layout extraction and critical-path analysis reduce per-object allocations with flat traversal maps.
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.
+  - GOLD reuses built-in objective costs while ranking candidates and accepting solutions.
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
     `&a_star_distance<Lyt, Dist>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.

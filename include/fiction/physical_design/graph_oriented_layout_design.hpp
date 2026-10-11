@@ -2041,6 +2041,12 @@ class graph_oriented_layout_design_impl
         std::vector<std::pair<coord_vec_type<Lyt>, double>> next_positions;
         next_positions.reserve(2 * ps.num_vertex_expansions);
         const auto node_count = static_cast<double>(ssg.nodes_to_place.size());
+        /** Built-in objectives are invariant while candidate positions are ranked. */
+        const double layout_cost = !possible_positions.empty() &&
+                                           ssg.cost != graph_oriented_layout_design_params::cost_objective::AREA &&
+                                           ssg.cost != graph_oriented_layout_design_params::cost_objective::CUSTOM ?
+                                       static_cast<double>(calculate_cost(layout, ssg.cost)) / (1000.0 * node_count) :
+                                       0.0;
 
         for (const auto& position : possible_positions)
         {
@@ -2068,7 +2074,10 @@ class graph_oriented_layout_design_impl
             }
             else
             {
-                const double cost = static_cast<double>(calculate_cost(layout, ssg.cost)) / (1000.0 * node_count);
+                /** Custom callbacks retain their per-candidate evaluation. */
+                const double cost = ssg.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM ?
+                                        static_cast<double>(calculate_cost(layout, ssg.cost)) / (1000.0 * node_count) :
+                                        layout_cost;
 
                 double priority = remaining_nodes_to_place + cost;
 
@@ -2163,7 +2172,10 @@ class graph_oriented_layout_design_impl
 
             if (found_solution && (!improve_solution || cost <= best_solution))
             {
-                cost = calculate_cost(layout, ssg.cost);
+                if (!improve_solution || ssg.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM)
+                {
+                    cost = calculate_cost(layout, ssg.cost);
+                }
 
                 switch (ssg.cost)
                 {
