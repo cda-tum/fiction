@@ -179,7 +179,8 @@ class gate_level_layout : public CoordinateLayout
             free_object{other.free_object},
             free_edge{other.free_edge},
             live_count{other.live_count},
-            wire_count{other.wire_count}
+            wire_count{other.wire_count},
+            crossing_count{other.crossing_count}
     {}
     /** @brief Replaces this layout with an independent value copy. */
     gate_level_layout& operator=(const gate_level_layout& other)
@@ -415,9 +416,13 @@ class gate_level_layout : public CoordinateLayout
             return id;
         }
         check_placement(t);
+        const auto old_position = object.position;
+        const bool same_column  = old_position.x == t.x && old_position.y == t.y;
+        const auto before       = crossing_at(old_position) + (same_column ? 0u : crossing_at(t));
         occupancy.emplace(t, id.index);
         occupancy.erase(object.position);
         object.position = t;
+        crossing_count  = crossing_count - before + crossing_at(old_position) + (same_column ? 0u : crossing_at(t));
         return id;
     }
     /** @brief Removes an object and disconnects all inputs and sinks. Stale identities reject. */
@@ -435,7 +440,9 @@ class gate_level_layout : public CoordinateLayout
         {
             unlink_edge(object.first_sink);
         }
+        const auto before = crossing_at(object.position);
         occupancy.erase(object.position);
+        crossing_count = crossing_count - before + crossing_at(object.position);
         names.erase(id);
         if (object.kind == object_kind::PI)
         {
@@ -500,17 +507,9 @@ class gate_level_layout : public CoordinateLayout
         return live_count == 0;
     }
     /** @brief Counts crossing-layer wires above occupied ground-layer tiles. */
-    [[nodiscard]] uint32_t num_crossings() const
+    [[nodiscard]] uint32_t num_crossings() const noexcept
     {
-        uint32_t count{};
-        foreach_wire(
-            [&](const auto id)
-            {
-                const auto t = get_tile(id);
-                count +=
-                    checked_object(id).kind == object_kind::WIRE && t.z == 1 && find_object({t.x, t.y, 0}).has_value();
-            });
-        return count;
+        return crossing_count;
     }
     /** @brief Counts connected input slots, irrespective of physical legality. */
     [[nodiscard]] uint32_t fanin_size(const object_id id) const
@@ -1745,6 +1744,16 @@ class gate_level_layout : public CoordinateLayout
     uint32_t live_count{};
     /** @brief Live identity-function count. */
     uint32_t wire_count{};
+    /** @brief Crossing-layer wires with an occupied ground tile. */
+    uint32_t crossing_count{};
+
+    /** @brief Returns the crossing contribution of an XY column. */
+    [[nodiscard]] uint32_t crossing_at(const tile& t) const noexcept
+    {
+        const auto upper = occupancy.find({t.x, t.y, 1});
+        return upper != occupancy.end() && objects[upper->second].kind == object_kind::WIRE &&
+               occupancy.contains({t.x, t.y, 0});
+    }
 
     /** @brief Swaps owned state without changing geometry. */
     void swap_owned_state(gate_level_layout& other) noexcept
@@ -1765,6 +1774,7 @@ class gate_level_layout : public CoordinateLayout
         swap(free_edge, other.free_edge);
         swap(live_count, other.live_count);
         swap(wire_count, other.wire_count);
+        swap(crossing_count, other.crossing_count);
     }
     /** @brief Initializes elementary functions when a moved-from layout is reused. */
     void ensure_functions()
@@ -1893,7 +1903,8 @@ class gate_level_layout : public CoordinateLayout
         {
             throw std::length_error("Layout object capacity exhausted");
         }
-        const auto slot = reuse ? free_object : static_cast<uint32_t>(objects.size());
+        const auto slot   = reuse ? free_object : static_cast<uint32_t>(objects.size());
+        const auto before = crossing_at(t);
         if (arity > record.inputs.size())
         {
             spilled_inputs.emplace(slot, std::vector<uint32_t>(arity, NO_INDEX));
@@ -1920,7 +1931,8 @@ class gate_level_layout : public CoordinateLayout
         }
         ++live_count;
         wire_count += static_cast<uint32_t>(function == 2);
-        const auto id = identity(slot);
+        crossing_count = crossing_count - before + crossing_at(t);
+        const auto id  = identity(slot);
         try
         {
             for (uint32_t input{}; input < children.size(); ++input)

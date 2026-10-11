@@ -66,6 +66,69 @@ TEST_CASE("Crossings count routing wires rather than identity terminals", "[gate
     CHECK(lyt.num_crossings() == 2);
 }
 
+TEST_CASE("Crossing counts follow edits on both layers and value copies", "[gate-layout-editing]")
+{
+    gate_level_layout<cartesian_layout> lyt{{4, 2, 3}};
+    const auto                          upper = lyt.create_buf({0, 0, 1});
+    CHECK(lyt.num_crossings() == 0);
+    const auto lower = lyt.create_pi("a", {0, 0, 0});
+    CHECK(lyt.num_crossings() == 1);
+    const auto third = lyt.create_buf({0, 0, 2});
+    CHECK(lyt.num_crossings() == 1);
+    lyt.move_object(third, {1, 0, 0});
+    CHECK(lyt.num_crossings() == 1);
+    lyt.move_object(upper, {1, 0, 1});
+    CHECK(lyt.num_crossings() == 1);
+    lyt.move_object(third, {1, 0, 2});
+    CHECK(lyt.num_crossings() == 0);
+    lyt.move_object(third, {1, 0, 0});
+    CHECK(lyt.num_crossings() == 1);
+    CHECK_THROWS_AS(lyt.move_object(lower, {1, 0, 0}), std::invalid_argument);
+    CHECK(lyt.num_crossings() == 1);
+    auto copy = lyt;
+    lyt.remove(upper);
+    CHECK(lyt.num_crossings() == 0);
+    CHECK(copy.num_crossings() == 1);
+    auto moved = std::move(copy);
+    CHECK(moved.num_crossings() == 1);
+    moved.remove(third);
+    CHECK(moved.num_crossings() == 0);
+    lyt = moved;
+    CHECK(lyt.num_crossings() == 0);
+}
+
+TEST_CASE("Crossing counts survive failed connection allocation", "[gate-layout-editing]")
+{
+    require_allocation_failure_support();
+    for (std::size_t failure{};; ++failure)
+    {
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
+        gate_level_layout<cartesian_layout> lyt{{2, 2, 2}};
+        const auto                          source = lyt.create_pi("a", {0, 0});
+        bool                                created{};
+        allocation_budget = failure;
+        try
+        {
+            lyt.create_buf(source, {0, 0, 1});
+            created = true;
+        }
+        catch (const std::bad_alloc&)
+        {}
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+        allocation_budget.reset();
+        CHECK(lyt.num_crossings() == static_cast<uint32_t>(created));
+        CHECK(lyt.size() == (created ? 2u : 1u));
+        if (created)
+        {
+            break;
+        }
+    }
+}
+
 TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-layout-editing]")
 {
     gate_level_layout<cartesian_layout> lyt{{8, 8}};
