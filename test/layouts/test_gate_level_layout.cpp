@@ -142,6 +142,22 @@ TEST_CASE("Layouts move without throwing so containers move them on growth", "[g
 {
     STATIC_REQUIRE(std::is_nothrow_move_constructible_v<gate_level_layout<cartesian_layout>>);
     STATIC_REQUIRE(std::is_nothrow_move_assignable_v<gate_level_layout<cartesian_layout>>);
+
+    require_allocation_failure_support();
+    gate_level_layout<cartesian_layout> source{{3, 2}, clocking::twoddwave()};
+    const auto                          input = source.create_pi("input", {0, 0});
+    source.assign_synchronization_element({0, 0}, 2);
+    gate_level_layout<cartesian_layout> destination{};
+    allocation_budget = 0;
+    auto moved        = std::move(source);
+    destination       = std::move(moved);
+    allocation_budget.reset();
+    CHECK(destination.contains(input));
+    CHECK(destination.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+    CHECK(destination.get_synchronization_element({0, 0}) == 2);
+    // The layout contract permits inspecting and reusing moved-from layouts.
+    // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move,hicpp-invalid-access-moved)
+    CHECK(source.get_clocking_scheme() == clocking::open());
 }
 
 TEST_CASE("Objects with more inputs than the inline capacity keep ordered ports", "[gate-layout-editing]")

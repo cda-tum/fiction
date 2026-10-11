@@ -190,10 +190,12 @@ TEST_CASE("Cell clocking wrappers propagate allocation failure", "[clocking-allo
     }
     SECTION("Scheme copy")
     {
+        tile_clocking patterned{};
+        patterned.replace_clocking_scheme(clocking::twoddwave());
         const auto result = check_allocation_failures(
-            original, [](const auto& candidate) { static_cast<void>(candidate.get_clocking_scheme()); },
-            [&](const auto& candidate) { CHECK(candidate.get_clocking_scheme() == original.get_clocking_scheme()); });
-        CHECK(result.get_clocking_scheme() == original.get_clocking_scheme());
+            patterned, [](const auto& candidate) { static_cast<void>(candidate.get_clocking_scheme()); },
+            [&](const auto& candidate) { CHECK(candidate.get_clocking_scheme() == patterned.get_clocking_scheme()); });
+        CHECK(result.get_clocking_scheme() == patterned.get_clocking_scheme());
     }
     SECTION("QCA synchronization insertion")
     {

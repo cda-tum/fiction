@@ -38,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added Python source coverage, including package-root modules, and separate C++ checks.
 
 - Data structures:
+  - Default OPEN clocking and gate-layout moves now allocate no storage.
 
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores tagged dots and defects without templates

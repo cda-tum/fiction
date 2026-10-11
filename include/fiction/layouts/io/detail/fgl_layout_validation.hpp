@@ -55,7 +55,8 @@ inline void validate_xml_text(const std::string& value)
  */
 [[nodiscard]] inline std::string clocking_name(const clocking::scheme& scheme)
 {
-    return scheme.name() + (scheme.num_clocks() == 3u && scheme.name() != layouts::clocking::BANCS_NAME ? "3" : "");
+    return std::string{scheme.name()} +
+           (scheme.num_clocks() == 3u && scheme.name() != layouts::clocking::BANCS_NAME ? "3" : "");
 }
 
 /**

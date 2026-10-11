@@ -31,6 +31,20 @@
 using namespace fiction;
 using namespace fiction::layouts;
 
+TEST_CASE("Implicit OPEN cutouts compare by clocking behavior", "[clocking-scheme]")
+{
+    auto             implicit = clocking::open();
+    clocking::scheme explicit_open{"OPEN", {{0}}, 4, clocking::scheme::UNBOUNDED, clocking::scheme::UNBOUNDED, false};
+    CHECK(implicit == explicit_open);
+    implicit.override_clock_number(-2, 3, 2);
+    explicit_open.override_clock_number(-2, 3, 2);
+    CHECK(implicit == explicit_open);
+    CHECK(implicit(-2, 3) == 2);
+    CHECK(implicit(-3, 3) == 0);
+    CHECK_FALSE(implicit == clocking::open());
+    CHECK(clocking::scheme{"", {{0}}, 4, 0, 0}.name().empty());
+}
+
 TEST_CASE("3-phase open clocking", "[clocking-scheme]")
 {
     auto open3 = clocking::open(clocking::num_clks::THREE);

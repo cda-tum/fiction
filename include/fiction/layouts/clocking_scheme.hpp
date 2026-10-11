@@ -30,6 +30,7 @@
 #include <functional>
 #include <limits>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -65,6 +66,8 @@ class scheme
      * Degree of a scheme that imposes no bound beyond the fan-in of the layout topology.
      */
     static constexpr degree UNBOUNDED = std::numeric_limits<degree>::max();
+    /** @brief Creates a four-phase OPEN scheme without allocating storage. */
+    scheme() noexcept = default;
     /**
      * Standard constructor.
      *
@@ -155,7 +158,8 @@ class scheme
             }
         }
 
-        return cells[static_cast<std::size_t>((floor_mod(y, height) * width) + floor_mod(x, width))];
+        return cells.empty() ? 0 :
+                               cells[static_cast<std::size_t>((floor_mod(y, height) * width) + floor_mod(x, width))];
     }
     /**
      * Overrides the clock number of the tile at \f$(x, y)\f$. An overridden scheme is irregular.
@@ -183,9 +187,9 @@ class scheme
      *
      * @return The canonical name, e.g., `"2DDWAVE"`, without a phase-count suffix.
      */
-    [[nodiscard]] const std::string& name() const noexcept
+    [[nodiscard]] std::string_view name() const noexcept
     {
-        return scheme_name;
+        return cells.empty() ? std::string_view{"OPEN"} : std::string_view{scheme_name};
     }
     /**
      * Number of clock phases in this scheme.
@@ -220,7 +224,12 @@ class scheme
      * @param other Scheme to compare against.
      * @return `true` iff both schemes are equal.
      */
-    [[nodiscard]] bool operator==(const scheme& other) const = default;
+    [[nodiscard]] bool operator==(const scheme& other) const
+    {
+        return name() == other.name() && width == other.width && height == other.height && phases == other.phases &&
+               in_degree == other.in_degree && out_degree == other.out_degree && regular_flag == other.regular_flag &&
+               std::ranges::equal(cutout(), other.cutout()) && overrides == other.overrides;
+    }
 
     /**
      * Visits manually overridden clock numbers.
@@ -241,15 +250,15 @@ class scheme
     /**
      * Canonical name.
      */
-    std::string scheme_name;
+    std::string scheme_name{};
     /**
      * Cutout width.
      */
-    int64_t width;
+    int64_t width{1};
     /**
      * Cutout height.
      */
-    int64_t height;
+    int64_t height{1};
     /**
      * Cutout entries in row-major order.
      */
@@ -257,23 +266,29 @@ class scheme
     /**
      * Number of clock phases.
      */
-    clock_number phases;
+    clock_number phases{4};
     /**
      * Maximum in-degree.
      */
-    degree in_degree;
+    degree in_degree{UNBOUNDED};
     /**
      * Maximum out-degree.
      */
-    degree out_degree;
+    degree out_degree{UNBOUNDED};
     /**
      * Defines the clocking as regular and well-defined by the cutout.
      */
-    bool regular_flag;
+    bool regular_flag{false};
     /**
      * Overridden clock numbers by tile position.
      */
     phmap::flat_hash_map<std::pair<int64_t, int64_t>, clock_number> overrides{};
+    /** @brief Returns the explicit cutout or the implicit OPEN cell. */
+    [[nodiscard]] std::span<const clock_number> cutout() const noexcept
+    {
+        static constexpr clock_number OPEN_CELL{0};
+        return cells.empty() ? std::span<const clock_number>{&OPEN_CELL, 1} : std::span<const clock_number>{cells};
+    }
     /**
      * Modulo that rounds toward negative infinity, so that a cutout repeats seamlessly at negative coordinates.
      *
@@ -369,6 +384,10 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
  */
 [[nodiscard]] inline scheme open(const num_clks n = num_clks::FOUR)
 {
+    if (n == num_clks::FOUR)
+    {
+        return {};
+    }
     return scheme{OPEN_NAME, {{0}}, detail::count(n), scheme::UNBOUNDED, scheme::UNBOUNDED, false};
 }
 /**
