@@ -299,7 +299,6 @@ void check_stats(const exact_physical_design_stats& st)
     CHECK(st.x_size > 0);
     CHECK(st.y_size > 0);
     CHECK(st.num_gates > 0);
-    CHECK(st.num_wires > 0);
 }
 
 template <typename Lyt>

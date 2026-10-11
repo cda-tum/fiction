@@ -123,9 +123,9 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
     }
 
     // log results
-    exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), lyt.get_clocking_scheme().name(), lyt.width(),
-        lyt.height(), lyt.area(), lyt.num_gates(), lyt.num_wires() + lyt.num_pis() + lyt.num_pos(), objectives.size(),
-        routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
+    exp(benchmark, ntk.num_pis(), ntk.num_pos(), ntk.num_gates(), std::string{lyt.get_clocking_scheme().name()},
+        lyt.width(), lyt.height(), lyt.area(), lyt.num_gates(), lyt.num_wires() + lyt.num_pis() + lyt.num_pos(),
+        objectives.size(), routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
         routing_stats.epg_stats.num_edges, mockturtle::to_seconds(stats.time_total),
         mockturtle::to_seconds(routing_stats.time_total), mockturtle::to_seconds(routing_stats.epg_stats.time_total),
         mockturtle::to_seconds(routing_stats.color_stats.time_total), equiv_stats.eq != eq_type::NO);
