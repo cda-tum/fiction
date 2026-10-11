@@ -26,10 +26,30 @@
 
 #include <cstddef>
 #include <new>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::test;
 using namespace fiction::layouts;
+
+TEST_CASE("Clocking state moves without allocating", "[clocking-state]")
+{
+    require_allocation_failure_support();
+    /** State with owned clock overrides and synchronization delays. */
+    clocking::state source{clocking::twoddwave()};
+    source.assign_clock_number({1, 0}, 3);
+    source.assign_synchronization_element({1, 0}, 2);
+    /** Destination whose previous state is replaced by the move. */
+    clocking::state destination{clocking::open()};
+    allocation_budget = 0;
+    /** Move construction must not allocate while transferring synchronization storage. */
+    auto moved  = std::move(source);
+    destination = std::move(moved);
+    allocation_budget.reset();
+    CHECK(destination.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+    CHECK(destination.get_clock_number({1, 0}) == 3);
+    CHECK(destination.get_synchronization_element({1, 0}) == 2);
+}
 
 namespace
 {

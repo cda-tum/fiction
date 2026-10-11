@@ -19,10 +19,11 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/layout_base.hpp"
 
+#include <phmap.h>
+
 #include <cstdint>
 #include <functional>
 #include <string_view>
-#include <unordered_map>
 #include <utility>
 
 namespace fiction::layouts::clocking
@@ -251,6 +252,6 @@ class state
      */
     clocking_scheme_t clocking;
     /** @brief Nonzero synchronization delays indexed by coordinate. */
-    std::unordered_map<clock_zone, sync_elem_t> synchronization{};
+    phmap::flat_hash_map<clock_zone, sync_elem_t> synchronization{};
 };
 }  // namespace fiction::layouts::clocking
