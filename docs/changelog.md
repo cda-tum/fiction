@@ -38,8 +38,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added Python source coverage, including package-root modules, and separate C++ checks.
 
 - Data structures:
-  - Gate layouts maintain crossing counts during edits for constant-time queries.
-  - Default OPEN clocking and gate-layout moves now allocate no storage.
 
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores tagged dots and defects without templates
@@ -632,6 +630,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Cartesian, hexagonal, and gate-layout clocked neighbor visitors now invoke temporary and move-only callbacks
     as lvalues.
   - Gate-layout crossings now exclude primary input and output terminals.
+  - Default OPEN clocking and gate-layout moves now allocate no storage.
+  - Gate layouts maintain crossing counts during edits for constant-time queries.
   - Python gate-layout constructors now raise `ValueError` for unknown clocking schemes.
   - Coordinate construction and gate-to-cell conversion now reject narrowing overflow.
   - Cell clock zones now use floor division for negative coordinates.

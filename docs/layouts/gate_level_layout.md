@@ -132,3 +132,13 @@ The layout stores object records and mutable connections in contiguous reusable 
 permit constant-time unlinking. Every built-in gate keeps its ordered inputs inline; gates with more than
 three inputs use separate overflow storage. Names and truth-table payloads also live outside object records.
 Removing an object releases its overflow inputs; the object and connection pools retain capacity for reuse.
+
+Contiguous connection storage does not make each object's sink list contiguous. Reconnecting inputs reuses
+free edge slots, so sink traversal follows indices that can span the pool. This representation supports local
+routing edits without shifting neighboring adjacency lists. Analyses that need repeated dense logic traversal
+can extract a network; the editable layout does not maintain a second adjacency representation.
+
+Coordinates use a sparse flat hash map rather than an array proportional to the layout's frame. Names and
+large truth tables are cold data: they do not enlarge the records read by ordinary topology traversal.
+The three inline input indices cover the built-in gate set without an allocation per gate. Object IDs keep
+their slot and generation across moves; compacting slots would require a separate identity mapping.
