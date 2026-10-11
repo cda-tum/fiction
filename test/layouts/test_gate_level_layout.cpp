@@ -1080,3 +1080,37 @@ TEST_CASE("Failed creation preserves object iteration across storage growth", "[
         CHECK(visited == expected);
     }
 }
+
+TEST_CASE("Name presence queries do not allocate", "[gate-layout-editing]")
+{
+    require_allocation_failure_support();
+    /** Layout with long names that cannot use short-string storage. */
+    gate_level_layout<cartesian_layout> layout{{2, 1}};
+    /** Named input. */
+    const auto input = layout.create_pi(std::string(128, 'a'), {0, 0});
+    layout.create_po(input, std::string(128, 'b'), {1, 0});
+    /** Results collected before Catch2 performs its own allocations. */
+    bool object_named{}, input_named{}, output_named{};
+    allocation_budget = 0;
+    try
+    {
+        object_named = layout.has_name(input);
+        input_named  = layout.has_input_name(0);
+        output_named = layout.has_output_name(0);
+    }
+    catch (...)
+    {
+        allocation_budget.reset();
+        throw;
+    }
+    allocation_budget.reset();
+    CHECK(object_named);
+    CHECK(input_named);
+    CHECK(output_named);
+    CHECK_THROWS_AS(layout.has_name(gate_level_layout<cartesian_layout>::object_id{999}), std::invalid_argument);
+    CHECK_THROWS_AS(layout.has_input_name(1), std::out_of_range);
+    CHECK_THROWS_AS(layout.has_output_name(1), std::out_of_range);
+    layout.set_name(input, "");
+    CHECK_FALSE(layout.has_name(input));
+    CHECK_FALSE(layout.has_input_name(0));
+}
