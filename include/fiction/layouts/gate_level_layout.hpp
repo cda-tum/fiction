@@ -679,7 +679,7 @@ class gate_level_layout : public CoordinateLayout
             auto word = live_object_bits[word_index];
             while (word != 0)
             {
-                const auto slot = word_index * 64u + static_cast<uint32_t>(std::countr_zero(word));
+                const auto slot = (word_index * 64u) + static_cast<uint32_t>(std::countr_zero(word));
                 if (!visit(fn, identity(slot), index++))
                 {
                     return;
@@ -1923,7 +1923,7 @@ class gate_level_layout : public CoordinateLayout
         const auto slot = reuse ? free_object : static_cast<uint32_t>(objects.size());
         if (slot / 64u >= live_object_bits.size())
         {
-            live_object_bits.resize(slot / 64u + 1u);
+            live_object_bits.resize((slot / 64u) + 1u);
         }
         if (arity > record.inputs.size())
         {

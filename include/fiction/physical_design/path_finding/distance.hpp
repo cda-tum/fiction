@@ -104,11 +104,11 @@ template <typename Lyt, typename Dist = uint64_t>
     /** Largest result representable by the requested distance type. */
     constexpr auto maximum = static_cast<uint64_t>(std::numeric_limits<Dist>::max());
 
-    if (x * x > maximum || y * y > maximum - x * x)
+    if (x * x > maximum || y * y > maximum - (x * x))
     {
         throw std::overflow_error("Squared Euclidean distance exceeds the distance type range");
     }
-    return static_cast<Dist>(x * x + y * y);
+    return static_cast<Dist>((x * x) + (y * y));
 }
 /**
  * The 2DDWave distance \f$D\f$ between two layout coordinates \f$s = (x_1, y_1)\f$ and \f$t = (x_2, y_2)\f$ given

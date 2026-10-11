@@ -290,8 +290,8 @@ class scheme
     [[nodiscard]] std::span<const clock_number> cutout() const noexcept
     {
         /** @brief Single implicit cell of default OPEN clocking. */
-        static constexpr clock_number OPEN_CELL{0};
-        return cells.empty() ? std::span<const clock_number>{&OPEN_CELL, 1} : std::span<const clock_number>{cells};
+        static constexpr clock_number open_cell{0};
+        return cells.empty() ? std::span<const clock_number>{&open_cell, 1} : std::span<const clock_number>{cells};
     }
     /**
      * Modulo that rounds toward negative infinity, so that a cutout repeats seamlessly at negative coordinates.
