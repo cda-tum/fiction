@@ -293,13 +293,20 @@ exact_physical_design_params&& minimize_crossings(exact_physical_design_params&&
     return std::move(ps);
 }
 
-void check_stats(const exact_physical_design_stats& st)
+/**
+ * @brief Check statistics against the resulting layout.
+ * @tparam Lyt Gate-level layout type.
+ * @param st Reported physical-design statistics.
+ * @param lyt Resulting layout.
+ */
+template <typename Lyt>
+void check_stats(const exact_physical_design_stats& st, const Lyt& lyt)
 {
     CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
     CHECK(st.x_size > 0);
     CHECK(st.y_size > 0);
     CHECK(st.num_gates > 0);
-    CHECK(st.num_wires > 0);
+    CHECK(st.num_wires == lyt.num_wires());
 }
 
 template <typename Lyt>
@@ -333,8 +340,8 @@ Lyt generate_layout(const Ntk& ntk, exact_physical_design_params ps, const std::
 
     REQUIRE(layout.has_value());
 
-    check_drvs(layout.value());  // NOLINT(bugprone-unchecked-optional-access)
-    check_stats(stats);
+    check_drvs(layout.value());          // NOLINT(bugprone-unchecked-optional-access)
+    check_stats(stats, layout.value());  // NOLINT(bugprone-unchecked-optional-access): REQUIRE guards the value.
 
     return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
@@ -348,8 +355,8 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
 
     REQUIRE(layout.has_value());
 
-    check_drvs(layout.value());  // NOLINT(bugprone-unchecked-optional-access)
-    check_stats(stats);
+    check_drvs(layout.value());          // NOLINT(bugprone-unchecked-optional-access)
+    check_stats(stats, layout.value());  // NOLINT(bugprone-unchecked-optional-access): REQUIRE guards the value.
 
     return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
