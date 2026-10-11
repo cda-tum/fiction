@@ -20,23 +20,47 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/design_rule_violations.hpp>
 
+#include <sstream>
 #include <stdexcept>
 #include <type_traits>
 
 using namespace fiction;
 using namespace fiction::inml;
 using namespace fiction::layouts;
+using namespace fiction::physical_design;
+using namespace fiction::verification;
 
 TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 {
     CHECK(std::is_same_v<topolinano_library::layout, inml::layout>);
     CHECK(!has_get_functional_implementations_v<topolinano_library>);
     CHECK(!has_get_gate_ports_v<topolinano_library>);
+}
+
+TEST_CASE("ToPoliNano rejects primary-input fanout", "[inml-topolinano-library]")
+{
+    shifted_cart_gate_clk_lyt lyt{arrangement::ODD_COLUMN, {2, 2}, clocking::columnar(clocking::num_clks::THREE)};
+    const auto                pi = lyt.create_pi("a", {0, 1});
+    lyt.create_po(pi, "north", {1, 0});
+    lyt.create_po(pi, "south", {1, 1});
+
+    std::ostringstream    report{};
+    gate_level_drv_params ps{};
+    ps.out = &report;
+    gate_level_drv_stats st{};
+    gate_level_drvs(lyt, ps, &st);
+    INFO(report.str());
+    REQUIRE(st.drvs == 0);
+
+    CHECK_THROWS_AS(apply_gate_library<topolinano_library>(lyt),
+                    fcn::unsupported_gate_type_exception<tile<decltype(lyt)>>);
 }
 
 TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")

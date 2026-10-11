@@ -55,6 +55,8 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @param t Tile to be realized as a ToPoliNano gate.
      * @return ToPoliNano gate representation of `t` including I/Os, rotation, etc.
      * @throws std::invalid_argument If `lyt` shifts rows instead of columns.
+     * @throws fcn::unsupported_gate_type_exception If a terminal also acts as a fanout. Connect the terminal to a
+     * separate fanout wire instead.
      */
     template <typename GateLyt>
     [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
@@ -82,6 +84,10 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
 
         if (lyt.is_fanout(n))
         {
+            if (lyt.is_pi(n) || lyt.is_po(n))
+            {
+                throw fcn::unsupported_gate_type_exception(t);
+            }
             return COUPLER;
         }
 

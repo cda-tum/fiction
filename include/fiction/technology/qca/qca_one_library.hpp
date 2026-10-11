@@ -53,6 +53,8 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a QCA ONE gate.
      * @return QCA ONE gate representation of `t` including I/Os, rotation, const cells, etc.
+     * @throws fcn::unsupported_gate_type_exception If a terminal also acts as a fanout. Connect the terminal to a
+     * separate fanout wire instead.
      */
     template <typename GateLyt>
     [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
@@ -71,6 +73,10 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
         {
             if (lyt.is_fanout(n))
             {
+                if (lyt.is_pi(n) || lyt.is_po(n))
+                {
+                    throw fcn::unsupported_gate_type_exception(t);
+                }
                 if (p.out.size() == 2)
                 {
                     return FANOUT_MAP.at(p);
