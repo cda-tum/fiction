@@ -13,12 +13,14 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from mnt.pyfiction.inml import inml_layout
 from mnt.pyfiction.layouts import (
     arrangement,
     cartesian_gate_layout,
     hexagonal_gate_layout,
     shifted_cartesian_gate_layout,
 )
+from mnt.pyfiction.qca import qca_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -88,11 +90,17 @@ def test_fetch_clocking_scheme(layout: Callable[..., Any]) -> None:
         layout((1, 2), "PES")
 
 
-def test_clocking_scheme_name() -> None:
-    layout = cartesian_gate_layout((2, 2), "2DDWave")
-    assert layout.get_clocking_scheme_name() == "2DDWAVE"
-    assert layout.is_clocking_scheme("2DDWAVE")
-    assert not layout.is_clocking_scheme("USE")
+@pytest.mark.parametrize("layout_type", [cartesian_gate_layout, qca_layout, inml_layout])
+@pytest.mark.parametrize("scheme", ["2DDWave", "USE", "BANCS"])
+def test_clocking_scheme_name(layout_type: Callable[..., Any], scheme: str) -> None:
+    layout = layout_type((2, 2), scheme)
+    name = layout.get_clocking_scheme_name()
+    assert name == scheme.upper()
+    assert layout.is_clocking_scheme(name)
+    layout.replace_clocking_scheme("RES")
+    assert name == scheme.upper()
+    assert not layout.is_clocking_scheme(name)
+    assert layout.get_clocking_scheme_name() == "RES"
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
