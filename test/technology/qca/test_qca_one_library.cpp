@@ -15,6 +15,7 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"

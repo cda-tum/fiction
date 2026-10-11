@@ -103,8 +103,11 @@ TEST_CASE("Color routing connects repeated sources to distinct inputs", "[color-
     REQUIRE(first_source.has_value());
     REQUIRE(second_source.has_value());
     CHECK(first_source != second_source);
-    CHECK(layout.source({*first_source, 0}) == a);
-    CHECK(layout.source({*second_source, 0}) == a);
+    if (first_source && second_source)
+    {
+        CHECK(layout.source({*first_source, 0}) == a);
+        CHECK(layout.source({*second_source, 0}) == a);
+    }
 }
 
 TEST_CASE("Two paths wire connections", "[color-routing]")
