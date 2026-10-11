@@ -53,12 +53,15 @@ namespace fgl
  */
 inline std::string xml_text(const std::string& value)
 {
+    /** XML printer escaping markup characters. */
     tinyxml2::XMLPrinter printer{};
     printer.PushText(value.c_str());
+    /** Escaped name with explicit whitespace references. */
     std::string text{printer.CStr()};
-    for (auto position = text.find('\r'); position != std::string::npos; position = text.find('\r', position + 5))
+    for (auto position = text.find_first_of(" \t\r\n"); position != std::string::npos;
+         position      = text.find_first_of(" \t\r\n", position + 1))
     {
-        text.replace(position, 1, "&#13;");
+        text.replace(position, 1, fmt::format("&#{};", static_cast<unsigned int>(text[position])));
     }
     return text;
 }

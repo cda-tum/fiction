@@ -548,3 +548,21 @@ TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl
     original.close();
     std::filesystem::remove(filename);
 }
+
+TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
+{
+    /** Layout with whitespace-only metadata and ports. */
+    cart_gate_clk_lyt layout{{2, 1, 1}, clocking::twoddwave()};
+    layout.set_layout_name("  ");
+    /** Primary input with a whitespace-only name. */
+    const auto input = layout.create_pi("  ", {0, 0});
+    layout.create_po(input, "\t", {1, 0});
+    /** Indented XML output read through the public reader. */
+    std::stringstream stream{};
+    write_fgl_layout(layout, stream);
+    /** Restored layout and port names. */
+    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(restored.get_layout_name() == "  ");
+    CHECK(restored.get_name(*restored.find_object({0, 0})) == "  ");
+    CHECK(restored.get_name(*restored.find_object({1, 0})) == "\t");
+}
