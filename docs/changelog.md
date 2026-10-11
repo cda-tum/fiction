@@ -537,6 +537,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Coordinate normalization now shifts out-of-frame cells to the origin and preserves trailing frame padding.
   - Transactional writes now remove read-only temporary files after failed replacement.
   - Fanout substitution now separates repeated gate inputs into distinct routing branches.
     The algorithm rejects degrees below two and a zero threshold.

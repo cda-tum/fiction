@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Coordinate conversion, normalization, and sampling helpers.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
@@ -25,6 +26,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <random>
 #include <stdexcept>
@@ -226,11 +228,13 @@ template <typename Lyt>
 /**
  * Returns a copy of the given cell grid layout whose cells are shifted towards the origin, so that the smallest
  * occupied x- and y-coordinates become 0. Cell types, names, and, where the layout has them, cell modes move with their
- * cells; layers, the layout name, and the clocking stay unchanged. The extent shrinks by the shift.
+ * cells. Layer coordinates, the layout name, and the clocking stay unchanged. The extent preserves trailing padding
+ * and encloses translated x/y coordinates and occupied nonnegative layers.
  *
  * @tparam Lyt Cell grid layout type, e.g., `qca::layout`, `mol_qca::layout`, or `inml::layout`.
  * @param lyt The layout to normalize.
  * @return Normalized copy of `lyt`.
+ * @throws std::invalid_argument If the normalized extent exceeds the signed coordinate domain.
  */
 template <typename Lyt>
 [[nodiscard]] Lyt normalize_layout_coordinates(const Lyt& lyt)
@@ -242,29 +246,42 @@ template <typename Lyt>
         return lyt;
     }
 
-    int64_t x_offset = lyt.width();
-    int64_t y_offset = lyt.height();
+    /** Smallest occupied column. */
+    int64_t x_offset = std::numeric_limits<int64_t>::max();
+    /** Smallest occupied row. */
+    int64_t y_offset = std::numeric_limits<int64_t>::max();
+    /** Exclusive upper column bound, including frame padding. */
+    int64_t x_end = lyt.width();
+    /** Exclusive upper row bound, including frame padding. */
+    int64_t y_end = lyt.height();
+    /** Exclusive upper layer bound, including frame padding. */
+    int64_t z_end = lyt.layers();
 
     lyt.foreach_cell(
-        [&x_offset, &y_offset](const auto& c)
+        [&](const auto& c)
         {
             x_offset = std::min(x_offset, static_cast<decltype(x_offset)>(c.x));
             y_offset = std::min(y_offset, static_cast<decltype(y_offset)>(c.y));
+            x_end    = std::max(x_end, static_cast<int64_t>(c.x) + 1);
+            y_end    = std::max(y_end, static_cast<int64_t>(c.y) + 1);
+            z_end    = std::max(z_end, static_cast<int64_t>(c.z) + 1);
         });
 
+    /** Whether this layout stores cell modes. */
     constexpr bool has_cell_modes =
         requires(Lyt& l, const coordinate<Lyt>& c) { l.assign_cell_mode(c, l.get_cell_mode(c)); };
 
+    /** Copy retaining layout metadata while cells move. */
     Lyt normalized{lyt};
 
     lyt.foreach_cell([&normalized](const auto& c) { normalized.assign_cell_type(c, Lyt::cell_type::EMPTY); });
 
-    normalized.resize(
-        {static_cast<int64_t>(lyt.width()) - x_offset, static_cast<int64_t>(lyt.height()) - y_offset, lyt.layers()});
+    normalized.resize({x_end - x_offset, y_end - y_offset, z_end});
 
     lyt.foreach_cell(
         [&normalized, &lyt, x_offset, y_offset](const auto& c)
         {
+            /** Cell coordinate translated by the occupied minima. */
             const coordinate<Lyt> shifted{c.x - x_offset, c.y - y_offset, c.z};
 
             normalized.assign_cell_type(shifted, lyt.get_cell_type(c));

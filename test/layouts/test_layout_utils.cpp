@@ -30,6 +30,7 @@
 #include <fiction/types.hpp>
 
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <tuple>
@@ -228,4 +229,42 @@ TEST_CASE("Random coordinates stay inside crossed-axis corners", "[layout-utils]
         CHECK(c.z >= minimum.z);
         CHECK(c.z <= maximum.z);
     }
+}
+TEST_CASE("Normalize occupied cells outside the layout extent", "[layout-utils]")
+{
+    /** Frame may be empty or smaller than its occupied coordinates. */
+    const auto size = GENERATE(0, 3);
+    /** Sparse layout with occupied cells beyond its declared frame. */
+    qca::layout lyt{{size, size, size == 0 ? 0 : 1}};
+    lyt.assign_cell_type({5, 7}, qca::cell_type::INPUT);
+    lyt.assign_cell_type({8, 9}, qca::cell_type::NORMAL);
+    /** Normalized frame encloses every translated cell. */
+    const auto normalized = normalize_layout_coordinates(lyt);
+    CHECK(normalized.get_cell_type({0, 0}) == qca::cell_type::INPUT);
+    CHECK(normalized.get_cell_type({3, 2}) == qca::cell_type::NORMAL);
+    CHECK(normalized.width() == 4);
+    CHECK(normalized.height() == 3);
+    CHECK(normalized.layers() == 1);
+}
+
+TEST_CASE("Normalize negative cells preserves trailing padding", "[layout-utils]")
+{
+    /** Layout with negative occupied coordinates and trailing padding. */
+    qca::layout lyt{{4, 5, 1}};
+    lyt.assign_cell_type({-2, -3}, qca::cell_type::INPUT);
+    /** Translated layout retains the original upper frame edges. */
+    const auto normalized = normalize_layout_coordinates(lyt);
+    CHECK(normalized.get_cell_type({0, 0}) == qca::cell_type::INPUT);
+    CHECK(normalized.width() == 6);
+    CHECK(normalized.height() == 8);
+}
+
+TEST_CASE("Normalize rejects an extent beyond the coordinate domain", "[layout-utils]")
+{
+    /** Occupied span wider than a nonnegative signed coordinate axis. */
+    qca::layout lyt{};
+    lyt.assign_cell_type({std::numeric_limits<int32_t>::min(), 0}, qca::cell_type::INPUT);
+    lyt.assign_cell_type({std::numeric_limits<int32_t>::max(), 0}, qca::cell_type::NORMAL);
+    CHECK_THROWS_AS(normalize_layout_coordinates(lyt), std::invalid_argument);
+    CHECK(lyt.num_cells() == 2);
 }
