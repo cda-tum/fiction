@@ -458,6 +458,8 @@ TEST_CASE("Squared Euclidean distance checks integral range", "[distance]")
     /** Layout used by the coordinate distance API. */
     const cartesian_layout layout{};
     STATIC_REQUIRE(squared_euclidean_distance(layout, {-2147483647, 0}, {2147483647, 0}) == 18446744056529682436ULL);
+    STATIC_REQUIRE(squared_euclidean_distance(layout, {std::numeric_limits<int32_t>::min(), 0},
+                                              {std::numeric_limits<int32_t>::max(), 0}) == 18446744065119617025ULL);
     CHECK_THROWS_AS(squared_euclidean_distance(layout, {-2147483647, -2147483647}, {2147483647, 2147483647}),
                     std::overflow_error);
     CHECK_THROWS_AS((squared_euclidean_distance<cartesian_layout, uint8_t>(layout, {0, 0}, {16, 0})),

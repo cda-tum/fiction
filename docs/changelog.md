@@ -121,6 +121,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Squared Euclidean distance checks overflow without integer division.
   - Layout extraction and critical-path analysis reduce per-object allocations with flat traversal maps.
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.
   - GOLD reuses built-in objective costs while ranking candidates and accepting solutions.

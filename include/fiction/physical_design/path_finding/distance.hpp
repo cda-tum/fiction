@@ -104,7 +104,7 @@ template <typename Lyt, typename Dist = uint64_t>
     /** Largest result representable by the requested distance type. */
     constexpr auto maximum = static_cast<uint64_t>(std::numeric_limits<Dist>::max());
 
-    if ((x != 0 && x > maximum / x) || (y != 0 && y > maximum / y) || y * y > maximum - x * x)
+    if (x * x > maximum || y * y > maximum - x * x)
     {
         throw std::overflow_error("Squared Euclidean distance exceeds the distance type range");
     }
