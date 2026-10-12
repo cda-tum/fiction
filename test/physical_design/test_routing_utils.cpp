@@ -193,12 +193,8 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     /** @brief Routed source connected to the second input port. */
     const auto second_source = layout.source({gate, 1});
     REQUIRE(second_source.has_value());
-    if (!second_source.has_value())
-    {
-        return;
-    }
     /** @brief Retained identity of the second routed wire. */
-    const auto second_wire = *second_source;
+    const auto second_wire = *second_source;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
     CHECK(layout.source({second_wire, 0}) == a);
     const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {0, 1}, {4, 2}};
     route_path(layout, first, {gate, 0});

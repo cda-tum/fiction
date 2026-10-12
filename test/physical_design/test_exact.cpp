@@ -817,10 +817,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 
         REQUIRE(layout.has_value());
 
-        if (layout)
-        {
-            CHECK(layout->height() <= 4);
-        }
+        CHECK(layout->height() <= 4);  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
 
         upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail
 
@@ -860,19 +857,19 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
 
     REQUIRE(layout.has_value());
 
-    if (layout)
-    {
-        // network name
-        CHECK(layout->get_layout_name() == "maj");
+    // network name
+    CHECK(layout->get_layout_name() == "maj");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
 
-        // PI names
-        CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
-        CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
-        CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
+    // PI names
+    CHECK(layout->get_name(layout->pi_at(0)) ==
+          "a");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
+    CHECK(layout->get_name(layout->pi_at(1)) ==
+          "b");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
+    CHECK(layout->get_name(layout->pi_at(2)) ==
+          "c");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
 
-        // PO names
-        CHECK(layout->get_output_name(0) == "f");
-    }
+    // PO names
+    CHECK(layout->get_output_name(0) == "f");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
 }
 
 TEST_CASE("Exact physical design reports progress", "[exact]")
