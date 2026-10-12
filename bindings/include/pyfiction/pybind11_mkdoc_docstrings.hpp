@@ -13843,10 +13843,7 @@ static const char *mkd_doc_fiction_sidb_gate_design_exception =
 R"doc(Reports an unsuccessful SiDB gate design.
 
 It provides information about the tile, truth table, and port list
-associated with the error.
-
-Template Args:
-    GateLyt: The type representing the gate-level layout.)doc";
+associated with the error.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_error_tile = R"doc(The tile associated with the error.)doc";
 
