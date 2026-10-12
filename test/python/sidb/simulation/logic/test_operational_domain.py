@@ -492,6 +492,7 @@ def test_operational_domain_to_numpy() -> None:
     domain[parameter_point([5.1, 5.7])] = operational_status.NON_OPERATIONAL
 
     coordinates, operational = domain.to_numpy()
+    del domain
 
     assert coordinates.shape == (2, 2)
     assert coordinates.dtype == np.float64
@@ -500,6 +501,9 @@ def test_operational_domain_to_numpy() -> None:
         ((5.0, 5.6), True),
         ((5.1, 5.7), False),
     }
+
+    del coordinates
+    assert set(operational.tolist()) == {False, True}
 
     empty_coordinates, empty_operational = operational_domain([sweep_parameter.EPSILON_R]).to_numpy()
     assert empty_coordinates.shape == (0, 1)

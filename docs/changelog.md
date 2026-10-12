@@ -670,6 +670,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Operational-domain NumPy export now frees buffers if capsule construction fails.
   - Linux extensions hide C++ implementation symbols while preserving nanobind's shared exception ABI.
   - `physically_valid_parameters` and `operational_domain_ratio` now release the GIL so
     worker progress callbacks can execute without deadlocking.

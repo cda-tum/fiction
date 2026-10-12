@@ -417,14 +417,16 @@ void operational_domain(nanobind::module_& m)
                         buffers->operational.push_back(std::get<0>(value) == operational_status::OPERATIONAL);
                     });
 
-                // the capsule owns the buffers from here on; both arrays keep it alive and free it together
-                auto* const       data = buffers.release();
+                /** @brief Buffer address retained by both returned arrays. */
+                auto* const       data = buffers.get();
                 const py::capsule owner{data, [](void* p) noexcept
                                         {
                                             // the capsule is the owner and runs this when the last array dies
                                             // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
                                             delete static_cast<detail::numpy_buffers*>(p);
                                         }};
+
+                static_cast<void>(buffers.release());
 
                 return std::make_tuple(
                     py::ndarray<py::numpy, double, py::ndim<2>>{data->coordinates.data(), {points, dimensions}, owner},
