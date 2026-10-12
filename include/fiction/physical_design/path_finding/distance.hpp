@@ -56,8 +56,8 @@ namespace fiction::physical_design::path_finding
  * @param target Target coordinate.
  * @return Euclidean distance between `source` and `target`.
  */
-[[nodiscard]] constexpr double euclidean_distance(const layouts::layout_base::coordinate& source,
-                                                  const layouts::layout_base::coordinate& target) noexcept
+[[nodiscard]] inline double euclidean_distance(const layouts::layout_base::coordinate& source,
+                                               const layouts::layout_base::coordinate& target) noexcept
 {
     /** Column difference. */
     const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
