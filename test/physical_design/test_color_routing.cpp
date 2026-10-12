@@ -91,7 +91,10 @@ TEST_CASE("Color routing connects repeated sources to distinct inputs", "[color-
     clear_routing(layout);
 
     color_routing_params ps{};
-    SECTION("Without crossings") {}
+    SECTION("Without crossings")
+    {
+        ps.crossings = false;
+    }
     SECTION("With crossings")
     {
         ps.crossings = true;
