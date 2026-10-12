@@ -29,6 +29,7 @@
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/utils/progress.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <chrono>
@@ -229,17 +230,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_first_column(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        apply_if_not_coordinate(c,
-                                layouts::cartesian_layout::north(c) ?
-                                    layouts::cartesian_layout::east(layouts::cartesian_layout::north(c).value()) :
-                                    std::nullopt,
-                                fn);
+        /** Neighbor to the north, when present. */
+        const auto north = layouts::cartesian_layout::north(c);
+        apply_if_not_coordinate(c, north ? layouts::cartesian_layout::east(*north) : std::nullopt, fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
-        apply_if_not_coordinate(c,
-                                layouts::cartesian_layout::south(c) ?
-                                    layouts::cartesian_layout::east(layouts::cartesian_layout::south(c).value()) :
-                                    std::nullopt,
-                                fn);
+        /** Neighbor to the south, when present. */
+        const auto south = layouts::cartesian_layout::south(c);
+        apply_if_not_coordinate(c, south ? layouts::cartesian_layout::east(*south) : std::nullopt, fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
     }
     /**
@@ -255,17 +252,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_middle_columns(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        apply_if_not_coordinate(c,
-                                layouts::cartesian_layout::north(c) ?
-                                    layouts::cartesian_layout::east(layouts::cartesian_layout::north(c).value()) :
-                                    std::nullopt,
-                                fn);
+        /** Neighbor to the north, when present. */
+        const auto north = layouts::cartesian_layout::north(c);
+        apply_if_not_coordinate(c, north ? layouts::cartesian_layout::east(*north) : std::nullopt, fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
-        apply_if_not_coordinate(c,
-                                layouts::cartesian_layout::south(c) ?
-                                    layouts::cartesian_layout::east(layouts::cartesian_layout::south(c).value()) :
-                                    std::nullopt,
-                                fn);
+        /** Neighbor to the south, when present. */
+        const auto south = layouts::cartesian_layout::south(c);
+        apply_if_not_coordinate(c, south ? layouts::cartesian_layout::east(*south) : std::nullopt, fn);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last column.
@@ -295,17 +288,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_first_row(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        apply_if_not_coordinate(c,
-                                layouts::cartesian_layout::east(c) ?
-                                    layouts::cartesian_layout::south(layouts::cartesian_layout::east(c).value()) :
-                                    std::nullopt,
-                                fn);
+        /** Neighbor to the east, when present. */
+        const auto east = layouts::cartesian_layout::east(c);
+        apply_if_not_coordinate(c, east ? layouts::cartesian_layout::south(*east) : std::nullopt, fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
-        apply_if_not_coordinate(c,
-                                layouts::cartesian_layout::west(c) ?
-                                    layouts::cartesian_layout::south(layouts::cartesian_layout::west(c).value()) :
-                                    std::nullopt,
-                                fn);
+        /** Neighbor to the west, when present. */
+        const auto west = layouts::cartesian_layout::west(c);
+        apply_if_not_coordinate(c, west ? layouts::cartesian_layout::south(*west) : std::nullopt, fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
     }
     /**
@@ -321,17 +310,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     template <typename Fn>
     void foreach_adjacent_coordinate_middle_rows(const layouts::layout_base::coordinate& c, Fn& fn) const
     {
-        apply_if_not_coordinate(c,
-                                layouts::cartesian_layout::east(c) ?
-                                    layouts::cartesian_layout::south(layouts::cartesian_layout::east(c).value()) :
-                                    std::nullopt,
-                                fn);
+        /** Neighbor to the east, when present. */
+        const auto east = layouts::cartesian_layout::east(c);
+        apply_if_not_coordinate(c, east ? layouts::cartesian_layout::south(*east) : std::nullopt, fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
-        apply_if_not_coordinate(c,
-                                layouts::cartesian_layout::west(c) ?
-                                    layouts::cartesian_layout::south(layouts::cartesian_layout::west(c).value()) :
-                                    std::nullopt,
-                                fn);
+        /** Neighbor to the west, when present. */
+        const auto west = layouts::cartesian_layout::west(c);
+        apply_if_not_coordinate(c, west ? layouts::cartesian_layout::south(*west) : std::nullopt, fn);
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last row.
