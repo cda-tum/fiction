@@ -568,7 +568,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
-  - The `pyfiction` CMake preset now requests the stable-ABI Python component required on Windows.
+  - Direct Python binding builds now request the stable-ABI component on CMake 3.26 and newer.
   - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - `pyfiction` built against such a Z3 finds `libz3` at import time, so Read the Docs renders the Python API again.

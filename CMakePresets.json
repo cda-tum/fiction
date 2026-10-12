@@ -85,8 +85,7 @@
         "FICTION_TEST": "OFF",
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON",
-        "FICTION_PYTHON_BINDINGS": "ON",
-        "SKBUILD_SABI_COMPONENT": "Development.SABIModule"
+        "FICTION_PYTHON_BINDINGS": "ON"
       }
     },
     {
