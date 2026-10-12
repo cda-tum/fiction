@@ -13,15 +13,15 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    import pytest
+import pytest
 
 
 def test_mkdoc_compile_flags(monkeypatch: pytest.MonkeyPatch) -> None:
     """Preserve quoted Windows paths and system includes without changing POSIX flags."""
     source = Path(__file__).resolve().parents[2] / ".github/scripts/mkdoc_compile_flags.py"
+    if not source.is_file():
+        pytest.skip("The docstring generator scripts are not part of the installed test tree.")
     spec = importlib.util.spec_from_file_location("mkdoc_compile_flags", source)
     assert spec is not None
     assert spec.loader is not None
