@@ -115,7 +115,7 @@ class color_routing_impl
             return false;
         }
 
-        const utils::graph::determine_vertex_coloring_params<::fiction::physical_design::edge_intersection_graph<Lyt>>
+        const utils::graph::determine_vertex_coloring_params<::fiction::physical_design::edge_intersection_graph>
             dvc_ps{
                 .engine     = ps.engine,
                 .sat_params = {.sat_engine        = bill::solvers::glucose_41,

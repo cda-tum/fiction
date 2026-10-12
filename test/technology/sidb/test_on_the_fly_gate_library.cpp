@@ -132,7 +132,7 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
                 static_cast<void>(on_the_fly_gate_library::set_up_gate(gate_layout, {1, 1}, params, surface));
                 FAIL("Two canvas SiDBs cannot fit on one available site");
             }
-            catch (const gate_design_exception<hex_gate_clk_lyt>& error)
+            catch (const gate_design_exception& error)
             {
                 CHECK(error.which_tile() == fiction::layouts::layout_base::coordinate{1, 1});
                 CHECK(error.which_truth_table() == function);

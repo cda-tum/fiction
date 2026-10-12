@@ -44,7 +44,6 @@ namespace fiction::physical_design
  * Each node (vertex) is identified via a unique ID whereas each edge is an undirected pair of such IDs. Since the
  * implementation demands it, each edge, additionally, is associated with a data field that represents its ID.
  */
-template <typename Lyt>
 using edge_intersection_graph =
     undirected_graph<std::size_t, layout_coordinate_path, undirected_pair<std::size_t>, std::size_t>;
 
@@ -118,7 +117,7 @@ class generate_edge_intersection_graph_impl
     {}
 
     /** @brief Generate the graph. @return Candidate paths and their intersections. */
-    edge_intersection_graph<Lyt> run()
+    edge_intersection_graph run()
     {
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
@@ -190,7 +189,7 @@ class generate_edge_intersection_graph_impl
     /**
      * The edge intersection graph to be created.
      */
-    edge_intersection_graph<Lyt> graph{};
+    edge_intersection_graph graph{};
     /**
      * IDs for nodes and edges.
      */
@@ -342,10 +341,10 @@ class generate_edge_intersection_graph_impl
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
  */
 template <typename Lyt>
-edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&                              lyt,
-                                                              const std::vector<routing_objective>&   objectives,
-                                                              generate_edge_intersection_graph_params ps  = {},
-                                                              generate_edge_intersection_graph_stats* pst = nullptr)
+edge_intersection_graph generate_edge_intersection_graph(const Lyt&                              lyt,
+                                                         const std::vector<routing_objective>&   objectives,
+                                                         generate_edge_intersection_graph_params ps  = {},
+                                                         generate_edge_intersection_graph_stats* pst = nullptr)
 {
     static_assert(
         requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },

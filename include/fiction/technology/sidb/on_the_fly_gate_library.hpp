@@ -55,10 +55,7 @@ namespace fiction::sidb
 /**
  * @brief Reports an unsuccessful SiDB gate design.
  * It provides information about the tile, truth table, and port list associated with the error.
- *
- * @tparam GateLyt The type representing the gate-level layout.
  */
-template <typename GateLyt>
 class gate_design_exception : public std::exception
 {
   public:
@@ -512,14 +509,14 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
 
         if (skeleton.num_defects() > 0 && sidb::generators::is_gate_design_impossible(skeleton, spec, params))
         {
-            throw gate_design_exception<GateLyt>(tile, function_to_report, p);
+            throw gate_design_exception(tile, function_to_report, p);
         }
 
         const auto found_gate_layouts = sidb::generators::design_gates(skeleton, spec, parameters.design_gate_params);
 
         if (found_gate_layouts.empty())
         {
-            throw gate_design_exception<GateLyt>(tile, function_to_report, p);
+            throw gate_design_exception(tile, function_to_report, p);
         }
 
         return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
