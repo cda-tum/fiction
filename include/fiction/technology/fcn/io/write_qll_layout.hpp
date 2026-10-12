@@ -149,7 +149,7 @@ class write_qll_layout_impl
   private:
     const Lyt& lyt;
 
-    const layouts::bounding_box_2d<Lyt> bb;
+    const layouts::bounding_box<Lyt> bb;
 
     std::vector<typename Lyt::cell> sorted_pi_list, sorted_po_list;
 

@@ -35,7 +35,7 @@ TEMPLATE_TEST_CASE("Occupied bounds include outside objects and clear after remo
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
     auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {1000000000, 1000000000});
-    bounding_box_2d bounds{lyt};
+    bounding_box bounds{lyt};
     CHECK_FALSE(bounds.get_min().has_value());
     CHECK(bounds.get_x_size() == 0);
     const auto a = lyt.create_pi("a", {-5, 12});

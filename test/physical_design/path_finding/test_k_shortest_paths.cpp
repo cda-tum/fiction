@@ -38,7 +38,7 @@ using namespace fiction::physical_design::path_finding;
 TEST_CASE("Yen's algorithm respects a zero path limit", "[k-shortest-paths]")
 {
     using lyt  = cartesian_layout;
-    using path = layout_coordinate_path<lyt>;
+    using path = layout_coordinate_path;
     const lyt layout{lyt::extent{2, 2, 1}};
     CHECK(yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, 0).empty());
     CHECK(yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, 0).empty());
@@ -47,7 +47,7 @@ TEST_CASE("Yen's algorithm respects a zero path limit", "[k-shortest-paths]")
 TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 {
     using lyt  = cartesian_layout;
-    using path = layout_coordinate_path<lyt>;
+    using path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -293,7 +293,7 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 TEST_CASE("Yen's algorithm enumerates every simple path on a small grid", "[k-shortest-paths]")
 {
     using lyt  = cartesian_layout;
-    using path = layout_coordinate_path<lyt>;
+    using path = layout_coordinate_path;
     const lyt layout{lyt::extent{3, 3, 1}};
     layout.foreach_coordinate(
         [&](const auto& source)
@@ -301,9 +301,9 @@ TEST_CASE("Yen's algorithm enumerates every simple path on a small grid", "[k-sh
             layout.foreach_coordinate(
                 [&](const auto& target)
                 {
-                    const routing_objective<lyt> objective{.source = source, .target = target};
-                    const auto                   expected = enumerate_all_paths<path>(layout, objective);
-                    const auto                   actual   = yen_k_shortest_paths<path>(layout, objective, 100);
+                    const routing_objective objective{.source = source, .target = target};
+                    const auto              expected = enumerate_all_paths<path>(layout, objective);
+                    const auto              actual   = yen_k_shortest_paths<path>(layout, objective, 100);
                     CAPTURE(source, target);
                     CHECK(actual.size() == expected.size());
                     for (const auto& candidate : expected)
@@ -317,7 +317,7 @@ TEST_CASE("Yen's algorithm enumerates every simple path on a small grid", "[k-sh
 TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
 {
     using lyt  = cartesian_layout;
-    using path = layout_coordinate_path<lyt>;
+    using path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -476,7 +476,7 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction", "[k-shortest-paths]")
 {
     using gate_lyt   = gate_level_layout<cartesian_layout>;
-    using coord_path = layout_coordinate_path<gate_lyt>;
+    using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -628,7 +628,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction", "[k-shortest-paths]")
 {
     using gate_lyt   = gate_level_layout<cartesian_layout>;
-    using coord_path = layout_coordinate_path<gate_lyt>;
+    using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -734,7 +734,7 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 {
     using gate_lyt   = gate_level_layout<cartesian_layout>;
     using obst_lyt   = gate_lyt;
-    using coord_path = layout_coordinate_path<obst_lyt>;
+    using coord_path = layout_coordinate_path;
 
     // enable crossings
     const yen_k_shortest_paths_params params{a_star_params{true}};
@@ -858,14 +858,14 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 TEST_CASE("Path enumeration reaches targets in the crossing layer", "[k-shortest-paths]")
 {
     using lyt  = gate_level_layout<cartesian_layout>;
-    using path = layout_coordinate_path<lyt>;
+    using path = layout_coordinate_path;
     lyt layout{lyt::extent{2, 2, 2}, clocking::twoddwave()};
     layout.create_pi("a", {0, 0});
     layout.obstruct_coordinate({1, 0});
     layout.create_pi("b", {1, 0, 1});
-    const routing_objective<lyt> objective{.source = {0, 0}, .target = {1, 0, 1}};
-    const auto shortest = a_star<path>(layout, objective, manhattan_distance_functor<lyt>{}, unit_cost_functor<lyt>{},
-                                       {.crossings = true});
+    const routing_objective objective{.source = {0, 0}, .target = {1, 0, 1}};
+    const auto              shortest =
+        a_star<path>(layout, objective, manhattan_distance_functor{}, unit_cost_functor<>{}, {.crossings = true});
     REQUIRE_FALSE(shortest.empty());
     const auto all = enumerate_all_paths<path>(layout, objective, {.crossings = true});
     CHECK(all.contains(shortest));
@@ -875,7 +875,7 @@ TEST_CASE("Path enumeration reaches targets in the crossing layer", "[k-shortest
 TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", "[k-shortest-paths]")
 {
     using lyt  = gate_level_layout<cartesian_layout>;
-    using path = layout_coordinate_path<lyt>;
+    using path = layout_coordinate_path;
     lyt layout{lyt::extent{4, 4, 1}, clocking::twoddwave()};
     layout.obstruct_coordinate({1, 0});
     layout.obstruct_connection({0, 1}, {1, 1});
@@ -884,13 +884,13 @@ TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", 
     extra.obstruct_coordinate({2, 1});
     extra.obstruct_connection({1, 2}, {2, 2});
 
-    const routing_objective<lyt> objective{.source = {0, 0}, .target = {3, 3}};
-    const auto                   all = enumerate_all_paths<path>(layout, objective, {}, extra);
+    const routing_objective objective{.source = {0, 0}, .target = {3, 3}};
+    const auto              all = enumerate_all_paths<path>(layout, objective, {}, extra);
     REQUIRE_FALSE(all.empty());
     for (auto repetition = 0; repetition < 2; ++repetition)
     {
         const auto shortest =
-            a_star<path>(layout, objective, manhattan_distance_functor<lyt>{}, unit_cost_functor<lyt>{}, {}, extra);
+            a_star<path>(layout, objective, manhattan_distance_functor{}, unit_cost_functor<>{}, {}, extra);
         CHECK(all.contains(shortest));
         const auto paths = yen_k_shortest_paths<path>(layout, objective, 20, {}, extra);
         CHECK(paths.size() == all.size());

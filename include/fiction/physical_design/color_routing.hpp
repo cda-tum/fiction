@@ -88,7 +88,7 @@ template <typename Lyt>
 class color_routing_impl
 {
   public:
-    color_routing_impl(Lyt& lyt, const std::vector<routing_objective<Lyt>>& obj, const color_routing_params& p,
+    color_routing_impl(Lyt& lyt, const std::vector<routing_objective>& obj, const color_routing_params& p,
                        color_routing_stats& st) :
             layout{lyt},
             objectives{obj},
@@ -143,7 +143,7 @@ class color_routing_impl
     /**
      * The routing objectives.
      */
-    const std::vector<routing_objective<Lyt>> objectives;
+    const std::vector<routing_objective> objectives;
     /**
      * Parameters.
      */
@@ -226,7 +226,7 @@ class color_routing_impl
  * @return `true` iff routing was successful, i.e., iff all objectives could be satisfied.
  */
 template <typename Lyt>
-bool color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {},
+bool color_routing(Lyt& lyt, const std::vector<routing_objective>& objectives, color_routing_params ps = {},
                    color_routing_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");

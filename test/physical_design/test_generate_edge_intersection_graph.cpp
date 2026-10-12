@@ -41,8 +41,8 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         SECTION("Disjoint paths")
         {
             // (0,0) --> (0,1), (1,0) --> (1,1)
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {0, 1}},
-                                                                      {.source = {1, 0}, .target = {1, 1}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {0, 1}},
+                                                            {.source = {1, 0}, .target = {1, 1}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -52,14 +52,14 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 0);
 
-            CHECK(graph.at_vertex(0) == layout_coordinate_path<gate_lyt>{{{0, 0}, {0, 1}}});
-            CHECK(graph.at_vertex(1) == layout_coordinate_path<gate_lyt>{{{1, 0}, {1, 1}}});
+            CHECK(graph.at_vertex(0) == layout_coordinate_path{{{0, 0}, {0, 1}}});
+            CHECK(graph.at_vertex(1) == layout_coordinate_path{{{1, 0}, {1, 1}}});
         }
         SECTION("Non-disjoint paths")
         {
             // (0,0) --> (1,1), (1,0) --> (1,1)
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {1, 1}},
-                                                                      {.source = {1, 0}, .target = {1, 1}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {1, 1}},
+                                                            {.source = {1, 0}, .target = {1, 1}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -72,8 +72,8 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         SECTION("Unsatisfiable objective")
         {
             // (0,0) --> (1,1), (1,1) --> (0,0)
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {1, 1}},
-                                                                      {.source = {1, 1}, .target = {0, 0}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {1, 1}},
+                                                            {.source = {1, 1}, .target = {0, 0}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -91,8 +91,8 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         SECTION("Disjoint paths")
         {
             // (0,0) --> (1,0), (1,1) --> (0,1)
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {1, 0}},
-                                                                      {.source = {1, 1}, .target = {0, 1}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {1, 0}},
+                                                            {.source = {1, 1}, .target = {0, 1}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -102,14 +102,14 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 0);
 
-            CHECK(graph.at_vertex(0) == layout_coordinate_path<gate_lyt>{{{0, 0}, {1, 0}}});
-            CHECK(graph.at_vertex(1) == layout_coordinate_path<gate_lyt>{{{1, 1}, {0, 1}}});
+            CHECK(graph.at_vertex(0) == layout_coordinate_path{{{0, 0}, {1, 0}}});
+            CHECK(graph.at_vertex(1) == layout_coordinate_path{{{1, 1}, {0, 1}}});
         }
         SECTION("Non-disjoint paths")
         {
             // (0,0) --> (0,1), (1,0) --> (1,1)
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {0, 1}},
-                                                                      {.source = {1, 0}, .target = {1, 1}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {0, 1}},
+                                                            {.source = {1, 0}, .target = {1, 1}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -123,8 +123,8 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         {
             layout.resize({1, 3});
             // (0,2) --> (0,0), (0,0) --> (0,2)
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 2}, .target = {0, 0}},
-                                                                      {.source = {0, 0}, .target = {0, 2}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 2}, .target = {0, 0}},
+                                                            {.source = {0, 0}, .target = {0, 2}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -148,8 +148,8 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
         SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
         {
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 1}, .target = {2, 1}},
-                                                                      {.source = {1, 0}, .target = {1, 2}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 1}, .target = {2, 1}},
+                                                            {.source = {1, 0}, .target = {1, 2}}};
 
             SECTION("without crossings")
             {
@@ -194,7 +194,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {3, 3}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {3, 3}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -212,7 +212,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {3, 3}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {3, 3}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -240,7 +240,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
             // create a PI as obstruction
             layout.create_pi("obstruction", {3, 0});  // blocks 1 path
 
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {3, 3}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {3, 3}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -261,7 +261,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
             // create a PI as obstruction
             layout.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
-            const std::vector<routing_objective<gate_lyt>> objectives{{.source = {0, 0}, .target = {3, 3}}};
+            const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {3, 3}}};
 
             const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
@@ -278,8 +278,8 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
 TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersection-graph]")
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
-    const gate_lyt                                 layout{{3, 3, 2}, clocking::twoddwave()};
-    const std::vector<routing_objective<gate_lyt>> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
+    const gate_lyt                       layout{{3, 3, 2}, clocking::twoddwave()};
+    const std::vector<routing_objective> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
     for (const auto limit : {1u, 2u})
     {
         const auto graph = generate_edge_intersection_graph(layout, objectives, {.path_limit = limit});

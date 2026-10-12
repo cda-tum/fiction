@@ -141,7 +141,7 @@ class write_qcc_layout_impl
   private:
     const inml::layout& lyt;
 
-    const layouts::bounding_box_2d<inml::layout> bb;
+    const layouts::bounding_box<inml::layout> bb;
 
     std::vector<inml::layout::cell> sorted_pi_list, sorted_po_list;
 

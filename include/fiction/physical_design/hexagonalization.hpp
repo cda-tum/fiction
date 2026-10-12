@@ -605,7 +605,7 @@ class hexagonalization_impl
             {
                 // adjust positions and prepare for routing
                 middle_pi = {static_cast<int64_t>(middle_pi.x) + x_shift, middle_pi.y, middle_pi.z};
-                std::vector<routing_objective<HexLyt>> objectives{};
+                std::vector<routing_objective> objectives{};
                 objectives.reserve(hex_layout.num_pis());
 
                 // process PIs from left column of the Cartesian layout
@@ -646,11 +646,11 @@ class hexagonalization_impl
 
                 // perform routing using A*
                 layouts::obstructions search_obstructions{};
-                using path           = layout_coordinate_path<decltype(hex_layout)>;
+                using path           = layout_coordinate_path;
                 const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
-                using dist = physical_design::path_finding::manhattan_distance_functor<decltype(hex_layout), uint64_t>;
-                using cost = physical_design::path_finding::unit_cost_functor<decltype(hex_layout), uint8_t>;
+                using dist = physical_design::path_finding::manhattan_distance_functor;
+                using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
 
                 // for each routing objective, find a path and route it
                 utils::progress_reporter input_progress{ps.on_progress, "input pins", objectives.size()};
@@ -702,7 +702,7 @@ class hexagonalization_impl
             {
                 // adjust positions and prepare for routing
                 middle_po = {static_cast<int64_t>(middle_po.x) + x_shift, middle_po.y, middle_po.z};
-                std::vector<routing_objective<HexLyt>> objectives{};
+                std::vector<routing_objective> objectives{};
                 objectives.reserve(hex_layout.num_pos());
 
                 // process POs from left column of the Cartesian layout
@@ -745,12 +745,12 @@ class hexagonalization_impl
 
                 // perform routing using A*
                 layouts::obstructions search_obstructions{};
-                using path = layout_coordinate_path<decltype(hex_layout)>;
+                using path = layout_coordinate_path;
                 const auto crossings =
                     ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
-                using dist = physical_design::path_finding::manhattan_distance_functor<decltype(hex_layout), uint64_t>;
-                using cost = physical_design::path_finding::unit_cost_functor<decltype(hex_layout), uint8_t>;
+                using dist = physical_design::path_finding::manhattan_distance_functor;
+                using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
 
                 // for each routing objective, find a path and route it
                 utils::progress_reporter output_progress{ps.on_progress, "output pins", objectives.size()};

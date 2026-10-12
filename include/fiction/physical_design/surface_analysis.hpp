@@ -42,13 +42,13 @@ namespace fiction::physical_design
  * with the listed ports. `surface_analysis` produces one from a defective SiDB surface, and `exact_with_blacklist`
  * consumes it.
  *
- * @tparam Lyt Gate-level layout type.
  * @tparam PortType Port type of the gate library.
  */
-template <typename Lyt, typename PortType>
+template <typename PortType>
 using surface_black_list =
-    std::unordered_map<tile<Lyt>, std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn::port_list<PortType>>,
-                                                     kitty::hash<kitty::dynamic_truth_table>>>;
+    std::unordered_map<layouts::layout_base::coordinate,
+                       std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn::port_list<PortType>>,
+                                          kitty::hash<kitty::dynamic_truth_table>>>;
 
 /**
  * @brief Analyzes a defective SiDB surface for a gate-level layout: for every tile and every gate implementation of the
@@ -77,7 +77,7 @@ surface_analysis(const GateLyt& gate_lyt, const sidb::layout& surface,
 
     using port_type = typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type;
 
-    surface_black_list<GateLyt, port_type> black_list{};
+    surface_black_list<port_type> black_list{};
 
     const auto sidbs_affected_by_defects =
         surface.all_affected_sidbs(charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);

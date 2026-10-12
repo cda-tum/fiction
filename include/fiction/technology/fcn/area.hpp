@@ -128,8 +128,7 @@ double area(const Lyt& lyt, const area_params<Dims>& ps = {}, area_stats* pst = 
  * @return Area requirements in nm².
  */
 template <typename Lyt>
-double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<Lyt>& ps = {},
-            area_stats* pst = nullptr) noexcept
+double area(const layouts::bounding_box<Lyt>& bb, const area_params<Lyt>& ps = {}, area_stats* pst = nullptr) noexcept
 {
     area_stats st{};
 

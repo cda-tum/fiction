@@ -521,10 +521,10 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             DOC(fiction_layouts_gate_level_layout_has_north_western_outgoing_signal))
 
         .def(
-            "bounding_box_2d",
+            "bounding_box",
             [](const GateLyt& layout)
             {
-                const auto bb = fiction::layouts::bounding_box_2d<GateLyt>(layout);
+                const auto bb = fiction::layouts::bounding_box<GateLyt>(layout);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             BOUNDING_BOX_2D_DOC)

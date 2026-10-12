@@ -31,11 +31,11 @@ namespace fiction::layouts
  * @tparam Lyt Gate-level layout or cell grid.
  */
 template <typename Lyt>
-class bounding_box_2d
+class bounding_box
 {
   public:
     /** @brief Computes occupied bounds. @param lyt Layout whose occupied positions are enclosed. */
-    explicit bounding_box_2d(const Lyt& lyt) : layout{lyt}
+    explicit bounding_box(const Lyt& lyt) : layout{lyt}
     {
         static_assert(is_gate_level_layout_v<Lyt> || is_cell_grid_v<Lyt>);
         update_bounding_box();

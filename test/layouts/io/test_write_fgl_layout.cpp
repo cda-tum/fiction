@@ -70,8 +70,8 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
 {
     CHECK(wlyt.get_layout_name() == rlyt.get_layout_name());
 
-    const bounding_box_2d<WLyt> wbb{wlyt};
-    const bounding_box_2d<RLyt> rbb{rlyt};
+    const bounding_box<WLyt> wbb{wlyt};
+    const bounding_box<RLyt> rbb{rlyt};
 
     CHECK(wbb.get_min() == rbb.get_min());
     CHECK(wbb.get_max() == rbb.get_max());

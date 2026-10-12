@@ -15,6 +15,7 @@
  */
 
 #pragma once
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/traits.hpp"
 
@@ -70,25 +71,21 @@ template <typename Lyt>
 /**
  * Routing objectives identify a geometric source and an ordered destination input.
  *
- * @tparam Lyt Layout type whose coordinates are to be used.
  */
-template <typename Lyt>
 struct routing_objective
 {
     /** @brief Source coordinate. */
-    const coordinate<Lyt> source;
+    const layouts::layout_base::coordinate source;
     /** @brief Target coordinate. */
-    const coordinate<Lyt> target;
+    const layouts::layout_base::coordinate target;
     /** @brief Logical input index at the target; geometric searches ignore this field. */
     uint32_t input_index{};
     /**
      * Equality operator.
-     * @tparam OtherLyt Type of other layout.
      * @param other Routing objective to compare to.
      * @return `true` iff the given objective is equal to this one.
      */
-    template <typename OtherLyt>
-    bool operator==(const routing_objective<OtherLyt>& other) const noexcept
+    bool operator==(const routing_objective& other) const noexcept
     {
         return source == other.source && target == other.target && input_index == other.input_index;
     }
@@ -96,34 +93,35 @@ struct routing_objective
 /**
  * A path in a layout defined as an ordered sequence of coordinates.
  *
- * @tparam Lyt Coordinate layout type.
  */
-template <typename Lyt>
-class layout_coordinate_path : public std::vector<coordinate<Lyt>>
+class layout_coordinate_path : public std::vector<layouts::layout_base::coordinate>
 {
   public:
     /** @brief Appends a coordinate. @param c Coordinate to append. @throws std::bad_alloc If storage allocation fails.
      */
-    void append(const coordinate<Lyt>& c)
+    void append(const layouts::layout_base::coordinate& c)
     {
         this->push_back(c);
     }
 
-    [[nodiscard]] coordinate<Lyt> source() const noexcept
+    /** @brief Returns the first coordinate, or the origin for an empty path. @return Source coordinate. */
+    [[nodiscard]] layouts::layout_base::coordinate source() const noexcept
     {
-        return this->empty() ? coordinate<Lyt>{} : this->front();
+        return this->empty() ? layouts::layout_base::coordinate{} : this->front();
     }
 
-    [[nodiscard]] coordinate<Lyt> target() const noexcept
+    /** @brief Returns the last coordinate, or the origin for an empty path. @return Target coordinate. */
+    [[nodiscard]] layouts::layout_base::coordinate target() const noexcept
     {
-        return this->empty() ? coordinate<Lyt>{} : this->back();
+        return this->empty() ? layouts::layout_base::coordinate{} : this->back();
     }
 
   protected:
-    using base = std::vector<coordinate<Lyt>>;
+    /** @brief Coordinate storage. */
+    using base = std::vector<layouts::layout_base::coordinate>;
 
   public:
-    // make all inherited constructors available
+    /** @brief Inherits coordinate sequence constructors. */
     using base::base;
 };
 /**
@@ -377,11 +375,11 @@ void route_path(Lyt& lyt, const Path& path, const typename Lyt::input_port desti
  * @throws std::invalid_argument If an intermediate wire chain contains a cycle.
  */
 template <typename Lyt>
-std::vector<routing_objective<Lyt>> extract_routing_objectives(const Lyt& lyt)
+std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     const auto intermediate = [&lyt](const auto id) { return lyt.is_wire(id) && !lyt.is_fanout(id); };
-    std::vector<routing_objective<Lyt>> objectives{};
+    std::vector<routing_objective> objectives{};
     lyt.foreach_object(
         [&](const auto id)
         {

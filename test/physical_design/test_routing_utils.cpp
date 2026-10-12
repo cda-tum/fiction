@@ -33,12 +33,11 @@ using namespace fiction;
 using namespace fiction::test;
 using namespace fiction::physical_design;
 
-/** @brief Checks objective coordinates and logical input indices. @tparam Lyt Layout type.
+/** @brief Checks objective coordinates and logical input indices.
  * @param objectives Extracted objectives. @param expected_objectives Expected connections.
  */
-template <typename Lyt>
-void check_containing_objectives(const std::vector<routing_objective<Lyt>>& objectives,
-                                 const std::vector<routing_objective<Lyt>>& expected_objectives)
+void check_containing_objectives(const std::vector<routing_objective>& objectives,
+                                 const std::vector<routing_objective>& expected_objectives)
 {
     CHECK(objectives.size() == expected_objectives.size());
 
@@ -60,7 +59,7 @@ void check_non_empty_tile(const Lyt& lyt, const tile<Lyt>& t)
 TEST_CASE("Coordinate paths expose construction and edits", "[routing-utils]")
 {
     const std::vector<tile<cart_gate_clk_lyt>> coordinates{{0, 0}, {1, 0}};
-    layout_coordinate_path<cart_gate_clk_lyt>  path{coordinates.cbegin(), coordinates.cend()};
+    layout_coordinate_path                     path{coordinates.cbegin(), coordinates.cend()};
     path.push_back({2, 0});
     path.insert(path.begin(), {0, 1});
     path.front() = {1, 1};
@@ -190,8 +189,8 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
     const auto        b    = layout.create_pi("b", {0, 1});
     const auto        gate = layout.create_lt(a, b, {4, 1});
     clear_routing(layout);
-    const layout_coordinate_path<cart_gate_clk_lyt> second{{0, 1}, {1, 1}, {4, 1}};
-    const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {1, 0}, {4, 1}};
+    const layout_coordinate_path second{{0, 1}, {1, 1}, {4, 1}};
+    const layout_coordinate_path first{{0, 0}, {1, 0}, {4, 1}};
     route_path(layout, second, {gate, 1});
     route_path(layout, first, {gate, 0});
     /** @brief Routed source connected to the first input port. */
@@ -202,8 +201,8 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
     CHECK((second_source.has_value() && layout.source({*second_source, 0}) == b));
     CHECK(layout.is_lt(gate));
     const auto objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 1}, 0}) != objectives.end());
-    CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 1}, {4, 1}, 1}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective{{0, 0}, {4, 1}, 0}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective{{0, 1}, {4, 1}, 1}) != objectives.end());
 }
 
 TEST_CASE("Routing preserves duplicate destination ports and retained identities", "[routing-utils]")
@@ -213,17 +212,16 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     const auto        gate       = layout.create_lt(a, a, {4, 2});
     const auto        po         = layout.create_po(gate, "f", {5, 2});
     const auto        objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 0}) != objectives.end());
-    CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 1}) != objectives.end());
-    CHECK((routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 0} !=
-           routing_objective<cart_gate_clk_lyt>{{0, 0}, {4, 2}, 1}));
+    CHECK(std::ranges::find(objectives, routing_objective{{0, 0}, {4, 2}, 0}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective{{0, 0}, {4, 2}, 1}) != objectives.end());
+    CHECK((routing_objective{{0, 0}, {4, 2}, 0} != routing_objective{{0, 0}, {4, 2}, 1}));
     clear_routing(layout);
     CHECK(layout.contains(a));
     CHECK(layout.contains(gate));
     CHECK(layout.contains(po));
     CHECK_FALSE(layout.source({gate, 0}));
     CHECK_FALSE(layout.source({gate, 1}));
-    const layout_coordinate_path<cart_gate_clk_lyt> second{{0, 0}, {1, 0}, {4, 2}};
+    const layout_coordinate_path second{{0, 0}, {1, 0}, {4, 2}};
     route_path(layout, second, {gate, 1});
     CHECK_FALSE(layout.source({gate, 0}));
     /** @brief Routed source connected to the second input port. */
@@ -232,7 +230,7 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     /** @brief Retained identity of the second routed wire. */
     const auto second_wire = *second_source;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE passed.
     CHECK(layout.source({second_wire, 0}) == a);
-    const layout_coordinate_path<cart_gate_clk_lyt> first{{0, 0}, {0, 1}, {4, 2}};
+    const layout_coordinate_path first{{0, 0}, {0, 1}, {4, 2}};
     route_path(layout, first, {gate, 0});
     CHECK(layout.source({gate, 1}) == second_wire);
     CHECK(layout.is_lt(gate));
@@ -242,16 +240,16 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
 
 TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-utils]")
 {
-    cart_gate_clk_lyt                               layout{{5, 3, 2}};
-    const auto                                      a    = layout.create_pi("a", {0, 0});
-    const auto                                      b    = layout.create_pi("b", {0, 1});
-    const auto                                      gate = layout.create_lt(a, b, {4, 0});
-    const layout_coordinate_path<cart_gate_clk_lyt> path{{0, 0}, {1, 0}, {4, 0}};
+    cart_gate_clk_lyt            layout{{5, 3, 2}};
+    const auto                   a    = layout.create_pi("a", {0, 0});
+    const auto                   b    = layout.create_pi("b", {0, 1});
+    const auto                   gate = layout.create_lt(a, b, {4, 0});
+    const layout_coordinate_path path{{0, 0}, {1, 0}, {4, 0}};
     CHECK_THROWS_AS(route_path(layout, path, {gate, 2}), std::out_of_range);
     CHECK(layout.size() == 3);
     CHECK(layout.source({gate, 0}) == a);
     CHECK(layout.source({gate, 1}) == b);
-    const layout_coordinate_path<cart_gate_clk_lyt> mismatch{{0, 0}, {1, 0}, {4, 1}};
+    const layout_coordinate_path mismatch{{0, 0}, {1, 0}, {4, 1}};
     CHECK_THROWS_AS(route_path(layout, mismatch, {gate, 0}), std::invalid_argument);
     CHECK_FALSE(layout.find_object({1, 0}));
     const auto blocker = layout.create_buf({1, 0});
@@ -264,9 +262,9 @@ TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-ut
 TEST_CASE("Routing paths propagate allocation failure", "[routing-utils]")
 {
     require_allocation_failure_support();
-    layout_coordinate_path<cart_gate_clk_lyt>                  path{};
-    path_collection<layout_coordinate_path<cart_gate_clk_lyt>> collection{};
-    path_set<layout_coordinate_path<cart_gate_clk_lyt>>        paths{};
+    layout_coordinate_path                  path{};
+    path_collection<layout_coordinate_path> collection{};
+    path_set<layout_coordinate_path>        paths{};
     /** @brief Checks that a failed path allocation reaches the caller. */
     const auto fail = [&](auto&& append)
     {

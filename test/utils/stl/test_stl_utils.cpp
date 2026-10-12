@@ -74,8 +74,8 @@ TEST_CASE("Test find_first_two_of with different iterator types", "[find_first_t
 
 TEST_CASE("Test find_first_two_of with layout_coordinate_paths", "[find_first_two_of]")
 {
-    static const layout_coordinate_path<cart_gate_clk_lyt> p1{{1, 1}, {2, 1}};
-    static const layout_coordinate_path<cart_gate_clk_lyt> p2{{0, 1}, {1, 1}, {2, 1}};
+    static const layout_coordinate_path p1{{1, 1}, {2, 1}};
+    static const layout_coordinate_path p2{{0, 1}, {1, 1}, {2, 1}};
 
     // regular iterators
     const auto it1 = find_first_two_of(p1.begin(), p1.end(), p2.begin(), p2.end());

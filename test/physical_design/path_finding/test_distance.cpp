@@ -38,7 +38,6 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Manhattan distance", "[distance]")
 {
-    const cartesian_layout layout{};
     const auto [source, target, expected] =
         GENERATE(std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 0}, uint64_t{0}},
                  std::tuple{layout_base::coordinate{1, 1}, layout_base::coordinate{1, 1}, uint64_t{0}},
@@ -54,18 +53,17 @@ TEST_CASE("Manhattan distance", "[distance]")
                  std::tuple{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}, uint64_t{8}});
     SECTION("Direct function")
     {
-        CHECK(manhattan_distance<cartesian_layout>(layout, source, target) == expected);
+        CHECK(manhattan_distance(source, target) == expected);
     }
     SECTION("Functor")
     {
-        const manhattan_distance_functor<cartesian_layout> distance{};
+        const manhattan_distance_functor distance{};
         CHECK(distance(layout, source, target) == expected);
     }
 }
 
 TEST_CASE("Euclidean distance", "[distance]")
 {
-    const cartesian_layout layout{};
     const auto [source, target, expected] =
         GENERATE(std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 0}, double{0.0}},
                  std::tuple{layout_base::coordinate{1, 1}, layout_base::coordinate{1, 1}, double{0.0}},
@@ -82,19 +80,18 @@ TEST_CASE("Euclidean distance", "[distance]")
                  std::tuple{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}, double{std::sqrt(32)}});
     SECTION("Direct function")
     {
-        CHECK_THAT(euclidean_distance<cartesian_layout>(layout, source, target),
+        CHECK_THAT(euclidean_distance(source, target),
                    Catch::Matchers::WithinAbs(expected, 0.00001));
     }
     SECTION("Functor")
     {
-        const euclidean_distance_functor<cartesian_layout> distance{};
+        const euclidean_distance_functor distance{};
         CHECK_THAT(distance(layout, source, target), Catch::Matchers::WithinAbs(expected, 0.00001));
     }
 }
 
 TEST_CASE("Squared Euclidean distance", "[distance]")
 {
-    const cartesian_layout layout{};
     const auto [source, target, expected] =
         GENERATE(std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 0}, uint64_t{0}},
                  std::tuple{layout_base::coordinate{1, 1}, layout_base::coordinate{1, 1}, uint64_t{0}},
@@ -108,18 +105,17 @@ TEST_CASE("Squared Euclidean distance", "[distance]")
                  std::tuple{layout_base::coordinate{0, 4, 1}, layout_base::coordinate{9, 1, 1}, uint64_t{90}});
     SECTION("Direct function")
     {
-        CHECK(squared_euclidean_distance<cartesian_layout>(layout, source, target) == expected);
+        CHECK(squared_euclidean_distance(source, target) == expected);
     }
     SECTION("Functor")
     {
-        const squared_euclidean_distance_functor<cartesian_layout> distance{};
+        const squared_euclidean_distance_functor distance{};
         CHECK(distance(layout, source, target) == expected);
     }
 }
 
 TEST_CASE("2DDWave distance", "[distance]")
 {
-    const cartesian_layout layout{};
     const auto [source, target, expected] =
         GENERATE(std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 0}, uint64_t{0}},
                  std::tuple{layout_base::coordinate{1, 1}, layout_base::coordinate{1, 1}, uint64_t{0}},
@@ -144,18 +140,17 @@ TEST_CASE("2DDWave distance", "[distance]")
                  std::tuple{layout_base::coordinate{-4, -3}, layout_base::coordinate{1, -1}, uint64_t{7}});
     SECTION("Direct function")
     {
-        CHECK(twoddwave_distance<cartesian_layout>(layout, source, target) == expected);
+        CHECK(twoddwave_distance(source, target) == expected);
     }
     SECTION("Functor")
     {
-        const twoddwave_distance_functor<cartesian_layout> distance{};
+        const twoddwave_distance_functor distance{};
         CHECK(distance(layout, source, target) == expected);
     }
 }
 
 TEST_CASE("Chebyshev distance", "[distance]")
 {
-    const cartesian_layout layout{};
     const auto [source, target, expected] =
         GENERATE(std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 0}, uint64_t{0}},
                  std::tuple{layout_base::coordinate{1, 1}, layout_base::coordinate{1, 1}, uint64_t{0}},
@@ -170,11 +165,11 @@ TEST_CASE("Chebyshev distance", "[distance]")
                  std::tuple{layout_base::coordinate{0, 0, 1}, layout_base::coordinate{8, 9, 1}, uint64_t{9}});
     SECTION("Direct function")
     {
-        CHECK(chebyshev_distance<cartesian_layout>(layout, source, target) == expected);
+        CHECK(chebyshev_distance(source, target) == expected);
     }
     SECTION("Functor")
     {
-        const chebyshev_distance_functor<cartesian_layout> distance{};
+        const chebyshev_distance_functor distance{};
         CHECK(distance(layout, source, target) == expected);
     }
 }
@@ -228,24 +223,6 @@ TEST_CASE("A* distance", "[distance]")
                     CHECK(a_star_distance<clk_lyt>(layout, {0, 4, 1}, {9, 1, 1}) ==
                           std::numeric_limits<uint64_t>::max());
                 }
-                SECTION("Floating-point distance type (double)")
-                {
-                    using namespace Catch::Matchers;
-
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 0})), WithinAbs(0.0, 0.00001));
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {1, 1}, {1, 1})), WithinAbs(0.0, 0.00001));
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 1})), WithinAbs(1.0, 0.00001));
-                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {1, 1})), WithinAbs(2.0, 0.00001));
-
-                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {9, 1}, {6, 2})));
-                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2}, {0, 4})));
-                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4}, {9, 1})));
-
-                    // A* is not meant for routing in the z-layer
-                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 1}, {0, 4, 0})));
-                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 0}, {0, 4, 1})));
-                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4, 1}, {9, 1, 1})));
-                }
             }
         }
     }
@@ -261,19 +238,19 @@ TEST_CASE("A* distance functor", "[distance]")
         {
             const lyt layout{lyt::extent{10, 5, 2}};
 
-            const a_star_distance_functor<lyt> distance{};
+            const a_star_distance_functor<lyt> distance{layout};
 
-            CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
-            CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
-            CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
-            CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
-            CHECK(distance(layout, {9, 1}, {6, 2}) == 4);
-            CHECK(distance(layout, {6, 2}, {0, 4}) == 8);
-            CHECK(distance(layout, {0, 4}, {9, 1}) == 12);
+            CHECK(distance({0, 0}, {0, 0}) == 0);
+            CHECK(distance({1, 1}, {1, 1}) == 0);
+            CHECK(distance({0, 0}, {0, 1}) == 1);
+            CHECK(distance({0, 0}, {1, 1}) == 2);
+            CHECK(distance({9, 1}, {6, 2}) == 4);
+            CHECK(distance({6, 2}, {0, 4}) == 8);
+            CHECK(distance({0, 4}, {9, 1}) == 12);
 
             // A* is not meant for routing to the z-layer
-            CHECK(distance(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-            CHECK(distance(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
+            CHECK(distance({6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+            CHECK(distance({0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
         }
         SECTION("clocking path distance")
         {
@@ -285,56 +262,29 @@ TEST_CASE("A* distance functor", "[distance]")
 
                 SECTION("Default distance type (uint64_t)")
                 {
-                    const a_star_distance_functor<clk_lyt> distance{};
+                    const a_star_distance_functor<clk_lyt> distance{layout};
 
-                    CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
-                    CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
-                    CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
-                    CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
-                    CHECK(distance(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
-                    CHECK(distance(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
-                    CHECK(distance(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
-
-                    // A* is not meant for routing to the z-layer
-                    CHECK(distance(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-                    CHECK(distance(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
-                }
-                SECTION("Floating-point distance type (double)")
-                {
-                    using namespace Catch::Matchers;
-
-                    const a_star_distance_functor<clk_lyt, double> distance{};
-
-                    CHECK_THAT(distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
-                    CHECK_THAT(distance(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
-                    CHECK_THAT(distance(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
-                    CHECK_THAT(distance(layout, {0, 0}, {1, 1}), WithinAbs(2.0, 0.00001));
-
-                    CHECK(std::isinf(distance(layout, {9, 1}, {6, 2})));
-                    CHECK(std::isinf(distance(layout, {6, 2}, {0, 4})));
-                    CHECK(std::isinf(distance(layout, {0, 4}, {9, 1})));
+                    CHECK(distance({0, 0}, {0, 0}) == 0);
+                    CHECK(distance({1, 1}, {1, 1}) == 0);
+                    CHECK(distance({0, 0}, {0, 1}) == 1);
+                    CHECK(distance({0, 0}, {1, 1}) == 2);
+                    CHECK(distance({9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(distance({6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(distance({0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
 
                     // A* is not meant for routing to the z-layer
-                    CHECK(std::isinf(distance(layout, {6, 2, 0}, {0, 4, 1})));
-                    CHECK(std::isinf(distance(layout, {0, 4, 1}, {9, 1, 1})));
+                    CHECK(distance({6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(distance({0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
                 }
             }
         }
     }
 }
 
-TEST_CASE("Squared Euclidean distance checks integral range", "[distance]")
+TEST_CASE("Squared Euclidean distance widens signed differences", "[distance]")
 {
-    /** Layout used by the coordinate distance API. */
-    const cartesian_layout layout{};
-    STATIC_REQUIRE(squared_euclidean_distance(layout, {-2147483647, 0}, {2147483647, 0}) == 18446744056529682436ULL);
-    STATIC_REQUIRE(squared_euclidean_distance(layout, {std::numeric_limits<int32_t>::min(), 0},
+    STATIC_REQUIRE(noexcept(squared_euclidean_distance({}, {})));
+    STATIC_REQUIRE(squared_euclidean_distance({-2147483647, 0}, {2147483647, 0}) == 18446744056529682436ULL);
+    STATIC_REQUIRE(squared_euclidean_distance({std::numeric_limits<int32_t>::min(), 0},
                                               {std::numeric_limits<int32_t>::max(), 0}) == 18446744065119617025ULL);
-    CHECK_THROWS_AS(squared_euclidean_distance(layout, {-2147483647, -2147483647}, {2147483647, 2147483647}),
-                    std::overflow_error);
-    CHECK_THROWS_AS((squared_euclidean_distance<cartesian_layout, uint8_t>(layout, {0, 0}, {16, 0})),
-                    std::overflow_error);
-    CHECK_THROWS_AS((squared_euclidean_distance<cartesian_layout, int8_t>(layout, {0, 0}, {8, 8})),
-                    std::overflow_error);
-    CHECK((squared_euclidean_distance<cartesian_layout, uint8_t>(layout, {0, 0}, {15, 0})) == 225);
 }

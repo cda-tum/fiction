@@ -223,7 +223,7 @@ class exact_impl
      */
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
                exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
-               const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
+               const surface_black_list<fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
             progress{ps.on_progress, "aspect ratios"},
@@ -296,7 +296,7 @@ class exact_impl
     /**
      * Maps tiles to blacklisted gate types via their truth tables and port information.
      */
-    const surface_black_list<Lyt, fcn::port_direction> black_list;
+    const surface_black_list<fcn::port_direction> black_list;
     /**
      * Lower bound for the number of layout tiles.
      */
@@ -334,7 +334,7 @@ class exact_impl
          * @param ps The parameters to respect in the SMT instance generation process.
          */
         smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, exact_physical_design_params ps,
-                    const surface_black_list<Lyt, fcn::port_direction>& sbl) noexcept :
+                    const surface_black_list<fcn::port_direction>& sbl) noexcept :
                 ctx{std::move(ctxp)},
                 layout{lyt},
                 network{ntk},
@@ -575,17 +575,17 @@ class exact_impl
         /**
          * Maps tiles to blacklisted gate types via their truth tables and port information.
          */
-        const surface_black_list<Lyt, fcn::port_direction>& black_list;
+        const surface_black_list<fcn::port_direction>& black_list;
         /**
          * Maps nodes to tile positions when creating the layout from the SMT model.
          */
-        mockturtle::node_map<
-            branching_signal_container<
-                Lyt, topology_ntk_t, Lyt::max_fanin_size>  // this currently assumes that max_fanin_size is equal to the
-                                                           // maximum fanout size of a layout type. Should the maximum
-                                                           // fanout size exceed max_fanin_size, this will break
-            ,
-            topology_ntk_t>
+        mockturtle::node_map<branching_signal_container<
+                                 topology_ntk_t, Lyt::max_fanin_size>  // this currently assumes that max_fanin_size is
+                                                                       // equal to the maximum fanout size of a layout
+                                                                       // type. Should the maximum fanout size exceed
+                                                                       // max_fanin_size, this will break
+                             ,
+                             topology_ntk_t>
             node2pos;
         /**
          * Mapping of levels to nodes used for symmetry breaking.
@@ -3360,7 +3360,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
  * `ps.layout_arrangement` is empty.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, fcn::port_direction>& black_list,
+std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<fcn::port_direction>& black_list,
                                         exact_physical_design_params ps  = {},
                                         exact_physical_design_stats* pst = nullptr)
 {

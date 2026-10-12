@@ -24,7 +24,7 @@ def test_empty_geometry_has_absent_cell_bounds() -> None:
     layout = qca_layout()
     assert layout.get_extent().width == 0
     assert layout.coordinates() == []
-    assert layout.bounding_box_2d() == (None, None)
+    assert layout.bounding_box() == (None, None)
 
 
 def test_geometry_is_cartesian() -> None:

@@ -51,7 +51,7 @@ template <typename Path, typename Lyt>
 class yen_k_shortest_paths_impl
 {
   public:
-    yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const uint32_t k,
+    yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective& obj, const uint32_t k,
                               const yen_k_shortest_paths_params& p, const layouts::obstructions& extra) :
             layout{lyt},
             initial_obstructions{extra},
@@ -61,8 +61,8 @@ class yen_k_shortest_paths_impl
             params{p}
     {
         // start by determining the shortest path between source and target
-        k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor<Lyt, uint64_t>(),
-                                                unit_cost_functor<Lyt, uint8_t>(), params.astar_params,
+        k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor(),
+                                                unit_cost_functor<uint8_t>(), params.astar_params,
                                                 search_obstructions));
     }
 
@@ -120,8 +120,8 @@ class yen_k_shortest_paths_impl
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
                 if (const auto spur_path =
-                        a_star<Path>(layout, {spur, objective.target}, manhattan_distance_functor<Lyt, uint64_t>(),
-                                     unit_cost_functor<Lyt, uint8_t>(), params.astar_params, search_obstructions);
+                        a_star<Path>(layout, {spur, objective.target}, manhattan_distance_functor(),
+                                     unit_cost_functor<uint8_t>(), params.astar_params, search_obstructions);
                     !spur_path.empty())
                 {
                     // the final path will be a concatenation of the root path and the spur path
@@ -171,7 +171,7 @@ class yen_k_shortest_paths_impl
     /**
      * Source and target coordinates.
      */
-    const routing_objective<Lyt> objective;
+    const routing_objective objective;
     /**
      * The number of paths to determine, i.e., k.
      */
@@ -238,7 +238,7 @@ class yen_k_shortest_paths_impl
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
  * using clk_lyt = gate_level_layout<cartesian_layout>;
- * using path = layout_coordinate_path<cartesian_layout>;
+ * using path = layout_coordinate_path;
  * clk_lyt layout = ...;
  * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
  * @endcode
@@ -258,7 +258,7 @@ class yen_k_shortest_paths_impl
  */
 template <typename Path, typename Lyt>
 [[nodiscard]] path_collection<Path>
-yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective, const uint32_t k,
+yen_k_shortest_paths(const Lyt& layout, const routing_objective& objective, const uint32_t k,
                      const yen_k_shortest_paths_params& params = {}, const layouts::obstructions& obstructions = {})
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");

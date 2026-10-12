@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 )
 def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
     layout = make_layout()
-    min_coord, max_coord = layout.bounding_box_2d()
+    min_coord, max_coord = layout.bounding_box()
     assert min_coord is None
     assert max_coord is None
 
@@ -54,7 +54,7 @@ def test_initialize_gate_level_with_ortho_bounding_box(resources_dir: Path, veri
     """Orthogonal placement fills the layout's declared extent."""
     network = read_technology_network(str(resources_dir / verilog))
     layout = orthogonal(network, orthogonal_params())
-    min_coord, max_coord = layout.bounding_box_2d()
+    min_coord, max_coord = layout.bounding_box()
 
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(layout.width() - 1, layout.height() - 1)
@@ -67,19 +67,19 @@ def test_update_gate_level_bounding_box() -> None:
     wire = layout.create_buf(source, (4, 6))
     edge = layout.create_buf(wire, (4, 7))
     output = layout.create_po(edge, "out", (5, 7))
-    min_coord, max_coord = layout.bounding_box_2d()
+    min_coord, max_coord = layout.bounding_box()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 7)
 
     layout.clear_tile((4, 7))
     layout.move_object(output, (5, 6))
     layout.connect(wire, LayoutInputPort(output, 0))
-    min_coord, max_coord = layout.bounding_box_2d()
+    min_coord, max_coord = layout.bounding_box()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 6)
 
     layout.move_object(output, (4, 7))
-    min_coord, max_coord = layout.bounding_box_2d()
+    min_coord, max_coord = layout.bounding_box()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(4, 7)
 
@@ -93,6 +93,6 @@ def test_update_gate_level_bounding_box() -> None:
 )
 def test_bounding_box_around_cell_level_layout(make_layout):
     layout = make_layout()
-    min_coord, max_coord = layout.bounding_box_2d()
+    min_coord, max_coord = layout.bounding_box()
     assert min_coord is None
     assert max_coord is None

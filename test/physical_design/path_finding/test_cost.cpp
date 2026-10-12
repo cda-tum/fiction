@@ -50,12 +50,12 @@ TEST_CASE("Unit cost", "[cost]")
                  std::pair{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}});
     SECTION("Direct function")
     {
-        const auto value = unit_cost<cartesian_layout>(source, target);
+        const auto value = unit_cost<>(source, target);
         CHECK(value == 1);
     }
     SECTION("Functor")
     {
-        const unit_cost_functor<cartesian_layout> cost{};
+        const unit_cost_functor<> cost{};
         const auto                                value = cost(source, target);
         CHECK(value == 1);
     }
@@ -84,12 +84,12 @@ TEST_CASE("Random cost", "[cost]")
                  std::pair{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}});
     SECTION("Direct function")
     {
-        const auto value = random_cost<cartesian_layout>(source, target);
+        const auto value = random_cost<>(source, target);
         CHECK((value >= 0 && value <= 1));
     }
     SECTION("Functor")
     {
-        const random_cost_functor<cartesian_layout> cost{};
+        const random_cost_functor<> cost{};
         const auto                                  value = cost(source, target);
         CHECK((value >= 0 && value <= 1));
     }

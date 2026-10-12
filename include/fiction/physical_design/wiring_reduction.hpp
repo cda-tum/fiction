@@ -683,17 +683,16 @@ void add_obstructions(WiringReductionLyt& lyt)
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename WiringReductionLyt>
-[[nodiscard]] layout_coordinate_path<WiringReductionLyt> get_path(WiringReductionLyt&                   lyt,
-                                                                  const coordinate<WiringReductionLyt>& start,
-                                                                  const coordinate<WiringReductionLyt>& end)
+[[nodiscard]] layout_coordinate_path get_path(WiringReductionLyt& lyt, const coordinate<WiringReductionLyt>& start,
+                                              const coordinate<WiringReductionLyt>& end)
 {
-    using dist = physical_design::path_finding::manhattan_distance_functor<WiringReductionLyt, uint64_t>;
-    using cost = physical_design::path_finding::unit_cost_functor<WiringReductionLyt, uint8_t>;
+    using dist = physical_design::path_finding::manhattan_distance_functor;
+    using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
 
     static const physical_design::path_finding::a_star_params params{false};
 
-    return physical_design::path_finding::a_star<layout_coordinate_path<WiringReductionLyt>>(
-        lyt, {start, end}, dist(), cost(), params, lyt.search_obstructions);
+    return physical_design::path_finding::a_star<layout_coordinate_path>(lyt, {start, end}, dist(), cost(), params,
+                                                                         lyt.search_obstructions);
 }
 /**
  * Update the to-delete list based on a possible path in a wiring_reduction_layout.
@@ -710,8 +709,8 @@ template <typename WiringReductionLyt>
  * @param to_delete Reference to the to-delete list to be updated with new coordinates.
  */
 template <typename WiringReductionLyt>
-void update_to_delete_list(WiringReductionLyt& lyt, const layout_coordinate_path<WiringReductionLyt>& possible_path,
-                           layout_coordinate_path<WiringReductionLyt>& to_delete)
+void update_to_delete_list(WiringReductionLyt& lyt, const layout_coordinate_path& possible_path,
+                           layout_coordinate_path& to_delete)
 {
     for (const auto& coord : possible_path)
     {
@@ -766,8 +765,8 @@ template <typename Matrix>
  * @return A 2D vector representing the calculated offset matrix.
  */
 template <typename WiringReductionLyt>
-[[nodiscard]] offset_matrix calculate_offset_matrix(const WiringReductionLyt&                         lyt,
-                                                    const layout_coordinate_path<WiringReductionLyt>& to_delete)
+[[nodiscard]] offset_matrix calculate_offset_matrix(const WiringReductionLyt&     lyt,
+                                                    const layout_coordinate_path& to_delete)
 {
     // initialize matrix with zeros
     offset_matrix matrix(static_cast<std::size_t>(lyt.height()),
@@ -838,8 +837,7 @@ template <typename Lyt, typename WiringReductionLyt>
  * @throws std::invalid_argument If a cut selects a retained object or a cyclic wire chain.
  */
 template <typename Lyt, typename WiringReductionLyt>
-void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
-                  const layout_coordinate_path<WiringReductionLyt>& to_delete)
+void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout, const layout_coordinate_path& to_delete)
 {
     const auto                                  offsets = calculate_offset_matrix(wiring_reduction_layout, to_delete);
     std::unordered_set<typename Lyt::object_id> removed{};
@@ -910,7 +908,7 @@ void delete_wires(Lyt& lyt, const WiringReductionLyt& wiring_reduction_layout,
     {
         reduced.move_object(id, position);
     }
-    const auto maximum = layouts::bounding_box_2d{reduced}.get_max();
+    const auto maximum = layouts::bounding_box{reduced}.get_max();
     reduced.resize(maximum ? typename Lyt::extent{static_cast<int64_t>(maximum->x) + 1,
                                                   static_cast<int64_t>(maximum->y) + 1, reduced.layers()} :
                              typename Lyt::extent{});
@@ -950,7 +948,7 @@ class wiring_reduction_impl
         auto& layout = plyt;
 
         // initialize the list of wires to delete
-        layout_coordinate_path<wiring_reduction_layout> to_delete = {};
+        layout_coordinate_path to_delete = {};
 
         bool found_wires = !layout.is_empty();
 
@@ -1034,7 +1032,7 @@ class wiring_reduction_impl
         }
 
         // calculate the final bounding box and resize the layout accordingly
-        const auto bounding_box = layouts::bounding_box_2d(layout);
+        const auto bounding_box = layouts::bounding_box(layout);
         const auto maximum      = bounding_box.get_max();
         layout.resize(maximum ? typename Lyt::extent{static_cast<int64_t>(maximum->x) + 1,
                                                      static_cast<int64_t>(maximum->y) + 1, layout.layers()} :

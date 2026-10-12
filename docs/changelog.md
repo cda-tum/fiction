@@ -121,13 +121,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - Squared Euclidean distance checks overflow without integer division.
+  - Geometric distances accept coordinate pairs directly and use fixed `uint64_t` or `double` results.
+    Squared Euclidean distance is `noexcept` and requires a result within the `uint64_t` range.
+  - Routing paths, objectives, costs, and coordinate-only placement state omit layout template parameters.
+    Distance callbacks accept coordinate pairs; A* distance callbacks borrow their layout at construction.
   - Layout extraction and critical-path analysis reduce per-object allocations with flat traversal maps.
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.
   - GOLD reuses built-in objective costs while ranking candidates and accepting solutions.
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
-    `&a_star_distance<Lyt, Dist>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
+    `&a_star_distance<Lyt>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
   - QCA ONE via optimization now visits occupied crossing cells instead of scanning the full frame.
   - Avoid redundant progress-callback copies in algorithms and layout writers.
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
@@ -206,6 +209,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - `bounding_box_2d` is renamed to `bounding_box` in C++ and Python.
   - Gate-level layouts now keep large-arity input storage outside the common object record.
   - **Breaking:** Clocking scheme `name()` returns a borrowed `std::string_view`. Copy with
     `std::string{scheme.name()}` when the name must outlive its scheme.
@@ -265,6 +269,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     bound symbol of their sections.
 
 - Experiments:
+
+  - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
   - Gate-layout experiments use extent counts and extract logic networks for mockturtle algorithms. The reported dimensions and areas retain their definitions.
@@ -511,7 +517,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `sidb_defect_*`; the traits `is_siqad_coord_v`, `has_siqad_coord_v`, `is_charge_distribution_surface_v`,
   `is_sidb_lattice*_v`, `is_sidb_defect_surface_v`, `has_*_sidb_defect_v`, and `has_*_charge_state_v`;
   `convert_layout_to_siqad_coordinates`, `convert_layout_to_fiction_coordinates`, and
-  `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box_2d` and
+  `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box` and
   `print_layout`; every `template <typename Lyt>` overload of the SiDB simulation, analysis, generator, and I/O
   functions together with `legacy_result`, `legacy_bdl_wire`, and `legacy_bdl_input_iterator`
 - **Breaking:** `layouts::are_cell_layouts_identical`, `layouts::cell_layout_digest`, and

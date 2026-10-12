@@ -100,10 +100,10 @@ void bind_cell_grid(nanobind::class_<Lyt, py_cartesian_layout>& cls)
             },
             "Returns the positions of all output cells, in unspecified order.")
         .def(
-            "bounding_box_2d",
+            "bounding_box",
             [](const Lyt& lyt)
             {
-                const auto bb = fiction::layouts::bounding_box_2d<Lyt>(lyt);
+                const auto bb = fiction::layouts::bounding_box<Lyt>(lyt);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             BOUNDING_BOX_2D_DOC)

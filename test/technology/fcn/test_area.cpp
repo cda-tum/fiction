@@ -44,7 +44,7 @@ TEST_CASE("Empty Cartesian geometry has zero physical area", "[area][size-contra
     CHECK(area(empty) == 0.0);
     const qca::layout singleton{{1, 1}};
     CHECK(area(singleton) == qca::layout::CELL_WIDTH * qca::layout::CELL_HEIGHT);
-    const bounding_box_2d bounds{singleton};
+    const bounding_box bounds{singleton};
     CHECK(area(bounds) == 0.0);
 }
 
@@ -64,8 +64,8 @@ TEST_CASE("Area computation for different technologies", "[area]")
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(98.0, 0.0001));
         CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(9604.0, 0.0001));
 
-        const bounding_box_2d bb{lyt};
-        const auto            area_bb = area<qca::layout>(bb, area_params<qca::layout>{});
+        const bounding_box bb{lyt};
+        const auto         area_bb = area<qca::layout>(bb, area_params<qca::layout>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(0.0, 0.0001));
     }
 
@@ -83,8 +83,8 @@ TEST_CASE("Area computation for different technologies", "[area]")
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(600.0, 0.0001));
         CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(174000.0, 0.0001));
 
-        const bounding_box_2d bb{lyt};
-        const auto            area_bb = area<inml::layout>(bb, area_params<inml::layout>{});
+        const bounding_box bb{lyt};
+        const auto         area_bb = area<inml::layout>(bb, area_params<inml::layout>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(0.0, 0.0001));
     }
 

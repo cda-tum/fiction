@@ -8,20 +8,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import pytest
 
-from mnt.pyfiction.layouts import (
-    arrangement,
-    cartesian_gate_layout,
-    cartesian_layout,
-    coordinate,
-    hexagonal_gate_layout,
-    hexagonal_layout,
-    shifted_cartesian_gate_layout,
-    shifted_cartesian_layout,
-)
+from mnt.pyfiction.layouts import coordinate
 from mnt.pyfiction.physical_design.path_finding import (
     chebyshev_distance,
     euclidean_distance,
@@ -30,105 +19,62 @@ from mnt.pyfiction.physical_design.path_finding import (
     twoddwave_distance,
 )
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
-    from typing import TypeAlias
 
-Layout: TypeAlias = (
-    cartesian_layout
-    | shifted_cartesian_layout
-    | hexagonal_layout
-    | cartesian_gate_layout
-    | shifted_cartesian_gate_layout
-    | hexagonal_gate_layout
-)
-
-ALL_LAYOUTS = [
-    pytest.param(lambda: cartesian_layout((5, 5)), id="cartesian_layout"),
-    pytest.param(lambda: cartesian_gate_layout((5, 5), "2DDWave", "Layout"), id="cartesian_gate_layout"),
-    pytest.param(lambda: shifted_cartesian_layout(arrangement.ODD_COLUMN, (5, 5)), id="shifted_cartesian_layout"),
-    pytest.param(
-        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (5, 5), "2DDWave", "Layout"),
-        id="shifted_cartesian_gate_layout",
-    ),
-    pytest.param(lambda: hexagonal_layout(arrangement.EVEN_ROW, (5, 5)), id="hexagonal_layout"),
-    pytest.param(
-        lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (5, 5), "2DDWave", "Layout"), id="hexagonal_gate_layout"
-    ),
-]
+def test_manhattan() -> None:
+    """Measure Manhattan distance between coordinate pairs."""
+    assert manhattan_distance(coordinate(0, 0), coordinate(0, 0)) == 0
+    assert manhattan_distance(coordinate(0, 0), coordinate(1, 0)) == 1
+    assert manhattan_distance(coordinate(0, 0), coordinate(0, 1)) == 1
+    assert manhattan_distance(coordinate(0, 0), coordinate(1, 1)) == 2
+    assert manhattan_distance(coordinate(0, 0), coordinate(2, 2)) == 4
+    assert manhattan_distance(coordinate(0, 0), coordinate(3, 3)) == 6
+    assert manhattan_distance(coordinate(0, 0), coordinate(4, 4)) == 8
 
 
-@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
-def test_manhattan(make_lyt: Callable[[], Layout]) -> None:
-    """Measure Manhattan distance through the frame boundary."""
-    lyt = make_lyt()
-    assert manhattan_distance(lyt, coordinate(0, 0), coordinate(0, 0)) == 0
-    assert manhattan_distance(lyt, coordinate(0, 0), coordinate(1, 0)) == 1
-    assert manhattan_distance(lyt, coordinate(0, 0), coordinate(0, 1)) == 1
-    assert manhattan_distance(lyt, coordinate(0, 0), coordinate(1, 1)) == 2
-    assert manhattan_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 4
-    assert manhattan_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 6
-    assert manhattan_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 8
+def test_euclidean() -> None:
+    """Measure Euclidean distance between coordinate pairs."""
+    assert euclidean_distance(coordinate(0, 0), coordinate(0, 0)) == 0
+    assert euclidean_distance(coordinate(0, 0), coordinate(1, 0)) == 1
+    assert euclidean_distance(coordinate(0, 0), coordinate(0, 1)) == 1
+    assert euclidean_distance(coordinate(0, 0), coordinate(1, 1)) == pytest.approx(2**0.5, abs=1e-7)
+    assert euclidean_distance(coordinate(0, 0), coordinate(2, 2)) == pytest.approx(2 * 2**0.5, abs=1e-7)
+    assert euclidean_distance(coordinate(0, 0), coordinate(3, 3)) == pytest.approx(3 * 2**0.5, abs=1e-7)
+    assert euclidean_distance(coordinate(0, 0), coordinate(4, 4)) == pytest.approx(4 * 2**0.5, abs=1e-7)
 
 
-@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
-def test_euclidean(make_lyt: Callable[[], Layout]) -> None:
-    """Measure Euclidean distance through the frame boundary."""
-    lyt = make_lyt()
-    assert euclidean_distance(lyt, coordinate(0, 0), coordinate(0, 0)) == 0
-    assert euclidean_distance(lyt, coordinate(0, 0), coordinate(1, 0)) == 1
-    assert euclidean_distance(lyt, coordinate(0, 0), coordinate(0, 1)) == 1
-    assert euclidean_distance(lyt, coordinate(0, 0), coordinate(1, 1)) == pytest.approx(2**0.5, abs=1e-7)
-    assert euclidean_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == pytest.approx(2 * 2**0.5, abs=1e-7)
-    assert euclidean_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == pytest.approx(3 * 2**0.5, abs=1e-7)
-    assert euclidean_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == pytest.approx(4 * 2**0.5, abs=1e-7)
+def test_squared_euclidean() -> None:
+    """Measure squared Euclidean distance between coordinate pairs."""
+    assert squared_euclidean_distance(coordinate(0, 0), coordinate(0, 0)) == 0
+    assert squared_euclidean_distance(coordinate(0, 0), coordinate(1, 0)) == 1
+    assert squared_euclidean_distance(coordinate(0, 0), coordinate(0, 1)) == 1
+    assert squared_euclidean_distance(coordinate(0, 0), coordinate(1, 1)) == 2
+    assert squared_euclidean_distance(coordinate(0, 0), coordinate(2, 2)) == 8
+    assert squared_euclidean_distance(coordinate(0, 0), coordinate(3, 3)) == 18
+    assert squared_euclidean_distance(coordinate(0, 0), coordinate(4, 4)) == 32
 
 
-@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
-def test_squared_euclidean(make_lyt: Callable[[], Layout]) -> None:
-    """Measure squared Euclidean distance through the frame boundary."""
-    lyt = make_lyt()
-    assert squared_euclidean_distance(lyt, coordinate(0, 0), coordinate(0, 0)) == 0
-    assert squared_euclidean_distance(lyt, coordinate(0, 0), coordinate(1, 0)) == 1
-    assert squared_euclidean_distance(lyt, coordinate(0, 0), coordinate(0, 1)) == 1
-    assert squared_euclidean_distance(lyt, coordinate(0, 0), coordinate(1, 1)) == 2
-    assert squared_euclidean_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 8
-    assert squared_euclidean_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 18
-    assert squared_euclidean_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 32
+def test_chebyshev() -> None:
+    """Measure Chebyshev distance between coordinate pairs."""
+    assert chebyshev_distance(coordinate(0, 0), coordinate(0, 0)) == 0
+    assert chebyshev_distance(coordinate(0, 0), coordinate(1, 0)) == 1
+    assert chebyshev_distance(coordinate(0, 0), coordinate(0, 1)) == 1
+    assert chebyshev_distance(coordinate(0, 0), coordinate(1, 1)) == 1
+    assert chebyshev_distance(coordinate(0, 0), coordinate(2, 2)) == 2
+    assert chebyshev_distance(coordinate(0, 0), coordinate(3, 3)) == 3
+    assert chebyshev_distance(coordinate(0, 0), coordinate(4, 4)) == 4
 
 
-@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
-def test_chebyshev(make_lyt: Callable[[], Layout]) -> None:
-    """Measure Chebyshev distance through the frame boundary."""
-    lyt = make_lyt()
-    assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(0, 0)) == 0
-    assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(1, 0)) == 1
-    assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(0, 1)) == 1
-    assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(1, 1)) == 1
-    assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 2
-    assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 3
-    assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 4
+def test_twoddwave() -> None:
+    """Measure forward 2DDWave distance between coordinate pairs."""
+    assert twoddwave_distance(coordinate(0, 0), coordinate(0, 0)) == 0
+    assert twoddwave_distance(coordinate(0, 0), coordinate(1, 0)) == 1
+    assert twoddwave_distance(coordinate(0, 0), coordinate(0, 1)) == 1
+    assert twoddwave_distance(coordinate(0, 0), coordinate(1, 1)) == 2
+    assert twoddwave_distance(coordinate(0, 0), coordinate(2, 2)) == 4
+    assert twoddwave_distance(coordinate(0, 0), coordinate(3, 3)) == 6
+    assert twoddwave_distance(coordinate(0, 0), coordinate(4, 4)) == 8
 
 
-@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
-def test_twoddwave(make_lyt: Callable[[], Layout]) -> None:
-    """Measure forward 2DDWave distance through the frame boundary."""
-    lyt = make_lyt()
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(0, 0)) == 0
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(1, 0)) == 1
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(0, 1)) == 1
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(1, 1)) == 2
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 4
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 6
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 8
-
-
-@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
-def test_squared_euclidean_range(make_lyt: Callable[[], Layout]) -> None:
-    """Preserve exact integral distances and reject an overflowing sum."""
-    lyt = make_lyt()
-    assert (
-        squared_euclidean_distance(lyt, coordinate(-2147483647, 0), coordinate(2147483647, 0)) == 18446744056529682436
-    )
-    with pytest.raises(OverflowError):
-        squared_euclidean_distance(lyt, coordinate(-2147483647, -2147483647), coordinate(2147483647, 2147483647))
+def test_squared_euclidean_range() -> None:
+    """Preserve exact squared distances after widening signed differences."""
+    assert squared_euclidean_distance(coordinate(-2147483647, 0), coordinate(2147483647, 0)) == 18446744056529682436

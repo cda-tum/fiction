@@ -51,7 +51,7 @@ void route_path(nanobind::module_& m)
         "route_path",
         [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path, const typename Lyt::input_port destination)
         {
-            const fiction::physical_design::layout_coordinate_path<Lyt> converted_path{path.cbegin(), path.cend()};
+            const fiction::physical_design::layout_coordinate_path converted_path{path.cbegin(), path.cend()};
 
             fiction::physical_design::route_path(lyt, converted_path, destination);
         },

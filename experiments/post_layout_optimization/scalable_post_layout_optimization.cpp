@@ -99,7 +99,7 @@ try
             const auto layout_copy       = gate_level_layout.clone();
 
             // calculate bounding box
-            const auto bounding_box_before_optimization = bounding_box_2d(gate_level_layout);
+            const auto bounding_box_before_optimization = bounding_box(gate_level_layout);
 
             const auto width_before_optimization  = bounding_box_before_optimization.get_x_size();
             const auto height_before_optimization = bounding_box_before_optimization.get_y_size();
@@ -131,7 +131,7 @@ try
             }
 
             // calculate bounding box
-            const auto bounding_box_after_optimization = bounding_box_2d(gate_level_layout);
+            const auto bounding_box_after_optimization = bounding_box(gate_level_layout);
 
             const auto width_after_optimization  = bounding_box_after_optimization.get_x_size();
             const auto height_after_optimization = bounding_box_after_optimization.get_y_size();

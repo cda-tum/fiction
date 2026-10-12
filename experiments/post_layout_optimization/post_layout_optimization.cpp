@@ -104,7 +104,7 @@ try
         const auto cp_tp = critical_path_length_and_throughput(gate_level_layout);
 
         // calculate bounding box
-        const auto bounding_box_before_optimization = bounding_box_2d(gate_level_layout);
+        const auto bounding_box_before_optimization = bounding_box(gate_level_layout);
 
         /** @brief Number of occupied bounding columns before optimization. */
         const auto width_before_optimization = bounding_box_before_optimization.get_x_size();
@@ -131,7 +131,7 @@ try
         }
 
         // calculate bounding box
-        const auto bounding_box_after_optimization = bounding_box_2d(gate_level_layout);
+        const auto bounding_box_after_optimization = bounding_box(gate_level_layout);
 
         /** @brief Number of occupied bounding columns after optimization. */
         const auto width_after_optimization = bounding_box_after_optimization.get_x_size();

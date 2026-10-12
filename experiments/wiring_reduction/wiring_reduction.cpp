@@ -112,7 +112,7 @@ try
         const auto cp_tp_stats = critical_path_length_and_throughput(gate_level_layout);
 
         // calculate bounding box
-        const auto bounding_box_before_wiring_reduction = bounding_box_2d(gate_level_layout);
+        const auto bounding_box_before_wiring_reduction = bounding_box(gate_level_layout);
 
         /** @brief Number of occupied bounding columns before wiring reduction. */
         const auto width_before_wiring_reduction = bounding_box_before_wiring_reduction.get_x_size();
@@ -148,7 +148,7 @@ try
         }
 
         // calculate bounding box
-        const auto bounding_box_after_wiring_reduction = bounding_box_2d(gate_level_layout);
+        const auto bounding_box_after_wiring_reduction = bounding_box(gate_level_layout);
 
         /** @brief Number of occupied bounding columns after wiring reduction. */
         const auto width_after_wiring_reduction = bounding_box_after_wiring_reduction.get_x_size();

@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
@@ -354,11 +355,10 @@ template <typename Lyt, typename Ntk>
  * placed in a layout, fetching the node's fanins and looking for their locations in the layout does not work properly
  * when branching nodes like fanouts are involved that got extended by wire nodes. This container solves that issue.
  *
- * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Logic network type.
  * @tparam fanout_size Maximum fanout size possible in the layout and/or the network.
  */
-template <typename Lyt, typename Ntk, uint16_t fanout_size = 2>
+template <typename Ntk, uint16_t fanout_size = 2>
 struct branching_signal_container
 {
     /**
@@ -373,15 +373,16 @@ struct branching_signal_container
         /**
          * Output port at the end of the route.
          */
-        typename Lyt::object_id lyt_signal;
+        layouts::layout_object_id lyt_signal;
 
         /**
          * Associates a network destination with a layout output port.
          */
-        branching_signal(const mockturtle::node<Ntk>& n, const typename Lyt::object_id& s) : ntk_node{n}, lyt_signal{s}
+        branching_signal(const mockturtle::node<Ntk>& n, const layouts::layout_object_id& s) :
+                ntk_node{n},
+                lyt_signal{s}
         {
             static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-            static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
         }
     };
     /**
@@ -391,7 +392,7 @@ struct branching_signal_container
      * @param n Node whose branching position is desired.
      * @return Signal to `n`'s layout location or the default signal if it wasn't found.
      */
-    [[nodiscard]] typename Lyt::object_id operator[](const mockturtle::node<Ntk>& n) const
+    [[nodiscard]] layouts::layout_object_id operator[](const mockturtle::node<Ntk>& n) const
     {
         if (const auto branch = std::ranges::find_if(branches,
                                                      [&n](const auto& b)
@@ -420,7 +421,7 @@ struct branching_signal_container
      * @param ntk_node Node whose branch is to be updated.
      * @param lyt_signal New signal pointing to the end of the branch.
      */
-    void update_branch(const mockturtle::node<Ntk>& ntk_node, const typename Lyt::object_id& lyt_signal)
+    void update_branch(const mockturtle::node<Ntk>& ntk_node, const layouts::layout_object_id& lyt_signal)
     {
         for (auto i = 0u; i < branches.size(); ++i)
         {
@@ -468,7 +469,7 @@ struct branching_signal_container
 template <typename Lyt, typename Ntk, uint16_t fanout_size = 2>
 [[nodiscard]] typename Lyt::object_id
 place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-      const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos)
+      const mockturtle::node_map<branching_signal_container<Ntk, fanout_size>, Ntk>& node2pos)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");

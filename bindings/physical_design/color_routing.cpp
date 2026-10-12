@@ -48,7 +48,7 @@ void color_routing_impl(nanobind::module_& m)
            const std::vector<std::tuple<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>, uint32_t>>& objectives,
            const fiction::physical_design::color_routing_params&                                        params)
         {
-            std::vector<fiction::physical_design::routing_objective<Lyt>> objs{};
+            std::vector<fiction::physical_design::routing_objective> objs{};
             objs.reserve(objectives.size());
 
             for (const auto& obj : objectives)

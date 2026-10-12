@@ -52,8 +52,7 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
            const fiction::layouts::obstructions& obstructions)
         {
             const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<
-                fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, k, params,
-                                                                            obstructions);
+                fiction::physical_design::layout_coordinate_path, Lyt>(lyt, {source, target}, k, params, obstructions);
 
             std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
             paths.reserve(k_paths.size());

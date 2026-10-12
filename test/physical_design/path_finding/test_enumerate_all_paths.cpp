@@ -32,7 +32,7 @@ using namespace fiction::physical_design::path_finding;
 TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 {
     using lyt  = cartesian_layout;
-    using path = layout_coordinate_path<lyt>;
+    using path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -127,7 +127,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 {
     using lyt  = cartesian_layout;
-    using path = layout_coordinate_path<lyt>;
+    using path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -172,7 +172,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-paths]")
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
-    using path     = layout_coordinate_path<gate_lyt>;
+    using path     = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -232,7 +232,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled", "[enumerate-all-paths]")
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
-    using path     = layout_coordinate_path<gate_lyt>;
+    using path     = layout_coordinate_path;
 
     // enable crossings
     const enumerate_all_paths_params params{true};
@@ -351,7 +351,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruction", "[enumerate-all-paths]")
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
-    using path     = layout_coordinate_path<gate_lyt>;
+    using path     = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {

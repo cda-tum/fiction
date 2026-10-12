@@ -51,8 +51,7 @@ void enumerate_all_paths_impl(nanobind::module_& m)
            const fiction::layouts::obstructions&                                     obstructions)
         {
             const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<
-                fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, params,
-                                                                            obstructions);
+                fiction::physical_design::layout_coordinate_path, Lyt>(lyt, {source, target}, params, obstructions);
 
             std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
             paths.reserve(all_paths.size());

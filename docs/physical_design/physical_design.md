@@ -74,7 +74,7 @@ path_finding/path_finding
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos)
+```{doxygenfunction} fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Ntk, fanout_size>, Ntk>& node2pos)
 
 ```
 

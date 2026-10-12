@@ -57,8 +57,8 @@ template <typename Path, typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {
   public:
-    a_star_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const distance_functor<Lyt, Dist>& dist_fn,
-                const cost_functor<Lyt, Cost>& cost_fn, const a_star_params& p, const layouts::obstructions& extra) :
+    a_star_impl(const Lyt& lyt, const routing_objective& obj, const distance_functor<Dist>& dist_fn,
+                const cost_functor<Cost>& cost_fn, const a_star_params& p, const layouts::obstructions& extra) :
             layout{lyt},
             search_obstructions{extra},
             objective{obj},
@@ -111,15 +111,15 @@ class a_star_impl
     /**
      * The source-target coordinate pair.
      */
-    const routing_objective<Lyt> objective;
+    const routing_objective objective;
     /**
      * The distance functor that implements the heuristic estimation function.
      */
-    const distance_functor<Lyt, Dist> distance;
+    const distance_functor<Dist>& distance;
     /**
      * The cost functor that implements the cost function.
      */
-    const cost_functor<Lyt, Cost> cost;
+    const cost_functor<Cost>& cost;
     /**
      * Routing parameters.
      */
@@ -239,7 +239,7 @@ class a_star_impl
             set_g(successor, tentative_g);
 
             // compute new f-value
-            const auto f = tentative_g + static_cast<g_f_type>(distance(layout, successor, objective.target));
+            const auto f = tentative_g + static_cast<g_f_type>(distance(successor, objective.target));
 
             // if successor is contained in the open list (frontier)
             if (it != open_list.end())
@@ -360,7 +360,7 @@ class a_star_impl
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
  * using clk_lyt = gate_level_layout<cartesian_layout>;
- * using path = layout_coordinate_path<cartesian_layout>;
+ * using path = layout_coordinate_path;
  * clk_lyt layout = ...;
  * auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
@@ -384,9 +384,9 @@ class a_star_impl
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
     requires is_coordinate_layout_v<Lyt>
-[[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
-                          const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, uint64_t>(),
-                          const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, uint8_t>(),
+[[nodiscard]] Path a_star(const Lyt& layout, const routing_objective& objective,
+                          const distance_functor<Dist>& dist_fn = manhattan_distance_functor(),
+                          const cost_functor<Cost>&     cost_fn = unit_cost_functor<uint8_t>(),
                           const a_star_params& params = {}, const layouts::obstructions& obstructions = {})
 {
     return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
@@ -397,54 +397,45 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * of A*.
  *
  * If no path between `source` and `target` exists in `layout`, the returned distance is
- * `std::numeric_limits<Dist>::infinity()` for floating-point types or `std::numeric_limits<Dist>::max()` for integral
- * types.
+ * `std::numeric_limits<uint64_t>::max()`.
  *
  * @tparam Lyt Coordinate layout type.
- * @tparam Dist Distance type.
  * @param layout The layout in which the distance between `source` and `target` is to be determined.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return Minimum path length between `source` and `target` in `layout`.
  */
-template <typename Lyt, typename Dist = uint64_t>
-    requires is_coordinate_layout_v<Lyt> && (std::integral<Dist> || std::floating_point<Dist>)
-[[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
-                                   const layouts::obstructions& obstructions = {})
+template <typename Lyt>
+    requires is_coordinate_layout_v<Lyt>
+[[nodiscard]] uint64_t a_star_distance(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
+                                       const layouts::obstructions& obstructions = {})
 {
-    const auto path_length =
-        a_star<layout_coordinate_path<Lyt>>(layout, {source, target}, manhattan_distance_functor<Lyt>(),
-                                            unit_cost_functor<Lyt>(), {}, obstructions)
-            .size();
+    const auto path_length = a_star<layout_coordinate_path>(layout, {source, target}, manhattan_distance_functor(),
+                                                            unit_cost_functor<>(), {}, obstructions)
+                                 .size();
 
     if (path_length == 0ul)
     {
-        if constexpr (std::is_floating_point_v<Dist>)
-        {
-            return std::numeric_limits<Dist>::infinity();
-        }
-        else
-        {
-            return std::numeric_limits<Dist>::max();
-        }
+        return std::numeric_limits<uint64_t>::max();
     }
 
-    return static_cast<Dist>(path_length - 1);
+    return static_cast<uint64_t>(path_length - 1);
 }
 /**
  * A pre-defined distance functor that uses the A* distance.
  *
  * @tparam Lyt Coordinate layout type.
- * @tparam Dist Distance type.
  */
-template <typename Lyt, typename Dist = uint64_t>
-class a_star_distance_functor : public distance_functor<Lyt, Dist>
+template <typename Lyt>
+class a_star_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    a_star_distance_functor() :
-            distance_functor<Lyt, Dist>([](const Lyt& lyt, const coordinate<Lyt>& source, const coordinate<Lyt>& target)
-                                        { return a_star_distance<Lyt, Dist>(lyt, source, target); })
+    /** @brief Computes distances in the borrowed layout. @param lyt Layout that outlives this functor. */
+    explicit a_star_distance_functor(const Lyt& lyt) :
+            distance_functor<uint64_t>(
+                [&lyt](const layouts::layout_base::coordinate& source, const layouts::layout_base::coordinate& target)
+                { return a_star_distance<Lyt>(lyt, source, target); })
     {}
 };
 

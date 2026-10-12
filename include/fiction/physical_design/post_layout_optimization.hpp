@@ -162,7 +162,7 @@ struct fanin_fanout_data
     /** @brief Intermediate wire coordinates to remove. */
     std::vector<tile<Lyt>> to_clear{};
     /** @brief Original routes, inputs first and then outputs. */
-    std::vector<layout_coordinate_path<Lyt>> routes{};
+    std::vector<layout_coordinate_path> routes{};
     /** @brief Explicit input endpoints corresponding to routes. */
     std::vector<typename Lyt::input_port> destinations{};
 };
@@ -172,7 +172,7 @@ struct fanin_fanout_data
 template <typename Lyt>
 void fit_occupied_geometry(Lyt& lyt)
 {
-    const auto maximum = layouts::bounding_box_2d{lyt}.get_max();
+    const auto maximum = layouts::bounding_box{lyt}.get_max();
     lyt.resize(maximum ? typename Lyt::extent{static_cast<int64_t>(maximum->x) + 1,
                                               static_cast<int64_t>(maximum->y) + 1, lyt.layers()} :
                          typename Lyt::extent{});
@@ -581,7 +581,7 @@ class post_layout_optimization_impl
         lyt.foreach_fanin(gate,
                           [&](const auto source, const auto index)
                           {
-                              layout_coordinate_path<Lyt>                 path{position};
+                              layout_coordinate_path                      path{position};
                               auto                                        id = source;
                               std::unordered_set<typename Lyt::object_id> visited{};
                               while (true)
@@ -611,7 +611,7 @@ class post_layout_optimization_impl
         lyt.foreach_sink(gate,
                          [&](auto destination)
                          {
-                             layout_coordinate_path<Lyt>                 path{position};
+                             layout_coordinate_path                      path{position};
                              std::unordered_set<typename Lyt::object_id> visited{};
                              while (true)
                              {
@@ -643,14 +643,14 @@ class post_layout_optimization_impl
      * @param end_tile The ending coordinate of the path.
      * @return The computed path as a sequence of coordinates in the layout.
      */
-    layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start_tile, const tile<Lyt>& end_tile)
+    layout_coordinate_path get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start_tile, const tile<Lyt>& end_tile)
     {
-        using dist = physical_design::path_finding::twoddwave_distance_functor<Lyt, uint64_t>;
-        using cost = physical_design::path_finding::unit_cost_functor<Lyt, uint8_t>;
+        using dist = physical_design::path_finding::twoddwave_distance_functor;
+        using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
         physical_design::path_finding::a_star_params astar_params{};
         astar_params.crossings = !ps.planar_optimization;
 
-        const auto path = physical_design::path_finding::a_star<layout_coordinate_path<Lyt>>(
+        const auto path = physical_design::path_finding::a_star<layout_coordinate_path>(
             lyt, {start_tile, end_tile}, dist(), cost(), astar_params, search_obstructions);
 
         // obstruct the tiles along the computed path.
@@ -696,8 +696,8 @@ class post_layout_optimization_impl
         search_obstructions.obstruct_coordinate(candidate);
         search_obstructions.obstruct_coordinate({candidate.x, candidate.y, 1});
         current = candidate;
-        std::vector<layout_coordinate_path<Lyt>> paths{};
-        bool                                     complete = true;
+        std::vector<layout_coordinate_path> paths{};
+        bool                                complete = true;
         for (std::size_t index{}; index < data.routes.size(); ++index)
         {
             const bool incoming = index < data.fanins.size();

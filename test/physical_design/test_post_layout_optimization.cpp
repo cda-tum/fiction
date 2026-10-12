@@ -412,10 +412,10 @@ TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-l
     CHECK(layout.contains(po));
     CHECK(layout.is_lt(gate));
     const auto objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives, routing_objective<gate_level_layout<cartesian_layout>>{
-                                            layout.get_tile(a), layout.get_tile(gate), 0}) != objectives.end());
-    CHECK(std::ranges::find(objectives, routing_objective<gate_level_layout<cartesian_layout>>{
-                                            layout.get_tile(b), layout.get_tile(gate), 1}) != objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(a), layout.get_tile(gate), 0}) !=
+          objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(b), layout.get_tile(gate), 1}) !=
+          objectives.end());
     CHECK(layout.area() <= 16);
 }
 

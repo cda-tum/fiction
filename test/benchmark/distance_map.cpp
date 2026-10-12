@@ -41,15 +41,12 @@ using namespace fiction::physical_design::path_finding;
  * @throws std::exception Propagates exceptions from the distance calculation.
  */
 template <typename Lyt, typename Dist>
-Dist sum_distances(const Lyt& layout, const distance_functor<Lyt, Dist>& dist_func)
+Dist sum_distances(const Lyt& layout, const distance_functor<Dist>& dist_func)
 {
     Dist sum = 0;
     layout.foreach_coordinate(
         [&layout, &dist_func, &sum](const auto& c1)
-        {
-            layout.foreach_coordinate([&layout, &dist_func, &sum, &c1](const auto& c2)
-                                      { sum += dist_func(layout, c1, c2); });
-        });
+        { layout.foreach_coordinate([&layout, &dist_func, &sum, &c1](const auto& c2) { sum += dist_func(c1, c2); }); });
 
     return sum;
 }
@@ -65,19 +62,19 @@ TEST_CASE("Benchmark distance maps", "[benchmark]")
 
     BENCHMARK("without distance maps")
     {
-        return sum_distances(layout, a_star_distance_functor<clk_lyt, dist>{});
+        return sum_distances(layout, a_star_distance_functor<clk_lyt>{layout});
     };
 
-    const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
-    const auto dist_map_func = distance_map_functor<clk_lyt, dist>{dist_map};
+    const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+    const auto dist_map_func = distance_map_functor<dist>{layout.get_extent(), dist_map};
 
     BENCHMARK("distance_map")
     {
         return sum_distances(layout, dist_map_func);
     };
 
-    const auto sparse_dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt, dist>{});
-    const auto sparse_dist_map_func = sparse_distance_map_functor<clk_lyt, dist>{sparse_dist_map};
+    const auto sparse_dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+    const auto sparse_dist_map_func = sparse_distance_map_functor<dist>{sparse_dist_map};
 
     BENCHMARK("sparse_distance_map")
     {
@@ -96,15 +93,13 @@ TEST_CASE("Benchmark smart distance cache", "[benchmark]")
 
     BENCHMARK("smart_distance_cache (cold start)")
     {
-        const auto dist_map_func =
-            smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
+        const auto dist_map_func = smart_distance_cache_functor<dist>{a_star_distance_functor<clk_lyt>{layout}};
 
         return sum_distances(layout, dist_map_func);
     };
 
     // warm up the cache
-    const auto dist_map_func =
-        smart_distance_cache_functor<clk_lyt, dist>{layout, a_star_distance_functor<clk_lyt, dist>{}};
+    const auto dist_map_func = smart_distance_cache_functor<dist>{a_star_distance_functor<clk_lyt>{layout}};
     sum_distances(layout, dist_map_func);
 
     BENCHMARK("smart_distance_cache (warm start)")
@@ -118,7 +113,7 @@ TEST_CASE("Distance summation propagates distance-functor exceptions", "[distanc
     /** @brief Single-coordinate frame whose distance call must propagate exceptions. */
     const cartesian_layout layout{{1, 1}};
     /** @brief Distance function that rejects every calculation. */
-    const distance_functor<cartesian_layout, uint64_t> throwing_distance{
-        [](const auto&, const auto&, const auto&) -> uint64_t { throw std::invalid_argument{"Distance unavailable"}; }};
+    const distance_functor<uint64_t> throwing_distance{[](const auto&, const auto&, const auto&) -> uint64_t
+                                                       { throw std::invalid_argument{"Distance unavailable"}; }};
     CHECK_THROWS_AS(sum_distances(layout, throwing_distance), std::invalid_argument);
 }

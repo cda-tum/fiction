@@ -44,7 +44,7 @@ namespace fiction::physical_design
  */
 template <typename Lyt>
 using edge_intersection_graph =
-    undirected_graph<std::size_t, layout_coordinate_path<Lyt>, undirected_pair<std::size_t>, std::size_t>;
+    undirected_graph<std::size_t, layout_coordinate_path, undirected_pair<std::size_t>, std::size_t>;
 
 /**
  * Parameters for the edge intersection graph generation algorithm.
@@ -106,7 +106,7 @@ class generate_edge_intersection_graph_impl
      * @param p Parameters.
      * @param st Statistics.
      */
-    generate_edge_intersection_graph_impl(const Lyt& lyt, const std::vector<routing_objective<Lyt>>& obj,
+    generate_edge_intersection_graph_impl(const Lyt& lyt, const std::vector<routing_objective>& obj,
                                           const generate_edge_intersection_graph_params& p,
                                           generate_edge_intersection_graph_stats&        st) :
             layout{lyt},
@@ -176,7 +176,7 @@ class generate_edge_intersection_graph_impl
     /**
      * The routing objectives.
      */
-    const std::vector<routing_objective<Lyt>> objectives;
+    const std::vector<routing_objective> objectives;
     /**
      * Parameters.
      */
@@ -194,7 +194,7 @@ class generate_edge_intersection_graph_impl
      */
     std::size_t node_id{0}, edge_id{0};
     /** @brief A coordinate path with its graph vertex label. */
-    class labeled_layout_coordinate_path : public layout_coordinate_path<Lyt>
+    class labeled_layout_coordinate_path : public layout_coordinate_path
     {
       public:
         /**
@@ -236,7 +236,7 @@ class generate_edge_intersection_graph_impl
         std::size_t label{};
 
       protected:
-        using base = layout_coordinate_path<Lyt>;
+        using base = layout_coordinate_path;
 
       public:
         // make all inherited constructors available
@@ -340,10 +340,10 @@ class generate_edge_intersection_graph_impl
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
  */
 template <typename Lyt>
-edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&                                 lyt,
-                                                              const std::vector<routing_objective<Lyt>>& objectives,
-                                                              generate_edge_intersection_graph_params    ps  = {},
-                                                              generate_edge_intersection_graph_stats*    pst = nullptr)
+edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&                              lyt,
+                                                              const std::vector<routing_objective>&   objectives,
+                                                              generate_edge_intersection_graph_params ps  = {},
+                                                              generate_edge_intersection_graph_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a clocked layout");
 
