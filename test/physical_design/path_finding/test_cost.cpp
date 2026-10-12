@@ -15,9 +15,13 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
+
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -25,222 +29,68 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Unit cost", "[cost]")
 {
-    SECTION("Unsigned Cartesian layout")
+    const auto [source, target] =
+        GENERATE(std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 0}},
+                 std::pair{layout_base::coordinate{1, 1}, layout_base::coordinate{1, 1}},
+                 std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 1}},
+                 std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{1, 1}},
+                 std::pair{layout_base::coordinate{1, 2}, layout_base::coordinate{3, 3}},
+                 std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{4, 4}},
+                 std::pair{layout_base::coordinate{4, 4}, layout_base::coordinate{0, 0}},
+                 std::pair{layout_base::coordinate{0, 0, 1}, layout_base::coordinate{8, 9, 0}},
+                 std::pair{layout_base::coordinate{0, 0, 1}, layout_base::coordinate{8, 9, 1}},
+                 std::pair{layout_base::coordinate{9, 1}, layout_base::coordinate{6, 2}},
+                 std::pair{layout_base::coordinate{6, 2}, layout_base::coordinate{0, 4}},
+                 std::pair{layout_base::coordinate{0, 4}, layout_base::coordinate{9, 1}},
+                 std::pair{layout_base::coordinate{6, 2, 1}, layout_base::coordinate{0, 4, 0}},
+                 std::pair{layout_base::coordinate{6, 2, 0}, layout_base::coordinate{0, 4, 1}},
+                 std::pair{layout_base::coordinate{0, 4, 1}, layout_base::coordinate{9, 1, 1}},
+                 std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{-1, -1}},
+                 std::pair{layout_base::coordinate{-4, -3}, layout_base::coordinate{1, -1}},
+                 std::pair{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}});
+    SECTION("Direct function")
     {
-        using layout = cartesian_layout;
-
-        CHECK(unit_cost<layout>({0, 0}, {0, 0}) == 1);
-        CHECK(unit_cost<layout>({1, 1}, {1, 1}) == 1);
-        CHECK(unit_cost<layout>({0, 0}, {0, 1}) == 1);
-        CHECK(unit_cost<layout>({0, 0}, {1, 1}) == 1);
-        CHECK(unit_cost<layout>({1, 2}, {3, 3}) == 1);
-        CHECK(unit_cost<layout>({0, 0}, {4, 4}) == 1);
-        CHECK(unit_cost<layout>({4, 4}, {0, 0}) == 1);
-
-        // ignore z-axis
-        CHECK(unit_cost<layout>({0, 0, 1}, {8, 9, 0}) == 1);
-        CHECK(unit_cost<layout>({0, 0, 1}, {8, 9, 1}) == 1);
+        const auto value = unit_cost<cartesian_layout>(source, target);
+        CHECK(value == 1);
     }
-    SECTION("Signed Cartesian layout")
+    SECTION("Functor")
     {
-        using layout = cartesian_layout;
-
-        CHECK(unit_cost<layout>({0, 0}, {0, 0}) == 1);
-        CHECK(unit_cost<layout>({1, 1}, {1, 1}) == 1);
-        CHECK(unit_cost<layout>({0, 0}, {0, 1}) == 1);
-        CHECK(unit_cost<layout>({0, 0}, {1, 1}) == 1);
-        CHECK(unit_cost<layout>({1, 2}, {3, 3}) == 1);
-        CHECK(unit_cost<layout>({0, 0}, {4, 4}) == 1);
-        CHECK(unit_cost<layout>({4, 4}, {0, 0}) == 1);
-
-        // ignore z-axis
-        CHECK(unit_cost<layout>({0, 0, 1}, {8, 9, 0}) == 1);
-        CHECK(unit_cost<layout>({0, 0, 1}, {8, 9, 1}) == 1);
-
-        // negative coordinates
-        CHECK(unit_cost<layout>({0, 0}, {-1, -1}) == 1);
-        CHECK(unit_cost<layout>({-4, -3}, {1, -1}) == 1);
-        CHECK(unit_cost<layout>({-2, -8}, {-6, -4}) == 1);
-    }
-}
-
-TEST_CASE("Unit cost functor", "[cost]")
-{
-    SECTION("Unsigned Cartesian layout")
-    {
-        using layout = cartesian_layout;
-
-        const unit_cost_functor<layout> cost{};
-
-        CHECK(cost({0, 0}, {0, 0}) == 1);
-        CHECK(cost({1, 1}, {1, 1}) == 1);
-        CHECK(cost({0, 0}, {0, 1}) == 1);
-        CHECK(cost({0, 0}, {1, 1}) == 1);
-        CHECK(cost({1, 2}, {3, 3}) == 1);
-        CHECK(cost({0, 0}, {4, 4}) == 1);
-        CHECK(cost({4, 4}, {0, 0}) == 1);
-
-        // ignore z-axis
-        CHECK(cost({0, 0, 1}, {8, 9, 0}) == 1);
-        CHECK(cost({0, 0, 1}, {8, 9, 1}) == 1);
-    }
-    SECTION("Signed Cartesian layout")
-    {
-        using layout = cartesian_layout;
-
-        const unit_cost_functor<layout> cost{};
-
-        CHECK(cost({0, 0}, {0, 0}) == 1);
-        CHECK(cost({1, 1}, {1, 1}) == 1);
-        CHECK(cost({0, 0}, {0, 1}) == 1);
-        CHECK(cost({0, 0}, {1, 1}) == 1);
-        CHECK(cost({1, 2}, {3, 3}) == 1);
-        CHECK(cost({0, 0}, {4, 4}) == 1);
-        CHECK(cost({4, 4}, {0, 0}) == 1);
-
-        // ignore z-axis
-        CHECK(cost({0, 0, 1}, {8, 9, 0}) == 1);
-        CHECK(cost({0, 0, 1}, {8, 9, 1}) == 1);
-
-        // negative coordinates
-        CHECK(cost({0, 0}, {-1, -1}) == 1);
-        CHECK(cost({-4, -3}, {1, -1}) == 1);
-        CHECK(cost({-2, -8}, {-6, -4}) == 1);
+        const unit_cost_functor<cartesian_layout> cost{};
+        const auto                                value = cost(source, target);
+        CHECK(value == 1);
     }
 }
 
 TEST_CASE("Random cost", "[cost]")
 {
-    SECTION("Unsigned Cartesian layout")
+    const auto [source, target] =
+        GENERATE(std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 0}},
+                 std::pair{layout_base::coordinate{1, 1}, layout_base::coordinate{1, 1}},
+                 std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 1}},
+                 std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{1, 1}},
+                 std::pair{layout_base::coordinate{1, 2}, layout_base::coordinate{3, 3}},
+                 std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{4, 4}},
+                 std::pair{layout_base::coordinate{4, 4}, layout_base::coordinate{0, 0}},
+                 std::pair{layout_base::coordinate{0, 0, 1}, layout_base::coordinate{8, 9, 0}},
+                 std::pair{layout_base::coordinate{0, 0, 1}, layout_base::coordinate{8, 9, 1}},
+                 std::pair{layout_base::coordinate{9, 1}, layout_base::coordinate{6, 2}},
+                 std::pair{layout_base::coordinate{6, 2}, layout_base::coordinate{0, 4}},
+                 std::pair{layout_base::coordinate{0, 4}, layout_base::coordinate{9, 1}},
+                 std::pair{layout_base::coordinate{6, 2, 1}, layout_base::coordinate{0, 4, 0}},
+                 std::pair{layout_base::coordinate{6, 2, 0}, layout_base::coordinate{0, 4, 1}},
+                 std::pair{layout_base::coordinate{0, 4, 1}, layout_base::coordinate{9, 1, 1}},
+                 std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{-1, -1}},
+                 std::pair{layout_base::coordinate{-4, -3}, layout_base::coordinate{1, -1}},
+                 std::pair{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}});
+    SECTION("Direct function")
     {
-        using layout = cartesian_layout;
-
-        auto r = random_cost<layout>({0, 0}, {0, 0});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({1, 1}, {1, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({0, 0}, {0, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({0, 0}, {1, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({9, 1}, {6, 2});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({6, 2}, {0, 4});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({0, 4}, {9, 1});
-        CHECK((r >= 0 && r <= 1));
-
-        // ignore z-axis
-        r = random_cost<layout>({6, 2, 1}, {0, 4, 0});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({6, 2, 0}, {0, 4, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({0, 4, 1}, {9, 1, 1});
-        CHECK((r >= 0 && r <= 1));
+        const auto value = random_cost<cartesian_layout>(source, target);
+        CHECK((value >= 0 && value <= 1));
     }
-    SECTION("Signed Cartesian layout")
+    SECTION("Functor")
     {
-        using layout = cartesian_layout;
-
-        auto r = random_cost<layout>({0, 0}, {0, 0});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({1, 1}, {1, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({0, 0}, {0, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({0, 0}, {1, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({9, 1}, {6, 2});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({6, 2}, {0, 4});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({0, 4}, {9, 1});
-        CHECK((r >= 0 && r <= 1));
-
-        // ignore z-axis
-        r = random_cost<layout>({6, 2, 1}, {0, 4, 0});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({6, 2, 0}, {0, 4, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({0, 4, 1}, {9, 1, 1});
-        CHECK((r >= 0 && r <= 1));
-
-        // negative coordinates
-        r = random_cost<layout>({0, 0}, {-1, -1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({-4, -3}, {1, -1});
-        CHECK((r >= 0 && r <= 1));
-        r = random_cost<layout>({-2, -8}, {-6, -4});
-        CHECK((r >= 0 && r <= 1));
-    }
-}
-
-TEST_CASE("Random cost functor", "[cost]")
-{
-    SECTION("Unsigned Cartesian layout")
-    {
-        using layout = cartesian_layout;
-
-        const random_cost_functor<layout> cost{};
-
-        auto r = cost({0, 0}, {0, 0});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({1, 1}, {1, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({0, 0}, {0, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({0, 0}, {1, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({9, 1}, {6, 2});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({6, 2}, {0, 4});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({0, 4}, {9, 1});
-        CHECK((r >= 0 && r <= 1));
-
-        // ignore z-axis
-        r = cost({6, 2, 1}, {0, 4, 0});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({6, 2, 0}, {0, 4, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({0, 4, 1}, {9, 1, 1});
-        CHECK((r >= 0 && r <= 1));
-    }
-    SECTION("Signed Cartesian layout")
-    {
-        using layout = cartesian_layout;
-
-        const random_cost_functor<layout> cost{};
-
-        auto r = cost({0, 0}, {0, 0});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({1, 1}, {1, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({0, 0}, {0, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({0, 0}, {1, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({9, 1}, {6, 2});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({6, 2}, {0, 4});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({0, 4}, {9, 1});
-        CHECK((r >= 0 && r <= 1));
-
-        // ignore z-axis
-        r = cost({6, 2, 1}, {0, 4, 0});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({6, 2, 0}, {0, 4, 1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({0, 4, 1}, {9, 1, 1});
-        CHECK((r >= 0 && r <= 1));
-
-        // negative coordinates
-        r = cost({0, 0}, {-1, -1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({-4, -3}, {1, -1});
-        CHECK((r >= 0 && r <= 1));
-        r = cost({-2, -8}, {-6, -4});
-        CHECK((r >= 0 && r <= 1));
+        const random_cost_functor<cartesian_layout> cost{};
+        const auto                                  value = cost(source, target);
+        CHECK((value >= 0 && value <= 1));
     }
 }
