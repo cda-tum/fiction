@@ -283,6 +283,19 @@ inline void optimize_output_positions(fiction::layouts::gate_level_layout<fictio
         }
     }
 }
+/** @brief Returns the object placed at a coordinate. @param lyt Layout. @param t Coordinate.
+ * @return Identity of the object at `t`. @throws std::invalid_argument If `t` is empty.
+ */
+[[nodiscard]] inline fiction::layouts::layout_object_id
+object_at(const fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+          const fiction::layouts::layout_base::coordinate&                               t)
+{
+    if (const auto id = lyt.find_object(t))
+    {
+        return *id;
+    }
+    throw std::invalid_argument("Post-layout optimization requires an object at the coordinate");
+}
 /** @brief Extends outputs one tile to the nearest border while preserving their logical inputs.
  * @param lyt Layout. @param moved_gates Relocation count to adjust.
  */
@@ -573,7 +586,7 @@ class post_layout_optimization_impl
                           const fiction::layouts::layout_base::coordinate&                               position)
     {
         fanin_fanout_data data{};
-        const auto        gate = lyt.find_object(position).value();
+        const auto        gate = object_at(lyt, position);
         const auto        wire = [&](const auto id) { return lyt.is_wire(id) && lyt.fanout_size(id) == 1; };
         lyt.foreach_fanin(gate,
                           [&](const auto source, const auto index)
@@ -691,7 +704,7 @@ class post_layout_optimization_impl
             return true;
         }
         ++attempts;
-        const auto id = lyt.find_object(current).value();
+        const auto id = object_at(lyt, current);
         lyt.move_object(id, candidate);
         search_obstructions.clear_obstructed_coordinate(current);
         search_obstructions.clear_obstructed_coordinate({current.x, current.y, 1});
@@ -734,7 +747,7 @@ class post_layout_optimization_impl
                                  const fiction::layouts::layout_base::coordinate&                         original,
                                  const fanin_fanout_data&                                                 data)
     {
-        lyt.move_object(lyt.find_object(current).value(), original);
+        lyt.move_object(object_at(lyt, current), original);
         for (std::size_t index{}; index < data.routes.size(); ++index)
         {
             route_path(lyt, data.routes[index], data.destinations[index]);
@@ -766,7 +779,7 @@ class post_layout_optimization_impl
                 return false;
             }
         }
-        const auto gate = lyt.find_object(original).value();
+        const auto gate = object_at(lyt, original);
         for (const auto& t : data.to_clear)
         {
             lyt.clear_tile(t);
