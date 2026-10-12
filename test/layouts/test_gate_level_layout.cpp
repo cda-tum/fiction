@@ -977,6 +977,8 @@ struct throwing_clone_geometry : cartesian_layout
 
 TEST_CASE("Geometry clone failures preserve layout move operands", "[gate-level-layout]")
 {
+    STATIC_REQUIRE_FALSE(std::is_nothrow_move_constructible_v<gate_level_layout<throwing_clone_geometry>>);
+    STATIC_REQUIRE_FALSE(std::is_nothrow_move_assignable_v<gate_level_layout<throwing_clone_geometry>>);
     gate_level_layout<throwing_clone_geometry> source{{3, 2}};
     const auto                                 input = source.create_pi("source", {0, 0});
     gate_level_layout<throwing_clone_geometry> destination{{2, 1}};
@@ -1001,6 +1003,62 @@ TEST_CASE("Geometry clone failures preserve layout move operands", "[gate-level-
     CHECK(destination.get_tile(retained) == layout_base::coordinate{1, 0});
     CHECK(destination.get_name(retained) == "destination");
     CHECK(destination.num_pis() == 1);
+}
+
+/** @brief Cartesian geometry whose move assignment changes geometry and reports a failure. */
+struct throwing_assignment_geometry : cartesian_layout
+{
+    /** @brief Constructs ordinary Cartesian geometry. */
+    using cartesian_layout::cartesian_layout;
+    /** @brief Copies the geometry. */
+    throwing_assignment_geometry(const throwing_assignment_geometry&) = default;
+    /** @brief Moves the geometry. */
+    throwing_assignment_geometry(throwing_assignment_geometry&&) noexcept = default;
+    /** @brief Copies the geometry. */
+    throwing_assignment_geometry& operator=(const throwing_assignment_geometry&) = default;
+    /** @brief Changes the extent and reports assignment failure. @throws std::runtime_error Always. */
+    // NOLINTNEXTLINE(bugprone-exception-escape): Intentionally fails to exercise layout-state rollback.
+    throwing_assignment_geometry& operator=(throwing_assignment_geometry&& other) noexcept(false)
+    {
+        cartesian_layout::operator=(std::move(other));
+        throw std::runtime_error("Geometry assignment failed");
+    }
+    /** @brief Releases the geometry. */
+    ~throwing_assignment_geometry() = default;
+    /** @brief Returns an independent geometry copy. */
+    [[nodiscard]] throwing_assignment_geometry clone() const noexcept
+    {
+        return *this;
+    }
+};
+
+TEST_CASE("Geometry assignment failures preserve owned layout state", "[gate-level-layout]")
+{
+    /** @brief Gate layout whose coordinate geometry can fail during assignment. */
+    using layout = gate_level_layout<throwing_assignment_geometry>;
+    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<layout>);
+    STATIC_REQUIRE_FALSE(std::is_nothrow_move_assignable_v<layout>);
+    layout     source{{3, 2}};
+    const auto input = source.create_pi("source", {0, 0});
+    source.assign_synchronization_element({0, 0}, 2);
+    layout     destination{{2, 1}};
+    const auto retained = destination.create_pi("destination", {1, 0});
+    destination.assign_synchronization_element({1, 0}, 1);
+
+    REQUIRE_THROWS_AS(destination = std::move(source), std::runtime_error);
+    // A failed geometry assignment restores the source's owned state.
+    REQUIRE(source.contains(input));  // NOLINT(*-use-after-move,*-invalid-access-moved)
+    CHECK(source.get_name(input) == "source");
+    CHECK(source.get_tile(input) == layout_base::coordinate{0, 0});
+    CHECK(source.get_synchronization_element({0, 0}) == 2);
+    CHECK(source.num_pis() == 1);
+    REQUIRE(destination.contains(retained));
+    CHECK(destination.get_name(retained) == "destination");
+    CHECK(destination.get_tile(retained) == layout_base::coordinate{1, 0});
+    CHECK(destination.get_synchronization_element({1, 0}) == 1);
+    CHECK(destination.num_pis() == 1);
+    // The geometry's assignment contract controls changes made before it throws.
+    CHECK(destination.get_extent() == layout_base::extent{3, 2});
 }
 
 TEST_CASE("Crossing counts survive failed connection allocation", "[gate-level-layout]")

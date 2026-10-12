@@ -208,7 +208,8 @@ class gate_level_layout : public CoordinateLayout
     }
     /**
      * @brief Moves owned state and leaves an empty reusable source.
-     * @note Exceptions from cloning, constructing, or assigning the coordinate geometry propagate to the caller.
+     * @note Geometry failures preserve both operands' owned state. The destination geometry follows
+     * CoordinateLayout's assignment guarantee. Exceptions from geometry operations propagate to the caller.
      */
     // The temporary move initializes empty owned state without allocating.
     // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -219,7 +220,22 @@ class gate_level_layout : public CoordinateLayout
         if (this != &other)
         {
             gate_level_layout moved{std::move(other)};
-            static_cast<CoordinateLayout&>(*this) = std::move(static_cast<CoordinateLayout&>(moved));
+            if constexpr (std::is_nothrow_move_assignable_v<CoordinateLayout>)
+            {
+                static_cast<CoordinateLayout&>(*this) = std::move(static_cast<CoordinateLayout&>(moved));
+            }
+            else
+            {
+                try
+                {
+                    static_cast<CoordinateLayout&>(*this) = std::move(static_cast<CoordinateLayout&>(moved));
+                }
+                catch (...)
+                {
+                    other.swap_owned_state(moved);
+                    throw;
+                }
+            }
             swap_owned_state(moved);
         }
         return *this;

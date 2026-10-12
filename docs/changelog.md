@@ -645,7 +645,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
-  - Gate-level layout moves propagate geometry clone failures and preserve the operands.
+  - Gate-level layout moves propagate geometry failures and preserve owned state.
+    Custom geometry controls its assignment failure guarantee.
   - Clocking-state moves now avoid synchronization-map allocations on Windows.
   - Gate-layout name-presence queries now report empty names consistently after failed assignment.
   - Gate-layout name-presence queries now avoid copying names and allocating memory.
