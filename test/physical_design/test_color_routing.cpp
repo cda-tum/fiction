@@ -103,10 +103,12 @@ TEST_CASE("Color routing connects repeated sources to distinct inputs", "[color-
     REQUIRE(first_source.has_value());
     REQUIRE(second_source.has_value());
     CHECK(first_source != second_source);
-    CHECK(layout.source({*first_source, 0}) ==
-          a);  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
-    CHECK(layout.source({*second_source, 0}) ==
-          a);  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
+    /** @brief Routed object on the first gate input. */
+    const auto first_wire = *first_source;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE passed.
+    /** @brief Routed object on the second gate input. */
+    const auto second_wire = *second_source;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE passed.
+    CHECK(layout.source({first_wire, 0}) == a);
+    CHECK(layout.source({second_wire, 0}) == a);
 }
 
 TEST_CASE("Two paths wire connections", "[color-routing]")

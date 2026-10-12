@@ -857,19 +857,19 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
 
     REQUIRE(layout.has_value());
 
+    /** @brief Placed layout whose names are checked. */
+    const auto& result = *layout;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE passed.
+
     // network name
-    CHECK(layout->get_layout_name() == "maj");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
+    CHECK(result.get_layout_name() == "maj");
 
     // PI names
-    CHECK(layout->get_name(layout->pi_at(0)) ==
-          "a");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
-    CHECK(layout->get_name(layout->pi_at(1)) ==
-          "b");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
-    CHECK(layout->get_name(layout->pi_at(2)) ==
-          "c");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
+    CHECK(result.get_name(result.pi_at(0)) == "a");
+    CHECK(result.get_name(result.pi_at(1)) == "b");
+    CHECK(result.get_name(result.pi_at(2)) == "c");
 
     // PO names
-    CHECK(layout->get_output_name(0) == "f");  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
+    CHECK(result.get_output_name(0) == "f");
 }
 
 TEST_CASE("Exact physical design reports progress", "[exact]")
