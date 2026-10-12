@@ -40,6 +40,34 @@ using namespace fiction::layouts;
 using namespace fiction::layouts::io;
 using namespace fiction::networks;
 
+namespace
+{
+
+/**
+ * Returns an FGL document of an empty layout with the given topology.
+ */
+std::string fgl_with_topology(const std::string_view topology)
+{
+    return fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                       "<fgl>\n"
+                       "  <layout>\n"
+                       "    <name>Test</name>\n"
+                       "    <topology>{}</topology>\n"
+                       "    <size>\n"
+                       "      <x>0</x>\n"
+                       "      <y>0</y>\n"
+                       "      <z>0</z>\n"
+                       "    </size>\n"
+                       "    <clocking>\n"
+                       "      <name>2DDWave</name>\n"
+                       "    </clocking>\n"
+                       "  </layout>\n"
+                       "</fgl>\n",
+                       topology);
+}
+
+}  // namespace
+
 TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
 {
     static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -287,6 +315,116 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
 
     using gate_layout = gate_level_layout<cartesian_layout>;
     check(read_fgl_layout<gate_layout>(layout_stream));
+}
+
+TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
+{
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fgl>\n";
+
+    const auto* const topology = GENERATE("", "<topology/>");
+    std::string       document{fgl_layout};
+    document.insert(document.find("<size>"), topology);
+
+    SECTION("Cartesian layouts default to Cartesian topology")
+    {
+        std::istringstream layout_stream{document};
+        const auto         lyt = read_fgl_layout<cart_gate_clk_lyt>(layout_stream);
+        CHECK(lyt.width() == 1);
+        CHECK(lyt.height() == 1);
+        CHECK(lyt.get_layout_name() == "Test");
+        CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
+    }
+
+    SECTION("Shifted Cartesian layouts require a topology")
+    {
+        std::istringstream layout_stream{document};
+        CHECK_THROWS_AS(read_fgl_layout<shifted_cart_gate_clk_lyt>(layout_stream), fgl_parsing_error);
+    }
+
+    SECTION("Hexagonal layouts require a topology")
+    {
+        std::istringstream layout_stream{document};
+        CHECK_THROWS_AS(read_fgl_layout<hex_gate_clk_lyt>(layout_stream), fgl_parsing_error);
+    }
+}
+
+TEST_CASE("Read FGL layout takes the arrangement from the file", "[read-fgl-layout]")
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    SECTION("shifted Cartesian")
+    {
+        std::istringstream layout_stream{fgl_with_topology(fmt::format("{}_cartesian", to_string(a)))};
+
+        CHECK(read_fgl_layout<shifted_cart_gate_clk_lyt>(layout_stream).get_arrangement() == a);
+    }
+    SECTION("hexagonal")
+    {
+        std::istringstream layout_stream{fgl_with_topology(fmt::format("{}_hex", to_string(a)))};
+
+        CHECK(read_fgl_layout<hex_gate_clk_lyt>(layout_stream).get_arrangement() == a);
+    }
+}
+
+TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-layout]")
+{
+    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>2</z></size>
+      <clocking><name>2DDWave</name></clocking></layout></fgl>)"};
+    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(layout.width() == 1);
+    CHECK(layout.height() == 1);
+    CHECK(layout.layers() == 3);
+}
+
+TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout]")
+{
+    using sync_layout = gate_level_layout<cartesian_layout>;
+    sync_layout original{{2, 1, 1}};
+    original.set_layout_name("A & B < C");
+    const auto input = original.create_pi("in<&>", {0, 0, 0});
+    original.create_po(input, "out<&>", {1, 0, 0});
+    original.assign_synchronization_element({0, 0, 0}, 2);
+    original.assign_synchronization_element({1, 0, 0}, 255);
+    std::stringstream stream{};
+    write_fgl_layout(original, stream);
+    const auto restored = read_fgl_layout<sync_layout>(stream);
+    CHECK(restored.get_layout_name() == original.get_layout_name());
+    CHECK(restored.num_pis() == 1);
+    CHECK(restored.num_pos() == 1);
+    /** @brief Object whose label is checked at the expected position. */
+    const auto restored_input = restored.find_object({0, 0, 0});
+    CHECK((restored_input.has_value() && restored.get_name(*restored_input) == "in<&>"));
+    /** @brief Object whose label is checked at the expected position. */
+    const auto restored_output = restored.find_object({1, 0, 0});
+    CHECK((restored_output.has_value() && restored.get_name(*restored_output) == "out<&>"));
+    CHECK(restored.num_se() == 2);
+    CHECK(restored.get_synchronization_element({0, 0, 0}) == 2);
+    CHECK(restored.get_synchronization_element({1, 0, 0}) == 255);
+}
+
+TEST_CASE("Legacy FGL keeps editable physical placement", "[read-fgl-layout]")
+{
+    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>0</z></size>
+<clocking><name>2DDWave</name></clocking></layout><gates>
+<gate><id>0</id><type>PI</type><name>a</name><loc><x>1</x><y>0</y><z>0</z></loc></gate>
+</gates></fgl>)"};
+    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(layout.width() == 1);
+    CHECK(layout.find_object({1, 0}).has_value());
 }
 
 TEST_CASE("Parsing error: malformed xml", "[read-fgl-layout]")
@@ -538,50 +676,6 @@ TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[read-fgl-layout]")
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
-{
-    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fgl>\n"
-                                              "  <layout>\n"
-                                              "    <name>Test</name>\n"
-                                              "    <size>\n"
-                                              "      <x>0</x>\n"
-                                              "      <y>0</y>\n"
-                                              "      <z>0</z>\n"
-                                              "    </size>\n"
-                                              "    <clocking>\n"
-                                              "      <name>2DDWave</name>\n"
-                                              "    </clocking>\n"
-                                              "  </layout>\n"
-                                              "</fgl>\n";
-
-    const auto* const topology = GENERATE("", "<topology/>");
-    std::string       document{fgl_layout};
-    document.insert(document.find("<size>"), topology);
-
-    SECTION("Cartesian layouts default to Cartesian topology")
-    {
-        std::istringstream layout_stream{document};
-        const auto         lyt = read_fgl_layout<cart_gate_clk_lyt>(layout_stream);
-        CHECK(lyt.width() == 1);
-        CHECK(lyt.height() == 1);
-        CHECK(lyt.get_layout_name() == "Test");
-        CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
-    }
-
-    SECTION("Shifted Cartesian layouts require a topology")
-    {
-        std::istringstream layout_stream{document};
-        CHECK_THROWS_AS(read_fgl_layout<shifted_cart_gate_clk_lyt>(layout_stream), fgl_parsing_error);
-    }
-
-    SECTION("Hexagonal layouts require a topology")
-    {
-        std::istringstream layout_stream{document};
-        CHECK_THROWS_AS(read_fgl_layout<hex_gate_clk_lyt>(layout_stream), fgl_parsing_error);
-    }
-}
-
 TEST_CASE("Parsing error: unknown topology", "[read-fgl-layout]")
 {
     static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -676,53 +770,6 @@ TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-fgl-layout]")
 
     using gate_layout = gate_level_layout<shifted_cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
-}
-
-namespace
-{
-
-/**
- * Returns an FGL document of an empty layout with the given topology.
- */
-std::string fgl_with_topology(const std::string_view topology)
-{
-    return fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                       "<fgl>\n"
-                       "  <layout>\n"
-                       "    <name>Test</name>\n"
-                       "    <topology>{}</topology>\n"
-                       "    <size>\n"
-                       "      <x>0</x>\n"
-                       "      <y>0</y>\n"
-                       "      <z>0</z>\n"
-                       "    </size>\n"
-                       "    <clocking>\n"
-                       "      <name>2DDWave</name>\n"
-                       "    </clocking>\n"
-                       "  </layout>\n"
-                       "</fgl>\n",
-                       topology);
-}
-
-}  // namespace
-
-TEST_CASE("Read FGL layout takes the arrangement from the file", "[read-fgl-layout]")
-{
-    const auto a =
-        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
-
-    SECTION("shifted Cartesian")
-    {
-        std::istringstream layout_stream{fgl_with_topology(fmt::format("{}_cartesian", to_string(a)))};
-
-        CHECK(read_fgl_layout<shifted_cart_gate_clk_lyt>(layout_stream).get_arrangement() == a);
-    }
-    SECTION("hexagonal")
-    {
-        std::istringstream layout_stream{fgl_with_topology(fmt::format("{}_hex", to_string(a)))};
-
-        CHECK(read_fgl_layout<hex_gate_clk_lyt>(layout_stream).get_arrangement() == a);
-    }
 }
 
 TEST_CASE("Parsing error: target layout has another arrangement than the file", "[read-fgl-layout]")
@@ -1833,32 +1880,6 @@ TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-fgl-layout]")
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout]")
-{
-    using sync_layout = gate_level_layout<cartesian_layout>;
-    sync_layout original{{2, 1, 1}};
-    original.set_layout_name("A & B < C");
-    const auto input = original.create_pi("in<&>", {0, 0, 0});
-    original.create_po(input, "out<&>", {1, 0, 0});
-    original.assign_synchronization_element({0, 0, 0}, 2);
-    original.assign_synchronization_element({1, 0, 0}, 255);
-    std::stringstream stream{};
-    write_fgl_layout(original, stream);
-    const auto restored = read_fgl_layout<sync_layout>(stream);
-    CHECK(restored.get_layout_name() == original.get_layout_name());
-    CHECK(restored.num_pis() == 1);
-    CHECK(restored.num_pos() == 1);
-    /** @brief Object whose label is checked at the expected position. */
-    const auto restored_input = restored.find_object({0, 0, 0});
-    CHECK((restored_input.has_value() && restored.get_name(*restored_input) == "in<&>"));
-    /** @brief Object whose label is checked at the expected position. */
-    const auto restored_output = restored.find_object({1, 0, 0});
-    CHECK((restored_output.has_value() && restored.get_name(*restored_output) == "out<&>"));
-    CHECK(restored.num_se() == 2);
-    CHECK(restored.get_synchronization_element({0, 0, 0}) == 2);
-    CHECK(restored.get_synchronization_element({1, 0, 0}) == 255);
-}
-
 TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
 {
     using sync_layout = gate_level_layout<cartesian_layout>;
@@ -1959,12 +1980,9 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
         /** @brief Output object restored from the destination-first XML. */
         const auto output = restored.find_object({1, 0, 0});
         REQUIRE(output.has_value());
-        if (!output.has_value())
-        {
-            return;
-        }
         /** @brief Source connected to the restored output. */
-        const auto source = restored.source({*output, 0});
+        const auto source =
+            restored.source({*output, 0});  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
         CHECK((source.has_value() && restored.get_tile(*source) == cart_gate_clk_lyt::tile{0, 0, 0}));
     }
     SECTION("Missing input")
@@ -2006,16 +2024,6 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
         std::stringstream stream{xml};
         CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
     }
-}
-
-TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-layout]")
-{
-    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>2</z></size>
-      <clocking><name>2DDWave</name></clocking></layout></fgl>)"};
-    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
-    CHECK(layout.width() == 1);
-    CHECK(layout.height() == 1);
-    CHECK(layout.layers() == 3);
 }
 
 TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read-fgl-layout]")
@@ -2090,15 +2098,4 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
     CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
     std::stringstream rejected{xml};
     CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(rejected), fgl_parsing_error);
-}
-
-TEST_CASE("Legacy FGL keeps editable physical placement", "[read-fgl-layout]")
-{
-    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>0</z></size>
-<clocking><name>2DDWave</name></clocking></layout><gates>
-<gate><id>0</id><type>PI</type><name>a</name><loc><x>1</x><y>0</y><z>0</z></loc></gate>
-</gates></fgl>)"};
-    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
-    CHECK(layout.width() == 1);
-    CHECK(layout.find_object({1, 0}).has_value());
 }

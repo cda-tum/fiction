@@ -98,22 +98,20 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
         {
             const auto restored = rlyt.find_object(wlyt.get_tile(id));
             REQUIRE(restored.has_value());
-            if (!restored.has_value())
-            {
-                return;
-            }
-            CHECK(wlyt.get_name(id) == rlyt.get_name(*restored));
-            CHECK(wlyt.is_pi(id) == rlyt.is_pi(*restored));
-            CHECK(wlyt.is_po(id) == rlyt.is_po(*restored));
-            CHECK(wlyt.is_buf(id) == rlyt.is_buf(*restored));
-            CHECK(wlyt.input_count(id) == rlyt.input_count(*restored));
-            CHECK(wlyt.object_function(id) == rlyt.object_function(*restored));
+            /** @brief Restored object whose presence REQUIRE checks. */
+            const auto restored_id = *restored;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
+            CHECK(wlyt.get_name(id) == rlyt.get_name(restored_id));
+            CHECK(wlyt.is_pi(id) == rlyt.is_pi(restored_id));
+            CHECK(wlyt.is_po(id) == rlyt.is_po(restored_id));
+            CHECK(wlyt.is_buf(id) == rlyt.is_buf(restored_id));
+            CHECK(wlyt.input_count(id) == rlyt.input_count(restored_id));
+            CHECK(wlyt.object_function(id) == rlyt.object_function(restored_id));
             for (uint32_t i = 0; i < wlyt.input_count(id); ++i)
             {
                 /** @brief Input connection in the written layout. */
                 const auto written_source = wlyt.source({id, i});
                 /** @brief Corresponding connection in the restored layout. */
-                const auto restored_source = rlyt.source({*restored, i});
+                const auto restored_source = rlyt.source({restored_id, i});
                 CHECK((written_source.has_value() && restored_source.has_value() &&
                        wlyt.get_tile(*written_source) == rlyt.get_tile(*restored_source)));
             }
@@ -217,7 +215,7 @@ void check_parsing_equiv_layout_all()
         blueprints::row_clocked_and_xor_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::EVEN_ROW));
 }
 
-TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
+TEST_CASE("Write empty gate-level layout", "[write-fgl-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
     const gate_layout layout{{}, "empty"};
@@ -229,12 +227,62 @@ TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write and read layouts", "[write-fgl-layout]")
+TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
+{
+    /** Layout with whitespace-only metadata and ports. */
+    cart_gate_clk_lyt layout{{2, 1, 1}, clocking::twoddwave()};
+    layout.set_layout_name("  ");
+    /** Primary input with a whitespace-only name. */
+    const auto input = layout.create_pi("  ", {0, 0});
+    layout.create_po(input, "\t", {1, 0});
+    /** Indented XML output read through the public reader. */
+    std::stringstream stream{};
+    write_fgl_layout(layout, stream);
+    /** Restored layout and port names. */
+    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(restored.get_layout_name() == "  ");
+    /** Restored terminals whose names must retain whitespace. */
+    const auto restored_input  = restored.find_object({0, 0});
+    const auto restored_output = restored.find_object({1, 0});
+    REQUIRE(restored_input.has_value());
+    REQUIRE(restored_output.has_value());
+    /** @brief Input identity whose presence REQUIRE checks. */
+    const auto input_id = *restored_input;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
+    /** @brief Output identity whose presence REQUIRE checks. */
+    const auto output_id = *restored_output;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
+    CHECK(restored.get_name(input_id) == "  ");
+    CHECK(restored.get_name(output_id) == "\t");
+}
+
+TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl-layout]")
+{
+    cart_gate_clk_lyt layout{{3, 1, 1}, clocking::twoddwave()};
+    const std::string label{"first\r\nsecond\t<&>"};
+    layout.set_layout_name(label);
+    const auto input = layout.create_pi(label, {0, 0});
+    const auto wire  = layout.create_buf(input, {1, 0});
+    layout.set_name(wire, label);
+    layout.create_po(wire, label, {2, 0});
+    std::stringstream stream{};
+    write_fgl_layout(layout, stream);
+    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(restored.get_layout_name() == label);
+    restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
+}
+
+TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    check_parsing_equiv_all<gate_layout>();
-    check_parsing_equiv_layout_all();
+    gate_layout original{{2, 2, 2}, clocking::open(), "crossing clocks"};
+    original.assign_clock_number({1, 1, 1}, 2);
+
+    std::stringstream stream{};
+    write_fgl_layout(original, stream);
+    const auto restored = read_fgl_layout<gate_layout>(stream);
+
+    CHECK(restored.get_clock_number({1, 1, 0}) == 2);
+    CHECK(restored.get_clock_number({1, 1, 1}) == 2);
 }
 
 TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fgl-layout]", cart_gate_clk_lyt,
@@ -256,14 +304,11 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
         INFO(name);
         const auto scheme =
             clocking::get_scheme(name, is_hexagonal_layout_v<TestType> ? std::optional{a} : std::nullopt);
-        if (!scheme.has_value())
-        {
-            FAIL("Unknown clocking scheme");
-            return;
-        }
-        auto original = blueprints::make_layout<TestType>(a, {4, 3, 1}, *scheme);
+        REQUIRE(scheme.has_value());
+        auto original = blueprints::make_layout<TestType>(
+            a, {4, 3, 1}, *scheme);  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
         original.set_layout_name("clock phases");
-        if (!scheme->is_regular())
+        if (!scheme->is_regular())  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
         {
             original.assign_clock_number({1, 1, 0}, 2);
         }
@@ -278,50 +323,6 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
             [&](const auto& coordinate)
             { CHECK(restored.get_clock_number(coordinate) == original.get_clock_number(coordinate)); });
         compare_written_and_read_layout(original, restored);
-    }
-}
-
-TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
-{
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    gate_layout original{{2, 2, 2}, clocking::open(), "crossing clocks"};
-    original.assign_clock_number({1, 1, 1}, 2);
-
-    std::stringstream stream{};
-    write_fgl_layout(original, stream);
-    const auto restored = read_fgl_layout<gate_layout>(stream);
-
-    CHECK(restored.get_clock_number({1, 1, 0}) == 2);
-    CHECK(restored.get_clock_number({1, 1, 1}) == 2);
-}
-
-TEST_CASE("FGL refuses nodes it cannot place", "[write-fgl-layout]")
-{
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    std::stringstream stream{};
-
-    SECTION("Incomplete object")
-    {
-        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
-        lyt.create_buf({0, 0, 0});
-
-        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
-    }
-    SECTION("Node on a negative tile")
-    {
-        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
-        lyt.create_pi("a", {-1, 0, 0});
-
-        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
-    }
-    SECTION("Placed nodes")
-    {
-        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
-        lyt.create_pi("a", {0, 0, 0});
-
-        CHECK_NOTHROW(write_fgl_layout(lyt, stream));
     }
 }
 
@@ -351,14 +352,12 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     /** @brief Restored gate whose input indices must be preserved. */
     const auto rg = restored.find_object({1, 1, 0});
     REQUIRE(rg.has_value());
-    if (!rg.has_value())
-    {
-        return;
-    }
     /** @brief First restored gate input. */
-    const auto first_input = restored.source({*rg, 0});
+    const auto first_input =
+        restored.source({*rg, 0});  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
     /** @brief Second restored gate input. */
-    const auto second_input = restored.source({*rg, 1});
+    const auto second_input =
+        restored.source({*rg, 1});  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
     CHECK((first_input.has_value() && restored.get_tile(*first_input) == layout.get_tile(a)));
     CHECK((second_input.has_value() && restored.get_tile(*second_input) == layout.get_tile(b)));
     /** @brief Placed zero-input function restored from the file. */
@@ -367,6 +366,102 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     CHECK(restored.get_output_name(0) == layout.get_name(po));
     CHECK(restored.get_output_name(1) == "pass");
     compare_written_and_read_layout(layout, restored);
+}
+
+TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy", "[write-fgl-layout]",
+                   cart_gate_clk_lyt, shifted_cart_gate_clk_lyt, hex_gate_clk_lyt)
+{
+    TestType layout = []
+    {
+        if constexpr (is_cartesian_layout_v<TestType>)
+        {
+            return TestType{{3, 2, 1}, clocking::twoddwave()};
+        }
+        else
+        {
+            return TestType{arrangement::EVEN_ROW, {3, 2, 1}, clocking::twoddwave()};
+        }
+    }();
+    const auto input = layout.create_pi("a", {0, 0});
+    const auto wire  = layout.create_buf(input, {1, 0});
+    layout.create_po(wire, "f", {2, 0});
+    layout.obstruct_coordinate({1, 0});
+    layout.obstruct_coordinate({1, 1});
+    layout.obstruct_coordinate({-1, -2, -3});
+    layout.obstruct_coordinate({7, 8, 9});
+    layout.obstruct_connection({0, 0}, {1, 0});
+    layout.obstruct_connection({-1, -2, -3}, {7, 8, 9});
+
+    std::stringstream stream{};
+    write_fgl_layout(layout, stream);
+    auto restored = read_fgl_layout<TestType>(stream);
+    CHECK(restored.is_obstructed_coordinate({1, 1}));
+    CHECK(restored.is_obstructed_coordinate({-1, -2, -3}));
+    CHECK(restored.is_obstructed_coordinate({7, 8, 9}));
+    CHECK(restored.is_obstructed_connection({-1, -2, -3}, {7, 8, 9}));
+    CHECK_FALSE(restored.is_obstructed_connection({7, 8, 9}, {-1, -2, -3}));
+
+    /** @brief Occupied tile whose manual obstruction must survive object removal. */
+    const auto occupied = restored.find_object({1, 0});
+    REQUIRE(occupied.has_value());
+    if (occupied.has_value())
+    {
+        restored.remove(*occupied);
+    }
+    CHECK(restored.is_obstructed_coordinate({1, 0}));
+    CHECK(restored.is_obstructed_connection({0, 0}, {1, 0}));
+    restored.clear_obstructed_coordinates();
+    restored.clear_obstructed_connections();
+    CHECK_FALSE(restored.is_obstructed_coordinate({1, 0}));
+    CHECK_FALSE(restored.is_obstructed_coordinate({-1, -2, -3}));
+    CHECK_FALSE(restored.is_obstructed_connection({0, 0}, {1, 0}));
+    CHECK(restored.is_obstructed_coordinate({2, 0}));
+}
+
+TEST_CASE("FGL keeps sparse metadata in a large multilayer extent", "[write-fgl-layout]")
+{
+    cart_gate_clk_lyt layout{{1000000000, 1000000000, 3}, clocking::twoddwave()};
+    layout.assign_clock_number({999999999, 999999999, 2}, 2);
+    layout.assign_synchronization_element({999999999, 999999999, 2}, 7);
+    std::stringstream stream{};
+    write_fgl_layout(layout, stream);
+    CHECK(stream.str().size() < 2000);
+    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    CHECK(restored.width() == 1000000000);
+    CHECK(restored.height() == 1000000000);
+    CHECK(restored.layers() == 3);
+    CHECK(restored.get_clock_number({999999999, 999999999, 2}) == 2);
+    CHECK(restored.get_clock_number({0, 1, 0}) == layout.get_clock_number({0, 1, 0}));
+    CHECK(restored.get_synchronization_element({999999999, 999999999, 2}) == 7);
+}
+
+TEST_CASE("FGL refuses nodes it cannot place", "[write-fgl-layout]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    std::stringstream stream{};
+
+    SECTION("Incomplete object")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_buf({0, 0, 0});
+
+        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
+    }
+    SECTION("Node on a negative tile")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a", {-1, 0, 0});
+
+        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
+    }
+    SECTION("Placed nodes")
+    {
+        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
+        lyt.create_pi("a", {0, 0, 0});
+
+        CHECK_NOTHROW(write_fgl_layout(lyt, stream));
+    }
 }
 
 TEST_CASE("FGL validates every object before changing the stream", "[write-fgl-layout]")
@@ -422,89 +517,6 @@ TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-lay
     CHECK(stream.str() == "kept");
 }
 
-TEST_CASE("FGL keeps sparse metadata in a large multilayer extent", "[write-fgl-layout]")
-{
-    cart_gate_clk_lyt layout{{1000000000, 1000000000, 3}, clocking::twoddwave()};
-    layout.assign_clock_number({999999999, 999999999, 2}, 2);
-    layout.assign_synchronization_element({999999999, 999999999, 2}, 7);
-    std::stringstream stream{};
-    write_fgl_layout(layout, stream);
-    CHECK(stream.str().size() < 2000);
-    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
-    CHECK(restored.width() == 1000000000);
-    CHECK(restored.height() == 1000000000);
-    CHECK(restored.layers() == 3);
-    CHECK(restored.get_clock_number({999999999, 999999999, 2}) == 2);
-    CHECK(restored.get_clock_number({0, 1, 0}) == layout.get_clock_number({0, 1, 0}));
-    CHECK(restored.get_synchronization_element({999999999, 999999999, 2}) == 7);
-}
-
-TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy", "[write-fgl-layout]",
-                   cart_gate_clk_lyt, shifted_cart_gate_clk_lyt, hex_gate_clk_lyt)
-{
-    TestType layout = []
-    {
-        if constexpr (is_cartesian_layout_v<TestType>)
-        {
-            return TestType{{3, 2, 1}, clocking::twoddwave()};
-        }
-        else
-        {
-            return TestType{arrangement::EVEN_ROW, {3, 2, 1}, clocking::twoddwave()};
-        }
-    }();
-    const auto input = layout.create_pi("a", {0, 0});
-    const auto wire  = layout.create_buf(input, {1, 0});
-    layout.create_po(wire, "f", {2, 0});
-    layout.obstruct_coordinate({1, 0});
-    layout.obstruct_coordinate({1, 1});
-    layout.obstruct_coordinate({-1, -2, -3});
-    layout.obstruct_coordinate({7, 8, 9});
-    layout.obstruct_connection({0, 0}, {1, 0});
-    layout.obstruct_connection({-1, -2, -3}, {7, 8, 9});
-
-    std::stringstream stream{};
-    write_fgl_layout(layout, stream);
-    auto restored = read_fgl_layout<TestType>(stream);
-    CHECK(restored.is_obstructed_coordinate({1, 1}));
-    CHECK(restored.is_obstructed_coordinate({-1, -2, -3}));
-    CHECK(restored.is_obstructed_coordinate({7, 8, 9}));
-    CHECK(restored.is_obstructed_connection({-1, -2, -3}, {7, 8, 9}));
-    CHECK_FALSE(restored.is_obstructed_connection({7, 8, 9}, {-1, -2, -3}));
-
-    /** @brief Occupied tile whose manual obstruction must survive object removal. */
-    const auto occupied = restored.find_object({1, 0});
-    REQUIRE(occupied.has_value());
-    if (occupied.has_value())
-    {
-        restored.remove(*occupied);
-    }
-    CHECK(restored.is_obstructed_coordinate({1, 0}));
-    CHECK(restored.is_obstructed_connection({0, 0}, {1, 0}));
-    restored.clear_obstructed_coordinates();
-    restored.clear_obstructed_connections();
-    CHECK_FALSE(restored.is_obstructed_coordinate({1, 0}));
-    CHECK_FALSE(restored.is_obstructed_coordinate({-1, -2, -3}));
-    CHECK_FALSE(restored.is_obstructed_connection({0, 0}, {1, 0}));
-    CHECK(restored.is_obstructed_coordinate({2, 0}));
-}
-
-TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl-layout]")
-{
-    cart_gate_clk_lyt layout{{3, 1, 1}, clocking::twoddwave()};
-    const std::string label{"first\r\nsecond\t<&>"};
-    layout.set_layout_name(label);
-    const auto input = layout.create_pi(label, {0, 0});
-    const auto wire  = layout.create_buf(input, {1, 0});
-    layout.set_name(wire, label);
-    layout.create_po(wire, label, {2, 0});
-    std::stringstream stream{};
-    write_fgl_layout(layout, stream);
-    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
-    CHECK(restored.get_layout_name() == label);
-    restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
-}
-
 TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl-layout]")
 {
     const auto        control = GENERATE(char{0}, char{1}, char{8}, char{11}, char{12}, char{14}, char{31});
@@ -549,28 +561,10 @@ TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl
     std::filesystem::remove(filename);
 }
 
-TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
+TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
-    /** Layout with whitespace-only metadata and ports. */
-    cart_gate_clk_lyt layout{{2, 1, 1}, clocking::twoddwave()};
-    layout.set_layout_name("  ");
-    /** Primary input with a whitespace-only name. */
-    const auto input = layout.create_pi("  ", {0, 0});
-    layout.create_po(input, "\t", {1, 0});
-    /** Indented XML output read through the public reader. */
-    std::stringstream stream{};
-    write_fgl_layout(layout, stream);
-    /** Restored layout and port names. */
-    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
-    CHECK(restored.get_layout_name() == "  ");
-    /** Restored terminals whose names must retain whitespace. */
-    const auto restored_input  = restored.find_object({0, 0});
-    const auto restored_output = restored.find_object({1, 0});
-    REQUIRE(restored_input.has_value());
-    REQUIRE(restored_output.has_value());
-    if (restored_input && restored_output)
-    {
-        CHECK(restored.get_name(*restored_input) == "  ");
-        CHECK(restored.get_name(*restored_output) == "\t");
-    }
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    check_parsing_equiv_all<gate_layout>();
+    check_parsing_equiv_layout_all();
 }

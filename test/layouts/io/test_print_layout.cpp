@@ -80,7 +80,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
     layout.create_po(a1, "f1", {0, 0});
     layout.create_po(n1, "f2", {3, 1});
 
-    SECTION("No clocking")
+    SECTION("OPEN clocking")
     {
         constexpr const char* layout_print = "        \n"
                                              "O & I ▢ \n"

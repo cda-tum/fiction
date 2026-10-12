@@ -98,6 +98,110 @@ void check_moves_stay_adjacent(const Lyt& lyt)
 
 }  // namespace
 
+TEST_CASE("Coordinates order by layer, then row, then column", "[coordinate-contracts]")
+{
+    using coord = coordinate<cartesian_layout>;
+
+    CHECK(coord{5, 0, 0} < coord{0, 1, 0});
+    CHECK(coord{5, 9, 0} < coord{0, 0, 1});
+    CHECK(coord{1, 2, 0} < coord{2, 2, 0});
+    CHECK(!(coord{2, 2, 0} < coord{2, 2, 0}));
+
+    const std::set<coord> ordered{{1, 1, 0}, {0, 0, 1}, {2, 0, 0}, {0, 1, 0}};
+
+    CHECK(*ordered.begin() == coord{2, 0, 0});
+    CHECK(*ordered.rbegin() == coord{0, 0, 1});
+}
+
+TEST_CASE("Equal coordinates hash equally", "[coordinate-contracts]")
+{
+    using coord = coordinate<cartesian_layout>;
+
+    const auto hash_of = [](const coord& c) { return std::hash<coord>{}(c); };
+
+    CHECK(hash_of({5, 7, 1}) == hash_of({5, 7, 1}));
+    CHECK(hash_of({-5, 7, 0}) == hash_of({-5, 7, 0}));
+    CHECK(hash_of({}) == hash_of({}));
+}
+
+TEST_CASE("Coordinate construction rejects narrowing", "[coordinate-regressions]")
+{
+    using coord = layout_base::coordinate;
+
+    CHECK_THROWS_AS((coord{4294967296ull, 0}), std::overflow_error);
+    CHECK_THROWS_AS((coord{0, 0, -4294967296ll}), std::overflow_error);
+    CHECK_THROWS_AS((cartesian_layout{{4294967296ull, 0}}), std::invalid_argument);
+    CHECK((coord{std::numeric_limits<int32_t>::max(), 0}.x == std::numeric_limits<int32_t>::max()));
+}
+
+TEST_CASE("Layouts check sizes against the signed coordinate domain", "[coordinate-contracts]")
+{
+    /** Largest axis size supported by the coordinate domain. */
+    constexpr uint64_t max_size = uint64_t{1} << 31u;
+    CHECK_THROWS_AS((cartesian_layout{layout_base::extent{-1, 0, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS((cartesian_layout{layout_base::extent{0, max_size + 1, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS((hexagonal_layout{arrangement::ODD_ROW, {0, -1, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS((hexagonal_layout{arrangement::ODD_ROW, {max_size + 1, 0, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS((shifted_cartesian_layout{arrangement::EVEN_COLUMN, {0, 0, -1}}), std::invalid_argument);
+
+    cartesian_layout cart{{2, 2}};
+    CHECK_THROWS_AS(cart.resize({-1, 0, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(cart.resize({0, 0, max_size + 1}), std::invalid_argument);
+
+    hexagonal_layout hex{arrangement::ODD_ROW, {2, 2}};
+    CHECK_THROWS_AS(hex.resize({0, -1, 0}), std::invalid_argument);
+    CHECK_NOTHROW((cartesian_layout{layout_base::extent{max_size, max_size, max_size}}));
+    CHECK_NOTHROW((hexagonal_layout{arrangement::ODD_ROW, {max_size, max_size, 1}}));
+}
+
+TEST_CASE("The origin belongs to the first clock zone", "[coordinate-contracts]")
+{
+    const tile_clocking clk{3, 3};
+    CHECK(clk.get_clock_zone({}) == layout_base::coordinate{});
+    CHECK(clk.get_clock_zone({4, 7, 0}) == layout_base::coordinate{1, 2, 0});
+}
+
+TEST_CASE("Negative cells use the clock zone below zero", "[coordinate-regressions]")
+{
+    tile_clocking clocks{3, 3};
+    clocks.assign_clock_number({-1, -1}, 2);
+
+    CHECK(clocks.get_clock_zone({-1, -2}) == layout_base::coordinate{-1, -1});
+    CHECK(clocks.get_clock_zone({-3, -3}) == layout_base::coordinate{-1, -1});
+    CHECK(clocks.get_clock_zone({-4, 0}) == layout_base::coordinate{-2, 0});
+    CHECK(clocks.get_clock_number({-1, -2}) == 2);
+}
+
+TEST_CASE("Coordinates iterate row by row, layer by layer", "[coordinate-contracts]")
+{
+    using coord = coordinate<cartesian_layout>;
+
+    const cartesian_layout lyt{{3, 2, 2}};
+
+    std::vector<coord> visited{};
+    lyt.foreach_coordinate([&visited](const auto& c) { visited.push_back(c); });
+
+    const std::vector<coord> expected{{0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {0, 1, 0}, {1, 1, 0}, {2, 1, 0},
+                                      {0, 0, 1}, {1, 0, 1}, {2, 0, 1}, {0, 1, 1}, {1, 1, 1}, {2, 1, 1}};
+
+    CHECK(visited == expected);
+}
+
+TEST_CASE("Direction predicates compare coordinates outside the frame", "[coordinate-contracts]")
+{
+    const cartesian_layout cart{{4, 4}};
+    const hexagonal_layout hex{arrangement::ODD_ROW, {4, 4}};
+
+    CHECK(cart.is_east_of({-1, 0, 0}, {}));
+    CHECK(cart.is_south_of({0, -1, 0}, {}));
+    CHECK(cart.is_above({0, 0, -1}, {}));
+    CHECK(hex.is_east_of({-1, 0, 0}, {}));
+    CHECK(hex.is_south_of({0, -1, 0}, {}));
+    CHECK(hex.is_above({0, 0, -1}, {}));
+    CHECK_FALSE(cart.is_adjacent_of({7, 0, 0}, {}));
+    CHECK_FALSE(hex.is_adjacent_of({7, 0, 0}, {}));
+}
+
 TEST_CASE("Border contract of Cartesian layouts", "[coordinate-contracts]")
 {
     const cartesian_layout lyt{{5, 4, 2}};
@@ -139,82 +243,6 @@ TEST_CASE("Hexagonal diagonals at the borders reject coordinates outside the lay
     CHECK_FALSE(lyt.south(corner));
     CHECK_FALSE(lyt.east(corner));
     CHECK_FALSE(lyt.south_east(corner));
-}
-
-TEST_CASE("Coordinates iterate row by row, layer by layer", "[coordinate-contracts]")
-{
-    using coord = coordinate<cartesian_layout>;
-
-    const cartesian_layout lyt{{3, 2, 2}};
-
-    std::vector<coord> visited{};
-    lyt.foreach_coordinate([&visited](const auto& c) { visited.push_back(c); });
-
-    const std::vector<coord> expected{{0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {0, 1, 0}, {1, 1, 0}, {2, 1, 0},
-                                      {0, 0, 1}, {1, 0, 1}, {2, 0, 1}, {0, 1, 1}, {1, 1, 1}, {2, 1, 1}};
-
-    CHECK(visited == expected);
-}
-
-TEST_CASE("Coordinates order by layer, then row, then column", "[coordinate-contracts]")
-{
-    using coord = coordinate<cartesian_layout>;
-
-    CHECK(coord{5, 0, 0} < coord{0, 1, 0});
-    CHECK(coord{5, 9, 0} < coord{0, 0, 1});
-    CHECK(coord{1, 2, 0} < coord{2, 2, 0});
-    CHECK(!(coord{2, 2, 0} < coord{2, 2, 0}));
-
-    const std::set<coord> ordered{{1, 1, 0}, {0, 0, 1}, {2, 0, 0}, {0, 1, 0}};
-
-    CHECK(*ordered.begin() == coord{2, 0, 0});
-    CHECK(*ordered.rbegin() == coord{0, 0, 1});
-}
-
-TEST_CASE("Equal coordinates hash equally", "[coordinate-contracts]")
-{
-    using coord = coordinate<cartesian_layout>;
-
-    const auto hash_of = [](const coord& c) { return std::hash<coord>{}(c); };
-
-    CHECK(hash_of({5, 7, 1}) == hash_of({5, 7, 1}));
-    CHECK(hash_of({-5, 7, 0}) == hash_of({-5, 7, 0}));
-    CHECK(hash_of({}) == hash_of({}));
-}
-
-TEST_CASE("Layouts check sizes against the signed coordinate domain", "[coordinate-contracts]")
-{
-    /** Largest axis size supported by the coordinate domain. */
-    constexpr uint64_t max_size = uint64_t{1} << 31u;
-    CHECK_THROWS_AS((cartesian_layout{layout_base::extent{-1, 0, 0}}), std::invalid_argument);
-    CHECK_THROWS_AS((cartesian_layout{layout_base::extent{0, max_size + 1, 0}}), std::invalid_argument);
-    CHECK_THROWS_AS((hexagonal_layout{arrangement::ODD_ROW, {0, -1, 0}}), std::invalid_argument);
-    CHECK_THROWS_AS((hexagonal_layout{arrangement::ODD_ROW, {max_size + 1, 0, 0}}), std::invalid_argument);
-    CHECK_THROWS_AS((shifted_cartesian_layout{arrangement::EVEN_COLUMN, {0, 0, -1}}), std::invalid_argument);
-
-    cartesian_layout cart{{2, 2}};
-    CHECK_THROWS_AS(cart.resize({-1, 0, 0}), std::invalid_argument);
-    CHECK_THROWS_AS(cart.resize({0, 0, max_size + 1}), std::invalid_argument);
-
-    hexagonal_layout hex{arrangement::ODD_ROW, {2, 2}};
-    CHECK_THROWS_AS(hex.resize({0, -1, 0}), std::invalid_argument);
-    CHECK_NOTHROW((cartesian_layout{layout_base::extent{max_size, max_size, max_size}}));
-    CHECK_NOTHROW((hexagonal_layout{arrangement::ODD_ROW, {max_size, max_size, 1}}));
-}
-
-TEST_CASE("Direction predicates compare coordinates outside the frame", "[coordinate-contracts]")
-{
-    const cartesian_layout cart{{4, 4}};
-    const hexagonal_layout hex{arrangement::ODD_ROW, {4, 4}};
-
-    CHECK(cart.is_east_of({-1, 0, 0}, {}));
-    CHECK(cart.is_south_of({0, -1, 0}, {}));
-    CHECK(cart.is_above({0, 0, -1}, {}));
-    CHECK(hex.is_east_of({-1, 0, 0}, {}));
-    CHECK(hex.is_south_of({0, -1, 0}, {}));
-    CHECK(hex.is_above({0, 0, -1}, {}));
-    CHECK_FALSE(cart.is_adjacent_of({7, 0, 0}, {}));
-    CHECK_FALSE(hex.is_adjacent_of({7, 0, 0}, {}));
 }
 
 TEST_CASE("Hexagonal offset and cube coordinates convert back and forth for negative and extreme values",
@@ -379,23 +407,6 @@ TEST_CASE("Bounding boxes include occupied coordinates outside the frame", "[coo
     CHECK(bb.get_max() == coordinate<lyt_t>{10, 10, 0});
 }
 
-TEST_CASE("The origin belongs to the first clock zone", "[coordinate-contracts]")
-{
-    const tile_clocking clk{3, 3};
-    CHECK(clk.get_clock_zone({}) == layout_base::coordinate{});
-    CHECK(clk.get_clock_zone({4, 7, 0}) == layout_base::coordinate{1, 2, 0});
-}
-
-TEST_CASE("Coordinate construction rejects narrowing", "[coordinate-regressions]")
-{
-    using coord = layout_base::coordinate;
-
-    CHECK_THROWS_AS((coord{4294967296ull, 0}), std::overflow_error);
-    CHECK_THROWS_AS((coord{0, 0, -4294967296ll}), std::overflow_error);
-    CHECK_THROWS_AS((cartesian_layout{{4294967296ull, 0}}), std::invalid_argument);
-    CHECK((coord{std::numeric_limits<int32_t>::max(), 0}.x == std::numeric_limits<int32_t>::max()));
-}
-
 TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-regressions]")
 {
     /** Checks independent sizes for geometry copies and complete layout clones. */
@@ -436,17 +447,6 @@ TEST_CASE("Cell scaling checks the final signed coordinate", "[coordinate-regres
                     std::overflow_error);
     CHECK_THROWS_AS((relative_to_absolute_cell_position<5, 5>(gates, coord{0, 0}, coord{-1, 0})),
                     std::invalid_argument);
-}
-
-TEST_CASE("Negative cells use the clock zone below zero", "[coordinate-regressions]")
-{
-    tile_clocking clocks{3, 3};
-    clocks.assign_clock_number({-1, -1}, 2);
-
-    CHECK(clocks.get_clock_zone({-1, -2}) == layout_base::coordinate{-1, -1});
-    CHECK(clocks.get_clock_zone({-3, -3}) == layout_base::coordinate{-1, -1});
-    CHECK(clocks.get_clock_zone({-4, 0}) == layout_base::coordinate{-2, 0});
-    CHECK(clocks.get_clock_number({-1, -2}) == 2);
 }
 
 TEST_CASE("Hexagonal cube conversion rejects unrepresentable axes", "[coordinate-regressions]")

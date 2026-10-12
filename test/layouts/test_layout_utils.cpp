@@ -39,6 +39,31 @@ using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
 
+TEST_CASE("Gate-level layouts are created with the required arrangement", "[layout-utils]")
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    SECTION("Cartesian layouts ignore the arrangement")
+    {
+        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::twoddwave()));
+        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(a, {3, 3}, clocking::twoddwave()));
+    }
+    SECTION("shifted Cartesian and hexagonal layouts take the arrangement")
+    {
+        CHECK(make_gate_level_layout<shifted_cart_gate_clk_lyt>(a, {3, 3}, clocking::twoddwave()).get_arrangement() ==
+              a);
+        CHECK(make_gate_level_layout<hex_gate_clk_lyt>(a, {3, 3}, clocking::row()).get_arrangement() == a);
+    }
+    SECTION("shifted Cartesian and hexagonal layouts reject a missing arrangement")
+    {
+        CHECK_THROWS_AS(make_gate_level_layout<shifted_cart_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::twoddwave()),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(make_gate_level_layout<hex_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::row()),
+                        std::invalid_argument);
+    }
+}
+
 TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesian_layout), (hexagonal_layout))
 {
     const auto a =
@@ -76,32 +101,7 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
         });
 }
 
-TEST_CASE("Gate-level layouts are created with the required arrangement", "[layout-utils]")
-{
-    const auto a =
-        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
-
-    SECTION("Cartesian layouts ignore the arrangement")
-    {
-        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::twoddwave()));
-        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(a, {3, 3}, clocking::twoddwave()));
-    }
-    SECTION("shifted Cartesian and hexagonal layouts take the arrangement")
-    {
-        CHECK(make_gate_level_layout<shifted_cart_gate_clk_lyt>(a, {3, 3}, clocking::twoddwave()).get_arrangement() ==
-              a);
-        CHECK(make_gate_level_layout<hex_gate_clk_lyt>(a, {3, 3}, clocking::row()).get_arrangement() == a);
-    }
-    SECTION("shifted Cartesian and hexagonal layouts reject a missing arrangement")
-    {
-        CHECK_THROWS_AS(make_gate_level_layout<shifted_cart_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::twoddwave()),
-                        std::invalid_argument);
-        CHECK_THROWS_AS(make_gate_level_layout<hex_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::row()),
-                        std::invalid_argument);
-    }
-}
-
-TEST_CASE("Generate random layout_base::coordinate coordinate", "[layout-utils]")
+TEST_CASE("Generate random coordinate", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
@@ -179,6 +179,30 @@ TEST_CASE("Generate random coordinate with negative axes", "[layout-utils]")
     }
 }
 
+TEST_CASE("Random coordinates stay inside crossed-axis corners", "[layout-utils]")
+{
+    /** Coordinate type sampled by the public helper. */
+    using coord = layout_base::coordinate;
+    /** Input corners and independently specified minimum and maximum axes. */
+    const auto [first, second, minimum, maximum] =
+        GENERATE(std::tuple{coord{5, 1, 0}, coord{1, 2, 0}, coord{1, 1, 0}, coord{5, 2, 0}},
+                 std::tuple{coord{5, -1, 3}, coord{1, 2, -4}, coord{1, -1, -4}, coord{5, 2, 3}});
+    /** Both argument orders describe the same region. */
+    const auto reverse = GENERATE(false, true);
+
+    for (uint32_t sample = 0; sample < 32; ++sample)
+    {
+        /** Sample from the specified coordinate region. */
+        const auto c = reverse ? random_coordinate<coord>(second, first) : random_coordinate<coord>(first, second);
+        CHECK(c.x >= minimum.x);
+        CHECK(c.x <= maximum.x);
+        CHECK(c.y >= minimum.y);
+        CHECK(c.y <= maximum.y);
+        CHECK(c.z >= minimum.z);
+        CHECK(c.z <= maximum.z);
+    }
+}
+
 TEST_CASE("Normalize QCA layout coordinates", "[layout-utils]")
 {
     qca::layout lyt{{7, 6, 2}, clocking::use(), "crossing", 2, 2};
@@ -205,30 +229,6 @@ TEST_CASE("Normalize QCA layout coordinates", "[layout-utils]")
     CHECK(normalized.get_tile_size_x() == 2);
 
     CHECK(lyt.get_cell_type({3, 2}) == qca::cell_type::INPUT);
-}
-
-TEST_CASE("Random coordinates stay inside crossed-axis corners", "[layout-utils]")
-{
-    /** Coordinate type sampled by the public helper. */
-    using coord = layout_base::coordinate;
-    /** Input corners and independently specified minimum and maximum axes. */
-    const auto [first, second, minimum, maximum] =
-        GENERATE(std::tuple{coord{5, 1, 0}, coord{1, 2, 0}, coord{1, 1, 0}, coord{5, 2, 0}},
-                 std::tuple{coord{5, -1, 3}, coord{1, 2, -4}, coord{1, -1, -4}, coord{5, 2, 3}});
-    /** Both argument orders describe the same region. */
-    const auto reverse = GENERATE(false, true);
-
-    for (uint32_t sample = 0; sample < 32; ++sample)
-    {
-        /** Sample from the specified coordinate region. */
-        const auto c = reverse ? random_coordinate<coord>(second, first) : random_coordinate<coord>(first, second);
-        CHECK(c.x >= minimum.x);
-        CHECK(c.x <= maximum.x);
-        CHECK(c.y >= minimum.y);
-        CHECK(c.y <= maximum.y);
-        CHECK(c.z >= minimum.z);
-        CHECK(c.z <= maximum.z);
-    }
 }
 TEST_CASE("Normalize occupied cells outside the layout extent", "[layout-utils]")
 {
