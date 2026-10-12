@@ -153,7 +153,7 @@ embed:rst
 .. code-block:: c++
 
 template <typename GateLyt>
-static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
 ```
 
 
@@ -678,25 +678,9 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R
 
 static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_above = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_below = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_cardinal_operations = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_create_dot = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_dimensions = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_east = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_elevation_operations = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_adjacent_coordinate = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_adjacent_opposite_coordinates = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_foreach_coordinate = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
 
@@ -750,29 +734,13 @@ static const char *mkd_doc_fiction_has_is_xnor = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_xor_and = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_north = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_north_east = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_north_west = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_num_real_pis = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_num_virtual_pis = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_ordinal_operations = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_set_layout_name = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_south = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_south_east = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_south_west = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_update_ranks = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_west = R"doc()doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_skip_component_magnets =
 R"doc(Adds to `skip` the magnets that belong to the MagCAD component
@@ -1096,17 +1064,7 @@ Raises:
 
 static const char *mkd_doc_fiction_inml_topolinano_library_topolinano_library = R"doc()doc";
 
-static const char *mkd_doc_fiction_is_cartesian_layout = R"doc()doc";
-
 static const char *mkd_doc_fiction_is_cell_grid = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_coordinate_layout = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_gate_level_layout = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_hexagonal_layout = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_shifted_cartesian_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
@@ -1133,50 +1091,50 @@ static const char *mkd_doc_fiction_layouts_arrangement_ODD_COLUMN = R"doc(Odd co
 
 static const char *mkd_doc_fiction_layouts_arrangement_ODD_ROW = R"doc(Odd rows are shifted.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d =
+static const char *mkd_doc_fiction_layouts_bounding_box =
 R"doc(Cached two-dimensional bounds of every occupied coordinate, including
 positions outside the geometry.
 
 Template Args:
     Lyt: Gate-level layout or cell grid.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_bounding_box_2d =
+static const char *mkd_doc_fiction_layouts_bounding_box_bounding_box =
 R"doc(Computes occupied bounds. @param lyt Layout whose occupied positions
 are enclosed.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_max =
+static const char *mkd_doc_fiction_layouts_bounding_box_get_max =
 R"doc(Returns the maximum occupied corner, or no coordinate for an empty
 layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_min =
+static const char *mkd_doc_fiction_layouts_bounding_box_get_min =
 R"doc(Returns the minimum occupied corner, or no coordinate for an empty
 layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_x_size = R"doc(Counts occupied bounding columns; zero for an empty layout.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_get_x_size = R"doc(Counts occupied bounding columns; zero for an empty layout.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_get_y_size = R"doc(Counts occupied bounding rows; zero for an empty layout.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_get_y_size = R"doc(Counts occupied bounding rows; zero for an empty layout.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_layout = R"doc(Layout observed when bounds are recomputed.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_layout = R"doc(Layout observed when bounds are recomputed.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_max = R"doc(Maximum occupied corner.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_max = R"doc(Maximum occupied corner.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_min = R"doc(Minimum occupied corner.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_min = R"doc(Minimum occupied corner.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_update_bounding_box =
+static const char *mkd_doc_fiction_layouts_bounding_box_update_bounding_box =
 R"doc(Recomputes bounds from live occupied coordinates. Empty layouts have
 no bounds.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_x_size = R"doc(Number of bounding columns.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_x_size = R"doc(Number of bounding columns.)doc";
 
-static const char *mkd_doc_fiction_layouts_bounding_box_2d_y_size = R"doc(Number of bounding rows.)doc";
+static const char *mkd_doc_fiction_layouts_bounding_box_y_size = R"doc(Number of bounding rows.)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout =
 R"doc( A layout type that utilizes signed offset coordinates to represent a
@@ -5274,7 +5232,7 @@ Args:
     clk_color: Flag to utilize color escapes for clock zones.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5307,7 +5265,7 @@ Args:
     os: Output stream. Defaults to `std::cout`.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5321,7 +5279,7 @@ Args:
     os: Output stream. Defaults to `std::cout`.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5500,7 +5458,7 @@ Args:
     os: The output stream to write into.
 
 Template Args:
-    Lyt: Layout.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Raises:
     std::invalid_argument: If the layout is incomplete, cyclic,
@@ -5523,7 +5481,7 @@ Args:
               preferably use the .fgl extension.
 
 Template Args:
-    Lyt: Layout.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Raises:
     std::invalid_argument: If the layout is incomplete, cyclic,
@@ -6755,8 +6713,7 @@ Args:
     lyt: Layout to extract without mutation.
 
 Template Args:
-    Lyt: Placed object layout with ordered input ports and declared
-         primary interfaces.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Independent named LUT network.
@@ -7207,7 +7164,7 @@ Template Args:
     NtkDest: Target network or gate-level layout type.
     T: Mapping type to identify signals by. Currently,
        `mockturtle::signal<NtkDest>` and
-       `branching_signal_container<NtkDest, NtkSrc, fanout_size>` are
+       `branching_signal_container<NtkSrc, fanout_size>` are
        supported.
 
 )doc";
@@ -7926,7 +7883,7 @@ Args:
 
 Template Args:
     GateLibrary: Type of the gate library to apply.
-    GateLyt: Type of the gate-level layout to apply the library to.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     A layout that implements `lyt`'s gate types with building blocks
@@ -7946,7 +7903,7 @@ Args:
 
 Template Args:
     GateLibrary: Gate library type.
-    GateLyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     The SiDB layout with the gates and the defects.
@@ -7968,7 +7925,7 @@ Args:
 
 Template Args:
     GateLibrary: Type of the gate library to apply.
-    GateLyt: Type of the gate-level layout to apply the library to.
+    Geometry: Coordinate geometry of the gate-level layout.
     Params: Type of the parameter used for SiDB on-the-fly gate
             library.
 
@@ -7991,7 +7948,7 @@ Args:
 
 Template Args:
     GateLibrary: Gate library type.
-    GateLyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Params: Parameter type of the gate library.
 
 Returns:
@@ -8095,7 +8052,6 @@ involved that got extended by wire nodes. This container solves that
 issue.
 
 Template Args:
-    Lyt: Gate-level layout type.
     Ntk: Logic network type.
     fanout_size: Maximum fanout size possible in the layout and/or the
                  network.)doc";
@@ -8165,7 +8121,7 @@ Args:
     lyt: Layout to edit.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -8324,8 +8280,9 @@ Args:
     set_up_gate: Returns the implementation of a tile.
 
 Template Args:
-    SetUpGate: Callable on `(const GateLyt&, const tile<GateLyt>&)`
-               returning a gate.
+    SetUpGate: Callable on `(const GateLyt&, const
+               fiction::layouts::layout_base::coordinate&)` returning
+               a gate.
 
 )doc";
 
@@ -8396,9 +8353,8 @@ static const char *mkd_doc_fiction_physical_design_detail_check_and_optimize_po_
 R"doc(Extends outputs one tile to the nearest border while preserving their
 logical inputs.
 
-Template Args:
-    Lyt: Layout type. @param lyt Layout. @param moved_gates Relocation
-         count to adjust.
+Args:
+    lyt: Layout. @param moved_gates Relocation count to adjust.
 
 )doc";
 
@@ -8456,9 +8412,6 @@ coordinates that breaks ties based on the x-coordinate.
 Args:
     a: First tile to compare.
     b: Second tile to compare.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.
 
 Returns:
     `true` iff `a < b` based on the aforementioned rule.
@@ -8560,9 +8513,6 @@ Args:
     direction: If set to horizontally, paths are searched from left to
                right, otherwise from top to bottom.
 
-Template Args:
-    Lyt: Type of the input Cartesian gate-level layout.
-
 Returns:
     wiring_reduction_layout suitable for finding excess wiring via A*.
 
@@ -8584,7 +8534,6 @@ Args:
     to_delete: Coordinates selected by the cut search.
 
 Template Args:
-    Lyt: Cartesian gate-level layout type.
     WiringReductionLyt: Wiring-reduction search layout type.
 
 Raises:
@@ -8636,7 +8585,6 @@ Args:
     offset: The offset value used for adjusting the layout.
 
 Template Args:
-    Lyt: Type of the Cartesian gate-level layout.
     WiringReductionLyt: Type of the `wiring_reduction_layout`.
 
 Returns:
@@ -9515,17 +9463,13 @@ static const char *mkd_doc_fiction_physical_design_detail_extend_output_position
 R"doc(Moves an output and inserts a wire at its former coordinate,
 preserving its identity.
 
-Template Args:
-    Lyt: Layout type. @param lyt Layout. @param id Output identity.
-         @param target New coordinate.
+Args:
+    lyt: Layout. @param id Output identity. @param target New
+         coordinate.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data =
-R"doc(Routes adjacent to a gate, with the logical destination of each route.
-
-Template Args:
-    Lyt: Gate-level layout type.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data = R"doc(Routes adjacent to a gate, with the logical destination of each route.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_destinations = R"doc(Explicit input endpoints corresponding to routes.)doc";
 
@@ -9541,8 +9485,8 @@ static const char *mkd_doc_fiction_physical_design_detail_fit_occupied_geometry 
 R"doc(Fits zero-origin geometry to occupied objects. Empty layouts receive
 empty geometry.
 
-Template Args:
-    Lyt: Layout type. @param lyt Layout to resize.
+Args:
+    lyt: Layout to resize.
 
 )doc";
 
@@ -10212,10 +10156,7 @@ static const char *mkd_doc_fiction_physical_design_detail_is_eastern_po_orientat
 static const char *mkd_doc_fiction_physical_design_detail_nested_vector_hash =
 R"doc(This struct defines a hash function for a nested vector of layout
 tiles. It calculates a combined hash value for a vector of tiles based
-on the coordinates of each tile.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.)doc";
+on the coordinates of each tile.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_nested_vector_hash_operator_call =
 R"doc(Computes a hash value for a vector of `tile` objects.
@@ -10259,8 +10200,8 @@ static const char *mkd_doc_fiction_physical_design_detail_optimize_output_positi
 R"doc(Shrinks empty final rows and columns while keeping outputs accessible
 at the border.
 
-Template Args:
-    Lyt: Cartesian layout type. @param lyt Layout to optimize.
+Args:
+    lyt: Layout to optimize.
 
 )doc";
 
@@ -10343,10 +10284,7 @@ Template Args:
 
 static const char *mkd_doc_fiction_physical_design_detail_placement_info =
 R"doc(Struct to hold information necessary for gate placement during layout
-generation for one vertex.
-
-Template Args:
-    Lyt: The type of the layout.)doc";
+generation for one vertex.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_placement_info_constant_output_margin =
 R"doc(Whether space for constant outputs has been reserved in this rebuilt
@@ -10364,10 +10302,7 @@ ports.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl =
 R"doc(Relocates retained objects and reroutes their explicit logical input
-endpoints.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.)doc";
+endpoints.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_check_new_position =
 R"doc(Attempts a placement and restores every route to its explicit
@@ -10483,10 +10418,7 @@ static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimizati
 static const char *mkd_doc_fiction_physical_design_detail_priority_queue =
 R"doc(A priority queue class for managing elements with associated
 priorities. The elements are stored in a priority queue, with the
-highest priority elements being retrieved first.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.)doc";
+highest priority elements being retrieved first.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_priority_queue_counter = R"doc(Counter to keep track of the insertion order of elements.)doc";
 
@@ -10638,10 +10570,7 @@ R"doc(A structure representing a search space graph.
 This struct encapsulates all the necessary data for managing a search
 space graph during the graph-oriented layout design process. It holds
 the current vertex, network, nodes to be placed, and other relevant
-information.
-
-Template Args:
-    Lyt: The layout type.)doc";
+information.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_best_description = R"doc(The most recent accepted solution found by this graph.)doc";
 
@@ -10721,12 +10650,11 @@ wiring_reduction_layout.
 
 This function updates the to-delete list by appending coordinates from
 the given possible path in a wiring_reduction_layout. It considers
-coordinates that are not at the leftmost (`x == 0`) or rightmost (`x
-== (static_cast<int32_t>(lyt.width()) - 1)`) positions for left to
-right, or at the top (`y == 0`) or bottom (`y ==
-(static_cast<int32_t>(lyt.height()) - 1)`) positions for top to bottom
-and shifts them to get the corresponding coordinates on the original
-layout. The coordinates are then obstructed in both layers (0 and 1).
+coordinates away from the western and eastern borders for left-to-
+right paths, or away from the northern and southern borders for top-
+to-bottom paths. It shifts these coordinates to the corresponding
+positions on the original layout. The coordinates are then obstructed
+in both layers (0 and 1).
 
 Args:
     lyt: The `wiring_reduction_layout` to be updated.
@@ -10746,10 +10674,7 @@ static const char *mkd_doc_fiction_physical_design_detail_wire_south = R"doc()do
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl =
 R"doc(Searches horizontal and vertical wire cuts and edits the caller's
-layout.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.)doc";
+layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl_plyt = R"doc(The 2DDWave-clocked layout whose wiring is to be reduced.)doc";
 
@@ -11049,10 +10974,10 @@ incorporates quite a few encoding optimizations to be as performant as
 possible on various layout topologies and clocking schemes.
 
 The approach applies to any data structures that implement the
-necessary functions to comply with `is_network_type` and
-`is_gate_level_layout`, respectively. It is, thereby, mostly
-technology-independent but can make certain assumptions if needed, for
-instance for ToPoliNano-compliant circuits.
+necessary functions to comply with `is_network_type` and concrete
+gate-level layouts, respectively. It is, thereby, mostly technology-
+independent but can make certain assumptions if needed, for instance
+for ToPoliNano-compliant circuits.
 
 This approach requires the Z3 SMT solver to be installed on the
 system. Due to this circumstance, it is excluded from (CLI)
@@ -11635,11 +11560,7 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_layout_coordinate_path =
-R"doc(A path in a layout defined as an ordered sequence of coordinates.
-
-Template Args:
-    Lyt: Coordinate layout type.)doc";
+static const char *mkd_doc_fiction_physical_design_layout_coordinate_path = R"doc(A path in a layout defined as an ordered sequence of coordinates.)doc";
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_append =
 R"doc(Appends a coordinate. @param c Coordinate to append. @throws
@@ -11647,9 +11568,17 @@ std::bad_alloc If storage allocation fails.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_source = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_source =
+R"doc(Returns the first coordinate, or the origin for an empty path. @return
+Source coordinate.
 
-static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_target = R"doc()doc";
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_target =
+R"doc(Returns the last coordinate, or the origin for an empty path. @return
+Target coordinate.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_operator_lshift =
 R"doc(Streams an effort mode to an output stream.
@@ -11820,7 +11749,7 @@ calling this function:
 ```
 {.cpp}
 using clk_lyt = gate_level_layout<cartesian_layout>;
-using path = layout_coordinate_path<cartesian_layout>;
+using path = layout_coordinate_path;
 clk_lyt layout = ...;
 auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
 ```
@@ -11868,9 +11797,7 @@ this function cannot be evaluated in :math:`\mathcal{O}(1)`, but has
 the polynomial complexity of A*.
 
 If no path between `source` and `target` exists in `layout`, the
-returned distance is `std::numeric_limits<Dist>::infinity()` for
-floating-point types or `std::numeric_limits<Dist>::max()` for
-integral types.
+returned distance is `std::numeric_limits<uint64_t>::max()`.
 
 Args:
     layout: The layout in which the distance between `source` and
@@ -11882,7 +11809,6 @@ Args:
 
 Template Args:
     Lyt: Coordinate layout type.
-    Dist: Distance type.
 
 Returns:
     Minimum path length between `source` and `target` in `layout`.
@@ -11893,10 +11819,13 @@ static const char *mkd_doc_fiction_physical_design_path_finding_a_star_distance_
 R"doc(A pre-defined distance functor that uses the A* distance.
 
 Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Distance type.)doc";
+    Lyt: Coordinate layout type.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_a_star_distance_functor_a_star_distance_functor = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_a_star_distance_functor_a_star_distance_functor =
+R"doc(Computes distances in the borrowed layout. @param lyt Layout that
+outlives this functor.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_a_star_params = R"doc(Parameters for the A* algorithm.)doc";
 
@@ -11914,27 +11843,17 @@ In contrast to the Manhattan distance, this function assumes the same
 cost for diagonal moves as it does for horizontal and vertical ones.
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
-
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Integral type for the distance.
 
 Returns:
     Chebyshev distance between `source` and `target`.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_chebyshev_distance_functor =
-R"doc(A pre-defined distance functor that uses the Chebyshev distance.
+static const char *mkd_doc_fiction_physical_design_path_finding_chebyshev_distance_functor = R"doc(A pre-defined distance functor that uses the Chebyshev distance.)doc";
 
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Integral distance type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_path_finding_chebyshev_distance_functor_chebyshev_distance_functor = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_chebyshev_distance_functor_chebyshev_distance_functor = R"doc(Constructs the coordinate distance functor.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_cost_functor =
 R"doc(A functor that computes costs between coordinates and can be passed as
@@ -11943,7 +11862,6 @@ signature. This class is intended to be instantiated with concrete
 cost functions passed to the constructor.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Cost: Cost value type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_cost_functor_cost_function = R"doc(Cost function.)doc";
@@ -12234,7 +12152,6 @@ standardized signature. This class is intended to be instantiated with
 concrete distance functions passed to the constructor.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Dist: Distance value type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_distance_functor_distance_function = R"doc(Distance function.)doc";
@@ -12252,7 +12169,6 @@ static const char *mkd_doc_fiction_physical_design_path_finding_distance_functor
 R"doc(Operator to call the distance function.
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
 
@@ -12267,7 +12183,6 @@ determine distances between coordinates. It can be used as a drop-in
 replacement for any other distance functor in path-finding algorithms.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Dist: Distance type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_distance_map_functor_coordinate_index =
@@ -12275,13 +12190,17 @@ R"doc(This function calculates the coordinate index of a given coordinate in
 a given layout.
 
 Args:
-    lyt: Layout.
     c: Coordinate.
 
 Returns:
     Coordinate index.
 
+Raises:
+    std::out_of_range: If the coordinate is outside the layout.
+
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_path_finding_distance_map_functor_dimensions = R"doc(Extent used to index the precomputed map.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_distance_map_functor_dist_map = R"doc(Distance map.)doc";
 
@@ -12289,6 +12208,7 @@ static const char *mkd_doc_fiction_physical_design_path_finding_distance_map_fun
 R"doc(Construct the distance functor from a `distance_map`.
 
 Args:
+    size: Extent of the layout represented by the map.
     dm: Distance map.
 
 )doc";
@@ -12298,7 +12218,6 @@ R"doc(Override the call operator to query the distance map instead of the
 distance function.
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
 
@@ -12344,7 +12263,7 @@ calling this function:
 ```
 {.cpp}
 using clk_lyt = gate_level_layout<cartesian_layout>;
-using path = layout_coordinate_path<cartesian_layout>;
+using path = layout_coordinate_path;
 clk_lyt layout = ...;
 auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
 ```
@@ -12381,27 +12300,17 @@ R"doc(The Euclidean distance :math:`D` between two layout coordinates
 :math:`D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}`
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
-
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Floating-point type for the distance.
 
 Returns:
     Euclidean distance between `source` and `target`.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_euclidean_distance_functor =
-R"doc(A pre-defined distance functor that uses the Euclidean distance.
+static const char *mkd_doc_fiction_physical_design_path_finding_euclidean_distance_functor = R"doc(A pre-defined distance functor that uses the Euclidean distance.)doc";
 
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Floating-point distance type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_path_finding_euclidean_distance_functor_euclidean_distance_functor = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_euclidean_distance_functor_euclidean_distance_functor = R"doc(Constructs the coordinate distance functor.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_initialize_distance_map =
 R"doc(This function fully initializes a `distance_map` for a given layout
@@ -12458,27 +12367,17 @@ R"doc(The Manhattan distance :math:`D` between two layout coordinates
 :math:`D = |x_1 - x_2| + |y_1 - y_2|`
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
-
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Integral type for the distance.
 
 Returns:
     Manhattan distance between `source` and `target`.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_manhattan_distance_functor =
-R"doc(A pre-defined distance functor that uses the Manhattan distance.
+static const char *mkd_doc_fiction_physical_design_path_finding_manhattan_distance_functor = R"doc(A pre-defined distance functor that uses the Manhattan distance.)doc";
 
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Integral distance type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_path_finding_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_manhattan_distance_functor_manhattan_distance_functor = R"doc(Constructs the coordinate distance functor.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_random_cost =
 R"doc(Random cost between two layout coordinates that returns a random value
@@ -12489,7 +12388,6 @@ Args:
     target: Target coordinate.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Cost: Floating-point type for the cost.
 
 Returns:
@@ -12502,7 +12400,6 @@ static const char *mkd_doc_fiction_physical_design_path_finding_random_cost_func
 R"doc(A pre-defined cost functor that uses random costs.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Cost: Floating-point cost type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_random_cost_functor_random_cost_functor = R"doc()doc";
@@ -12518,7 +12415,6 @@ a drop-in replacement for any other distance functor in path-finding
 algorithms.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Dist: Distance type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_smart_distance_cache_functor_distance_cache = R"doc(Sparse distance map serving as a cache.)doc";
@@ -12529,7 +12425,6 @@ distance function. Only on a cache miss, the distance function will be
 called and the result will be stored in the cache.
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
 
@@ -12540,13 +12435,12 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_smart_distance_cache_functor_smart_distance_cache_functor =
-R"doc(Construct a distance functor from a layout and a distance function.
+R"doc(Construct a distance functor from a distance function.
 
 The internal cache will be initialized empty. Distances will be
 computed on the fly and stored in the cache whenever they are queried.
 
 Args:
-    lyt: Layout.
     dist_fn: Distance function.
 
 )doc";
@@ -12558,7 +12452,6 @@ in replacement for any other distance functor in path-finding
 algorithms.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Dist: Distance type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_sparse_distance_map_functor_operator_call =
@@ -12566,7 +12459,6 @@ R"doc(Override the call operator to query the sparse distance map instead of
 the distance function.
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
 
@@ -12603,32 +12495,22 @@ gradients. Additionally, it is computationally cheaper by omitting the
 square root operation.
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
-
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Integral type for the distance.
 
 Returns:
     Squared euclidean distance between `source` and `target`.
 
-Raises:
-    std::overflow_error: If the squared distance is not representable
-                         by `Dist`.
+Precondition:
+    The squared distance is representable by `uint64_t`.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_squared_euclidean_distance_functor =
 R"doc(A pre-defined distance functor that uses the squared Euclidean
-distance.
+distance.)doc";
 
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Integral distance type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_path_finding_squared_euclidean_distance_functor_squared_euclidean_distance_functor = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_squared_euclidean_distance_functor_squared_euclidean_distance_functor = R"doc(Constructs the coordinate distance functor.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_twoddwave_distance =
 R"doc(The 2DDWave distance :math:`D` between two layout coordinates :math:`s
@@ -12641,13 +12523,8 @@ Thereby, :math:`s \leq t` iff :math:`x_1 \leq x_2` and :math:`y_1 \leq
 y_2`.
 
 Args:
-    lyt: Layout.
     source: Source coordinate.
     target: Target coordinate.
-
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Integral type for the distance.
 
 Returns:
     2DDWave distance between `source` and `target`.
@@ -12660,14 +12537,9 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_twoddwave_distance_functor =
-R"doc(A pre-defined distance functor that uses the 2DDWave distance.
+static const char *mkd_doc_fiction_physical_design_path_finding_twoddwave_distance_functor = R"doc(A pre-defined distance functor that uses the 2DDWave distance.)doc";
 
-Template Args:
-    Lyt: Coordinate layout type.
-    Dist: Integral distance type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_path_finding_twoddwave_distance_functor_twoddwave_distance_functor = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_twoddwave_distance_functor_twoddwave_distance_functor = R"doc(Constructs the coordinate distance functor.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_unit_cost =
 R"doc(Unit cost between two layout coordinates that always returns 1.
@@ -12677,7 +12549,6 @@ Args:
     target: Target coordinate.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Cost: Integral type for the cost.
 
 Returns:
@@ -12689,7 +12560,6 @@ static const char *mkd_doc_fiction_physical_design_path_finding_unit_cost_functo
 R"doc(A pre-defined cost functor that uses unit costs.
 
 Template Args:
-    Lyt: Coordinate layout type.
     Cost: Integral cost type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_unit_cost_functor_unit_cost_functor = R"doc()doc";
@@ -12732,7 +12602,7 @@ calling this function:
 ```
 {.cpp}
 using clk_lyt = gate_level_layout<cartesian_layout>;
-using path = layout_coordinate_path<cartesian_layout>;
+using path = layout_coordinate_path;
 clk_lyt layout = ...;
 auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
 ```
@@ -12792,7 +12662,7 @@ Args:
     n: Node in `ntk` to place onto `t` in `lyt`.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Ntk: Logic network type.
 
 Returns:
@@ -12811,7 +12681,7 @@ Args:
     a: Incoming signal to the newly placed gate in `lyt`.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Ntk: Logic network type.
 
 Returns:
@@ -12834,7 +12704,7 @@ Args:
        e.g., from a MAJ to an AND if `c == false`.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Ntk: Logic network type.
 
 Returns:
@@ -12855,7 +12725,7 @@ Args:
     c: Third incoming signal to the newly placed gate in `lyt`.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Ntk: Logic network type.
 
 Returns:
@@ -12879,7 +12749,7 @@ Args:
               `mockturtle::node_map` is not updated by this function.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Ntk: Logic network type.
 
 Returns:
@@ -12905,7 +12775,7 @@ Args:
               this function.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Ntk: Logic network type.
 
 Returns:
@@ -12944,9 +12814,6 @@ Args:
     lyt: 2DDWave-clocked Cartesian gate-level layout to optimize.
     ps: Parameters.
     pst: Statistics.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.
 
 Raises:
     std::invalid_argument: If clocking or occupied geometry is
@@ -13038,7 +12905,7 @@ Args:
     destination: Ordered destination input.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Path: Coordinate path type.
 
 Raises:
@@ -13050,10 +12917,7 @@ Raises:
 
 static const char *mkd_doc_fiction_physical_design_routing_objective =
 R"doc(Routing objectives identify a geometric source and an ordered
-destination input.
-
-Template Args:
-    Lyt: Layout type whose coordinates are to be used.)doc";
+destination input.)doc";
 
 static const char *mkd_doc_fiction_physical_design_routing_objective_input_index =
 R"doc(Logical input index at the target; geometric searches ignore this
@@ -13064,9 +12928,6 @@ R"doc(Equality operator.
 
 Args:
     other: Routing objective to compare to.
-
-Template Args:
-    OtherLyt: Type of other layout.
 
 Returns:
     `true` iff the given objective is equal to this one.
@@ -13094,7 +12955,7 @@ Args:
 
 Template Args:
     GateLibrary: SiDB gate library type.
-    GateLyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     The black list.
@@ -13155,9 +13016,6 @@ Args:
     lyt: The 2DDWave-clocked layout whose wiring is to be reduced.
     ps: Parameters.
     pst: Statistics.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.
 
 Raises:
     std::invalid_argument: If clocking or occupied geometry is
@@ -18701,7 +18559,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
@@ -27058,7 +26916,7 @@ Args:
     lyt: The gate-level layout whose CP and TP are desired.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     A struct containing the CP and TP.
@@ -27467,7 +27325,7 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 

@@ -259,10 +259,10 @@ def exact_cartesian(
     possible on various layout topologies and clocking schemes.
 
     The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
+    necessary functions to comply with `is_network_type` and concrete
+    gate-level layouts, respectively. It is, thereby, mostly technology-
+    independent but can make certain assumptions if needed, for instance
+    for ToPoliNano-compliant circuits.
 
     This approach requires the Z3 SMT solver to be installed on the
     system. Due to this circumstance, it is excluded from (CLI)
@@ -343,10 +343,10 @@ def exact_shifted_cartesian(
     possible on various layout topologies and clocking schemes.
 
     The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
+    necessary functions to comply with `is_network_type` and concrete
+    gate-level layouts, respectively. It is, thereby, mostly technology-
+    independent but can make certain assumptions if needed, for instance
+    for ToPoliNano-compliant circuits.
 
     This approach requires the Z3 SMT solver to be installed on the
     system. Due to this circumstance, it is excluded from (CLI)
@@ -427,10 +427,10 @@ def exact_hexagonal(
     possible on various layout topologies and clocking schemes.
 
     The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
+    necessary functions to comply with `is_network_type` and concrete
+    gate-level layouts, respectively. It is, thereby, mostly technology-
+    independent but can make certain assumptions if needed, for instance
+    for ToPoliNano-compliant circuits.
 
     This approach requires the Z3 SMT solver to be installed on the
     system. Due to this circumstance, it is excluded from (CLI)
@@ -1012,7 +1012,7 @@ def apply_qca_one_library(
 
     Template Args:
         GateLibrary: Type of the gate library to apply.
-        GateLyt: Type of the gate-level layout to apply the library to.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A layout that implements `lyt`'s gate types with building blocks
@@ -1049,7 +1049,7 @@ def apply_sim7_mol_library(
 
     Template Args:
         GateLibrary: Type of the gate library to apply.
-        GateLyt: Type of the gate-level layout to apply the library to.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A layout that implements `lyt`'s gate types with building blocks
@@ -1087,7 +1087,7 @@ def apply_topolinano_library(
 
     Template Args:
         GateLibrary: Type of the gate library to apply.
-        GateLyt: Type of the gate-level layout to apply the library to.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A layout that implements `lyt`'s gate types with building blocks
@@ -1124,7 +1124,7 @@ def apply_bestagon_library(
 
     Template Args:
         GateLibrary: Type of the gate library to apply.
-        GateLyt: Type of the gate-level layout to apply the library to.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A layout that implements `lyt`'s gate types with building blocks
@@ -1564,9 +1564,6 @@ def post_layout_optimization(
         ps: Parameters.
         pst: Statistics.
 
-    Template Args:
-        Lyt: Cartesian gate-level layout type.
-
     Raises:
         std::invalid_argument: If clocking or occupied geometry is
                                invalid.
@@ -1684,9 +1681,6 @@ def wiring_reduction(
         ps: Parameters.
         pst: Statistics.
 
-    Template Args:
-        Lyt: Cartesian gate-level layout type.
-
     Raises:
         std::invalid_argument: If clocking or occupied geometry is
                                invalid.
@@ -1773,7 +1767,7 @@ def route_path(
         destination: Ordered destination input.
 
     Template Args:
-        Lyt: Gate-level layout type.
+        Geometry: Coordinate geometry of the gate-level layout.
         Path: Coordinate path type.
 
     Raises:
@@ -1830,7 +1824,7 @@ def clear_routing(lyt: mnt.pyfiction.layouts.hexagonal_gate_layout) -> None:
         lyt: Layout to edit.
 
     Template Args:
-        Lyt: Gate-level layout type.
+        Geometry: Coordinate geometry of the gate-level layout.
     """
 
 @overload

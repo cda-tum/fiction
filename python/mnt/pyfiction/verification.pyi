@@ -155,7 +155,7 @@ def critical_path_length_and_throughput(layout: mnt.pyfiction.layouts.hexagonal_
         lyt: The gate-level layout whose CP and TP are desired.
 
     Template Args:
-        Lyt: Gate-level layout type.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A struct containing the CP and TP.
@@ -288,7 +288,7 @@ def gate_level_drvs(
         pst: Statistics.
 
     Template Args:
-        Lyt: Gate-level layout type.
+        Geometry: Coordinate geometry of the gate-level layout.
     """
 
 class eq_type(enum.Enum):

@@ -198,9 +198,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
     def pos(self) -> list[mnt.pyfiction.layouts.coordinate]:
         """Returns the positions of all output cells, in unspecified order."""
 
-    def bounding_box_2d(
-        self,
-    ) -> tuple[mnt.pyfiction.layouts.coordinate | None, mnt.pyfiction.layouts.coordinate | None]:
+    def bounding_box(self) -> tuple[mnt.pyfiction.layouts.coordinate | None, mnt.pyfiction.layouts.coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all

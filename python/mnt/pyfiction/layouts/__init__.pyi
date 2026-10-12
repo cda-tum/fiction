@@ -3078,7 +3078,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff `north_west(t)` is outgoing from `t`.
         """
 
-    def bounding_box_2d(self) -> tuple[coordinate | None, coordinate | None]:
+    def bounding_box(self) -> tuple[coordinate | None, coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all
@@ -4041,7 +4041,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff `north_west(t)` is outgoing from `t`.
         """
 
-    def bounding_box_2d(self) -> tuple[coordinate | None, coordinate | None]:
+    def bounding_box(self) -> tuple[coordinate | None, coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all
@@ -5004,7 +5004,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff `north_west(t)` is outgoing from `t`.
         """
 
-    def bounding_box_2d(self) -> tuple[coordinate | None, coordinate | None]:
+    def bounding_box(self) -> tuple[coordinate | None, coordinate | None]:
         """
         Returns the minimum and maximum corner of the bounding box.
         A 2D bounding box object computes a minimum-sized box around all

@@ -83,7 +83,7 @@ def write_fgl_layout(
                   preferably use the .fgl extension.
 
     Template Args:
-        Lyt: Layout.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Raises:
         std::invalid_argument: If the layout is incomplete, cyclic,
