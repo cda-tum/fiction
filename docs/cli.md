@@ -419,8 +419,11 @@ The x and y axes sweep `epsilon_r` from 1 to 10 and `lambda_tf` from 1 to 10 in 
 `-z` names a parameter; its default range is -0.5 to -0.1 in steps of 0.025, made for `mu_minus`. Every axis
 needs its own parameter; sweeping one on two axes would produce a degenerate domain and is refused.
 
-Grid search evaluates every point. `-r N`, `-f N`, and `-c N` start random sampling, flood fill, and contour
-tracing from `N` random samples instead. Grid search and random sampling accept any number of dimensions; flood
+Both entry points accept `--algorithm grid_search|random_sampling|flood_fill|contour_tracing|sketch`.
+Grid search is the default and evaluates every point. Random sampling, flood fill, and contour tracing require
+`--samples N`. `--algorithm sketch` uses grid search with filter-only analysis; `--sketch` also combines with
+any reconstruction method. The named selector and the existing `-g`, `-r N`, `-f N`, and `-c N` flags are
+mutually exclusive. The short flags keep their sample counts. Grid search and random sampling accept any number of dimensions; flood
 fill and contour tracing follow the operational region and need at least two, and in three dimensions contour
 tracing collects the boundary surface. `-s` computes the _operational domain sketch_, which judges every point by
 filtering alone instead of by simulation: dramatically faster, never rejecting an operational point, but
@@ -461,13 +464,16 @@ For scripts or notebooks, use `uv pip install 'mnt-pyfiction[plot]'` in an activ
 
 ```console
 fiction-opdom gate.sqd --gate xor --plot domain.png --plot domain.html
-fiction-opdom gate.sqd --table 0110 --csv domain.csv
+fiction-opdom gate.sqd --table 0110 --algorithm flood_fill --samples 100 --csv domain.csv
 fiction -c 'read gate.sqd; tt -t 0110; opdom domain.csv --plot domain.html'
 ```
 
 The dedicated command requires an SQD file and an explicit specification: `--gate` selects `id`, `not`,
 `and`, `nand`, `or`, `nor`, `xor`, `xnor`, or `maj`; repeated `--table` or `--expression` options specify
-one function per output. Tables use the same binary and hexadecimal conventions as `tt`. Expressions
+one function per output. The shell's `opdom` command and `fiction-opdom` share argument definitions,
+parameter validation, reconstruction, statistics, and CSV/plot export. The shell uses its active SiDB layout
+and falls back to its active truth table; the dedicated command loads an SQD file and requires an explicit
+specification. Tables use the same binary and hexadecimal conventions as `tt`. Expressions
 use the detected input count, so an expression can leave inputs unused. The shell accepts these options
 as overrides of its active truth table. Every specification must match the detected BDL ports.
 

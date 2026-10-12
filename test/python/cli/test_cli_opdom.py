@@ -24,6 +24,7 @@ import pytest
 
 from mnt.fiction.cli.stores import CellEntry
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.io import write_sqd_layout
 from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
 
 if TYPE_CHECKING:
@@ -205,18 +206,40 @@ assert "plotly" not in sys.modules
     assert len(csv.read_text(encoding="utf-8").splitlines()) == 5
 
 
-@pytest.mark.parametrize("method", ["--grid-search", "--random-sampling 4", "--flood-fill 4", "--contour-tracing 4"])
+@pytest.mark.parametrize("entry_point", ["shell", "standalone"])
+@pytest.mark.parametrize(
+    "method",
+    [
+        "--grid-search",
+        "--random-sampling 4",
+        "--flood-fill 4",
+        "--contour-tracing 4",
+        "--algorithm grid_search",
+        "--algorithm random_sampling --samples 4",
+        "--algorithm flood_fill --samples 4",
+        "--algorithm contour_tracing --samples 4",
+        "--algorithm sketch",
+    ],
+)
 @pytest.mark.parametrize("dimensions", [2, 3])
 def test_methods_and_sketch(
-    shell: Shell, wire_with_canvas: sidb_layout, tmp_path: Path, method: str, dimensions: int
+    shell: Shell, wire_with_canvas: sidb_layout, tmp_path: Path, method: str, dimensions: int, entry_point: str
 ) -> None:
     """Every method accepts 2D and 3D Sketch computations."""
 
     shell.session.cell_layouts.add(CellEntry(wire_with_canvas))
     path = tmp_path / "sketch.csv"
     z = "--z-sweep mu_minus --z-min -0.32 --z-max -0.32" if dimensions == 3 else ""
-    shell.ok(f'opdom "{path}" --gate id --sketch {method} {z} ' + " ".join(SMALL_SWEEP))
-    result = shell.session.log[-1]["result"]
+    flags = ["--gate", "id", "--sketch", *method.split(), *z.split(), *SMALL_SWEEP]
+    if entry_point == "shell":
+        shell.ok(f'opdom "{path}" ' + " ".join(flags))
+        result = shell.session.log[-1]["result"]
+    else:
+        source, log = tmp_path / "wire.sqd", tmp_path / "run.json"
+        write_sqd_layout(wire_with_canvas, str(source))
+        main = importlib.import_module("mnt.fiction.opdom").main
+        assert main([str(source), "--csv", str(path), "--log", str(log), *flags]) == 0
+        result = json.loads(log.read_text(encoding="utf-8"))[0]["result"]
     assert result["num_evaluated_parameter_combinations"] > 0
     assert result["num_simulator_invocations"] == 0
     assert len(path.read_text(encoding="utf-8").splitlines()[0].split(",")) == dimensions + 1
@@ -336,4 +359,70 @@ def test_expression_rejects_inputs_beyond_variable_names(
     shell.session.cell_layouts.add(CellEntry(layout))
     path = tmp_path / "domain.csv"
     assert "at most 16" in shell.fails(f'opdom "{path}" --expression "a"')
+    assert not path.exists()
+
+
+@pytest.mark.parametrize("algorithm", ["grid_search", "random_sampling", "flood_fill", "contour_tracing", "sketch"])
+@pytest.mark.parametrize("entry_point", ["shell", "standalone"])
+def test_named_algorithm(
+    shell: Shell, wire_with_canvas: sidb_layout, tmp_path: Path, algorithm: str, entry_point: str
+) -> None:
+    """Named algorithms compute domains; Sketch uses filters without simulation."""
+    csv, log, source = tmp_path / "domain.csv", tmp_path / "run.json", tmp_path / "wire.sqd"
+    flags = ["--gate", "id", "--algorithm", algorithm, *SMALL_SWEEP]
+    if algorithm in {"random_sampling", "flood_fill", "contour_tracing"}:
+        flags += ["--samples", "4"]
+    if entry_point == "shell":
+        shell.session.cell_layouts.add(CellEntry(wire_with_canvas))
+        shell.ok(f'opdom "{csv}" ' + " ".join(flags))
+        result = shell.session.log[-1]["result"]
+    else:
+        write_sqd_layout(wire_with_canvas, str(source))
+        main = importlib.import_module("mnt.fiction.opdom").main
+        assert main([str(source), "--csv", str(csv), "--log", str(log), *flags]) == 0
+        result = json.loads(log.read_text(encoding="utf-8"))[0]["result"]
+    assert result["num_evaluated_parameter_combinations"] > 0
+    assert (result["num_simulator_invocations"] == 0) == (algorithm == "sketch")
+    assert result["grid_search"] == (algorithm in {"grid_search", "sketch"})
+    assert csv.exists()
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        "--algorithm invalid",
+        "--algorithm random_sampling",
+        "--algorithm flood_fill",
+        "--algorithm contour_tracing",
+        "--algorithm grid_search --samples 4",
+        "--algorithm sketch --samples 4",
+        "--samples 4",
+        "--algorithm random_sampling --samples 0",
+        "--algorithm grid_search --flood-fill 4",
+        "--algorithm sketch --strategy simulation_only",
+        "--algorithm sketch --condition tolerate_kinks",
+    ],
+)
+@pytest.mark.parametrize("entry_point", ["shell", "standalone"])
+def test_invalid_named_algorithm(
+    xor_gate: Shell, resource: Callable[[str], str], tmp_path: Path, options: str, entry_point: str
+) -> None:
+    """Invalid algorithm selections fail before creating a domain file."""
+    path = tmp_path / "domain.csv"
+    if entry_point == "shell":
+        xor_gate.fails(f'opdom "{path}" {options} ' + " ".join(SMALL_SWEEP))
+    else:
+        main = importlib.import_module("mnt.fiction.opdom").main
+        assert (
+            main([
+                resource("hex_21_inputsdbp_xor_v1.sqd"),
+                "--gate",
+                "xor",
+                "--csv",
+                str(path),
+                *options.split(),
+                *SMALL_SWEEP,
+            ])
+            != 0
+        )
     assert not path.exists()

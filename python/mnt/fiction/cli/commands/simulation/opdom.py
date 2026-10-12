@@ -118,6 +118,12 @@ def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
     logic.add_argument("--expression", action="append", metavar="EXPR", help="Boolean expression; repeat per output")
     algorithm = parser.add_mutually_exclusive_group()
     algorithm.add_argument(
+        "--algorithm",
+        choices=["grid_search", "random_sampling", "flood_fill", "contour_tracing", "sketch"],
+        help="reconstruction method; grid_search by default; sketch uses grid search with filters only",
+    )
+    parser.add_argument("--samples", type=positive_int, metavar="N", help="random samples for a named sampling method")
+    algorithm.add_argument(
         "-g", "--grid-search", action="store_true", help="reconstruct the domain by grid search; the default"
     )
     algorithm.add_argument("-r", "--random-sampling", type=positive_int, metavar="N", help="sample N random points")
@@ -221,6 +227,15 @@ def run_domain(session: Session, args: argparse.Namespace) -> Result:
     Returns:
         Statistics and output paths for the log.
     """
+    if args.algorithm in {"random_sampling", "flood_fill", "contour_tracing"}:
+        if args.samples is None:
+            msg = f"--algorithm {args.algorithm} requires --samples N"
+            raise CommandError(msg)
+        setattr(args, args.algorithm, args.samples)
+    elif args.samples is not None:
+        msg = "--samples requires --algorithm random_sampling, flood_fill, or contour_tracing"
+        raise CommandError(msg)
+    args.sketch = args.sketch or args.algorithm == "sketch"
     layout = _active_sidb_layout(session)
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
 
