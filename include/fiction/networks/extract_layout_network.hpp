@@ -17,13 +17,13 @@
 
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/views/names_view.hpp>
-#include <phmap.h>
-#include <phmap_fwd_decl.h>
 
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
 #include <vector>
+
+#include <parallel_hashmap/phmap.h>
 
 namespace fiction::networks
 {
