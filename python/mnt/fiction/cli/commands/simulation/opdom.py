@@ -119,8 +119,8 @@ def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
     algorithm = parser.add_mutually_exclusive_group()
     algorithm.add_argument(
         "--algorithm",
-        choices=["grid_search", "random_sampling", "flood_fill", "contour_tracing", "sketch"],
-        help="reconstruction method; grid_search by default; sketch uses grid search with filters only",
+        choices=["grid_search", "random_sampling", "flood_fill", "contour_tracing"],
+        help="reconstruction method; grid_search by default; add --sketch for filters only",
     )
     parser.add_argument("--samples", type=positive_int, metavar="N", help="random samples for a named sampling method")
     algorithm.add_argument(
@@ -235,7 +235,6 @@ def run_domain(session: Session, args: argparse.Namespace) -> Result:
     elif args.samples is not None:
         msg = "--samples requires --algorithm random_sampling, flood_fill, or contour_tracing"
         raise CommandError(msg)
-    args.sketch = args.sketch or args.algorithm == "sketch"
     layout = _active_sidb_layout(session)
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
 

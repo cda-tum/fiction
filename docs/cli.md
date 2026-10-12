@@ -419,13 +419,13 @@ The x and y axes sweep `epsilon_r` from 1 to 10 and `lambda_tf` from 1 to 10 in 
 `-z` names a parameter; its default range is -0.5 to -0.1 in steps of 0.025, made for `mu_minus`. Every axis
 needs its own parameter; sweeping one on two axes would produce a degenerate domain and is refused.
 
-Both entry points accept `--algorithm grid_search|random_sampling|flood_fill|contour_tracing|sketch`.
+Both entry points accept `--algorithm grid_search|random_sampling|flood_fill|contour_tracing`.
 Grid search is the default and evaluates every point. Random sampling, flood fill, and contour tracing require
-`--samples N`. `--algorithm sketch` uses grid search with filter-only analysis; `--sketch` also combines with
-any reconstruction method. The named selector and the existing `-g`, `-r N`, `-f N`, and `-c N` flags are
-mutually exclusive. The short flags keep their sample counts. Grid search and random sampling accept any number of dimensions; flood
-fill and contour tracing follow the operational region and need at least two, and in three dimensions contour
-tracing collects the boundary surface. `-s` computes the _operational domain sketch_, which judges every point by
+`--samples N`. Add `--sketch` to any reconstruction method for filter-only analysis. The named selector and
+the existing `-g`, `-r N`, `-f N`, and `-c N` flags are mutually exclusive. The short flags keep their sample
+counts. Grid search and random sampling accept any number of dimensions; flood fill and contour tracing
+follow the operational region and need at least two, and in three dimensions contour tracing collects the
+boundary surface. `-s` computes the _operational domain sketch_, which judges every point by
 filtering alone instead of by simulation: dramatically faster, never rejecting an operational point, but
 reporting some non-operational points as operational. The sketch implies kink rejection and needs a layout with
 `LOGIC` dots for the filters to enumerate; it pairs best with grid search and random sampling. `-o` writes only
@@ -464,7 +464,8 @@ For scripts or notebooks, use `uv pip install 'mnt-pyfiction[plot]'` in an activ
 
 ```console
 fiction-opdom gate.sqd --gate xor --plot domain.png --plot domain.html
-fiction-opdom gate.sqd --table 0110 --algorithm flood_fill --samples 100 --csv domain.csv
+fiction-opdom gate.sqd --table 0110 --algorithm flood_fill --samples 100 --plot domain.html
+fiction-opdom gate.sqd --gate xor --algorithm grid_search --sketch --plot sketch.png --plot sketch.html
 fiction -c 'read gate.sqd; tt -t 0110; opdom domain.csv --plot domain.html'
 ```
 

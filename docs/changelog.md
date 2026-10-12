@@ -22,8 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
-  - Both `opdom` entry points accept `--algorithm` for all reconstruction methods and Sketch, with
-    `--samples` for random sampling, flood fill, and contour tracing.
+  - Both `opdom` entry points accept `--algorithm` for all reconstruction methods, with `--samples` for
+    random sampling, flood fill, and contour tracing. `--sketch` adds filter-only analysis to any method.
   - Added `fiction-opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or
     interactive plots, including Sketch. Install `mnt-pyfiction[plot]` for plotting support.
   - `uv tool install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,

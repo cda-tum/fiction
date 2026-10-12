@@ -218,7 +218,6 @@ assert "plotly" not in sys.modules
         "--algorithm random_sampling --samples 4",
         "--algorithm flood_fill --samples 4",
         "--algorithm contour_tracing --samples 4",
-        "--algorithm sketch",
     ],
 )
 @pytest.mark.parametrize("dimensions", [2, 3])
@@ -362,12 +361,12 @@ def test_expression_rejects_inputs_beyond_variable_names(
     assert not path.exists()
 
 
-@pytest.mark.parametrize("algorithm", ["grid_search", "random_sampling", "flood_fill", "contour_tracing", "sketch"])
+@pytest.mark.parametrize("algorithm", ["grid_search", "random_sampling", "flood_fill", "contour_tracing"])
 @pytest.mark.parametrize("entry_point", ["shell", "standalone"])
 def test_named_algorithm(
     shell: Shell, wire_with_canvas: sidb_layout, tmp_path: Path, algorithm: str, entry_point: str
 ) -> None:
-    """Named algorithms compute domains; Sketch uses filters without simulation."""
+    """Named reconstruction algorithms compute domains through simulation."""
     csv, log, source = tmp_path / "domain.csv", tmp_path / "run.json", tmp_path / "wire.sqd"
     flags = ["--gate", "id", "--algorithm", algorithm, *SMALL_SWEEP]
     if algorithm in {"random_sampling", "flood_fill", "contour_tracing"}:
@@ -382,8 +381,8 @@ def test_named_algorithm(
         assert main([str(source), "--csv", str(csv), "--log", str(log), *flags]) == 0
         result = json.loads(log.read_text(encoding="utf-8"))[0]["result"]
     assert result["num_evaluated_parameter_combinations"] > 0
-    assert (result["num_simulator_invocations"] == 0) == (algorithm == "sketch")
-    assert result["grid_search"] == (algorithm in {"grid_search", "sketch"})
+    assert result["num_simulator_invocations"] > 0
+    assert result["grid_search"] == (algorithm == "grid_search")
     assert csv.exists()
 
 
@@ -391,16 +390,16 @@ def test_named_algorithm(
     "options",
     [
         "--algorithm invalid",
+        "--algorithm sketch",
         "--algorithm random_sampling",
         "--algorithm flood_fill",
         "--algorithm contour_tracing",
         "--algorithm grid_search --samples 4",
-        "--algorithm sketch --samples 4",
         "--samples 4",
         "--algorithm random_sampling --samples 0",
         "--algorithm grid_search --flood-fill 4",
-        "--algorithm sketch --strategy simulation_only",
-        "--algorithm sketch --condition tolerate_kinks",
+        "--algorithm grid_search --sketch --strategy simulation_only",
+        "--algorithm grid_search --sketch --condition tolerate_kinks",
     ],
 )
 @pytest.mark.parametrize("entry_point", ["shell", "standalone"])
