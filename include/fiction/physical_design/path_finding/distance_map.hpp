@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -33,7 +34,7 @@ namespace fiction::physical_design::path_finding
 /**
  * A distance map is a two-dimensional array of distances between coordinates. The distance map is accessed via the
  * indices of the coordinates in the associated layout. A coordinate index \f$i\f$ is calculated as follows:
- * \f$i = y \cdot W + x\f$, with \f$W\f$ being the width of the layout. As an example, in a layout of size
+ * \f$i = (z \cdot H + y) \cdot W + x\f$, with \f$W\f$ and \f$H\f$ being the width and height. In a layout of size
  * \f$3 \times 3\f$, the coordinate index of the coordinate \f$(2, 1)\f$ has index \f$1 \cdot 3 + 2 = 5\f$.
  *
  * The `distance_map` is to be preferred over the `sparse_distance_map` in most cases when performance is the main goal.
@@ -63,13 +64,14 @@ using sparse_distance_map = phmap::parallel_flat_hash_map<std::pair<coordinate<L
  * @return Fully initialized `distance_map` for `lyt`.
  */
 template <typename Lyt, typename Dist>
-[[nodiscard]] distance_map<Dist> initialize_distance_map(const Lyt&                         lyt,
-                                                         const distance_functor<Lyt, Dist>& dist_fn) noexcept
+[[nodiscard]] distance_map<Dist> initialize_distance_map(const Lyt& lyt, const distance_functor<Lyt, Dist>& dist_fn)
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
     // initialize distance map
-    distance_map<Dist> dist_map(lyt.area(), std::vector<Dist>(lyt.area(), Dist{}));
+    /** Number of coordinates across all layers. */
+    const auto         coordinate_count = lyt.volume();
+    distance_map<Dist> dist_map(coordinate_count, std::vector<Dist>(coordinate_count, Dist{}));
 
     // compute distances and store them via coordinate index
     lyt.foreach_coordinate(
@@ -166,10 +168,17 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
      * @param lyt Layout.
      * @param c Coordinate.
      * @return Coordinate index.
+     * @throws std::out_of_range If the coordinate is outside the layout.
      */
-    [[nodiscard]] static constexpr std::size_t coordinate_index(const Lyt& lyt, const coordinate<Lyt>& c) noexcept
+    [[nodiscard]] static constexpr std::size_t coordinate_index(const Lyt& lyt, const coordinate<Lyt>& c)
     {
-        return static_cast<std::size_t>((static_cast<int64_t>(c.y) * lyt.width()) + c.x);
+        if (!lyt.contains_coordinate(c))
+        {
+            throw std::out_of_range("The coordinate is outside the distance map layout");
+        }
+        return static_cast<std::size_t>((static_cast<uint64_t>(c.z) * lyt.height() + static_cast<uint32_t>(c.y)) *
+                                            lyt.width() +
+                                        static_cast<uint32_t>(c.x));
     }
 };
 /**

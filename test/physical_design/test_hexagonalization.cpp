@@ -34,6 +34,7 @@
 #include <mockturtle/networks/aig.hpp>
 
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <vector>
 
@@ -367,4 +368,20 @@ TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
     CHECK(rec.final_count("objects") == layout.size());
     CHECK(rec.is_consistent("input pins"));
     CHECK(rec.is_consistent("output pins"));
+}
+
+TEST_CASE("Hexagonalization preserves the maximum signed layer", "[hexagonalization]")
+{
+    /** Highest representable layer coordinate. */
+    constexpr auto maximum = std::numeric_limits<int32_t>::max();
+    /** Sparse layout with one input on the final layer. */
+    cart_gate_clk_lyt layout{{1, 1, static_cast<uint64_t>(maximum) + 1}, clocking::twoddwave()};
+    layout.create_pi("a", {0, 0, maximum});
+
+    /** Converted geometry retains all layers without enumerating empty coordinates. */
+    const auto converted = hexagonalization<hex_gate_clk_lyt>(layout);
+
+    CHECK(converted.layers() == static_cast<uint64_t>(maximum) + 1);
+    REQUIRE(converted.num_pis() == 1);
+    CHECK(converted.get_tile(converted.pi_at(0)).z == maximum);
 }

@@ -200,10 +200,10 @@ void optimize_output_positions(Lyt& lyt)
         fit_occupied_geometry(lyt);
         return;
     }
-    auto x_max       = static_cast<int32_t>(lyt.width()) - 1;
-    auto y_max       = static_cast<int32_t>(lyt.height()) - 1;
+    auto x_max       = static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1);
+    auto y_max       = static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1);
     bool optimizable = y_max > 0;
-    for (int32_t x = 0; x <= x_max; ++x)
+    for (int64_t x = 0; x <= x_max; ++x)
     {
         if (!(lyt.is_empty_tile({x, y_max}) ||
               (lyt.is_po_tile({x, y_max}) && x < x_max && lyt.is_empty_tile({x + 1, y_max - 1}))))
@@ -223,7 +223,7 @@ void optimize_output_positions(Lyt& lyt)
         }
     }
     optimizable = x_max > 0;
-    for (int32_t y = 0; y <= y_max; ++y)
+    for (int64_t y = 0; y <= y_max; ++y)
     {
         if (!(lyt.is_empty_tile({x_max, y}) ||
               (lyt.is_po_tile({x_max, y}) && y < y_max && lyt.is_empty_tile({x_max - 1, y + 1}))))
@@ -243,8 +243,8 @@ void optimize_output_positions(Lyt& lyt)
         }
     }
     fit_occupied_geometry(lyt);
-    x_max = static_cast<int32_t>(lyt.width()) - 1;
-    y_max = static_cast<int32_t>(lyt.height()) - 1;
+    x_max = static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1);
+    y_max = static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1);
     for (int32_t x = 0; x < x_max && y_max > 0; ++x)
     {
         if (const auto id = lyt.find_object({x, y_max - 1}); id && lyt.is_po(*id) && lyt.is_empty_tile({x, y_max}))
@@ -260,8 +260,8 @@ void optimize_output_positions(Lyt& lyt)
         }
     }
     fit_occupied_geometry(lyt);
-    x_max = static_cast<int32_t>(lyt.width()) - 1;
-    y_max = static_cast<int32_t>(lyt.height()) - 1;
+    x_max = static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1);
+    y_max = static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1);
     if (lyt.num_pos() == 1 && x_max > 0 && y_max > 0)
     {
         const auto id = lyt.find_object({x_max, y_max});
@@ -288,8 +288,8 @@ void optimize_output_positions(Lyt& lyt)
 template <typename Lyt>
 void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates)
 {
-    const auto x_max = static_cast<int32_t>(lyt.width()) - 1;
-    const auto y_max = static_cast<int32_t>(lyt.height()) - 1;
+    const auto x_max = static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1);
+    const auto y_max = static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1);
     // Output extension inserts wires, so select terminals without an active visitor.
     for (uint32_t output{}; output < lyt.num_pos(); ++output)
     {

@@ -639,33 +639,37 @@ void add_obstructions(WiringReductionLyt& lyt)
     if (lyt.get_search_direction() == search_direction::HORIZONTAL)
     {
         // add obstructions to the top edge of the layout
-        for (int32_t x = 1; x <= (static_cast<int32_t>(lyt.width()) - 1); x++)
+        for (int64_t x = 1; x <= (static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1)); x++)
         {
             lyt.search_obstructions.obstruct_coordinate({x, 0, 0});
             lyt.search_obstructions.obstruct_coordinate({x, 0, 1});
         }
 
         // add obstructions to the bottom edge of the layout
-        for (int32_t x = 0; x < (static_cast<int32_t>(lyt.width()) - 1); x++)
+        for (int32_t x = 0; x < (static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1)); x++)
         {
-            lyt.search_obstructions.obstruct_coordinate({x, (static_cast<int32_t>(lyt.height()) - 1), 0});
-            lyt.search_obstructions.obstruct_coordinate({x, (static_cast<int32_t>(lyt.height()) - 1), 1});
+            lyt.search_obstructions.obstruct_coordinate(
+                {x, (static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1)), 0});
+            lyt.search_obstructions.obstruct_coordinate(
+                {x, (static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1)), 1});
         }
     }
     else
     {
         // add obstructions to the left edge of the layout
-        for (int32_t y = 1; y <= (static_cast<int32_t>(lyt.height()) - 1); y++)
+        for (int64_t y = 1; y <= (static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1)); y++)
         {
             lyt.search_obstructions.obstruct_coordinate({0, y, 0});
             lyt.search_obstructions.obstruct_coordinate({0, y, 1});
         }
 
         // add obstructions to the right edge of the layout
-        for (int32_t y = 0; y < (static_cast<int32_t>(lyt.height()) - 1); y++)
+        for (int32_t y = 0; y < (static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1)); y++)
         {
-            lyt.search_obstructions.obstruct_coordinate({(static_cast<int32_t>(lyt.width()) - 1), y, 0});
-            lyt.search_obstructions.obstruct_coordinate({(static_cast<int32_t>(lyt.width()) - 1), y, 1});
+            lyt.search_obstructions.obstruct_coordinate(
+                {(static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1)), y, 0});
+            lyt.search_obstructions.obstruct_coordinate(
+                {(static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1)), y, 1});
         }
     }
 }
@@ -695,10 +699,10 @@ template <typename WiringReductionLyt>
  * Update the to-delete list based on a possible path in a wiring_reduction_layout.
  *
  * This function updates the to-delete list by appending coordinates from the given possible path
- * in a wiring_reduction_layout. It considers coordinates that are not at the leftmost (`x == 0`) or rightmost (`x ==
- * (static_cast<int32_t>(lyt.width()) - 1)`) positions for left to right, or at the top (`y == 0`) or bottom (`y ==
- * (static_cast<int32_t>(lyt.height()) - 1)`) positions for top to bottom and shifts them to get the corresponding
- * coordinates on the original layout. The coordinates are then obstructed in both layers (0 and 1).
+ * in a wiring_reduction_layout. It considers coordinates away from the western and eastern borders for left-to-right
+ * paths, or away from the northern and southern borders for top-to-bottom paths. It shifts these coordinates to the
+ * corresponding positions on the original layout. The coordinates are then obstructed in both
+ * layers (0 and 1).
  *
  * @tparam WiringReductionLyt Type of the `wiring_reduction_layout`.
  * @param lyt The `wiring_reduction_layout` to be updated.
@@ -713,9 +717,9 @@ void update_to_delete_list(WiringReductionLyt& lyt, const layout_coordinate_path
     {
         // check if the coordinate is not at the leftmost or rightmost position
         if (((lyt.get_search_direction() == search_direction::HORIZONTAL) && coord.x != 0 &&
-             coord.x != (static_cast<int32_t>(lyt.width()) - 1)) ||
+             coord.x != (static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1))) ||
             ((lyt.get_search_direction() == search_direction::VERTICAL) && coord.y != 0 &&
-             coord.y != (static_cast<int32_t>(lyt.height()) - 1)))
+             coord.y != (static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1))))
         {
             // create the corresponding coordinate on the original layout
             const fiction::coordinate<WiringReductionLyt> shifted_coord{coord.x - 1, coord.y - 1, 0};
@@ -766,9 +770,8 @@ template <typename WiringReductionLyt>
                                                     const layout_coordinate_path<WiringReductionLyt>& to_delete)
 {
     // initialize matrix with zeros
-    offset_matrix matrix(
-        static_cast<std::size_t>((static_cast<int32_t>(lyt.height()) - 1)) + 1,
-        std::vector<int32_t>(static_cast<std::size_t>((static_cast<int32_t>(lyt.width()) - 1)) + 1, 0));
+    offset_matrix matrix(static_cast<std::size_t>(lyt.height()),
+                         std::vector<int32_t>(static_cast<std::size_t>(lyt.width()), 0));
 
     // update matrix based on coordinates
     for (const auto& coord : to_delete)
@@ -778,14 +781,14 @@ template <typename WiringReductionLyt>
 
         if (lyt.get_search_direction() == search_direction::HORIZONTAL)
         {
-            for (int32_t i = (static_cast<int32_t>(lyt.height()) - 1); i > y; --i)
+            for (int32_t i = (static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1)); i > y; --i)
             {
                 offset_at(matrix, i, x) += 1;
             }
         }
         else
         {
-            for (int32_t i = (static_cast<int32_t>(lyt.width()) - 1); i > x; --i)
+            for (int32_t i = (static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1)); i > x; --i)
             {
                 offset_at(matrix, y, i) += 1;
             }
@@ -995,9 +998,10 @@ class wiring_reduction_impl
                 to_delete.clear();
 
                 // get the initial possible path for wire deletion
-                auto possible_path = get_path(wiring_reduction_lyt, {0, 0},
-                                              {(static_cast<int32_t>(wiring_reduction_lyt.width()) - 1),
-                                               (static_cast<int32_t>(wiring_reduction_lyt.height()) - 1)});
+                auto possible_path =
+                    get_path(wiring_reduction_lyt, {0, 0},
+                             {(static_cast<int32_t>(static_cast<int64_t>(wiring_reduction_lyt.width()) - 1)),
+                              (static_cast<int32_t>(static_cast<int64_t>(wiring_reduction_lyt.height()) - 1))});
 
                 // iterate while there is a possible path and timeout not reached
                 while (!possible_path.empty() && !timeout_limit_reached)
@@ -1013,9 +1017,10 @@ class wiring_reduction_impl
                     if (!timeout_limit_reached)
                     {
                         // get the next possible path for wire deletion
-                        possible_path = get_path(wiring_reduction_lyt, {0, 0},
-                                                 {(static_cast<int32_t>(wiring_reduction_lyt.width()) - 1),
-                                                  (static_cast<int32_t>(wiring_reduction_lyt.height()) - 1)});
+                        possible_path =
+                            get_path(wiring_reduction_lyt, {0, 0},
+                                     {(static_cast<int32_t>(static_cast<int64_t>(wiring_reduction_lyt.width()) - 1)),
+                                      (static_cast<int32_t>(static_cast<int64_t>(wiring_reduction_lyt.height()) - 1))});
                     }
                 }
 

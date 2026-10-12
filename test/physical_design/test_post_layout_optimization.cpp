@@ -36,6 +36,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 
 using namespace fiction;
@@ -416,4 +417,29 @@ TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-l
     CHECK(std::ranges::find(objectives, routing_objective<gate_level_layout<cartesian_layout>>{
                                             layout.get_tile(b), layout.get_tile(gate), 1}) != objectives.end());
     CHECK(layout.area() <= 16);
+}
+
+TEST_CASE("Output border extension handles the full signed coordinate domain", "[post-layout-optimization]")
+{
+    /** Largest representable coordinate. */
+    constexpr auto maximum = std::numeric_limits<int32_t>::max();
+    /** Sparse geometry whose width includes the maximum coordinate. */
+    gate_level_layout<cartesian_layout> layout{{static_cast<uint64_t>(maximum) + 1, 3}};
+    /** Input and output adjacent to the eastern border. */
+    const auto input  = layout.create_pi("a", {maximum - 2, 1});
+    const auto output = layout.create_po(input, "f", {maximum - 1, 1});
+    /** Relocation count remains zero when the output extension adds a wire. */
+    uint64_t moved_gates{};
+
+    physical_design::detail::check_and_optimize_po_positions(layout, moved_gates);
+
+    CHECK(layout.get_tile(output) == layout_base::coordinate{maximum, 1});
+    CHECK(layout.width() == static_cast<uint64_t>(maximum) + 1);
+    /** Inserted wire drives the relocated output. */
+    const auto source = layout.source({output, 0});
+    REQUIRE(source.has_value());
+    /** Wire occupies the former output coordinate. */
+    const layout_base::coordinate former_output{maximum - 1, 1};
+    CHECK(layout.get_tile(*source) ==  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
+          former_output);
 }

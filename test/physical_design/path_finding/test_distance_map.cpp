@@ -23,6 +23,8 @@
 #include <fiction/physical_design/path_finding/distance_map.hpp>
 
 #include <cstdint>
+#include <cstdlib>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -109,6 +111,36 @@ TEST_CASE("Distance map", "[distance-map]")
                     });
             });
     }
+}
+
+TEST_CASE("Distance maps index every layer and reject coordinates outside the frame", "[distance-map]")
+{
+    /** Small geometry with two rows and two layers. */
+    const cartesian_layout layout{{2, 2, 2}};
+    /** Coordinate distances include layer displacement. */
+    const distance_functor<cartesian_layout, uint64_t> distance{
+        [](const auto& lyt, const auto& source, const auto& target)
+        { return manhattan_distance(lyt, source, target) + static_cast<uint64_t>(std::abs(source.z - target.z)); }};
+    /** Precompute every coordinate pair in the frame. */
+    const auto distances = initialize_distance_map(layout, distance);
+    /** Lookup uses the same coordinate indices as initialization. */
+    const distance_map_functor<cartesian_layout, uint64_t> lookup{distances};
+
+    REQUIRE(distances.size() == layout.volume());
+    layout.foreach_coordinate(
+        [&](const auto& source, const auto source_index)
+        {
+            REQUIRE(distances[source_index].size() == layout.volume());
+            layout.foreach_coordinate(
+                [&](const auto& target, const auto target_index)
+                {
+                    CHECK(distances[source_index][target_index] == distance(layout, source, target));
+                    CHECK(lookup(layout, source, target) == distance(layout, source, target));
+                });
+        });
+    CHECK_THROWS_AS(lookup(layout, {2, 0, 0}, {0, 0, 0}), std::out_of_range);
+    CHECK_THROWS_AS(lookup(layout, {0, -1, 1}, {0, 0, 0}), std::out_of_range);
+    CHECK_THROWS_AS(lookup(layout, {0, 0, 2}, {0, 0, 0}), std::out_of_range);
 }
 
 TEST_CASE("Sparse distance map", "[distance-map]")

@@ -1942,7 +1942,7 @@ class exact_impl
                                               (static_cast<int64_t>(layout.width()) - 1));
                                      ++column)
                                 {
-                                    for (int32_t row = 0; row <= (static_cast<int64_t>(layout.height()) - 1); ++row)
+                                    for (int64_t row = 0; row <= (static_cast<int64_t>(layout.height()) - 1); ++row)
                                     {
                                         if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
                                         {
@@ -1965,7 +1965,7 @@ class exact_impl
                                 for (int64_t column = std::max(static_cast<int64_t>(layout.width()) - il, int64_t{0});
                                      column < (static_cast<int64_t>(layout.width()) - 1); ++column)
                                 {
-                                    for (int32_t row = 0; row <= (static_cast<int64_t>(layout.height()) - 1); ++row)
+                                    for (int64_t row = 0; row <= (static_cast<int64_t>(layout.height()) - 1); ++row)
                                     {
                                         const auto t = typename Lyt::tile{column, row};
 
@@ -2010,7 +2010,7 @@ class exact_impl
                                               (static_cast<int64_t>(layout.height()) - 1));
                                      ++row)
                                 {
-                                    for (int32_t column = 0; column <= (static_cast<int64_t>(layout.width()) - 1);
+                                    for (int64_t column = 0; column <= (static_cast<int64_t>(layout.width()) - 1);
                                          ++column)
                                     {
                                         if (const auto t = typename Lyt::tile{column, row}; is_added_tile(t))
@@ -2034,7 +2034,7 @@ class exact_impl
                                 for (int64_t row = std::max(static_cast<int64_t>(layout.height()) - il, int64_t{0});
                                      row < (static_cast<int64_t>(layout.height()) - 1); ++row)
                                 {
-                                    for (int32_t column = 0; column <= (static_cast<int64_t>(layout.width()) - 1);
+                                    for (int64_t column = 0; column <= (static_cast<int64_t>(layout.width()) - 1);
                                          ++column)
                                     {
                                         const auto t = typename Lyt::tile{column, row};

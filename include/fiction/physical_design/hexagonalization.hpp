@@ -222,8 +222,9 @@ template <typename CartLyt>
         [&lyt, &num_outputs_left_to_middle_po](const auto& gate)
         {
             // if the tile is at the southern border, it is placed left of the middle PO in the hex layout
-            if (const auto coord = lyt.get_tile(gate); coord.x != (static_cast<int32_t>(lyt.width()) - 1) &&
-                                                       coord.y == (static_cast<int32_t>(lyt.height()) - 1))
+            if (const auto coord = lyt.get_tile(gate);
+                coord.x != (static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1)) &&
+                coord.y == (static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1)))
             {
                 ++num_outputs_left_to_middle_po;
             }
@@ -279,8 +280,9 @@ template <typename CartLyt>
         [&lyt, &num_outputs_right_to_middle_po](const auto& gate)
         {
             // if the tile is at the eastern border, it is placed right of the middle PO in the hex layout
-            if (const auto coord = lyt.get_tile(gate); coord.x == (static_cast<int32_t>(lyt.width()) - 1) &&
-                                                       coord.y != (static_cast<int32_t>(lyt.height()) - 1))
+            if (const auto coord = lyt.get_tile(gate);
+                coord.x == (static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1)) &&
+                coord.y != (static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1)))
             {
                 ++num_outputs_right_to_middle_po;
             }
@@ -406,15 +408,14 @@ class hexagonalization_impl
             });
 
         if (layout.width() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()) ||
-            layout.height() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()) ||
-            layout.layers() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
+            layout.height() > static_cast<uint32_t>(std::numeric_limits<int32_t>::max()))
         {
             throw std::overflow_error("Hexagonalization extent exceeds the signed coordinate range");
         }
         // get Cartesian layout extent
         const auto layout_width  = static_cast<int32_t>(layout.width());
         const auto layout_height = static_cast<int32_t>(layout.height());
-        const auto layout_depth  = (static_cast<int32_t>(layout.layers()) - 1);
+        const auto layout_depth  = (static_cast<int32_t>(static_cast<int64_t>(layout.layers()) - 1));
 
         // compute the hexagonal layout extent from the Cartesian extent
         const auto hex_height =
@@ -451,9 +452,10 @@ class hexagonalization_impl
             auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
 
             // determine the bottom primary output coordinate
-            auto middle_po = detail::to_hex<CartLyt, HexLyt>(
-                {(static_cast<int32_t>(layout.width()) - 1), (static_cast<int32_t>(layout.height()) - 1)},
-                layout_height);
+            auto middle_po =
+                detail::to_hex<CartLyt, HexLyt>({(static_cast<int32_t>(static_cast<int64_t>(layout.width()) - 1)),
+                                                 (static_cast<int32_t>(static_cast<int64_t>(layout.height()) - 1))},
+                                                layout_height);
 
             // vectors to store primary inputs
             std::vector<tile<HexLyt>> left_pis{};
@@ -566,13 +568,13 @@ class hexagonalization_impl
                     hex_layout.create_po(layout.get_name(gate), hex_coord);
 
                     // collect POs to the left and to the right of the middle PO
-                    if (old_coord.x != (static_cast<int32_t>(layout.width()) - 1) &&
-                        old_coord.y == (static_cast<int32_t>(layout.height()) - 1))
+                    if (old_coord.x != (static_cast<int32_t>(static_cast<int64_t>(layout.width()) - 1)) &&
+                        old_coord.y == (static_cast<int32_t>(static_cast<int64_t>(layout.height()) - 1)))
                     {
                         left_pos.push_back(hex_coord);
                     }
-                    else if (old_coord.x == (static_cast<int32_t>(layout.width()) - 1) &&
-                             old_coord.y != (static_cast<int32_t>(layout.height()) - 1))
+                    else if (old_coord.x == (static_cast<int32_t>(static_cast<int64_t>(layout.width()) - 1)) &&
+                             old_coord.y != (static_cast<int32_t>(static_cast<int64_t>(layout.height()) - 1)))
                     {
                         right_pos.push_back(hex_coord);
                     }

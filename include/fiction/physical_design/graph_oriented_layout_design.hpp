@@ -1655,8 +1655,8 @@ class graph_oriented_layout_design_impl
             if (fc.fanin_nodes.empty())
             {
                 coord_vec_type<Lyt> positions{};
-                const auto          x = static_cast<int32_t>(layout.width()) - 1;
-                for (int32_t y{}; y < static_cast<int32_t>(layout.height()); ++y)
+                const auto          x = static_cast<int32_t>(static_cast<int64_t>(layout.width()) - 1);
+                for (int64_t y{}; y < static_cast<int64_t>(layout.height()); ++y)
                 {
                     if (layout.is_empty_tile({x, y}) && layout.is_empty_tile({x - 1, y}))
                     {

@@ -542,6 +542,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Dense distance maps now index every layer and reject coordinates outside the layout frame.
+  - Physical-design border calculations and hexagonalization now preserve the maximum signed coordinate.
   - Squared Euclidean distance remains evaluable at compile time under C++20.
   - Squared Euclidean distance now preserves exact integer results and rejects distance-type overflow.
   - Coordinate normalization now shifts out-of-frame cells to the origin and preserves trailing frame padding.
