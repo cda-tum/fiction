@@ -195,8 +195,8 @@ def test_distance(make_lyt: Callable[[], GateLayout]) -> None:
     assert a_star_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 4
     assert a_star_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 6
     assert a_star_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 8
-    assert a_star_distance(lyt, coordinate(1, 1), coordinate(0, 0)) == float("inf")
-    assert a_star_distance(lyt, coordinate(2, 2), coordinate(1, 1)) == float("inf")
+    assert a_star_distance(lyt, coordinate(1, 1), coordinate(0, 0)) == (1 << 64) - 1
+    assert a_star_distance(lyt, coordinate(2, 2), coordinate(1, 1)) == (1 << 64) - 1
 
 
 def test_search_constraints_are_local() -> None:
