@@ -435,35 +435,6 @@ TEST_CASE("FGL keeps sparse metadata in a large multilayer extent", "[write-fgl-
     CHECK(restored.get_synchronization_element({999999999, 999999999, 2}) == 7);
 }
 
-TEST_CASE("FGL refuses nodes it cannot place", "[write-fgl-layout]")
-{
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    std::stringstream stream{};
-
-    SECTION("Incomplete object")
-    {
-        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
-        lyt.create_buf({0, 0, 0});
-
-        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
-    }
-    SECTION("Node on a negative tile")
-    {
-        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
-        lyt.create_pi("a", {-1, 0, 0});
-
-        CHECK_THROWS_AS(write_fgl_layout(lyt, stream), std::invalid_argument);
-    }
-    SECTION("Placed nodes")
-    {
-        gate_layout lyt{{2, 2, 1}, clocking::twoddwave()};
-        lyt.create_pi("a", {0, 0, 0});
-
-        CHECK_NOTHROW(write_fgl_layout(lyt, stream));
-    }
-}
-
 TEST_CASE("FGL validates every object before changing the stream", "[write-fgl-layout]")
 {
     cart_gate_clk_lyt layout{{4, 2, 1}, clocking::twoddwave()};

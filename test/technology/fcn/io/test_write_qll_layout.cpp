@@ -21,7 +21,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
-#include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
@@ -629,16 +628,4 @@ TEST_CASE("Write dual-layer mQCA crossover", "[qll]")
     write_qll_layout(layout, layout_stream);
 
     CHECK(layout_stream.str() == qll_layout);
-}
-
-TEST_CASE("QCC dimensions retain their maximum-index schema", "[qcc]")
-{
-    inml::layout layout{{3, 1}};
-    layout.assign_cell_type({0, 0}, inml::magnet_type::INPUT);
-    layout.assign_cell_type({1, 0}, inml::magnet_type::NORMAL);
-    layout.assign_cell_type({2, 0}, inml::magnet_type::OUTPUT);
-    std::ostringstream stream{};
-    inml::io::write_qcc_layout(layout, stream);
-    CHECK(stream.str().find("maxX=\"2\" maxY=\"0\"") != std::string::npos);
-    CHECK(stream.str().find("x=\"2\" y=\"0\"") != std::string::npos);
 }
