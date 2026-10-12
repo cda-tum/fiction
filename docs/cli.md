@@ -484,7 +484,10 @@ when no output paths are given. `--csv FILE` requests CSV; a CSV-only invocation
 `--show` opens plots after saving. HTML files embed Plotly and work offline, with hover information,
 zoom, pan, 3D rotation, and legend toggles. Both backends draw the returned samples and leave missing
 samples blank. Sketch positives are labeled "Potentially operational". Each output is written atomically;
-if a later output fails, earlier outputs remain.
+if a later output fails, earlier outputs remain. The dedicated command rejects outputs or logs that would
+replace its input SQD file. The shell stores layouts without source paths; choose output paths that differ
+from files read into the shell. Statistics logs accept devices such as `/dev/null`; CSV and plot outputs
+require regular files. The dedicated command writes no log when argument or output validation fails.
 
 Both commands expose `--threads`, `--timeout-ms`, `--condition tolerate_kinks|reject_kinks`,
 `--strategy simulation_only|filter_only|filter_then_simulation`, and `--input-encoding distance|absence`.

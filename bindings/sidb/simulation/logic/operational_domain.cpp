@@ -418,7 +418,7 @@ void operational_domain(nanobind::module_& m)
                     });
 
                 /** @brief Buffer address retained by both returned arrays. */
-                auto* const       data = buffers.get();
+                auto*             data = buffers.get();
                 const py::capsule owner{data, [](void* p) noexcept
                                         {
                                             // the capsule is the owner and runs this when the last array dies
@@ -426,7 +426,7 @@ void operational_domain(nanobind::module_& m)
                                             delete static_cast<detail::numpy_buffers*>(p);
                                         }};
 
-                static_cast<void>(buffers.release());
+                data = buffers.release();
 
                 return std::make_tuple(
                     py::ndarray<py::numpy, double, py::ndim<2>>{data->coordinates.data(), {points, dimensions}, owner},

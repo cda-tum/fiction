@@ -13,6 +13,7 @@ from __future__ import annotations
 import builtins
 import importlib
 import json
+import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- installed CLI tests use argument lists
 import sys
@@ -425,3 +426,24 @@ def test_invalid_named_algorithm(
             != 0
         )
     assert not path.exists()
+
+
+def test_log_accepts_null_device(xor_gate: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
+    """Both entry points accept the platform's null device as a statistics log."""
+    main = importlib.import_module("mnt.fiction.opdom").main
+    log = Path(os.devnull)
+    xor_gate.session.log_path = log
+    xor_gate.ok(f'opdom "{tmp_path / "shell.csv"}" ' + " ".join(SMALL_SWEEP))
+    assert (
+        main([
+            resource("hex_21_inputsdbp_xor_v1.sqd"),
+            "--gate",
+            "xor",
+            "--log",
+            str(log),
+            "--csv",
+            str(tmp_path / "standalone.csv"),
+            *SMALL_SWEEP,
+        ])
+        == 0
+    )

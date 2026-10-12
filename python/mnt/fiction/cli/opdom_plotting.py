@@ -97,7 +97,7 @@ def validate_outputs(args: argparse.Namespace, *, log_path: Path | None = None) 
     seen: list[Path] = []
     paths = ([args.file] if args.file is not None else []) + args.plot + ([log_path] if log_path is not None else [])
     for path in paths:
-        _validate_path(path)
+        _validate_path(path, regular_file=path != log_path)
         if any(_same_destination(path, other) for other in seen):
             msg = "output paths must be distinct"
             raise CommandError(msg)
@@ -132,11 +132,12 @@ def _same_destination(left: Path, right: Path) -> bool:
     return left.resolve() == right.resolve() or (left.exists() and right.exists() and left.samefile(right))
 
 
-def _validate_path(path: Path) -> None:
+def _validate_path(path: Path, *, regular_file: bool = True) -> None:
     """Reject unsupported destinations without opening them.
 
     Args:
         path: A requested output path.
+        regular_file: Require a regular file for atomic CSV and plot replacement.
 
     Raises:
         CommandError: The path is dangling, non-regular, or has no parent directory.
@@ -144,7 +145,7 @@ def _validate_path(path: Path) -> None:
     if path.is_symlink() and not path.exists():
         msg = f"'{path}' is a dangling output link"
         raise CommandError(msg)
-    if path.exists() and not path.is_file():
+    if path.is_dir() or (regular_file and path.exists() and not path.is_file()):
         msg = f"'{path}' is not a regular output file"
         raise CommandError(msg)
     if not path.parent.is_dir():
