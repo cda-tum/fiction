@@ -17,6 +17,7 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/progress.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): defines the nanobind coordinate type casters
 
 #include <fiction/physical_design/wiring_reduction.hpp>
 
