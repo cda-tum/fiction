@@ -30,7 +30,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <memory>
 #include <optional>

@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"

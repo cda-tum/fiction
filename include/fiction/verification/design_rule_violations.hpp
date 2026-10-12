@@ -16,11 +16,8 @@
 
 #pragma once
 
-#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -30,7 +27,6 @@
 #include <nlohmann/json.hpp>
 
 #include <array>
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>

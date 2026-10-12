@@ -14,8 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>

@@ -19,9 +19,7 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"

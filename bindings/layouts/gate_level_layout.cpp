@@ -555,7 +555,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                 const auto bb = fiction::layouts::bounding_box<GateLyt>(layout);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
-            BOUNDING_BOX_2D_DOC)
+            BOUNDING_BOX_DOC)
         .def(
             "__repr__",
             [](const GateLyt& lyt) -> std::string

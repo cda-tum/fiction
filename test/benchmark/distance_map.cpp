@@ -113,7 +113,7 @@ TEST_CASE("Distance summation propagates distance-functor exceptions", "[distanc
     /** @brief Single-coordinate frame whose distance call must propagate exceptions. */
     const cartesian_layout layout{{1, 1}};
     /** @brief Distance function that rejects every calculation. */
-    const distance_functor<uint64_t> throwing_distance{[](const auto&, const auto&, const auto&) -> uint64_t
+    const distance_functor<uint64_t> throwing_distance{[](const auto&, const auto&) -> uint64_t
                                                        { throw std::invalid_argument{"Distance unavailable"}; }};
     CHECK_THROWS_AS(sum_distances(layout, throwing_distance), std::invalid_argument);
 }

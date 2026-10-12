@@ -124,7 +124,7 @@ https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
 on the topic.)doc";
 
 /** @brief Documentation for occupied layout bounds. */
-inline constexpr auto BOUNDING_BOX_2D_DOC =
+inline constexpr auto BOUNDING_BOX_DOC =
     R"doc(Returns the minimum and maximum corner of the bounding box.
 A 2D bounding box object computes a minimum-sized box around all
 non-empty coordinates in a given layout. Layouts can be of arbitrary

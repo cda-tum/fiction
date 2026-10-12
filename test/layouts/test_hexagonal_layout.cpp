@@ -18,15 +18,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 
-#include <concepts>
 #include <cstdint>
 #include <limits>
 #include <set>

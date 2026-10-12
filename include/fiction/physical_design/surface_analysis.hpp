@@ -17,12 +17,9 @@
 
 #pragma once
 
-#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"

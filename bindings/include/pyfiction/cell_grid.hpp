@@ -106,7 +106,7 @@ void bind_cell_grid(nanobind::class_<Lyt, py_cartesian_layout>& cls)
                 const auto bb = fiction::layouts::bounding_box<Lyt>(lyt);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
-            BOUNDING_BOX_2D_DOC)
+            BOUNDING_BOX_DOC)
         .def(
             "__copy__", [](const Lyt& lyt) { return Lyt{lyt}; }, "Returns an independent copy of the layout.")
         .def(

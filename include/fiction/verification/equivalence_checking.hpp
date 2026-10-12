@@ -17,10 +17,7 @@
 
 #pragma once
 
-#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/networks/extract_layout_network.hpp"
 #include "fiction/networks/interface_matching.hpp"
 #include "fiction/traits.hpp"

@@ -114,7 +114,7 @@ try
             }
 
             // calculate bounding box
-            const auto bounding_box = bounding_box(*gate_level_layout);
+            const auto bounding_box = layouts::bounding_box(*gate_level_layout);
 
             const auto width  = bounding_box.get_x_size();
             const auto height = bounding_box.get_y_size();

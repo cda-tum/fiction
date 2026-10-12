@@ -21,7 +21,6 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
