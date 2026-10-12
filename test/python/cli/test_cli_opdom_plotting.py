@@ -14,9 +14,7 @@ import importlib
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-import numpy as np
 import pytest
-from mpl_toolkits.mplot3d import Axes3D
 
 from mnt.fiction.cli.registry import REGISTRY
 from mnt.pyfiction.sidb.simulation.logic import operational_domain, operational_status, parameter_point, sweep_parameter
@@ -27,6 +25,11 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from .conftest import Shell
+
+
+np = pytest.importorskip("numpy")
+Axes3D = pytest.importorskip("mpl_toolkits.mplot3d").Axes3D
+pytest.importorskip("plotly")
 
 
 @pytest.fixture(params=[2, 3])

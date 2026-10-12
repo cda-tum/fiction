@@ -290,7 +290,7 @@ def domain_parameters(
         raise CommandError(msg)
     args.sketch = args.sketch or args.strategy == "filter_only"
     if args.sketch and args.condition == "tolerate_kinks":
-        msg = "Sketch requires --condition reject_kinks"
+        msg = "Filter-only analysis requires --condition reject_kinks"
         raise CommandError(msg)
     operational.strategy_to_analyze_operational_status = operational_analysis_strategy[
         (args.strategy or ("filter_only" if args.sketch else "simulation_only")).upper()

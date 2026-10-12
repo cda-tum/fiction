@@ -483,13 +483,14 @@ as PNG, SVG, PDF, or HTML. The dedicated command writes `<input-stem>_opdom.png`
 when no output paths are given. `--csv FILE` requests CSV; a CSV-only invocation needs no plotting packages.
 `--show` opens plots after saving. HTML files embed Plotly and work offline, with hover information,
 zoom, pan, 3D rotation, and legend toggles. Both backends draw the returned samples and leave missing
-samples blank. Sketch positives are labeled "Potentially operational".
+samples blank. Sketch positives are labeled "Potentially operational". Each output is written atomically;
+if a later output fails, earlier outputs remain.
 
 Both commands expose `--threads`, `--timeout-ms`, `--condition tolerate_kinks|reject_kinks`,
 `--strategy simulation_only|filter_only|filter_then_simulation`, and `--input-encoding distance|absence`.
 BDL detection uses `--bdl-pair-min`, `--bdl-pair-max`, and `--bdl-wire-distance`, all in nm.
-Advanced defaults follow the bindings. `--sketch` selects `filter_only` and requires kink rejection
-and `LOGIC` dots. QuickSim requires base 2 and cannot simulate charged defects. A finite timeout
+Advanced defaults follow the bindings. `--sketch` or `--strategy filter_only` enables Sketch, which
+requires kink rejection and `LOGIC` dots. QuickSim requires base 2 and cannot simulate charged defects. A finite timeout
 bounds the complete computation and is unsupported with ClusterComplete; expiration produces no partial domain.
 
 Plots show a legend and non-operational samples by default. `--no-legend`, `--no-non-operational`, and
@@ -497,7 +498,8 @@ Plots show a legend and non-operational samples by default. `--no-legend`, `--no
 `--operational-size`, and `--non-operational-size` control markers; sizes are diameters in points for static
 plots and pixels for HTML. `--width` and `--height` set figure dimensions in inches; HTML uses 96 pixels
 per inch. `--dpi` sets static-image resolution. Defaults are 7×6 inches, 300 DPI, purple operational
-samples, yellow Sketch positives, and gray non-operational samples.
+samples, yellow Sketch positives, and gray non-operational samples. Use hex colors or names accepted by
+both backends when exporting static plots and HTML together.
 
 The results table prints computation runtime, evaluated samples, operational/non-operational counts,
 total parameter points, and simulator calls. `--log FILE` records statistics and native parameters as JSON.

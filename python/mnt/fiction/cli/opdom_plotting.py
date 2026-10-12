@@ -112,7 +112,7 @@ def validate_outputs(args: argparse.Namespace, *, log_path: Path | None = None) 
         try:
             _validate_colors(args, html=path.suffix.lower() == ".html")
         except ImportError as error:
-            msg = "plotting requires 'pip install mnt-pyfiction[plot]'"
+            msg = "plotting requires uv tool install 'mnt-pyfiction[plot]' (or uv pip install in a virtual environment)"
             raise CommandError(msg) from error
         except ValueError as error:
             msg = f"invalid plot color: {error}"

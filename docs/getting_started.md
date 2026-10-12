@@ -25,7 +25,7 @@ To help you getting started with _fiction_, pick the interface that best fits yo
 
 | Goal                                   | Recommended Path          | Section                                  |
 | -------------------------------------- | ------------------------- | ---------------------------------------- |
-| Try the tool immediately               | 🐍 `uv tool install`          | {ref}`CLI (uv) <cli-pip>`               |
+| Try the tool immediately               | 🐍 `uv tool install`      | {ref}`CLI (uv) <cli-pip>`               |
 | Run the CLI without installing Python  | 🐳 Docker CLI image       | {ref}`CLI (Docker) <cli-docker>`         |
 | Develop the C++ library                | 💻 Native build           | {ref}`Building from source <cli-source>` |
 | Integrate into a C++ project           | 📚 Header-only library    | {ref}`C++ Library <header-only>`         |
