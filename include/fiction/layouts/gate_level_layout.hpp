@@ -194,14 +194,27 @@ class gate_level_layout : public CoordinateLayout
         }
         return *this;
     }
-    /** @brief Moves owned state and leaves an empty reusable source with its original geometry. */
-    gate_level_layout(gate_level_layout&& other) noexcept :
+    /**
+     * @brief Moves owned state and leaves an empty reusable source with its original geometry.
+     * @note Exceptions from cloning or constructing the coordinate geometry propagate to the caller.
+     */
+    // Empty owned state and truth-table reserve(0) do not allocate.
+    // NOLINTNEXTLINE(bugprone-exception-escape)
+    gate_level_layout(gate_level_layout&& other) noexcept(noexcept(CoordinateLayout{
+        std::declval<const CoordinateLayout&>().clone()})) :
             CoordinateLayout{static_cast<const CoordinateLayout&>(other).clone()}
     {
         swap_owned_state(other);
     }
-    /** @brief Moves owned state and leaves an empty reusable source. */
-    gate_level_layout& operator=(gate_level_layout&& other) noexcept
+    /**
+     * @brief Moves owned state and leaves an empty reusable source.
+     * @note Exceptions from cloning, constructing, or assigning the coordinate geometry propagate to the caller.
+     */
+    // The temporary move initializes empty owned state without allocating.
+    // NOLINTNEXTLINE(bugprone-exception-escape)
+    gate_level_layout& operator=(gate_level_layout&& other) noexcept(
+        noexcept(CoordinateLayout{std::declval<const CoordinateLayout&>().clone()}) &&
+        std::is_nothrow_move_assignable_v<CoordinateLayout>)
     {
         if (this != &other)
         {

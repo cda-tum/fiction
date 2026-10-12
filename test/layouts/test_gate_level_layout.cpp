@@ -939,16 +939,18 @@ TEST_CASE("Name presence queries do not allocate", "[gate-level-layout]")
     CHECK_FALSE(layout.has_input_name(0));
 }
 
-TEST_CASE("Layout moves preserve objects and clocking without allocating", "[gate-level-layout]")
+TEMPLATE_TEST_CASE("Layout moves preserve objects and clocking without allocating", "[gate-level-layout]",
+                   cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<gate_level_layout<cartesian_layout>>);
-    STATIC_REQUIRE(std::is_nothrow_move_assignable_v<gate_level_layout<cartesian_layout>>);
+    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<gate_level_layout<TestType>>);
+    STATIC_REQUIRE(std::is_nothrow_move_assignable_v<gate_level_layout<TestType>>);
 
     require_allocation_failure_support();
-    gate_level_layout<cartesian_layout> source{{3, 2}, clocking::twoddwave()};
-    const auto                          input = source.create_pi("input", {0, 0});
+    auto source =
+        blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {3, 2}, clocking::twoddwave());
+    const auto input = source.create_pi("input", {0, 0});
     source.assign_synchronization_element({0, 0}, 2);
-    gate_level_layout<cartesian_layout> destination{};
+    auto destination  = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {});
     allocation_budget = 0;
     auto moved        = std::move(source);
     destination       = std::move(moved);
@@ -959,6 +961,46 @@ TEST_CASE("Layout moves preserve objects and clocking without allocating", "[gat
     // The layout contract permits inspecting and reusing moved-from layouts.
     // NOLINTNEXTLINE(*-use-after-move,*.Move,*-invalid-access-moved)
     CHECK(source.get_clocking_scheme() == clocking::open());
+}
+
+/** @brief Cartesian geometry whose independent clone reports a failure. */
+struct throwing_clone_geometry : cartesian_layout
+{
+    /** @brief Constructs ordinary Cartesian geometry. */
+    using cartesian_layout::cartesian_layout;
+    /** @brief Reports a failed geometry clone. @throws std::runtime_error Always. */
+    [[nodiscard]] static throwing_clone_geometry clone()
+    {
+        throw std::runtime_error("Geometry clone failed");
+    }
+};
+
+TEST_CASE("Geometry clone failures preserve layout move operands", "[gate-level-layout]")
+{
+    gate_level_layout<throwing_clone_geometry> source{{3, 2}};
+    const auto                                 input = source.create_pi("source", {0, 0});
+    gate_level_layout<throwing_clone_geometry> destination{{2, 1}};
+    const auto                                 retained = destination.create_pi("destination", {1, 0});
+
+    SECTION("Move construction")
+    {
+        REQUIRE_THROWS_AS(gate_level_layout<throwing_clone_geometry>{std::move(source)}, std::runtime_error);
+    }
+    SECTION("Move assignment")
+    {
+        // Catch2 runs these sections independently; the clone failure preserves the source.
+        REQUIRE_THROWS_AS(destination = std::move(source),  // NOLINT(*-use-after-move,*-invalid-access-moved)
+                          std::runtime_error);
+    }
+    // A failed geometry clone preserves the source before ownership transfer.
+    CHECK(source.contains(input));  // NOLINT(*-use-after-move,*-invalid-access-moved)
+    CHECK(source.get_tile(input) == layout_base::coordinate{0, 0});
+    CHECK(source.get_name(input) == "source");
+    CHECK(source.num_pis() == 1);
+    CHECK(destination.contains(retained));
+    CHECK(destination.get_tile(retained) == layout_base::coordinate{1, 0});
+    CHECK(destination.get_name(retained) == "destination");
+    CHECK(destination.num_pis() == 1);
 }
 
 TEST_CASE("Crossing counts survive failed connection allocation", "[gate-level-layout]")
