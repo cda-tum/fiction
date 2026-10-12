@@ -800,14 +800,14 @@ TEMPLATE_TEST_CASE("Object visitors accept move-only lvalues and temporaries", "
     };
 
     /** @brief Visits reported by the lvalue callback. */
-    uint32_t observed{};
+    uint32_t observed{};  // NOLINT(misc-const-correctness): The visitor writes through its reference member.
     /** @brief Move-only callback passed as an lvalue. */
     move_only_visitor visitor{.calls = std::make_unique<uint32_t>(0), .observed = observed};
     lyt.foreach_object(visitor);
     CHECK(observed == 2);
 
     /** @brief Visits reported by the temporary callback. */
-    uint32_t observed_temporary{};
+    uint32_t observed_temporary{};  // NOLINT(misc-const-correctness): The visitor writes through its reference member.
     lyt.foreach_object(move_only_visitor{.calls = std::make_unique<uint32_t>(0), .observed = observed_temporary});
     CHECK(observed_temporary == 2);
 }
