@@ -31,9 +31,23 @@ def test_mkdoc_compile_flags(monkeypatch: pytest.MonkeyPatch) -> None:
     assert module.extract_flags({
         "command": r'cl /nologo -I"C:\Project Files\include" -external:I"C:\Vendor Files" /DWIN32'
     }) == [r"-IC:\Project Files\include", r"-isystemC:\Vendor Files", "-DWIN32"]
+    assert module.extract_flags({
+        "command": r'cl /I "C:\Project Files\include" /external:I"C:\Vendor Files" /external:I "C:\Other Files" '
+        r'-DNAME=\"v\" -DLABEL="\"two words\""'
+    }) == [
+        r"-IC:\Project Files\include",
+        r"-isystemC:\Vendor Files",
+        r"-isystemC:\Other Files",
+        '-DNAME="v"',
+        '-DLABEL="two words"',
+    ]
     monkeypatch.setattr(module, "os", SimpleNamespace(name="posix"))
     assert module.extract_flags({"command": 'c++ -I "project includes" -isystem /usr/include -DVALUE=1 -DVALUE=1'}) == [
         "-Iproject includes",
         "-isystem/usr/include",
         "-DVALUE=1",
+    ]
+    assert module.extract_flags({"command": "c++ /Docs/input.cpp /Include/input.cpp -I/include"}) == ["-I/include"]
+    assert module.extract_flags({"arguments": ["c++", "/Docs/input.cpp", "/Include/input.cpp", "-I/include"]}) == [
+        "-I/include"
     ]

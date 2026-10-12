@@ -51,13 +51,16 @@ def extract_flags(entry: dict[str, Any]) -> list[str]:
     """
     command = entry.get("command")
     if command:
+        if os.name == "nt":
+            # NUL cannot occur in a command line; protect CMake's literal escaped quotes.
+            command = str(command).replace(r"\"", "\0")
         lexer = shlex.shlex(str(command), posix=True)
         lexer.whitespace_split = True
         lexer.commenters = ""
         if os.name == "nt":
             # Windows paths use backslashes literally, including inside quoted paths.
             lexer.escape = ""
-        tokens = list(lexer)
+        tokens = [token.replace("\0", '"') for token in lexer] if os.name == "nt" else list(lexer)
     else:
         tokens = [str(argument) for argument in entry["arguments"]]
 
@@ -65,10 +68,10 @@ def extract_flags(entry: dict[str, Any]) -> list[str]:
     index = 0
     while index < len(tokens):
         token = tokens[index]
+        if os.name == "nt" and token.startswith(("/I", "/D", "/external:I")):
+            token = "-" + token[1:]
         if token.startswith("-external:I"):
             token = "-isystem" + token.removeprefix("-external:I")
-        elif token.startswith(("/I", "/D")):
-            token = "-" + token[1:]
         if token in _VALUE_FLAGS:
             flags.append(token + tokens[index + 1])
             index += 2
