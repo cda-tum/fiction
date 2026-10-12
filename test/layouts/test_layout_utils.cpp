@@ -101,92 +101,21 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
         });
 }
 
-TEST_CASE("Generate random coordinate", "[layout-utils]")
-{
-    SECTION("two identical cells as input")
-    {
-        const auto randomly_generated_coordinate = random_coordinate<layout_base::coordinate>({0, 0, 0}, {0, 0, 0});
-        CHECK(randomly_generated_coordinate.x == 0);
-        CHECK(randomly_generated_coordinate.y == 0);
-        CHECK(randomly_generated_coordinate.z == 0);
-
-        const auto randomly_generated_coordinate_second =
-            random_coordinate<layout_base::coordinate>({1, 0, 0}, {1, 0, 0});
-        CHECK(randomly_generated_coordinate_second.x == 1);
-        CHECK(randomly_generated_coordinate_second.y == 0);
-        CHECK(randomly_generated_coordinate_second.z == 0);
-    }
-
-    SECTION("two unidentical cells as input, correct order")
-    {
-        const auto randomly_generated_coordinate_second =
-            random_coordinate<layout_base::coordinate>({1, 1, 1}, {5, 2, 3});
-        CHECK(randomly_generated_coordinate_second.x >= 1);
-        CHECK(randomly_generated_coordinate_second.x <= 5);
-        CHECK(randomly_generated_coordinate_second.y <= 2);
-        CHECK(randomly_generated_coordinate_second.y >= 0);
-        CHECK(randomly_generated_coordinate_second.z <= 3);
-        CHECK(randomly_generated_coordinate_second.z >= 1);
-    }
-
-    SECTION("two unidentical cells as input, switched correct order")
-    {
-        const auto randomly_generated_coordinate = random_coordinate<layout_base::coordinate>({5, 2, 3}, {1, 1, 1});
-        CHECK(randomly_generated_coordinate.x >= 1);
-        CHECK(randomly_generated_coordinate.x <= 5);
-        CHECK(randomly_generated_coordinate.y <= 2);
-        CHECK(randomly_generated_coordinate.y >= 0);
-        CHECK(randomly_generated_coordinate.z <= 3);
-        CHECK(randomly_generated_coordinate.z >= 1);
-    }
-}
-
-TEST_CASE("Generate random coordinate with negative axes", "[layout-utils]")
-{
-    SECTION("two identical cells as input")
-    {
-        const auto randomly_generated_coordinate =
-            random_coordinate<layout_base::coordinate>({-10, -5, 0}, {-10, -5, 0});
-        CHECK(randomly_generated_coordinate.x == -10);
-        CHECK(randomly_generated_coordinate.y == -5);
-        CHECK(randomly_generated_coordinate.z == 0);
-
-        const auto randomly_generated_coordinate_second =
-            random_coordinate<layout_base::coordinate>({1, 0, 0}, {1, 0, 0});
-        CHECK(randomly_generated_coordinate_second.x == 1);
-        CHECK(randomly_generated_coordinate_second.y == 0);
-        CHECK(randomly_generated_coordinate_second.z == 0);
-    }
-
-    SECTION("two unidentical cells as input, correct order")
-    {
-        const auto randomly_generated_coordinate =
-            random_coordinate<layout_base::coordinate>({-10, -1, 3}, {-10, -1, 6});
-        CHECK(randomly_generated_coordinate.x == -10);
-        CHECK(randomly_generated_coordinate.y == -1);
-        CHECK(randomly_generated_coordinate.z >= 3);
-        CHECK(randomly_generated_coordinate.z <= 6);
-    }
-
-    SECTION("two unidentical cells as input, switched correct order")
-    {
-        const auto randomly_generated_coordinate =
-            random_coordinate<layout_base::coordinate>({-10, -1, 6}, {-10, -1, 3});
-        CHECK(randomly_generated_coordinate.x == -10);
-        CHECK(randomly_generated_coordinate.y == -1);
-        CHECK(randomly_generated_coordinate.z >= 3);
-        CHECK(randomly_generated_coordinate.z <= 6);
-    }
-}
-
-TEST_CASE("Random coordinates stay inside crossed-axis corners", "[layout-utils]")
+TEST_CASE("Random coordinates stay inside inclusive corner bounds", "[layout-utils]")
 {
     /** Coordinate type sampled by the public helper. */
     using coord = layout_base::coordinate;
     /** Input corners and independently specified minimum and maximum axes. */
-    const auto [first, second, minimum, maximum] =
-        GENERATE(std::tuple{coord{5, 1, 0}, coord{1, 2, 0}, coord{1, 1, 0}, coord{5, 2, 0}},
-                 std::tuple{coord{5, -1, 3}, coord{1, 2, -4}, coord{1, -1, -4}, coord{5, 2, 3}});
+    const auto [first, second, minimum, maximum] = GENERATE(
+        std::tuple{coord{0, 0, 0}, coord{0, 0, 0}, coord{0, 0, 0}, coord{0, 0, 0}},
+        std::tuple{coord{1, 0, 0}, coord{1, 0, 0}, coord{1, 0, 0}, coord{1, 0, 0}},
+        std::tuple{coord{1, 1, 1}, coord{5, 2, 3}, coord{1, 1, 1}, coord{5, 2, 3}},
+        std::tuple{coord{-10, -5, 0}, coord{-10, -5, 0}, coord{-10, -5, 0}, coord{-10, -5, 0}},
+        std::tuple{coord{-10, -1, 3}, coord{-10, -1, 6}, coord{-10, -1, 3}, coord{-10, -1, 6}},
+        std::tuple{coord{5, 1, 0}, coord{1, 2, 0}, coord{1, 1, 0}, coord{5, 2, 0}},
+        std::tuple{coord{5, -1, 3}, coord{1, 2, -4}, coord{1, -1, -4}, coord{5, 2, 3}},
+        std::tuple{coord{std::numeric_limits<int32_t>::min(), 0, 0}, coord{std::numeric_limits<int32_t>::max(), 0, 0},
+                   coord{std::numeric_limits<int32_t>::min(), 0, 0}, coord{std::numeric_limits<int32_t>::max(), 0, 0}});
     /** Both argument orders describe the same region. */
     const auto reverse = GENERATE(false, true);
 
