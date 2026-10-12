@@ -90,7 +90,7 @@ jobs:
           set -euo pipefail
           mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
           mkdoc_headers="$(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)"
-          python3 -m pybind11_mkdoc \
+          python3 .github/scripts/generate_docstrings.py \
             -o "${DOCSTRINGS}" \
             -std=c++20 \
             "-resource-dir=/usr/lib/llvm-${LLVM_VERSION}/lib/clang/${LLVM_VERSION}" \
