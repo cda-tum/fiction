@@ -34,6 +34,70 @@ if TYPE_CHECKING:
 GateLayout: TypeAlias = cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout
 
 
+def test_layout_input_port_value_keys() -> None:
+    """Equal immutable input ports identify one set entry and dictionary key."""
+    port = LayoutInputPort(LayoutObjectId(3, 2), 1)
+    equal_port = LayoutInputPort(LayoutObjectId(3, 2), 1)
+    other_index = LayoutInputPort(LayoutObjectId(3, 2), 0)
+    other_generation = LayoutInputPort(LayoutObjectId(3, 3), 1)
+    assert port == equal_port
+    assert hash(port) == hash(equal_port)
+    assert len({port, equal_port, other_index, other_generation}) == 3
+    assert {port: "source"}[equal_port] == "source"
+
+
+@pytest.mark.parametrize(
+    ("value", "equal_value", "different_value"),
+    [
+        pytest.param(LayoutObjectId(0, 1), LayoutObjectId(0, 1), LayoutObjectId(0, 2), id="object_id"),
+        pytest.param(
+            LayoutInputPort(LayoutObjectId(0, 1), 0),
+            LayoutInputPort(LayoutObjectId(0, 1), 0),
+            LayoutInputPort(LayoutObjectId(0, 1), 1),
+            id="input_port",
+        ),
+        pytest.param(Extent(1, 2), Extent(1, 2), Extent(2, 2), id="extent"),
+    ],
+)
+@pytest.mark.parametrize("unrelated", [None, 0, "identity", object()])
+def test_layout_values_compare_with_unrelated_values(
+    value: LayoutObjectId | LayoutInputPort | Extent,
+    equal_value: LayoutObjectId | LayoutInputPort | Extent,
+    different_value: LayoutObjectId | LayoutInputPort | Extent,
+    unrelated: object,
+) -> None:
+    """Layout values compare unequal to unrelated operands without raising."""
+    assert operator.eq(value, unrelated) is False
+    assert operator.eq(unrelated, value) is False
+    assert operator.eq(value, equal_value) is True
+    assert operator.eq(value, different_value) is False
+
+
+def test_mutable_layout_extent_is_unhashable() -> None:
+    """Mutable extents cannot serve as hash keys."""
+    extent = Extent(1, 2)
+    extent.width = 3
+    assert extent.width == 3
+    with pytest.raises(TypeError, match="unhashable"):
+        hash(extent)
+
+
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(lambda: cartesian_gate_layout((2, 2, 1), "unknown-scheme"), id="cartesian"),
+        pytest.param(
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 1), "unknown-scheme"), id="shifted"
+        ),
+        pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 1), "unknown-scheme"), id="hexagonal"),
+    ],
+)
+def test_unknown_clocking_scheme_rejects_construction(make_layout: Callable[[], GateLayout]) -> None:
+    """Every gate-layout geometry rejects an unknown scheme with ValueError."""
+    with pytest.raises(ValueError, match="clocking scheme"):
+        make_layout()
+
+
 @pytest.mark.parametrize(
     "make_layout",
     [
@@ -66,6 +130,128 @@ def test_gate_level_layout_inheritance(make_layout: Callable[[], GateLayout]) ->
 
     for icz in layout.outgoing_clocked_zones((1, 1)):
         assert icz in [layout.coord(1, 2), layout.coord(2, 1)]
+
+
+def test_gate_creation_requires_placement_and_valid_ports() -> None:
+    """Reject missing placement, duplicate placement, and invalid endpoints."""
+    layout = cartesian_gate_layout((2, 1, 1))
+    with pytest.raises(TypeError):
+        cast("Callable[..., LayoutObjectId]", layout.create_pi)("unplaced")
+    source = layout.create_pi("a", (0, 0))
+    with pytest.raises(ValueError, match="occupied"):
+        layout.create_pi("occupied", (0, 0))
+    with pytest.raises(TypeError):
+        layout.create_po(cast("LayoutObjectId", coordinate(0, 0)), "f", (1, 0))
+    output = layout.create_po(source, "f", (1, 0))
+    with pytest.raises(ValueError, match="identity"):
+        layout.get_tile(LayoutObjectId(source.index, 0))
+    assert layout.source(LayoutInputPort(output, 0)) == source
+
+
+def test_placed_constant_function() -> None:
+    """Represent a constant with a placed zero-input function."""
+    layout = cartesian_gate_layout((1, 1, 1))
+    function = dynamic_truth_table(0)
+    function.create_from_hex_string("1")
+    constant = layout.create_gate([], function, (0, 0))
+    assert layout.size() == 1
+    assert layout.input_count(constant) == 0
+    assert layout.object_function(constant).num_vars() == 0
+    assert layout.object_function(constant).to_hex() == "1"
+    assert layout.gates() == [constant]
+    assert layout.wires() == []
+
+
+def test_gate_level_layout_gate_types() -> None:
+    """Classify placed gates and identity objects for every topology."""
+    layouts: list[cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout] = [
+        cartesian_gate_layout((3, 9, 1), "2DDWave", "Layout"),
+        shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 9, 1), "2DDWave", "Layout"),
+        hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 9, 1), "2DDWave", "Layout"),
+    ]
+    for layout in layouts:
+        assert layout.is_empty()
+
+        # layout creation
+        # pis
+        x1 = layout.create_pi("x1", (0, 0))
+        x2 = layout.create_pi("x2", (0, 1))
+        x3 = layout.create_pi("x3", (0, 2))
+        x4 = layout.create_pi("x4", (0, 3))
+        x5 = layout.create_pi("x5", (0, 4))
+        x6 = layout.create_pi("x6", (0, 5))
+        x7 = layout.create_pi("x7", (0, 6))
+
+        # gates
+        inv = layout.create_not(x1, (1, 0))
+        and_gate = layout.create_and(x2, inv, (1, 1))
+        nand_gate = layout.create_nand(x3, and_gate, (1, 2))
+        or_gate = layout.create_or(x4, nand_gate, (1, 3))
+        nor_gate = layout.create_nor(x5, or_gate, (1, 4))
+        xor_gate = layout.create_xor(x6, nor_gate, (1, 5))
+        xnor_gate = layout.create_xnor(x7, xor_gate, (1, 6))
+        fanout = layout.create_buf(xnor_gate, (1, 7))
+        buf = layout.create_buf(fanout, (2, 7))
+
+        # pos
+        f1 = layout.create_po(fanout, "f1", (1, 8))
+        f2 = layout.create_po(buf, "f2", (2, 8))
+
+        # check gate type
+        # pis
+        assert layout.is_pi(x1)
+        assert layout.is_pi(x2)
+        assert layout.is_pi(x3)
+        assert layout.is_pi(x4)
+        assert layout.is_pi(x5)
+        assert layout.is_pi(x6)
+        assert layout.is_pi(x7)
+
+        # gates
+        assert layout.is_inv(inv)
+        assert layout.is_and(and_gate)
+        assert layout.is_nand(nand_gate)
+        assert layout.is_or(or_gate)
+        assert layout.is_nor(nor_gate)
+        assert layout.is_xor(xor_gate)
+        assert layout.is_xnor(xnor_gate)
+        assert layout.is_fanout(fanout)
+        assert layout.is_wire(buf)
+
+        # pos
+        assert layout.is_po(f1)
+        assert layout.is_po(f2)
+
+    layouts = [
+        cartesian_gate_layout((3, 3, 1), "RES", "Layout"),
+        shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "RES", "Layout"),
+        hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "RES", "Layout"),
+    ]
+    for layout in layouts:
+        assert layout.is_empty()
+
+        # pis
+        x1 = layout.create_pi("x1", (0, 1))
+        x2 = layout.create_pi("x2", (1, 0))
+        x3 = layout.create_pi("x3", (2, 1))
+
+        # maj
+        maj = layout.create_maj(x1, x2, x3, (1, 1))
+
+        # po
+        f1 = layout.create_po(maj, "f1", (1, 2))
+
+        # check gate type
+        # pis
+        assert layout.is_pi(x1)
+        assert layout.is_pi(x2)
+        assert layout.is_pi(x3)
+
+        # maj
+        assert layout.is_maj(maj)
+
+        # po
+        assert layout.is_po(f1)
 
 
 @pytest.mark.parametrize(
@@ -161,98 +347,6 @@ def test_gate_level_layout_iteration(make_layout: Callable[[], GateLayout]) -> N
 
     drv_params = gate_level_drv_params()
     assert gate_level_drvs(layout, drv_params) == (0, 0)
-
-
-def test_gate_level_layout_gate_types() -> None:
-    """Classify placed gates and identity objects for every topology."""
-    layouts: list[cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout] = [
-        cartesian_gate_layout((3, 9, 1), "2DDWave", "Layout"),
-        shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 9, 1), "2DDWave", "Layout"),
-        hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 9, 1), "2DDWave", "Layout"),
-    ]
-    for layout in layouts:
-        assert layout.is_empty()
-
-        # layout creation
-        # pis
-        x1 = layout.create_pi("x1", (0, 0))
-        x2 = layout.create_pi("x2", (0, 1))
-        x3 = layout.create_pi("x3", (0, 2))
-        x4 = layout.create_pi("x4", (0, 3))
-        x5 = layout.create_pi("x5", (0, 4))
-        x6 = layout.create_pi("x6", (0, 5))
-        x7 = layout.create_pi("x7", (0, 6))
-
-        # gates
-        inv = layout.create_not(x1, (1, 0))
-        and_gate = layout.create_and(x2, inv, (1, 1))
-        nand_gate = layout.create_nand(x3, and_gate, (1, 2))
-        or_gate = layout.create_or(x4, nand_gate, (1, 3))
-        nor_gate = layout.create_nor(x5, or_gate, (1, 4))
-        xor_gate = layout.create_xor(x6, nor_gate, (1, 5))
-        xnor_gate = layout.create_xnor(x7, xor_gate, (1, 6))
-        fanout = layout.create_buf(xnor_gate, (1, 7))
-        buf = layout.create_buf(fanout, (2, 7))
-
-        # pos
-        f1 = layout.create_po(fanout, "f1", (1, 8))
-        f2 = layout.create_po(buf, "f2", (2, 8))
-
-        # check gate type
-        # pis
-        assert layout.is_pi(x1)
-        assert layout.is_pi(x2)
-        assert layout.is_pi(x3)
-        assert layout.is_pi(x4)
-        assert layout.is_pi(x5)
-        assert layout.is_pi(x6)
-        assert layout.is_pi(x7)
-
-        # gates
-        assert layout.is_inv(inv)
-        assert layout.is_and(and_gate)
-        assert layout.is_nand(nand_gate)
-        assert layout.is_or(or_gate)
-        assert layout.is_nor(nor_gate)
-        assert layout.is_xor(xor_gate)
-        assert layout.is_xnor(xnor_gate)
-        assert layout.is_fanout(fanout)
-        assert layout.is_wire(buf)
-
-        # pos
-        assert layout.is_po(f1)
-        assert layout.is_po(f2)
-
-    layouts = [
-        cartesian_gate_layout((3, 3, 1), "RES", "Layout"),
-        shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "RES", "Layout"),
-        hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "RES", "Layout"),
-    ]
-    for layout in layouts:
-        assert layout.is_empty()
-
-        # pis
-        x1 = layout.create_pi("x1", (0, 1))
-        x2 = layout.create_pi("x2", (1, 0))
-        x3 = layout.create_pi("x3", (2, 1))
-
-        # maj
-        maj = layout.create_maj(x1, x2, x3, (1, 1))
-
-        # po
-        f1 = layout.create_po(maj, "f1", (1, 2))
-
-        # check gate type
-        # pis
-        assert layout.is_pi(x1)
-        assert layout.is_pi(x2)
-        assert layout.is_pi(x3)
-
-        # maj
-        assert layout.is_maj(maj)
-
-        # po
-        assert layout.is_po(f1)
 
 
 @pytest.mark.parametrize(
@@ -361,100 +455,3 @@ def test_gate_interface_order_and_clone_ownership(copy_layout: Callable[[GateLay
     assert layout.source(LayoutInputPort(gate, 0)) == a
     assert clone.source(LayoutInputPort(gate, 0)) is None
     assert clone.object_function(gate).to_hex() == layout.object_function(gate).to_hex()
-
-
-def test_gate_creation_requires_placement_and_valid_ports() -> None:
-    """Reject missing placement, duplicate placement, and invalid endpoints."""
-    layout = cartesian_gate_layout((2, 1, 1))
-    with pytest.raises(TypeError):
-        cast("Callable[..., LayoutObjectId]", layout.create_pi)("unplaced")
-    source = layout.create_pi("a", (0, 0))
-    with pytest.raises(ValueError, match="occupied"):
-        layout.create_pi("occupied", (0, 0))
-    with pytest.raises(TypeError):
-        layout.create_po(cast("LayoutObjectId", coordinate(0, 0)), "f", (1, 0))
-    output = layout.create_po(source, "f", (1, 0))
-    with pytest.raises(ValueError, match="identity"):
-        layout.get_tile(LayoutObjectId(source.index, 0))
-    assert layout.source(LayoutInputPort(output, 0)) == source
-
-
-def test_gate_constant_function_requires_an_explicit_placed_object() -> None:
-    """Keep an empty layout empty and represent a constant with a placed zero-input function."""
-    layout = cartesian_gate_layout((1, 1, 1))
-    assert layout.size() == 0
-    assert layout.gates() == []
-    assert layout.wires() == []
-    function = dynamic_truth_table(0)
-    function.create_from_hex_string("1")
-    constant = layout.create_gate([], function, (0, 0))
-    assert layout.size() == 1
-    assert layout.input_count(constant) == 0
-    assert layout.object_function(constant).num_vars() == 0
-    assert layout.object_function(constant).to_hex() == "1"
-    assert layout.gates() == [constant]
-    assert layout.wires() == []
-
-
-@pytest.mark.parametrize(
-    "make_layout",
-    [
-        pytest.param(lambda: cartesian_gate_layout((2, 2, 1), "unknown-scheme"), id="cartesian"),
-        pytest.param(
-            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 1), "unknown-scheme"), id="shifted"
-        ),
-        pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 1), "unknown-scheme"), id="hexagonal"),
-    ],
-)
-def test_unknown_clocking_scheme_rejects_construction(make_layout: Callable[[], GateLayout]) -> None:
-    """Every gate-layout geometry rejects an unknown scheme with ValueError."""
-    with pytest.raises(ValueError, match="clocking scheme"):
-        make_layout()
-
-
-def test_layout_input_port_value_keys() -> None:
-    """Equal immutable input ports identify one set entry and dictionary key."""
-    port = LayoutInputPort(LayoutObjectId(3, 2), 1)
-    equal_port = LayoutInputPort(LayoutObjectId(3, 2), 1)
-    other_index = LayoutInputPort(LayoutObjectId(3, 2), 0)
-    other_generation = LayoutInputPort(LayoutObjectId(3, 3), 1)
-    assert port == equal_port
-    assert hash(port) == hash(equal_port)
-    assert len({port, equal_port, other_index, other_generation}) == 3
-    assert {port: "source"}[equal_port] == "source"
-
-
-@pytest.mark.parametrize(
-    ("value", "equal_value", "different_value"),
-    [
-        pytest.param(LayoutObjectId(0, 1), LayoutObjectId(0, 1), LayoutObjectId(0, 2), id="object_id"),
-        pytest.param(
-            LayoutInputPort(LayoutObjectId(0, 1), 0),
-            LayoutInputPort(LayoutObjectId(0, 1), 0),
-            LayoutInputPort(LayoutObjectId(0, 1), 1),
-            id="input_port",
-        ),
-        pytest.param(Extent(1, 2), Extent(1, 2), Extent(2, 2), id="extent"),
-    ],
-)
-@pytest.mark.parametrize("unrelated", [None, 0, "identity", object()])
-def test_layout_values_compare_with_unrelated_values(
-    value: LayoutObjectId | LayoutInputPort | Extent,
-    equal_value: LayoutObjectId | LayoutInputPort | Extent,
-    different_value: LayoutObjectId | LayoutInputPort | Extent,
-    unrelated: object,
-) -> None:
-    """Layout values compare unequal to unrelated operands without raising."""
-    assert operator.eq(value, unrelated) is False
-    assert operator.eq(unrelated, value) is False
-    assert operator.eq(value, equal_value) is True
-    assert operator.eq(value, different_value) is False
-
-
-def test_mutable_layout_extent_is_unhashable() -> None:
-    """Mutable extents cannot serve as hash keys."""
-    extent = Extent(1, 2)
-    extent.width = 3
-    assert extent.width == 3
-    with pytest.raises(TypeError, match="unhashable"):
-        hash(extent)

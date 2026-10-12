@@ -46,10 +46,3 @@ def test_write_dot_layout_draws_every_topology(tmp_path: Path, layout_type: Call
     text = file.read_text(encoding="utf-8")
     assert "graph" in text
     assert "a" in text
-
-
-def test_clone_is_independent(mux21_layout: cartesian_gate_layout) -> None:
-    copy = mux21_layout.clone()
-    assert copy.num_gates() == mux21_layout.num_gates()
-    copy.set_layout_name("copy")
-    assert mux21_layout.get_layout_name() != "copy"

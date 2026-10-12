@@ -45,6 +45,27 @@ OBSTRUCTION_LAYOUTS = [
 ]
 
 
+def test_explicit_obstruction_lists_own_values() -> None:
+    """Enumerate unique manual coordinates and directed connections as owned values."""
+    constraints = obstructions()
+    position = coordinate(-1, 4, 8)
+    target = coordinate(0, 0)
+    constraints.obstruct_coordinate(position)
+    constraints.obstruct_coordinate(position)
+    constraints.obstruct_connection(position, target)
+    constraints.obstruct_connection(position, target)
+    coordinates = constraints.obstructed_coordinates()
+    connections = constraints.obstructed_connections()
+    assert coordinates == [position]
+    assert connections == [(position, target)]
+    constraints.clear_obstructed_coordinates()
+    constraints.clear_obstructed_connections()
+    assert constraints.obstructed_coordinates() == []
+    assert constraints.obstructed_connections() == []
+    assert coordinates == [position]
+    assert connections == [(position, target)]
+
+
 @pytest.mark.parametrize(
     "make_layout",
     [
@@ -132,6 +153,72 @@ def test_obstruction_via_gates(make_layout: Callable[[], GateLayout]) -> None:
 
 
 @pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_manual_obstruction_lists_exclude_implicit_occupancy(make_layout: Callable[[], GateLayout]) -> None:
+    """Enumerate persistent manual constraints separately from objects and physical edges."""
+    layout = make_layout()
+    source = layout.create_pi("a", (0, 0))
+    layout.create_po(source, "f", (1, 0))
+    assert layout.obstructed_coordinates() == []
+    assert layout.obstructed_connections() == []
+    layout.obstruct_coordinate((0, 0))
+    layout.obstruct_connection((0, 0), (1, 0))
+    assert layout.obstructed_coordinates() == [coordinate(0, 0)]
+    assert layout.obstructed_connections() == [(coordinate(0, 0), coordinate(1, 0))]
+    layout.clear_obstructed_coordinates()
+    layout.clear_obstructed_connections()
+    assert layout.obstructed_coordinates() == []
+    assert layout.obstructed_connections() == []
+    assert layout.is_obstructed_coordinate((0, 0))
+    assert layout.is_obstructed_connection((0, 0), (1, 0))
+
+
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_disconnect_and_move_update_implicit_obstructions(make_layout: Callable[[], GateLayout]) -> None:
+    """Track physical connections and moved placements through typed endpoints."""
+    layout = make_layout()
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    output = layout.create_po(wire, "f", (1, 1))
+    assert layout.is_obstructed_connection((0, 0), (1, 0))
+    assert layout.is_obstructed_connection((1, 0), (1, 1))
+    layout.disconnect(LayoutInputPort(output, 0))
+    assert layout.source(LayoutInputPort(output, 0)) is None
+    assert not layout.is_obstructed_connection((1, 0), (1, 1))
+    assert layout.is_obstructed_coordinate((1, 1))
+    layout.move_object(wire, (0, 1))
+    assert not layout.is_obstructed_coordinate((1, 0))
+    assert layout.is_obstructed_coordinate((0, 1))
+    assert not layout.is_obstructed_connection((0, 0), (1, 0))
+    assert layout.is_obstructed_connection((0, 0), (0, 1))
+    layout.connect(wire, LayoutInputPort(output, 0))
+    assert layout.is_obstructed_connection((0, 1), (1, 1))
+    layout.remove(wire)
+    assert layout.source(LayoutInputPort(output, 0)) is None
+    assert not layout.is_obstructed_coordinate((0, 1))
+    assert not layout.is_obstructed_connection((0, 1), (1, 1))
+
+
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_clearing_manual_obstructions_preserves_objects_and_ports(make_layout: Callable[[], GateLayout]) -> None:
+    """Clear manual obstructions without changing declared placement or topology."""
+    layout = make_layout()
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    layout.obstruct_coordinate((1, 0))
+    layout.obstruct_connection((0, 0), (1, 0))
+    layout.clear_obstructed_coordinate((1, 0))
+    layout.clear_obstructed_connection((0, 0), (1, 0))
+    assert layout.contains(wire)
+    assert layout.source(LayoutInputPort(wire, 0)) == source
+    assert layout.is_obstructed_coordinate((1, 0))
+    assert layout.is_obstructed_connection((0, 0), (1, 0))
+    layout.disconnect(LayoutInputPort(wire, 0))
+    assert not layout.is_obstructed_connection((0, 0), (1, 0))
+    layout.remove(wire)
+    assert not layout.is_obstructed_coordinate((1, 0))
+
+
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
 def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
     """Expose placed identities, physical flow, timing, and validation."""
     layout = make_layout()
@@ -203,52 +290,6 @@ def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
 
 
 @pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
-def test_disconnect_and_move_update_implicit_obstructions(make_layout: Callable[[], GateLayout]) -> None:
-    """Track physical connections and moved placements through typed endpoints."""
-    layout = make_layout()
-    source = layout.create_pi("a", (0, 0))
-    wire = layout.create_buf(source, (1, 0))
-    output = layout.create_po(wire, "f", (1, 1))
-    assert layout.is_obstructed_connection((0, 0), (1, 0))
-    assert layout.is_obstructed_connection((1, 0), (1, 1))
-    layout.disconnect(LayoutInputPort(output, 0))
-    assert layout.source(LayoutInputPort(output, 0)) is None
-    assert not layout.is_obstructed_connection((1, 0), (1, 1))
-    assert layout.is_obstructed_coordinate((1, 1))
-    layout.move_object(wire, (0, 1))
-    assert not layout.is_obstructed_coordinate((1, 0))
-    assert layout.is_obstructed_coordinate((0, 1))
-    assert not layout.is_obstructed_connection((0, 0), (1, 0))
-    assert layout.is_obstructed_connection((0, 0), (0, 1))
-    layout.connect(wire, LayoutInputPort(output, 0))
-    assert layout.is_obstructed_connection((0, 1), (1, 1))
-    layout.remove(wire)
-    assert layout.source(LayoutInputPort(output, 0)) is None
-    assert not layout.is_obstructed_coordinate((0, 1))
-    assert not layout.is_obstructed_connection((0, 1), (1, 1))
-
-
-@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
-def test_clearing_manual_obstructions_preserves_objects_and_ports(make_layout: Callable[[], GateLayout]) -> None:
-    """Clear manual obstructions without changing declared placement or topology."""
-    layout = make_layout()
-    source = layout.create_pi("a", (0, 0))
-    wire = layout.create_buf(source, (1, 0))
-    layout.obstruct_coordinate((1, 0))
-    layout.obstruct_connection((0, 0), (1, 0))
-    layout.clear_obstructed_coordinate((1, 0))
-    layout.clear_obstructed_connection((0, 0), (1, 0))
-    assert layout.contains(wire)
-    assert layout.source(LayoutInputPort(wire, 0)) == source
-    assert layout.is_obstructed_coordinate((1, 0))
-    assert layout.is_obstructed_connection((0, 0), (1, 0))
-    layout.disconnect(LayoutInputPort(wire, 0))
-    assert not layout.is_obstructed_connection((0, 0), (1, 0))
-    layout.remove(wire)
-    assert not layout.is_obstructed_coordinate((1, 0))
-
-
-@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
 def test_clone_owns_obstructions_objects_and_connections(make_layout: Callable[[], GateLayout]) -> None:
     """Keep manual and implicit obstructions independent in a cloned layout."""
     layout = make_layout()
@@ -269,44 +310,3 @@ def test_clone_owns_obstructions_objects_and_connections(make_layout: Callable[[
     assert not clone.is_obstructed_coordinate((1, 0))
     assert layout.source(LayoutInputPort(output, 0)) == wire
     assert clone.source(LayoutInputPort(output, 0)) is None
-
-
-def test_explicit_obstruction_lists_own_values() -> None:
-    """Enumerate unique manual coordinates and directed connections as owned values."""
-    constraints = obstructions()
-    position = coordinate(-1, 4, 8)
-    target = coordinate(0, 0)
-    constraints.obstruct_coordinate(position)
-    constraints.obstruct_coordinate(position)
-    constraints.obstruct_connection(position, target)
-    constraints.obstruct_connection(position, target)
-    coordinates = constraints.obstructed_coordinates()
-    connections = constraints.obstructed_connections()
-    assert coordinates == [position]
-    assert connections == [(position, target)]
-    constraints.clear_obstructed_coordinates()
-    constraints.clear_obstructed_connections()
-    assert constraints.obstructed_coordinates() == []
-    assert constraints.obstructed_connections() == []
-    assert coordinates == [position]
-    assert connections == [(position, target)]
-
-
-@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
-def test_manual_obstruction_lists_exclude_implicit_occupancy(make_layout: Callable[[], GateLayout]) -> None:
-    """Enumerate persistent manual constraints separately from objects and physical edges."""
-    layout = make_layout()
-    source = layout.create_pi("a", (0, 0))
-    layout.create_po(source, "f", (1, 0))
-    assert layout.obstructed_coordinates() == []
-    assert layout.obstructed_connections() == []
-    layout.obstruct_coordinate((0, 0))
-    layout.obstruct_connection((0, 0), (1, 0))
-    assert layout.obstructed_coordinates() == [coordinate(0, 0)]
-    assert layout.obstructed_connections() == [(coordinate(0, 0), coordinate(1, 0))]
-    layout.clear_obstructed_coordinates()
-    layout.clear_obstructed_connections()
-    assert layout.obstructed_coordinates() == []
-    assert layout.obstructed_connections() == []
-    assert layout.is_obstructed_coordinate((0, 0))
-    assert layout.is_obstructed_connection((0, 0), (1, 0))

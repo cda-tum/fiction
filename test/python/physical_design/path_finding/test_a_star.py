@@ -39,26 +39,6 @@ CoordinateLayout: TypeAlias = cartesian_layout | shifted_cartesian_layout | hexa
 GateLayout: TypeAlias = cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout
 
 
-def test_search_constraints_are_local() -> None:
-    """Searches combine persistent constraints with independent routing data."""
-    layout = cartesian_gate_layout((3, 3), "2DDWave")
-    layout.obstruct_coordinate((1, 0))
-    blocked = obstructions()
-    blocked.obstruct_connection((0, 1), (1, 1))
-    expected = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2)]
-    for _ in range(2):
-        assert a_star(layout, (0, 0), (2, 2), obstructions=blocked) == expected
-        assert a_star_distance(layout, (0, 0), (2, 2), obstructions=blocked) == 4
-        assert enumerate_all_paths(layout, (0, 0), (2, 2), obstructions=blocked) == [expected]
-        assert yen_k_shortest_paths(layout, (0, 0), (2, 2), 4, obstructions=blocked) == [expected]
-        assert layout.is_obstructed_coordinate((1, 0))
-        assert not layout.is_obstructed_connection((0, 1), (1, 1))
-        assert blocked.is_obstructed_connection((0, 1), (1, 1))
-        assert not blocked.is_obstructed_coordinate((1, 0))
-
-    grid = cartesian_layout((2, 2))
-    blocked.obstruct_coordinate((1, 0))
-    assert a_star(grid, (0, 0), (1, 1), obstructions=blocked) == []
 
 
 CLOCKED_LAYOUTS = [
@@ -219,3 +199,25 @@ def test_distance(make_lyt: Callable[[], GateLayout]) -> None:
     assert a_star_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 8
     assert a_star_distance(lyt, coordinate(1, 1), coordinate(0, 0)) == float("inf")
     assert a_star_distance(lyt, coordinate(2, 2), coordinate(1, 1)) == float("inf")
+
+
+def test_search_constraints_are_local() -> None:
+    """Searches combine persistent constraints with independent routing data."""
+    layout = cartesian_gate_layout((3, 3), "2DDWave")
+    layout.obstruct_coordinate((1, 0))
+    blocked = obstructions()
+    blocked.obstruct_connection((0, 1), (1, 1))
+    expected = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2)]
+    for _ in range(2):
+        assert a_star(layout, (0, 0), (2, 2), obstructions=blocked) == expected
+        assert a_star_distance(layout, (0, 0), (2, 2), obstructions=blocked) == 4
+        assert enumerate_all_paths(layout, (0, 0), (2, 2), obstructions=blocked) == [expected]
+        assert yen_k_shortest_paths(layout, (0, 0), (2, 2), 4, obstructions=blocked) == [expected]
+        assert layout.is_obstructed_coordinate((1, 0))
+        assert not layout.is_obstructed_connection((0, 1), (1, 1))
+        assert blocked.is_obstructed_connection((0, 1), (1, 1))
+        assert not blocked.is_obstructed_coordinate((1, 0))
+
+    grid = cartesian_layout((2, 2))
+    blocked.obstruct_coordinate((1, 0))
+    assert a_star(grid, (0, 0), (1, 1), obstructions=blocked) == []

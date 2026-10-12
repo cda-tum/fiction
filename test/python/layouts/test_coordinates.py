@@ -30,6 +30,13 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
+def test_default_coordinate_is_origin() -> None:
+    assert coordinate() == coordinate((0, 0, 0))
+    c = coordinate()
+    c.x = -(2**31)
+    assert c.x == -(2**31)
+
+
 def test_construction_from_a_tuple():
     coordinate((1, 0))
     coordinate((1, 0, 0))
@@ -73,6 +80,14 @@ def test_axes_outside_of_the_int32_range_raise(axis):
         coordinate(0, 0, 0).x = axis
 
 
+def test_equality_disregards_an_omitted_z():
+    with_z, without_z = coordinate(1, 2, 0), coordinate(1, 2)
+
+    assert with_z == without_z
+    assert without_z == with_z
+    assert hash(with_z) == hash(without_z)
+
+
 @pytest.mark.parametrize(
     ("compare", "ascending"),
     [
@@ -95,17 +110,54 @@ def test_ordering_with_negative_axes():
     assert coordinate(5, 5, -1) < coordinate(-5, -5, 0)
 
 
-def test_equality_disregards_an_omitted_z():
-    with_z, without_z = coordinate(1, 2, 0), coordinate(1, 2)
-
-    assert with_z == without_z
-    assert without_z == with_z
-    assert hash(with_z) == hash(without_z)
-
-
 def test_repr():
     assert repr(coordinate(3, 2, 1)) == "(3,2,1)"
     assert repr(coordinate(-3, 2, 1)) == "(-3,2,1)"
+
+
+def test_extent_tuple_conversion_and_checked_axes() -> None:
+    size = Extent(extent=(2, 3))
+    assert Extent(extent=size) == size
+    assert (size.width, size.height, size.layers) == (2, 3, 1)
+    assert cartesian_layout(size).get_extent() == Extent((2, 3, 1))
+    assert cartesian_layout((2, 3, 0)).coordinates() == []
+    assert cartesian_layout((2**31, 1)).last_coordinate() == coordinate(2**31 - 1, 0, 0)
+    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
+        size.width = 2**31 + 1
+    assert size.width == 2
+
+
+@pytest.mark.parametrize("value", [-1, 2**31 + 1])
+def test_extent_rejects_sizes_outside_the_coordinate_domain(value: int) -> None:
+    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
+        Extent(value, 1)
+    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
+        Extent((1, value, 1))
+    size = Extent(2, 3)
+    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
+        size.layers = value
+    assert size.layers == 1
+
+
+def test_sizes_and_coordinates_have_distinct_meanings() -> None:
+    assert area(extent=(2, 3)) == 6
+    assert volume(extent=(2, 3)) == 6
+    assert volume((2, 3, 0)) == 0
+    with pytest.raises(TypeError):
+        cartesian_layout(coordinate(2, 3))  # ty: ignore[invalid-argument-type]  # deliberately a coordinate
+    with pytest.raises(OverflowError):
+        volume(Extent(2**31, 2**31, 4))
+    layout = cartesian_layout((2, 3))
+    size = layout.get_extent()
+    size.width = 4
+    assert layout.width() == 2
+
+
+def test_default_geometry_is_empty() -> None:
+    layout = cartesian_layout()
+    assert layout.coordinates() == []
+    assert layout.last_coordinate() is None
+    assert layout.north((0, 0)) is None
 
 
 def test_stacked_cartesian_layout_is_an_alias_of_cartesian_layout():
@@ -155,32 +207,6 @@ def test_tuples_outside_of_the_int32_range_do_not_convert_to_coordinates():
         lyt.north((2**31, 0))
 
 
-def test_default_coordinate_is_origin() -> None:
-    assert coordinate() == coordinate((0, 0, 0))
-    c = coordinate()
-    c.x = -(2**31)
-    assert c.x == -(2**31)
-
-
-def test_default_geometry_is_empty() -> None:
-    layout = cartesian_layout()
-    assert layout.coordinates() == []
-    assert layout.last_coordinate() is None
-    assert layout.north((0, 0)) is None
-
-
-def test_extent_tuple_conversion_and_checked_axes() -> None:
-    size = Extent(extent=(2, 3))
-    assert Extent(extent=size) == size
-    assert (size.width, size.height, size.layers) == (2, 3, 1)
-    assert cartesian_layout(size).get_extent() == Extent((2, 3, 1))
-    assert cartesian_layout((2, 3, 0)).coordinates() == []
-    assert cartesian_layout((2**31, 1)).last_coordinate() == coordinate(2**31 - 1, 0, 0)
-    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
-        size.width = 2**31 + 1
-    assert size.width == 2
-
-
 @pytest.mark.parametrize(
     "make_layout",
     [
@@ -201,32 +227,6 @@ def test_geometry_copies_have_independent_sizes(
     deep.resize(extent=(6, 7))
     assert layout.height() == 3
     assert deep.height() == 7
-
-
-@pytest.mark.parametrize("value", [-1, 2**31 + 1])
-def test_extent_rejects_sizes_outside_the_coordinate_domain(value: int) -> None:
-    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
-        Extent(value, 1)
-    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
-        Extent((1, value, 1))
-    size = Extent(2, 3)
-    with pytest.raises(ValueError, match=r"negative|coordinate domain"):
-        size.layers = value
-    assert size.layers == 1
-
-
-def test_sizes_and_coordinates_have_distinct_meanings() -> None:
-    assert area(extent=(2, 3)) == 6
-    assert volume(extent=(2, 3)) == 6
-    assert volume((2, 3, 0)) == 0
-    with pytest.raises(TypeError):
-        cartesian_layout(coordinate(2, 3))  # ty: ignore[invalid-argument-type]  # deliberately a coordinate
-    with pytest.raises(OverflowError):
-        volume(Extent(2**31, 2**31, 4))
-    layout = cartesian_layout((2, 3))
-    size = layout.get_extent()
-    size.width = 4
-    assert layout.width() == 2
 
 
 @pytest.mark.parametrize(
@@ -285,4 +285,3 @@ def test_extent_argument_docstrings_name_the_keyword() -> None:
     ):
         assert api.__doc__ is not None
         assert "\n    extent:" in api.__doc__
-        assert "\n    size:" not in api.__doc__

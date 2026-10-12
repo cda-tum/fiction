@@ -98,19 +98,6 @@ def test_squared_euclidean(make_lyt: Callable[[], Layout]) -> None:
 
 
 @pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
-def test_twoddwave(make_lyt: Callable[[], Layout]) -> None:
-    """Measure forward 2DDWave distance through the frame boundary."""
-    lyt = make_lyt()
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(0, 0)) == 0
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(1, 0)) == 1
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(0, 1)) == 1
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(1, 1)) == 2
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 4
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 6
-    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 8
-
-
-@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
 def test_chebyshev(make_lyt: Callable[[], Layout]) -> None:
     """Measure Chebyshev distance through the frame boundary."""
     lyt = make_lyt()
@@ -121,6 +108,19 @@ def test_chebyshev(make_lyt: Callable[[], Layout]) -> None:
     assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 2
     assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 3
     assert chebyshev_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 4
+
+
+@pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)
+def test_twoddwave(make_lyt: Callable[[], Layout]) -> None:
+    """Measure forward 2DDWave distance through the frame boundary."""
+    lyt = make_lyt()
+    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(0, 0)) == 0
+    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(1, 0)) == 1
+    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(0, 1)) == 1
+    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(1, 1)) == 2
+    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(2, 2)) == 4
+    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(3, 3)) == 6
+    assert twoddwave_distance(lyt, coordinate(0, 0), coordinate(4, 4)) == 8
 
 
 @pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)

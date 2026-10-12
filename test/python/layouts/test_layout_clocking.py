@@ -51,19 +51,6 @@ def test_layout_coordinate_access(make_layout):
         assert t in [(1, 1), (1, 2), (2, 1), (3, 2), (2, 3)]
 
 
-@pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
-def test_clock_zone_iteration(make_layout):
-    layout = make_layout()
-    assert layout.incoming_clocked_zones((0, 0)) == []
-    assert layout.outgoing_clocked_zones((2, 2)) == []
-
-    for icz in layout.incoming_clocked_zones((1, 1)):
-        assert icz in [layout.coord(1, 0), layout.coord(0, 1)]
-
-    for icz in layout.outgoing_clocked_zones((1, 1)):
-        assert icz in [layout.coord(1, 2), layout.coord(2, 1)]
-
-
 @pytest.mark.parametrize(
     "layout",
     [
@@ -111,6 +98,19 @@ def test_clock_number_applies_to_every_layer(make_layout: Callable[[], Any]) -> 
 
     layout.assign_clock_number((0, 1, 1), 2)
     assert layout.get_clock_number((0, 1, 0)) == 2
+
+
+@pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
+def test_clock_zone_iteration(make_layout):
+    layout = make_layout()
+    assert layout.incoming_clocked_zones((0, 0)) == []
+    assert layout.outgoing_clocked_zones((2, 2)) == []
+
+    for icz in layout.incoming_clocked_zones((1, 1)):
+        assert icz in [layout.coord(1, 0), layout.coord(0, 1)]
+
+    for icz in layout.outgoing_clocked_zones((1, 1)):
+        assert icz in [layout.coord(1, 2), layout.coord(2, 1)]
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)

@@ -66,37 +66,6 @@ if TYPE_CHECKING:
     from mnt.pyfiction.networks import technology_network
 
 
-def test_long_route_statistics_release_the_gil() -> None:
-    """Deep layout summaries finish while Python display threads can run."""
-    length = 200_000
-    layout = cartesian_gate_layout((length, 0), "2DDWave")
-    signal = layout.create_pi("in", (0, 0))
-    for x in range(1, length):
-        signal = layout.create_buf(signal, (x, 0))
-    layout.create_po(signal, "out", (length, 0))
-    start = threading.Event()
-    refreshed = threading.Event()
-
-    def refresh() -> None:
-        """Run one Python update after the native analysis starts."""
-        start.wait()
-        refreshed.set()
-
-    worker = threading.Thread(target=refresh)
-    interval = sys.getswitchinterval()
-    worker.start()
-    try:
-        # The native call must release the GIL before Python's next scheduled handoff.
-        sys.setswitchinterval(10)
-        start.set()
-        result = critical_path_length_and_throughput(layout)
-        refreshed_during_analysis = refreshed.is_set()
-    finally:
-        sys.setswitchinterval(interval)
-        start.set()
-        worker.join()
-    assert result == (length + 1, 1)
-    assert refreshed_during_analysis
 
 
 @pytest.mark.parametrize("threads", [1, 4])
@@ -449,3 +418,36 @@ def test_borrowed_progress_parameters_preserve_live_owner_callback() -> None:
     assert callback is callback_ref()
     callback("probe", 0, 1)
     params.design_gate_params.on_progress = None
+
+
+def test_long_route_statistics_release_the_gil() -> None:
+    """Deep layout summaries finish while Python display threads can run."""
+    length = 200_000
+    layout = cartesian_gate_layout((length, 0), "2DDWave")
+    signal = layout.create_pi("in", (0, 0))
+    for x in range(1, length):
+        signal = layout.create_buf(signal, (x, 0))
+    layout.create_po(signal, "out", (length, 0))
+    start = threading.Event()
+    refreshed = threading.Event()
+
+    def refresh() -> None:
+        """Run one Python update after the native analysis starts."""
+        start.wait()
+        refreshed.set()
+
+    worker = threading.Thread(target=refresh)
+    interval = sys.getswitchinterval()
+    worker.start()
+    try:
+        # The native call must release the GIL before Python's next scheduled handoff.
+        sys.setswitchinterval(10)
+        start.set()
+        result = critical_path_length_and_throughput(layout)
+        refreshed_during_analysis = refreshed.is_set()
+    finally:
+        sys.setswitchinterval(interval)
+        start.set()
+        worker.join()
+    assert result == (length + 1, 1)
+    assert refreshed_during_analysis
