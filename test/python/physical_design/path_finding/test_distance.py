@@ -26,8 +26,14 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    "metric",
-    [manhattan_distance, euclidean_distance, squared_euclidean_distance, twoddwave_distance, chebyshev_distance],
+    ("metric", "expected"),
+    [
+        (manhattan_distance, 7),
+        (euclidean_distance, 5.0),
+        (squared_euclidean_distance, 25),
+        (twoddwave_distance, 7),
+        (chebyshev_distance, 4),
+    ],
 )
 @pytest.mark.parametrize(("source", "target"), [((0, 0), (3, 4)), ((0, 0, -2), (3, 4, 5))])
 def test_distance_tuple_inputs(
@@ -35,11 +41,12 @@ def test_distance_tuple_inputs(
         [coordinate | tuple[int, int] | tuple[int, int, int], coordinate | tuple[int, int] | tuple[int, int, int]],
         int | float,
     ],
+    expected: float,
     source: tuple[int, int] | tuple[int, int, int],
     target: tuple[int, int] | tuple[int, int, int],
 ) -> None:
     """Convert two- and three-axis tuple inputs to coordinates for every metric."""
-    assert metric(source, target) == metric(coordinate(source), coordinate(target))
+    assert metric(source, target) == expected
 
 
 def test_manhattan() -> None:

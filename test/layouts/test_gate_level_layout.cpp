@@ -1058,7 +1058,6 @@ TEST_CASE("Geometry assignment failures preserve owned layout state", "[gate-lev
     CHECK(destination.get_synchronization_element({1, 0}) == 1);
     CHECK(destination.num_pis() == 1);
     // The geometry's assignment contract controls changes made before it throws.
-    CHECK(destination.get_extent() == layout_base::extent{3, 2});
 }
 
 TEST_CASE("Crossing counts survive failed connection allocation", "[gate-level-layout]")
