@@ -139,6 +139,30 @@ TEST_CASE("Unbalanced networks are rejected", "[crossing-gate-planarization]")
     CHECK_THROWS_AS(crossing_gate_planarization(ranked), std::invalid_argument);
 }
 
+TEST_CASE("Dangling gates are dropped", "[crossing-gate-planarization]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x2));
+
+    // a gate that drives no primary output gets no level and no rank
+    const auto dangling = tec.create_or(x1, x2);
+
+    const mutable_rank_view ranked{tec};
+    REQUIRE(!ranked.has_level(ranked.get_node(dangling)));
+
+    // the ranks list ranked nodes only, so neither the crossing count nor the planarization visits the gate
+    CHECK(count_crossings(ranked) == 0);
+
+    const auto result = crossing_gate_planarization(ranked);
+
+    CHECK(result.size() == tec.size() - 1);
+    CHECK(is_balanced(result));
+    check_equivalent(tec, result);
+}
+
 TEST_CASE("A single crossing becomes one gadget", "[crossing-gate-planarization]")
 {
     const auto tec    = single_crossing_network();
