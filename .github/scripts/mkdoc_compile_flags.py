@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import sys
 from pathlib import Path
@@ -49,12 +50,25 @@ def extract_flags(entry: dict[str, Any]) -> list[str]:
         and with duplicates removed.
     """
     command = entry.get("command")
-    tokens = shlex.split(str(command)) if command else [str(a) for a in entry["arguments"]]
+    if command:
+        lexer = shlex.shlex(str(command), posix=True)
+        lexer.whitespace_split = True
+        lexer.commenters = ""
+        if os.name == "nt":
+            # Windows paths use backslashes literally, including inside quoted paths.
+            lexer.escape = ""
+        tokens = list(lexer)
+    else:
+        tokens = [str(argument) for argument in entry["arguments"]]
 
     flags: list[str] = []
     index = 0
     while index < len(tokens):
         token = tokens[index]
+        if token.startswith("-external:I"):
+            token = "-isystem" + token.removeprefix("-external:I")
+        elif token.startswith(("/I", "/D")):
+            token = "-" + token[1:]
         if token in _VALUE_FLAGS:
             flags.append(token + tokens[index + 1])
             index += 2
