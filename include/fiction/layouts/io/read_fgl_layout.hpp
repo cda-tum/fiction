@@ -17,21 +17,14 @@
 
 #pragma once
 
-// clang-format off
-// NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but the
-// clocking::get_scheme free function is looked up via two-phase name lookup at template instantiation time, so
-// removing any of these breaks the build despite the tool's "not used directly" heuristic
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/layouts/layout_base.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
-// NOLINTEND(misc-include-cleaner)
-// clang-format on
-
+#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
