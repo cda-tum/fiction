@@ -18,7 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
     Gate mapping, network passes, design-rule checks, and layout writers report counted phases.
-  - Python: `operational_domain.to_numpy()` returns the sampled coordinates and operational flags as NumPy arrays.
+  - Python: `operational_domain.to_numpy()` returns sampled coordinates and operational flags as NumPy arrays.
+    The `plot` extra supplies NumPy; the method reports an installation hint when NumPy is missing.
 
 - CLI:
 

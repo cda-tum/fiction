@@ -83,7 +83,7 @@ name = "Willem Lambooy"
 email = "willem.lambooy@tum.de"
 
 [project.optional-dependencies]
-plot = [ "matplotlib>=3.10.0", "plotly>=6.0.0" ]
+plot = [ "matplotlib>=3.10.0", "numpy>=1.23.5", "plotly>=6.0.0" ]
 
 [project.urls]
 Source = "https://github.com/cda-tum/fiction"

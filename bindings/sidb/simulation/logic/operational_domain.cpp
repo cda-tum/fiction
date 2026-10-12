@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+#include <Python.h>
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 #include <nanobind/operators.h>
@@ -400,6 +401,20 @@ void operational_domain(nanobind::module_& m)
             "to_numpy",
             [](const fiction::sidb::simulation::logic::operational_domain& self)
             {
+                try
+                {
+                    static_cast<void>(py::module_::import_("numpy"));
+                }
+                catch (const py::python_error& error)
+                {
+                    if (error.matches(PyExc_ModuleNotFoundError) && error.value().attr("name").equal(py::str("numpy")))
+                    {
+                        throw py::import_error("operational_domain.to_numpy() requires NumPy; install it with "
+                                               "uv pip install 'mnt.pyfiction[plot]'");
+                    }
+                    throw;
+                }
+
                 using fiction::sidb::simulation::logic::operational_status;
 
                 const auto points     = self.size();
@@ -434,7 +449,9 @@ void operational_domain(nanobind::module_& m)
             },
             "Returns the domain as NumPy arrays: a float64 array of shape (points, dimensions) holding the sampled "
             "parameter values in dimension order, and a boolean array of length points that is True where the "
-            "point is operational. Requires NumPy.")
+            "point is operational. Requires NumPy; install it with uv pip install 'mnt.pyfiction[plot]'.\n\n"
+            "Raises:\n"
+            "    ImportError: NumPy is not installed or cannot be imported.")
 
         ;
 

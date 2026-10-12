@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- isolated optional dependency tests
+import sys
 from typing import TYPE_CHECKING
 
 import pytest
@@ -508,3 +510,40 @@ def test_operational_domain_to_numpy() -> None:
     empty_coordinates, empty_operational = operational_domain([sweep_parameter.EPSILON_R]).to_numpy()
     assert empty_coordinates.shape == (0, 1)
     assert empty_operational.shape == (0,)
+
+
+@pytest.mark.parametrize("failure", ["numpy", "numpy._core", "broken"])
+def test_operational_domain_to_numpy_import_error(failure: str) -> None:
+    """Missing NumPy reports installation help; broken installations retain their error."""
+    script = """
+import importlib.abc
+import sys
+
+class MissingNumpy(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == "numpy":
+            if sys.argv[1] == "broken":
+                raise ImportError("NumPy ABI failed")
+            raise ModuleNotFoundError("missing dependency", name=sys.argv[1])
+        return None
+
+sys.meta_path.insert(0, MissingNumpy())
+from mnt.pyfiction.sidb.simulation.logic import operational_domain, sweep_parameter
+
+domain = operational_domain([sweep_parameter.EPSILON_R])
+try:
+    domain.to_numpy()
+except ImportError as error:
+    if sys.argv[1] == "numpy":
+        assert "uv pip install 'mnt.pyfiction[plot]'" in str(error), str(error)
+    elif sys.argv[1] == "numpy._core":
+        assert isinstance(error, ModuleNotFoundError) and error.name == "numpy._core", repr(error)
+    else:
+        assert str(error) == "NumPy ABI failed", str(error)
+else:
+    raise AssertionError("NumPy import failure must raise ImportError")
+"""
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- isolated interpreter
+        [sys.executable, "-c", script, failure], capture_output=True, text=True, check=False
+    )
+    assert result.returncode == 0, result.stderr
