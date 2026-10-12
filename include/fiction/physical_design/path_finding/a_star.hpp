@@ -35,7 +35,6 @@
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 namespace fiction::physical_design::path_finding
@@ -59,14 +58,23 @@ template <typename Path, typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {
   public:
-    a_star_impl(const Lyt& lyt, const routing_objective& obj, const distance_functor<Dist>& dist_fn,
-                const cost_functor<Cost>& cost_fn, a_star_params p, const layouts::obstructions& extra) :
+    /**
+     * @brief Initializes the A* search.
+     * @param lyt Layout to search.
+     * @param obj Routing endpoints.
+     * @param dist_fn Distance heuristic.
+     * @param cost_fn Step cost.
+     * @param p Search parameters.
+     * @param extra Additional routing obstructions.
+     */
+    a_star_impl(const Lyt& lyt, const routing_objective obj, const distance_functor<Dist>& dist_fn,
+                const cost_functor<Cost>& cost_fn, const a_star_params p, const layouts::obstructions& extra) :
             layout{lyt},
             search_obstructions{extra},
             objective{obj},
             distance{dist_fn},
             cost{cost_fn},
-            params{std::move(p)}
+            params{p}
     {
         open_list.push(coordinate_f{objective.source, 0});
     }
@@ -174,8 +182,7 @@ class a_star_impl
      * C++ is weird at times...
      */
     using a_star_priority_queue =
-        fiction::utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>,
-                                                       std::greater<coordinate_f>>;
+        fiction::utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<>>;
     /**
      * Open list that contains all coordinates to process next sorted by their f-value.
      */
@@ -285,7 +292,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is desired.
      * @return g-value of coordinate c or 0 if no value has been stored.
      */
-    g_f_type g(const fiction::layouts::layout_base::coordinate& c) const
+    [[nodiscard]] g_f_type g(const fiction::layouts::layout_base::coordinate& c) const
     {
         if (const auto it = g_values.find(c); it != g_values.cend())
         {
@@ -321,7 +328,7 @@ class a_star_impl
      *
      * @return The shortest path connecting source and target.
      */
-    Path reconstruct_path() const
+    [[nodiscard]] Path reconstruct_path() const
     {
         Path path{};
 

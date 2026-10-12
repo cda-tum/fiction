@@ -30,7 +30,6 @@
 #include <cstdint>
 #include <iterator>
 #include <stdexcept>
-#include <utility>
 
 namespace fiction::physical_design::path_finding
 {
@@ -53,14 +52,22 @@ template <typename Path, typename Lyt>
 class yen_k_shortest_paths_impl
 {
   public:
-    yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective& obj, const uint32_t k,
-                              yen_k_shortest_paths_params p, const layouts::obstructions& extra) :
+    /**
+     * @brief Initializes the k-shortest-path search.
+     * @param lyt Layout to search.
+     * @param obj Routing endpoints.
+     * @param k Maximum number of paths.
+     * @param p Search parameters.
+     * @param extra Additional routing obstructions.
+     */
+    yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective obj, const uint32_t k,
+                              const yen_k_shortest_paths_params p, const layouts::obstructions& extra) :
             layout{lyt},
             initial_obstructions{extra},
             search_obstructions{extra},
             objective{obj},
             num_shortest_paths{k},
-            params{std::move(p)}
+            params{p}
     {
         // start by determining the shortest path between source and target
         k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor(),
