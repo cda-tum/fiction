@@ -247,6 +247,7 @@ TEST_CASE("Dangling nodes have no level", "[static-depth-view]")
 
     CHECK(depth_dangling.has_level(dangling_aig.get_node(f2)));
     CHECK(!depth_dangling.has_level(dangling_aig.get_node(f3)));
+    CHECK(depth_dangling.depth() == 2);
 
     // a depth view over a depth view passes the question through instead of claiming a level for every node
     // (the template argument is spelled out, since class template argument deduction would pick the copy)
@@ -259,4 +260,30 @@ TEST_CASE("Dangling nodes have no level", "[static-depth-view]")
     const static_depth_view over_mockturtle{mockturtle::depth_view{aig}};
 
     CHECK(over_mockturtle.has_level(aig.get_node(f2)));
+}
+
+TEST_CASE("Primary inputs without fanout have level 0", "[static-depth-view]")
+{
+    mockturtle::aig_network aig;
+    const auto              a      = aig.create_pi();
+    const auto              unused = aig.create_pi();
+    const auto              b      = aig.create_pi();
+    const auto              f      = aig.create_and(a, b);
+    aig.create_po(f);
+
+    const static_depth_view depth_aig{aig};
+
+    // an input that drives nothing is not reached from any output but belongs to the interface; it sits on level 0
+    CHECK(depth_aig.has_level(aig.get_node(unused)));
+    CHECK(depth_aig.level(aig.get_node(unused)) == 0);
+    CHECK(depth_aig.level(aig.get_node(f)) == 1);
+    CHECK(depth_aig.depth() == 1);
+    CHECK(!depth_aig.is_on_critical_path(aig.get_node(unused)));
+
+    // the same holds after recomputing the levels
+    static_depth_view updated{aig};
+    updated.update_levels();
+
+    CHECK(updated.has_level(aig.get_node(unused)));
+    CHECK(updated.level(aig.get_node(unused)) == 0);
 }

@@ -577,7 +577,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `synthesis::delete_virtual_pis` maps outputs driven by a virtual primary input to the real one
   - `verification::virtual_miter` pairs primary inputs by creation order, so ranked networks whose inputs are
     reordered or unused compare correctly
-  - `networks::views::mutable_rank_view` skips dangling nodes instead of throwing when initializing ranks
+  - `networks::views::static_depth_view` gives every combinational input a level, so an input that drives nothing
+    sits on level 0 and in rank 0 of `networks::views::mutable_rank_view`; the rank view rejects a gate that no output
+    reaches with `std::invalid_argument` instead of leaving it unranked (remove such gates with
+    `mockturtle::cleanup_dangling` first)
 
 - Build system:
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.

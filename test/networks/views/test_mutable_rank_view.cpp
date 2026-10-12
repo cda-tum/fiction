@@ -360,7 +360,7 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
     CHECK(cec_m == 1);
 }
 
-TEST_CASE("Dangling nodes are not ranked", "[mutable-rank-view]")
+TEST_CASE("Dangling gates are rejected", "[mutable-rank-view]")
 {
     technology_network tec{};
 
@@ -369,20 +369,24 @@ TEST_CASE("Dangling nodes are not ranked", "[mutable-rank-view]")
     const auto a1 = tec.create_and(x1, x2);
     tec.create_po(a1);
 
-    // a gate that drives no primary output
+    // a gate that drives no primary output has no level, so it cannot be ranked
     const auto dangling = tec.create_or(x1, x2);
 
-    const mutable_rank_view ranked{tec};
+    CHECK_THROWS_AS(mutable_rank_view<technology_network>{tec}, std::invalid_argument);
+
+    // after removing the dead gate every remaining node is ranked
+    const auto cleaned = mockturtle::cleanup_dangling(tec);
+
+    const mutable_rank_view ranked{cleaned};
 
     CHECK(ranked.check_validity());
     CHECK(ranked.rank_width(0) == 2);
     CHECK(ranked.rank_width(1) == 1);
-    CHECK(ranked.at_rank_position(1, 0) == tec.get_node(a1));
-    CHECK(!ranked.has_level(tec.get_node(dangling)));
-    CHECK_THROWS_AS(ranked.rank_position(tec.get_node(dangling)), std::out_of_range);
+    CHECK(ranked.size() == tec.size() - 1);
+    CHECK(!tec.is_constant(tec.get_node(dangling)));
 }
 
-TEST_CASE("Primary inputs without fanout are visited last", "[mutable-rank-view]")
+TEST_CASE("Primary inputs without fanout are ranked", "[mutable-rank-view]")
 {
     technology_network tec{};
 
@@ -393,13 +397,20 @@ TEST_CASE("Primary inputs without fanout are visited last", "[mutable-rank-view]
 
     const mutable_rank_view ranked{tec};
 
+    // an input is on level 0 whether or not it drives anything
+    CHECK(ranked.check_validity());
+    CHECK(ranked.has_level(tec.get_node(unused)));
+    CHECK(ranked.level(tec.get_node(unused)) == 0);
+    CHECK(ranked.rank_width(0) == 3);
+    CHECK(ranked.rank_position(tec.get_node(unused)) == 0);
+
     std::vector<mockturtle::node<technology_network>> visited{};
     ranked.foreach_pi([&visited](const auto& n) { visited.push_back(n); });
 
     REQUIRE(visited.size() == 3);
-    CHECK(visited.back() == tec.get_node(unused));
-    CHECK(ranked.rank_position(visited[0]) == 0);
-    CHECK(ranked.rank_position(visited[1]) == 1);
+    CHECK(visited[0] == tec.get_node(unused));
+    CHECK(visited[1] == tec.get_node(x1));
+    CHECK(visited[2] == tec.get_node(x2));
 
     std::vector<mockturtle::node<technology_network>> cis{};
     ranked.foreach_ci([&cis](const auto& n) { cis.push_back(n); });
@@ -409,7 +420,8 @@ TEST_CASE("Primary inputs without fanout are visited last", "[mutable-rank-view]
     const auto copy = mockturtle::cleanup_dangling(ranked);
     CHECK(copy.num_pis() == 3);
 }
-TEST_CASE("Several unranked primary inputs keep their index order", "[mutable-rank-view]")
+
+TEST_CASE("Rearranging primary inputs keeps unused inputs in rank 0", "[mutable-rank-view]")
 {
     technology_network tec{};
 
@@ -421,15 +433,22 @@ TEST_CASE("Several unranked primary inputs keep their index order", "[mutable-ra
 
     mutable_rank_view ranked{tec};
 
+    ranked.swap(tec.get_node(unused_1), tec.get_node(x2));
+    ranked.swap(tec.get_node(x1), tec.get_node(unused_2));
+    REQUIRE(ranked.check_validity());
+
+    // rearranging restores the creation order, including the inputs that drive nothing
+    ranked.rearrange_pis();
+
+    CHECK(ranked.check_validity());
+    CHECK(ranked.rank_width(0) == 4);
+
     std::vector<mockturtle::node<technology_network>> visited{};
     ranked.foreach_pi([&visited](const auto& n) { visited.push_back(n); });
 
     REQUIRE(visited.size() == 4);
-    CHECK(visited[2] == tec.get_node(unused_1));
-    CHECK(visited[3] == tec.get_node(unused_2));
-
-    // rearranging keeps the unranked inputs out of rank 0
-    ranked.rearrange_pis();
-    CHECK(ranked.rank_width(0) == 2);
-    CHECK(ranked.check_validity());
+    CHECK(visited[0] == tec.get_node(unused_1));
+    CHECK(visited[1] == tec.get_node(x1));
+    CHECK(visited[2] == tec.get_node(unused_2));
+    CHECK(visited[3] == tec.get_node(x2));
 }

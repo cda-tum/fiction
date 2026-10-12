@@ -81,7 +81,7 @@ std::pair<py_tec_network, std::vector<uint32_t>> flatten(const Planar& planar)
             }
         });
 
-    // inputs in rank order, unranked ones last
+    // inputs in rank order
     planar.foreach_pi(
         [&](const auto& n)
         {
@@ -244,7 +244,8 @@ Returns:
     those inputs together when simulating or checking equivalence.
 
 Raises:
-    ValueError: If `network` is not balanced with unified outputs, or if a gate has only constant fanins.)doc",
+    ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, or if a gate
+        drives no output (remove such gates first, e.g., with `cleanup_dangling`).)doc",
         py::call_guard<py::gil_scoped_release>());
 }
 

@@ -293,8 +293,9 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
-     * @return Whether a level is stored for the node. A node has no level if it was added after the last call to
-     * `update_levels` without `on_add` being called for it, or if it is dangling.
+     * @return Whether a level is stored for the node. Every combinational input has one. A gate has none if no output
+     * reaches it (a dangling gate) or if it was added after the last call to `update_levels` without `on_add` being
+     * called for it.
      */
     [[nodiscard]] bool has_level(node const& n) const
     {
@@ -437,6 +438,10 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                     ntk_depth = std::max(ntk_depth, clevel);
                 });
         }
+
+        // an input that drives nothing is not reached from any output but is still part of the interface and sits on
+        // level 0 by definition; give it a level so that rank views and drawers can place it
+        this->foreach_ci([&](auto const& n) { compute_levels(n); });
 
         this->foreach_po(
             [&](auto const& f)

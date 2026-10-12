@@ -115,6 +115,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * interface methods.
      *
      * @param ntk A reference to the network object.
+     * @throws std::invalid_argument If the network has a gate that no output reaches (see `init_ranks`).
      */
     explicit mutable_rank_view(const Ntk& ntk) :
             fiction::networks::views::static_depth_view<Ntk>{ntk},
@@ -223,7 +224,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      *
      * @param n Node to get the rank position of.
      * @return Rank position of node `n`.
-     * @throws std::out_of_range If `n` has no rank, which is the case for a node without a level.
+     * @throws std::out_of_range If `n` has no rank, which is the case for a node added after the last `update_ranks`.
      */
     uint32_t rank_position(const node& n) const
     {
@@ -491,7 +492,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         pis.reserve(this->num_pis());
 
         fiction::networks::views::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
-        sort_by_rank(pis);
+        std::ranges::sort(pis,
+                          [this](auto const& n1, auto const& n2) { return rank_position(n1) < rank_position(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
 
@@ -513,29 +515,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Sorts nodes by rank position. Nodes without a rank, such as primary inputs that drive nothing, come last in
-     * index order.
-     *
-     * @param nodes Nodes to sort.
-     */
-    void sort_by_rank(std::vector<node>& nodes) const
-    {
-        std::ranges::sort(nodes,
-                          [this](auto const& n1, auto const& n2)
-                          {
-                              const auto p1 = rank_pos.find(n1);
-                              const auto p2 = rank_pos.find(n2);
-
-                              if ((p1 == rank_pos.end()) != (p2 == rank_pos.end()))
-                              {
-                                  return p2 == rank_pos.end();
-                              }
-
-                              return p1 == rank_pos.end() ? n1 < n2 : p1->second < p2->second;
-                          });
-    }
-
-    /**
      * Rearranges the rank order of the PIs to match the underlying PI order defined by `static_depth_view`. This
      * corresponds to the order in the network's `_storage`, which reflects the order of PI creation.
      *
@@ -547,14 +526,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         std::vector<node> pis{};
         pis.reserve(this->num_pis());
 
-        fiction::networks::views::static_depth_view<Ntk>::foreach_pi(
-            [this, &pis](auto const& pi)
-            {
-                if (rank_pos.contains(pi))
-                {
-                    pis.push_back(pi);
-                }
-            });
+        fiction::networks::views::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
 
         set_ranks(0, pis);
     }
@@ -574,7 +546,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         pis.reserve(this->num_pis());
 
         fiction::networks::views::static_depth_view<Ntk>::foreach_ci([&pis](auto const& pi) { pis.push_back(pi); });
-        sort_by_rank(pis);
+        std::ranges::sort(pis,
+                          [this](auto const& n1, auto const& n2) { return rank_position(n1) < rank_position(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
     /**
@@ -648,22 +621,34 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Initializes the ranks for the given network. It traverses the nodes in the network using a depth-first search and
-     * inserts each non-constant node that has a level into the rank of its level. Constants and nodes without a level
-     * (dangling nodes) get no rank.
+     * Initializes the ranks for the given network. It traverses the nodes in the network in index order and inserts
+     * each non-constant node into the rank of its level, so that every non-constant node, including an input that
+     * drives nothing, has a rank afterwards.
      *
-     * This function is noexcept.
+     * A gate that no output reaches has no level and would have no rank either. Such a network is rejected: the view
+     * keeps the invariant that every non-constant node is ranked, and callers remove dead gates beforehand with
+     * `mockturtle::cleanup_dangling`.
+     *
+     * @throws std::invalid_argument If the network has a gate that no output reaches.
      */
-    void init_ranks() noexcept
+    void init_ranks()
     {
         fiction::networks::views::static_depth_view<Ntk>::foreach_node(
             [this](auto const& n)
             {
-                // constants and nodes without a level (dangling nodes) have no rank
-                if (!this->is_constant(n) && this->has_level(n))
+                if (this->is_constant(n))
                 {
-                    insert_in_rank(n);
+                    return;
                 }
+
+                if (!this->has_level(n))
+                {
+                    throw std::invalid_argument(
+                        "mutable_rank_view: the network has a gate that no output reaches; remove dangling gates "
+                        "first, e.g., with mockturtle::cleanup_dangling");
+                }
+
+                insert_in_rank(n);
             });
     }
 
