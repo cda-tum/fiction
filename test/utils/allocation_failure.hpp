@@ -71,7 +71,7 @@ void* operator new(const std::size_t size)
         --*fiction::test::allocation_budget;
     }
     // The global new replacement must use malloc to avoid recursion.
-    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
+    // NOLINTNEXTLINE(*-no-malloc,cppcoreguidelines-owning-memory)
     if (auto* const memory = std::malloc(size == 0 ? 1 : size))
     {
         return memory;
@@ -87,7 +87,7 @@ void* operator new(const std::size_t size)
 void operator delete(void* const memory) noexcept
 {
     // Matches malloc in the global new replacement.
-    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory,hicpp-no-malloc)
+    // NOLINTNEXTLINE(*-no-malloc,cppcoreguidelines-owning-memory)
     std::free(memory);
 }
 /**
