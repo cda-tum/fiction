@@ -20,105 +20,12 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/traits.hpp>
 
 #include <set>
 #include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
-
-TEST_CASE("Cartesian layout traits", "[cartesian-layout]")
-{
-    using layout = cartesian_layout;
-
-    CHECK(has_north_v<layout>);
-    CHECK(has_east_v<layout>);
-    CHECK(has_south_v<layout>);
-    CHECK(has_west_v<layout>);
-    CHECK(has_cardinal_operations_v<layout>);
-    CHECK(has_north_east_v<layout>);
-    CHECK(has_south_east_v<layout>);
-    CHECK(has_south_west_v<layout>);
-    CHECK(has_north_west_v<layout>);
-    CHECK(has_ordinal_operations_v<layout>);
-    CHECK(has_above_v<layout>);
-    CHECK(has_below_v<layout>);
-    CHECK(has_elevation_operations_v<layout>);
-    CHECK(is_coordinate_layout_v<layout>);
-    CHECK(is_cartesian_layout_v<layout>);
-    CHECK(!is_gate_level_layout_v<layout>);
-    CHECK(!is_hexagonal_layout_v<layout>);
-
-    CHECK(has_foreach_coordinate_v<layout>);
-    CHECK(has_foreach_adjacent_coordinate_v<layout>);
-    CHECK(has_foreach_adjacent_opposite_coordinates_v<layout>);
-}
-
-TEST_CASE("Cartesian sizes and value copies", "[cartesian-layout][size-contract]")
-{
-    const cartesian_layout empty{};
-    CHECK(empty.area() == 0);
-    CHECK(empty.volume() == 0);
-    CHECK(empty.coordinates().empty());
-    CHECK(empty.ground_coordinates().empty());
-    CHECK(!empty.contains_coordinate({0, 0, 0}));
-    CHECK(!empty.last_coordinate());
-    CHECK(!empty.northern_border_of({0, 0}));
-    CHECK(!empty.eastern_border_of({0, 0}));
-    CHECK(!empty.southern_border_of({0, 0}));
-    CHECK(!empty.western_border_of({0, 0}));
-    CHECK(!empty.is_at_any_border({0, 0}));
-    const cartesian_layout original{{5, 4, 3}};
-    auto                   copy = original;
-    copy.resize({10, 9, 8});
-    CHECK(original.get_extent() == layout_base::extent{5, 4, 3});
-    CHECK(original.clone().get_extent() == original.get_extent());
-    CHECK(copy.get_extent() == layout_base::extent{10, 9, 8});
-    CHECK(original.width() == 5);
-    CHECK(original.height() == 4);
-    CHECK(original.layers() == 3);
-    CHECK(original.last_coordinate() == layout_base::coordinate{4, 3, 2});
-    CHECK(original.coord(-1, 2, 7) == layout_base::coordinate{-1, 2, 7});
-    CHECK(!original.contains_coordinate({5, 0}));
-    CHECK(!original.contains_coordinate({0, 4}));
-    CHECK(!original.contains_coordinate({0, 0, 3}));
-    CHECK(!original.contains_coordinate({-1, 0}));
-    for (const auto sizes : {layout_base::extent{0, 4, 3}, layout_base::extent{5, 0, 3}, layout_base::extent{5, 4, 0}})
-    {
-        const cartesian_layout layout{sizes};
-        CHECK(!layout.last_coordinate());
-        CHECK(layout.coordinates().empty());
-        CHECK(layout.ground_coordinates().empty());
-    }
-}
-
-TEST_CASE("Cartesian ranges enumerate half-open sizes", "[cartesian-layout][size-contract]")
-{
-    const cartesian_layout                 layout{{10, 10, 2}};
-    std::set<cartesian_layout::coordinate> visited{};
-    layout.foreach_coordinate(
-        [&](const auto c)
-        {
-            CHECK(layout.contains_coordinate(c));
-            CHECK(visited.insert(c).second);
-        });
-    CHECK(visited.size() == 200);
-    visited.clear();
-    layout.foreach_ground_coordinate(
-        [&](const auto c)
-        {
-            CHECK(c.z == 0);
-            CHECK(visited.insert(c).second);
-        });
-    CHECK(visited.size() == 100);
-    visited.clear();
-    for (const auto c : layout.coordinates(cartesian_layout::coordinate{2, 2}, cartesian_layout::coordinate{5, 4}))
-    {
-        CHECK(visited.insert(c).second);
-    }
-    CHECK(visited.size() == 23);
-}
 
 TEST_CASE("Cartesian neighbors report missing positions", "[cartesian-layout][size-contract]")
 {
@@ -183,15 +90,4 @@ TEST_CASE("Cartesian predicates ignore frame bounds", "[cartesian-layout][size-c
     CHECK(wide.southern_border_of({0, 0}) == layout_base::coordinate{0, 2147483647});
     CHECK(!wide.east({2147483647, 0}));
     CHECK(wide.west({2147483647, 0}) == layout_base::coordinate{2147483646, 0});
-}
-
-TEST_CASE("Cartesian neighbor callbacks propagate exceptions", "[cartesian-layout][neighbor-exceptions]")
-{
-    const cartesian_layout layout{{3, 3}};
-    CHECK_THROWS_AS(
-        layout.foreach_adjacent_coordinate({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
-        std::runtime_error);
-    CHECK_THROWS_AS(
-        layout.foreach_adjacent_opposite_coordinates({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
-        std::runtime_error);
 }

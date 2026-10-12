@@ -18,11 +18,15 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 
 #include <fmt/format.h>
 
@@ -31,6 +35,7 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>
@@ -39,6 +44,105 @@
 
 using namespace fiction;
 using namespace fiction::layouts;
+
+/**
+ * @brief Checks the geometry contract for a layout type.
+ * @tparam Lyt Coordinate layout type.
+ * @param a Arrangement of the shifted rows or columns.
+ */
+template <typename Lyt>
+void check_visited_coordinates(const arrangement a)
+{
+    /** @brief Extent whose coordinate iteration is checked. */
+    const typename Lyt::extent ex{10, 10, 2};
+
+    auto layout = blueprints::make_layout<Lyt>(a, ex);
+
+    std::set<typename Lyt::coordinate> visited{};
+
+    const auto check1 = [&visited, &layout](const auto& c)
+    {
+        CHECK(c <= *layout.last_coordinate());
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(c));
+
+        // no coordinate is visited twice
+        CHECK(visited.count(c) == 0);
+        visited.insert(c);
+    };
+
+    for (auto&& t : layout.coordinates())
+    {
+        check1(t);
+    }
+    CHECK(visited.size() == 200);
+
+    visited.clear();
+
+    layout.foreach_coordinate(check1);
+    CHECK(visited.size() == 200);
+
+    visited.clear();
+
+    typename Lyt::coordinate ar_ground{9, 9, 0};
+
+    const auto check2 = [&visited, &ar_ground, &layout](const auto& c)
+    {
+        // iteration stays in ground layer
+        CHECK(c.z == 0);
+        CHECK(c <= ar_ground);
+        CHECK(layout.is_ground_layer(c));
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(c));
+
+        // no coordinate is visited twice
+        CHECK(visited.count(c) == 0);
+        visited.insert(c);
+    };
+
+    for (auto&& t : layout.ground_coordinates())
+    {
+        check2(t);
+    }
+    CHECK(visited.size() == 100);
+
+    visited.clear();
+
+    layout.foreach_ground_coordinate(check2);
+    CHECK(visited.size() == 100);
+
+    visited.clear();
+
+    typename Lyt::coordinate start{2, 2}, stop{5, 4};
+
+    const auto check3 = [&visited, &start, &stop, &layout](const auto& c)
+    {
+        CHECK(c.z == 0);
+        // iteration stays in between the bounds
+        CHECK(c >= start);
+        CHECK(c < stop);
+
+        // all coordinates are within the layout bounds
+        CHECK(layout.is_within_bounds(c));
+
+        // no coordinate is visited twice
+        CHECK(visited.count(c) == 0);
+        visited.insert(c);
+    };
+
+    for (auto&& t : layout.coordinates(start, stop))
+    {
+        check3(t);
+    }
+    CHECK(visited.size() == 23);
+
+    visited.clear();
+
+    layout.foreach_coordinate(check3, start, stop);
+    CHECK(visited.size() == 23);
+}
 
 TEST_CASE("Every signed coordinate is a value", "[coordinates][size-contract]")
 {
@@ -58,6 +162,24 @@ TEST_CASE("Every signed coordinate is a value", "[coordinates][size-contract]")
     CHECK_THROWS_AS((coordinate{0, 0, std::numeric_limits<uint64_t>::max()}), std::overflow_error);
     CHECK(coordinate{std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()} ==
           coordinate{-2147483648ll, 2147483647ll});
+
+    using coord = layout_base::coordinate;
+
+    CHECK(coord{5, 0, 0} < coord{0, 1, 0});
+    CHECK(coord{5, 9, 0} < coord{0, 0, 1});
+    CHECK(coord{1, 2, 0} < coord{2, 2, 0});
+    CHECK(!(coord{2, 2, 0} < coord{2, 2, 0}));
+
+    const std::set<coord> ordered{{1, 1, 0}, {0, 0, 1}, {2, 0, 0}, {0, 1, 0}};
+
+    CHECK(*ordered.begin() == coord{2, 0, 0});
+    CHECK(*ordered.rbegin() == coord{0, 0, 1});
+
+    CHECK_THROWS_AS((coordinate{4294967296ull, 0}), std::overflow_error);
+    CHECK_THROWS_AS((coordinate{0, 0, -4294967296ll}), std::overflow_error);
+    CHECK_THROWS_AS((cartesian_layout{{4294967296ull, 0}}), std::invalid_argument);
+    CHECK((coordinate{std::numeric_limits<int32_t>::max(), 0}.x == std::numeric_limits<int32_t>::max()));
+
     std::ostringstream stream{};
     stream << coordinate{-3, 2, 7};
     CHECK(stream.str() == "(-3,2,7)");
@@ -89,6 +211,61 @@ TEST_CASE("Extent sizes validate the coordinate domain", "[coordinates][size-con
     CHECK_THROWS_AS(cartesian_layout{edited}, std::invalid_argument);
 }
 
+TEMPLATE_TEST_CASE("Geometry copies retain arrangement", "[coordinates]", shifted_cartesian_layout, hexagonal_layout)
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+    const TestType lyt{a, {3, 3}};
+
+    CHECK(lyt.get_arrangement() == a);
+    CHECK(lyt.clone().get_arrangement() == a);
+    CHECK(TestType{lyt}.get_arrangement() == a);
+}
+TEMPLATE_TEST_CASE("Geometry sizes and value copies", "[coordinates][size-contract]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
+{
+    const auto empty = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, {});
+    CHECK(empty.area() == 0);
+    CHECK(empty.volume() == 0);
+    CHECK(empty.coordinates().empty());
+    CHECK(empty.ground_coordinates().empty());
+    CHECK(!empty.contains_coordinate({0, 0, 0}));
+    CHECK(!empty.last_coordinate());
+    CHECK(!empty.northern_border_of({0, 0}));
+    CHECK(!empty.eastern_border_of({0, 0}));
+    CHECK(!empty.southern_border_of({0, 0}));
+    CHECK(!empty.western_border_of({0, 0}));
+    CHECK(!empty.is_at_any_border({0, 0}));
+    const auto original = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, {5, 4, 3});
+    auto       copy     = original;
+    copy.resize({10, 9, 8});
+    CHECK(original.get_extent() == layout_base::extent{5, 4, 3});
+    CHECK(original.clone().get_extent() == original.get_extent());
+    CHECK(copy.get_extent() == layout_base::extent{10, 9, 8});
+    auto zero_layers = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, {5, 5, 0});
+    auto layered     = zero_layers.clone();
+    layered.resize({10, 10, 1});
+    CHECK(zero_layers.get_extent() == layout_base::extent{5, 5, 0});
+    CHECK(layered.get_extent() == layout_base::extent{10, 10, 1});
+    CHECK(original.width() == 5);
+    CHECK(original.height() == 4);
+    CHECK(original.layers() == 3);
+    CHECK(original.last_coordinate() == layout_base::coordinate{4, 3, 2});
+    CHECK(original.coord(-1, 2, 7) == layout_base::coordinate{-1, 2, 7});
+    CHECK(!original.contains_coordinate({5, 0}));
+    CHECK(!original.contains_coordinate({0, 4}));
+    CHECK(!original.contains_coordinate({0, 0, 3}));
+    CHECK(!original.contains_coordinate({-1, 0}));
+    for (const auto sizes : {layout_base::extent{0, 4, 3}, layout_base::extent{5, 0, 3}, layout_base::extent{5, 4, 0}})
+    {
+        const auto layout = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, sizes);
+        CHECK(!layout.last_coordinate());
+        CHECK(layout.coordinates().empty());
+        CHECK(layout.ground_coordinates().empty());
+    }
+}
+
 TEST_CASE("Coordinate iteration uses an explicit end", "[coordinates][size-contract]")
 {
     using coordinate = layout_base::coordinate;
@@ -118,9 +295,29 @@ TEST_CASE("Coordinate iteration uses an explicit end", "[coordinates][size-contr
     CHECK(edge == wide.coordinates().end());
 }
 
+TEMPLATE_TEST_CASE("Geometry ranges enumerate half-open sizes", "[coordinates][size-contract]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
+{
+    const auto a =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+    check_visited_coordinates<TestType>(a);
+}
+
+TEMPLATE_TEST_CASE("Geometry neighbor callbacks propagate exceptions", "[coordinates][neighbor-exceptions]",
+                   cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
+{
+    const auto layout = blueprints::make_layout<TestType>(arrangement::ODD_ROW, {3, 3});
+    CHECK_THROWS_AS(
+        layout.foreach_adjacent_coordinate({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
+        std::runtime_error);
+    CHECK_THROWS_AS(
+        layout.foreach_adjacent_opposite_coordinates({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
+        std::runtime_error);
+}
+
 /** @brief Adjacent traversals invoke move-only visitors as lvalues. */
 TEMPLATE_TEST_CASE("Geometry invokes temporary and lvalue visitors as lvalues", "[coordinates][visitors]",
-                   cartesian_layout, hexagonal_layout)
+                   cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
     /** @brief Geometry with an interior coordinate. */
     const auto layout = []

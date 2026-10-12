@@ -13,10 +13,15 @@
  * @brief Tests for names transferred between networks and placed layouts.
  */
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 
@@ -31,15 +36,16 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 
-TEST_CASE("Name transfer respects interface order and string-view bounds", "[name-utils]")
+TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bounds", "[name-utils]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
     mockturtle::names_view<technology_network> ntk{};
     const auto                                 input = ntk.create_pi("a");
     ntk.create_po(input, "f");
     set_name(ntk, std::string_view{"prefix suffix", 6});
 
-    gate_level_layout<cartesian_layout> lyt{{2, 1}};
-    const auto                          placed = lyt.create_pi("", {0, 0});
+    auto       lyt    = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {2, 1});
+    const auto placed = lyt.create_pi("", {0, 0});
     lyt.create_po(placed, "", {1, 0});
     restore_names(ntk, lyt);
     CHECK(lyt.get_layout_name() == "prefix");
@@ -54,7 +60,8 @@ TEST_CASE("Name transfer respects interface order and string-view bounds", "[nam
     CHECK(copied.get_output_name(0) == "f");
 }
 
-TEST_CASE("Signal names transfer from a logic network to placed objects", "[name-utils]")
+TEMPLATE_TEST_CASE("Signal names transfer from a logic network to placed objects", "[name-utils]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
     /** Named logic source with an internal signal and a declared output. */
     mockturtle::names_view<technology_network> ntk{};
@@ -67,7 +74,7 @@ TEST_CASE("Signal names transfer from a logic network to placed objects", "[name
     const auto sink = ntk.create_buf(internal);
     ntk.create_po(sink, "output");
     /** Native target with separate placed terminals. */
-    gate_level_layout<cartesian_layout> lyt{{4, 1}};
+    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
     /** Placed primary input. */
     const auto placed_input = lyt.create_pi("", {0, 0});
     /** Placed internal gate. */
@@ -77,7 +84,7 @@ TEST_CASE("Signal names transfer from a logic network to placed objects", "[name
     /** Named output terminal independent of the driver name. */
     const auto placed_output = lyt.create_po(placed_sink, "terminal", {3, 0});
     /** Source-node map with native output endpoints as its values. */
-    mockturtle::node_map<decltype(lyt)::object_id, decltype(ntk)> mapping{ntk};
+    mockturtle::node_map<typename decltype(lyt)::object_id, decltype(ntk)> mapping{ntk};
     mapping[ntk.get_node(input)]    = placed_input;
     mapping[ntk.get_node(internal)] = placed_internal;
     mapping[ntk.get_node(sink)]     = placed_sink;
@@ -89,7 +96,8 @@ TEST_CASE("Signal names transfer from a logic network to placed objects", "[name
     CHECK(lyt.get_name(placed_output) == "terminal");
 }
 
-TEST_CASE("Signal name restoration covers output drivers and mapped unused inputs", "[name-utils]")
+TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unused inputs", "[name-utils]",
+                   cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
     /** Logic source with a named output driver and unused inputs. */
     mockturtle::names_view<technology_network> ntk{};
@@ -103,7 +111,7 @@ TEST_CASE("Signal name restoration covers output drivers and mapped unused input
     ntk.set_name(driver, "driver");
     ntk.create_po(driver, "output");
     /** Placed target with an independent output terminal name. */
-    gate_level_layout<cartesian_layout> lyt{{4, 1}};
+    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
     /** Placed connected input. */
     const auto placed_input = lyt.create_pi("", {0, 0});
     /** Placed output driver. */
@@ -113,7 +121,7 @@ TEST_CASE("Signal name restoration covers output drivers and mapped unused input
     /** Placed unused input. */
     const auto placed_unused = lyt.create_pi("", {3, 0});
     /** Mapped native endpoints; unmapped nodes retain an absent default endpoint. */
-    mockturtle::node_map<decltype(lyt)::object_id, decltype(ntk)> mapping{ntk};
+    mockturtle::node_map<typename decltype(lyt)::object_id, decltype(ntk)> mapping{ntk};
     mapping[ntk.get_node(input)]  = placed_input;
     mapping[ntk.get_node(driver)] = placed_driver;
     mapping[ntk.get_node(unused)] = placed_unused;

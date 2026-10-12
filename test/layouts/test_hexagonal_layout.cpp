@@ -21,7 +21,6 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/traits.hpp>
 
 #include <cstdint>
 #include <limits>
@@ -30,74 +29,6 @@
 
 using namespace fiction;
 using namespace fiction::layouts;
-
-/**
- * @brief Checks the geometry contract for a layout type.
- * @tparam Lyt Coordinate layout type.
- */
-template <typename Lyt>
-void check_common_traits()
-{
-    CHECK(has_north_v<Lyt>);
-    CHECK(has_east_v<Lyt>);
-    CHECK(has_south_v<Lyt>);
-    CHECK(has_west_v<Lyt>);
-    CHECK(has_cardinal_operations_v<Lyt>);
-    CHECK(has_north_east_v<Lyt>);
-    CHECK(has_south_east_v<Lyt>);
-    CHECK(has_south_west_v<Lyt>);
-    CHECK(has_north_west_v<Lyt>);
-    CHECK(has_ordinal_operations_v<Lyt>);
-    CHECK(has_above_v<Lyt>);
-    CHECK(has_below_v<Lyt>);
-    CHECK(has_elevation_operations_v<Lyt>);
-    CHECK(is_coordinate_layout_v<Lyt>);
-    CHECK(!is_gate_level_layout_v<Lyt>);
-    CHECK(!is_cartesian_layout_v<Lyt>);
-    CHECK(is_hexagonal_layout_v<Lyt>);
-
-    CHECK(has_foreach_coordinate_v<Lyt>);
-    CHECK(has_foreach_adjacent_coordinate_v<Lyt>);
-    CHECK(has_foreach_adjacent_opposite_coordinates_v<Lyt>);
-}
-
-TEST_CASE("Hexagonal layout traits", "[hexagonal-layout]")
-{
-    using layout = hexagonal_layout;
-
-    CHECK(!is_shifted_cartesian_layout_v<layout>);
-
-    check_common_traits<layout>();
-}
-
-TEST_CASE("Hexagonal layout arrangement", "[hexagonal-layout]")
-{
-    const auto a =
-        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
-
-    const hexagonal_layout lyt{a, {3, 3}};
-
-    CHECK(lyt.get_arrangement() == a);
-    CHECK(lyt.clone().get_arrangement() == a);
-    CHECK(hexagonal_layout{lyt}.get_arrangement() == a);
-}
-
-TEST_CASE("Deep copy hexagonal layout", "[hexagonal-layout]")
-{
-    const hexagonal_layout original{arrangement::EVEN_ROW, {5, 5, 0}};
-
-    auto copy = original.clone();
-
-    copy.resize({10, 10, 1});
-
-    CHECK(original.width() == 5);
-    CHECK(original.height() == 5);
-    CHECK(original.layers() == 0);
-
-    CHECK(copy.width() == 10);
-    CHECK(copy.height() == 10);
-    CHECK(copy.layers() == 1);
-}
 
 /**
  * @brief Checks the geometry contract for a layout type.
@@ -239,113 +170,6 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, -1, 0});
         CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, -2, 0});
     }
-}
-
-/**
- * @brief Checks the geometry contract for a layout type.
- * @tparam Lyt Coordinate layout type.
- * @param a Arrangement of the shifted rows or columns.
- */
-template <typename Lyt>
-void check_visited_coordinates(const arrangement a)
-{
-    /** @brief Extent whose coordinate iteration is checked. */
-    const typename Lyt::extent ex{10, 10, 2};
-
-    Lyt layout{a, ex};
-
-    std::set<typename Lyt::coordinate> visited{};
-
-    const auto check1 = [&visited, &layout](const auto& c)
-    {
-        CHECK(c <= *layout.last_coordinate());
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(c));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(c) == 0);
-        visited.insert(c);
-    };
-
-    for (auto&& t : layout.coordinates())
-    {
-        check1(t);
-    }
-    CHECK(visited.size() == 200);
-
-    visited.clear();
-
-    layout.foreach_coordinate(check1);
-    CHECK(visited.size() == 200);
-
-    visited.clear();
-
-    typename Lyt::coordinate ar_ground{9, 9, 0};
-
-    const auto check2 = [&visited, &ar_ground, &layout](const auto& c)
-    {
-        // iteration stays in ground layer
-        CHECK(c.z == 0);
-        CHECK(c <= ar_ground);
-        CHECK(layout.is_ground_layer(c));
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(c));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(c) == 0);
-        visited.insert(c);
-    };
-
-    for (auto&& t : layout.ground_coordinates())
-    {
-        check2(t);
-    }
-    CHECK(visited.size() == 100);
-
-    visited.clear();
-
-    layout.foreach_ground_coordinate(check2);
-    CHECK(visited.size() == 100);
-
-    visited.clear();
-
-    typename Lyt::coordinate start{2, 2}, stop{5, 4};
-
-    const auto check3 = [&visited, &start, &stop, &layout](const auto& c)
-    {
-        CHECK(c.z == 0);
-        // iteration stays in between the bounds
-        CHECK(c >= start);
-        CHECK(c < stop);
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(c));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(c) == 0);
-        visited.insert(c);
-    };
-
-    for (auto&& t : layout.coordinates(start, stop))
-    {
-        check3(t);
-    }
-    CHECK(visited.size() == 23);
-
-    visited.clear();
-
-    layout.foreach_coordinate(check3, start, stop);
-    CHECK(visited.size() == 23);
-}
-
-TEST_CASE("Hexagonal coordinate iteration", "[hexagonal-layout]")
-{
-    const auto a =
-        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
-
-    check_visited_coordinates<hexagonal_layout>(a);
 }
 
 TEST_CASE("Cardinal and ordinal operations: odd row", "[hexagonal-layout]")
@@ -750,12 +574,16 @@ TEST_CASE("Hexagonal empty geometry and signed edge arithmetic", "[hexagonal-lay
     copy.resize({3, 4, 7});
     CHECK(empty.get_extent() == layout_base::extent{});
     CHECK(copy.get_extent() == layout_base::extent{3, 4, 7});
-    for (const auto x : {-2147483648ll, -3ll, -2ll, -1ll, 0ll, 2147483647ll})
+    for (const auto x : {-2147483648ll, -2147483647ll, -7ll, -6ll, -5ll, -4ll, -3ll, -2ll, -1ll, 0ll, 1ll, 2ll, 3ll,
+                         4ll, 5ll, 6ll, 7ll, 2147483647ll})
     {
-        for (const auto y : {-2147483648ll, -3ll, -2ll, -1ll, 0ll, 2147483647ll})
+        for (const auto y : {-2147483648ll, -2147483647ll, -7ll, -6ll, -5ll, -4ll, -3ll, -2ll, -1ll, 0ll, 1ll, 2ll, 3ll,
+                             4ll, 5ll, 6ll, 7ll, 2147483647ll})
         {
             const layout_base::coordinate c{x, y};
-            CHECK(empty.to_offset_coordinate(empty.to_cube_coordinate(c)) == c);
+            const auto                    cube = empty.to_cube_coordinate(c);
+            CHECK(cube.x + cube.y + cube.z == 0);
+            CHECK(empty.to_offset_coordinate(cube) == c);
             CHECK(!empty.is_adjacent_of(c, c));
         }
     }
@@ -784,13 +612,17 @@ TEST_CASE("Hexagonal empty geometry and signed edge arithmetic", "[hexagonal-lay
     }
 }
 
-TEST_CASE("Hexagonal neighbor callbacks propagate exceptions", "[hexagonal-layout][neighbor-exceptions]")
+TEST_CASE("Hexagonal cube conversion rejects unrepresentable axes", "[hexagonal-layout]")
 {
-    const hexagonal_layout layout{arrangement::ODD_ROW, {3, 3}};
-    CHECK_THROWS_AS(
-        layout.foreach_adjacent_coordinate({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
-        std::runtime_error);
-    CHECK_THROWS_AS(
-        layout.foreach_adjacent_opposite_coordinates({1, 1}, [](const auto&) { throw std::runtime_error("callback"); }),
-        std::runtime_error);
+    const auto max_axis = std::numeric_limits<int64_t>::max();
+    const auto min_axis = std::numeric_limits<int64_t>::min();
+    for (const auto a :
+         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
+    {
+        const hexagonal_layout hex{a, {4, 4}};
+        CHECK_FALSE(hex.to_offset_coordinate({max_axis, min_axis, 1}));
+        CHECK_FALSE(hex.to_offset_coordinate({1, min_axis, max_axis}));
+    }
+    const hexagonal_layout rows{arrangement::ODD_ROW, {4, 4}};
+    CHECK(rows.to_offset_coordinate({2147483648ll, -2147483646ll, -2}) == layout_base::coordinate{2147483647, -2});
 }

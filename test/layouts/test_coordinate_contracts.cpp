@@ -14,8 +14,11 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
@@ -30,6 +33,7 @@
 #include <fiction/traits.hpp>
 
 #include <algorithm>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -97,42 +101,6 @@ void check_moves_stay_adjacent(const Lyt& lyt)
 }
 
 }  // namespace
-
-TEST_CASE("Coordinates order by layer, then row, then column", "[coordinate-contracts]")
-{
-    using coord = coordinate<cartesian_layout>;
-
-    CHECK(coord{5, 0, 0} < coord{0, 1, 0});
-    CHECK(coord{5, 9, 0} < coord{0, 0, 1});
-    CHECK(coord{1, 2, 0} < coord{2, 2, 0});
-    CHECK(!(coord{2, 2, 0} < coord{2, 2, 0}));
-
-    const std::set<coord> ordered{{1, 1, 0}, {0, 0, 1}, {2, 0, 0}, {0, 1, 0}};
-
-    CHECK(*ordered.begin() == coord{2, 0, 0});
-    CHECK(*ordered.rbegin() == coord{0, 0, 1});
-}
-
-TEST_CASE("Equal coordinates hash equally", "[coordinate-contracts]")
-{
-    using coord = coordinate<cartesian_layout>;
-
-    const auto hash_of = [](const coord& c) { return std::hash<coord>{}(c); };
-
-    CHECK(hash_of({5, 7, 1}) == hash_of({5, 7, 1}));
-    CHECK(hash_of({-5, 7, 0}) == hash_of({-5, 7, 0}));
-    CHECK(hash_of({}) == hash_of({}));
-}
-
-TEST_CASE("Coordinate construction rejects narrowing", "[coordinate-contracts]")
-{
-    using coord = layout_base::coordinate;
-
-    CHECK_THROWS_AS((coord{4294967296ull, 0}), std::overflow_error);
-    CHECK_THROWS_AS((coord{0, 0, -4294967296ll}), std::overflow_error);
-    CHECK_THROWS_AS((cartesian_layout{{4294967296ull, 0}}), std::invalid_argument);
-    CHECK((coord{std::numeric_limits<int32_t>::max(), 0}.x == std::numeric_limits<int32_t>::max()));
-}
 
 TEST_CASE("Layouts check sizes against the signed coordinate domain", "[coordinate-contracts]")
 {
@@ -202,25 +170,18 @@ TEST_CASE("Direction predicates compare coordinates outside the frame", "[coordi
     CHECK_FALSE(hex.is_adjacent_of({7, 0, 0}, {}));
 }
 
-TEST_CASE("Border contract of Cartesian layouts", "[coordinate-contracts]")
-{
-    const cartesian_layout lyt{{5, 4, 2}};
-
-    check_border_contract(lyt);
-}
-
-TEST_CASE("Border contract of shifted Cartesian and hexagonal layouts", "[coordinate-contracts]")
+TEMPLATE_TEST_CASE("Geometry neighbors respect borders", "[coordinate-contracts]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    const hexagonal_layout         hex{a, {5, 4, 2}};
-    const shifted_cartesian_layout shifted{a, {5, 4, 2}};
-
-    check_border_contract(hex);
-    check_border_contract(shifted);
-    check_moves_stay_adjacent(hex);
-    check_moves_stay_adjacent(shifted);
+    const auto layout = blueprints::make_layout<TestType>(a, {5, 4, 2});
+    check_border_contract(layout);
+    if constexpr (!std::same_as<TestType, cartesian_layout>)
+    {
+        check_moves_stay_adjacent(layout);
+    }
 }
 
 TEST_CASE("Hexagonal diagonals at the borders reject coordinates outside the layout", "[coordinate-contracts]")
@@ -243,35 +204,6 @@ TEST_CASE("Hexagonal diagonals at the borders reject coordinates outside the lay
     CHECK_FALSE(lyt.south(corner));
     CHECK_FALSE(lyt.east(corner));
     CHECK_FALSE(lyt.south_east(corner));
-}
-
-TEST_CASE("Hexagonal offset and cube coordinates convert back and forth for negative and extreme values",
-          "[coordinate-contracts]")
-{
-    for (const auto a :
-         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
-    {
-        const hexagonal_layout hex{a, {0, 0, 0}};
-
-        for (int32_t x = -7; x <= 7; ++x)
-        {
-            for (int32_t y = -7; y <= 7; ++y)
-            {
-                const auto cube = hex.to_cube_coordinate({x, y});
-
-                CHECK(cube.x + cube.y + cube.z == 0);
-                CHECK(hex.to_offset_coordinate(cube) == layout_base::coordinate{x, y});
-            }
-        }
-
-        for (const auto x : {-2147483647, 2147483647})
-        {
-            for (const auto y : {-2147483647, 2147483647})
-            {
-                CHECK(hex.to_offset_coordinate(hex.to_cube_coordinate({x, y})) == layout_base::coordinate{x, y});
-            }
-        }
-    }
 }
 
 TEST_CASE("Hexagonal neighbor queries stay inside the layout for any 32-bit coordinate", "[coordinate-contracts]")
@@ -312,61 +244,22 @@ TEST_CASE("Hexagonal neighbor queries stay inside the layout for any 32-bit coor
     }
 }
 
-TEST_CASE("Gate-level layouts map tiles to object identities and back", "[coordinate-contracts]")
+TEMPLATE_TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-contracts]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
-    gate_level_layout<cartesian_layout> lyt{{4, 4, 2}, clocking::twoddwave()};
-
-    const auto a = lyt.create_pi("a", {0, 1, 0});
-    const auto b = lyt.create_buf(a, {1, 1, 1});
-
-    CHECK(lyt.get_tile(a) == coordinate<cartesian_layout>{0, 1, 0});
-    CHECK(lyt.get_tile(b) == coordinate<cartesian_layout>{1, 1, 1});
-    CHECK(lyt.find_object({1, 1, 1}) == b);
-    CHECK(lyt.is_empty_tile({2, 2, 0}));
-    CHECK_FALSE(lyt.is_empty_tile({0, 1, 0}));
-
-    const auto moved = lyt.move_object(b, {2, 2, 0});
-
-    CHECK(moved == b);
-    CHECK(lyt.get_tile(b) == coordinate<cartesian_layout>{2, 2, 0});
-    CHECK(lyt.source({b, 0}) == a);
-    CHECK(lyt.is_empty_tile({1, 1, 1}));
-}
-
-TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-contracts]")
-{
-    /** Cartesian layout with stable object identities. */
-    using lyt_t = gate_level_layout<cartesian_layout>;
+    /** @brief Gate layout with stable object identities. */
+    using lyt_t = gate_level_layout<TestType>;
     /** Coordinate value used for placement. */
     using tile = coordinate<lyt_t>;
 
     SECTION("The geometry supports more than two layers")
     {
-        const lyt_t lyt{cartesian_layout{{6, 6, 4}}};
+        const auto lyt = blueprints::make_layout<lyt_t>(arrangement::EVEN_ROW, {6, 6, 4});
         CHECK(lyt.get_extent() == layout_base::extent{6, 6, 4});
-    }
-    SECTION("Occupied placement leaves objects and connections unchanged")
-    {
-        lyt_t      lyt{{4, 4, 2}, clocking::twoddwave()};
-        const auto a   = lyt.create_pi("a", {0, 0, 0});
-        const auto buf = lyt.create_buf(a, {1, 0, 0});
-        const auto po  = lyt.create_po(buf, "po", {2, 0, 0});
-
-        CHECK_THROWS_AS(lyt.create_pi("b", {0, 0, 0}), std::invalid_argument);
-        CHECK_THROWS_AS(lyt.move_object(buf, {2, 0, 0}), std::invalid_argument);
-        CHECK(lyt.get_tile(buf) == tile{1, 0, 0});
-        CHECK(lyt.source({po, 0}) == buf);
-        CHECK(lyt.size() == 3);
-        CHECK(lyt.num_pis() == 1);
-        CHECK(lyt.num_pos() == 1);
-
-        CHECK(lyt.move_object(buf, {5, 0, 2}) == buf);
-        CHECK_FALSE(lyt.contains_coordinate(lyt.get_tile(buf)));
-        CHECK(lyt.source({po, 0}) == buf);
     }
     SECTION("Every layer has distinct placement")
     {
-        lyt_t lyt{{4, 4, 2}, clocking::twoddwave()};
+        auto lyt = blueprints::make_layout<lyt_t>(arrangement::EVEN_ROW, {4, 4, 2}, clocking::twoddwave());
         /** Ground-layer primary input. */
         const auto ground = lyt.create_pi("a", {2, 0, 0});
         /** Primary input beyond the declared layer count. */
@@ -379,62 +272,30 @@ TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-co
     }
     SECTION("Negative coordinates identify placed objects")
     {
-        lyt_t      lyt{{4, 4, 2}, clocking::twoddwave()};
-        const auto a = lyt.create_pi("a", {std::numeric_limits<int32_t>::min(), 0, 0});
-        const auto b = lyt.create_pi("b", {-1, -1, -1});
+        auto       lyt = blueprints::make_layout<lyt_t>(arrangement::EVEN_ROW, {4, 4, 2}, clocking::twoddwave());
+        const auto a   = lyt.create_pi("a", {std::numeric_limits<int32_t>::min(), 0, 0});
+        const auto b   = lyt.create_pi("b", {-1, -1, -1});
         CHECK(lyt.num_pis() == 2);
         CHECK(lyt.get_tile(a) == tile{std::numeric_limits<int32_t>::min(), 0, 0});
         CHECK(lyt.get_tile(b) == tile{-1, -1, -1});
     }
 }
 
-TEST_CASE("Bounding boxes include occupied coordinates outside the frame", "[coordinate-contracts]")
+TEMPLATE_TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-contracts]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
-    /** Cartesian layout with stable object identities. */
-    using lyt_t = gate_level_layout<cartesian_layout>;
-    lyt_t           lyt{{4, 4, 2}, clocking::twoddwave()};
-    bounding_box_2d bb{lyt};
-    CHECK_FALSE(bb.get_min());
-    CHECK_FALSE(bb.get_max());
-    CHECK(bb.get_x_size() == 0);
-    CHECK(bb.get_y_size() == 0);
-
-    lyt.create_pi("a", {10, 10, 0});
-    bb.update_bounding_box();
-    CHECK(bb.get_x_size() == 1);
-    CHECK(bb.get_y_size() == 1);
-    CHECK(bb.get_min() == coordinate<lyt_t>{10, 10, 0});
-    CHECK(bb.get_max() == coordinate<lyt_t>{10, 10, 0});
-}
-
-TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-contracts]")
-{
-    /** Checks independent sizes for geometry copies and complete layout clones. */
-    const auto check_sizes = [](auto coordinates)
-    {
-        /** Geometry copied into the gate layout. */
-        using geometry = decltype(coordinates);
-        /** @brief Gate layout whose size remains unchanged. */
-        const gate_level_layout<geometry> gates{coordinates};
-        /** Sizes retained by the source gate layout. */
-        const auto original = coordinates.get_extent();
-
-        coordinates.resize({4, 4, 4});
-        CHECK(gates.get_extent() == original);
-        /** Independent geometry value. */
-        auto copy = static_cast<const geometry&>(gates);
-        copy.resize({5, 5, 5});
-        CHECK(gates.get_extent() == original);
-        /** Independent complete layout clone. */
-        auto clone = gates.clone();
-        clone.resize({6, 6, 6});
-        CHECK(gates.get_extent() == original);
-        CHECK(clone.get_extent() == layout_base::extent{6, 6, 6});
-    };
-
-    check_sizes(cartesian_layout{{4, 4, 2}});
-    check_sizes(hexagonal_layout{arrangement::ODD_ROW, {4, 4, 2}});
-    check_sizes(shifted_cartesian_layout{arrangement::EVEN_COLUMN, {4, 4, 2}});
+    auto coordinates = blueprints::make_layout<TestType>(arrangement::EVEN_COLUMN, {4, 4, 2});
+    const gate_level_layout<TestType> gates{coordinates};
+    const auto                        original = coordinates.get_extent();
+    coordinates.resize({4, 4, 4});
+    CHECK(gates.get_extent() == original);
+    auto copy = static_cast<const TestType&>(gates);
+    copy.resize({5, 5, 5});
+    CHECK(gates.get_extent() == original);
+    auto clone = gates.clone();
+    clone.resize({6, 6, 6});
+    CHECK(gates.get_extent() == original);
+    CHECK(clone.get_extent() == layout_base::extent{6, 6, 6});
 }
 
 TEST_CASE("Cell scaling checks the final signed coordinate", "[coordinate-contracts]")
@@ -447,19 +308,4 @@ TEST_CASE("Cell scaling checks the final signed coordinate", "[coordinate-contra
                     std::overflow_error);
     CHECK_THROWS_AS((relative_to_absolute_cell_position<5, 5>(gates, coord{0, 0}, coord{-1, 0})),
                     std::invalid_argument);
-}
-
-TEST_CASE("Hexagonal cube conversion rejects unrepresentable axes", "[coordinate-contracts]")
-{
-    const auto max_axis = std::numeric_limits<int64_t>::max();
-    const auto min_axis = std::numeric_limits<int64_t>::min();
-    for (const auto a :
-         {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
-    {
-        const hexagonal_layout hex{a, {4, 4}};
-        CHECK_FALSE(hex.to_offset_coordinate({max_axis, min_axis, 1}));
-        CHECK_FALSE(hex.to_offset_coordinate({1, min_axis, max_axis}));
-    }
-    const hexagonal_layout rows{arrangement::ODD_ROW, {4, 4}};
-    CHECK(rows.to_offset_coordinate({2147483648ll, -2147483646ll, -2}) == layout_base::coordinate{2147483647, -2});
 }

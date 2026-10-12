@@ -12,10 +12,15 @@
  * @file
  * @brief Tests for extraction of layout logic.
  */
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 
 #include <kitty/constructors.hpp>
@@ -34,9 +39,10 @@ using namespace fiction::networks;
 /** @brief Placed Cartesian objects used by extraction tests. */
 using extraction_layout = gate_level_layout<cartesian_layout>;
 
-TEST_CASE("Extraction accepts explicitly placed constant functions", "[extract-layout-network]")
+TEMPLATE_TEST_CASE("Extraction accepts explicitly placed constant functions", "[extract-layout-network]",
+                   cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    extraction_layout          lyt{};
+    auto                       lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {});
     kitty::dynamic_truth_table function{0};
     kitty::create_from_hex_string(function, "1");
     const auto constant = lyt.create_gate({}, function, {0, 0});
@@ -47,9 +53,11 @@ TEST_CASE("Extraction accepts explicitly placed constant functions", "[extract-l
     CHECK(ntk.po_at(0) == ntk.get_constant(true));
 }
 
-TEST_CASE("Extraction preserves interface order and truth-table argument indices", "[extract-layout-network]")
+TEMPLATE_TEST_CASE("Extraction preserves interface order and truth-table argument indices", "[extract-layout-network]",
+                   cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    extraction_layout          lyt{{1, 1}, "ordered"};
+    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {1, 1});
+    lyt.set_layout_name("ordered");
     const auto                 unused = lyt.create_pi("unused", {10, 0});
     const auto                 a      = lyt.create_pi("a", {0, 0});
     const auto                 b      = lyt.create_pi("b", {7, 0});
@@ -78,10 +86,11 @@ TEST_CASE("Extraction preserves interface order and truth-table argument indices
     CHECK(kitty::to_hex(tables[1]) == "22");
 }
 
-TEST_CASE("Extraction follows connections across allocation order and reused identities", "[extract-layout-network]")
+TEMPLATE_TEST_CASE("Extraction follows connections across allocation order and reused identities",
+                   "[extract-layout-network]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    extraction_layout lyt{};
-    const auto        removed = lyt.create_pi("removed", {0, 0});
+    auto       lyt     = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {});
+    const auto removed = lyt.create_pi("removed", {0, 0});
     lyt.remove(removed);
     const auto                 po = lyt.create_po("result", {0, 0});
     kitty::dynamic_truth_table function{2};
@@ -99,11 +108,12 @@ TEST_CASE("Extraction follows connections across allocation order and reused ide
     CHECK(kitty::to_hex(tables[0]) == "2");
 }
 
-TEST_CASE("Extraction validates only dependencies of primary outputs", "[extract-layout-network]")
+TEMPLATE_TEST_CASE("Extraction validates only dependencies of primary outputs", "[extract-layout-network]",
+                   cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    extraction_layout lyt{};
-    const auto        a     = lyt.create_pi("a", {0, 0});
-    const auto        cycle = lyt.create_buf({1, 0});
+    auto       lyt   = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {});
+    const auto a     = lyt.create_pi("a", {0, 0});
+    const auto cycle = lyt.create_buf({1, 0});
     lyt.connect(cycle, {cycle, 0});
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
