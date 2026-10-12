@@ -127,32 +127,7 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
         });
 }
 
-TEST_CASE("Domain algorithms share one budget across parameter points", "[operational-domain][application-timeout]")
-{
-    const auto                lyt = blueprints::siqad_or_gate();
-    const std::vector<tt>     spec{create_or_tt()};
-    operational_domain_params params{};
-    operational_domain_stats  stats{};
-    stats.num_evaluated_parameter_combinations = 42;
-    params.operational_params.timeout          = 0;
-
-    CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
-    CHECK_THROWS_AS(operational_domain_random_sampling(lyt, spec, 0, params, &stats), utils::timeout_error);
-    CHECK_THROWS_AS(operational_domain_flood_fill(lyt, spec, 0, params, &stats), utils::timeout_error);
-    CHECK_THROWS_AS(operational_domain_contour_tracing(lyt, spec, 0, params, &stats), utils::timeout_error);
-    CHECK_THROWS_AS(critical_temperature_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
-    CHECK_THROWS_AS(critical_temperature_domain_random_sampling(lyt, spec, 0, params, &stats), utils::timeout_error);
-    CHECK_THROWS_AS(critical_temperature_domain_flood_fill(lyt, spec, 0, params, &stats), utils::timeout_error);
-    CHECK_THROWS_AS(critical_temperature_domain_contour_tracing(lyt, spec, 0, params, &stats), utils::timeout_error);
-
-    params.operational_params.timeout  = 1000;
-    params.operational_params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
-    params.number_of_threads           = 2;
-    params.on_worker_progress          = [&](auto, auto, auto, auto, auto, auto)
-    { std::this_thread::sleep_until(params.operational_params.deadline); };
-    CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
-    CHECK(stats.num_evaluated_parameter_combinations == 42);
-}
+// NOLINTNEXTLINE(*-function-size)
 
 TEST_CASE("Test parameter point", "[operational-domain]")
 {
@@ -245,6 +220,33 @@ TEST_CASE("operational_domain class member functions", "[operational-domain]")
     CHECK(opdom.get_number_of_dimensions() == 2);
     CHECK(opdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
     CHECK(opdom.get_dimension(1) == sweep_parameter::MU_MINUS);
+}
+
+TEST_CASE("critical_temperature_domain class member functions", "[operational-domain]")
+{
+    critical_temperature_domain ctdom{};
+
+    CHECK(ctdom.empty());
+    CHECK(ctdom.get_number_of_dimensions() == 0);
+    REQUIRE_THROWS_AS(ctdom.get_dimension(0), std::out_of_range);
+    REQUIRE_THROWS_AS(ctdom.get_dimension(1), std::out_of_range);
+
+    ctdom.add_dimension(sweep_parameter::EPSILON_R);
+    CHECK(ctdom.get_number_of_dimensions() == 1);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::EPSILON_R);
+    REQUIRE_THROWS_AS(ctdom.get_dimension(1), std::out_of_range);
+
+    ctdom = critical_temperature_domain({sweep_parameter::LAMBDA_TF, sweep_parameter::MU_MINUS});
+    CHECK(ctdom.get_number_of_dimensions() == 2);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
+    CHECK(ctdom.get_dimension(1) == sweep_parameter::MU_MINUS);
+
+    ctdom = critical_temperature_domain(
+        {sweep_parameter::LAMBDA_TF, sweep_parameter::EPSILON_R, sweep_parameter::MU_MINUS});
+    CHECK(ctdom.get_number_of_dimensions() == 3);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
+    CHECK(ctdom.get_dimension(1) == sweep_parameter::EPSILON_R);
+    CHECK(ctdom.get_dimension(2) == sweep_parameter::MU_MINUS);
 }
 
 TEST_CASE("Error handling of operational domain algorithms", "[operational-domain]")
@@ -460,241 +462,6 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
     check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 }
 
-TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
-{
-    // the sketch determines the operational status by filtering alone, which is a property of a single parameter
-    // point and therefore independent of how many dimensions are swept. These cases pin that contract in three
-    // dimensions, where the third dimension is the only remaining sweep parameter, `MU_MINUS`
-    const layout lat{blueprints::bestagon_and_gate()};
-
-    operational_domain_params params{};
-    params.operational_params.sim_params   = simulation_parameters{2, -0.32};
-    params.operational_params.sim_engine   = engine::QUICKEXACT;
-    params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
-                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1},
-                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
-
-    // 3 x 3 x 2 parameter points
-    constexpr std::size_t num_parameter_points = 18;
-
-    auto simulation_params = params;
-    simulation_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
-
-    auto sketch_params = params;
-    sketch_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
-
-    const auto simulated = operational_domain_grid_search(lat, std::vector{create_and_tt()}, simulation_params);
-
-    REQUIRE(simulated.size() == num_parameter_points);
-
-    SECTION("grid search yields a superset of the simulated operational domain")
-    {
-        // the sketch never rejects an operational point, it only fails to reject some non-operational ones. So every
-        // point that is operational under simulation must be operational in the sketch. This is the sketch's actual
-        // guarantee; the number of points it marks operational depends on how well the filters bite and is not a
-        // contract
-        operational_domain_stats stats{};
-
-        const auto sketch = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params, &stats);
-
-        CHECK(sketch.size() == num_parameter_points);
-        CHECK(stats.num_evaluated_parameter_combinations == num_parameter_points);
-
-        simulated.for_each(
-            [&sketch](const auto& parameter_point, const auto& status)
-            {
-                if (std::get<0>(status) == operational_status::OPERATIONAL)
-                {
-                    const auto sketched = sketch.contains(parameter_point);
-
-                    REQUIRE(sketched.has_value());
-                    CHECK(std::get<0>(sketched.value()) == operational_status::OPERATIONAL);
-                }
-            });
-    }
-
-    SECTION("random sampling agrees with a direct operational check")
-    {
-        const auto sketch = operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 8, sketch_params);
-
-        CHECK(sketch.size() <= 8);
-
-        const auto input_wires = detect_bdl_wires(
-            lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
-        const auto output_wires =
-            detect_bdl_wires(lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params,
-                             bdl_wire_selection::OUTPUT);
-
-        sketch.for_each(
-            [&](const auto& parameter_point, const auto& status)
-            {
-                auto point_params = sketch_params.operational_params;
-
-                point_params.sim_params.epsilon_r = parameter_point.get_parameters().at(0);
-                point_params.sim_params.lambda_tf = parameter_point.get_parameters().at(1);
-                point_params.sim_params.mu_minus  = parameter_point.get_parameters().at(2);
-
-                const auto [expected, _] =
-                    is_operational(lat, std::vector{create_and_tt()}, point_params, input_wires, output_wires);
-
-                CHECK(std::get<0>(status) == expected);
-            });
-    }
-
-    SECTION("flood fill yields a subset of the grid-searched sketch")
-    {
-        // flood fill traces the boundary of the sketch region rather than of the operational region, which is sound
-        // because the sketch region is a superset of the operational one. It can only miss a component that no
-        // random sample landed in, which is the failure mode it already has under simulation
-        const auto grid_sketch  = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params);
-        const auto flood_sketch = operational_domain_flood_fill(lat, std::vector{create_and_tt()}, 4, sketch_params);
-
-        CHECK(flood_sketch.size() <= num_parameter_points);
-
-        flood_sketch.for_each(
-            [&grid_sketch](const auto& parameter_point, const auto& status)
-            {
-                const auto grid_status = grid_sketch.contains(parameter_point);
-
-                REQUIRE(grid_status.has_value());
-                CHECK(std::get<0>(status) == std::get<0>(grid_status.value()));
-            });
-    }
-}
-
-TEST_CASE("Three-dimensional contour tracing", "[operational-domain]")
-{
-    // in three dimensions the boundary of the operational region is a surface rather than a curve, so it is collected
-    // by a breadth-first search over the operational points that border a non-operational one instead of being walked
-    // in clockwise order. What the algorithm promises is unchanged: every point it reports was either simulated or
-    // enclosed by the traced boundary
-    const layout lat{blueprints::bestagon_and_gate()};
-
-    operational_domain_params params{};
-    params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    params.operational_params.sim_engine = engine::QUICKEXACT;
-    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.4, .max = 5.8, .step = 0.1},
-                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.3, .step = 0.1},
-                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
-
-    const auto exhaustive = operational_domain_grid_search(lat, std::vector{create_and_tt()}, params);
-
-    REQUIRE(exhaustive.size() == 50);
-
-    SECTION("agrees with the grid search on every point it reports")
-    {
-        operational_domain_stats stats{};
-
-        const auto traced = operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 8, params, &stats);
-
-        // tracing only samples the boundary and its surroundings, so it must not cover the whole space
-        CHECK(traced.size() <= exhaustive.size());
-        CHECK(stats.num_evaluated_parameter_combinations <= exhaustive.size());
-
-        traced.for_each(
-            [&exhaustive](const auto& parameter_point, const auto& status)
-            {
-                const auto expected = exhaustive.contains(parameter_point);
-
-                REQUIRE(expected.has_value());
-                CHECK(std::get<0>(status) == std::get<0>(expected.value()));
-            });
-    }
-
-    SECTION("carries the operational domain sketch")
-    {
-        auto sketch_params                            = params;
-        sketch_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-        sketch_params.operational_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
-
-        const auto grid_sketch = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params);
-        const auto traced_sketch =
-            operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 8, sketch_params);
-
-        traced_sketch.for_each(
-            [&grid_sketch](const auto& parameter_point, const auto& status)
-            {
-                const auto expected = grid_sketch.contains(parameter_point);
-
-                REQUIRE(expected.has_value());
-                CHECK(std::get<0>(status) == std::get<0>(expected.value()));
-            });
-    }
-}
-
-TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]")
-{
-    // the parallel helpers slice their work across `min(number_of_threads, work_size)` threads and derive the slice
-    // size by dividing by that count, which is zero when there is no work at all. `samples = 0` reaches it through
-    // public API
-    const layout lat{blueprints::siqad_and_gate()};
-
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions              = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
-        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
-
-    operational_domain_stats op_domain_stats{};
-
-    const auto op_domain =
-        operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 0, op_domain_params, &op_domain_stats);
-
-    CHECK(op_domain.empty());
-    CHECK(op_domain_stats.num_evaluated_parameter_combinations == 0);
-}
-
-TEST_CASE("Pinning the thread count does not change the operational domain", "[operational-domain]")
-{
-    const layout lat{blueprints::siqad_and_gate()};
-
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions              = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
-        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
-
-    operational_domain_stats default_stats{};
-
-    const auto default_domain =
-        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &default_stats);
-
-    // one worker thread must produce exactly the same domain as the hardware-thread default
-    op_domain_params.number_of_threads = 1;
-
-    operational_domain_stats single_threaded_stats{};
-
-    const auto single_threaded_domain =
-        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &single_threaded_stats);
-
-    CHECK(single_threaded_domain.size() == default_domain.size());
-    CHECK(single_threaded_stats.num_simulator_invocations == default_stats.num_simulator_invocations);
-    CHECK(single_threaded_stats.num_evaluated_parameter_combinations ==
-          default_stats.num_evaluated_parameter_combinations);
-    CHECK(single_threaded_stats.num_operational_parameter_combinations ==
-          default_stats.num_operational_parameter_combinations);
-    CHECK(single_threaded_stats.num_non_operational_parameter_combinations ==
-          default_stats.num_non_operational_parameter_combinations);
-
-    // a thread count of zero is treated as one rather than dividing by zero
-    op_domain_params.number_of_threads = 0;
-
-    operational_domain_stats zero_stats{};
-
-    const auto zero_domain =
-        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &zero_stats);
-
-    CHECK(zero_domain.size() == default_domain.size());
-    CHECK(zero_stats.num_evaluated_parameter_combinations == default_stats.num_evaluated_parameter_combinations);
-}
-
-// NOLINTNEXTLINE(*-function-size)
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
 
@@ -1448,6 +1215,267 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     }
 }
 
+TEST_CASE("Domain algorithms share one budget across parameter points", "[operational-domain][application-timeout]")
+{
+    const auto                lyt = blueprints::siqad_or_gate();
+    const std::vector<tt>     spec{create_or_tt()};
+    operational_domain_params params{};
+    operational_domain_stats  stats{};
+    stats.num_evaluated_parameter_combinations = 42;
+    params.operational_params.timeout          = 0;
+
+    CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(operational_domain_random_sampling(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(operational_domain_flood_fill(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(operational_domain_contour_tracing(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(critical_temperature_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(critical_temperature_domain_random_sampling(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(critical_temperature_domain_flood_fill(lyt, spec, 0, params, &stats), utils::timeout_error);
+    CHECK_THROWS_AS(critical_temperature_domain_contour_tracing(lyt, spec, 0, params, &stats), utils::timeout_error);
+
+    params.operational_params.timeout  = 1000;
+    params.operational_params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
+    params.number_of_threads           = 2;
+    params.on_worker_progress          = [&](auto, auto, auto, auto, auto, auto)
+    { std::this_thread::sleep_until(params.operational_params.deadline); };
+    CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
+    CHECK(stats.num_evaluated_parameter_combinations == 42);
+}
+
+TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
+{
+    // the sketch determines the operational status by filtering alone, which is a property of a single parameter
+    // point and therefore independent of how many dimensions are swept. These cases pin that contract in three
+    // dimensions, where the third dimension is the only remaining sweep parameter, `MU_MINUS`
+    const layout lat{blueprints::bestagon_and_gate()};
+
+    operational_domain_params params{};
+    params.operational_params.sim_params   = simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine   = engine::QUICKEXACT;
+    params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
+
+    // 3 x 3 x 2 parameter points
+    constexpr std::size_t num_parameter_points = 18;
+
+    auto simulation_params = params;
+    simulation_params.operational_params.strategy_to_analyze_operational_status =
+        is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
+
+    auto sketch_params = params;
+    sketch_params.operational_params.strategy_to_analyze_operational_status =
+        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+
+    const auto simulated = operational_domain_grid_search(lat, std::vector{create_and_tt()}, simulation_params);
+
+    REQUIRE(simulated.size() == num_parameter_points);
+
+    SECTION("grid search yields a superset of the simulated operational domain")
+    {
+        // the sketch never rejects an operational point, it only fails to reject some non-operational ones. So every
+        // point that is operational under simulation must be operational in the sketch. This is the sketch's actual
+        // guarantee; the number of points it marks operational depends on how well the filters bite and is not a
+        // contract
+        operational_domain_stats stats{};
+
+        const auto sketch = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params, &stats);
+
+        CHECK(sketch.size() == num_parameter_points);
+        CHECK(stats.num_evaluated_parameter_combinations == num_parameter_points);
+
+        simulated.for_each(
+            [&sketch](const auto& parameter_point, const auto& status)
+            {
+                if (std::get<0>(status) == operational_status::OPERATIONAL)
+                {
+                    const auto sketched = sketch.contains(parameter_point);
+
+                    REQUIRE(sketched.has_value());
+                    CHECK(std::get<0>(sketched.value()) == operational_status::OPERATIONAL);
+                }
+            });
+    }
+
+    SECTION("random sampling agrees with a direct operational check")
+    {
+        const auto sketch = operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 8, sketch_params);
+
+        CHECK(sketch.size() <= 8);
+
+        const auto input_wires = detect_bdl_wires(
+            lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
+        const auto output_wires =
+            detect_bdl_wires(lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                             bdl_wire_selection::OUTPUT);
+
+        sketch.for_each(
+            [&](const auto& parameter_point, const auto& status)
+            {
+                auto point_params = sketch_params.operational_params;
+
+                point_params.sim_params.epsilon_r = parameter_point.get_parameters().at(0);
+                point_params.sim_params.lambda_tf = parameter_point.get_parameters().at(1);
+                point_params.sim_params.mu_minus  = parameter_point.get_parameters().at(2);
+
+                const auto [expected, _] =
+                    is_operational(lat, std::vector{create_and_tt()}, point_params, input_wires, output_wires);
+
+                CHECK(std::get<0>(status) == expected);
+            });
+    }
+
+    SECTION("flood fill yields a subset of the grid-searched sketch")
+    {
+        // flood fill traces the boundary of the sketch region rather than of the operational region, which is sound
+        // because the sketch region is a superset of the operational one. It can only miss a component that no
+        // random sample landed in, which is the failure mode it already has under simulation
+        const auto grid_sketch  = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params);
+        const auto flood_sketch = operational_domain_flood_fill(lat, std::vector{create_and_tt()}, 4, sketch_params);
+
+        CHECK(flood_sketch.size() <= num_parameter_points);
+
+        flood_sketch.for_each(
+            [&grid_sketch](const auto& parameter_point, const auto& status)
+            {
+                const auto grid_status = grid_sketch.contains(parameter_point);
+
+                REQUIRE(grid_status.has_value());
+                CHECK(std::get<0>(status) == std::get<0>(grid_status.value()));
+            });
+    }
+}
+
+TEST_CASE("Three-dimensional contour tracing", "[operational-domain]")
+{
+    // in three dimensions the boundary of the operational region is a surface rather than a curve, so it is collected
+    // by a breadth-first search over the operational points that border a non-operational one instead of being walked
+    // in clockwise order. What the algorithm promises is unchanged: every point it reports was either simulated or
+    // enclosed by the traced boundary
+    const layout lat{blueprints::bestagon_and_gate()};
+
+    operational_domain_params params{};
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine = engine::QUICKEXACT;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.4, .max = 5.8, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.3, .step = 0.1},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
+
+    const auto exhaustive = operational_domain_grid_search(lat, std::vector{create_and_tt()}, params);
+
+    REQUIRE(exhaustive.size() == 50);
+
+    SECTION("agrees with the grid search on every point it reports")
+    {
+        operational_domain_stats stats{};
+
+        const auto traced = operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 8, params, &stats);
+
+        // tracing only samples the boundary and its surroundings, so it must not cover the whole space
+        CHECK(traced.size() <= exhaustive.size());
+        CHECK(stats.num_evaluated_parameter_combinations <= exhaustive.size());
+
+        traced.for_each(
+            [&exhaustive](const auto& parameter_point, const auto& status)
+            {
+                const auto expected = exhaustive.contains(parameter_point);
+
+                REQUIRE(expected.has_value());
+                CHECK(std::get<0>(status) == std::get<0>(expected.value()));
+            });
+    }
+
+    SECTION("carries the operational domain sketch")
+    {
+        auto sketch_params                            = params;
+        sketch_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        sketch_params.operational_params.strategy_to_analyze_operational_status =
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+
+        const auto grid_sketch = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params);
+        const auto traced_sketch =
+            operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 8, sketch_params);
+
+        traced_sketch.for_each(
+            [&grid_sketch](const auto& parameter_point, const auto& status)
+            {
+                const auto expected = grid_sketch.contains(parameter_point);
+
+                REQUIRE(expected.has_value());
+                CHECK(std::get<0>(status) == std::get<0>(expected.value()));
+            });
+    }
+}
+
+TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]")
+{
+    // the parallel helpers slice their work across `min(number_of_threads, work_size)` threads and derive the slice
+    // size by dividing by that count, which is zero when there is no work at all. `samples = 0` reaches it through
+    // public API
+    const layout lat{blueprints::siqad_and_gate()};
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions              = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+
+    operational_domain_stats op_domain_stats{};
+
+    const auto op_domain =
+        operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 0, op_domain_params, &op_domain_stats);
+
+    CHECK(op_domain.empty());
+    CHECK(op_domain_stats.num_evaluated_parameter_combinations == 0);
+}
+
+TEST_CASE("Pinning the thread count does not change the operational domain", "[operational-domain]")
+{
+    const layout lat{blueprints::siqad_and_gate()};
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions              = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+
+    operational_domain_stats default_stats{};
+
+    const auto default_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &default_stats);
+
+    // one worker thread must produce exactly the same domain as the hardware-thread default
+    op_domain_params.number_of_threads = 1;
+
+    operational_domain_stats single_threaded_stats{};
+
+    const auto single_threaded_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &single_threaded_stats);
+
+    CHECK(single_threaded_domain.size() == default_domain.size());
+    CHECK(single_threaded_stats.num_simulator_invocations == default_stats.num_simulator_invocations);
+    CHECK(single_threaded_stats.num_evaluated_parameter_combinations ==
+          default_stats.num_evaluated_parameter_combinations);
+    CHECK(single_threaded_stats.num_operational_parameter_combinations ==
+          default_stats.num_operational_parameter_combinations);
+    CHECK(single_threaded_stats.num_non_operational_parameter_combinations ==
+          default_stats.num_non_operational_parameter_combinations);
+
+    // a thread count of zero is treated as one rather than dividing by zero
+    op_domain_params.number_of_threads = 0;
+
+    operational_domain_stats zero_stats{};
+
+    const auto zero_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &zero_stats);
+
+    CHECK(zero_domain.size() == default_domain.size());
+    CHECK(zero_stats.num_evaluated_parameter_combinations == default_stats.num_evaluated_parameter_combinations);
+}
+
 TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operational-domain]")
 {
 
@@ -1933,33 +1961,6 @@ TEST_CASE("Grid search to determine the operational domain. The operational stat
                 CHECK(pp.get_parameters()[1] >= 4.0);
             });
     }
-}
-
-TEST_CASE("critical_temperature_domain class member functions", "[operational-domain]")
-{
-    critical_temperature_domain ctdom{};
-
-    CHECK(ctdom.empty());
-    CHECK(ctdom.get_number_of_dimensions() == 0);
-    REQUIRE_THROWS_AS(ctdom.get_dimension(0), std::out_of_range);
-    REQUIRE_THROWS_AS(ctdom.get_dimension(1), std::out_of_range);
-
-    ctdom.add_dimension(sweep_parameter::EPSILON_R);
-    CHECK(ctdom.get_number_of_dimensions() == 1);
-    CHECK(ctdom.get_dimension(0) == sweep_parameter::EPSILON_R);
-    REQUIRE_THROWS_AS(ctdom.get_dimension(1), std::out_of_range);
-
-    ctdom = critical_temperature_domain({sweep_parameter::LAMBDA_TF, sweep_parameter::MU_MINUS});
-    CHECK(ctdom.get_number_of_dimensions() == 2);
-    CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
-    CHECK(ctdom.get_dimension(1) == sweep_parameter::MU_MINUS);
-
-    ctdom = critical_temperature_domain(
-        {sweep_parameter::LAMBDA_TF, sweep_parameter::EPSILON_R, sweep_parameter::MU_MINUS});
-    CHECK(ctdom.get_number_of_dimensions() == 3);
-    CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
-    CHECK(ctdom.get_dimension(1) == sweep_parameter::EPSILON_R);
-    CHECK(ctdom.get_dimension(2) == sweep_parameter::MU_MINUS);
 }
 
 TEST_CASE("Bestagon AND gate operational domain and temperature computation", "[operational-domain]")

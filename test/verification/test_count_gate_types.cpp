@@ -37,6 +37,20 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::verification;
 
+TEMPLATE_TEST_CASE("Network gate counts exclude inputs and constants", "[count-gate-types]", technology_network,
+                   mockturtle::aig_network, mockturtle::xag_network)
+{
+    TestType   ntk{};
+    const auto a = ntk.create_pi();
+    const auto b = ntk.create_pi();
+    ntk.create_po(ntk.create_and(a, b));
+    count_gate_types_stats stats{};
+    count_gate_types(ntk, &stats);
+    CHECK(stats.num_and2 == 1);
+    CHECK(stats.num_buf == 0);
+    CHECK(stats.num_other == 0);
+}
+
 TEST_CASE("Gate counts exclude terminals and classify placed wires", "[count-gate-types]")
 {
     gate_level_layout<cartesian_layout> lyt{{4, 2}};
@@ -53,17 +67,32 @@ TEST_CASE("Gate counts exclude terminals and classify placed wires", "[count-gat
     CHECK(stats.num_other == 0);
 }
 
-TEMPLATE_TEST_CASE("Network gate counts exclude inputs and constants", "[count-gate-types]", technology_network,
-                   mockturtle::aig_network, mockturtle::xag_network)
+TEST_CASE("Technology network gate counts retain ternary classifications", "[count-gate-types]")
 {
-    TestType   ntk{};
-    const auto a = ntk.create_pi();
-    const auto b = ntk.create_pi();
-    ntk.create_po(ntk.create_and(a, b));
+    technology_network ntk{};
+    const auto         a = ntk.create_pi();
+    const auto         b = ntk.create_pi();
+    const auto         c = ntk.create_pi();
+    ntk.create_maj(a, b, c);
+    ntk.create_ite(a, b, c);
+    ntk.create_dot(a, b, c);
+    for (const auto* hex : {"80", "28", "a8", "16", "81", "6a"})
+    {
+        kitty::dynamic_truth_table function{3};
+        kitty::create_from_hex_string(function, hex);
+        ntk.create_node({a, b, c}, function);
+    }
     count_gate_types_stats stats{};
     count_gate_types(ntk, &stats);
-    CHECK(stats.num_and2 == 1);
-    CHECK(stats.num_buf == 0);
+    CHECK(stats.num_maj3 == 1);
+    CHECK(stats.num_mux == 1);
+    CHECK(stats.num_dot == 1);
+    CHECK(stats.num_and3 == 1);
+    CHECK(stats.num_xor_and == 1);
+    CHECK(stats.num_or_and == 1);
+    CHECK(stats.num_onehot == 1);
+    CHECK(stats.num_gamble == 1);
+    CHECK(stats.num_and_xor == 1);
     CHECK(stats.num_other == 0);
 }
 
@@ -119,33 +148,4 @@ TEMPLATE_TEST_CASE("Native gate counts classify supported functions and generic 
     CHECK(stats.num_dot == 0);
     CHECK(stats.num_mux == 0);
     CHECK(stats.num_and_xor == 0);
-}
-
-TEST_CASE("Technology network gate counts retain ternary classifications", "[count-gate-types]")
-{
-    technology_network ntk{};
-    const auto         a = ntk.create_pi();
-    const auto         b = ntk.create_pi();
-    const auto         c = ntk.create_pi();
-    ntk.create_maj(a, b, c);
-    ntk.create_ite(a, b, c);
-    ntk.create_dot(a, b, c);
-    for (const auto* hex : {"80", "28", "a8", "16", "81", "6a"})
-    {
-        kitty::dynamic_truth_table function{3};
-        kitty::create_from_hex_string(function, hex);
-        ntk.create_node({a, b, c}, function);
-    }
-    count_gate_types_stats stats{};
-    count_gate_types(ntk, &stats);
-    CHECK(stats.num_maj3 == 1);
-    CHECK(stats.num_mux == 1);
-    CHECK(stats.num_dot == 1);
-    CHECK(stats.num_and3 == 1);
-    CHECK(stats.num_xor_and == 1);
-    CHECK(stats.num_or_and == 1);
-    CHECK(stats.num_onehot == 1);
-    CHECK(stats.num_gamble == 1);
-    CHECK(stats.num_and_xor == 1);
-    CHECK(stats.num_other == 0);
 }

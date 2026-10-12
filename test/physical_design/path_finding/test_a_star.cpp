@@ -204,6 +204,139 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
     }
 }
 
+TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
+{
+    using clk_lyt    = gate_level_layout<cartesian_layout>;
+    using coord_path = layout_coordinate_path<clk_lyt>;
+
+    const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::use()};
+
+    SECTION("Unit cost")
+    {
+        const auto path =
+            a_star<coord_path, clk_lyt>(layout, {.source = {0, 0}, .target = {3, 3}},
+                                        manhattan_distance_functor<clk_lyt>(), unit_cost_functor<clk_lyt>());
+
+        CHECK(path.size() == 7);
+        CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+        CHECK(path.target() == coordinate<clk_lyt>{3, 3});
+    }
+    SECTION("Random cost")
+    {
+        const auto path =
+            a_star<coord_path, clk_lyt>(layout, {.source = {0, 0}, .target = {3, 3}},
+                                        manhattan_distance_functor<clk_lyt>(), random_cost_functor<clk_lyt>());
+
+        CHECK(path.size() == 7);
+        CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+        CHECK(path.target() == coordinate<clk_lyt>{3, 3});
+    }
+}
+
+TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
+{
+    using lyt        = cartesian_layout;
+    using clk_lyt    = gate_level_layout<lyt>;
+    using coord_path = layout_coordinate_path<lyt>;
+
+    SECTION("Manhattan distance")
+    {
+        SECTION("coordinate paths")
+        {
+            const lyt layout{lyt::extent{10, 10, 1}};
+
+            SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
+            {
+                const auto path =
+                    a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}}, manhattan_distance_functor<lyt>());
+
+                CHECK(path.size() == 19);
+                CHECK(path.source() == coordinate<lyt>{0, 0});
+                CHECK(path.target() == coordinate<lyt>{9, 9});
+            }
+        }
+        SECTION("clocking paths")
+        {
+            SECTION("RES")
+            {
+                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::res()};
+
+                SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
+                {
+                    const auto path = a_star<coord_path, clk_lyt>(layout, {.source = {0, 0}, .target = {9, 9}},
+                                                                  manhattan_distance_functor<clk_lyt>());
+
+                    CHECK(path.size() == 19);
+                    CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+                    CHECK(path.target() == coordinate<clk_lyt>{9, 9});
+                }
+            }
+            SECTION("ESP")
+            {
+                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::esr()};
+
+                SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
+                {
+                    const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}},
+                                                         manhattan_distance_functor<clk_lyt>());
+
+                    CHECK(path.size() == 19);
+                    CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+                    CHECK(path.target() == coordinate<clk_lyt>{9, 9});
+                }
+            }
+        }
+    }
+    SECTION("Euclidean distance")
+    {
+        SECTION("coordinate paths")
+        {
+            const lyt layout{lyt::extent{10, 10, 1}};
+
+            SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
+            {
+                const auto path =
+                    a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}}, euclidean_distance_functor<lyt>());
+
+                CHECK(path.size() == 19);
+                CHECK(path.source() == coordinate<lyt>{0, 0});
+                CHECK(path.target() == coordinate<lyt>{9, 9});
+            }
+        }
+        SECTION("clocking paths")
+        {
+            SECTION("RES")
+            {
+                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::res()};
+
+                SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
+                {
+                    const auto path = a_star<coord_path, clk_lyt>(layout, {.source = {0, 0}, .target = {9, 9}},
+                                                                  euclidean_distance_functor<clk_lyt>());
+
+                    CHECK(path.size() == 19);
+                    CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+                    CHECK(path.target() == coordinate<clk_lyt>{9, 9});
+                }
+            }
+            SECTION("ESP")
+            {
+                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::esr()};
+
+                SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
+                {
+                    const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}},
+                                                         euclidean_distance_functor<clk_lyt>());
+
+                    CHECK(path.size() == 19);
+                    CHECK(path.source() == coordinate<clk_lyt>{0, 0});
+                    CHECK(path.target() == coordinate<clk_lyt>{9, 9});
+                }
+            }
+        }
+    }
+}
+
 TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 {
     using gate_lyt   = gate_level_layout<cartesian_layout>;
@@ -293,6 +426,100 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
                 CHECK(path.size() == 7);
                 CHECK(dist == 6);
+                CHECK(path.source() == coordinate<gate_lyt>{0, 0});
+                CHECK(path.target() == coordinate<gate_lyt>{3, 3});
+                CHECK(path[1] == coordinate<gate_lyt>{1, 0});
+                CHECK(path[2] == coordinate<gate_lyt>{1, 1});
+                CHECK(path[3] == coordinate<gate_lyt>{1, 2});
+                CHECK(path[4] == coordinate<gate_lyt>{2, 2});
+                CHECK(path[5] == coordinate<gate_lyt>{3, 2});
+            }
+        }
+    }
+}
+
+TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
+{
+    using gate_lyt   = gate_level_layout<cartesian_layout>;
+    using coord_path = layout_coordinate_path<gate_lyt>;
+
+    SECTION("coordinate paths")
+    {
+        const gate_lyt layout{gate_lyt::extent{4, 4, 1}};
+
+        SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
+        {
+            auto         obstr_lyt = static_cast<cartesian_layout>(layout);
+            obstructions search_obstructions{};
+
+            // create some connection obstructions
+            search_obstructions.obstruct_connection({0, 0}, {1, 0});
+            search_obstructions.obstruct_connection({0, 1}, {1, 1});
+            search_obstructions.obstruct_connection({0, 2}, {1, 2});
+            // leaving only one valid path via (0,4)
+
+            const auto path = a_star<coord_path>(
+                obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor<decltype(obstr_lyt)>(),
+                unit_cost_functor<decltype(obstr_lyt)>(), {}, search_obstructions);  // only one path possible
+
+            CHECK(path.size() == 7);
+            CHECK(path.source() == coordinate<gate_lyt>{0, 0});
+            CHECK(path.target() == coordinate<gate_lyt>{3, 3});
+            CHECK(path[1] == coordinate<gate_lyt>{0, 1});
+            CHECK(path[2] == coordinate<gate_lyt>{0, 2});
+            CHECK(path[3] == coordinate<gate_lyt>{0, 3});
+            CHECK(path[4] == coordinate<gate_lyt>{1, 3});
+            CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+        }
+    }
+    SECTION("clocking paths")
+    {
+        SECTION("2DDWave")
+        {
+            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::twoddwave()};
+
+            SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
+            {
+                auto         obstr_lyt = layout;
+                obstructions search_obstructions{};
+
+                // create some connection obstructions
+                search_obstructions.obstruct_connection({0, 0}, {1, 0});
+                search_obstructions.obstruct_connection({0, 1}, {1, 1});
+                search_obstructions.obstruct_connection({0, 2}, {1, 2});
+                // leaving only one valid path via (0,4)
+
+                const auto path = a_star<coord_path>(
+                    obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor<decltype(obstr_lyt)>(),
+                    unit_cost_functor<decltype(obstr_lyt)>(), {}, search_obstructions);  // only one path possible
+
+                CHECK(path.size() == 7);
+                CHECK(path.source() == coordinate<gate_lyt>{0, 0});
+                CHECK(path.target() == coordinate<gate_lyt>{3, 3});
+                CHECK(path[1] == coordinate<gate_lyt>{0, 1});
+                CHECK(path[2] == coordinate<gate_lyt>{0, 2});
+                CHECK(path[3] == coordinate<gate_lyt>{0, 3});
+                CHECK(path[4] == coordinate<gate_lyt>{1, 3});
+                CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+            }
+        }
+        SECTION("USE")
+        {
+            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::use()};
+
+            SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
+            {
+                auto         obstr_lyt = layout;
+                obstructions search_obstructions{};
+
+                // create a PI as obstruction
+                search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
+
+                const auto path = a_star<coord_path>(
+                    obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor<decltype(obstr_lyt)>(),
+                    unit_cost_functor<decltype(obstr_lyt)>(), {}, search_obstructions);  // only one path possible
+
+                CHECK(path.size() == 7);
                 CHECK(path.source() == coordinate<gate_lyt>{0, 0});
                 CHECK(path.target() == coordinate<gate_lyt>{3, 3});
                 CHECK(path[1] == coordinate<gate_lyt>{1, 0});
@@ -421,233 +648,6 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
                 }
             }
         }
-    }
-}
-
-TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
-{
-    using gate_lyt   = gate_level_layout<cartesian_layout>;
-    using coord_path = layout_coordinate_path<gate_lyt>;
-
-    SECTION("coordinate paths")
-    {
-        const gate_lyt layout{gate_lyt::extent{4, 4, 1}};
-
-        SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
-        {
-            auto         obstr_lyt = static_cast<cartesian_layout>(layout);
-            obstructions search_obstructions{};
-
-            // create some connection obstructions
-            search_obstructions.obstruct_connection({0, 0}, {1, 0});
-            search_obstructions.obstruct_connection({0, 1}, {1, 1});
-            search_obstructions.obstruct_connection({0, 2}, {1, 2});
-            // leaving only one valid path via (0,4)
-
-            const auto path = a_star<coord_path>(
-                obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor<decltype(obstr_lyt)>(),
-                unit_cost_functor<decltype(obstr_lyt)>(), {}, search_obstructions);  // only one path possible
-
-            CHECK(path.size() == 7);
-            CHECK(path.source() == coordinate<gate_lyt>{0, 0});
-            CHECK(path.target() == coordinate<gate_lyt>{3, 3});
-            CHECK(path[1] == coordinate<gate_lyt>{0, 1});
-            CHECK(path[2] == coordinate<gate_lyt>{0, 2});
-            CHECK(path[3] == coordinate<gate_lyt>{0, 3});
-            CHECK(path[4] == coordinate<gate_lyt>{1, 3});
-            CHECK(path[5] == coordinate<gate_lyt>{2, 3});
-        }
-    }
-    SECTION("clocking paths")
-    {
-        SECTION("2DDWave")
-        {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::twoddwave()};
-
-            SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
-            {
-                auto         obstr_lyt = layout;
-                obstructions search_obstructions{};
-
-                // create some connection obstructions
-                search_obstructions.obstruct_connection({0, 0}, {1, 0});
-                search_obstructions.obstruct_connection({0, 1}, {1, 1});
-                search_obstructions.obstruct_connection({0, 2}, {1, 2});
-                // leaving only one valid path via (0,4)
-
-                const auto path = a_star<coord_path>(
-                    obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor<decltype(obstr_lyt)>(),
-                    unit_cost_functor<decltype(obstr_lyt)>(), {}, search_obstructions);  // only one path possible
-
-                CHECK(path.size() == 7);
-                CHECK(path.source() == coordinate<gate_lyt>{0, 0});
-                CHECK(path.target() == coordinate<gate_lyt>{3, 3});
-                CHECK(path[1] == coordinate<gate_lyt>{0, 1});
-                CHECK(path[2] == coordinate<gate_lyt>{0, 2});
-                CHECK(path[3] == coordinate<gate_lyt>{0, 3});
-                CHECK(path[4] == coordinate<gate_lyt>{1, 3});
-                CHECK(path[5] == coordinate<gate_lyt>{2, 3});
-            }
-        }
-        SECTION("USE")
-        {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::use()};
-
-            SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
-            {
-                auto         obstr_lyt = layout;
-                obstructions search_obstructions{};
-
-                // create a PI as obstruction
-                search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
-
-                const auto path = a_star<coord_path>(
-                    obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor<decltype(obstr_lyt)>(),
-                    unit_cost_functor<decltype(obstr_lyt)>(), {}, search_obstructions);  // only one path possible
-
-                CHECK(path.size() == 7);
-                CHECK(path.source() == coordinate<gate_lyt>{0, 0});
-                CHECK(path.target() == coordinate<gate_lyt>{3, 3});
-                CHECK(path[1] == coordinate<gate_lyt>{1, 0});
-                CHECK(path[2] == coordinate<gate_lyt>{1, 1});
-                CHECK(path[3] == coordinate<gate_lyt>{1, 2});
-                CHECK(path[4] == coordinate<gate_lyt>{2, 2});
-                CHECK(path[5] == coordinate<gate_lyt>{3, 2});
-            }
-        }
-    }
-}
-
-TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
-{
-    using lyt        = cartesian_layout;
-    using clk_lyt    = gate_level_layout<lyt>;
-    using coord_path = layout_coordinate_path<lyt>;
-
-    SECTION("Manhattan distance")
-    {
-        SECTION("coordinate paths")
-        {
-            const lyt layout{lyt::extent{10, 10, 1}};
-
-            SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
-            {
-                const auto path =
-                    a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}}, manhattan_distance_functor<lyt>());
-
-                CHECK(path.size() == 19);
-                CHECK(path.source() == coordinate<lyt>{0, 0});
-                CHECK(path.target() == coordinate<lyt>{9, 9});
-            }
-        }
-        SECTION("clocking paths")
-        {
-            SECTION("RES")
-            {
-                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::res()};
-
-                SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
-                {
-                    const auto path = a_star<coord_path, clk_lyt>(layout, {.source = {0, 0}, .target = {9, 9}},
-                                                                  manhattan_distance_functor<clk_lyt>());
-
-                    CHECK(path.size() == 19);
-                    CHECK(path.source() == coordinate<clk_lyt>{0, 0});
-                    CHECK(path.target() == coordinate<clk_lyt>{9, 9});
-                }
-            }
-            SECTION("ESP")
-            {
-                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::esr()};
-
-                SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
-                {
-                    const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}},
-                                                         manhattan_distance_functor<clk_lyt>());
-
-                    CHECK(path.size() == 19);
-                    CHECK(path.source() == coordinate<clk_lyt>{0, 0});
-                    CHECK(path.target() == coordinate<clk_lyt>{9, 9});
-                }
-            }
-        }
-    }
-    SECTION("Euclidean distance")
-    {
-        SECTION("coordinate paths")
-        {
-            const lyt layout{lyt::extent{10, 10, 1}};
-
-            SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
-            {
-                const auto path =
-                    a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}}, euclidean_distance_functor<lyt>());
-
-                CHECK(path.size() == 19);
-                CHECK(path.source() == coordinate<lyt>{0, 0});
-                CHECK(path.target() == coordinate<lyt>{9, 9});
-            }
-        }
-        SECTION("clocking paths")
-        {
-            SECTION("RES")
-            {
-                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::res()};
-
-                SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
-                {
-                    const auto path = a_star<coord_path, clk_lyt>(layout, {.source = {0, 0}, .target = {9, 9}},
-                                                                  euclidean_distance_functor<clk_lyt>());
-
-                    CHECK(path.size() == 19);
-                    CHECK(path.source() == coordinate<clk_lyt>{0, 0});
-                    CHECK(path.target() == coordinate<clk_lyt>{9, 9});
-                }
-            }
-            SECTION("ESP")
-            {
-                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::esr()};
-
-                SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
-                {
-                    const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}},
-                                                         euclidean_distance_functor<clk_lyt>());
-
-                    CHECK(path.size() == 19);
-                    CHECK(path.source() == coordinate<clk_lyt>{0, 0});
-                    CHECK(path.target() == coordinate<clk_lyt>{9, 9});
-                }
-            }
-        }
-    }
-}
-
-TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
-{
-    using clk_lyt    = gate_level_layout<cartesian_layout>;
-    using coord_path = layout_coordinate_path<clk_lyt>;
-
-    const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::use()};
-
-    SECTION("Unit cost")
-    {
-        const auto path =
-            a_star<coord_path, clk_lyt>(layout, {.source = {0, 0}, .target = {3, 3}},
-                                        manhattan_distance_functor<clk_lyt>(), unit_cost_functor<clk_lyt>());
-
-        CHECK(path.size() == 7);
-        CHECK(path.source() == coordinate<clk_lyt>{0, 0});
-        CHECK(path.target() == coordinate<clk_lyt>{3, 3});
-    }
-    SECTION("Random cost")
-    {
-        const auto path =
-            a_star<coord_path, clk_lyt>(layout, {.source = {0, 0}, .target = {3, 3}},
-                                        manhattan_distance_functor<clk_lyt>(), random_cost_functor<clk_lyt>());
-
-        CHECK(path.size() == 7);
-        CHECK(path.source() == coordinate<clk_lyt>{0, 0});
-        CHECK(path.target() == coordinate<clk_lyt>{3, 3});
     }
 }
 

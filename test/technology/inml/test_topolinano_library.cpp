@@ -47,75 +47,6 @@ TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
     CHECK(!has_get_gate_ports_v<topolinano_library>);
 }
 
-TEST_CASE("ToPoliNano rejects primary-input fanout", "[inml-topolinano-library]")
-{
-    shifted_cart_gate_clk_lyt lyt{arrangement::ODD_COLUMN, {2, 2}, clocking::columnar(clocking::num_clks::THREE)};
-    const auto                pi = lyt.create_pi("a", {0, 1});
-    lyt.create_po(pi, "north", {1, 0});
-    lyt.create_po(pi, "south", {1, 1});
-
-    std::ostringstream    report{};
-    gate_level_drv_params ps{};
-    ps.out = &report;
-    gate_level_drv_stats st{};
-    gate_level_drvs(lyt, ps, &st);
-    INFO(report.str());
-    REQUIRE(st.drvs == 0);
-
-    CHECK_THROWS_AS(apply_gate_library<topolinano_library>(lyt),
-                    fcn::unsupported_gate_type_exception<tile<decltype(lyt)>>);
-}
-
-TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")
-{
-    const auto                a = GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW);
-    shifted_cart_gate_clk_lyt lyt{a, {2, 2}};
-    const auto                x = lyt.create_pi("x", {0, 0});
-    const auto                y = lyt.create_pi("y", {1, 0});
-    lyt.create_and(x, y, {1, 1});
-
-    CHECK_THROWS_AS(topolinano_library::set_up_gate(lyt, {1, 1}), std::invalid_argument);
-    CHECK_THROWS_AS(topolinano_library::set_up_gate(lyt, {0, 0}), std::invalid_argument);
-}
-
-TEST_CASE("ToPoliNano straightens two-cell wire segments", "[inml-topolinano-library]")
-{
-    const auto   row = GENERATE(0u, 2u);
-    inml::layout lyt{{3, 4}};
-    lyt.assign_cell_type({0, row}, magnet_type::INPUT);
-    lyt.assign_cell_name({0, row}, "x");
-    lyt.assign_cell_type({1, row}, magnet_type::NORMAL);
-    lyt.assign_cell_type({1, 1}, magnet_type::NORMAL);
-
-    topolinano_library::post_layout_optimization(lyt);
-
-    CHECK(lyt.get_cell_type({0, 1}) == magnet_type::INPUT);
-    CHECK(lyt.get_cell_name({0, 1}) == "x");
-    CHECK(lyt.get_cell_type({1, 1}) == magnet_type::NORMAL);
-    CHECK(lyt.is_empty_cell({0, row}));
-    CHECK(lyt.is_empty_cell({1, row}));
-}
-
-TEST_CASE("ToPoliNano preserves obstructed wire segments", "[inml-topolinano-library]")
-{
-    const auto   row = GENERATE(0u, 4u);
-    inml::layout lyt{{4, 6}};
-    for (const auto column : {0u, 1u, 2u})
-    {
-        lyt.assign_cell_type({column, row}, magnet_type::NORMAL);
-    }
-    const auto adjacent_row = row == 0 ? 1u : 3u;
-    lyt.assign_cell_type({0, adjacent_row}, magnet_type::NORMAL);
-    lyt.assign_cell_type({2, adjacent_row}, magnet_type::NORMAL);
-    lyt.assign_cell_type({1, 2}, magnet_type::SLANTED_EDGE_UP_MAGNET);
-
-    topolinano_library::post_layout_optimization(lyt);
-
-    CHECK(lyt.get_cell_type({1, row}) == magnet_type::NORMAL);
-    CHECK(lyt.is_empty_cell({1, adjacent_row}));
-    CHECK(lyt.get_cell_type({1, 2}) == magnet_type::SLANTED_EDGE_UP_MAGNET);
-}
-
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")
 {
     const auto layout =
@@ -208,6 +139,75 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
     CHECK(topolinano_library::set_up_gate(layout, {3, 0}) == disjunction);
 
     CHECK(topolinano_library::set_up_gate(layout, {4, 0}) == lower_po);
+}
+
+TEST_CASE("ToPoliNano rejects primary-input fanout", "[inml-topolinano-library]")
+{
+    shifted_cart_gate_clk_lyt lyt{arrangement::ODD_COLUMN, {2, 2}, clocking::columnar(clocking::num_clks::THREE)};
+    const auto                pi = lyt.create_pi("a", {0, 1});
+    lyt.create_po(pi, "north", {1, 0});
+    lyt.create_po(pi, "south", {1, 1});
+
+    std::ostringstream    report{};
+    gate_level_drv_params ps{};
+    ps.out = &report;
+    gate_level_drv_stats st{};
+    gate_level_drvs(lyt, ps, &st);
+    INFO(report.str());
+    REQUIRE(st.drvs == 0);
+
+    CHECK_THROWS_AS(apply_gate_library<topolinano_library>(lyt),
+                    fcn::unsupported_gate_type_exception<tile<decltype(lyt)>>);
+}
+
+TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")
+{
+    const auto                a = GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW);
+    shifted_cart_gate_clk_lyt lyt{a, {2, 2}};
+    const auto                x = lyt.create_pi("x", {0, 0});
+    const auto                y = lyt.create_pi("y", {1, 0});
+    lyt.create_and(x, y, {1, 1});
+
+    CHECK_THROWS_AS(topolinano_library::set_up_gate(lyt, {1, 1}), std::invalid_argument);
+    CHECK_THROWS_AS(topolinano_library::set_up_gate(lyt, {0, 0}), std::invalid_argument);
+}
+
+TEST_CASE("ToPoliNano straightens two-cell wire segments", "[inml-topolinano-library]")
+{
+    const auto   row = GENERATE(0u, 2u);
+    inml::layout lyt{{3, 4}};
+    lyt.assign_cell_type({0, row}, magnet_type::INPUT);
+    lyt.assign_cell_name({0, row}, "x");
+    lyt.assign_cell_type({1, row}, magnet_type::NORMAL);
+    lyt.assign_cell_type({1, 1}, magnet_type::NORMAL);
+
+    topolinano_library::post_layout_optimization(lyt);
+
+    CHECK(lyt.get_cell_type({0, 1}) == magnet_type::INPUT);
+    CHECK(lyt.get_cell_name({0, 1}) == "x");
+    CHECK(lyt.get_cell_type({1, 1}) == magnet_type::NORMAL);
+    CHECK(lyt.is_empty_cell({0, row}));
+    CHECK(lyt.is_empty_cell({1, row}));
+}
+
+TEST_CASE("ToPoliNano preserves obstructed wire segments", "[inml-topolinano-library]")
+{
+    const auto   row = GENERATE(0u, 4u);
+    inml::layout lyt{{4, 6}};
+    for (const auto column : {0u, 1u, 2u})
+    {
+        lyt.assign_cell_type({column, row}, magnet_type::NORMAL);
+    }
+    const auto adjacent_row = row == 0 ? 1u : 3u;
+    lyt.assign_cell_type({0, adjacent_row}, magnet_type::NORMAL);
+    lyt.assign_cell_type({2, adjacent_row}, magnet_type::NORMAL);
+    lyt.assign_cell_type({1, 2}, magnet_type::SLANTED_EDGE_UP_MAGNET);
+
+    topolinano_library::post_layout_optimization(lyt);
+
+    CHECK(lyt.get_cell_type({1, row}) == magnet_type::NORMAL);
+    CHECK(lyt.is_empty_cell({1, adjacent_row}));
+    CHECK(lyt.get_cell_type({1, 2}) == magnet_type::SLANTED_EDGE_UP_MAGNET);
 }
 
 TEST_CASE("ToPoliNano preserves wire segments without a neighboring row", "[inml-topolinano-library]")

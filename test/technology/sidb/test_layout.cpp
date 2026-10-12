@@ -73,27 +73,6 @@ layout check_allocation_failures(const layout& original, const std::function<voi
 }
 }  // namespace
 
-TEST_CASE("Layout updates preserve data when allocation fails", "[layout]")
-{
-    SECTION("SiDB insertion")
-    {
-        const auto result = check_allocation_failures(layout{}, [](layout& lyt) { lyt.assign_sidb({0, 0, 0}); });
-        CHECK(result.num_dots() == 1);
-        CHECK(result.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
-    }
-    SECTION("defect movement")
-    {
-        layout       original{};
-        const defect vacancy{defect_type::SI_VACANCY, -1, 5.6, 5.0};
-        original.assign_defect({0, 0, 0}, vacancy);
-        const auto result =
-            check_allocation_failures(original, [](layout& lyt) { lyt.move_defect({0, 0, 0}, {1, 0, 0}); });
-        CHECK(result.num_defects() == 1);
-        CHECK(result.get_defect({0, 0, 0}).type == defect_type::NONE);
-        CHECK(result.get_defect({1, 0, 0}) == vacancy);
-    }
-}
-
 TEST_CASE("Empty layout", "[layout]")
 {
     const layout lyt{};
@@ -336,5 +315,26 @@ TEST_CASE("Defects", "[layout]")
         CHECK(upper.size() == 4);
         CHECK(upper.contains(last));
         CHECK(upper.contains({max_coordinate - 1, max_coordinate - 1, 1}));
+    }
+}
+
+TEST_CASE("Layout updates preserve data when allocation fails", "[layout]")
+{
+    SECTION("SiDB insertion")
+    {
+        const auto result = check_allocation_failures(layout{}, [](layout& lyt) { lyt.assign_sidb({0, 0, 0}); });
+        CHECK(result.num_dots() == 1);
+        CHECK(result.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
+    }
+    SECTION("defect movement")
+    {
+        layout       original{};
+        const defect vacancy{defect_type::SI_VACANCY, -1, 5.6, 5.0};
+        original.assign_defect({0, 0, 0}, vacancy);
+        const auto result =
+            check_allocation_failures(original, [](layout& lyt) { lyt.move_defect({0, 0, 0}, {1, 0, 0}); });
+        CHECK(result.num_defects() == 1);
+        CHECK(result.get_defect({0, 0, 0}).type == defect_type::NONE);
+        CHECK(result.get_defect({1, 0, 0}) == vacancy);
     }
 }

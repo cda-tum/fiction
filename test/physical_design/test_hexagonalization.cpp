@@ -266,16 +266,6 @@ static void check_mapping_equiv_all()
     check_mapping_equiv_layout_with_planar_rerouting(blueprints::po_extension_corner_case_layout<cart_gate_clk_lyt>());
 }
 
-TEST_CASE("Layout equivalence", "[hexagonalization]")
-{
-    SECTION("Cartesian layouts")
-    {
-        using gate_layout = gate_level_layout<cartesian_layout>;
-
-        check_mapping_equiv_all<gate_layout>();
-    }
-}
-
 TEST_CASE("Cartesian to hexagonal")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
@@ -322,28 +312,14 @@ TEST_CASE("Cartesian to hexagonal")
           layout_base::coordinate(1, 4, 1));
 }
 
-TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
+TEST_CASE("Layout equivalence", "[hexagonalization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-    using hex_lyt     = hex_gate_clk_lyt;
+    SECTION("Cartesian layouts")
+    {
+        using gate_layout = gate_level_layout<cartesian_layout>;
 
-    const auto ntk    = blueprints::mux21_network<technology_network>();
-    const auto layout = orthogonal<gate_layout>(ntk);
-
-    progress_recorder       rec{};
-    hexagonalization_params params{};
-    params.input_pin_extension  = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    params.output_pin_extension = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    params.on_progress          = rec.callback();
-
-    const auto hex_layout = hexagonalization<hex_lyt>(layout, params);
-
-    check_eq(ntk, hex_layout);
-
-    CHECK(rec.is_consistent("objects"));
-    CHECK(rec.final_count("objects") == layout.size());
-    CHECK(rec.is_consistent("input pins"));
-    CHECK(rec.is_consistent("output pins"));
+        check_mapping_equiv_all<gate_layout>();
+    }
 }
 
 TEST_CASE("Hexagonalization preserves declared input holes and terminal order", "[hexagonalization-ports]")
@@ -367,4 +343,28 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
             REQUIRE(hex.source({id, 1}));
             CHECK(hex.get_name(*hex.source({id, 1})) == "b");
         });
+}
+
+TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    using hex_lyt     = hex_gate_clk_lyt;
+
+    const auto ntk    = blueprints::mux21_network<technology_network>();
+    const auto layout = orthogonal<gate_layout>(ntk);
+
+    progress_recorder       rec{};
+    hexagonalization_params params{};
+    params.input_pin_extension  = hexagonalization_params::io_pin_extension_mode::EXTEND;
+    params.output_pin_extension = hexagonalization_params::io_pin_extension_mode::EXTEND;
+    params.on_progress          = rec.callback();
+
+    const auto hex_layout = hexagonalization<hex_lyt>(layout, params);
+
+    check_eq(ntk, hex_layout);
+
+    CHECK(rec.is_consistent("objects"));
+    CHECK(rec.final_count("objects") == layout.size());
+    CHECK(rec.is_consistent("input pins"));
+    CHECK(rec.is_consistent("output pins"));
 }

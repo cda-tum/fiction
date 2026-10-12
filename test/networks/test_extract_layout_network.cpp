@@ -34,6 +34,19 @@ using namespace fiction::networks;
 /** @brief Placed Cartesian objects used by extraction tests. */
 using extraction_layout = gate_level_layout<cartesian_layout>;
 
+TEST_CASE("Extraction accepts explicitly placed constant functions", "[extract-layout-network]")
+{
+    extraction_layout          lyt{};
+    kitty::dynamic_truth_table function{0};
+    kitty::create_from_hex_string(function, "1");
+    const auto constant = lyt.create_gate({}, function, {0, 0});
+    lyt.create_po(constant, "one", {1, 0});
+    const auto ntk = extract_layout_network(lyt);
+    REQUIRE(ntk.num_pis() == 0);
+    REQUIRE(ntk.num_pos() == 1);
+    CHECK(ntk.po_at(0) == ntk.get_constant(true));
+}
+
 TEST_CASE("Extraction preserves interface order and truth-table argument indices", "[extract-layout-network]")
 {
     extraction_layout          lyt{{1, 1}, "ordered"};
@@ -65,6 +78,27 @@ TEST_CASE("Extraction preserves interface order and truth-table argument indices
     CHECK(kitty::to_hex(tables[1]) == "22");
 }
 
+TEST_CASE("Extraction follows connections across allocation order and reused identities", "[extract-layout-network]")
+{
+    extraction_layout lyt{};
+    const auto        removed = lyt.create_pi("removed", {0, 0});
+    lyt.remove(removed);
+    const auto                 po = lyt.create_po("result", {0, 0});
+    kitty::dynamic_truth_table function{2};
+    kitty::create_from_hex_string(function, "4");  // !a & b
+    const auto gate = lyt.create_gate({}, function, {1, 0});
+    const auto b    = lyt.create_pi("b", {2, 0});
+    const auto a    = lyt.create_pi("a", {3, 0});
+    lyt.connect(a, {gate, 0});
+    lyt.connect(b, {gate, 1});
+    lyt.connect(gate, {po, 0});
+    const auto ntk = extract_layout_network(lyt);
+    REQUIRE(ntk.num_pis() == 2);
+    const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
+        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{ntk.num_pis()});
+    CHECK(kitty::to_hex(tables[0]) == "2");
+}
+
 TEST_CASE("Extraction validates only dependencies of primary outputs", "[extract-layout-network]")
 {
     extraction_layout lyt{};
@@ -89,19 +123,6 @@ TEST_CASE("Extraction validates only dependencies of primary outputs", "[extract
     CHECK_THROWS_AS(extract_layout_network(lyt), std::invalid_argument);
 }
 
-TEST_CASE("Extraction accepts explicitly placed constant functions", "[extract-layout-network]")
-{
-    extraction_layout          lyt{};
-    kitty::dynamic_truth_table function{0};
-    kitty::create_from_hex_string(function, "1");
-    const auto constant = lyt.create_gate({}, function, {0, 0});
-    lyt.create_po(constant, "one", {1, 0});
-    const auto ntk = extract_layout_network(lyt);
-    REQUIRE(ntk.num_pis() == 0);
-    REQUIRE(ntk.num_pos() == 1);
-    CHECK(ntk.po_at(0) == ntk.get_constant(true));
-}
-
 TEST_CASE("Extraction traverses a million wires without recursive stack growth", "[extract-layout-network]")
 {
     extraction_layout lyt{};
@@ -115,25 +136,4 @@ TEST_CASE("Extraction traverses a million wires without recursive stack growth",
     REQUIRE(ntk.num_pis() == 1);
     REQUIRE(ntk.num_pos() == 1);
     CHECK(ntk.po_at(0) == ntk.make_signal(ntk.pi_at(0)));
-}
-
-TEST_CASE("Extraction follows connections across allocation order and reused identities", "[extract-layout-network]")
-{
-    extraction_layout lyt{};
-    const auto        removed = lyt.create_pi("removed", {0, 0});
-    lyt.remove(removed);
-    const auto                 po = lyt.create_po("result", {0, 0});
-    kitty::dynamic_truth_table function{2};
-    kitty::create_from_hex_string(function, "4");  // !a & b
-    const auto gate = lyt.create_gate({}, function, {1, 0});
-    const auto b    = lyt.create_pi("b", {2, 0});
-    const auto a    = lyt.create_pi("a", {3, 0});
-    lyt.connect(a, {gate, 0});
-    lyt.connect(b, {gate, 1});
-    lyt.connect(gate, {po, 0});
-    const auto ntk = extract_layout_network(lyt);
-    REQUIRE(ntk.num_pis() == 2);
-    const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
-        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{ntk.num_pis()});
-    CHECK(kitty::to_hex(tables[0]) == "2");
 }

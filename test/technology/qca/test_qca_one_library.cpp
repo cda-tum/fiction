@@ -46,30 +46,6 @@ TEST_CASE("QCA ONE library traits", "[qca-one-library]")
     CHECK(!has_get_gate_ports_v<qca_one_library>);
 }
 
-TEST_CASE("QCA ONE rejects primary-input fanout", "[qca-one-library]")
-{
-    gate_level_layout<cartesian_layout> lyt{{2, 3}};
-    const auto                          pi = lyt.create_pi("a", {0, 1});
-    lyt.create_po(pi, "north", {0, 0});
-    lyt.create_po(pi, "east", {1, 1});
-    lyt.create_po(pi, "south", {0, 2});
-    lyt.assign_clock_number({0, 1}, 0);
-    lyt.assign_clock_number({0, 0}, 1);
-    lyt.assign_clock_number({1, 1}, 1);
-    lyt.assign_clock_number({0, 2}, 1);
-
-    std::ostringstream    report{};
-    gate_level_drv_params ps{};
-    ps.out = &report;
-    gate_level_drv_stats st{};
-    gate_level_drvs(lyt, ps, &st);
-    INFO(report.str());
-    REQUIRE(st.drvs == 0);
-
-    CHECK_THROWS_AS(apply_gate_library<qca_one_library>(lyt),
-                    fcn::unsupported_gate_type_exception<tile<decltype(lyt)>>);
-}
-
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
@@ -211,6 +187,30 @@ TEST_CASE("Setting up fanouts", "[qca-one-library]")
     CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_180(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 1}) == qca_one_library::rotate_90(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(bent_wire));
+}
+
+TEST_CASE("QCA ONE rejects primary-input fanout", "[qca-one-library]")
+{
+    gate_level_layout<cartesian_layout> lyt{{2, 3}};
+    const auto                          pi = lyt.create_pi("a", {0, 1});
+    lyt.create_po(pi, "north", {0, 0});
+    lyt.create_po(pi, "east", {1, 1});
+    lyt.create_po(pi, "south", {0, 2});
+    lyt.assign_clock_number({0, 1}, 0);
+    lyt.assign_clock_number({0, 0}, 1);
+    lyt.assign_clock_number({1, 1}, 1);
+    lyt.assign_clock_number({0, 2}, 1);
+
+    std::ostringstream    report{};
+    gate_level_drv_params ps{};
+    ps.out = &report;
+    gate_level_drv_stats st{};
+    gate_level_drvs(lyt, ps, &st);
+    INFO(report.str());
+    REQUIRE(st.drvs == 0);
+
+    CHECK_THROWS_AS(apply_gate_library<qca_one_library>(lyt),
+                    fcn::unsupported_gate_type_exception<tile<decltype(lyt)>>);
 }
 
 TEST_CASE("QCA ONE rejects an unoccupied tile", "[qca-one-library]")

@@ -51,67 +51,6 @@ using namespace fiction::qca;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
-TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
-{
-    technology_network ntk{};
-    const auto         a        = ntk.create_pi();
-    const auto         function = GENERATE(0, 1, 2);
-    /** @brief Gate with repeated input ports for the selected Boolean function. */
-    const auto output = [&ntk, a, function]()
-    {
-        if (function == 0)
-        {
-            return ntk.create_and(a, a);
-        }
-        if (function == 1)
-        {
-            return ntk.create_or(a, a);
-        }
-        return ntk.create_xor(a, a);
-    }();
-    if (GENERATE(false, true))
-    {
-        ntk.create_po(a);
-    }
-    ntk.create_po(output);
-
-    const auto layout = orthogonal<gate_level_layout<cartesian_layout>>(ntk);
-    check_eq(ntk, layout);
-    std::ostringstream    report{};
-    gate_level_drv_params params{};
-    params.out = &report;
-    gate_level_drv_stats stats{};
-    gate_level_drvs(layout, params, &stats);
-    CHECK(stats.drvs == 0);
-}
-
-TEST_CASE("East-south coloring", "[orthogonal]")
-{
-    const auto check = [](const auto& ntk)
-    {
-        auto container = physical_design::detail::east_south_edge_coloring(ntk);
-        CHECK(physical_design::detail::is_east_south_colored(container.color_ntk));
-    };
-
-    check(mockturtle::fanout_view{
-        fanout_substitution<technology_network>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<technology_network>(blueprints::maj1_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<technology_network>(blueprints::se_coloring_corner_case_network<technology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<technology_network>(
-        blueprints::fanout_substitution_corner_case_network<technology_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<technology_network>(blueprints::nary_operation_network<technology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<technology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
-}
-
 void check_stats(const orthogonal_physical_design_stats& st) noexcept
 {
     CHECK(st.x_size > 0);
@@ -151,6 +90,46 @@ void check_ortho_equiv_all(const std::optional<arrangement> a = std::nullopt)
     check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>(), a);
 }
 
+TEST_CASE("East-south coloring", "[orthogonal]")
+{
+    const auto check = [](const auto& ntk)
+    {
+        auto container = physical_design::detail::east_south_edge_coloring(ntk);
+        CHECK(physical_design::detail::is_east_south_colored(container.color_ntk));
+    };
+
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::maj1_network<mockturtle::aig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::se_coloring_corner_case_network<technology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<technology_network>(
+        blueprints::fanout_substitution_corner_case_network<technology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::nary_operation_network<technology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
+}
+
+TEST_CASE("Orthogonal physical design of a network without primary inputs", "[orthogonal]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    technology_network ntk{};
+    ntk.create_po(ntk.get_constant(false));
+
+    const auto lyt = orthogonal<gate_layout>(ntk);
+    CHECK(lyt.num_pis() == 0);
+    CHECK(lyt.num_pos() == 1);
+    check_eq(ntk, extract_layout_network(lyt));
+}
+
 TEST_CASE("Layout equivalence", "[algorithms]")
 {
     SECTION("Cartesian layouts")
@@ -168,6 +147,85 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
         check_ortho_equiv_all<gate_layout>(a);
     }
+}
+
+TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
+{
+    technology_network ntk{};
+    const auto         a        = ntk.create_pi();
+    const auto         function = GENERATE(0, 1, 2);
+    /** @brief Gate with repeated input ports for the selected Boolean function. */
+    const auto output = [&ntk, a, function]()
+    {
+        if (function == 0)
+        {
+            return ntk.create_and(a, a);
+        }
+        if (function == 1)
+        {
+            return ntk.create_or(a, a);
+        }
+        return ntk.create_xor(a, a);
+    }();
+    if (GENERATE(false, true))
+    {
+        ntk.create_po(a);
+    }
+    ntk.create_po(output);
+
+    const auto layout = orthogonal<gate_level_layout<cartesian_layout>>(ntk);
+    check_eq(ntk, layout);
+    std::ostringstream    report{};
+    gate_level_drv_params params{};
+    params.out = &report;
+    gate_level_drv_stats stats{};
+    gate_level_drvs(layout, params, &stats);
+    CHECK(stats.drvs == 0);
+}
+
+TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogonal]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    technology_network ntk{};
+    const auto         a      = ntk.create_pi();
+    const auto         b      = ntk.create_pi();
+    const auto         unused = ntk.create_pi();
+    ntk.create_po(ntk.create_lt(b, a));
+    const auto lyt = orthogonal<gate_layout>(ntk);
+    CHECK(lyt.num_pis() == 3);
+    CHECK(lyt.is_pi(lyt.pi_at(2)));
+    const auto extracted = extract_layout_network(lyt);
+    CHECK(extracted.num_pis() == 3);
+    check_eq(ntk, extract_layout_network(lyt));
+    CHECK(ntk.is_pi(ntk.get_node(unused)));
+}
+
+TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+
+    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
+    maj.set_network_name("maj");
+
+    const auto layout = orthogonal<gate_layout>(maj);
+
+    // network name
+    CHECK(layout.get_layout_name() == "maj");
+
+    // PI names
+    CHECK(layout.get_name(layout.pi_at(0)) == "a");  // first PI
+    CHECK(layout.get_name(layout.pi_at(1)) == "b");  // second PI
+    CHECK(layout.get_name(layout.pi_at(2)) == "c");  // third PI
+
+    // PO names
+    CHECK(layout.get_output_name(0) == "f");
+}
+
+TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layouts", "[orthogonal]")
+{
+    using gate_layout = gate_level_layout<hexagonal_layout>;
+
+    CHECK_THROWS_AS(orthogonal<gate_layout>(blueprints::and_or_network<technology_network>()), std::invalid_argument);
 }
 
 TEST_CASE("Gate library application", "[orthogonal]")
@@ -195,27 +253,6 @@ TEST_CASE("Gate library application", "[orthogonal]")
     check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 }
 
-TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
-{
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
-    maj.set_network_name("maj");
-
-    const auto layout = orthogonal<gate_layout>(maj);
-
-    // network name
-    CHECK(layout.get_layout_name() == "maj");
-
-    // PI names
-    CHECK(layout.get_name(layout.pi_at(0)) == "a");  // first PI
-    CHECK(layout.get_name(layout.pi_at(1)) == "b");  // second PI
-    CHECK(layout.get_name(layout.pi_at(2)) == "c");  // third PI
-
-    // PO names
-    CHECK(layout.get_output_name(0) == "f");
-}
-
 TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
@@ -232,41 +269,4 @@ TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 
     CHECK(rec.is_consistent("placing gates"));
     CHECK(rec.final_count("placing gates") > 0);
-}
-
-TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layouts", "[orthogonal]")
-{
-    using gate_layout = gate_level_layout<hexagonal_layout>;
-
-    CHECK_THROWS_AS(orthogonal<gate_layout>(blueprints::and_or_network<technology_network>()), std::invalid_argument);
-}
-
-TEST_CASE("Orthogonal physical design of a network without primary inputs", "[orthogonal]")
-{
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    technology_network ntk{};
-    ntk.create_po(ntk.get_constant(false));
-
-    const auto lyt = orthogonal<gate_layout>(ntk);
-    CHECK(lyt.num_pis() == 0);
-    CHECK(lyt.num_pos() == 1);
-    check_eq(ntk, extract_layout_network(lyt));
-}
-
-TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogonal]")
-{
-    using gate_layout = gate_level_layout<cartesian_layout>;
-    technology_network ntk{};
-    const auto         a      = ntk.create_pi();
-    const auto         b      = ntk.create_pi();
-    const auto         unused = ntk.create_pi();
-    ntk.create_po(ntk.create_lt(b, a));
-    const auto lyt = orthogonal<gate_layout>(ntk);
-    CHECK(lyt.num_pis() == 3);
-    CHECK(lyt.is_pi(lyt.pi_at(2)));
-    const auto extracted = extract_layout_network(lyt);
-    CHECK(extracted.num_pis() == 3);
-    check_eq(ntk, extract_layout_network(lyt));
-    CHECK(ntk.is_pi(ntk.get_node(unused)));
 }
