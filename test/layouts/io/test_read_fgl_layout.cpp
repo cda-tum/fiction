@@ -438,8 +438,9 @@ TEST_CASE("FGL requires layout, clocking, placement, and signal fields", "[read-
         std::pair{"fgl/layout/size", "x"}, std::pair{"fgl/layout/size", "y"}, std::pair{"fgl/layout/size", "z"},
         std::pair{"fgl/gates/gate", "id"}, std::pair{"fgl/gates/gate", "type"}, std::pair{"fgl/gates/gate", "name"},
         std::pair{"fgl/gates/gate", "loc"}, std::pair{"fgl/gates/gate/loc", "x"}, std::pair{"fgl/gates/gate/loc", "y"},
-        std::pair{"fgl/gates/gate/loc", "z"}, std::pair{"fgl/gates/gate[2]/incoming/signal", "x"},
-        std::pair{"fgl/gates/gate[2]/incoming/signal", "y"}, std::pair{"fgl/gates/gate[2]/incoming/signal", "z"});
+        std::pair{"fgl/gates/gate/loc", "z"}, std::pair{"fgl/gates/third-gate/incoming/signal", "x"},
+        std::pair{"fgl/gates/third-gate/incoming/signal", "y"}, std::pair{"fgl/gates/third-gate/incoming/signal", "z"});
+    CAPTURE(parent_path, field);
     const std::string  fixture = R"(<fgl><layout><name>Test</name><topology>cartesian</topology>
 <size><x>2</x><y>1</y><z>0</z></size>
 <clocking><name>OPEN</name><zones><zone><x>0</x><y>0</y><clock>0</clock></zone></zones></clocking></layout>
@@ -458,7 +459,7 @@ TEST_CASE("FGL requires layout, clocking, placement, and signal fields", "[read-
     std::istringstream path{parent_path};
     for (std::string element; std::getline(path, element, '/');)
     {
-        if (element == "gate[2]")
+        if (element == "third-gate")
         {
             parent = parent->FirstChildElement("gate")->NextSiblingElement("gate")->NextSiblingElement("gate");
         }

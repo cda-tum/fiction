@@ -394,7 +394,6 @@ create_wiring_reduction_layout(const fiction::layouts::gate_level_layout<fiction
                                const int32_t x_offset = 0, const int32_t y_offset = 0,
                                search_direction direction = search_direction::HORIZONTAL)
 {
-
     // create a wiring_reduction_layout with specified offsets
     wiring_reduction_layout wiring_reduction_lyt{{static_cast<int64_t>(lyt.width()) + x_offset + 1,
                                                   static_cast<int64_t>(lyt.height()) + y_offset + 1, lyt.layers()},
@@ -936,7 +935,6 @@ class wiring_reduction_impl
     /** @brief Runs wire-cut searches until convergence or timeout. */
     void run()
     {
-
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
 
@@ -1117,7 +1115,6 @@ class wiring_reduction_impl
 inline void wiring_reduction(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
                              wiring_reduction_params ps = {}, wiring_reduction_stats* pst = nullptr)
 {
-
     if (!lyt.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME))
     {
         throw std::invalid_argument("Wiring reduction requires 2DDWave clocking");

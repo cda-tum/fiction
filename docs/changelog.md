@@ -123,7 +123,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Geometric distances accept coordinate pairs directly and use fixed `uint64_t` or `double` results.
     Squared Euclidean distance is `noexcept` and requires a result within the `uint64_t` range.
-  - Routing paths, objectives, costs, and coordinate-only placement state omit layout template parameters.
+    Euclidean distance is a runtime `noexcept` function.
+  - Routing paths, objectives, costs, gate-design exceptions, and coordinate-only placement state omit layout
+    template parameters.
     Distance callbacks accept coordinate pairs; A* distance callbacks borrow their layout at construction.
   - Layout extraction and critical-path analysis reduce per-object allocations with flat traversal maps.
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.

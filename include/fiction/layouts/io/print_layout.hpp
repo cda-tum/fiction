@@ -389,7 +389,6 @@ template <typename Geometry>
 void print_object_to_tile_assignments(const fiction::layouts::gate_level_layout<Geometry>& lyt,
                                       std::ostream&                                        os = std::cout)
 {
-
     os << "\n---- OBJECT TO TILE ----\n";
 
     lyt.foreach_object(
@@ -418,7 +417,6 @@ template <typename Geometry>
 void print_tile_to_object_assignments(const fiction::layouts::gate_level_layout<Geometry>& lyt,
                                       std::ostream&                                        os = std::cout)
 {
-
     os << "\n---- TILE TO OBJECT ----\n";
 
     lyt.foreach_tile(

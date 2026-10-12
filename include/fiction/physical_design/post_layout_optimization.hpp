@@ -331,7 +331,6 @@ check_and_optimize_po_positions(fiction::layouts::gate_level_layout<fiction::lay
 inline bool compare_gate_tiles(const fiction::layouts::layout_base::coordinate& a,
                                const fiction::layouts::layout_base::coordinate& b)
 {
-
     return std::make_pair(static_cast<int64_t>(a.x) + a.y, a.x) < std::make_pair(static_cast<int64_t>(b.x) + b.y, b.x);
 }
 
@@ -355,7 +354,6 @@ class post_layout_optimization_impl
     /** @brief Optimizes placement and wiring until convergence or timeout. */
     void run()
     {
-
         // start the stopwatch to measure total optimization time
         const mockturtle::stopwatch stop{pst.time_total};
 
@@ -869,7 +867,6 @@ inline void post_layout_optimization(fiction::layouts::gate_level_layout<fiction
                                      post_layout_optimization_params                                          ps = {},
                                      post_layout_optimization_stats* pst = nullptr)
 {
-
     if (!lyt.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME))
     {
         throw std::invalid_argument("Post-layout optimization requires 2DDWave clocking");

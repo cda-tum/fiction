@@ -316,7 +316,6 @@ template <typename Geometry>
 void write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, std::ostream& os,
                       utils::progress_callback on_progress = {})
 {
-
     detail::write_fgl_layout_impl p{lyt, os, std::move(on_progress)};
 
     p.run();
