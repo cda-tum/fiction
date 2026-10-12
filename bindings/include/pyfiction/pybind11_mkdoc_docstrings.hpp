@@ -659,7 +659,10 @@ static const char *mkd_doc_fiction_has_foreach_adjacent_opposite_coordinates = R
 
 static const char *mkd_doc_fiction_has_foreach_coordinate = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_foreach_pi_unranked = R"doc()doc";
+static const char *mkd_doc_fiction_has_foreach_pi_unranked =
+R"doc(Whether `Ntk` offers `foreach_pi_unranked`, which visits the primary
+inputs in creation order regardless of their rank, as
+`networks::views::mutable_rank_view` does.)doc";
 
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
 
@@ -671,7 +674,10 @@ static const char *mkd_doc_fiction_has_get_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_real_pi = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_has_level = R"doc()doc";
+static const char *mkd_doc_fiction_has_has_level =
+R"doc(Whether `Ntk` offers `has_level`, which tells whether a level is
+stored for a node, as `networks::views::static_depth_view` does for
+nodes that are reachable from an output.)doc";
 
 static const char *mkd_doc_fiction_has_is_and3 = R"doc()doc";
 
