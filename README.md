@@ -53,7 +53,7 @@ To help you get started with _fiction_, pick the interface that best fits your u
 
 | Goal                                   | Recommended Path          | Section                                        |
 | -------------------------------------- | ------------------------- | ---------------------------------------------- |
-| Try the tool immediately               | 🐍 `pip install`          | [CLI (pip)](#-cli-pip)                         |
+| Try the tool immediately               | 🐍 `uv tool install`      | [CLI (uv)](#-cli-uv)                           |
 | Run the CLI without installing Python  | 🐳 Docker CLI image       | [CLI (Docker)](#-cli-docker)                   |
 | Develop the C++ library                | 💻 Native build           | [Building from source](#-building-from-source) |
 | Integrate into a C++ project           | 📚 Header-only library    | [C++ Library](#-c-library)                     |
@@ -63,12 +63,14 @@ For a
 full [getting started guide](https://fiction.readthedocs.io/en/latest/getting_started.html), [CLI command list](https://fiction.readthedocs.io/en/latest/cli.html),
 or API reference, see the [documentation](https://fiction.readthedocs.io/en/latest/index.html).
 
-### 🐍 CLI (pip)
+<span id="-cli-pip"></span>
+
+### 🐍 CLI (uv)
 
 The `fiction` command-line interface ships with the `mnt.pyfiction` Python package:
 
 ```bash
-pip install mnt.pyfiction
+uv tool install mnt.pyfiction
 fiction
 ```
 
@@ -150,13 +152,14 @@ Then include what you need:
 
 Ideal for notebooks, exploratory scripts, and integration with Python tooling.
 
-Install the library from PyPI:
+Install the library from PyPI in a virtual environment with [uv](https://docs.astral.sh/uv/):
 
 ```bash
-pip install mnt.pyfiction
+uv venv
+uv pip install mnt.pyfiction
 ```
 
-Import what you need from the submodule that mirrors its C++ namespace:
+Activate the virtual environment before running Python, then import from the submodule that mirrors its C++ namespace:
 
 ```python
 from mnt.pyfiction.layouts import cartesian_layout

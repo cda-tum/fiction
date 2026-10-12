@@ -11,12 +11,13 @@ Every command also accepts `-h` for its full list of options.
 The shell ships with the Python package:
 
 ```console
-$ pip install mnt.pyfiction
+$ uv tool install mnt.pyfiction
 $ fiction
 ```
 
-`python -m mnt.fiction.cli` starts the same shell. The `mnt.pyfiction` distribution contains both the
-bindings and the `mnt.fiction.cli` module; the executable is named `fiction`.
+`python -m mnt.fiction.cli` starts the same shell when the package is installed in that Python environment.
+The `mnt.pyfiction` distribution contains both the bindings and the `mnt.fiction.cli` module;
+the executable is named `fiction`.
 
 From a local checkout, `uv run fiction` builds and installs the project as needed, then starts the shell.
 After installation, `uv run --no-sync fiction` reuses the environment. To build and run an isolated copy,
@@ -454,8 +455,9 @@ done
 
 ### Dedicated command and plots
 
-Install plotting support once with `pip install 'mnt-pyfiction[plot]'` or
-`uv tool install 'mnt-pyfiction[plot]'`. Run `fiction-opdom` or `python -m mnt.fiction.opdom`:
+Install plotting support once with `uv tool install 'mnt-pyfiction[plot]'`, then run `fiction-opdom`.
+For scripts or notebooks, use `uv pip install 'mnt-pyfiction[plot]'` in an active virtual environment;
+`python -m mnt.fiction.opdom` runs the command in that environment:
 
 ```console
 fiction-opdom gate.sqd --gate xor --plot domain.png --plot domain.html

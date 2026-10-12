@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Added `fiction-opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or
     interactive plots, including Sketch. Install `mnt-pyfiction[plot]` for plotting support.
-  - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
+  - `uv tool install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
     completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
@@ -248,6 +248,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+
+  - Installation guides now use `uv` for CLI tools and Python environments.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
