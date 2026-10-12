@@ -53,7 +53,7 @@ To help you get started with _fiction_, pick the interface that best fits your u
 
 | Goal                                   | Recommended Path          | Section                                        |
 | -------------------------------------- | ------------------------- | ---------------------------------------------- |
-| Try the tool immediately               | 🐍 `uv tool install`      | [CLI (uv)](#-cli-uv)                           |
+| Try the tool immediately               | 🐍 `uv tool install`      | [CLI](#-cli)                                   |
 | Run the CLI without installing Python  | 🐳 Docker CLI image       | [CLI (Docker)](#-cli-docker)                   |
 | Develop the C++ library                | 💻 Native build           | [Building from source](#-building-from-source) |
 | Integrate into a C++ project           | 📚 Header-only library    | [C++ Library](#-c-library)                     |
@@ -64,8 +64,9 @@ full [getting started guide](https://fiction.readthedocs.io/en/latest/getting_st
 or API reference, see the [documentation](https://fiction.readthedocs.io/en/latest/index.html).
 
 <span id="-cli-pip"></span>
+<span id="-cli-uv"></span>
 
-### 🐍 CLI (uv)
+### 🐍 CLI
 
 The `fiction` command-line interface ships with the `mnt.pyfiction` Python package:
 

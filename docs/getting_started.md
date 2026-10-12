@@ -25,7 +25,7 @@ To help you getting started with _fiction_, pick the interface that best fits yo
 
 | Goal                                   | Recommended Path          | Section                                  |
 | -------------------------------------- | ------------------------- | ---------------------------------------- |
-| Try the tool immediately               | 🐍 `uv tool install`      | {ref}`CLI (uv) <cli-pip>`               |
+| Try the tool immediately               | 🐍 `uv tool install`      | {ref}`CLI <cli-pip>`                     |
 | Run the CLI without installing Python  | 🐳 Docker CLI image       | {ref}`CLI (Docker) <cli-docker>`         |
 | Develop the C++ library                | 💻 Native build           | {ref}`Building from source <cli-source>` |
 | Integrate into a C++ project           | 📚 Header-only library    | {ref}`C++ Library <header-only>`         |
@@ -37,7 +37,7 @@ For a full CLI command list or API reference, see the respective documentation s
 
 (cli-pip)=
 
-## CLI (uv)
+## CLI
 
 The `fiction` command-line interface is part of the `mnt.pyfiction` Python package:
 
@@ -141,7 +141,7 @@ $ ctest --preset ci-debug
 ```
 
 Any preset can still be combined with additional `-D` overrides on the command line. The `fiction` shell is not
-part of the CMake build; it comes with the Python package, see {ref}`CLI (uv) <cli-pip>`.
+part of the CMake build; it comes with the Python package, see {ref}`CLI <cli-pip>`.
 
 (header-only)=
 
