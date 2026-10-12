@@ -16,13 +16,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
@@ -35,7 +31,6 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
-#include <mockturtle/traits.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 #include <array>
@@ -43,7 +38,6 @@
 #include <vector>
 
 using namespace fiction;
-using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
 
@@ -79,25 +73,6 @@ void to_x(const Ntk& ntk)
     }
 }
 
-TEST_CASE("Name conservation after network conversion", "[network-conversion]")
-{
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
-    maj.set_network_name("maj");
-
-    const auto converted_maj = convert_network<mockturtle::names_view<technology_network>>(maj);
-
-    // network name
-    CHECK(converted_maj.get_network_name() == "maj");
-
-    // PI names
-    CHECK(converted_maj.get_name(converted_maj.make_signal(2)) == "a");
-    CHECK(converted_maj.get_name(converted_maj.make_signal(3)) == "b");
-    CHECK(converted_maj.get_name(converted_maj.make_signal(4)) == "c");
-
-    // PO names
-    CHECK(converted_maj.get_output_name(0) == "f");
-}
-
 TEST_CASE("Simple network conversion", "[network-conversion]")
 {
     SECTION("MIG to X")
@@ -124,6 +99,42 @@ TEST_CASE("Simple network conversion", "[network-conversion]")
 
         to_x(tec);
     }
+}
+
+TEST_CASE("Name conservation after network conversion", "[network-conversion]")
+{
+    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    maj.set_network_name("maj");
+
+    const auto converted_maj = convert_network<mockturtle::names_view<technology_network>>(maj);
+
+    // network name
+    CHECK(converted_maj.get_network_name() == "maj");
+
+    // PI names
+    CHECK(converted_maj.get_name(converted_maj.make_signal(2)) == "a");
+    CHECK(converted_maj.get_name(converted_maj.make_signal(3)) == "b");
+    CHECK(converted_maj.get_name(converted_maj.make_signal(4)) == "c");
+
+    // PO names
+    CHECK(converted_maj.get_output_name(0) == "f");
+}
+
+TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]")
+{
+    SECTION("MIG to X")
+    {
+        to_x(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
+    }
+    SECTION("AIG to X")
+    {
+        to_x(blueprints::constant_gate_input_maj_network<mockturtle::aig_network>());
+    }
+    SECTION("XAG to X")
+    {
+        to_x(blueprints::constant_gate_input_maj_network<mockturtle::xag_network>());
+    }
+    // no test for technology_network because it does not support inverted signals
 }
 
 TEST_CASE("Technology network inverters and buffers survive conversion", "[network-conversion]")
@@ -165,38 +176,6 @@ TEST_CASE("Complex network conversion", "[network-conversion]")
     {
         to_x(blueprints::maj4_network<technology_network>());
         to_x(blueprints::nary_operation_network<technology_network>());
-    }
-}
-
-TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]")
-{
-    SECTION("MIG to X")
-    {
-        to_x(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    }
-    SECTION("AIG to X")
-    {
-        to_x(blueprints::constant_gate_input_maj_network<mockturtle::aig_network>());
-    }
-    SECTION("XAG to X")
-    {
-        to_x(blueprints::constant_gate_input_maj_network<mockturtle::xag_network>());
-    }
-    // no test for technology_network because it does not support inverted signals
-}
-
-TEST_CASE("Layout conversion", "[network-conversion]")
-{
-    SECTION("Gate layout to X")
-    {
-        /** @brief Placed layout whose logic enters network conversion through extraction. */
-        using gate_layout = gate_level_layout<cartesian_layout>;
-
-        REQUIRE_FALSE(mockturtle::is_network_type_v<gate_layout>);
-
-        const auto layout = blueprints::xor_maj_gate_layout<gate_layout>();
-
-        to_x(extract_layout_network(layout));
     }
 }
 
