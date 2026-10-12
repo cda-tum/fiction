@@ -34,6 +34,7 @@
 #include "fiction/physical_design/wiring_reduction.hpp"
 #include "fiction/utils/progress.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
