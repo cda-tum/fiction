@@ -18,7 +18,7 @@
 
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/utils/stl/hash.hpp"
+#include "fiction/utils/stl/hash.hpp"  // NOLINT(misc-include-cleaner): supplies the std::pair hash specialization.
 
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/interface/common.hpp>
