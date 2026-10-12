@@ -39,8 +39,6 @@ CoordinateLayout: TypeAlias = cartesian_layout | shifted_cartesian_layout | hexa
 GateLayout: TypeAlias = cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout
 
 
-
-
 CLOCKED_LAYOUTS = [
     pytest.param(lambda: cartesian_gate_layout((5, 5), "2DDWave", "Layout"), id="cartesian_gate_layout"),
     pytest.param(

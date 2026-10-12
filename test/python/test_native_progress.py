@@ -66,8 +66,6 @@ if TYPE_CHECKING:
     from mnt.pyfiction.networks import technology_network
 
 
-
-
 @pytest.mark.parametrize("threads", [1, 4])
 def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> None:
     """Solver candidates use tile dimensions and leave no active worker after success."""
