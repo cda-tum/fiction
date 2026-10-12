@@ -179,7 +179,7 @@ TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-cloc
     CHECK(lyt.get_clocking_scheme() == scheme);
 }
 
-TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[determine-clocking-ports]")
+TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[determine-clocking]")
 {
     using layout = gate_level_layout<cartesian_layout>;
     layout     lyt{{4, 4}, clocking::twoddwave()};
@@ -209,7 +209,7 @@ TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[
     CHECK(lyt.get_clocking_scheme() == original_scheme);
 }
 
-TEST_CASE("Clock determination uses explicit constants and logical input ports", "[determine-clocking-ports]")
+TEST_CASE("Clock determination uses explicit constants and logical input ports", "[determine-clocking]")
 {
     using layout = gate_level_layout<cartesian_layout>;
     layout lyt{{3, 1}, clocking::open()};
@@ -233,7 +233,7 @@ TEST_CASE("Clock determination uses explicit constants and logical input ports",
         });
 }
 
-TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[determine-clocking-ports]")
+TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[determine-clocking]")
 {
     using layout = gate_level_layout<cartesian_layout>;
     layout lyt{{3, 1, 3}, clocking::open()};
@@ -263,7 +263,7 @@ TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[d
         });
 }
 
-TEST_CASE("Clock determination commits complete clocking values", "[determine-clocking-ports]")
+TEST_CASE("Clock determination commits complete clocking values", "[determine-clocking]")
 {
     require_allocation_failure_support();
     using layout = gate_level_layout<cartesian_layout>;
@@ -308,7 +308,7 @@ TEST_CASE("Clock determination commits complete clocking values", "[determine-cl
     }
 }
 
-TEST_CASE("Clock determination visits sparse occupancy independently of frame area", "[determine-clocking-ports]")
+TEST_CASE("Clock determination visits sparse occupancy independently of frame area", "[determine-clocking]")
 {
     gate_level_layout<cartesian_layout> lyt{{1'000'000, 1'000'000}, clocking::open()};
     const auto                          pi   = lyt.create_pi("a", {0, 0});

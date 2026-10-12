@@ -277,7 +277,7 @@ TEST_CASE(
     }
 }
 
-TEST_CASE("Physical-validity sweeps report their total", "[physically-valid-parameters]")
+TEST_CASE("Physical-validity sweeps report their total", "[determine-physically-valid-parameters]")
 {
     layout lyt{};
     lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
@@ -297,7 +297,7 @@ TEST_CASE("Physical-validity sweeps report their total", "[physically-valid-para
     CHECK(reports.back().total == 3);
 }
 
-TEST_CASE("Physical-validity sweep boundaries", "[physically-valid-parameters]")
+TEST_CASE("Physical-validity sweep boundaries", "[determine-physically-valid-parameters]")
 {
     layout lyt{};
     lyt.assign_sidb({0, 0}, dot_tag::NORMAL);

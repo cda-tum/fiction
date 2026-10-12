@@ -113,7 +113,7 @@ static void check_layout_equiv_all()
     }
 }
 
-TEST_CASE("Wiring reduction counts physical wires without terminals", "[wiring_reduction]")
+TEST_CASE("Wiring reduction counts physical wires without terminals", "[wiring-reduction]")
 {
     gate_level_layout<cartesian_layout> layout{{2, 1}, clocking::twoddwave()};
     const auto                          input = layout.create_pi("a", {0, 0});
@@ -124,7 +124,7 @@ TEST_CASE("Wiring reduction counts physical wires without terminals", "[wiring_r
     CHECK(stats.num_wires_after == 0);
 }
 
-TEST_CASE("Layout equivalence", "[wiring_reduction]")
+TEST_CASE("Layout equivalence", "[wiring-reduction]")
 {
     SECTION("Cartesian layouts")
     {
@@ -198,7 +198,7 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
     }
 }
 
-TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
+TEST_CASE("Wrong clocking scheme", "[wiring-reduction]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
@@ -217,7 +217,7 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
     }
 }
 
-TEST_CASE("Search Direction", "[wiring_reduction]")
+TEST_CASE("Search Direction", "[wiring-reduction]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
@@ -232,7 +232,7 @@ TEST_CASE("Search Direction", "[wiring_reduction]")
     }
 }
 
-TEST_CASE("Optimization accepts interior terminals", "[wiring_reduction]")
+TEST_CASE("Optimization accepts interior terminals", "[wiring-reduction]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
@@ -249,7 +249,7 @@ TEST_CASE("Optimization accepts interior terminals", "[wiring_reduction]")
     }
 }
 
-TEST_CASE("Wiring reduction reports progress", "[wiring_reduction]")
+TEST_CASE("Wiring reduction reports progress", "[wiring-reduction]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
@@ -271,7 +271,7 @@ TEST_CASE("Wiring reduction reports progress", "[wiring_reduction]")
     CHECK(reports.back().total == 0);
 }
 
-TEST_CASE("Wiring reduction preserves identities and ordered input ports", "[wiring-reduction-ports]")
+TEST_CASE("Wiring reduction preserves identities and ordered input ports", "[wiring-reduction]")
 {
     gate_level_layout<cartesian_layout> layout{{3, 6, 2}, layouts::clocking::twoddwave()};
     const auto                          a     = layout.create_pi("a", {0, 0});
@@ -303,7 +303,7 @@ TEST_CASE("Wiring reduction preserves identities and ordered input ports", "[wir
     CHECK(independent.height() == 6);
     CHECK(stats.y_size_after == layout.height());
 }
-TEST_CASE("Wiring reduction handles empty layouts and invalid geometry", "[wiring-reduction-ports]")
+TEST_CASE("Wiring reduction handles empty layouts and invalid geometry", "[wiring-reduction]")
 {
     gate_level_layout<cartesian_layout> empty{{}, layouts::clocking::twoddwave()};
     wiring_reduction_stats              stats{};
@@ -318,7 +318,7 @@ TEST_CASE("Wiring reduction handles empty layouts and invalid geometry", "[wirin
     CHECK(invalid.get_tile(outside) == gate_level_layout<cartesian_layout>::tile{-1, 0});
 }
 
-TEST_CASE("Wiring reduction rejects dimensions beyond its routing range", "[wiring-reduction-ports]")
+TEST_CASE("Wiring reduction rejects dimensions beyond its routing range", "[wiring-reduction]")
 {
     gate_level_layout<cartesian_layout> layout{{2147483647, 1}, layouts::clocking::twoddwave()};
     const auto                          object = layout.create_buf({0, 0});

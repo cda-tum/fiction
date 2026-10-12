@@ -113,7 +113,7 @@ static void check_layout_equiv_all()
     }
 }
 
-TEST_CASE("Post-layout optimization counts physical wires without terminals", "[post_layout_optimization]")
+TEST_CASE("Post-layout optimization counts physical wires without terminals", "[post-layout-optimization]")
 {
     gate_level_layout<cartesian_layout> layout{{2, 1}, clocking::twoddwave()};
     const auto                          input = layout.create_pi("a", {0, 0});
@@ -124,7 +124,7 @@ TEST_CASE("Post-layout optimization counts physical wires without terminals", "[
     CHECK(stats.num_wires_after == 0);
 }
 
-TEST_CASE("Layout equivalence", "[post_layout_optimization]")
+TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 {
     SECTION("Cartesian layouts")
     {
@@ -284,7 +284,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     }
 }
 
-TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
+TEST_CASE("Wrong clocking scheme", "[post-layout-optimization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
@@ -300,7 +300,7 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
     }
 }
 
-TEST_CASE("Optimization accepts interior terminals", "[post_layout_optimization]")
+TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
@@ -337,7 +337,7 @@ TEST_CASE("Optimization accepts interior terminals", "[post_layout_optimization]
     }
 }
 
-TEST_CASE("Post-layout optimization reports progress", "[post_layout_optimization]")
+TEST_CASE("Post-layout optimization reports progress", "[post-layout-optimization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
@@ -358,7 +358,7 @@ TEST_CASE("Post-layout optimization reports progress", "[post_layout_optimizatio
     CHECK(rec.is_consistent("wire paths"));
 }
 
-TEST_CASE("Post-layout optimization edits its caller and preserves terminal identities", "[post-layout-ports]")
+TEST_CASE("Post-layout optimization edits its caller and preserves terminal identities", "[post-layout-optimization]")
 {
     gate_level_layout<cartesian_layout> layout{{6, 3}, layouts::clocking::twoddwave()};
     const auto                          a           = layout.create_pi("a", {0, 0});
@@ -379,7 +379,7 @@ TEST_CASE("Post-layout optimization edits its caller and preserves terminal iden
     CHECK(stats.y_size_after == 1);
 }
 
-TEST_CASE("Post-layout optimization rejects outside objects without mutation", "[post-layout-ports]")
+TEST_CASE("Post-layout optimization rejects outside objects without mutation", "[post-layout-optimization]")
 {
     gate_level_layout<cartesian_layout> layout{{4, 4}, layouts::clocking::twoddwave()};
     const auto                          pi = layout.create_pi("a", {-1, 1});
@@ -390,7 +390,7 @@ TEST_CASE("Post-layout optimization rejects outside objects without mutation", "
     CHECK(layout.height() == 4);
 }
 
-TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-layout-ports]")
+TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-layout-optimization]")
 {
     gate_level_layout<cartesian_layout> layout{{4, 4, 2}, layouts::clocking::twoddwave()};
     const auto                          a    = layout.create_pi("a", {0, 0});

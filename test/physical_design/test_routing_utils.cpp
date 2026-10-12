@@ -183,7 +183,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
     }
 }
 
-TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[routing-ports]")
+TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[routing-utils]")
 {
     cart_gate_clk_lyt layout{{5, 3, 2}, layouts::clocking::twoddwave()};
     const auto        a    = layout.create_pi("a", {0, 0});
@@ -206,7 +206,7 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
     CHECK(std::ranges::find(objectives, routing_objective<cart_gate_clk_lyt>{{0, 1}, {4, 1}, 1}) != objectives.end());
 }
 
-TEST_CASE("Routing preserves duplicate destination ports and retained identities", "[routing-ports]")
+TEST_CASE("Routing preserves duplicate destination ports and retained identities", "[routing-utils]")
 {
     cart_gate_clk_lyt layout{{6, 4, 2}, layouts::clocking::twoddwave()};
     const auto        a          = layout.create_pi("a", {0, 0});
@@ -240,7 +240,7 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     CHECK(layout.source({gate, 1}) == second_wire);
 }
 
-TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-ports]")
+TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-utils]")
 {
     cart_gate_clk_lyt                               layout{{5, 3, 2}};
     const auto                                      a    = layout.create_pi("a", {0, 0});

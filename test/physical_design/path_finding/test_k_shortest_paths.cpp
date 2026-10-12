@@ -730,7 +730,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
     }
 }
 
-TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "[A*]")
+TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "[k-shortest-paths]")
 {
     using gate_lyt   = gate_level_layout<cartesian_layout>;
     using obst_lyt   = gate_lyt;

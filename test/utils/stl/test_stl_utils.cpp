@@ -72,7 +72,7 @@ TEST_CASE("Test find_first_two_of with different iterator types", "[find_first_t
     CHECK(it == std::next(v1.begin(), 2));
 }
 
-TEST_CASE("Test find_first_two_of with layout_coordinate_paths", "[first_first_two_of]")
+TEST_CASE("Test find_first_two_of with layout_coordinate_paths", "[find_first_two_of]")
 {
     static const layout_coordinate_path<cart_gate_clk_lyt> p1{{1, 1}, {2, 1}};
     static const layout_coordinate_path<cart_gate_clk_lyt> p2{{0, 1}, {1, 1}, {2, 1}};

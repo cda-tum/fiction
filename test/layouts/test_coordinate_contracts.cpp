@@ -124,7 +124,7 @@ TEST_CASE("Equal coordinates hash equally", "[coordinate-contracts]")
     CHECK(hash_of({}) == hash_of({}));
 }
 
-TEST_CASE("Coordinate construction rejects narrowing", "[coordinate-regressions]")
+TEST_CASE("Coordinate construction rejects narrowing", "[coordinate-contracts]")
 {
     using coord = layout_base::coordinate;
 
@@ -161,7 +161,7 @@ TEST_CASE("The origin belongs to the first clock zone", "[coordinate-contracts]"
     CHECK(clk.get_clock_zone({4, 7, 0}) == layout_base::coordinate{1, 2, 0});
 }
 
-TEST_CASE("Negative cells use the clock zone below zero", "[coordinate-regressions]")
+TEST_CASE("Negative cells use the clock zone below zero", "[coordinate-contracts]")
 {
     tile_clocking clocks{3, 3};
     clocks.assign_clock_number({-1, -1}, 2);
@@ -407,7 +407,7 @@ TEST_CASE("Bounding boxes include occupied coordinates outside the frame", "[coo
     CHECK(bb.get_max() == coordinate<lyt_t>{10, 10, 0});
 }
 
-TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-regressions]")
+TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-contracts]")
 {
     /** Checks independent sizes for geometry copies and complete layout clones. */
     const auto check_sizes = [](auto coordinates)
@@ -437,7 +437,7 @@ TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-regression
     check_sizes(shifted_cartesian_layout{arrangement::EVEN_COLUMN, {4, 4, 2}});
 }
 
-TEST_CASE("Cell scaling checks the final signed coordinate", "[coordinate-regressions]")
+TEST_CASE("Cell scaling checks the final signed coordinate", "[coordinate-contracts]")
 {
     using coord = layout_base::coordinate;
     const gate_level_layout<cartesian_layout> gates{{1073741824, 1}};
@@ -449,7 +449,7 @@ TEST_CASE("Cell scaling checks the final signed coordinate", "[coordinate-regres
                     std::invalid_argument);
 }
 
-TEST_CASE("Hexagonal cube conversion rejects unrepresentable axes", "[coordinate-regressions]")
+TEST_CASE("Hexagonal cube conversion rejects unrepresentable axes", "[coordinate-contracts]")
 {
     const auto max_axis = std::numeric_limits<int64_t>::max();
     const auto min_axis = std::numeric_limits<int64_t>::min();

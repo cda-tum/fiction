@@ -45,7 +45,7 @@ using namespace fiction;
 using namespace fiction::test;
 using namespace fiction::layouts;
 
-TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout-editing]")
+TEST_CASE("Elementary truth tables retain logical input order", "[gate-level-layout]")
 {
     using layout         = gate_level_layout<cartesian_layout>;
     using binary_creator = layout::object_id (layout::*)(layout::object_id, layout::object_id, const layout::tile&);
@@ -90,7 +90,7 @@ TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout-ed
     CHECK(gates == lyt.num_gates());
 }
 
-TEST_CASE("Connections expose declared ports despite physical violations", "[gate-layout-editing]")
+TEST_CASE("Connections expose declared ports despite physical violations", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{{1, 1}, clocking::twoddwave()};
     const auto                          a    = lyt.create_pi("a", {-5, 0});
@@ -104,7 +104,7 @@ TEST_CASE("Connections expose declared ports despite physical violations", "[gat
     CHECK_FALSE(lyt.find_object({0, 0}).has_value());
 }
 
-TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-layout-editing]")
+TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{{8, 8}};
     const auto                          a    = lyt.create_pi("a", {0, 0});
@@ -131,7 +131,7 @@ TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gat
     CHECK(lyt.source({id, 0}) == replacement);
 }
 
-TEST_CASE("Physical wire counts exclude terminals through removal and reuse", "[gate-layout-editing]")
+TEST_CASE("Physical wire counts exclude terminals through removal and reuse", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{{5, 1}};
     const auto                          pi   = lyt.create_pi("a", {0, 0});
@@ -166,7 +166,7 @@ TEST_CASE("Physical wire counts exclude terminals through removal and reuse", "[
     CHECK_FALSE(lyt.is_empty());
 }
 
-TEST_CASE("Removing terminals updates declared order and sparse names", "[gate-layout-editing]")
+TEST_CASE("Removing terminals updates declared order and sparse names", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{{5, 5}};
     const auto                          a      = lyt.create_pi("a", {0, 0});
@@ -185,7 +185,7 @@ TEST_CASE("Removing terminals updates declared order and sparse names", "[gate-l
     CHECK(lyt.fanout_size(c) == 0);
 }
 
-TEST_CASE("Deletion disconnects self loops and duplicate destination inputs", "[gate-layout-editing]")
+TEST_CASE("Deletion disconnects self loops and duplicate destination inputs", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{{4, 4}};
     const auto                          input = lyt.create_pi("a", {0, 0});
@@ -200,7 +200,7 @@ TEST_CASE("Deletion disconnects self loops and duplicate destination inputs", "[
     CHECK(lyt.size() == 1);
 }
 
-TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gate-layout-editing]")
+TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> original{{4, 4}};
     const auto                          a    = original.create_pi("a", {0, 0});
@@ -220,7 +220,7 @@ TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gate-layout-
     CHECK(copy.pi_at(0) == b);
 }
 
-TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
+TEST_CASE("Moved layouts leave reusable empty sources", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> source{{4, 4}};
     const auto                          removed = source.create_pi("removed", {0, 0});
@@ -241,7 +241,7 @@ TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout-editing]")
     CHECK(source.get_input_name(0) == "kept");
 }
 
-TEST_CASE("Clock zone assignment", "[clocked-layout]")
+TEST_CASE("Clock zone assignment", "[gate-level-layout]")
 {
     using clk_lyt = gate_level_layout<cartesian_layout>;
 
@@ -340,7 +340,7 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
     }
 }
 
-TEST_CASE("Clones isolate clock overrides, schemes, and geometry", "[clocked-layout]")
+TEST_CASE("Clones isolate clock overrides, schemes, and geometry", "[gate-level-layout]")
 {
     using clk_lyt = gate_level_layout<cartesian_layout>;
 
@@ -369,7 +369,7 @@ TEST_CASE("Clones isolate clock overrides, schemes, and geometry", "[clocked-lay
     CHECK(copy.is_clocking_scheme(clocking::USE_NAME));
 }
 
-TEST_CASE("Borrowed clocking schemes observe overrides and isolate clones", "[clocked-layout]")
+TEST_CASE("Borrowed clocking schemes observe overrides and isolate clones", "[gate-level-layout]")
 {
     /** Clocked gate layout under test. */
     using clk_lyt = gate_level_layout<cartesian_layout>;
@@ -388,7 +388,7 @@ TEST_CASE("Borrowed clocking schemes observe overrides and isolate clones", "[cl
     CHECK(copy.get_clocking_scheme()(0, 0) == 2);
 }
 
-TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
+TEST_CASE("Iteration over clocking zones", "[gate-level-layout]")
 {
     using clk_lyt = gate_level_layout<cartesian_layout>;
 
@@ -412,11 +412,9 @@ TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
     layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
 
     CHECK(s3 == s4);
-
-    layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
 }
 
-TEST_CASE("Clocked neighbor degrees", "[clocked-layout]")
+TEST_CASE("Clocked neighbor degrees", "[gate-level-layout]")
 {
     using clk_lyt = gate_level_layout<cartesian_layout>;
 
@@ -466,7 +464,7 @@ TEST_CASE("Clocked neighbor degrees", "[clocked-layout]")
     }
 }
 
-TEST_CASE("Synchronization element layout properties", "[synchronization-element-layout]")
+TEST_CASE("Synchronization element layout properties", "[gate-level-layout]")
 {
     using se_layout = gate_level_layout<cartesian_layout>;
 
@@ -525,7 +523,7 @@ TEST_CASE("Synchronization element layout properties", "[synchronization-element
     CHECK(layout.degree({2, 2}) == static_cast<se_layout::degree_t>(2));
 }
 
-TEST_CASE("Clones isolate synchronization delays", "[synchronization-element-layout]")
+TEST_CASE("Clones isolate synchronization delays", "[gate-level-layout]")
 {
     using se_layout = gate_level_layout<cartesian_layout>;
 
@@ -555,7 +553,7 @@ TEST_CASE("Clones isolate synchronization delays", "[synchronization-element-lay
     CHECK(copy.get_synchronization_element({1, 0}) == 3);
 }
 
-TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-element-layout]")
+TEST_CASE("Shifted clocking with synchronization elements", "[gate-level-layout]")
 {
     using se_layout = gate_level_layout<cartesian_layout>;
 
@@ -590,7 +588,7 @@ TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-el
     CHECK(layout.is_outgoing_clocked({1, 2}, {1, 1}));
 }
 
-TEST_CASE("Iteration over synchronization elements", "[synchronization-element-layout]")
+TEST_CASE("Iteration over synchronization elements", "[gate-level-layout]")
 {
     using se_layout = gate_level_layout<cartesian_layout>;
 
@@ -617,7 +615,7 @@ TEST_CASE("Iteration over synchronization elements", "[synchronization-element-l
     CHECK(s3 == s4);
 }
 
-TEST_CASE("Copied capabilities remain independent", "[gate-layout-editing]")
+TEST_CASE("Copied capabilities remain independent", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> original{{4, 4}, clocking::twoddwave()};
     original.assign_clock_number({1, 1}, 3);
@@ -635,7 +633,7 @@ TEST_CASE("Copied capabilities remain independent", "[gate-layout-editing]")
     CHECK(original.is_obstructed_connection({0, 0}, {1, 0}));
 }
 
-TEST_CASE("Sparse clock metadata enumerates assigned zones independently of frame area", "[gate-layout-clocking]")
+TEST_CASE("Sparse clock metadata enumerates assigned zones independently of frame area", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{{1'000'000, 1'000'000}};
     lyt.assign_clock_number({999'999, 999'999}, 2);
@@ -661,7 +659,7 @@ TEST_CASE("Sparse clock metadata enumerates assigned zones independently of fram
     CHECK(delays == 1);
 }
 
-TEST_CASE("Crossings count routing wires rather than identity terminals", "[gate-layout-editing]")
+TEST_CASE("Crossings count routing wires rather than identity terminals", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{{4, 2, 2}};
     for (int64_t x{}; x < 4; ++x)
@@ -681,7 +679,7 @@ TEST_CASE("Crossings count routing wires rather than identity terminals", "[gate
     CHECK(lyt.num_crossings() == 2);
 }
 
-TEST_CASE("Crossing counts follow edits on both layers and value copies", "[gate-layout-editing]")
+TEST_CASE("Crossing counts follow edits on both layers and value copies", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{{4, 2, 3}};
     const auto                          upper = lyt.create_buf({0, 0, 1});
@@ -712,7 +710,7 @@ TEST_CASE("Crossing counts follow edits on both layers and value copies", "[gate
     CHECK(lyt.num_crossings() == 0);
 }
 
-TEST_CASE("Five-input objects keep ordered ports", "[gate-layout-editing]")
+TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout>                         lyt{{6, 6}};
     std::vector<gate_level_layout<cartesian_layout>::object_id> pis{};
@@ -737,8 +735,7 @@ TEST_CASE("Five-input objects keep ordered ports", "[gate-layout-editing]")
     CHECK_THROWS_AS(lyt.source({gate, 5}), std::out_of_range);
 }
 
-TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",
-          "[gate-layout-editing]")
+TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> original{{8, 8}};
     const auto                          a = original.create_pi("a", {0, 0});
@@ -768,7 +765,7 @@ TEST_CASE("Large-arity objects preserve disconnected ports through copying, movi
     CHECK(moved.source({wire, 0}) == a);
 }
 
-TEST_CASE("Object visitors accept move-only lvalues and temporaries", "[gate-layout-editing]")
+TEST_CASE("Object visitors accept move-only lvalues and temporaries", "[gate-level-layout]")
 {
     /** @brief Layout with enough live objects to test early termination. */
     gate_level_layout<cartesian_layout> lyt{{3, 1, 1}};
@@ -807,7 +804,7 @@ TEST_CASE("Object visitors accept move-only lvalues and temporaries", "[gate-lay
     CHECK(observed_temporary == 2);
 }
 
-TEST_CASE("Clocked neighbor visitors accept move-only lvalues and temporaries", "[gate-layout-editing]")
+TEST_CASE("Clocked neighbor visitors accept move-only lvalues and temporaries", "[gate-level-layout]")
 {
     /** @brief Cartesian gate layout used for the neighbor traversal. */
     using layout = gate_level_layout<cartesian_layout>;
@@ -847,7 +844,7 @@ TEST_CASE("Clocked neighbor visitors accept move-only lvalues and temporaries", 
     CHECK(outgoing == std::set<layout::coordinate>{{1, 2}, {2, 1}});
 }
 
-TEST_CASE("Object iteration preserves sparse membership through reuse and ownership changes", "[gate-layout-editing]")
+TEST_CASE("Object iteration preserves sparse membership through reuse and ownership changes", "[gate-level-layout]")
 {
     gate_level_layout<cartesian_layout> lyt{};
     std::vector<layout_object_id>       objects{};
@@ -899,7 +896,7 @@ TEST_CASE("Object iteration preserves sparse membership through reuse and owners
     CHECK(copied.contains(replacement));
 }
 
-TEST_CASE("Name presence queries do not allocate", "[gate-layout-editing]")
+TEST_CASE("Name presence queries do not allocate", "[gate-level-layout]")
 {
     require_allocation_failure_support();
     /** Layout with long names that cannot use short-string storage. */
@@ -933,7 +930,7 @@ TEST_CASE("Name presence queries do not allocate", "[gate-layout-editing]")
     CHECK_FALSE(layout.has_input_name(0));
 }
 
-TEST_CASE("Layout moves preserve objects and clocking without allocating", "[gate-layout-editing]")
+TEST_CASE("Layout moves preserve objects and clocking without allocating", "[gate-level-layout]")
 {
     STATIC_REQUIRE(std::is_nothrow_move_constructible_v<gate_level_layout<cartesian_layout>>);
     STATIC_REQUIRE(std::is_nothrow_move_assignable_v<gate_level_layout<cartesian_layout>>);
@@ -955,7 +952,7 @@ TEST_CASE("Layout moves preserve objects and clocking without allocating", "[gat
     CHECK(source.get_clocking_scheme() == clocking::open());
 }
 
-TEST_CASE("Crossing counts survive failed connection allocation", "[gate-layout-editing]")
+TEST_CASE("Crossing counts survive failed connection allocation", "[gate-level-layout]")
 {
     require_allocation_failure_support();
     for (std::size_t failure{};; ++failure)
@@ -989,7 +986,7 @@ TEST_CASE("Crossing counts survive failed connection allocation", "[gate-layout-
     }
 }
 
-TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-layout-editing]")
+TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-level-layout]")
 {
     require_allocation_failure_support();
     const bool reuse = GENERATE(false, true);
@@ -1036,7 +1033,7 @@ TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-
     }
 }
 
-TEST_CASE("Moved-from layouts remain reusable after allocation failure", "[gate-layout-editing]")
+TEST_CASE("Moved-from layouts remain reusable after allocation failure", "[gate-level-layout]")
 {
     require_allocation_failure_support();
     using layout = gate_level_layout<cartesian_layout>;
@@ -1082,7 +1079,7 @@ TEST_CASE("Moved-from layouts remain reusable after allocation failure", "[gate-
     }
 }
 
-TEST_CASE("Failed creation preserves object iteration across storage growth", "[gate-layout-editing]")
+TEST_CASE("Failed creation preserves object iteration across storage growth", "[gate-level-layout]")
 {
     require_allocation_failure_support();
     const auto initial_count = GENERATE(0, 64, 128);
@@ -1135,7 +1132,7 @@ TEST_CASE("Failed creation preserves object iteration across storage growth", "[
     }
 }
 
-TEST_CASE("Failed name assignment preserves name presence", "[gate-layout-editing]")
+TEST_CASE("Failed name assignment preserves name presence", "[gate-level-layout]")
 {
     require_allocation_failure_support();
     /** Long name whose assignment requires string storage. */

@@ -322,7 +322,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
     }
 }
 
-TEST_CASE("Hexagonalization preserves declared input holes and terminal order", "[hexagonalization-ports]")
+TEST_CASE("Hexagonalization preserves declared input holes and terminal order", "[hexagonalization]")
 {
     cart_gate_clk_lyt layout{{4, 3, 2}, clocking::twoddwave()};
     const auto        b    = layout.create_pi("b", {0, 1});

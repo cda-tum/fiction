@@ -130,7 +130,7 @@ TEST_CASE("Orthogonal physical design of a network without primary inputs", "[or
     check_eq(ntk, extract_layout_network(lyt));
 }
 
-TEST_CASE("Layout equivalence", "[algorithms]")
+TEST_CASE("Layout equivalence", "[orthogonal]")
 {
     SECTION("Cartesian layouts")
     {

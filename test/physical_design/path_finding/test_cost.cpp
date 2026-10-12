@@ -109,7 +109,7 @@ TEST_CASE("Unit cost functor", "[cost]")
     }
 }
 
-TEST_CASE("Random cost", "[distance]")
+TEST_CASE("Random cost", "[cost]")
 {
     SECTION("Unsigned Cartesian layout")
     {
@@ -175,7 +175,7 @@ TEST_CASE("Random cost", "[distance]")
     }
 }
 
-TEST_CASE("Random cost functor", "[distance]")
+TEST_CASE("Random cost functor", "[cost]")
 {
     SECTION("Unsigned Cartesian layout")
     {

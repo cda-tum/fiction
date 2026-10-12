@@ -26,7 +26,7 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
-TEST_CASE("Aspect Ratio Iterator Traits", "[bdl-input-iterator]")
+TEST_CASE("Aspect Ratio Iterator Traits", "[aspect-ratio-iterator]")
 {
     CHECK(std::is_same_v<std::iterator_traits<aspect_ratio_iterator<layout_base::extent>>::iterator_category,
                          std::forward_iterator_tag>);

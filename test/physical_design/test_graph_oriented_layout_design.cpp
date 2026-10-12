@@ -642,7 +642,7 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
 
 // NOLINTEND(bugprone-unchecked-optional-access)
 
-TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[gold-ports]")
+TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[graph-oriented-layout-design]")
 {
     mockturtle::names_view<technology_network> ntk{};
     const auto                                 unused = ntk.create_pi("unused");
@@ -671,7 +671,8 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     layout.foreach_object([&](const auto id) { CHECK(layout.is_within_bounds(layout.get_tile(id))); });
 }
 
-TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty", "[gold-ports]")
+TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty",
+          "[graph-oriented-layout-design]")
 {
     mockturtle::names_view<technology_network> empty{};
     graph_oriented_layout_design_params        params{};
@@ -695,7 +696,7 @@ TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks 
           mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
 }
 
-TEST_CASE("GOLD preserves mixed constant and logic output order", "[gold-ports]")
+TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-oriented-layout-design]")
 {
     mockturtle::names_view<technology_network> ntk{};
     const auto                                 input = ntk.create_pi("input");

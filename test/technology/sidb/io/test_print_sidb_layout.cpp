@@ -162,7 +162,7 @@ TEST_CASE("Print SiDBs with a charge distribution", "[print-sidb-layout]")
     CHECK(layout_print == print_stream.str());
 }
 
-TEST_CASE("test_print_sidb_layout rejects mismatched distribution sites", "[sidb-distribution-sites]")
+TEST_CASE("test_print_sidb_layout rejects mismatched distribution sites", "[print-sidb-layout]")
 {
     layout lyt{};
     lyt.assign_sidb({0, 0}, dot_tag::NORMAL);

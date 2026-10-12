@@ -95,7 +95,7 @@ State check_allocation_failures(const State& original, const Update& update, con
 }
 }  // namespace
 
-TEST_CASE("Clocking updates preserve state on allocation failure", "[clocking-allocation]")
+TEST_CASE("Clocking updates preserve state on allocation failure", "[clocking-state]")
 {
     clocking::state original{clocking::open()};
     original.assign_synchronization_element({1, 1}, 2);
@@ -137,7 +137,7 @@ TEST_CASE("Clocking updates preserve state on allocation failure", "[clocking-al
     }
 }
 
-TEST_CASE("Obstruction insertion propagates allocation failure", "[clocking-allocation]")
+TEST_CASE("Obstruction insertion propagates allocation failure", "[clocking-state]")
 {
     SECTION("Coordinate")
     {
@@ -156,7 +156,7 @@ TEST_CASE("Obstruction insertion propagates allocation failure", "[clocking-allo
     }
 }
 
-TEST_CASE("Clocking copy assignment preserves values on allocation failure", "[clocking-assignment]")
+TEST_CASE("Clocking copy assignment preserves values on allocation failure", "[clocking-state]")
 {
     auto source_scheme = clocking::scheme{"Allocated replacement scheme name", {{0, 1, 2}, {1, 2, 3}}, 4, 3, 3};
     source_scheme.override_clock_number(7, 8, 2);
@@ -190,7 +190,7 @@ TEST_CASE("Clocking copy assignment preserves values on allocation failure", "[c
     }
 }
 
-TEST_CASE("Cell clocking wrappers propagate allocation failure", "[clocking-allocation]")
+TEST_CASE("Cell clocking wrappers propagate allocation failure", "[clocking-state]")
 {
     const tile_clocking original{};
     SECTION("Scheme replacement")
