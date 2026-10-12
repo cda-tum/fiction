@@ -3830,8 +3830,10 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_operator_assign_2 =
 R"doc(Moves owned state and leaves an empty reusable source.
 
 Note:
-    Exceptions from cloning, constructing, or assigning the coordinate
-    geometry propagate to the caller.
+    Geometry failures preserve both operands' owned state. The
+    destination geometry follows CoordinateLayout's assignment
+    guarantee. Exceptions from geometry operations propagate to the
+    caller.
 
 )doc";
 
