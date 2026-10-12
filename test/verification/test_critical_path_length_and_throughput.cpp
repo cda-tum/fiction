@@ -71,6 +71,39 @@ TEST_CASE("Unbalanced layout", "[throughput]")
     check(blueprints::unbalanced_and_layout<gate_layout>(), 6, 2);
 }
 
+TEST_CASE("Timing counts declared wire paths independently of placement", "[throughput][placed-objects]")
+{
+    gate_level_layout<cartesian_layout> lyt{{1, 1}};
+    const auto                          pi   = lyt.create_pi("a", {10, 0});
+    auto                                path = pi;
+    for (int64_t x = 11; x < 15; ++x)
+    {
+        path = lyt.create_buf(path, {x, 0});
+    }
+    const auto gate = lyt.create_and(pi, path, {15, 0});
+    lyt.create_po(gate, "result", {16, 0});
+    const auto result = critical_path_length_and_throughput(lyt);
+    CHECK(result.critical_path_length == 7);
+    CHECK(result.throughput == 2);
+}
+
+TEST_CASE("Timing rejects required holes and cycles without rejecting dangling objects", "[throughput][placed-objects]")
+{
+    gate_level_layout<cartesian_layout> lyt{{1, 4}};
+    const auto                          pi       = lyt.create_pi("a", {0, 0});
+    const auto                          wire     = lyt.create_buf(pi, {0, 1});
+    const auto                          po       = lyt.create_po(wire, "result", {0, 2});
+    const auto                          dangling = lyt.create_buf({0, 3});
+    lyt.connect(dangling, {dangling, 0});
+    const auto result = critical_path_length_and_throughput(lyt);
+    CHECK(result.critical_path_length == 3);
+    CHECK(result.throughput == 1);
+    lyt.disconnect({wire, 0});
+    CHECK_THROWS_AS(critical_path_length_and_throughput(lyt), std::invalid_argument);
+    lyt.connect(po, {wire, 0});
+    CHECK_THROWS_AS(critical_path_length_and_throughput(lyt), std::invalid_argument);
+}
+
 TEST_CASE("Critical path analysis handles long routes", "[throughput]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
@@ -93,37 +126,4 @@ TEST_CASE("Critical path analysis handles long routes", "[throughput]")
     const auto result = critical_path_length_and_throughput(layout);
     CHECK(result.critical_path_length == static_cast<uint64_t>(length + 1));
     CHECK(result.throughput == 1);
-}
-
-TEST_CASE("Timing rejects required holes and cycles without rejecting dangling objects", "[throughput][placed-objects]")
-{
-    gate_level_layout<cartesian_layout> lyt{{1, 4}};
-    const auto                          pi       = lyt.create_pi("a", {0, 0});
-    const auto                          wire     = lyt.create_buf(pi, {0, 1});
-    const auto                          po       = lyt.create_po(wire, "result", {0, 2});
-    const auto                          dangling = lyt.create_buf({0, 3});
-    lyt.connect(dangling, {dangling, 0});
-    const auto result = critical_path_length_and_throughput(lyt);
-    CHECK(result.critical_path_length == 3);
-    CHECK(result.throughput == 1);
-    lyt.disconnect({wire, 0});
-    CHECK_THROWS_AS(critical_path_length_and_throughput(lyt), std::invalid_argument);
-    lyt.connect(po, {wire, 0});
-    CHECK_THROWS_AS(critical_path_length_and_throughput(lyt), std::invalid_argument);
-}
-
-TEST_CASE("Timing counts declared wire paths independently of placement", "[throughput][placed-objects]")
-{
-    gate_level_layout<cartesian_layout> lyt{{1, 1}};
-    const auto                          pi   = lyt.create_pi("a", {10, 0});
-    auto                                path = pi;
-    for (int64_t x = 11; x < 15; ++x)
-    {
-        path = lyt.create_buf(path, {x, 0});
-    }
-    const auto gate = lyt.create_and(pi, path, {15, 0});
-    lyt.create_po(gate, "result", {16, 0});
-    const auto result = critical_path_length_and_throughput(lyt);
-    CHECK(result.critical_path_length == 7);
-    CHECK(result.throughput == 2);
 }

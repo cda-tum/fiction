@@ -34,6 +34,20 @@ using namespace fiction::fcn;
 using namespace fiction::layouts;
 using namespace fiction::sidb;
 
+TEST_CASE("Empty Cartesian geometry has zero physical area", "[area][size-contract]")
+{
+    area_stats stats{};
+    CHECK(area(qca::layout{}, {}, &stats) == 0.0);
+    CHECK(stats.width == 0.0);
+    CHECK(stats.height == 0.0);
+    const qca::layout empty{{0, 3}};
+    CHECK(area(empty) == 0.0);
+    const qca::layout singleton{{1, 1}};
+    CHECK(area(singleton) == qca::layout::CELL_WIDTH * qca::layout::CELL_HEIGHT);
+    const bounding_box_2d bounds{singleton};
+    CHECK(area(bounds) == 0.0);
+}
+
 TEST_CASE("Area computation for different technologies", "[area]")
 {
     SECTION("QCA")
@@ -119,18 +133,4 @@ TEST_CASE("Area computation for different technologies", "[area]")
 
         CHECK_THAT(stats.width, Catch::Matchers::WithinRel(4'294'967'295.0 * sidb::layout::CELL_HSPACE, 0.000001));
     }
-}
-
-TEST_CASE("Empty Cartesian geometry has zero physical area", "[area][size-contract]")
-{
-    area_stats stats{};
-    CHECK(area(qca::layout{}, {}, &stats) == 0.0);
-    CHECK(stats.width == 0.0);
-    CHECK(stats.height == 0.0);
-    const qca::layout empty{{0, 3}};
-    CHECK(area(empty) == 0.0);
-    const qca::layout singleton{{1, 1}};
-    CHECK(area(singleton) == qca::layout::CELL_WIDTH * qca::layout::CELL_HEIGHT);
-    const bounding_box_2d bounds{singleton};
-    CHECK(area(bounds) == 0.0);
 }

@@ -82,24 +82,6 @@ TEST_CASE("Write empty iNML layout", "[qll]")
     CHECK(layout_stream.str() == qll_layout);
 }
 
-TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
-{
-    std::ostringstream layout_stream{};
-
-    inml::layout layout{{5, 5}, "Non-pin layout"};
-
-    // add two normal cells to span a bounding boy
-    layout.assign_cell_type({0, 0}, inml::magnet_type::NORMAL);
-    layout.assign_cell_type({4, 4}, inml::magnet_type::NORMAL);
-
-    // add I/O cells inside the bounding box such that they are not located at the borders
-    layout.assign_cell_type({1, 1}, inml::magnet_type::INPUT);
-    layout.assign_cell_type({2, 2}, inml::magnet_type::OUTPUT);
-
-    // this layout should throw an exception
-    CHECK_THROWS_AS(write_qll_layout(layout, layout_stream), std::invalid_argument);
-}
-
 TEST_CASE("Write single-layer iNML MAJ gate", "[qll]")
 {
     static const std::string qll_layout =
@@ -353,6 +335,24 @@ TEST_CASE("Write single-layer iNML crosswire", "[qll]")
     write_qll_layout(layout, layout_stream);
 
     CHECK(layout_stream.str() == qll_layout);
+}
+
+TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
+{
+    std::ostringstream layout_stream{};
+
+    inml::layout layout{{5, 5}, "Non-pin layout"};
+
+    // add two normal cells to span a bounding boy
+    layout.assign_cell_type({0, 0}, inml::magnet_type::NORMAL);
+    layout.assign_cell_type({4, 4}, inml::magnet_type::NORMAL);
+
+    // add I/O cells inside the bounding box such that they are not located at the borders
+    layout.assign_cell_type({1, 1}, inml::magnet_type::INPUT);
+    layout.assign_cell_type({2, 2}, inml::magnet_type::OUTPUT);
+
+    // this layout should throw an exception
+    CHECK_THROWS_AS(write_qll_layout(layout, layout_stream), std::invalid_argument);
 }
 
 TEST_CASE("Write empty mQCA layout", "[qll]")
