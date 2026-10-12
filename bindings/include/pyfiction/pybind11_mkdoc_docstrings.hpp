@@ -3155,6 +3155,10 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_7
 R"doc(Moves owned state and leaves an empty reusable source with its
 original geometry.
 
+Note:
+    Exceptions from cloning or constructing the coordinate geometry
+    propagate to the caller.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clock_number =
@@ -3822,7 +3826,14 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_occupancy = R"doc(C
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_operator_assign = R"doc(Replaces this layout with an independent value copy.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_operator_assign_2 = R"doc(Moves owned state and leaves an empty reusable source.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_operator_assign_2 =
+R"doc(Moves owned state and leaves an empty reusable source.
+
+Note:
+    Exceptions from cloning, constructing, or assigning the coordinate
+    geometry propagate to the caller.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_out_degree =
 R"doc(Returns the number of outgoing clock zones from the given one.
@@ -11889,7 +11900,18 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_a_star_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_a_star_impl =
+R"doc(Initializes the A* search.
+
+Args:
+    lyt: Layout to search.
+    obj: Routing endpoints.
+    dist_fn: Distance heuristic.
+    cost_fn: Step cost.
+    p: Search parameters.
+    extra: Additional routing obstructions.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_came_from = R"doc(Tracks the origin of each coordinate to recreate the path.)doc";
 
@@ -12036,7 +12058,16 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_collection = R"doc(Collection of all enumerated paths.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_enumerate_all_paths_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_enumerate_all_paths_impl =
+R"doc(Initializes path enumeration.
+
+Args:
+    lyt: Layout to search.
+    obj: Routing endpoints.
+    p: Search parameters.
+    extra: Additional routing obstructions.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_is_visited =
 R"doc(Check if a coordinate has been visited.
@@ -12143,7 +12174,17 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_sho
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_shortest_path_candidates = R"doc(A set of potential shortest paths.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_yen_k_shortest_paths_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_yen_k_shortest_paths_impl =
+R"doc(Initializes the k-shortest-path search.
+
+Args:
+    lyt: Layout to search.
+    obj: Routing endpoints.
+    k: Maximum number of paths.
+    p: Search parameters.
+    extra: Additional routing obstructions.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_distance_functor =
 R"doc(A functor that computes distances between coordinates and can be
@@ -18556,7 +18597,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long_long =
 R"doc(Explicit instructions for the compiler on how to cast a cluster charge
 state to an 64-bit unsigned integer.
 
