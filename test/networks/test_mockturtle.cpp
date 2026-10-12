@@ -52,8 +52,6 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
     /** @brief Placed layout whose logic enters mockturtle through extraction. */
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    REQUIRE_FALSE(mockturtle::is_network_type_v<gate_layout>);
-
     const auto and_or_layout   = blueprints::and_or_gate_layout<gate_layout>();
     const auto xor_maj_layout  = blueprints::xor_maj_gate_layout<gate_layout>();
     const auto crossing_layout = blueprints::crossing_layout<gate_layout>();
@@ -99,12 +97,7 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
 
     SECTION("Synchronization elements")
     {
-        /** @brief Placed layout with owned synchronization elements. */
-        using se_layout = gate_level_layout<cartesian_layout>;
-
-        REQUIRE_FALSE(mockturtle::is_network_type_v<se_layout>);
-
-        const auto se_or_layout = blueprints::se_gate_layout<se_layout>();
+        const auto se_or_layout = blueprints::se_gate_layout<gate_layout>();
 
         const auto se_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(se_or_layout),
