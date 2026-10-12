@@ -14,6 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -25,6 +27,7 @@
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // time measurements
 
+#include <concepts>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -47,7 +50,9 @@ using namespace fiction::verification;
 template <typename Lyt>
 void remove_clocking(Lyt& lyt)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }

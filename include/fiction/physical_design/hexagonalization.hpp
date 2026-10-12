@@ -18,8 +18,13 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
@@ -32,6 +37,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <concepts>
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -154,10 +160,13 @@ namespace detail
  * @return corresponding tile on the hexagonal grid.
  */
 template <typename CartLyt, typename HexLyt>
-[[nodiscard]] tile<HexLyt> to_hex(tile<CartLyt> cartesian_tile, const int32_t cartesian_layout_height)
+[[nodiscard]] fiction::layouts::layout_base::coordinate to_hex(fiction::layouts::layout_base::coordinate cartesian_tile,
+                                                               const int32_t cartesian_layout_height)
 {
-    static_assert(is_cartesian_layout_v<CartLyt>, "Old tile is not Cartesian");
-    static_assert(is_hexagonal_layout_v<HexLyt>, "New tile is not hexagonal");
+    static_assert(std::derived_from<CartLyt, fiction::layouts::cartesian_layout>, "Old tile is not Cartesian");
+    static_assert((std::derived_from<HexLyt, fiction::layouts::hexagonal_layout> &&
+                   !std::derived_from<HexLyt, fiction::layouts::shifted_cartesian_layout>),
+                  "New tile is not hexagonal");
 
     // compute new y coordinate as sum of x and y
     const auto y = static_cast<int64_t>(cartesian_tile.x) + cartesian_tile.y;
@@ -172,7 +181,7 @@ template <typename CartLyt, typename HexLyt>
     const auto x = static_cast<int64_t>(cartesian_tile.x) + adjustment;
 
     // return the new hexagonal tile
-    return tile<HexLyt>{x, y, cartesian_tile.z};
+    return fiction::layouts::layout_base::coordinate{x, y, cartesian_tile.z};
 }
 
 /**
@@ -314,8 +323,10 @@ template <typename HexLyt, typename CartLyt>
                                  const hexagonalization_params::io_pin_extension_mode input_mode,
                                  const hexagonalization_params::io_pin_extension_mode output_mode)
 {
-    static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
-    static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
+    static_assert(std::derived_from<CartLyt, fiction::layouts::cartesian_layout>, "CartLyt is not a Cartesian layout");
+    static_assert((std::derived_from<HexLyt, fiction::layouts::hexagonal_layout> &&
+                   !std::derived_from<HexLyt, fiction::layouts::shifted_cartesian_layout>),
+                  "HexLyt is not a hexagonal layout");
 
     int32_t offset{};
     int64_t first_diagonal = std::numeric_limits<int64_t>::max();
@@ -379,10 +390,17 @@ class hexagonalization_impl
     [[nodiscard]] HexLyt run()
     {
         // static assertions for layout types
-        static_assert(is_gate_level_layout_v<HexLyt>, "HexLyt is not a gate-level layout");
-        static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
-        static_assert(is_gate_level_layout_v<CartLyt>, "CartLyt is not a gate-level layout");
-        static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
+        static_assert(
+            requires { requires std::same_as<typename HexLyt::object_id, fiction::layouts::layout_object_id>; },
+            "HexLyt is not a gate-level layout");
+        static_assert((std::derived_from<HexLyt, fiction::layouts::hexagonal_layout> &&
+                       !std::derived_from<HexLyt, fiction::layouts::shifted_cartesian_layout>),
+                      "HexLyt is not a hexagonal layout");
+        static_assert(
+            requires { requires std::same_as<typename CartLyt::object_id, fiction::layouts::layout_object_id>; },
+            "CartLyt is not a gate-level layout");
+        static_assert(std::derived_from<CartLyt, fiction::layouts::cartesian_layout>,
+                      "CartLyt is not a Cartesian layout");
 
         if (!layout.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME))
         {
@@ -458,14 +476,14 @@ class hexagonalization_impl
                                                 layout_height);
 
             // vectors to store primary inputs
-            std::vector<tile<HexLyt>> left_pis{};
-            std::vector<tile<HexLyt>> right_pis{};
+            std::vector<fiction::layouts::layout_base::coordinate> left_pis{};
+            std::vector<fiction::layouts::layout_base::coordinate> right_pis{};
             left_pis.reserve(layout.num_pis());
             right_pis.reserve(layout.num_pis());
 
             // vectors to store primary outputs
-            std::vector<tile<HexLyt>> left_pos{};
-            std::vector<tile<HexLyt>> right_pos{};
+            std::vector<fiction::layouts::layout_base::coordinate> left_pos{};
+            std::vector<fiction::layouts::layout_base::coordinate> right_pos{};
             left_pos.reserve(layout.num_pos());
             right_pos.reserve(layout.num_pos());
 
@@ -762,9 +780,9 @@ class hexagonalization_impl
 
                     if (const auto above = hex_layout.above(obj.source); above && !hex_layout.is_empty_tile(*above))
                     {
-                        const tile<HexLyt> ground{obj.source.x, obj.source.y, 0};
-                        const auto         east = hex_layout.south_east(ground);
-                        const auto         west = hex_layout.south_west(ground);
+                        const fiction::layouts::layout_base::coordinate ground{obj.source.x, obj.source.y, 0};
+                        const auto                                      east = hex_layout.south_east(ground);
+                        const auto                                      west = hex_layout.south_west(ground);
                         if (east && west)
                         {
                             for (const auto& [neighbor, opposite] : {std::pair{*east, *west}, std::pair{*west, *east}})

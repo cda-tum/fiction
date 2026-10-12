@@ -21,6 +21,7 @@
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/clocking_state.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 
 #include <kitty/constructors.hpp>
@@ -103,11 +104,12 @@ namespace fiction::layouts
  * @tparam CoordinateLayout Coordinate geometry used for placement.
  */
 template <typename CoordinateLayout>
+    requires std::derived_from<CoordinateLayout, layout_base>
 class gate_level_layout : public CoordinateLayout
 {
   public:
     /** @brief Coordinate identifying a clock zone. */
-    using clock_zone = typename CoordinateLayout::coordinate;
+    using clock_zone = layout_base::coordinate;
     /** @brief Clocking scheme. */
     using clocking_scheme_t = clocking::scheme;
     /** @brief Clock phase. */
@@ -117,7 +119,7 @@ class gate_level_layout : public CoordinateLayout
     /** @brief Hold extension in full cycles. */
     using sync_elem_t = clocking::state::sync_elem_t;
     /** @brief Placement coordinate. */
-    using tile = typename CoordinateLayout::coordinate;
+    using tile = layout_base::coordinate;
     /** @brief Stable layout-local identity. */
     using object_id = layout_object_id;
     /** @brief Ordered destination endpoint. */
@@ -126,34 +128,31 @@ class gate_level_layout : public CoordinateLayout
     using base_type = gate_level_layout;
 
     /** @brief Creates an empty layout with the given geometry and name. */
-    explicit gate_level_layout(const typename CoordinateLayout::extent& size = {}, std::string name = {})
-        requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::extent&>
+    explicit gate_level_layout(const layout_base::extent& size = {}, std::string name = {})
+        requires std::constructible_from<CoordinateLayout, const layout_base::extent&>
             : CoordinateLayout{size}, layout_name{std::move(name)}
     {
         initialize_functions();
     }
     /** @brief Creates an empty layout with the given geometry, clocking, and name. */
-    gate_level_layout(const typename CoordinateLayout::extent& size, const clocking::scheme& scheme,
-                      const std::string& name = {})
-        requires std::constructible_from<CoordinateLayout, const typename CoordinateLayout::extent&>
+    gate_level_layout(const layout_base::extent& size, const clocking::scheme& scheme, const std::string& name = {})
+        requires std::constructible_from<CoordinateLayout, const layout_base::extent&>
             : gate_level_layout{size, name}
     {
         replace_clocking_scheme(scheme);
     }
     /** @brief Creates an empty layout with shifted rows or columns. */
-    explicit gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& size = {},
+    explicit gate_level_layout(const layouts::arrangement a, const layout_base::extent& size = {},
                                std::string name = {})
-        requires std::constructible_from<CoordinateLayout, layouts::arrangement,
-                                         const typename CoordinateLayout::extent&>
+        requires std::constructible_from<CoordinateLayout, layouts::arrangement, const layout_base::extent&>
             : CoordinateLayout{a, size}, layout_name{std::move(name)}
     {
         initialize_functions();
     }
     /** @brief Creates an empty layout with shifted rows or columns and clocking. */
-    gate_level_layout(const layouts::arrangement a, const typename CoordinateLayout::extent& size,
-                      const clocking::scheme& scheme, const std::string& name = {})
-        requires std::constructible_from<CoordinateLayout, layouts::arrangement,
-                                         const typename CoordinateLayout::extent&>
+    gate_level_layout(const layouts::arrangement a, const layout_base::extent& size, const clocking::scheme& scheme,
+                      const std::string& name = {})
+        requires std::constructible_from<CoordinateLayout, layouts::arrangement, const layout_base::extent&>
             : gate_level_layout{a, size, name}
     {
         replace_clocking_scheme(scheme);

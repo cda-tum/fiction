@@ -273,44 +273,44 @@ TEST_CASE("Cartesian to hexagonal")
     using hex_lyt     = hex_gate_clk_lyt;
 
     constexpr const auto layout_height = 3;
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 0), layout_height) ==
-          layout_base::coordinate(1, 0, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 1), layout_height) ==
-          layout_base::coordinate(1, 0, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 0, 0), layout_height) ==
-          layout_base::coordinate(2, 1, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 0, 1), layout_height) ==
-          layout_base::coordinate(2, 1, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 0, 0), layout_height) ==
-          layout_base::coordinate(2, 2, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 0, 1), layout_height) ==
-          layout_base::coordinate(2, 2, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 0, 0),
+                                                                layout_height) == layout_base::coordinate(1, 0, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 0, 1),
+                                                                layout_height) == layout_base::coordinate(1, 0, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 0, 0),
+                                                                layout_height) == layout_base::coordinate(2, 1, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 0, 1),
+                                                                layout_height) == layout_base::coordinate(2, 1, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 0, 0),
+                                                                layout_height) == layout_base::coordinate(2, 2, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 0, 1),
+                                                                layout_height) == layout_base::coordinate(2, 2, 1));
 
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 1, 0), layout_height) ==
-          layout_base::coordinate(1, 1, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 1, 1), layout_height) ==
-          layout_base::coordinate(1, 1, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 1, 0), layout_height) ==
-          layout_base::coordinate(1, 2, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 1, 1), layout_height) ==
-          layout_base::coordinate(1, 2, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 1, 0), layout_height) ==
-          layout_base::coordinate(2, 3, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 1, 1), layout_height) ==
-          layout_base::coordinate(2, 3, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 1, 0),
+                                                                layout_height) == layout_base::coordinate(1, 1, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 1, 1),
+                                                                layout_height) == layout_base::coordinate(1, 1, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 1, 0),
+                                                                layout_height) == layout_base::coordinate(1, 2, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 1, 1),
+                                                                layout_height) == layout_base::coordinate(1, 2, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 1, 0),
+                                                                layout_height) == layout_base::coordinate(2, 3, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 1, 1),
+                                                                layout_height) == layout_base::coordinate(2, 3, 1));
 
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 2, 0), layout_height) ==
-          layout_base::coordinate(0, 2, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 2, 1), layout_height) ==
-          layout_base::coordinate(0, 2, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 2, 0), layout_height) ==
-          layout_base::coordinate(1, 3, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 2, 1), layout_height) ==
-          layout_base::coordinate(1, 3, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 0), layout_height) ==
-          layout_base::coordinate(1, 4, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 1), layout_height) ==
-          layout_base::coordinate(1, 4, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 2, 0),
+                                                                layout_height) == layout_base::coordinate(0, 2, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 2, 1),
+                                                                layout_height) == layout_base::coordinate(0, 2, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 2, 0),
+                                                                layout_height) == layout_base::coordinate(1, 3, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 2, 1),
+                                                                layout_height) == layout_base::coordinate(1, 3, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 2, 0),
+                                                                layout_height) == layout_base::coordinate(1, 4, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 2, 1),
+                                                                layout_height) == layout_base::coordinate(1, 4, 1));
 }
 
 TEST_CASE("Layout equivalence", "[hexagonalization]")

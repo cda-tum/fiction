@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -218,7 +219,7 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             "coordinates",
             [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
             {
-                std::vector<fiction::coordinate<Lyt>> coords{};
+                std::vector<fiction::layouts::layout_base::coordinate> coords{};
                 if (!start && !stop)
                 {
                     coords.reserve(lyt.volume());
@@ -233,7 +234,7 @@ void shifted_cartesian_layout(nanobind::module_& m, const char* name)
             "ground_coordinates",
             [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
             {
-                std::vector<fiction::coordinate<Lyt>> coords{};
+                std::vector<fiction::layouts::layout_base::coordinate> coords{};
                 if (!start && !stop)
                 {
                     coords.reserve(lyt.layers() == 0 ? 0 : lyt.area());

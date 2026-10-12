@@ -14,6 +14,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -21,6 +24,7 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/progress.hpp>
 
+#include <concepts>
 #include <string_view>
 
 #include <nanobind/nanobind.h>
@@ -53,19 +57,20 @@ namespace detail
 template <typename Lyt, bool ClockColors, bool DrawIndexes>
 void draw(const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
 {
-    if constexpr (fiction::is_cartesian_layout_v<Lyt>)
+    if constexpr (std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
     {
         fiction::layouts::io::write_dot_layout<
             Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
                                                                                                     on_progress);
     }
-    else if constexpr (fiction::is_shifted_cartesian_layout_v<Lyt>)
+    else if constexpr (std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
     {
         fiction::layouts::io::write_dot_layout<
             Lyt, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(
             lyt, filename, {}, on_progress);
     }
-    else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
+    else if constexpr ((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                        !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
     {
         fiction::layouts::io::write_dot_layout<
             Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},

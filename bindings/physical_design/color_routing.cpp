@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -44,9 +45,10 @@ void color_routing_impl(nanobind::module_& m)
 {
     m.def(
         "color_routing",
-        [](Lyt&                                                                                         lyt,
-           const std::vector<std::tuple<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>, uint32_t>>& objectives,
-           const fiction::physical_design::color_routing_params&                                        params)
+        [](Lyt&                                                                                lyt,
+           const std::vector<std::tuple<fiction::layouts::layout_base::coordinate,
+                                        fiction::layouts::layout_base::coordinate, uint32_t>>& objectives,
+           const fiction::physical_design::color_routing_params&                               params)
         {
             std::vector<fiction::physical_design::routing_objective> objs{};
             objs.reserve(objectives.size());

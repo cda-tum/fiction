@@ -18,6 +18,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -210,7 +211,7 @@ TEST_CASE("QCA ONE rejects primary-input fanout", "[qca-one-library]")
     REQUIRE(st.drvs == 0);
 
     CHECK_THROWS_AS(apply_gate_library<qca_one_library>(lyt),
-                    fcn::unsupported_gate_type_exception<tile<decltype(lyt)>>);
+                    fcn::unsupported_gate_type_exception<fiction::layouts::layout_base::coordinate>);
 }
 
 TEST_CASE("QCA ONE rejects an unoccupied tile", "[qca-one-library]")

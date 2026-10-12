@@ -87,7 +87,7 @@ void wiring_reduction(nanobind::module_& m)
 
         ;
 
-    m.def("wiring_reduction", &fiction::physical_design::wiring_reduction<py_cartesian_gate_layout>, py::arg("layout"),
+    m.def("wiring_reduction", &fiction::physical_design::wiring_reduction, py::arg("layout"),
           py::arg("parameters") = fiction::physical_design::wiring_reduction_params{}, py::arg("statistics") = nullptr,
           py::call_guard<py::gil_scoped_release>(), DOC(fiction_physical_design_wiring_reduction));
 }

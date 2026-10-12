@@ -64,7 +64,7 @@ namespace fiction::physical_design::path_finding
     /** Row difference. */
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
-    return std::hypot(x, y);
+    return std::sqrt(x * x + y * y);
 }
 /**
  * The squared Euclidean distance \f$D\f$ between two layout coordinates \f$(x_1, y_1)\f$ and \f$(x_2, y_2)\f$ given by

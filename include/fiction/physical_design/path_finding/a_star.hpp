@@ -17,7 +17,12 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
@@ -137,7 +142,8 @@ class a_star_impl
         /**
          * Coordinate.
          */
-        coordinate<Lyt> coord;  // cannot be const because operator= is required by std::priority_queue
+        fiction::layouts::layout_base::coordinate
+            coord;  // cannot be const because operator= is required by std::priority_queue
         /**
          * f-value of the coordinate.
          */
@@ -180,21 +186,22 @@ class a_star_impl
     /**
      * Closed list that acts as a set of already visited coordinates.
      */
-    phmap::flat_hash_set<coordinate<Lyt>> closed_list{};
+    phmap::flat_hash_set<fiction::layouts::layout_base::coordinate> closed_list{};
     /**
      * Stores the g-cost for each coordinate c, i.e., the length of the shortest path from source to c found so far.
      */
-    phmap::parallel_flat_hash_map<coordinate<Lyt>, g_f_type> g_values{};
+    phmap::parallel_flat_hash_map<fiction::layouts::layout_base::coordinate, g_f_type> g_values{};
     /**
      * Tracks the origin of each coordinate to recreate the path.
      */
-    phmap::parallel_flat_hash_map<coordinate<Lyt>, coordinate<Lyt>> came_from{};
+    phmap::parallel_flat_hash_map<fiction::layouts::layout_base::coordinate, fiction::layouts::layout_base::coordinate>
+        came_from{};
     /**
      * Fetches and pops the coordinate with the lowest f-value from the open list priority queue.
      *
      * @return Coordinate with the lowest f-value from the open list.
      */
-    coordinate<Lyt> get_lowest_f_coord()
+    fiction::layouts::layout_base::coordinate get_lowest_f_coord()
     {
         const auto current = open_list.top().coord;
         open_list.pop();
@@ -206,7 +213,7 @@ class a_star_impl
      *
      * @param current Coordinate that is currently examined.
      */
-    void expand(const coordinate<Lyt>& current)
+    void expand(const fiction::layouts::layout_base::coordinate& current)
     {
         const auto explore_successor = [this, current](const auto& adjacent)
         {
@@ -254,7 +261,7 @@ class a_star_impl
             }
         };
 
-        if constexpr (is_gate_level_layout_v<Lyt>)
+        if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
         {
             // recurse for all outgoing clock zones
             layout.foreach_outgoing_clocked_zone(current, explore_successor);
@@ -271,7 +278,7 @@ class a_star_impl
      * @param c Coordinate to check.
      * @return `true` iff c has already been visited.
      */
-    bool is_visited(const coordinate<Lyt>& c) const
+    bool is_visited(const fiction::layouts::layout_base::coordinate& c) const
     {
         return closed_list.count(c) > 0;
     }
@@ -281,7 +288,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is desired.
      * @return g-value of coordinate c or 0 if no value has been stored.
      */
-    g_f_type g(const coordinate<Lyt>& c) const
+    g_f_type g(const fiction::layouts::layout_base::coordinate& c) const
     {
         if (const auto it = g_values.find(c); it != g_values.cend())
         {
@@ -296,7 +303,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is to be updated to g_val.
      * @param g_val New g-value for c.
      */
-    void set_g(const coordinate<Lyt>& c, const g_f_type g_val)
+    void set_g(const fiction::layouts::layout_base::coordinate& c, const g_f_type g_val)
     {
         g_values.insert_or_assign(c, g_val);
     }
@@ -308,7 +315,7 @@ class a_star_impl
      * @param g_val g-value to compare to c's.
      * @return `true` iff the given g-value does not mean an improvement for the given coordinate.
      */
-    bool no_improvement(const coordinate<Lyt>& c, const g_f_type g_val)
+    bool no_improvement(const fiction::layouts::layout_base::coordinate& c, const g_f_type g_val)
     {
         return g_val >= g(c);
     }
@@ -383,7 +390,7 @@ class a_star_impl
  * @return The shortest loop-less path in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
-    requires is_coordinate_layout_v<Lyt>
+    requires std::derived_from<Lyt, fiction::layouts::layout_base>
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective& objective,
                           const distance_functor<Dist>& dist_fn = manhattan_distance_functor(),
                           const cost_functor<Cost>&     cost_fn = unit_cost_functor<uint8_t>(),
@@ -407,9 +414,10 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * @return Minimum path length between `source` and `target` in `layout`.
  */
 template <typename Lyt>
-    requires is_coordinate_layout_v<Lyt>
-[[nodiscard]] uint64_t a_star_distance(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
-                                       const layouts::obstructions& obstructions = {})
+    requires std::derived_from<Lyt, fiction::layouts::layout_base>
+[[nodiscard]] uint64_t a_star_distance(const Lyt& layout, const fiction::layouts::layout_base::coordinate& source,
+                                       const fiction::layouts::layout_base::coordinate& target,
+                                       const layouts::obstructions&                     obstructions = {})
 {
     const auto path_length = a_star<layout_coordinate_path>(layout, {source, target}, manhattan_distance_functor(),
                                                             unit_cost_functor<>(), {}, obstructions)

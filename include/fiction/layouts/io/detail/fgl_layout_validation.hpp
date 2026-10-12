@@ -17,9 +17,12 @@
 
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/verification/design_rule_violations.hpp"
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -105,7 +108,8 @@ void validate_layout(const Lyt& lyt)
         throw std::invalid_argument("FGL requires an acyclic layout");
     }
     std::optional<layouts::arrangement> arrangement{};
-    if constexpr (is_hexagonal_layout_v<Lyt>)
+    if constexpr ((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                   !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
     {
         arrangement = lyt.get_arrangement();
     }

@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
 
@@ -110,7 +111,7 @@ class unsupported_gate_orientation_exception : public std::exception
    .. code-block:: c++
 
       template <typename GateLyt>
-      static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+      static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
 
    \endverbatim
  *

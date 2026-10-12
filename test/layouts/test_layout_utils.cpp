@@ -29,6 +29,7 @@
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/types.hpp>
 
+#include <concepts>
 #include <cstdint>
 #include <limits>
 #include <optional>
@@ -71,7 +72,7 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
 
     const auto lyt = [](const arrangement layout_arrangement)
     {
-        if constexpr (is_cartesian_layout_v<TestType>)
+        if constexpr (std::derived_from<TestType, fiction::layouts::cartesian_layout>)
         {
             return TestType{{5, 5}};
         }

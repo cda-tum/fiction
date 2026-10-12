@@ -16,6 +16,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
 #include "utils/allocation_failure.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -49,7 +50,7 @@ void check_containing_objectives(const std::vector<routing_objective>& objective
  * @param lyt Layout. @param t Retained tile.
  */
 template <typename Lyt>
-void check_non_empty_tile(const Lyt& lyt, const tile<Lyt>& t)
+void check_non_empty_tile(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
 {
     CHECK(!lyt.is_empty_tile(t));
     CHECK(lyt.has_no_incoming_signal(t));
@@ -58,14 +59,14 @@ void check_non_empty_tile(const Lyt& lyt, const tile<Lyt>& t)
 
 TEST_CASE("Coordinate paths expose construction and edits", "[routing-utils]")
 {
-    const std::vector<tile<cart_gate_clk_lyt>> coordinates{{0, 0}, {1, 0}};
-    layout_coordinate_path                     path{coordinates.cbegin(), coordinates.cend()};
+    const std::vector<fiction::layouts::layout_base::coordinate> coordinates{{0, 0}, {1, 0}};
+    layout_coordinate_path                                       path{coordinates.cbegin(), coordinates.cend()};
     path.push_back({2, 0});
     path.insert(path.begin(), {0, 1});
     path.front() = {1, 1};
     path.back()  = {3, 0};
-    CHECK(path.source() == tile<cart_gate_clk_lyt>{1, 1});
-    CHECK(path.target() == tile<cart_gate_clk_lyt>{3, 0});
+    CHECK(path.source() == fiction::layouts::layout_base::coordinate{1, 1});
+    CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 0});
     CHECK(path.size() == 4);
 }
 

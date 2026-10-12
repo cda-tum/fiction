@@ -60,8 +60,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
             CHECK(collection.size() == 1);
             CHECK(collection.contains({{{0, 0}}}));
-            CHECK(collection[0].source() == coordinate<lyt>{0, 0});
-            CHECK(collection[0].target() == coordinate<lyt>{0, 0});
+            CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
+            CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 0});
         }
     }
     SECTION("clocking paths")
@@ -94,8 +94,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
-                CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
-                CHECK(collection[0].target() == coordinate<clk_lyt>{0, 0});
+                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
+                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 0});
             }
         }
         SECTION("USE")
@@ -108,8 +108,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
-                CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
-                CHECK(collection[0].target() == coordinate<clk_lyt>{0, 1});
+                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
+                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 1});
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
@@ -117,8 +117,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
-                CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
-                CHECK(collection[0].target() == coordinate<clk_lyt>{0, 0});
+                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
+                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 0});
             }
         }
     }

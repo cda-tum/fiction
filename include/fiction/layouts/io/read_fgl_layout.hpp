@@ -21,6 +21,9 @@
 // NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but the
 // clocking::get_scheme free function is looked up via two-phase name lookup at template instantiation time, so
 // removing any of these breaks the build despite the tool's "not used directly" heuristic
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -40,6 +43,7 @@
 #include <array>
 #include <cctype>
 #include <charconv>
+#include <concepts>
 #include <cstdint>
 #include <fstream>
 #include <istream>
@@ -95,7 +99,7 @@ class read_fgl_layout_impl
      */
     read_fgl_layout_impl(const Lyt& tgt, std::istream& s) : layout_name{tgt.get_layout_name()}, is{s}
     {
-        if constexpr (!is_cartesian_layout_v<Lyt>)
+        if constexpr (!std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
         {
             expected_arrangement = tgt.get_arrangement();
         }
@@ -139,7 +143,8 @@ class read_fgl_layout_impl
 
         // the topology selects the arrangement of the layout to create
         auto* const topology = layout->FirstChildElement("topology");
-        if ((topology == nullptr || topology->GetText() == nullptr) && !is_cartesian_layout_v<Lyt>)
+        if ((topology == nullptr || topology->GetText() == nullptr) &&
+            !std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
         {
             throw fgl_parsing_error("Error parsing FGL file: no element 'topology' in 'layout'");
         }
@@ -163,7 +168,7 @@ class read_fgl_layout_impl
 
         if (topology_name == "cartesian")
         {
-            if constexpr (!is_cartesian_layout_v<Lyt>)
+            if constexpr (!std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
             {
                 throw fgl_parsing_error("Error parsing FGL file: Lyt is not a cartesian layout");
             }
@@ -172,7 +177,7 @@ class read_fgl_layout_impl
         {
             file_arrangement = shifted;
 
-            if constexpr (!is_shifted_cartesian_layout_v<Lyt>)
+            if constexpr (!std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
             {
                 throw fgl_parsing_error("Error parsing FGL file: Lyt is not a shifted_cartesian layout");
             }
@@ -181,7 +186,8 @@ class read_fgl_layout_impl
         {
             file_arrangement = hexagonal;
 
-            if constexpr (!is_hexagonal_layout_v<Lyt>)
+            if constexpr (!(std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                            !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
             {
                 throw fgl_parsing_error("Error parsing FGL file: Lyt is not a hexagonal layout");
             }
@@ -197,7 +203,7 @@ class read_fgl_layout_impl
                 fmt::format("Error parsing FGL file: target arrangement differs from {}", topology_name));
         }
 
-        if constexpr (is_cartesian_layout_v<Lyt>)
+        if constexpr (std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
         {
             target.emplace(typename Lyt::extent{}, layout_name);
         }
@@ -263,7 +269,11 @@ class read_fgl_layout_impl
                 clocking_scheme_name != nullptr && (clocking_scheme_name->GetText() != nullptr))
             {
                 const auto clocking_scheme = layouts::clocking::get_scheme(
-                    clocking_scheme_name->GetText(), is_hexagonal_layout_v<Lyt> ? file_arrangement : std::nullopt);
+                    clocking_scheme_name->GetText(),
+                    (std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                     !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>) ?
+                        file_arrangement :
+                        std::nullopt);
                 if (clocking_scheme.has_value())
                 {
                     lyt.replace_clocking_scheme(*clocking_scheme);
@@ -651,7 +661,8 @@ class read_fgl_layout_impl
      * @throws fgl_parsing_error If an axis is invalid or overflows.
      */
     template <typename Integer = uint64_t>
-    static tile<Lyt> read_position(const tinyxml2::XMLElement* element, const bool with_z = true)
+    static fiction::layouts::layout_base::coordinate read_position(const tinyxml2::XMLElement* element,
+                                                                   const bool                  with_z = true)
     {
         if (element == nullptr)
         {
@@ -662,7 +673,7 @@ class read_fgl_layout_impl
         const auto z = with_z ? read_number<Integer>(element, "z") : Integer{0};
         try
         {
-            const tile<Lyt> position{x, y, z};
+            const fiction::layouts::layout_base::coordinate position{x, y, z};
             return position;
         }
         catch (const std::overflow_error&)
@@ -693,11 +704,11 @@ class read_fgl_layout_impl
         /**
          * Location of the gate represented its x-, y- and z-coordinate.
          */
-        tile<Lyt> loc{};
+        fiction::layouts::layout_base::coordinate loc{};
         /**
          * List of incoming connections to the gate.
          */
-        std::vector<tile<Lyt>> incoming{};
+        std::vector<fiction::layouts::layout_base::coordinate> incoming{};
         /** @brief Declared function arity in version 2. */
         uint32_t arity{};
         /** @brief Serialized source IDs and destination input indices. */
@@ -733,7 +744,9 @@ class read_fgl_layout_impl
 template <typename Lyt>
 [[nodiscard]] Lyt read_fgl_layout(std::istream& is, const std::string_view& name = "")
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     detail::read_fgl_layout_impl<Lyt> p{is, name};
 
@@ -755,7 +768,9 @@ template <typename Lyt>
 template <typename Lyt>
 void read_fgl_layout(Lyt& lyt, std::istream& is)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     detail::read_fgl_layout_impl<Lyt> p{lyt, is};
 

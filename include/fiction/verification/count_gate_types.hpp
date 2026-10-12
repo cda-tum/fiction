@@ -17,11 +17,16 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 
+#include <concepts>
 #include <cstdint>
 #include <iostream>
 #include <ostream>
@@ -141,7 +146,7 @@ class count_gate_types_impl
     void run()
     {
         const auto count = [this](const auto& id) { return this->count_gate(id); };
-        if constexpr (is_gate_level_layout_v<Ntk>)
+        if constexpr (requires { requires std::same_as<typename Ntk::object_id, fiction::layouts::layout_object_id>; })
         {
             ntk.foreach_object(count);
         }
@@ -165,7 +170,7 @@ class count_gate_types_impl
         {
             return true;
         }
-        if constexpr (is_gate_level_layout_v<Ntk>)
+        if constexpr (requires { requires std::same_as<typename Ntk::object_id, fiction::layouts::layout_object_id>; })
         {
             if (ntk.is_po(n))
             {
@@ -379,8 +384,10 @@ class count_gate_types_impl
 template <typename Ntk>
 void count_gate_types(const Ntk& ntk, count_gate_types_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk> || is_gate_level_layout_v<Ntk>,
-                  "Ntk is not a network or gate layout");
+    static_assert(
+        mockturtle::is_network_type_v<Ntk> || requires {
+            requires std::same_as<typename Ntk::object_id, fiction::layouts::layout_object_id>;
+        }, "Ntk is not a network or gate layout");
 
     count_gate_types_stats        st{};
     detail::count_gate_types_impl p{ntk, st};

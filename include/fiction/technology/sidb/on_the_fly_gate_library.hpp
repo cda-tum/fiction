@@ -19,8 +19,12 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -39,6 +43,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <cstdlib>
 #include <exception>
@@ -67,7 +72,7 @@ class gate_design_exception : public std::exception
      * @param spec The truth table associated with the error.
      * @param portlist The port list associated with the error.
      */
-    explicit gate_design_exception(const tile<GateLyt>& ti, kitty::dynamic_truth_table spec,
+    explicit gate_design_exception(const fiction::layouts::layout_base::coordinate& ti, kitty::dynamic_truth_table spec,
                                    const fcn::port_list<fcn::port_direction>& portlist) :
             std::exception(),
             error_tile{ti},
@@ -79,7 +84,7 @@ class gate_design_exception : public std::exception
      *
      * @return The gate-level tile.
      */
-    [[nodiscard]] tile<GateLyt> which_tile() const noexcept
+    [[nodiscard]] fiction::layouts::layout_base::coordinate which_tile() const noexcept
     {
         return error_tile;
     }
@@ -106,7 +111,7 @@ class gate_design_exception : public std::exception
     /**
      * The tile associated with the error.
      */
-    const tile<GateLyt> error_tile{};
+    const fiction::layouts::layout_base::coordinate error_tile{};
     /**
      * The truth table associated with the error.
      */
@@ -201,10 +206,12 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      * @throws utils::timeout_error if the per-gate or enclosing deadline is reached.
      */
     template <typename GateLyt, typename Params>
-    static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& parameters,
-                            const std::optional<layout>& defect_surface = std::nullopt)
+    static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+                            const Params& parameters, const std::optional<layout>& defect_surface = std::nullopt)
     {
-        static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
+        static_assert(
+            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
+            "GateLyt must be a gate-level layout");
 
         auto params               = parameters;
         params.design_gate_params = simulation::logic::detail::checked_parameters(params.design_gate_params);
@@ -495,8 +502,9 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      */
     template <typename GateLyt>
     [[nodiscard]] static gate design_gate(const layout& skeleton, const std::vector<kitty::dynamic_truth_table>& spec,
-                                          const on_the_fly_gate_library_params&      parameters,
-                                          const fcn::port_list<fcn::port_direction>& p, const tile<GateLyt>& tile)
+                                          const on_the_fly_gate_library_params&            parameters,
+                                          const fcn::port_list<fcn::port_direction>&       p,
+                                          const fiction::layouts::layout_base::coordinate& tile)
     {
         const auto params = sidb::generators::is_gate_design_impossible_params{
             .sim_params          = parameters.design_gate_params.operational_params.sim_params,

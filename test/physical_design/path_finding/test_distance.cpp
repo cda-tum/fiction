@@ -29,7 +29,6 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
-#include <stdexcept>
 #include <tuple>
 
 using namespace fiction;
@@ -58,7 +57,7 @@ TEST_CASE("Manhattan distance", "[distance]")
     SECTION("Functor")
     {
         const manhattan_distance_functor distance{};
-        CHECK(distance(layout, source, target) == expected);
+        CHECK(distance(source, target) == expected);
     }
 }
 
@@ -80,13 +79,12 @@ TEST_CASE("Euclidean distance", "[distance]")
                  std::tuple{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}, double{std::sqrt(32)}});
     SECTION("Direct function")
     {
-        CHECK_THAT(euclidean_distance(source, target),
-                   Catch::Matchers::WithinAbs(expected, 0.00001));
+        CHECK_THAT(euclidean_distance(source, target), Catch::Matchers::WithinAbs(expected, 0.00001));
     }
     SECTION("Functor")
     {
         const euclidean_distance_functor distance{};
-        CHECK_THAT(distance(layout, source, target), Catch::Matchers::WithinAbs(expected, 0.00001));
+        CHECK_THAT(distance(source, target), Catch::Matchers::WithinAbs(expected, 0.00001));
     }
 }
 
@@ -110,7 +108,7 @@ TEST_CASE("Squared Euclidean distance", "[distance]")
     SECTION("Functor")
     {
         const squared_euclidean_distance_functor distance{};
-        CHECK(distance(layout, source, target) == expected);
+        CHECK(distance(source, target) == expected);
     }
 }
 
@@ -145,7 +143,7 @@ TEST_CASE("2DDWave distance", "[distance]")
     SECTION("Functor")
     {
         const twoddwave_distance_functor distance{};
-        CHECK(distance(layout, source, target) == expected);
+        CHECK(distance(source, target) == expected);
     }
 }
 
@@ -170,7 +168,7 @@ TEST_CASE("Chebyshev distance", "[distance]")
     SECTION("Functor")
     {
         const chebyshev_distance_functor distance{};
-        CHECK(distance(layout, source, target) == expected);
+        CHECK(distance(source, target) == expected);
     }
 }
 
@@ -184,20 +182,17 @@ TEST_CASE("A* distance", "[distance]")
         {
             const lyt layout{lyt::extent{10, 5, 2}};
 
-            SECTION("Default distance type (uint64_t)")
-            {
-                CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 0}) == 0);
-                CHECK(a_star_distance<lyt>(layout, {1, 1}, {1, 1}) == 0);
-                CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 1}) == 1);
-                CHECK(a_star_distance<lyt>(layout, {0, 0}, {1, 1}) == 2);
-                CHECK(a_star_distance<lyt>(layout, {9, 1}, {6, 2}) == 4);
-                CHECK(a_star_distance<lyt>(layout, {6, 2}, {0, 4}) == 8);
-                CHECK(a_star_distance<lyt>(layout, {0, 4}, {9, 1}) == 12);
+            CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 0}) == 0);
+            CHECK(a_star_distance<lyt>(layout, {1, 1}, {1, 1}) == 0);
+            CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 1}) == 1);
+            CHECK(a_star_distance<lyt>(layout, {0, 0}, {1, 1}) == 2);
+            CHECK(a_star_distance<lyt>(layout, {9, 1}, {6, 2}) == 4);
+            CHECK(a_star_distance<lyt>(layout, {6, 2}, {0, 4}) == 8);
+            CHECK(a_star_distance<lyt>(layout, {0, 4}, {9, 1}) == 12);
 
-                // A* is not meant for routing to the z-layer
-                CHECK(a_star_distance<lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
-            }
+            // A* is not meant for routing to the z-layer
+            CHECK(a_star_distance<lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+            CHECK(a_star_distance<lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
         }
         SECTION("clocking path distance")
         {
@@ -207,22 +202,17 @@ TEST_CASE("A* distance", "[distance]")
             {
                 const clk_lyt layout{clk_lyt::extent{10, 5, 2}, clocking::twoddwave()};
 
-                SECTION("Default distance type (uint64_t)")
-                {
-                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 0}) == 0);
-                    CHECK(a_star_distance<clk_lyt>(layout, {1, 1}, {1, 1}) == 0);
-                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 1}) == 1);
-                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {1, 1}) == 2);
-                    CHECK(a_star_distance<clk_lyt>(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
-                    CHECK(a_star_distance<clk_lyt>(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
-                    CHECK(a_star_distance<clk_lyt>(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 0}) == 0);
+                CHECK(a_star_distance<clk_lyt>(layout, {1, 1}, {1, 1}) == 0);
+                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 1}) == 1);
+                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {1, 1}) == 2);
+                CHECK(a_star_distance<clk_lyt>(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<clk_lyt>(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<clk_lyt>(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
 
-                    // A* is not meant for routing to the z-layer
-                    CHECK(a_star_distance<clk_lyt>(layout, {6, 2, 0}, {0, 4, 1}) ==
-                          std::numeric_limits<uint64_t>::max());
-                    CHECK(a_star_distance<clk_lyt>(layout, {0, 4, 1}, {9, 1, 1}) ==
-                          std::numeric_limits<uint64_t>::max());
-                }
+                // A* is not meant for routing to the z-layer
+                CHECK(a_star_distance<clk_lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<clk_lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
             }
         }
     }
@@ -260,22 +250,19 @@ TEST_CASE("A* distance functor", "[distance]")
             {
                 const clk_lyt layout{clk_lyt::extent{10, 5, 2}, clocking::twoddwave()};
 
-                SECTION("Default distance type (uint64_t)")
-                {
-                    const a_star_distance_functor<clk_lyt> distance{layout};
+                const a_star_distance_functor<clk_lyt> distance{layout};
 
-                    CHECK(distance({0, 0}, {0, 0}) == 0);
-                    CHECK(distance({1, 1}, {1, 1}) == 0);
-                    CHECK(distance({0, 0}, {0, 1}) == 1);
-                    CHECK(distance({0, 0}, {1, 1}) == 2);
-                    CHECK(distance({9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
-                    CHECK(distance({6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
-                    CHECK(distance({0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(distance({0, 0}, {0, 0}) == 0);
+                CHECK(distance({1, 1}, {1, 1}) == 0);
+                CHECK(distance({0, 0}, {0, 1}) == 1);
+                CHECK(distance({0, 0}, {1, 1}) == 2);
+                CHECK(distance({9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
+                CHECK(distance({6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
+                CHECK(distance({0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
 
-                    // A* is not meant for routing to the z-layer
-                    CHECK(distance({6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-                    CHECK(distance({0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
-                }
+                // A* is not meant for routing to the z-layer
+                CHECK(distance({6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(distance({0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
             }
         }
     }

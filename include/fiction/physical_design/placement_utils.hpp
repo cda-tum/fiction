@@ -18,6 +18,7 @@
 #pragma once
 
 #include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
@@ -29,6 +30,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -40,7 +42,7 @@ namespace fiction::physical_design
 /**
  * Place 0-input gates.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 0-input gate.
  * @param t Tile in `lyt` to place the gate onto.
@@ -48,11 +50,11 @@ namespace fiction::physical_design
  * @param n Node in `ntk` to place onto `t` in `lyt`.
  * @return Output port pointing to the placed gate in `lyt`.
  */
-template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::object_id place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>& n)
+template <typename Geometry, typename Ntk>
+[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
+place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const Ntk& ntk, const mockturtle::node<Ntk>& n)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     if constexpr (mockturtle::has_is_pi_v<Ntk>)
@@ -74,7 +76,7 @@ template <typename Lyt, typename Ntk>
 /**
  * Place 1-input gates.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 1-input gate.
  * @param t Tile in `lyt` to place the gate onto.
@@ -83,11 +85,12 @@ template <typename Lyt, typename Ntk>
  * @param a Incoming signal to the newly placed gate in `lyt`.
  * @return Output port pointing to the placed gate in `lyt`.
  */
-template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::object_id place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a)
+template <typename Geometry, typename Ntk>
+[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
+place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const Ntk& ntk, const mockturtle::node<Ntk>& n,
+      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     if constexpr (has_is_inv_v<Ntk>)
@@ -110,7 +113,7 @@ template <typename Lyt, typename Ntk>
 /**
  * Place 2-input gates.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 2-input gate.
  * @param t Tile in `lyt` to place the gate onto.
@@ -122,12 +125,14 @@ template <typename Lyt, typename Ntk>
  * function when set, e.g., from a MAJ to an AND if `c == false`.
  * @return Output port pointing to the placed gate in `lyt`.
  */
-template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::object_id
-place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a,
-      const typename Lyt::object_id& b, const std::optional<bool>& c = std::nullopt)
+template <typename Geometry, typename Ntk>
+[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
+place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const Ntk& ntk, const mockturtle::node<Ntk>& n,
+      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a,
+      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& b,
+      const std::optional<bool>&                                               c = std::nullopt)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     if constexpr (mockturtle::has_is_and_v<Ntk>)
@@ -255,7 +260,7 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
 /**
  * Place 3-input gates.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 3-input gate.
  * @param t Tile in `lyt` to place the gate onto.
@@ -266,12 +271,14 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
  * @param c Third incoming signal to the newly placed gate in `lyt`.
  * @return Output port pointing to the placed gate in `lyt`.
  */
-template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::object_id place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>& n, const typename Lyt::object_id& a,
-                                            const typename Lyt::object_id& b, const typename Lyt::object_id& c)
+template <typename Geometry, typename Ntk>
+[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
+place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const Ntk& ntk, const mockturtle::node<Ntk>& n,
+      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a,
+      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& b,
+      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& c)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     if constexpr (mockturtle::has_is_maj_v<Ntk>)
@@ -297,7 +304,7 @@ template <typename Lyt, typename Ntk>
  * incoming signals from the given network and a provided `mockturtle::node_map`. This function does not update the
  * `mockturtle::node_map`.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place any gate.
  * @param t Tile in `lyt` to place the gate onto.
@@ -307,12 +314,12 @@ template <typename Lyt, typename Ntk>
  * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
  * @return Output port of the newly placed gate in `lyt`.
  */
-template <typename Lyt, typename Ntk>
-[[nodiscard]] typename Lyt::object_id place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>&                              n,
-                                            const mockturtle::node_map<typename Lyt::object_id, Ntk>& node2pos)
+template <typename Geometry, typename Ntk>
+[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
+place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const Ntk& ntk, const mockturtle::node<Ntk>& n,
+      const mockturtle::node_map<typename fiction::layouts::gate_level_layout<Geometry>::object_id, Ntk>& node2pos)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     const auto fc = networks::fanins(ntk, n);
@@ -455,7 +462,7 @@ struct branching_signal_container
  * incoming signals from the given network and a provided branching_signal_container `mockturtle::node_map`. This
  * function does not update the `mockturtle::node_map`.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place any gate.
  * @param t Tile in `lyt` to place the gate onto.
@@ -466,12 +473,12 @@ struct branching_signal_container
  * function.
  * @return Output port of the newly placed gate in `lyt`.
  */
-template <typename Lyt, typename Ntk, uint16_t fanout_size = 2>
-[[nodiscard]] typename Lyt::object_id
-place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+template <typename Geometry, typename Ntk, uint16_t fanout_size = 2>
+[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
+place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const Ntk& ntk, const mockturtle::node<Ntk>& n,
       const mockturtle::node_map<branching_signal_container<Ntk, fanout_size>, Ntk>& node2pos)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     const auto fc = networks::fanins(ntk, n);

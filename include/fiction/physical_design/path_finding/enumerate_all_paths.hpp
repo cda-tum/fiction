@@ -16,13 +16,19 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
 
 #include <phmap.h>
 
 #include <cassert>
+#include <concepts>
 #include <stdexcept>
 
 namespace fiction::physical_design::path_finding
@@ -89,7 +95,7 @@ class enumerate_all_paths_impl
     /**
      * Set of visited coordinates.
      */
-    phmap::flat_hash_set<coordinate<Lyt>> visited{};
+    phmap::flat_hash_set<fiction::layouts::layout_base::coordinate> visited{};
     /**
      * Collection of all enumerated paths.
      */
@@ -99,7 +105,7 @@ class enumerate_all_paths_impl
      *
      * @param c Coordinate to mark as visited.
      */
-    void mark_visited(const coordinate<Lyt>& c)
+    void mark_visited(const fiction::layouts::layout_base::coordinate& c)
     {
         visited.insert(c);
     }
@@ -108,7 +114,7 @@ class enumerate_all_paths_impl
      *
      * @param c Coordinate to mark as unvisited.
      */
-    void mark_unvisited(const coordinate<Lyt>& c)
+    void mark_unvisited(const fiction::layouts::layout_base::coordinate& c)
     {
         visited.erase(c);
     }
@@ -118,7 +124,7 @@ class enumerate_all_paths_impl
      * @param c Coordinate to check.
      * @return `true` if the coordinate has been visited, `false` otherwise.
      */
-    [[nodiscard]] bool is_visited(const coordinate<Lyt>& c) const
+    [[nodiscard]] bool is_visited(const fiction::layouts::layout_base::coordinate& c) const
     {
         return visited.count(c) > 0;
     }
@@ -131,7 +137,8 @@ class enumerate_all_paths_impl
      * @param tgt Target coordinate.
      * @param p Current path to extend.
      */
-    void recursively_enumerate_all_paths(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt, Path p)
+    void recursively_enumerate_all_paths(const fiction::layouts::layout_base::coordinate& src,
+                                         const fiction::layouts::layout_base::coordinate& tgt, Path p)
     {
         // mark source coordinate as visited and append it to the path
         mark_visited(src);
@@ -163,7 +170,9 @@ class enumerate_all_paths_impl
                 return;  // keep looping
             };
 
-            if constexpr (is_gate_level_layout_v<Lyt>)
+            if constexpr (requires {
+                              requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>;
+                          })
             {
                 // recurse for all outgoing clock zones
                 layout.foreach_outgoing_clocked_zone(src, explore_successor);
@@ -222,7 +231,7 @@ template <typename Path, typename Lyt>
                                                         const enumerate_all_paths_params& params       = {},
                                                         const layouts::obstructions&      obstructions = {})
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
     return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params, obstructions}.run();
 }

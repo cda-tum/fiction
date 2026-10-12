@@ -18,9 +18,15 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
+#include <concepts>
 #include <cstdint>
 #include <optional>
 
@@ -37,7 +43,9 @@ class bounding_box
     /** @brief Computes occupied bounds. @param lyt Layout whose occupied positions are enclosed. */
     explicit bounding_box(const Lyt& lyt) : layout{lyt}
     {
-        static_assert(is_gate_level_layout_v<Lyt> || is_cell_grid_v<Lyt>);
+        static_assert(requires {
+            requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>;
+        } || is_cell_grid_v<Lyt>);
         update_bounding_box();
     }
     /** @brief Recomputes bounds from live occupied coordinates. Empty layouts have no bounds. */
@@ -51,7 +59,7 @@ class bounding_box
         {
             if (!min)
             {
-                min = coordinate<Lyt>{c.x, c.y, 0};
+                min = fiction::layouts::layout_base::coordinate{c.x, c.y, 0};
                 max = min;
             }
             else
@@ -62,7 +70,7 @@ class bounding_box
                 max->y = std::max(max->y, c.y);
             }
         };
-        if constexpr (is_gate_level_layout_v<Lyt>)
+        if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
         {
             layout.foreach_object([&](const auto id) { include(layout.get_tile(id)); });
         }
@@ -77,12 +85,12 @@ class bounding_box
         }
     }
     /** @brief Returns the minimum occupied corner, or no coordinate for an empty layout. */
-    [[nodiscard]] std::optional<coordinate<Lyt>> get_min() const noexcept
+    [[nodiscard]] std::optional<fiction::layouts::layout_base::coordinate> get_min() const noexcept
     {
         return min;
     }
     /** @brief Returns the maximum occupied corner, or no coordinate for an empty layout. */
-    [[nodiscard]] std::optional<coordinate<Lyt>> get_max() const noexcept
+    [[nodiscard]] std::optional<fiction::layouts::layout_base::coordinate> get_max() const noexcept
     {
         return max;
     }
@@ -101,9 +109,9 @@ class bounding_box
     /** @brief Layout observed when bounds are recomputed. */
     const Lyt& layout;
     /** @brief Minimum occupied corner. */
-    std::optional<coordinate<Lyt>> min{};
+    std::optional<fiction::layouts::layout_base::coordinate> min{};
     /** @brief Maximum occupied corner. */
-    std::optional<coordinate<Lyt>> max{};
+    std::optional<fiction::layouts::layout_base::coordinate> max{};
     /** @brief Number of bounding columns. */
     uint64_t x_size{};
     /** @brief Number of bounding rows. */

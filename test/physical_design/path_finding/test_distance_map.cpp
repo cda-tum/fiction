@@ -49,7 +49,7 @@ TEST_CASE("Distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const auto tgt)
                     {
-                        CHECK(dist_map[src][tgt] == a_star_distance(c1, c2));
+                        CHECK(dist_map[src][tgt] == a_star_distance(layout, c1, c2));
                         CHECK(dist_map[src][tgt] == dist_map_func(c1, c2));
                     });
             });
@@ -68,7 +68,7 @@ TEST_CASE("Distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const auto tgt)
                     {
-                        CHECK(dist_map[src][tgt] == a_star_distance(c1, c2));
+                        CHECK(dist_map[src][tgt] == a_star_distance(layout, c1, c2));
                         CHECK(dist_map[src][tgt] == dist_map_func(c1, c2));
                     });
             });
@@ -87,7 +87,7 @@ TEST_CASE("Distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const auto tgt)
                     {
-                        CHECK(dist_map[src][tgt] == a_star_distance(c1, c2));
+                        CHECK(dist_map[src][tgt] == a_star_distance(layout, c1, c2));
                         CHECK(dist_map[src][tgt] == dist_map_func(c1, c2));
                     });
             });
@@ -106,7 +106,7 @@ TEST_CASE("Distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1, src](const auto& c2, const auto tgt)
                     {
-                        CHECK(dist_map[src][tgt] == a_star_distance(c1, c2));
+                        CHECK(dist_map[src][tgt] == a_star_distance(layout, c1, c2));
                         CHECK(dist_map[src][tgt] == dist_map_func(c1, c2));
                     });
             });
@@ -119,12 +119,12 @@ TEST_CASE("Distance maps index every layer and reject coordinates outside the fr
     const cartesian_layout layout{{2, 2, 2}};
     /** Coordinate distances include layer displacement. */
     const distance_functor<uint64_t> distance{
-        [](const auto& lyt, const auto& source, const auto& target)
-        { return manhattan_distance(lyt, source, target) + static_cast<uint64_t>(std::abs(source.z - target.z)); }};
+        [](const auto& source, const auto& target)
+        { return manhattan_distance(source, target) + static_cast<uint64_t>(std::abs(source.z - target.z)); }};
     /** Precompute every coordinate pair in the frame. */
     const auto distances = initialize_distance_map(layout, distance);
     /** Lookup uses the same coordinate indices as initialization. */
-    const distance_map_functor<cartesian_layout, uint64_t> lookup{distances};
+    const distance_map_functor<uint64_t> lookup{layout.get_extent(), distances};
 
     REQUIRE(distances.size() == layout.volume());
     layout.foreach_coordinate(
@@ -162,7 +162,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
                     {
-                        CHECK(dist_map.at({c1, c2}) == a_star_distance(c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == a_star_distance(layout, c1, c2));
                         CHECK(dist_map.at({c1, c2}) == dist_map_func(c1, c2));
                     });
             });
@@ -181,7 +181,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
                     {
-                        CHECK(dist_map.at({c1, c2}) == a_star_distance(c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == a_star_distance(layout, c1, c2));
                         CHECK(dist_map.at({c1, c2}) == dist_map_func(c1, c2));
                     });
             });
@@ -200,7 +200,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
                     {
-                        CHECK(dist_map.at({c1, c2}) == a_star_distance(c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == a_star_distance(layout, c1, c2));
                         CHECK(dist_map.at({c1, c2}) == dist_map_func(c1, c2));
                     });
             });
@@ -219,7 +219,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
                 layout.foreach_coordinate(
                     [&layout, &dist_map, &dist_map_func, &c1](const auto& c2)
                     {
-                        CHECK(dist_map.at({c1, c2}) == a_star_distance(c1, c2));
+                        CHECK(dist_map.at({c1, c2}) == a_star_distance(layout, c1, c2));
                         CHECK(dist_map.at({c1, c2}) == dist_map_func(c1, c2));
                     });
             });
@@ -242,7 +242,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
             [&layout, &dist_map_func](const auto& c1)
             {
                 layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
-                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(c1, c2)); });
+                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(layout, c1, c2)); });
             });
 
         // check that the cached distances are correct
@@ -250,7 +250,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
             [&layout, &dist_map_func](const auto& c1)
             {
                 layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
-                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(c1, c2)); });
+                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(layout, c1, c2)); });
             });
     }
     SECTION("USE clocking")
@@ -264,7 +264,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
             [&layout, &dist_map_func](const auto& c1)
             {
                 layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
-                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(c1, c2)); });
+                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(layout, c1, c2)); });
             });
 
         // check that the cached distances are correct
@@ -272,7 +272,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
             [&layout, &dist_map_func](const auto& c1)
             {
                 layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
-                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(c1, c2)); });
+                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(layout, c1, c2)); });
             });
     }
     SECTION("RES clocking")
@@ -286,7 +286,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
             [&layout, &dist_map_func](const auto& c1)
             {
                 layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
-                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(c1, c2)); });
+                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(layout, c1, c2)); });
             });
 
         // check that the cached distances are correct
@@ -294,7 +294,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
             [&layout, &dist_map_func](const auto& c1)
             {
                 layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
-                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(c1, c2)); });
+                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(layout, c1, c2)); });
             });
     }
     SECTION("CFE clocking")
@@ -308,7 +308,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
             [&layout, &dist_map_func](const auto& c1)
             {
                 layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
-                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(c1, c2)); });
+                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(layout, c1, c2)); });
             });
 
         // check that the cached distances are correct
@@ -316,7 +316,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
             [&layout, &dist_map_func](const auto& c1)
             {
                 layout.foreach_coordinate([&layout, &dist_map_func, &c1](const auto& c2)
-                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(c1, c2)); });
+                                          { CHECK(dist_map_func(c1, c2) == a_star_distance(layout, c1, c2)); });
             });
     }
 }

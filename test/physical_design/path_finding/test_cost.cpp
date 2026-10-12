@@ -56,7 +56,7 @@ TEST_CASE("Unit cost", "[cost]")
     SECTION("Functor")
     {
         const unit_cost_functor<> cost{};
-        const auto                                value = cost(source, target);
+        const auto                value = cost(source, target);
         CHECK(value == 1);
     }
 }
@@ -90,7 +90,7 @@ TEST_CASE("Random cost", "[cost]")
     SECTION("Functor")
     {
         const random_cost_functor<> cost{};
-        const auto                                  value = cost(source, target);
+        const auto                  value = cost(source, target);
         CHECK((value >= 0 && value <= 1));
     }
 }

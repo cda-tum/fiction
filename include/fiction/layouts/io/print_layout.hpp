@@ -16,12 +16,18 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
 
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -52,17 +58,18 @@ inline const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
 /**
  * Writes a simplified 2D representation of a gate-level layout to an output stream.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param os Output stream to write into.
  * @param layout The gate-level layout to print.
  * @param io_color Flag to utilize color escapes for inputs and outputs.
  * @param clk_color Flag to utilize color escapes for clock zones.
  */
-template <typename Lyt>
-void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
-                             const bool clk_color = false)
+template <typename Geometry>
+void print_gate_level_layout(std::ostream& os, const fiction::layouts::gate_level_layout<Geometry>& layout,
+                             const bool io_color = true, const bool clk_color = false)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
 
     // empty layout
     if (layout.is_empty())
@@ -71,12 +78,13 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         return;
     }
 
-    if constexpr (is_hexagonal_layout_v<Lyt>)
+    if constexpr ((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                   !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
     {
         os << "[e] hexagonal layout printing is not supported\n";
         return;
     }
-    else if constexpr (is_shifted_cartesian_layout_v<Lyt>)
+    else if constexpr (std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
     {
         os << "[e] shifted cartesian layout printing is not supported\n";
         return;
@@ -153,7 +161,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     {
         for (auto j = std::size_t{0}; j < num_cols; ++j)
         {
-            auto t1     = tile<Lyt>{j, i};
+            auto t1     = fiction::layouts::layout_base::coordinate{j, i};
             auto t2     = layout.above(t1);
             reprs[i][j] = gate_repr(t1);
 
@@ -212,7 +220,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         {
             const auto& gate{row[c_ctr]};
 
-            const auto t = tile<Lyt>{c_ctr, r_ctr};
+            const auto t = fiction::layouts::layout_base::coordinate{c_ctr, r_ctr};
 
             fmt::text_style color{};
 
@@ -354,9 +362,9 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 template <typename Lyt>
 void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
-    if constexpr (is_gate_level_layout_v<Lyt>)
+    if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
     {
         print_gate_level_layout(os, lyt);
     }
@@ -374,14 +382,14 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
  * Prints every object of a gate-level layout with the tile it occupies and the tiles of its fanins and
  * fanouts. This is a debugging aid; the output format is not stable.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to print.
  * @param os Output stream. Defaults to `std::cout`.
  */
-template <typename Lyt>
-void print_object_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::cout)
+template <typename Geometry>
+void print_object_to_tile_assignments(const fiction::layouts::gate_level_layout<Geometry>& lyt,
+                                      std::ostream&                                        os = std::cout)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     os << "\n---- OBJECT TO TILE ----\n";
 
@@ -403,14 +411,14 @@ void print_object_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::co
  * Prints every tile of a gate-level layout with the object it holds, if any, and the tiles of that object's
  * fanins and fanouts. This is a debugging aid; the output format is not stable.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to print.
  * @param os Output stream. Defaults to `std::cout`.
  */
-template <typename Lyt>
-void print_tile_to_object_assignments(const Lyt& lyt, std::ostream& os = std::cout)
+template <typename Geometry>
+void print_tile_to_object_assignments(const fiction::layouts::gate_level_layout<Geometry>& lyt,
+                                      std::ostream&                                        os = std::cout)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     os << "\n---- TILE TO OBJECT ----\n";
 

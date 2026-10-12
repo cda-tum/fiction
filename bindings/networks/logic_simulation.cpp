@@ -14,6 +14,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/networks/extract_layout_network.hpp>
@@ -24,6 +28,7 @@
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <cassert>
+#include <concepts>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -61,7 +66,9 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
         }
         const auto& network = [&]() -> decltype(auto)
         {
-            if constexpr (fiction::is_gate_level_layout_v<NtkOrLyt>)
+            if constexpr (requires {
+                              requires std::same_as<typename NtkOrLyt::object_id, fiction::layouts::layout_object_id>;
+                          })
             {
                 return fiction::networks::extract_layout_network(ntk);
             }

@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include "fiction/layouts/gate_level_layout.hpp"
+
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/views/names_view.hpp>
 
@@ -34,14 +36,18 @@ namespace fiction::networks
  * Every primary input appears in declared interface order, including unused inputs. Output order, terminal names, and
  * truth-table input indices are preserved. Wires and primary output objects forward their input. Dangling objects do
  * not enter the network. Placement, adjacency, and clocking do not affect extraction. Traversal uses an explicit stack.
- * @tparam Lyt Placed object layout with ordered input ports and declared primary interfaces.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to extract without mutation.
  * @return Independent named LUT network.
  * @throws std::invalid_argument If an output dependency has a missing input or a cycle.
  */
-template <typename Lyt>
-[[nodiscard]] mockturtle::names_view<mockturtle::klut_network> extract_layout_network(const Lyt& lyt)
+template <typename Geometry>
+[[nodiscard]] mockturtle::names_view<mockturtle::klut_network>
+extract_layout_network(const fiction::layouts::gate_level_layout<Geometry>& lyt)
 {
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
+
     /** @brief Stable identity of an object in the source layout. */
     using object_id = typename Lyt::object_id;
     /** @brief Signal in the extracted network. */

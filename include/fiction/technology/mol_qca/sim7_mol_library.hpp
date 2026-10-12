@@ -17,6 +17,11 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/mol_qca/layout.hpp"
@@ -24,6 +29,7 @@
 
 #include <phmap.h>
 
+#include <concepts>
 #include <stdexcept>
 
 namespace fiction::mol_qca
@@ -61,9 +67,11 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
      * @return molQCA gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename GateLyt>
-    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
+        static_assert(
+            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
+            "GateLyt must be a gate-level layout");
 
         const auto object = lyt.find_object(t);
         if (!object)
@@ -140,7 +148,8 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
      * @return Incoming and outgoing molQCA connector positions for `t`.
      */
     template <typename Lyt, bool RespectClocking = true>
-    [[nodiscard]] static fcn::port_list<fcn::port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
+    [[nodiscard]] static fcn::port_list<fcn::port_position>
+    determine_port_routing(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
         fcn::port_list<fcn::port_position> p{};
 

@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/placement_utils.hpp>
@@ -38,20 +39,21 @@ template <typename Lyt, typename Ntk>
 void place(nanobind::module_& m)
 {
     m.def(
-        "place", [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
+        "place",
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
         { return fiction::physical_design::place(lyt, t, ntk, n); }, nanobind::arg("lyt"), nanobind::arg("t"),
         nanobind::arg("ntk"), nanobind::arg("n"),
         "Places a primary input at the given coordinate and returns its output port.");
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const typename Lyt::object_id& a) { return fiction::physical_design::place(lyt, t, ntk, n, a); },
         nanobind::arg("lyt"), nanobind::arg("t"), nanobind::arg("ntk"), nanobind::arg("n"), nanobind::arg("a"));
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const typename Lyt::object_id& a, const typename Lyt::object_id& b,
            const std::optional<bool>& c = std::nullopt)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
@@ -60,7 +62,7 @@ void place(nanobind::module_& m)
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const typename Lyt::object_id& a, const typename Lyt::object_id& b, const typename Lyt::object_id& c)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
         nanobind::arg("lyt"), nanobind::arg("t"), nanobind::arg("ntk"), nanobind::arg("n"), nanobind::arg("a"),

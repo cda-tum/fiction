@@ -19,12 +19,18 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/traits.hpp"
 
+#include <concepts>
 #include <stdexcept>
 
 namespace fiction::sidb
@@ -127,10 +133,15 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
      * @throws std::invalid_argument if `lyt` shifts columns instead of rows.
      */
     template <typename Lyt>
-    [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
+    [[nodiscard]] static fcn::port_list<fcn::port_direction>
+    determine_port_routing(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(is_gate_level_layout_v<Lyt>, "Lyt must be a gate-level layout");
-        static_assert(is_hexagonal_layout_v<Lyt>, "Lyt must be a hexagonal layout");
+        static_assert(
+            requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+            "Lyt must be a gate-level layout");
+        static_assert((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                       !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>),
+                      "Lyt must be a hexagonal layout");
 
         if (!layouts::is_row_arrangement(lyt.get_arrangement()))
         {

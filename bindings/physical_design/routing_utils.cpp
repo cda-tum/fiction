@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -49,7 +50,8 @@ void route_path(nanobind::module_& m)
 {
     m.def(
         "route_path",
-        [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path, const typename Lyt::input_port destination)
+        [](Lyt& lyt, const std::vector<fiction::layouts::layout_base::coordinate>& path,
+           const typename Lyt::input_port destination)
         {
             const fiction::physical_design::layout_coordinate_path converted_path{path.cbegin(), path.cend()};
 
@@ -65,9 +67,11 @@ void extract_routing_objectives(nanobind::module_& m)
 {
     m.def(
         "extract_routing_objectives",
-        [](Lyt& lyt) -> std::vector<std::tuple<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>, uint32_t>>
+        [](Lyt& lyt) -> std::vector<std::tuple<fiction::layouts::layout_base::coordinate,
+                                               fiction::layouts::layout_base::coordinate, uint32_t>>
         {
-            std::vector<std::tuple<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>, uint32_t>>
+            std::vector<std::tuple<fiction::layouts::layout_base::coordinate, fiction::layouts::layout_base::coordinate,
+                                   uint32_t>>
                 converted_objectives{};
 
             const auto objectives = fiction::physical_design::extract_routing_objectives(lyt);

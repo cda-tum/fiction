@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
@@ -25,6 +26,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -261,7 +263,7 @@ template <typename Path, typename Lyt>
 yen_k_shortest_paths(const Lyt& layout, const routing_objective& objective, const uint32_t k,
                      const yen_k_shortest_paths_params& params = {}, const layouts::obstructions& obstructions = {})
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
     if (k == 0)
     {

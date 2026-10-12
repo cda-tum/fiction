@@ -15,12 +15,15 @@
  */
 
 #pragma once
+#include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <optional>
 #include <set>
@@ -37,10 +40,10 @@ namespace detail
  * @return Whether the position is obstructed.
  */
 template <typename Lyt>
-[[nodiscard]] bool routing_coordinate_obstructed(const Lyt& lyt, const coordinate<Lyt>& c,
+[[nodiscard]] bool routing_coordinate_obstructed(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& c,
                                                  const layouts::obstructions& extra) noexcept
 {
-    if constexpr (is_gate_level_layout_v<Lyt>)
+    if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
     {
         return extra.is_obstructed_coordinate(c) || lyt.is_obstructed_coordinate(c);
     }
@@ -54,10 +57,11 @@ template <typename Lyt>
  * @return Whether the directed connection is obstructed.
  */
 template <typename Lyt>
-[[nodiscard]] bool routing_connection_obstructed(const Lyt& lyt, const coordinate<Lyt>& src, const coordinate<Lyt>& tgt,
-                                                 const layouts::obstructions& extra) noexcept
+[[nodiscard]] bool routing_connection_obstructed(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& src,
+                                                 const fiction::layouts::layout_base::coordinate& tgt,
+                                                 const layouts::obstructions&                     extra) noexcept
 {
-    if constexpr (is_gate_level_layout_v<Lyt>)
+    if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
     {
         return extra.is_obstructed_connection(src, tgt) || lyt.is_obstructed_connection(src, tgt);
     }
@@ -203,14 +207,14 @@ class path_set : public std::set<Path>
  * @return `true` iff `successor` hosts a wire that is crossable from `src`.
  */
 template <typename Lyt>
-[[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const coordinate<Lyt>& src,
-                                     const coordinate<Lyt>& successor) noexcept
+[[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& src,
+                                     const fiction::layouts::layout_base::coordinate& successor) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt must be a coordinate layout type");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt must be a coordinate layout type");
 
     assert(lyt.is_adjacent_elevation_of(src, successor));
 
-    if constexpr (is_gate_level_layout_v<Lyt>)
+    if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
     {
         const auto successor_node = lyt.find_object(successor);
 
@@ -256,9 +260,11 @@ namespace detail
  * @return The coordinate to enter, or `std::nullopt` if the step is obstructed.
  */
 template <typename Lyt>
-[[nodiscard]] std::optional<coordinate<Lyt>>
-routing_successor(const Lyt& lyt, const coordinate<Lyt>& current, coordinate<Lyt> successor,
-                  const coordinate<Lyt>& target, const bool crossings, const layouts::obstructions& extra) noexcept
+[[nodiscard]] std::optional<fiction::layouts::layout_base::coordinate>
+routing_successor(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& current,
+                  fiction::layouts::layout_base::coordinate        successor,
+                  const fiction::layouts::layout_base::coordinate& target, const bool crossings,
+                  const layouts::obstructions& extra) noexcept
 {
     // return to ground layer to avoid getting stuck in crossing layer
     if (successor.z != 0)
@@ -300,7 +306,7 @@ routing_successor(const Lyt& lyt, const coordinate<Lyt>& current, coordinate<Lyt
  *
  * Occupied intermediate ground coordinates use their free crossing layer. Endpoints and all intermediate
  * placements are checked before mutation. A failed allocation removes newly created wires.
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Path Coordinate path type.
  * @param lyt Layout to edit.
  * @param path Path containing at least its occupied source and target coordinates.
@@ -308,10 +314,13 @@ routing_successor(const Lyt& lyt, const coordinate<Lyt>& current, coordinate<Lyt
  * @throws std::invalid_argument If an endpoint or intermediate placement is unavailable.
  * @throws std::out_of_range If the destination input index is invalid.
  */
-template <typename Lyt, typename Path>
-void route_path(Lyt& lyt, const Path& path, const typename Lyt::input_port destination)
+template <typename Geometry, typename Path>
+void route_path(fiction::layouts::gate_level_layout<Geometry>& lyt, const Path& path,
+                const typename fiction::layouts::gate_level_layout<Geometry>::input_port destination)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
+
     if (path.size() < 2 || path.target() != lyt.get_tile(destination.object))
     {
         throw std::invalid_argument("A routing path requires matching occupied endpoints");
@@ -322,9 +331,9 @@ void route_path(Lyt& lyt, const Path& path, const typename Lyt::input_port desti
     {
         throw std::invalid_argument("The routing source is empty");
     }
-    std::vector<tile<Lyt>> positions{};
+    std::vector<fiction::layouts::layout_base::coordinate> positions{};
     positions.reserve(path.size() - 2);
-    std::unordered_set<tile<Lyt>> unique{};
+    std::unordered_set<fiction::layouts::layout_base::coordinate> unique{};
     for (auto it = path.cbegin() + 1; it != path.cend() - 1; ++it)
     {
         auto position = *it;
@@ -377,7 +386,9 @@ void route_path(Lyt& lyt, const Path& path, const typename Lyt::input_port desti
 template <typename Lyt>
 std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
     const auto intermediate = [&lyt](const auto id) { return lyt.is_wire(id) && !lyt.is_fanout(id); };
     std::vector<routing_objective> objectives{};
     lyt.foreach_object(
@@ -412,13 +423,15 @@ std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
 }
 /**
  * @brief Removes routing wires and disconnects retained objects while preserving identities and input indices.
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to edit.
  */
-template <typename Lyt>
-void clear_routing(Lyt& lyt)
+template <typename Geometry>
+void clear_routing(fiction::layouts::gate_level_layout<Geometry>& lyt)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
+
     std::vector<typename Lyt::object_id> wires{};
     lyt.foreach_object(
         [&](const auto id)

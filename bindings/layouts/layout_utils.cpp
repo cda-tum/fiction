@@ -15,6 +15,7 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -78,8 +79,8 @@ void random_coordinate(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::coordinate<Lyt>>, py::arg("coordinate1"),
-          py::arg("coordinate_2"), DOC(fiction_layouts_random_coordinate));
+    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
+          py::arg("coordinate1"), py::arg("coordinate_2"), DOC(fiction_layouts_random_coordinate));
 }
 
 }  // namespace detail

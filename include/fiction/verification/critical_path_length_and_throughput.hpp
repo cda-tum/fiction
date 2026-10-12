@@ -16,11 +16,16 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <phmap.h>
 
 #include <algorithm>
+#include <concepts>
 #include <cstdint>
 #include <limits>
 #include <optional>
@@ -167,15 +172,14 @@ class critical_path_length_and_throughput_impl
  *
  * The complexity is \f$\mathcal{O}(|V| + |E|)\f$ for objects and connections in the output dependency cones.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The gate-level layout whose CP and TP are desired.
  * @return A struct containing the CP and TP.
  * @throws std::invalid_argument If an output dependency has a disconnected input or a cycle.
  */
-template <typename Lyt>
-cp_and_tp critical_path_length_and_throughput(const Lyt& lyt)
+template <typename Geometry>
+cp_and_tp critical_path_length_and_throughput(const fiction::layouts::gate_level_layout<Geometry>& lyt)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate layout type");
 
     detail::critical_path_length_and_throughput_impl p{lyt};
 

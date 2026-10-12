@@ -16,6 +16,10 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/path_finding/enumerate_all_paths.hpp"
 #include "fiction/physical_design/path_finding/k_shortest_paths.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
@@ -25,6 +29,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -345,7 +350,9 @@ edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&        
                                                               generate_edge_intersection_graph_params ps  = {},
                                                               generate_edge_intersection_graph_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a clocked layout");
 
     generate_edge_intersection_graph_stats st{};
 

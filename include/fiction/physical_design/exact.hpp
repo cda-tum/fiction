@@ -21,9 +21,13 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/networks/technology_network.hpp"
@@ -51,6 +55,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -608,7 +613,7 @@ class exact_impl
          * strategy using factorizations is kept and several solvers are employed that can be reused at a later point.
          * In the example, the 4 x 4 solver would be stored and revisited when 4 x 5 is to be explored.
          */
-        std::unordered_map<tile<Lyt>, state_ptr> solver_tree{};
+        std::unordered_map<fiction::layouts::layout_base::coordinate, state_ptr> solver_tree{};
         /**
          * Current solver checkpoint extracted from the solver tree.
          */
@@ -3279,7 +3284,7 @@ class exact_impl
  * layout topologies and clocking schemes.
  *
  * The approach applies to any data structures that implement the necessary functions to comply with `is_network_type`
- * and `is_gate_level_layout`, respectively. It is, thereby, mostly technology-independent but can make certain
+ * and concrete gate-level layouts, respectively. It is, thereby, mostly technology-independent but can make certain
  * assumptions if needed, for instance for ToPoliNano-compliant circuits.
  *
  * This approach requires the Z3 SMT solver to be installed on the system. Due to this circumstance, it is excluded from
@@ -3302,7 +3307,9 @@ template <typename Lyt, typename Ntk>
 std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps = {},
                          exact_physical_design_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
@@ -3310,7 +3317,10 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
     layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
     auto clocking_scheme =
-        layouts::clocking::get_scheme(ps.scheme, is_hexagonal_layout_v<Lyt> ? ps.layout_arrangement : std::nullopt);
+        layouts::clocking::get_scheme(ps.scheme, (std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                                                  !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>) ?
+                                                     ps.layout_arrangement :
+                                                     std::nullopt);
 
     if (!clocking_scheme.has_value())
     {
@@ -3364,7 +3374,9 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
                                         exact_physical_design_params ps  = {},
                                         exact_physical_design_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
@@ -3372,7 +3384,10 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
     layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
     auto clocking_scheme =
-        layouts::clocking::get_scheme(ps.scheme, is_hexagonal_layout_v<Lyt> ? ps.layout_arrangement : std::nullopt);
+        layouts::clocking::get_scheme(ps.scheme, (std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                                                  !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>) ?
+                                                     ps.layout_arrangement :
+                                                     std::nullopt);
 
     if (!clocking_scheme.has_value())
     {

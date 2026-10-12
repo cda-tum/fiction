@@ -19,6 +19,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
+
 #include <fiction/layouts/clocking_scheme.hpp>
 
 #if (FICTION_Z3_SOLVER)

@@ -122,7 +122,7 @@ try
         const auto area_before_wiring_reduction = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
-        wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
+        wiring_reduction(gate_level_layout, {}, &wiring_reduction_stats);
 
         //  compute critical path and throughput
         const auto cp_tp_stats_after = critical_path_length_and_throughput(gate_level_layout);

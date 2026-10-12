@@ -18,8 +18,12 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -27,6 +31,7 @@
 #include "fiction/utils/progress.hpp"
 
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -58,7 +63,9 @@ namespace fiction::physical_design
 template <typename GateLibrary, typename GateLyt>
 [[nodiscard]] layouts::layout_base::extent cell_grid_extent(const GateLyt& gate_lyt)
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
+        "GateLyt is not a gate-level layout");
 
     if (gate_lyt.width() == 0 || gate_lyt.height() == 0 || gate_lyt.layers() == 0)
     {
@@ -67,7 +74,8 @@ template <typename GateLibrary, typename GateLyt>
 
     using cell_t = layouts::layout_base::coordinate;
 
-    const auto rel_to_abs_cell_pos = [](const GateLyt& g, const tile<GateLyt>& t, const cell_t& rel)
+    const auto rel_to_abs_cell_pos =
+        [](const GateLyt& g, const fiction::layouts::layout_base::coordinate& t, const cell_t& rel)
     {
         return layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size()>(g, t,
                                                                                                                    rel);
@@ -124,7 +132,8 @@ class apply_gate_library_impl
      */
     [[nodiscard]] cell_lyt_t run_static_gate_library()
     {
-        map_gates([](const GateLyt& g, const tile<GateLyt>& t) { return GateLibrary::set_up_gate(g, t); });
+        map_gates([](const GateLyt& g, const fiction::layouts::layout_base::coordinate& t)
+                  { return GateLibrary::set_up_gate(g, t); });
 
         if constexpr (requires(cell_lyt_t& l) { GateLibrary::post_layout_optimization(l); })
         {
@@ -151,7 +160,7 @@ class apply_gate_library_impl
     run_parameterized_gate_library(const Params&                      params,
                                    const std::optional<sidb::layout>& defect_surface = std::nullopt)
     {
-        map_gates([&params, &defect_surface](const GateLyt& g, const tile<GateLyt>& t)
+        map_gates([&params, &defect_surface](const GateLyt& g, const fiction::layouts::layout_base::coordinate& t)
                   { return GateLibrary::set_up_gate(g, t, params, defect_surface); });
 
         cell_lyt.set_layout_name(networks::get_name(gate_lyt));
@@ -214,7 +223,8 @@ class apply_gate_library_impl
     }
     /**
      * @brief Places the implementation of every object in its tile.
-     * @tparam SetUpGate Callable on `(const GateLyt&, const tile<GateLyt>&)` returning a gate.
+     * @tparam SetUpGate Callable on `(const GateLyt&, const fiction::layouts::layout_base::coordinate&)` returning a
+     * gate.
      * @param set_up_gate Returns the implementation of a tile.
      */
     template <typename SetUpGate>
@@ -307,16 +317,17 @@ class apply_gate_library_impl
  * `unsupported_gate_orientation_exception`.
  *
  * @tparam GateLibrary Type of the gate library to apply.
- * @tparam GateLyt Type of the gate-level layout to apply the library to.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The gate-level layout.
  * @param on_progress Optional callback reporting completed object mappings.
  * @return A layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
-template <typename GateLibrary, typename GateLyt>
-[[nodiscard]] typename GateLibrary::layout apply_gate_library(const GateLyt&           lyt,
+template <typename GateLibrary, typename Geometry>
+[[nodiscard]] typename GateLibrary::layout apply_gate_library(const fiction::layouts::gate_level_layout<Geometry>& lyt,
                                                               utils::progress_callback on_progress = {})
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using GateLyt = fiction::layouts::gate_level_layout<Geometry>;
 
     detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, std::move(on_progress)};
 
@@ -328,16 +339,19 @@ template <typename GateLibrary, typename GateLyt>
  * surface's lattice as with `apply_gate_library`, and the surface's defects are copied into the result.
  *
  * @tparam GateLibrary Gate library type.
- * @tparam GateLyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The gate-level layout.
  * @param defect_surface The surface with the defects.
  * @return The SiDB layout with the gates and the defects.
  */
-template <typename GateLibrary, typename GateLyt>
-[[nodiscard]] sidb::layout apply_gate_library_to_defective_surface(const GateLyt&      lyt,
-                                                                   const sidb::layout& defect_surface)
+template <typename GateLibrary, typename Geometry>
+[[nodiscard]] sidb::layout
+apply_gate_library_to_defective_surface(const fiction::layouts::gate_level_layout<Geometry>& lyt,
+                                        const sidb::layout&                                  defect_surface)
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using GateLyt = fiction::layouts::gate_level_layout<Geometry>;
+
     static_assert(std::is_same_v<typename GateLibrary::layout, sidb::layout>, "GateLibrary must produce SiDB layouts");
 
     detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, {}, defect_surface.get_lattice()};
@@ -356,16 +370,18 @@ template <typename GateLibrary, typename GateLyt>
  * `unsupported_gate_orientation_exception` and any further custom exceptions of the gate libraries.
  *
  * @tparam GateLibrary Type of the gate library to apply.
- * @tparam GateLyt Type of the gate-level layout to apply the library to.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Params Type of the parameter used for SiDB on-the-fly gate library.
  * @param lyt The gate-level layout.
  * @param params Parameter for the gate library.
  * @return A layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
-template <typename GateLibrary, typename GateLyt, typename Params>
-[[nodiscard]] typename GateLibrary::layout apply_parameterized_gate_library(const GateLyt& lyt, const Params& params)
+template <typename GateLibrary, typename Geometry, typename Params>
+[[nodiscard]] typename GateLibrary::layout
+apply_parameterized_gate_library(const fiction::layouts::gate_level_layout<Geometry>& lyt, const Params& params)
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using GateLyt = fiction::layouts::gate_level_layout<Geometry>;
 
     detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt};
 
@@ -378,19 +394,21 @@ template <typename GateLibrary, typename GateLyt, typename Params>
  * surface's defects are copied into the result.
  *
  * @tparam GateLibrary Gate library type.
- * @tparam GateLyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Params Parameter type of the gate library.
  * @param lyt The gate-level layout.
  * @param params Parameters of the gate library.
  * @param defect_surface The surface with the defects.
  * @return The SiDB layout with the gates and the defects.
  */
-template <typename GateLibrary, typename GateLyt, typename Params>
-[[nodiscard]] sidb::layout apply_parameterized_gate_library_to_defective_surface(const GateLyt&      lyt,
-                                                                                 const Params&       params,
-                                                                                 const sidb::layout& defect_surface)
+template <typename GateLibrary, typename Geometry, typename Params>
+[[nodiscard]] sidb::layout
+apply_parameterized_gate_library_to_defective_surface(const fiction::layouts::gate_level_layout<Geometry>& lyt,
+                                                      const Params& params, const sidb::layout& defect_surface)
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using GateLyt = fiction::layouts::gate_level_layout<Geometry>;
+
     static_assert(std::is_same_v<typename GateLibrary::layout, sidb::layout>, "GateLibrary must produce SiDB layouts");
 
     detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, {}, defect_surface.get_lattice()};

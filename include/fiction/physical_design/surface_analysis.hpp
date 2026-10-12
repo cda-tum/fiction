@@ -17,8 +17,12 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -56,21 +60,20 @@ using surface_black_list =
  * surface, the gate's ports are blacklisted for that tile and function. Placement can then avoid those gates.
  *
  * @tparam GateLibrary SiDB gate library type.
- * @tparam GateLyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param gate_lyt The gate-level layout.
  * @param surface The defective surface.
  * @param charged_defect_spacing_overwrite Overrides the spacing charged defects keep SiDBs at.
  * @param neutral_defect_spacing_overwrite Overrides the spacing neutral defects keep SiDBs at.
  * @return The black list.
  */
-template <typename GateLibrary, typename GateLyt>
+template <typename GateLibrary, typename Geometry>
     requires std::same_as<typename GateLibrary::layout, sidb::layout>
 [[nodiscard]] auto
-surface_analysis(const GateLyt& gate_lyt, const sidb::layout& surface,
+surface_analysis(const fiction::layouts::gate_level_layout<Geometry>& gate_lyt, const sidb::layout& surface,
                  const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
                  const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt)
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(has_get_functional_implementations_v<GateLibrary>,
                   "GateLibrary does not implement the get_functional_implementations function");
     static_assert(has_get_gate_ports_v<GateLibrary>, "GateLibrary does not implement the get_gate_ports function");

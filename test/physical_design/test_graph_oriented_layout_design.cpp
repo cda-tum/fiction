@@ -18,6 +18,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
@@ -598,7 +599,7 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
      */
     const auto pi_positions = [](const gate_layout& lyt)
     {
-        std::vector<tile<gate_layout>> positions{};
+        std::vector<fiction::layouts::layout_base::coordinate> positions{};
         lyt.foreach_pi([&](const auto& pi) { positions.push_back(lyt.get_tile(pi)); });
         return positions;
     };

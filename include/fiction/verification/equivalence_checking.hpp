@@ -17,6 +17,10 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/networks/extract_layout_network.hpp"
 #include "fiction/networks/interface_matching.hpp"
 #include "fiction/traits.hpp"
@@ -31,6 +35,7 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <concepts>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -113,14 +118,14 @@ class equivalence_checking_impl
     {
         mockturtle::stopwatch stop{pst.runtime};
 
-        if constexpr (is_gate_level_layout_v<Spec>)
+        if constexpr (requires { requires std::same_as<typename Spec::object_id, fiction::layouts::layout_object_id>; })
         {
             if (has_drvs(spec, &pst.spec_drv_stats))
             {
                 return eq_type::NO;
             }
         }
-        if constexpr (is_gate_level_layout_v<Impl>)
+        if constexpr (requires { requires std::same_as<typename Impl::object_id, fiction::layouts::layout_object_id>; })
         {
             if (has_drvs(impl, &pst.impl_drv_stats))
             {
@@ -153,7 +158,9 @@ class equivalence_checking_impl
     template <typename NtkOrLyt>
     static decltype(auto) logical_network(const NtkOrLyt& source)
     {
-        if constexpr (is_gate_level_layout_v<NtkOrLyt>)
+        if constexpr (requires {
+                          requires std::same_as<typename NtkOrLyt::object_id, fiction::layouts::layout_object_id>;
+                      })
         {
             return networks::extract_layout_network(source);
         }
@@ -195,14 +202,20 @@ class equivalence_checking_impl
                 if (pst.eq == eq_type::STRONG)
                 {
                     // compute TP of specification
-                    if constexpr (fiction::is_gate_level_layout_v<Spec>)
+                    if constexpr (requires {
+                                      requires std::same_as<typename Spec::object_id,
+                                                            fiction::layouts::layout_object_id>;
+                                  })
                     {
                         const auto cp_tp = fiction::verification::critical_path_length_and_throughput(spec);
 
                         pst.tp_spec = static_cast<int64_t>(cp_tp.throughput);
                     }
                     // compute TP of implementation
-                    if constexpr (fiction::is_gate_level_layout_v<Impl>)
+                    if constexpr (requires {
+                                      requires std::same_as<typename Impl::object_id,
+                                                            fiction::layouts::layout_object_id>;
+                                  })
                     {
                         const auto cp_tp = fiction::verification::critical_path_length_and_throughput(impl);
 
@@ -301,10 +314,14 @@ class equivalence_checking_impl
 template <typename Spec, typename Impl>
 eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Spec> || is_gate_level_layout_v<Spec>,
-                  "Spec is not a network or gate layout");
-    static_assert(mockturtle::is_network_type_v<Impl> || is_gate_level_layout_v<Impl>,
-                  "Impl is not a network or gate layout");
+    static_assert(
+        mockturtle::is_network_type_v<Spec> || requires {
+            requires std::same_as<typename Spec::object_id, fiction::layouts::layout_object_id>;
+        }, "Spec is not a network or gate layout");
+    static_assert(
+        mockturtle::is_network_type_v<Impl> || requires {
+            requires std::same_as<typename Impl::object_id, fiction::layouts::layout_object_id>;
+        }, "Impl is not a network or gate layout");
 
     equivalence_checking_stats        st{};
     detail::equivalence_checking_impl p{spec, impl, st};

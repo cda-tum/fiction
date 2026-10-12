@@ -17,11 +17,16 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
+#include <concepts>
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -84,8 +89,12 @@ void set_name(NtkOrLyt& ntk_or_lyt, const std::string_view& name)
 template <typename NtkOrLytSrc, typename NtkOrLytDest>
 void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_or_lyt_dest)
 {
-    static_assert(mockturtle::is_network_type_v<NtkOrLytSrc> || is_gate_level_layout_v<NtkOrLytSrc>);
-    static_assert(mockturtle::is_network_type_v<NtkOrLytDest> || is_gate_level_layout_v<NtkOrLytDest>);
+    static_assert(mockturtle::is_network_type_v<NtkOrLytSrc> || requires {
+        requires std::same_as<typename NtkOrLytSrc::object_id, fiction::layouts::layout_object_id>;
+    });
+    static_assert(mockturtle::is_network_type_v<NtkOrLytDest> || requires {
+        requires std::same_as<typename NtkOrLytDest::object_id, fiction::layouts::layout_object_id>;
+    });
 
     std::string network_name{};
 
@@ -118,19 +127,26 @@ void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_o
 template <typename NtkSrc, typename NtkDest>
 void restore_input_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc> || is_gate_level_layout_v<NtkSrc>);
-    static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
+    static_assert(mockturtle::is_network_type_v<NtkSrc> ||
+                  requires { requires std::same_as<typename NtkSrc::object_id, fiction::layouts::layout_object_id>; });
+    static_assert(mockturtle::is_network_type_v<NtkDest> ||
+                  requires { requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>; });
 
-    if constexpr ((is_gate_level_layout_v<NtkSrc> ||
-                   (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc>)) &&
-                  (is_gate_level_layout_v<NtkDest> || mockturtle::has_set_name_v<NtkDest>))
+    if constexpr ((requires {
+                      requires std::same_as<typename NtkSrc::object_id, fiction::layouts::layout_object_id>;
+                  } || (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc>)) && (requires {
+                      requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>;
+                  } || mockturtle::has_set_name_v<NtkDest>))
     {
         ntk_src.foreach_pi(
             [&](const auto& pi, const auto i)
             {
                 const auto input = [&]
                 {
-                    if constexpr (is_gate_level_layout_v<NtkSrc>)
+                    if constexpr (requires {
+                                      requires std::same_as<typename NtkSrc::object_id,
+                                                            fiction::layouts::layout_object_id>;
+                                  })
                     {
                         return pi;
                     }
@@ -141,7 +157,10 @@ void restore_input_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
                 }();
                 if (ntk_src.has_name(input))
                 {
-                    if constexpr (is_gate_level_layout_v<NtkDest>)
+                    if constexpr (requires {
+                                      requires std::same_as<typename NtkDest::object_id,
+                                                            fiction::layouts::layout_object_id>;
+                                  })
                     {
                         ntk_dest.set_name(ntk_dest.pi_at(i), ntk_src.get_name(input));
                     }
@@ -164,11 +183,14 @@ void restore_input_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 template <typename NtkSrc, typename NtkDest>
 void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc> || is_gate_level_layout_v<NtkSrc>);
-    static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
+    static_assert(mockturtle::is_network_type_v<NtkSrc> ||
+                  requires { requires std::same_as<typename NtkSrc::object_id, fiction::layouts::layout_object_id>; });
+    static_assert(mockturtle::is_network_type_v<NtkDest> ||
+                  requires { requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>; });
 
-    if constexpr (mockturtle::has_has_output_name_v<NtkSrc> && mockturtle::has_get_output_name_v<NtkSrc> &&
-                  (is_gate_level_layout_v<NtkDest> || mockturtle::has_set_output_name_v<NtkDest>))
+    if constexpr (mockturtle::has_has_output_name_v<NtkSrc> && mockturtle::has_get_output_name_v<NtkSrc> && (requires {
+                      requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>;
+                  } || mockturtle::has_set_output_name_v<NtkDest>))
     {
 
         ntk_src.foreach_po(
@@ -198,10 +220,12 @@ template <typename NtkSrc, typename NtkDest, typename Signal>
 void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<Signal, NtkSrc>& old2new)
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a logic network");
-    static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
+    static_assert(mockturtle::is_network_type_v<NtkDest> ||
+                  requires { requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>; });
 
-    if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
-                  (is_gate_level_layout_v<NtkDest> || mockturtle::has_set_name_v<NtkDest>))
+    if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> && (requires {
+                      requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>;
+                  } || mockturtle::has_set_name_v<NtkDest>))
     {
         static_assert(mockturtle::has_foreach_node_v<NtkSrc>, "NtkSrc does not implement the foreach_node function");
         static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
@@ -214,7 +238,10 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mocktu
             {
                 /** Target endpoint corresponding to the source node. */
                 const auto target = old2new[ntk_src.get_node(f)];
-                if constexpr (is_gate_level_layout_v<NtkDest>)
+                if constexpr (requires {
+                                  requires std::same_as<typename NtkDest::object_id,
+                                                        fiction::layouts::layout_object_id>;
+                              })
                 {
                     if (target == typename NtkDest::object_id{})
                     {
@@ -267,10 +294,12 @@ void restore_signal_names(
     const mockturtle::node_map<physical_design::branching_signal_container<NtkSrc, fanout_size>, NtkSrc>& old2new)
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a logic network");
-    static_assert(mockturtle::is_network_type_v<NtkDest> || is_gate_level_layout_v<NtkDest>);
+    static_assert(mockturtle::is_network_type_v<NtkDest> ||
+                  requires { requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>; });
 
-    if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> &&
-                  (is_gate_level_layout_v<NtkDest> || mockturtle::has_set_name_v<NtkDest>))
+    if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> && (requires {
+                      requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>;
+                  } || mockturtle::has_set_name_v<NtkDest>))
     {
         static_assert(mockturtle::has_foreach_node_v<NtkSrc>, "NtkSrc does not implement the foreach_node function");
         static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");

@@ -18,6 +18,11 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
@@ -29,6 +34,7 @@
 
 #include <algorithm>
 #include <array>
+#include <concepts>
 #include <cstdint>
 #include <iomanip>
 #include <ostream>
@@ -86,7 +92,7 @@ class simple_gate_layout_tile_drawer
      * @param t Tile coordinate.
      * @return Identifier with signed axes encoded as letters and digits.
      */
-    [[nodiscard]] virtual std::string tile_id(const tile<Lyt>& t) const
+    [[nodiscard]] virtual std::string tile_id(const fiction::layouts::layout_base::coordinate& t) const
     {
         auto id = fmt::format("x{}y{}", t.x, t.y);
         std::replace(id.begin(), id.end(), '-', 'n');
@@ -107,7 +113,8 @@ class simple_gate_layout_tile_drawer
     }
 
     /** @brief Return the gate label. */
-    [[nodiscard]] virtual std::string tile_label(const Lyt& lyt, const tile<Lyt>& t) const
+    [[nodiscard]] virtual std::string tile_label(const Lyt&                                       lyt,
+                                                 const fiction::layouts::layout_base::coordinate& t) const
     {
         /** @brief Occupant at the tile position. */
         const auto occupant = lyt.find_object(t);
@@ -139,7 +146,8 @@ class simple_gate_layout_tile_drawer
     }
 
     /** @brief Return the tile color. */
-    [[nodiscard]] virtual std::string tile_fillcolor(const Lyt& lyt, const tile<Lyt>& t) const
+    [[nodiscard]] virtual std::string tile_fillcolor(const Lyt&                                       lyt,
+                                                     const fiction::layouts::layout_base::coordinate& t) const
     {
         if constexpr (ClockColors)
         {
@@ -496,7 +504,11 @@ class gate_layout_shifted_tile_drawer : public simple_gate_layout_tile_drawer<Ly
      */
     void shift_line(const Lyt& lyt, const int64_t index, const bool is_row, std::stringstream& stream) const
     {
-        const auto line_tile = [is_row](const int64_t i) { return is_row ? tile<Lyt>{0, i} : tile<Lyt>{i, 0}; };
+        const auto line_tile = [is_row](const int64_t i)
+        {
+            return is_row ? fiction::layouts::layout_base::coordinate{0, i} :
+                            fiction::layouts::layout_base::coordinate{i, 0};
+        };
 
         stream << base_drawer::same_rank(
             std::vector<std::string>{invisible_node(index), base_drawer::tile_id(line_tile(index))});
@@ -603,7 +615,9 @@ template <class Lyt, class Drawer>
 void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {},
                       utils::progress_callback on_progress = {})
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     std::stringstream nodes{}, edges{}, topology{};
 

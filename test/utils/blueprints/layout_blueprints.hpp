@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/inml/layout.hpp>
@@ -29,6 +31,8 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+
+#include <concepts>
 
 namespace blueprints
 {
@@ -45,7 +49,7 @@ namespace blueprints
 template <typename GateLyt>
 GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::extent& ex)
 {
-    if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
+    if constexpr (std::derived_from<GateLyt, fiction::layouts::cartesian_layout>)
     {
         return GateLyt{ex};
     }
@@ -69,7 +73,7 @@ template <typename GateLyt>
 GateLyt make_layout([[maybe_unused]] const fiction::layouts::arrangement a, const typename GateLyt::extent& ex,
                     const fiction::layouts::clocking::scheme& scheme)
 {
-    if constexpr (fiction::is_cartesian_layout_v<GateLyt>)
+    if constexpr (std::derived_from<GateLyt, fiction::layouts::cartesian_layout>)
     {
         return GateLyt{ex, scheme};
     }

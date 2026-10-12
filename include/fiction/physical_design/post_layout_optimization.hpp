@@ -22,8 +22,13 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
@@ -37,6 +42,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -150,38 +156,37 @@ namespace detail
 {
 
 /** @brief Routes adjacent to a gate, with the logical destination of each route.
- * @tparam Lyt Gate-level layout type.
+ *
  */
-template <typename Lyt>
 struct fanin_fanout_data
 {
     /** @brief Retained source coordinates in logical input order. */
-    std::vector<tile<Lyt>> fanins{};
+    std::vector<fiction::layouts::layout_base::coordinate> fanins{};
     /** @brief Retained destination coordinates. */
-    std::vector<tile<Lyt>> fanouts{};
+    std::vector<fiction::layouts::layout_base::coordinate> fanouts{};
     /** @brief Intermediate wire coordinates to remove. */
-    std::vector<tile<Lyt>> to_clear{};
+    std::vector<fiction::layouts::layout_base::coordinate> to_clear{};
     /** @brief Original routes, inputs first and then outputs. */
     std::vector<layout_coordinate_path> routes{};
     /** @brief Explicit input endpoints corresponding to routes. */
-    std::vector<typename Lyt::input_port> destinations{};
+    std::vector<fiction::layouts::layout_input_port> destinations{};
 };
 /** @brief Fits zero-origin geometry to occupied objects. Empty layouts receive empty geometry.
- * @tparam Lyt Layout type. @param lyt Layout to resize.
+ * @param lyt Layout to resize.
  */
-template <typename Lyt>
-void fit_occupied_geometry(Lyt& lyt)
+inline void fit_occupied_geometry(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt)
 {
     const auto maximum = layouts::bounding_box{lyt}.get_max();
-    lyt.resize(maximum ? typename Lyt::extent{static_cast<int64_t>(maximum->x) + 1,
-                                              static_cast<int64_t>(maximum->y) + 1, lyt.layers()} :
-                         typename Lyt::extent{});
+    lyt.resize(maximum ? fiction::layouts::layout_base::extent{static_cast<int64_t>(maximum->x) + 1,
+                                                               static_cast<int64_t>(maximum->y) + 1, lyt.layers()} :
+                         fiction::layouts::layout_base::extent{});
 }
 /** @brief Moves an output and inserts a wire at its former coordinate, preserving its identity.
- * @tparam Lyt Layout type. @param lyt Layout. @param id Output identity. @param target New coordinate.
+ * @param lyt Layout. @param id Output identity. @param target New coordinate.
  */
-template <typename Lyt>
-void extend_output_position(Lyt& lyt, const typename Lyt::object_id id, const tile<Lyt>& target)
+inline void extend_output_position(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                                   const fiction::layouts::layout_object_id                                 id,
+                                   const fiction::layouts::layout_base::coordinate&                         target)
 {
     const auto old    = lyt.get_tile(id);
     const auto source = lyt.source({id, 0});
@@ -190,10 +195,9 @@ void extend_output_position(Lyt& lyt, const typename Lyt::object_id id, const ti
     lyt.connect(wire, {id, 0});
 }
 /** @brief Shrinks empty final rows and columns while keeping outputs accessible at the border.
- * @tparam Lyt Cartesian layout type. @param lyt Layout to optimize.
+ * @param lyt Layout to optimize.
  */
-template <typename Lyt>
-void optimize_output_positions(Lyt& lyt)
+inline void optimize_output_positions(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt)
 {
     if (lyt.is_empty())
     {
@@ -283,10 +287,11 @@ void optimize_output_positions(Lyt& lyt)
     }
 }
 /** @brief Extends outputs one tile to the nearest border while preserving their logical inputs.
- * @tparam Lyt Layout type. @param lyt Layout. @param moved_gates Relocation count to adjust.
+ * @param lyt Layout. @param moved_gates Relocation count to adjust.
  */
-template <typename Lyt>
-void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates)
+inline void
+check_and_optimize_po_positions(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                                uint64_t&                                                                moved_gates)
 {
     const auto x_max = static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1);
     const auto y_max = static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1);
@@ -322,30 +327,26 @@ void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates)
  * Custom comparison function for sorting tiles based on the sum of their coordinates that breaks ties based on the
  * x-coordinate.
  *
- * @tparam Lyt Cartesian gate-level layout type.
  * @param a First tile to compare.
  * @param b Second tile to compare.
  * @return `true` iff `a < b` based on the aforementioned rule.
  */
-template <typename Lyt>
-bool compare_gate_tiles(const tile<Lyt>& a, const tile<Lyt>& b)
+inline bool compare_gate_tiles(const fiction::layouts::layout_base::coordinate& a,
+                               const fiction::layouts::layout_base::coordinate& b)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    return static_cast<bool>(std::make_pair(static_cast<int64_t>(a.x) + a.y, a.x) <
-                             std::make_pair(static_cast<int64_t>(b.x) + b.y, b.x));
+    return std::make_pair(static_cast<int64_t>(a.x) + a.y, a.x) < std::make_pair(static_cast<int64_t>(b.x) + b.y, b.x);
 }
 
 /** @brief Relocates retained objects and reroutes their explicit logical input endpoints.
- * @tparam Lyt Cartesian gate-level layout type.
+ *
  */
-template <typename Lyt>
 class post_layout_optimization_impl
 {
   public:
     /** @brief Initializes relocation search. @param lyt Layout. @param p Parameters. @param st Statistics. */
-    post_layout_optimization_impl(Lyt& lyt, post_layout_optimization_params p, post_layout_optimization_stats& st) :
+    post_layout_optimization_impl(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                                  post_layout_optimization_params p, post_layout_optimization_stats& st) :
             plyt{lyt},
             ps{std::move(p)},
             pst{st},
@@ -357,8 +358,6 @@ class post_layout_optimization_impl
     /** @brief Optimizes placement and wiring until convergence or timeout. */
     void run()
     {
-        static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-        static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
         // start the stopwatch to measure total optimization time
         const mockturtle::stopwatch stop{pst.time_total};
@@ -417,12 +416,12 @@ class post_layout_optimization_impl
                 }
 
                 // gather all relevant gate tiles for relocation
-                std::vector<tile<Lyt>> gate_tiles{};
+                std::vector<fiction::layouts::layout_base::coordinate> gate_tiles{};
                 gate_tiles.reserve(layout.num_gates() + layout.num_pis() + layout.num_pos());
                 layout.foreach_object(
                     [this, &layout, &gate_tiles](const auto& object)
                     {
-                        if (const tile<Lyt> gate_tile = layout.get_tile(object);
+                        if (const fiction::layouts::layout_base::coordinate gate_tile = layout.get_tile(object);
                             layout.is_gate(object) || layout.is_fanout(object) || layout.is_pi_tile(gate_tile) ||
                             layout.is_po_tile(gate_tile))
                         {
@@ -432,11 +431,11 @@ class post_layout_optimization_impl
                     });
 
                 // sort the gate tiles using the custom comparator
-                std::ranges::sort(gate_tiles, compare_gate_tiles<Lyt>);
+                std::ranges::sort(gate_tiles, compare_gate_tiles);
 
                 progress.reset(gate_tiles.size());
 
-                max_non_po = tile<Lyt>{0, 0};
+                max_non_po = fiction::layouts::layout_base::coordinate{0, 0};
                 // determine minimal border for POs
                 for (const auto& gate_tile : gate_tiles)
                 {
@@ -517,7 +516,7 @@ class post_layout_optimization_impl
     /**
      * 2DDWave-clocked Cartesian gate-level layout to optimize.
      */
-    Lyt& plyt;
+    fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& plyt;
     /**
      * Post-layout optimization parameters.
      */
@@ -537,7 +536,7 @@ class post_layout_optimization_impl
     /**
      * Maximum coordinate of all gates that are not POs.
      */
-    tile<Lyt> max_non_po{0, 0};
+    fiction::layouts::layout_base::coordinate max_non_po{0, 0};
     /**
      * Timeout limit reached.
      */
@@ -553,12 +552,13 @@ class post_layout_optimization_impl
     /** @brief Moves crossing wires onto empty ground positions; topology follows their identities.
      * @param lyt Layout. @param deleted_coords Positions cleared by rerouting.
      */
-    void fix_wires(Lyt& lyt, const std::vector<tile<Lyt>>& deleted_coords)
+    void fix_wires(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                   const std::vector<fiction::layouts::layout_base::coordinate>&            deleted_coords)
     {
         for (const auto& t : deleted_coords)
         {
-            const tile<Lyt> ground{t.x, t.y, 0};
-            const auto      above = lyt.above(ground);
+            const fiction::layouts::layout_base::coordinate ground{t.x, t.y, 0};
+            const auto                                      above = lyt.above(ground);
             if (above && lyt.is_empty_tile(ground))
             {
                 if (const auto id = lyt.find_object(*above); id && lyt.is_wire(*id))
@@ -573,17 +573,19 @@ class post_layout_optimization_impl
      * @param lyt Layout. @param position Gate coordinate. @return Routes adjacent to the gate.
      * @throws std::invalid_argument If an intermediate wire is disconnected or cyclic.
      */
-    [[nodiscard]] fanin_fanout_data<Lyt> get_fanin_and_fanouts(const Lyt& lyt, const tile<Lyt>& position)
+    [[nodiscard]] fanin_fanout_data
+    get_fanin_and_fanouts(const fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                          const fiction::layouts::layout_base::coordinate&                               position)
     {
-        fanin_fanout_data<Lyt> data{};
-        const auto             gate = *lyt.find_object(position);
-        const auto             wire = [&](const auto id) { return lyt.is_wire(id) && lyt.fanout_size(id) == 1; };
+        fanin_fanout_data data{};
+        const auto        gate = *lyt.find_object(position);
+        const auto        wire = [&](const auto id) { return lyt.is_wire(id) && lyt.fanout_size(id) == 1; };
         lyt.foreach_fanin(gate,
                           [&](const auto source, const auto index)
                           {
-                              layout_coordinate_path                      path{position};
-                              auto                                        id = source;
-                              std::unordered_set<typename Lyt::object_id> visited{};
+                              layout_coordinate_path                                 path{position};
+                              auto                                                   id = source;
+                              std::unordered_set<fiction::layouts::layout_object_id> visited{};
                               while (true)
                               {
                                   path.push_back(lyt.get_tile(id));
@@ -611,8 +613,8 @@ class post_layout_optimization_impl
         lyt.foreach_sink(gate,
                          [&](auto destination)
                          {
-                             layout_coordinate_path                      path{position};
-                             std::unordered_set<typename Lyt::object_id> visited{};
+                             layout_coordinate_path                                 path{position};
+                             std::unordered_set<fiction::layouts::layout_object_id> visited{};
                              while (true)
                              {
                                  const auto id = destination.object;
@@ -643,7 +645,10 @@ class post_layout_optimization_impl
      * @param end_tile The ending coordinate of the path.
      * @return The computed path as a sequence of coordinates in the layout.
      */
-    layout_coordinate_path get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start_tile, const tile<Lyt>& end_tile)
+    layout_coordinate_path
+    get_path_and_obstruct(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                          const fiction::layouts::layout_base::coordinate&                         start_tile,
+                          const fiction::layouts::layout_base::coordinate&                         end_tile)
     {
         using dist = physical_design::path_finding::twoddwave_distance_functor;
         using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
@@ -680,8 +685,10 @@ class post_layout_optimization_impl
      * @param current Current gate coordinate. @param data Adjacent routes. @param moved Successful movement flag.
      * @param original Original coordinate. @return Whether another candidate may be tried.
      */
-    bool check_new_position(Lyt& lyt, const tile<Lyt>& candidate, uint64_t& attempts, tile<Lyt>& current,
-                            const fanin_fanout_data<Lyt>& data, bool& moved, const tile<Lyt>& original)
+    bool check_new_position(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                            const fiction::layouts::layout_base::coordinate& candidate, uint64_t& attempts,
+                            fiction::layouts::layout_base::coordinate& current, const fanin_fanout_data& data,
+                            bool& moved, const fiction::layouts::layout_base::coordinate& original)
     {
         if ((candidate != current && !lyt.is_empty_tile(candidate)) ||
             !lyt.is_empty_tile({candidate.x, candidate.y, 1}))
@@ -727,8 +734,10 @@ class post_layout_optimization_impl
     /** @brief Moves the gate back and recreates its original routing with ordered input endpoints.
      * @param lyt Layout. @param current Current coordinate. @param original Original coordinate. @param data Routes.
      */
-    void restore_original_wiring(Lyt& lyt, const tile<Lyt>& current, const tile<Lyt>& original,
-                                 const fanin_fanout_data<Lyt>& data)
+    void restore_original_wiring(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                                 const fiction::layouts::layout_base::coordinate&                         current,
+                                 const fiction::layouts::layout_base::coordinate&                         original,
+                                 const fanin_fanout_data&                                                 data)
     {
         lyt.move_object(*lyt.find_object(current), original);
         for (std::size_t index{}; index < data.routes.size(); ++index)
@@ -747,7 +756,8 @@ class post_layout_optimization_impl
     /** @brief Relocates a gate toward the origin and reroutes without changing identities or input numbering.
      * @param lyt Layout. @param original Original coordinate. @return Whether the gate moved.
      */
-    bool improve_gate_location(Lyt& lyt, const tile<Lyt>& original)
+    bool improve_gate_location(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                               const fiction::layouts::layout_base::coordinate&                         original)
     {
         const auto data = get_fanin_and_fanouts(lyt, original);
         int32_t    min_x{}, min_y{};
@@ -852,19 +862,16 @@ class post_layout_optimization_impl
  * @note Exceptions may leave a partially edited layout. Object identities, occupancy, and connection storage remain
  * structurally valid; logical equivalence and physical validity are not guaranteed after failure.
  *
- * @tparam Lyt Cartesian gate-level layout type.
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to optimize.
  * @param ps Parameters.
  * @param pst Statistics.
  * @throws std::invalid_argument If clocking or occupied geometry is invalid.
  * @throws std::overflow_error If the extent leaves no room for signed routing coordinates.
  */
-template <typename Lyt>
-void post_layout_optimization(Lyt& lyt, post_layout_optimization_params ps = {},
-                              post_layout_optimization_stats* pst = nullptr)
+inline void post_layout_optimization(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+                                     post_layout_optimization_params                                          ps = {},
+                                     post_layout_optimization_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     if (!lyt.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME))
     {
@@ -885,8 +892,8 @@ void post_layout_optimization(Lyt& lyt, post_layout_optimization_params ps = {},
             }
         });
     // initialize stats for runtime measurement
-    post_layout_optimization_stats             st{};
-    detail::post_layout_optimization_impl<Lyt> p{lyt, ps, st};
+    post_layout_optimization_stats        st{};
+    detail::post_layout_optimization_impl p{lyt, ps, st};
 
     p.run();
 

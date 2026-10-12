@@ -49,7 +49,7 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
     {
         /** @brief Layout copy for one optimization measurement. */
         auto optimized_layout = layout.clone();
-        post_layout_optimization<gate_layout>(optimized_layout, full_optimization_params);
+        post_layout_optimization(optimized_layout, full_optimization_params);
     };
 
     post_layout_optimization_params wiring_reduction_only_params{};
@@ -63,7 +63,7 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
     {
         /** @brief Layout copy for one optimization measurement. */
         auto optimized_layout = layout.clone();
-        post_layout_optimization<gate_layout>(optimized_layout, wiring_reduction_only_params);
+        post_layout_optimization(optimized_layout, wiring_reduction_only_params);
     };
 }
 

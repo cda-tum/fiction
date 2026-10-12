@@ -18,8 +18,10 @@
 #pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
@@ -47,6 +49,7 @@
 #include <atomic>
 #include <cassert>
 #include <chrono>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -1219,7 +1222,9 @@ class graph_oriented_layout_design_impl
      * Defaults to `new_gate_location::NONE`.
      * @return A path from `src` to `dest` if one exists.
      */
-    [[nodiscard]] layout_coordinate_path check_path(const Lyt& layout, const tile<Lyt>& src, const tile<Lyt>& dest,
+    [[nodiscard]] layout_coordinate_path check_path(const Lyt&                                       layout,
+                                                    const fiction::layouts::layout_base::coordinate& src,
+                                                    const fiction::layouts::layout_base::coordinate& dest,
                                                     const new_gate_location new_gate_loc = new_gate_location::NONE,
                                                     const bool              check_straight_inverter = false)
     {
@@ -1305,7 +1310,8 @@ class graph_oriented_layout_design_impl
 
         layout.resize({static_cast<int64_t>(layout.width()) + resize, static_cast<int64_t>(layout.height()) + resize,
                        layout.layers()});
-        const tile<Lyt> drain{static_cast<int32_t>(layout.width() - 1), static_cast<int32_t>(layout.height() - 1), 0};
+        const fiction::layouts::layout_base::coordinate drain{static_cast<int32_t>(layout.width() - 1),
+                                                              static_cast<int32_t>(layout.height() - 1), 0};
 
         int32_t min_x = 0;
         int32_t min_y = 0;
@@ -1334,7 +1340,7 @@ class graph_oriented_layout_design_impl
         // check if a path from the input to the drain exists
         const auto check_tile = [&](const int32_t x, const int32_t y)
         {
-            const tile<Lyt> tile{x, y, 0};
+            const fiction::layouts::layout_base::coordinate tile{x, y, 0};
             if (!check_path(layout, tile, drain, new_gate_location::SRC).empty())
             {
                 count_expansions++;
@@ -1427,7 +1433,7 @@ class graph_oriented_layout_design_impl
         // check if path from previous tile to PO exists
         auto check_tile = [&](const int64_t x, const int64_t y)
         {
-            const tile<Lyt> tile{x, y, 0};
+            const fiction::layouts::layout_base::coordinate tile{x, y, 0};
             const auto check_straight_inverter = ps.straight_inverters && layout.is_inv(*layout.find_object(pre_t));
 
             if (!check_path(layout, pre_t, tile, new_gate_location::DEST, check_straight_inverter).empty())
@@ -1474,15 +1480,16 @@ class graph_oriented_layout_design_impl
         // check if path from previous tile to new tile and from new tile to drain exist
         const auto check_tile = [&](const int64_t x, const int64_t y)
         {
-            const tile<Lyt> new_pos{static_cast<int64_t>(pre_t.x) + x, static_cast<int64_t>(pre_t.y) + y, 0};
+            const fiction::layouts::layout_base::coordinate new_pos{static_cast<int64_t>(pre_t.x) + x,
+                                                                    static_cast<int64_t>(pre_t.y) + y, 0};
             const auto check_straight_inverter = ps.straight_inverters && layout.is_inv(*layout.find_object(pre_t));
 
             if (!check_path(layout, pre_t, new_pos, new_gate_location::DEST, check_straight_inverter).empty())
             {
                 layout.resize({static_cast<int64_t>(layout.width()) + 1, static_cast<int64_t>(layout.height()) + 1,
                                layout.layers()});
-                const tile<Lyt> drain{static_cast<int32_t>(layout.width() - 1),
-                                      static_cast<int32_t>(layout.height() - 1), 0};
+                const fiction::layouts::layout_base::coordinate drain{static_cast<int32_t>(layout.width() - 1),
+                                                                      static_cast<int32_t>(layout.height() - 1), 0};
 
                 if (!check_path(layout, new_pos, drain, new_gate_location::SRC).empty())
                 {
@@ -1544,7 +1551,7 @@ class graph_oriented_layout_design_impl
         // check if path from previous tiles to new tile and from new tile to drain exist
         auto check_tile = [&](const int64_t x, const int64_t y)
         {
-            const tile<Lyt> new_pos{min_x + x, min_y + y, 0};
+            const fiction::layouts::layout_base::coordinate new_pos{min_x + x, min_y + y, 0};
             auto check_straight_inverter = ps.straight_inverters && layout.is_inv(*layout.find_object(pre1_t));
 
             const auto path = check_path(layout, pre1_t, new_pos, new_gate_location::DEST, check_straight_inverter);
@@ -1560,8 +1567,8 @@ class graph_oriented_layout_design_impl
                 {
                     layout.resize({static_cast<int64_t>(layout.width()) + 1, static_cast<int64_t>(layout.height()) + 1,
                                    layout.layers()});
-                    const tile<Lyt> drain{static_cast<int32_t>(layout.width() - 1),
-                                          static_cast<int32_t>(layout.height() - 1), 0};
+                    const fiction::layouts::layout_base::coordinate drain{static_cast<int32_t>(layout.width() - 1),
+                                                                          static_cast<int32_t>(layout.height() - 1), 0};
 
                     if (!check_path(layout, new_pos, drain, new_gate_location::SRC).empty())
                     {
@@ -1642,7 +1649,7 @@ class graph_oriented_layout_design_impl
             if (fc.fanin_nodes.empty())
             {
                 coord_vec_type positions{};
-                const auto          x = static_cast<int32_t>(static_cast<int64_t>(layout.width()) - 1);
+                const auto     x = static_cast<int32_t>(static_cast<int64_t>(layout.width()) - 1);
                 for (int64_t y{}; y < static_cast<int64_t>(layout.height()); ++y)
                 {
                     if (layout.is_empty_tile({x, y}) && layout.is_empty_tile({x - 1, y}))
@@ -1681,8 +1688,8 @@ class graph_oriented_layout_design_impl
         {
             layout.resize(
                 {static_cast<int64_t>(layout.width()) + 1, static_cast<int64_t>(layout.height()) + 1, layout.layers()});
-            const tile<Lyt> drain{static_cast<int32_t>(layout.width() - 1), static_cast<int32_t>(layout.height() - 1),
-                                  0};
+            const fiction::layouts::layout_base::coordinate drain{static_cast<int32_t>(layout.width() - 1),
+                                                                  static_cast<int32_t>(layout.height() - 1), 0};
 
             const bool path_exists = !check_path(layout, t, drain, new_gate_location::DEST).empty();
             layout.resize(
@@ -1717,8 +1724,8 @@ class graph_oriented_layout_design_impl
 
                 if (check_straight_inverter)
                 {
-                    const tile<Lyt> right_tile{layout_tile.x + 1, layout_tile.y, 0};
-                    const tile<Lyt> bottom_tile{layout_tile.x, layout_tile.y + 1, 0};
+                    const fiction::layouts::layout_base::coordinate right_tile{layout_tile.x + 1, layout_tile.y, 0};
+                    const fiction::layouts::layout_base::coordinate bottom_tile{layout_tile.x, layout_tile.y + 1, 0};
 
                     const auto incoming = layout.incoming_data_flow(layout_tile);
                     if (incoming.empty())
@@ -1742,8 +1749,8 @@ class graph_oriented_layout_design_impl
 
             if (two_dangling_fanouts)
             {
-                const tile<Lyt> right_tile{layout_tile.x + 1, layout_tile.y, 0};
-                const tile<Lyt> bottom_tile{layout_tile.x, layout_tile.y + 1, 0};
+                const fiction::layouts::layout_base::coordinate right_tile{layout_tile.x + 1, layout_tile.y, 0};
+                const fiction::layouts::layout_base::coordinate bottom_tile{layout_tile.x, layout_tile.y + 1, 0};
 
                 if (!(is_empty_tile_or_crossable(right_tile) && is_empty_tile_or_crossable(bottom_tile)))
                 {
@@ -1762,8 +1769,8 @@ class graph_oriented_layout_design_impl
      * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @param fc A vector of nodes that precede the single fanin node.
      */
-    void route_single_input_node(const tile<Lyt>& position, Lyt& layout, node_dict_type<tec_nt>& node2pos,
-                                 const networks::fanin_container<tec_nt>& fc)
+    void route_single_input_node(const fiction::layouts::layout_base::coordinate& position, Lyt& layout,
+                                 node_dict_type<tec_nt>& node2pos, const networks::fanin_container<tec_nt>& fc)
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = layout.get_tile(node2pos[pre]);
@@ -1789,8 +1796,8 @@ class graph_oriented_layout_design_impl
      * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @param fc A vector of nodes that precede the double fanin node.
      */
-    void route_double_input_node(const tile<Lyt>& position, Lyt& layout, node_dict_type<tec_nt>& node2pos,
-                                 const networks::fanin_container<tec_nt>& fc)
+    void route_double_input_node(const fiction::layouts::layout_base::coordinate& position, Lyt& layout,
+                                 node_dict_type<tec_nt>& node2pos, const networks::fanin_container<tec_nt>& fc)
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -1832,8 +1839,8 @@ class graph_oriented_layout_design_impl
      * @param ssg The search space graph.
      * @return A boolean indicating if a solution was found.
      */
-    [[nodiscard]] bool place_and_route(const tile<Lyt>& position, Lyt& layout, search_space_graph& ssg,
-                                       placement_info& place_info)
+    [[nodiscard]] bool place_and_route(const fiction::layouts::layout_base::coordinate& position, Lyt& layout,
+                                       search_space_graph& ssg, placement_info& place_info)
     {
         // vector to store preceding nodes
         prepare_constant_outputs(layout, ssg, place_info);
@@ -1964,8 +1971,8 @@ class graph_oriented_layout_design_impl
      * @param ssg The search space graph.
      * @param place_info The placement information.
      */
-    void adjust_layout_size(const tile<Lyt>& position, Lyt& layout, const search_space_graph& ssg,
-                            const placement_info& place_info)
+    void adjust_layout_size(const fiction::layouts::layout_base::coordinate& position, Lyt& layout,
+                            const search_space_graph& ssg, const placement_info& place_info)
     {
         if (position.x == static_cast<int32_t>(layout.width() - 1) &&
             !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
@@ -2660,8 +2667,10 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
                                                 graph_oriented_layout_design_stats* pst                   = nullptr,
                                                 std::function<uint64_t(const Lyt&)> custom_cost_objective = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::cartesian_layout>, "Lyt is not a Cartesian layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here

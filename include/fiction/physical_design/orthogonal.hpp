@@ -18,8 +18,13 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/networks/technology_network.hpp"
@@ -41,6 +46,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <iostream>
 #include <optional>
@@ -243,7 +249,8 @@ uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
 }
 
 template <typename Lyt, typename Ntk>
-extent<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn, const uint32_t num_multi_output_nodes)
+fiction::layouts::layout_base::extent determine_layout_size(const coloring_container<Ntk>& ctn,
+                                                            const uint32_t                 num_multi_output_nodes)
 {
     uint64_t x = 0ull, y = ctn.color_ntk.num_pis() == 0 ? 0 : ctn.color_ntk.num_pis() - 1;
     ctn.color_ntk.foreach_node(
@@ -297,13 +304,14 @@ extent<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn, const uint
 }
 
 template <typename Lyt>
-typename Lyt::object_id wire_east(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
+typename Lyt::object_id wire_east(Lyt& lyt, const fiction::layouts::layout_base::coordinate& src,
+                                  const fiction::layouts::layout_base::coordinate& dest)
 {
     auto a = lyt.find_object(src).value();
 
     for (auto x = src.x + 1; x < dest.x; ++x)
     {
-        auto t = tile<Lyt>{x, src.y, 0};
+        auto t = fiction::layouts::layout_base::coordinate{x, src.y, 0};
         if (!lyt.is_empty_tile(t))  // crossing case
         {
             t = lyt.above(t).value();
@@ -316,13 +324,14 @@ typename Lyt::object_id wire_east(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt
 }
 
 template <typename Lyt>
-typename Lyt::object_id wire_south(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
+typename Lyt::object_id wire_south(Lyt& lyt, const fiction::layouts::layout_base::coordinate& src,
+                                   const fiction::layouts::layout_base::coordinate& dest)
 {
     auto a = lyt.find_object(src).value();
 
     for (auto y = src.y + 1; y < dest.y; ++y)
     {
-        auto t = tile<Lyt>{src.x, y, 0};
+        auto t = fiction::layouts::layout_base::coordinate{src.x, y, 0};
         if (!lyt.is_empty_tile(t))  // crossing case
         {
             t = lyt.above(t).value();
@@ -335,9 +344,10 @@ typename Lyt::object_id wire_south(Lyt& lyt, const tile<Lyt>& src, const tile<Ly
 }
 
 template <typename Lyt, typename Ntk>
-typename Lyt::object_id connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-                                          tile<Lyt> pre1_t, tile<Lyt> pre2_t,
-                                          const std::optional<bool>& c = std::nullopt)
+typename Lyt::object_id
+connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
+                  const mockturtle::node<Ntk>& n, fiction::layouts::layout_base::coordinate pre1_t,
+                  fiction::layouts::layout_base::coordinate pre2_t, const std::optional<bool>& c = std::nullopt)
 {
     const bool reversed = pre2_t < pre1_t;
     if (reversed)
@@ -350,8 +360,9 @@ typename Lyt::object_id connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
 }
 
 template <typename Lyt, typename Ntk>
-typename Lyt::object_id connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-                                          const tile<Lyt>& pre_t)
+typename Lyt::object_id connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
+                                          const mockturtle::node<Ntk>&                     n,
+                                          const fiction::layouts::layout_base::coordinate& pre_t)
 {
     if (lyt.is_westwards_of(t, pre_t))
     {
@@ -422,7 +433,7 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
                 // place PO at the border and connect it by wire segments
                 else
                 {
-                    const tile<Lyt> anker{po_tile};
+                    const fiction::layouts::layout_base::coordinate anker{po_tile};
 
                     po_tile = layout.eastern_border_of(po_tile).value();
 
@@ -520,7 +531,7 @@ class orthogonal_impl
         mockturtle::node_map<typename Lyt::object_id, decltype(ctn.color_ntk)> pi2node{ctn.color_ntk};
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
-        tile<Lyt> latest_pos{1, 0};
+        fiction::layouts::layout_base::coordinate latest_pos{1, 0};
 
         utils::progress_reporter progress{ps.on_progress, "placing gates", ctn.color_ntk.size()};
 
@@ -564,14 +575,14 @@ class orthogonal_impl
                         // n is colored east
                         if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
                         {
-                            const tile<Lyt> t{latest_pos.x, pre_t.y};
+                            const fiction::layouts::layout_base::coordinate t{latest_pos.x, pre_t.y};
                             node2pos[n] = connect_and_place(layout, t, ctn.color_ntk, n, pre_t);
                             ++latest_pos.x;
                         }
                         // n is colored south
                         else if (clr == ctn.color_south)
                         {
-                            const tile<Lyt> t{pre_t.x, latest_pos.y};
+                            const fiction::layouts::layout_base::coordinate t{pre_t.x, latest_pos.y};
                             node2pos[n] = connect_and_place(layout, t, ctn.color_ntk, n, pre_t);
                             ++latest_pos.y;
                         }
@@ -588,8 +599,8 @@ class orthogonal_impl
 
                         auto pre1_t = layout.get_tile(node2pos[pre1]), pre2_t = layout.get_tile(node2pos[pre2]);
 
-                        tile<Lyt> t{};
-                        bool      reversed = false;
+                        fiction::layouts::layout_base::coordinate t{};
+                        bool                                      reversed = false;
 
                         // n is colored east
                         if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
@@ -734,7 +745,9 @@ template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
                orthogonal_physical_design_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here

@@ -309,8 +309,8 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return lyt;
     };
 
-    const auto cl_4_seg = (apply_gate_library<bestagon_library, hex_gate_clk_lyt>(
-        create_diagonal_wire_with_n_non_terminating_segments(2)));
+    const auto cl_4_seg =
+        (apply_gate_library<bestagon_library>(create_diagonal_wire_with_n_non_terminating_segments(2)));
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
@@ -318,8 +318,8 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return clustercomplete(cl_4_seg, sim_params);
     };
 
-    const auto cl_3_seg = (apply_gate_library<bestagon_library, hex_gate_clk_lyt>(
-        create_diagonal_wire_with_n_non_terminating_segments(1)));
+    const auto cl_3_seg =
+        (apply_gate_library<bestagon_library>(create_diagonal_wire_with_n_non_terminating_segments(1)));
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {

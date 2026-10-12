@@ -16,6 +16,11 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -25,6 +30,7 @@
 #include <nlohmann/json.hpp>
 
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -237,7 +243,7 @@ class gate_level_drvs_impl
      * @param t Tile whose attributes are to be logged.
      * @param report Report to log into.
      */
-    void log_tile(const tile<Lyt> t, nlohmann::json& report) const
+    void log_tile(const fiction::layouts::layout_base::coordinate t, nlohmann::json& report) const
     {
         std::stringstream s{};
 
@@ -556,15 +562,17 @@ class gate_level_drvs_impl
  * Unplaced objects, placed dead objects, empty terminals, and gate terminals cannot occur in the placed-object API
  * and have no corresponding checks.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The gate-level layout that is to be examined for DRVs and warnings.
  * @param ps Parameters.
  * @param pst Statistics.
  */
-template <typename Lyt>
-void gate_level_drvs(const Lyt& lyt, const gate_level_drv_params& ps = {}, gate_level_drv_stats* pst = nullptr)
+template <typename Geometry>
+void gate_level_drvs(const fiction::layouts::gate_level_layout<Geometry>& lyt, const gate_level_drv_params& ps = {},
+                     gate_level_drv_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    /** @brief Gate-level layout using the requested coordinate geometry. */
+    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
 
     gate_level_drv_stats              st{};
     detail::gate_level_drvs_impl<Lyt> p{lyt, ps, st};

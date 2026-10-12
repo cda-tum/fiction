@@ -49,7 +49,7 @@ static void check_layout_equiv(const Ntk& ntk)
     auto layout = orthogonal<Lyt>(ntk, {});
 
     wiring_reduction_stats stats{};
-    wiring_reduction<Lyt>(layout, {}, &stats);
+    wiring_reduction(layout, {}, &stats);
 
     check_eq(ntk, layout);
 
@@ -139,32 +139,32 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
         auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
         wiring_reduction_stats stats_corner_case_1{};
-        wiring_reduction<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
+        wiring_reduction(layout_corner_case_1, {}, &stats_corner_case_1);
         check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
 
         auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
         wiring_reduction_stats stats_corner_case_2{};
-        wiring_reduction<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
+        wiring_reduction(layout_corner_case_2, {}, &stats_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
 
         auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
         wiring_reduction_stats stats_corner_case_3{};
-        wiring_reduction<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
+        wiring_reduction(layout_corner_case_3, {}, &stats_corner_case_3);
         check_eq(blueprints::optimization_layout_corner_case_outputs_3<gate_layout>(), layout_corner_case_3);
 
         auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
         wiring_reduction_stats stats_corner_case_4{};
-        wiring_reduction<gate_layout>(layout_corner_case_4, {}, &stats_corner_case_4);
+        wiring_reduction(layout_corner_case_4, {}, &stats_corner_case_4);
         check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_4);
 
         auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
         wiring_reduction_stats stats_corner_case_5{};
-        wiring_reduction<gate_layout>(layout_corner_case_5, {}, &stats_corner_case_5);
+        wiring_reduction(layout_corner_case_5, {}, &stats_corner_case_5);
         check_eq(blueprints::optimization_layout_corner_case_outputs_5<gate_layout>(), layout_corner_case_5);
 
         auto layout_corner_case_inputs = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
         wiring_reduction_stats stats_corner_case_inputs{};
-        wiring_reduction<gate_layout>(layout_corner_case_inputs, {}, &stats_corner_case_inputs);
+        wiring_reduction(layout_corner_case_inputs, {}, &stats_corner_case_inputs);
         check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_inputs);
     }
 
@@ -177,7 +177,7 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
         wiring_reduction_stats  stats{};
         wiring_reduction_params params{};
         params.timeout = 1000000;
-        wiring_reduction<gate_layout>(layout, params, &stats);
+        wiring_reduction(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
     }
@@ -191,7 +191,7 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
         wiring_reduction_stats  stats{};
         wiring_reduction_params params{};
         params.timeout = 0;
-        wiring_reduction<gate_layout>(layout, params, &stats);
+        wiring_reduction(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
         CHECK(stats.area_improvement == 0);
@@ -212,8 +212,7 @@ TEST_CASE("Wrong clocking scheme", "[wiring-reduction]")
 
         wiring_reduction_stats stats_wrong_clocking_scheme{};
 
-        CHECK_THROWS_AS(wiring_reduction<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme),
-                        std::invalid_argument);
+        CHECK_THROWS_AS(wiring_reduction(obstr_lyt, {}, &stats_wrong_clocking_scheme), std::invalid_argument);
     }
 }
 
@@ -239,13 +238,13 @@ TEST_CASE("Optimization accepts interior terminals", "[wiring-reduction]")
     SECTION("Interior primary input")
     {
         auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
+        CHECK_NOTHROW(wiring_reduction(layout));
     }
 
     SECTION("Interior primary output")
     {
         auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(wiring_reduction<gate_layout>(layout));
+        CHECK_NOTHROW(wiring_reduction(layout));
     }
 }
 
@@ -260,7 +259,7 @@ TEST_CASE("Wiring reduction reports progress", "[wiring-reduction]")
     wiring_reduction_params params{};
     params.on_progress = rec.callback();
 
-    wiring_reduction<gate_layout>(layout, params);
+    wiring_reduction(layout, params);
 
     check_eq(ntk, layout);
 

@@ -62,16 +62,16 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
                 const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, k);
 
                 CHECK(collection.size() == 1);
-                CHECK(collection[0].source() == coordinate<lyt>{0, 0});
-                CHECK(collection[0].target() == coordinate<lyt>{1, 1});
+                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
+                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{1, 1});
             }
             SECTION("(1,1) to (0,0)")  // two valid paths
             {
                 const auto collection = yen_k_shortest_paths<path>(layout, {.source = {1, 1}, .target = {0, 0}}, k);
 
                 CHECK(collection.size() == 1);
-                CHECK(collection[0].source() == coordinate<lyt>{1, 1});
-                CHECK(collection[0].target() == coordinate<lyt>{0, 0});
+                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{1, 1});
+                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 0});
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
@@ -155,8 +155,8 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
                     const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, k);
 
                     CHECK(collection.size() == 1);
-                    CHECK(collection[0].source() == coordinate<clk_lyt>{0, 0});
-                    CHECK(collection[0].target() == coordinate<clk_lyt>{1, 1});
+                    CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
+                    CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{1, 1});
                 }
                 SECTION("(1,1) to (0,0)")  // no valid paths
                 {
@@ -500,11 +500,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
             REQUIRE(collection.size() == 1);
             const auto& path = collection[0];
             REQUIRE(path.size() == 7);
-            CHECK(path[1] == coordinate<gate_lyt>{0, 1});
-            CHECK(path[2] == coordinate<gate_lyt>{0, 2});
-            CHECK(path[3] == coordinate<gate_lyt>{0, 3});
-            CHECK(path[4] == coordinate<gate_lyt>{1, 3});
-            CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+            CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
+            CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
+            CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
+            CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
+            CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
 
             // coordinates should still be obstructed
             CHECK(search_obstructions.is_obstructed_coordinate({3, 0}));
@@ -536,11 +536,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
                 REQUIRE(path.size() == 7);
-                CHECK(path[1] == coordinate<gate_lyt>{0, 1});
-                CHECK(path[2] == coordinate<gate_lyt>{0, 2});
-                CHECK(path[3] == coordinate<gate_lyt>{0, 3});
-                CHECK(path[4] == coordinate<gate_lyt>{1, 3});
-                CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
+                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
+                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
+                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
+                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
             }
             SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
             {
@@ -561,11 +561,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
                 REQUIRE(path.size() == 7);
-                CHECK(path[1] == coordinate<gate_lyt>{0, 1});
-                CHECK(path[2] == coordinate<gate_lyt>{0, 2});
-                CHECK(path[3] == coordinate<gate_lyt>{0, 3});
-                CHECK(path[4] == coordinate<gate_lyt>{1, 3});
-                CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
+                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
+                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
+                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
+                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
 
                 // coordinates should still be obstructed
                 CHECK(search_obstructions.is_obstructed_coordinate({3, 0}));
@@ -591,11 +591,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
                 REQUIRE(path.size() == 7);
-                CHECK(path[1] == coordinate<gate_lyt>{1, 0});
-                CHECK(path[2] == coordinate<gate_lyt>{1, 1});
-                CHECK(path[3] == coordinate<gate_lyt>{1, 2});
-                CHECK(path[4] == coordinate<gate_lyt>{2, 2});
-                CHECK(path[5] == coordinate<gate_lyt>{3, 2});
+                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
+                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
+                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
+                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
+                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
             }
             SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
             {
@@ -612,11 +612,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
                 REQUIRE(path.size() == 7);
-                CHECK(path[1] == coordinate<gate_lyt>{1, 0});
-                CHECK(path[2] == coordinate<gate_lyt>{1, 1});
-                CHECK(path[3] == coordinate<gate_lyt>{1, 2});
-                CHECK(path[4] == coordinate<gate_lyt>{2, 2});
-                CHECK(path[5] == coordinate<gate_lyt>{3, 2});
+                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
+                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
+                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
+                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
+                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
 
                 // coordinates should still be obstructed
                 CHECK(search_obstructions.is_obstructed_coordinate({3, 0}));
@@ -651,11 +651,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
             REQUIRE(collection.size() == 1);
             const auto& path = collection[0];
             REQUIRE(path.size() == 7);
-            CHECK(path[1] == coordinate<gate_lyt>{0, 1});
-            CHECK(path[2] == coordinate<gate_lyt>{0, 2});
-            CHECK(path[3] == coordinate<gate_lyt>{0, 3});
-            CHECK(path[4] == coordinate<gate_lyt>{1, 3});
-            CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+            CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
+            CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
+            CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
+            CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
+            CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
 
             // connections should still be obstructed
             CHECK(search_obstructions.is_obstructed_connection({0, 0}, {1, 0}));
@@ -687,11 +687,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
                 REQUIRE(path.size() == 7);
-                CHECK(path[1] == coordinate<gate_lyt>{0, 1});
-                CHECK(path[2] == coordinate<gate_lyt>{0, 2});
-                CHECK(path[3] == coordinate<gate_lyt>{0, 3});
-                CHECK(path[4] == coordinate<gate_lyt>{1, 3});
-                CHECK(path[5] == coordinate<gate_lyt>{2, 3});
+                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
+                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
+                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
+                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
+                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
 
                 // connections should still be obstructed
                 CHECK(search_obstructions.is_obstructed_connection({0, 0}, {1, 0}));
@@ -717,11 +717,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
                 REQUIRE(path.size() == 7);
-                CHECK(path[1] == coordinate<gate_lyt>{1, 0});
-                CHECK(path[2] == coordinate<gate_lyt>{1, 1});
-                CHECK(path[3] == coordinate<gate_lyt>{1, 2});
-                CHECK(path[4] == coordinate<gate_lyt>{2, 2});
-                CHECK(path[5] == coordinate<gate_lyt>{3, 2});
+                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
+                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
+                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
+                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
+                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
 
                 // connections should still be obstructed
                 CHECK(search_obstructions.is_obstructed_connection({2, 0}, {3, 0}));
@@ -733,7 +733,6 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
 TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "[k-shortest-paths]")
 {
     using gate_lyt   = gate_level_layout<cartesian_layout>;
-    using obst_lyt   = gate_lyt;
     using coord_path = layout_coordinate_path;
 
     // enable crossings
@@ -901,15 +900,18 @@ TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", 
         layout.foreach_coordinate(
             [&](const auto& c)
             {
-                CHECK(layout.is_obstructed_coordinate(c) == (c == coordinate<lyt>{1, 0}));
-                CHECK(extra.is_obstructed_coordinate(c) == (c == coordinate<lyt>{1, 0} || c == coordinate<lyt>{2, 1}));
+                CHECK(layout.is_obstructed_coordinate(c) == (c == fiction::layouts::layout_base::coordinate{1, 0}));
+                CHECK(extra.is_obstructed_coordinate(c) == (c == fiction::layouts::layout_base::coordinate{1, 0} ||
+                                                            c == fiction::layouts::layout_base::coordinate{2, 1}));
                 layout.foreach_coordinate(
                     [&](const auto& target)
                     {
                         CHECK(layout.is_obstructed_connection(c, target) ==
-                              (c == coordinate<lyt>{0, 1} && target == coordinate<lyt>{1, 1}));
+                              (c == fiction::layouts::layout_base::coordinate{0, 1} &&
+                               target == fiction::layouts::layout_base::coordinate{1, 1}));
                         CHECK(extra.is_obstructed_connection(c, target) ==
-                              (c == coordinate<lyt>{1, 2} && target == coordinate<lyt>{2, 2}));
+                              (c == fiction::layouts::layout_base::coordinate{1, 2} &&
+                               target == fiction::layouts::layout_base::coordinate{2, 2}));
                     });
             });
     }

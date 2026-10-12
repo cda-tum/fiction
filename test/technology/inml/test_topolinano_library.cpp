@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
@@ -157,7 +158,7 @@ TEST_CASE("ToPoliNano rejects primary-input fanout", "[inml-topolinano-library]"
     REQUIRE(st.drvs == 0);
 
     CHECK_THROWS_AS(apply_gate_library<topolinano_library>(lyt),
-                    fcn::unsupported_gate_type_exception<tile<decltype(lyt)>>);
+                    fcn::unsupported_gate_type_exception<fiction::layouts::layout_base::coordinate>);
 }
 
 TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")

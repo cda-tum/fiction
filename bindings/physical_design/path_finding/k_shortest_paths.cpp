@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -47,14 +48,15 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
 
     m.def(
         "yen_k_shortest_paths",
-        [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
-           const uint32_t k, const fiction::physical_design::path_finding::yen_k_shortest_paths_params& params,
-           const fiction::layouts::obstructions& obstructions)
+        [](const Lyt& lyt, const fiction::layouts::layout_base::coordinate& source,
+           const fiction::layouts::layout_base::coordinate& target, const uint32_t k,
+           const fiction::physical_design::path_finding::yen_k_shortest_paths_params& params,
+           const fiction::layouts::obstructions&                                      obstructions)
         {
             const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<
                 fiction::physical_design::layout_coordinate_path, Lyt>(lyt, {source, target}, k, params, obstructions);
 
-            std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
+            std::vector<std::vector<fiction::layouts::layout_base::coordinate>> paths{};
             paths.reserve(k_paths.size());
 
             for (const auto& path : k_paths)

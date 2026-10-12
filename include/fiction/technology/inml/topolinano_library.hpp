@@ -19,6 +19,11 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/inml/layout.hpp"
@@ -28,6 +33,7 @@
 #include <phmap.h>
 
 #include <algorithm>
+#include <concepts>
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
@@ -59,10 +65,13 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * separate fanout wire instead.
      */
     template <typename GateLyt>
-    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
-        static_assert(is_shifted_cartesian_layout_v<GateLyt>, "GateLyt must be a shifted Cartesian layout");
+        static_assert(
+            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
+            "GateLyt must be a gate-level layout");
+        static_assert(std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>,
+                      "GateLyt must be a shifted Cartesian layout");
 
         if (layouts::is_row_arrangement(lyt.get_arrangement()))
         {
@@ -407,7 +416,8 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @return Physical connector ports.
      */
     template <typename Lyt>
-    [[nodiscard]] static fcn::port_list<fcn::port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
+    [[nodiscard]] static fcn::port_list<fcn::port_position>
+    determine_port_routing(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
         fcn::port_list<fcn::port_position> p{};
 

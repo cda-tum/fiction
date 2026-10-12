@@ -114,8 +114,8 @@ try
                 max_relocations = gate_level_layout.area();
             }
             // perform post-layout optimization
-            post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,
-                                               &post_layout_optimization_stats);
+            post_layout_optimization(gate_level_layout, post_layout_optimization_params,
+                                     &post_layout_optimization_stats);
 
             // check equivalence
             const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);

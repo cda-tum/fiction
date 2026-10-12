@@ -18,6 +18,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
+
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
@@ -69,7 +71,7 @@ TEST_CASE("Circuit design rejects unsupported gates before gate search", "[on-th
     params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
 
     CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params),
-                    fcn::unsupported_gate_type_exception<tile<hex_gate_clk_lyt>>);
+                    fcn::unsupported_gate_type_exception<fiction::layouts::layout_base::coordinate>);
     CHECK(gate_layout.num_pis() == 3);
     CHECK(gate_layout.is_maj(majority));
     CHECK(gate_layout.source({majority, 0}) == first);

@@ -94,8 +94,8 @@ void post_layout_optimization(nanobind::module_& m)
         .def_ro("num_crossings_after", &fiction::physical_design::post_layout_optimization_stats::num_crossings_after,
                 DOC(fiction_physical_design_post_layout_optimization_stats_num_crossings_after));
 
-    m.def("post_layout_optimization", &fiction::physical_design::post_layout_optimization<py_cartesian_gate_layout>,
-          py::arg("layout"), py::arg("parameters") = fiction::physical_design::post_layout_optimization_params{},
+    m.def("post_layout_optimization", &fiction::physical_design::post_layout_optimization, py::arg("layout"),
+          py::arg("parameters") = fiction::physical_design::post_layout_optimization_params{},
           py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
           DOC(fiction_physical_design_post_layout_optimization));
 }

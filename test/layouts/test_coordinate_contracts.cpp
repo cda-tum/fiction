@@ -142,7 +142,7 @@ TEST_CASE("Negative cells use the clock zone below zero", "[coordinate-contracts
 
 TEST_CASE("Coordinates iterate row by row, layer by layer", "[coordinate-contracts]")
 {
-    using coord = coordinate<cartesian_layout>;
+    using coord = fiction::layouts::layout_base::coordinate;
 
     const cartesian_layout lyt{{3, 2, 2}};
 
@@ -192,14 +192,14 @@ TEST_CASE("Hexagonal diagonals at the borders reject coordinates outside the lay
     const hexagonal_layout lyt{a, {4, 4, 1}};
 
     // the origin has no north or west neighbor in any direction
-    const coordinate<hexagonal_layout> origin{0, 0, 0};
+    const fiction::layouts::layout_base::coordinate origin{0, 0, 0};
 
     CHECK_FALSE(lyt.north(origin));
     CHECK_FALSE(lyt.west(origin));
     CHECK_FALSE(lyt.north_west(origin));
 
     // the far corner has no south or east neighbor in any direction
-    const coordinate<hexagonal_layout> corner{3, 3, 0};
+    const fiction::layouts::layout_base::coordinate corner{3, 3, 0};
 
     CHECK_FALSE(lyt.south(corner));
     CHECK_FALSE(lyt.east(corner));
@@ -213,7 +213,7 @@ TEST_CASE("Hexagonal neighbor queries stay inside the layout for any 32-bit coor
     {
         const hexagonal_layout hex{a, {7, 7, 2}};
 
-        for (const auto& c : {coordinate<hexagonal_layout>{},
+        for (const auto& c : {fiction::layouts::layout_base::coordinate{},
                               {2, std::numeric_limits<int32_t>::min(), 0},
                               {2147483647, 0, 0},
                               {0, 2147483647, 0},
@@ -250,7 +250,7 @@ TEMPLATE_TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coor
     /** @brief Gate layout with stable object identities. */
     using lyt_t = gate_level_layout<TestType>;
     /** Coordinate value used for placement. */
-    using tile = coordinate<lyt_t>;
+    using tile = fiction::layouts::layout_base::coordinate;
 
     SECTION("The geometry supports more than two layers")
     {

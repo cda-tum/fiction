@@ -20,6 +20,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
+
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
@@ -132,7 +134,7 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
             }
             catch (const gate_design_exception<hex_gate_clk_lyt>& error)
             {
-                CHECK(error.which_tile() == tile<hex_gate_clk_lyt>{1, 1});
+                CHECK(error.which_tile() == fiction::layouts::layout_base::coordinate{1, 1});
                 CHECK(error.which_truth_table() == function);
                 CHECK(error.which_port_list().inp.size() == 2);
                 CHECK(error.which_port_list().out.size() == 1);

@@ -16,6 +16,11 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <bill/sat/cardinality.hpp>
@@ -25,6 +30,7 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -125,14 +131,14 @@ class sat_clocking_handler
     /** @brief SAT backend. */
     bill::solver<SolverType> solver{};
     /** @brief Clock-zone and phase key. */
-    using tile_clock_number = std::pair<tile<Lyt>, typename Lyt::clock_number_t>;
+    using tile_clock_number = std::pair<fiction::layouts::layout_base::coordinate, typename Lyt::clock_number_t>;
     /** @brief Variables for every occupied clock zone and phase. */
     std::unordered_map<tile_clock_number, bill::var_type> variables{};
     /** @brief Distinct occupied clock zones, shared across all layers. */
-    std::vector<tile<Lyt>> clock_zones{};
+    std::vector<fiction::layouts::layout_base::coordinate> clock_zones{};
 
     /** @brief Returns the zero-layer clock-zone coordinate. @param id Placed object. @return Clock zone. */
-    [[nodiscard]] tile<Lyt> clock_zone(const typename Lyt::object_id id) const
+    [[nodiscard]] fiction::layouts::layout_base::coordinate clock_zone(const typename Lyt::object_id id) const
     {
         const auto t = layout.get_tile(id);
         return {t.x, t.y, 0};
@@ -386,7 +392,9 @@ template <typename Lyt>
 bool determine_clocking(Lyt& lyt, const determine_clocking_params& params = {},
                         determine_clocking_stats* stats = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     determine_clocking_stats             st{};
     detail::determine_clocking_impl<Lyt> p{lyt, params, st};

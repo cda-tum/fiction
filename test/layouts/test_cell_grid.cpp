@@ -16,10 +16,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/cartesian_layout.hpp"
+
 #include <fiction/layouts/cell_grid.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/traits.hpp>
 
+#include <concepts>
 #include <cstdint>
 #include <set>
 
@@ -43,7 +46,7 @@ using grid = cell_grid<test_cell>;
 
 TEST_CASE("Cell grid traits", "[cell-grid]")
 {
-    CHECK(is_cartesian_layout_v<grid>);
+    CHECK(std::derived_from<grid, fiction::layouts::cartesian_layout>);
     CHECK(is_cell_grid_v<grid>);
     CHECK(has_get_layout_name_v<grid>);
     CHECK(has_set_layout_name_v<grid>);

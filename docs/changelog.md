@@ -210,6 +210,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - `bounding_box_2d` is renamed to `bounding_box` in C++ and Python.
+  - Coordinate aliases and geometry traits are removed; use `layout_base` types and concrete layout arguments.
   - Gate-level layouts now keep large-arity input storage outside the common object record.
   - **Breaking:** Clocking scheme `name()` returns a borrowed `std::string_view`. Copy with
     `std::string{scheme.name()}` when the name must outlive its scheme.
@@ -479,7 +480,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
     `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
     `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
-    and `has_is_empty_v`. Use `is_gate_level_layout_v` or `is_cell_grid_v`. The unused `is_offset_coord_v`
+    and `has_is_empty_v`. Use concrete gate-level layout arguments or `is_cell_grid_v`. The unused `is_offset_coord_v`
     and `has_offset_coord_v` are gone as well.
   - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
     `wiring_reduction_layout`.

@@ -22,6 +22,7 @@
 
 #include <phmap.h>
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -68,7 +69,7 @@ using sparse_distance_map =
 template <typename Lyt, typename Dist>
 [[nodiscard]] distance_map<Dist> initialize_distance_map(const Lyt& lyt, const distance_functor<Dist>& dist_fn)
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
     // initialize distance map
     /** Number of coordinates across all layers. */
@@ -103,7 +104,7 @@ template <typename Lyt, typename Dist>
 [[nodiscard]] sparse_distance_map<Dist> initialize_sparse_distance_map(const Lyt&                    lyt,
                                                                        const distance_functor<Dist>& dist_fn)
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
     // initialize distance map
     sparse_distance_map<Dist> dist_map{};
@@ -181,7 +182,8 @@ class distance_map_functor : public distance_functor<Dist>
             throw std::out_of_range("The coordinate is outside the distance map layout");
         }
         return static_cast<std::size_t>((static_cast<uint64_t>(c.z) * dimensions.height + static_cast<uint32_t>(c.y)) *
-                                            dimensions.width + static_cast<uint32_t>(c.x));
+                                            dimensions.width +
+                                        static_cast<uint32_t>(c.x));
     }
 };
 /**

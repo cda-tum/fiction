@@ -18,7 +18,11 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
@@ -30,6 +34,7 @@
 #include <kitty/print.hpp>
 #include <tinyxml2.h>
 
+#include <concepts>
 #include <cstdint>
 #include <ctime>
 #include <ostream>
@@ -165,15 +170,16 @@ class write_fgl_layout_impl
 
         // check if topology matches Lyt
         std::string topology{};
-        if constexpr (is_cartesian_layout_v<Lyt>)
+        if constexpr (std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
         {
             topology = "cartesian";
         }
-        else if constexpr (is_shifted_cartesian_layout_v<Lyt>)
+        else if constexpr (std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
         {
             topology = fmt::format("{}_cartesian", layouts::to_string(lyt.get_arrangement()));
         }
-        else if constexpr (is_hexagonal_layout_v<Lyt>)
+        else if constexpr ((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
+                            !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
         {
             topology = fmt::format("{}_hex", layouts::to_string(lyt.get_arrangement()));
         }
@@ -299,17 +305,17 @@ class write_fgl_layout_impl
  *
  * This overload uses an output stream to write into.
  *
- * @tparam Lyt Layout.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The layout to be written.
  * @param on_progress Receives completed serialization work.
  * @param os The output stream to write into.
  * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
  * contains illegal XML text controls.
  */
-template <typename Lyt>
-void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
+template <typename Geometry>
+void write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, std::ostream& os,
+                      utils::progress_callback on_progress = {})
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     detail::write_fgl_layout_impl p{lyt, os, std::move(on_progress)};
 
@@ -320,15 +326,16 @@ void write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback
  *
  * This overload uses a file name to create and write into.
  *
- * @tparam Lyt Layout.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The layout to be written.
  * @param on_progress Receives completed serialization work.
  * @param filename The file name to create and write into. Should preferably use the .fgl extension.
  * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
  * contains illegal XML text controls.
  */
-template <typename Lyt>
-void write_fgl_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
+template <typename Geometry>
+void write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, const std::string_view& filename,
+                      utils::progress_callback on_progress = {})
 {
     fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_fgl_layout(lyt, os, on_progress); });
 }

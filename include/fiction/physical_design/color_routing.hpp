@@ -16,6 +16,10 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/generate_edge_intersection_graph.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
@@ -25,6 +29,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -229,7 +234,9 @@ template <typename Lyt>
 bool color_routing(Lyt& lyt, const std::vector<routing_objective>& objectives, color_routing_params ps = {},
                    color_routing_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     color_routing_stats st{};
 

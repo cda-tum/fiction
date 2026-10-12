@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -46,14 +47,15 @@ void enumerate_all_paths_impl(nanobind::module_& m)
 
     m.def(
         "enumerate_all_paths",
-        [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
+        [](const Lyt& lyt, const fiction::layouts::layout_base::coordinate& source,
+           const fiction::layouts::layout_base::coordinate&                          target,
            const fiction::physical_design::path_finding::enumerate_all_paths_params& params,
            const fiction::layouts::obstructions&                                     obstructions)
         {
             const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<
                 fiction::physical_design::layout_coordinate_path, Lyt>(lyt, {source, target}, params, obstructions);
 
-            std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
+            std::vector<std::vector<fiction::layouts::layout_base::coordinate>> paths{};
             paths.reserve(all_paths.size());
 
             for (const auto& path : all_paths)

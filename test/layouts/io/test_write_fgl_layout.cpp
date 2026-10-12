@@ -20,6 +20,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -42,6 +44,7 @@
 #include <mockturtle/networks/aig.hpp>
 
 #include <array>
+#include <concepts>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -146,7 +149,7 @@ void check_parsing_equiv_layout(const Lyt& lyt)
 
     compare_written_and_read_layout(lyt, read_layout);
 
-    if constexpr (!is_cartesian_layout_v<Lyt>)
+    if constexpr (!std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
     {
         CHECK(read_layout.get_arrangement() == lyt.get_arrangement());
     }
@@ -294,7 +297,8 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
     for (const auto* const name : {"OPEN3", "OPEN4", "COLUMNAR3", "COLUMNAR4", "ROW3", "ROW4", "2DDWAVE3", "2DDWAVE4",
                                    "2DDWAVEHEX3", "2DDWAVEHEX4", "BANCS"})
     {
-        if constexpr (!is_hexagonal_layout_v<TestType>)
+        if constexpr (!(std::derived_from<TestType, fiction::layouts::hexagonal_layout> &&
+                        !std::derived_from<TestType, fiction::layouts::shifted_cartesian_layout>))
         {
             if (std::string_view{name}.starts_with("2DDWAVEHEX"))
             {
@@ -303,7 +307,10 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
         }
         INFO(name);
         const auto scheme =
-            clocking::get_scheme(name, is_hexagonal_layout_v<TestType> ? std::optional{a} : std::nullopt);
+            clocking::get_scheme(name, (std::derived_from<TestType, fiction::layouts::hexagonal_layout> &&
+                                        !std::derived_from<TestType, fiction::layouts::shifted_cartesian_layout>) ?
+                                           std::optional{a} :
+                                           std::nullopt);
         REQUIRE(scheme.has_value());
         auto original = blueprints::make_layout<TestType>(
             a, {4, 3, 1}, *scheme);  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
@@ -373,7 +380,7 @@ TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy
 {
     TestType layout = []
     {
-        if constexpr (is_cartesian_layout_v<TestType>)
+        if constexpr (std::derived_from<TestType, fiction::layouts::cartesian_layout>)
         {
             return TestType{{3, 2, 1}, clocking::twoddwave()};
         }

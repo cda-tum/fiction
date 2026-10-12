@@ -50,7 +50,7 @@ static void check_layout_equiv(const Ntk& ntk)
     auto layout = orthogonal<Lyt>(ntk, {});
 
     post_layout_optimization_stats stats{};
-    post_layout_optimization<Lyt>(layout, {}, &stats);
+    post_layout_optimization(layout, {}, &stats);
 
     check_eq(ntk, layout);
 
@@ -142,7 +142,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         {
             auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
             post_layout_optimization_stats stats_corner_case_1{};
-            post_layout_optimization<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
+            post_layout_optimization(layout_corner_case_1, {}, &stats_corner_case_1);
             check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
         }
 
@@ -150,7 +150,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         {
             auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
             post_layout_optimization_stats stats_corner_case_2{};
-            post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
+            post_layout_optimization(layout_corner_case_2, {}, &stats_corner_case_2);
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
         }
 
@@ -158,7 +158,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         {
             auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
             post_layout_optimization_stats stats_corner_case_3{};
-            post_layout_optimization<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
+            post_layout_optimization(layout_corner_case_3, {}, &stats_corner_case_3);
             check_eq(blueprints::optimization_layout_corner_case_outputs_3<gate_layout>(), layout_corner_case_3);
         }
 
@@ -166,7 +166,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         {
             auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
             post_layout_optimization_stats stats_corner_case_4{};
-            post_layout_optimization<gate_layout>(layout_corner_case_4, {}, &stats_corner_case_4);
+            post_layout_optimization(layout_corner_case_4, {}, &stats_corner_case_4);
             check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_4);
         }
 
@@ -174,7 +174,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         {
             auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
             post_layout_optimization_stats stats_corner_case_5{};
-            post_layout_optimization<gate_layout>(layout_corner_case_5, {}, &stats_corner_case_5);
+            post_layout_optimization(layout_corner_case_5, {}, &stats_corner_case_5);
             check_eq(blueprints::optimization_layout_corner_case_outputs_5<gate_layout>(), layout_corner_case_5);
         }
 
@@ -182,7 +182,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         {
             auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
             post_layout_optimization_stats stats_corner_case_3{};
-            post_layout_optimization<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
+            post_layout_optimization(layout_corner_case_3, {}, &stats_corner_case_3);
             check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_3);
         }
     }
@@ -198,7 +198,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
             post_layout_optimization_stats  stats{};
             post_layout_optimization_params params{};
             params.max_gate_relocations = max_gate_relocations;
-            post_layout_optimization<gate_layout>(layout, params, &stats);
+            post_layout_optimization(layout, params, &stats);
 
             check_eq(blueprints::mux21_network<technology_network>(), layout);
         }
@@ -213,7 +213,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.optimize_pos_only = true;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
     }
@@ -227,7 +227,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.timeout = 1000000;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
     }
@@ -241,7 +241,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.timeout = 0;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
         CHECK(stats.area_improvement == 0);
@@ -256,7 +256,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.planar_optimization = true;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::planar_unoptimized_layout<gate_layout>(), layout);
         CHECK(layout.layers() == 1);
@@ -272,13 +272,13 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         post_layout_optimization_params params{};
 
         params.planar_optimization = true;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
         /** @brief Object at the position whose inverter has been moved. */
         const auto planar_object = layout.find_object({1, 0});
         CHECK((planar_object.has_value() && !layout.is_inv(*planar_object)));
 
         params.planar_optimization = false;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
         /** @brief Object at the position whose inverter has been restored. */
         const auto crossing_object = layout.find_object({1, 0});
         CHECK((crossing_object.has_value() && layout.is_inv(*crossing_object)));
@@ -296,8 +296,7 @@ TEST_CASE("Wrong clocking scheme", "[post-layout-optimization]")
     {
         post_layout_optimization_stats stats_wrong_clocking_scheme{};
 
-        CHECK_THROWS_AS(post_layout_optimization<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme),
-                        std::invalid_argument);
+        CHECK_THROWS_AS(post_layout_optimization(obstr_lyt, {}, &stats_wrong_clocking_scheme), std::invalid_argument);
     }
 }
 
@@ -308,19 +307,19 @@ TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]
     SECTION("Interior primary input")
     {
         auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+        CHECK_NOTHROW(post_layout_optimization(layout));
     }
 
     SECTION("Interior primary output")
     {
         auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+        CHECK_NOTHROW(post_layout_optimization(layout));
     }
 
     SECTION("PO have to be moved to borders during optimization")
     {
         auto layout = blueprints::po_have_to_be_moved_to_border_optimization_layout<gate_layout>();
-        post_layout_optimization<gate_layout>(layout);
+        post_layout_optimization(layout);
 
         layout.foreach_pi(
             [&layout](const auto& pi) noexcept
@@ -349,7 +348,7 @@ TEST_CASE("Post-layout optimization reports progress", "[post-layout-optimizatio
     post_layout_optimization_params params{};
     params.on_progress = rec.callback();
 
-    post_layout_optimization<gate_layout>(layout, params);
+    post_layout_optimization(layout, params);
 
     check_eq(ntk, layout);
 
