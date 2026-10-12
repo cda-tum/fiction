@@ -89,8 +89,9 @@ void extract_routing_objectives(nanobind::module_& m)
 template <typename Lyt>
 void clear_routing(nanobind::module_& m)
 {
-    m.def("clear_routing", &fiction::physical_design::clear_routing<Lyt>, nanobind::arg("lyt"),
-          DOC(fiction_physical_design_clear_routing));
+    m.def(
+        "clear_routing", [](Lyt& lyt) { fiction::physical_design::clear_routing(lyt); }, nanobind::arg("lyt"),
+        DOC(fiction_physical_design_clear_routing));
 }
 
 }  // namespace detail

@@ -40,7 +40,7 @@ void write_fgl_layout(nanobind::module_& m)
     m.def(
         "write_fgl_layout",
         [](const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
-        { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename, on_progress); }, nanobind::arg("layout"),
+        { fiction::layouts::io::write_fgl_layout(lyt, filename, on_progress); }, nanobind::arg("layout"),
         nanobind::arg("filename"), nanobind::arg("on_progress").none() = nanobind::none(),
         DOC(fiction_layouts_io_write_fgl_layout_2), nanobind::call_guard<nanobind::gil_scoped_release>());
 }
