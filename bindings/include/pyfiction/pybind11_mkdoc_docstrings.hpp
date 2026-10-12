@@ -10193,6 +10193,16 @@ static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_NONE
 
 static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_object_at =
+R"doc(Returns the object placed at a coordinate. @param lyt Layout. @param t
+Coordinate.
+
+Returns:
+    Identity of the object at `t`. @throws std::invalid_argument If
+    `t` is empty.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_offset_at =
 R"doc(Accesses the entry of an offset matrix at a tile position.
 
