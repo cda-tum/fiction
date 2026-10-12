@@ -10,8 +10,7 @@
 
 from __future__ import annotations
 
-from clang.cindex import CursorKind
-from pybind11_mkdoc import main as mkdoc_main
+from importlib import import_module
 
 
 def main() -> int:
@@ -20,12 +19,13 @@ def main() -> int:
     Returns:
         ``0`` after successful docstring extraction.
     """
+    cursor_kind = import_module("clang.cindex").CursorKind
     try:
-        CursorKind.from_id(153)
+        cursor_kind.from_id(153)
     except ValueError:
         # Clang 18 emits concept expressions that its Python bindings do not name.
-        CursorKind.CONCEPT_SPECIALIZATION_EXPR = CursorKind(153)
-    return mkdoc_main()
+        cursor_kind.CONCEPT_SPECIALIZATION_EXPR = cursor_kind(153)
+    return import_module("pybind11_mkdoc").main()
 
 
 if __name__ == "__main__":
