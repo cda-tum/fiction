@@ -36,7 +36,6 @@
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>

@@ -20,7 +20,6 @@
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
 #include "fiction/utils/version_info.hpp"
@@ -92,7 +91,7 @@ class simple_gate_layout_tile_drawer
     [[nodiscard]] virtual std::string tile_id(const fiction::layouts::layout_base::coordinate& t) const
     {
         auto id = fmt::format("x{}y{}", t.x, t.y);
-        std::replace(id.begin(), id.end(), '-', 'n');
+        std::ranges::replace(id, '-', 'n');
         return id;
     }
 

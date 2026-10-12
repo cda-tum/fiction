@@ -35,6 +35,7 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <limits>
 #include <optional>
@@ -1620,7 +1621,7 @@ class gate_level_layout : public CoordinateLayout
      * @param t Base tile.
      * @return Adjacent tiles in the coordinate geometry.
      */
-    std::vector<tile> adjacent_tiles(const tile& t) const
+    [[nodiscard]] std::vector<tile> adjacent_tiles(const tile& t) const
     {
         return CoordinateLayout::adjacent_coordinates(t);
     }
@@ -1642,7 +1643,7 @@ class gate_level_layout : public CoordinateLayout
      * @param t Base tile.
      * @return Adjacent tiles in the coordinate geometry.
      */
-    std::vector<std::pair<tile, tile>> adjacent_opposite_tiles(const tile& t) const
+    [[nodiscard]] std::vector<std::pair<tile, tile>> adjacent_opposite_tiles(const tile& t) const
     {
         return CoordinateLayout::adjacent_opposite_coordinates(t);
     }

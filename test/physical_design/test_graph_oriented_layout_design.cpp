@@ -31,7 +31,6 @@
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/traits.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>

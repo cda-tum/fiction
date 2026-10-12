@@ -18,7 +18,6 @@
 
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/traits.hpp"
 
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/interface/common.hpp>

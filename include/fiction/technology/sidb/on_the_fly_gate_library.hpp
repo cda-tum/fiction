@@ -31,7 +31,6 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>

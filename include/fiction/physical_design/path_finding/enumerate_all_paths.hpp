@@ -20,13 +20,13 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 
 #include <phmap.h>
 
 #include <cassert>
 #include <concepts>
 #include <stdexcept>
+#include <utility>
 
 namespace fiction::physical_design::path_finding
 {
@@ -49,12 +49,12 @@ template <typename Path, typename Lyt>
 class enumerate_all_paths_impl
 {
   public:
-    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective& obj, const enumerate_all_paths_params& p,
+    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective& obj, enumerate_all_paths_params p,
                              const layouts::obstructions& extra) :
             layout{lyt},
             search_obstructions{extra},
             objective{obj},
-            params{p}
+            params{std::move(p)}
     {}
 
     /**

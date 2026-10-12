@@ -17,7 +17,6 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/stl/stl_utils.hpp>
 
 #include <array>

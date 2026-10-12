@@ -480,7 +480,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
-                auto         obstr_lyt = layout;
+                const auto&  obstr_lyt = layout;
                 obstructions search_obstructions{};
 
                 // create some connection obstructions
@@ -509,7 +509,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
-                auto         obstr_lyt = layout;
+                const auto&  obstr_lyt = layout;
                 obstructions search_obstructions{};
 
                 // create a PI as obstruction
@@ -740,7 +740,8 @@ TEST_CASE("A* invokes distance and cost functor overrides", "[A*]")
     const cartesian_layout  layout{{3, 3}};
     const counting_distance heuristic{};
     const counting_cost     edge_cost{};
-    const auto              path = a_star<layout_coordinate_path>(layout, {{0, 0}, {2, 2}}, heuristic, edge_cost);
+    const auto              path =
+        a_star<layout_coordinate_path>(layout, {.source = {0, 0}, .target = {2, 2}}, heuristic, edge_cost);
     CHECK(path.size() == 5);
     CHECK(heuristic.calls > 0);
     CHECK(edge_cost.calls > 0);

@@ -27,7 +27,6 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
-#include <fiction/traits.hpp>
 
 #include <fmt/format.h>
 

@@ -21,7 +21,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
-#include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
@@ -30,14 +29,11 @@
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/layouts/tile_clocking.hpp>
-#include <fiction/traits.hpp>
 
 #include <algorithm>
 #include <concepts>
 #include <cstdint>
-#include <functional>
 #include <limits>
-#include <set>
 #include <stdexcept>
 #include <vector>
 

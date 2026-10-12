@@ -25,7 +25,6 @@
 #include <cstdint>
 #include <limits>
 #include <set>
-#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;

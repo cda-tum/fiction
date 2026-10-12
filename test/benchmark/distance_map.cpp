@@ -46,7 +46,7 @@ Dist sum_distances(const Lyt& layout, const distance_functor<Dist>& dist_func)
     Dist sum = 0;
     layout.foreach_coordinate(
         [&layout, &dist_func, &sum](const auto& c1)
-        { layout.foreach_coordinate([&layout, &dist_func, &sum, &c1](const auto& c2) { sum += dist_func(c1, c2); }); });
+        { layout.foreach_coordinate([&dist_func, &sum, &c1](const auto& c2) { sum += dist_func(c1, c2); }); });
 
     return sum;
 }

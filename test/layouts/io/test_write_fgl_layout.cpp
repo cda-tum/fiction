@@ -36,7 +36,6 @@
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
@@ -297,8 +296,8 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
     for (const auto* const name : {"OPEN3", "OPEN4", "COLUMNAR3", "COLUMNAR4", "ROW3", "ROW4", "2DDWAVE3", "2DDWAVE4",
                                    "2DDWAVEHEX3", "2DDWAVEHEX4", "BANCS"})
     {
-        if constexpr (!(std::derived_from<TestType, fiction::layouts::hexagonal_layout> &&
-                        !std::derived_from<TestType, fiction::layouts::shifted_cartesian_layout>))
+        if constexpr (!std::derived_from<TestType, fiction::layouts::hexagonal_layout> ||
+                      std::derived_from<TestType, fiction::layouts::shifted_cartesian_layout>)
         {
             if (std::string_view{name}.starts_with("2DDWAVEHEX"))
             {

@@ -23,7 +23,6 @@
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 
 #include <phmap.h>
@@ -36,6 +35,7 @@
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace fiction::physical_design::path_finding
@@ -60,13 +60,13 @@ class a_star_impl
 {
   public:
     a_star_impl(const Lyt& lyt, const routing_objective& obj, const distance_functor<Dist>& dist_fn,
-                const cost_functor<Cost>& cost_fn, const a_star_params& p, const layouts::obstructions& extra) :
+                const cost_functor<Cost>& cost_fn, a_star_params p, const layouts::obstructions& extra) :
             layout{lyt},
             search_obstructions{extra},
             objective{obj},
             distance{dist_fn},
             cost{cost_fn},
-            params{p}
+            params{std::move(p)}
     {
         open_list.push(coordinate_f{objective.source, 0});
     }
@@ -275,7 +275,7 @@ class a_star_impl
      * @param c Coordinate to check.
      * @return `true` iff c has already been visited.
      */
-    bool is_visited(const fiction::layouts::layout_base::coordinate& c) const
+    [[nodiscard]] bool is_visited(const fiction::layouts::layout_base::coordinate& c) const
     {
         return closed_list.count(c) > 0;
     }

@@ -26,7 +26,6 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>

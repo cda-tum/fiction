@@ -23,7 +23,6 @@
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/atomic_write.hpp"
 #include "fiction/utils/progress.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"

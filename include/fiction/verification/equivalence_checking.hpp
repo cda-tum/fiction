@@ -20,7 +20,6 @@
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/networks/extract_layout_network.hpp"
 #include "fiction/networks/interface_matching.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/verification/critical_path_length_and_throughput.hpp"
 #include "fiction/verification/design_rule_violations.hpp"
 

@@ -19,7 +19,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/traits.hpp>
 
 #include <algorithm>
 #include <cstdint>

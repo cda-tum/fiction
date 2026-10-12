@@ -31,7 +31,6 @@
 #include "fiction/physical_design/post_layout_optimization.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -450,7 +449,7 @@ class priority_queue
     /**
      * Priority queue containing elements with associated priorities.
      */
-    std::priority_queue<queue_element, std::vector<queue_element>, std::greater<queue_element>> elements;
+    std::priority_queue<queue_element, std::vector<queue_element>, std::greater<>> elements;
 };
 /**
  * Maps logic-network nodes to typed layout output ports.
@@ -1654,7 +1653,7 @@ class graph_oriented_layout_design_impl
                 {
                     if (layout.is_empty_tile({x, y}) && layout.is_empty_tile({x - 1, y}))
                     {
-                        positions.push_back({x, y});
+                        positions.emplace_back(x, y);
                         if (positions.size() >= std::max(uint64_t{1}, ps.num_vertex_expansions))
                         {
                             break;
@@ -2061,8 +2060,8 @@ class graph_oriented_layout_design_impl
                     ((static_cast<double>(position.x) + 1.0) * (static_cast<double>(position.y) + 1.0)) /
                     (node_count * node_count);
 
-                double priority = remaining_nodes_to_place + layout_size + last_position;
-                next_positions.push_back({new_sequence, priority});
+                const double priority = remaining_nodes_to_place + layout_size + last_position;
+                next_positions.emplace_back(new_sequence, priority);
             }
             else
             {
@@ -2071,9 +2070,9 @@ class graph_oriented_layout_design_impl
                                         static_cast<double>(calculate_cost(layout, ssg.cost)) / (1000.0 * node_count) :
                                         layout_cost;
 
-                double priority = remaining_nodes_to_place + cost;
+                const double priority = remaining_nodes_to_place + cost;
 
-                next_positions.push_back({new_sequence, priority});
+                next_positions.emplace_back(new_sequence, priority);
             }
         }
 

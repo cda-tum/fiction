@@ -28,7 +28,6 @@
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 #include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/traits.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;

@@ -17,7 +17,6 @@
 #pragma once
 
 #include "fiction/layouts/gate_level_layout.hpp"
-#include "fiction/traits.hpp"
 
 #include <phmap.h>
 

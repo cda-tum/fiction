@@ -23,7 +23,6 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
-#include <fiction/traits.hpp>
 
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -35,7 +34,7 @@ using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
 template <typename Lyt>
-void remove_clocking(Lyt& lyt) noexcept
+void remove_clocking(Lyt& lyt)
 {
     static_assert(
         requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },

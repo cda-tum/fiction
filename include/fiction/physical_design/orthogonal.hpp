@@ -28,7 +28,6 @@
 #include "fiction/networks/views/edge_color_view.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>

@@ -19,7 +19,6 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/verification/design_rule_violations.hpp"
 
 #include <concepts>

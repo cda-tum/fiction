@@ -18,7 +18,6 @@
 
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
-#include "fiction/traits.hpp"
 
 #include <phmap.h>
 
@@ -176,14 +175,14 @@ class distance_map_functor : public distance_functor<Dist>
      */
     [[nodiscard]] constexpr std::size_t coordinate_index(const layouts::layout_base::coordinate& c) const
     {
-        if (c.x < 0 || c.y < 0 || c.z < 0 || static_cast<uint32_t>(c.x) >= dimensions.width ||
-            static_cast<uint32_t>(c.y) >= dimensions.height || static_cast<uint32_t>(c.z) >= dimensions.layers)
+        if (c.x < 0 || c.y < 0 || c.z < 0 || std::cmp_greater_equal(c.x, dimensions.width) ||
+            std::cmp_greater_equal(c.y, dimensions.height) || std::cmp_greater_equal(c.z, dimensions.layers))
         {
             throw std::out_of_range("The coordinate is outside the distance map layout");
         }
-        return static_cast<std::size_t>((static_cast<uint64_t>(c.z) * dimensions.height + static_cast<uint32_t>(c.y)) *
-                                            dimensions.width +
-                                        static_cast<uint32_t>(c.x));
+        return static_cast<std::size_t>(
+            (((static_cast<uint64_t>(c.z) * dimensions.height) + static_cast<uint32_t>(c.y)) * dimensions.width) +
+            static_cast<uint32_t>(c.x));
     }
 };
 /**

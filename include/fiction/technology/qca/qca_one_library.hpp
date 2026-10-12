@@ -23,7 +23,6 @@
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/qca/layout.hpp"
-#include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 #include <phmap.h>

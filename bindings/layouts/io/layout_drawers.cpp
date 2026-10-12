@@ -21,7 +21,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/io/layout_drawers.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/utils/progress.hpp>
 
 #include <concepts>

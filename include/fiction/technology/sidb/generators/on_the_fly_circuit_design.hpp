@@ -25,7 +25,6 @@
 #include "fiction/physical_design/apply_gate_library.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 
 #include <algorithm>

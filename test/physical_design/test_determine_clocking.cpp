@@ -30,7 +30,6 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
-#include <fiction/traits.hpp>
 
 #include <bill/sat/interface/common.hpp>
 #include <kitty/dynamic_truth_table.hpp>

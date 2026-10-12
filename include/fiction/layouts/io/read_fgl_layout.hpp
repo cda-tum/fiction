@@ -32,7 +32,6 @@
 // clang-format on
 
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
-#include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
@@ -186,8 +185,8 @@ class read_fgl_layout_impl
         {
             file_arrangement = hexagonal;
 
-            if constexpr (!(std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
-                            !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
+            if constexpr (!std::derived_from<Lyt, fiction::layouts::hexagonal_layout> ||
+                          std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
             {
                 throw fgl_parsing_error("Error parsing FGL file: Lyt is not a hexagonal layout");
             }

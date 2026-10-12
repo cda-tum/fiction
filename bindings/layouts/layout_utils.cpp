@@ -23,7 +23,6 @@
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
-#include <fiction/traits.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)

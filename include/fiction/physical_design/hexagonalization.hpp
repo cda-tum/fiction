@@ -29,7 +29,6 @@
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>

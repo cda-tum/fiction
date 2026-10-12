@@ -22,7 +22,6 @@
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -31,6 +30,7 @@
 #include <cstdint>
 #include <iterator>
 #include <stdexcept>
+#include <utility>
 
 namespace fiction::physical_design::path_finding
 {
@@ -54,13 +54,13 @@ class yen_k_shortest_paths_impl
 {
   public:
     yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective& obj, const uint32_t k,
-                              const yen_k_shortest_paths_params& p, const layouts::obstructions& extra) :
+                              yen_k_shortest_paths_params p, const layouts::obstructions& extra) :
             layout{lyt},
             initial_obstructions{extra},
             search_obstructions{extra},
             objective{obj},
             num_shortest_paths{k},
-            params{p}
+            params{std::move(p)}
     {
         // start by determining the shortest path between source and target
         k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor(),

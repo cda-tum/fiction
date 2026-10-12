@@ -27,7 +27,6 @@
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -232,13 +231,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     {
         apply_if_not_coordinate(c,
                                 layouts::cartesian_layout::north(c) ?
-                                    layouts::cartesian_layout::east(*layouts::cartesian_layout::north(c)) :
+                                    layouts::cartesian_layout::east(layouts::cartesian_layout::north(c).value()) :
                                     std::nullopt,
                                 fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
         apply_if_not_coordinate(c,
                                 layouts::cartesian_layout::south(c) ?
-                                    layouts::cartesian_layout::east(*layouts::cartesian_layout::south(c)) :
+                                    layouts::cartesian_layout::east(layouts::cartesian_layout::south(c).value()) :
                                     std::nullopt,
                                 fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
@@ -258,13 +257,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     {
         apply_if_not_coordinate(c,
                                 layouts::cartesian_layout::north(c) ?
-                                    layouts::cartesian_layout::east(*layouts::cartesian_layout::north(c)) :
+                                    layouts::cartesian_layout::east(layouts::cartesian_layout::north(c).value()) :
                                     std::nullopt,
                                 fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
         apply_if_not_coordinate(c,
                                 layouts::cartesian_layout::south(c) ?
-                                    layouts::cartesian_layout::east(*layouts::cartesian_layout::south(c)) :
+                                    layouts::cartesian_layout::east(layouts::cartesian_layout::south(c).value()) :
                                     std::nullopt,
                                 fn);
     }
@@ -298,13 +297,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     {
         apply_if_not_coordinate(c,
                                 layouts::cartesian_layout::east(c) ?
-                                    layouts::cartesian_layout::south(*layouts::cartesian_layout::east(c)) :
+                                    layouts::cartesian_layout::south(layouts::cartesian_layout::east(c).value()) :
                                     std::nullopt,
                                 fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
         apply_if_not_coordinate(c,
                                 layouts::cartesian_layout::west(c) ?
-                                    layouts::cartesian_layout::south(*layouts::cartesian_layout::west(c)) :
+                                    layouts::cartesian_layout::south(layouts::cartesian_layout::west(c).value()) :
                                     std::nullopt,
                                 fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::east(c), fn);
@@ -324,13 +323,13 @@ class wiring_reduction_layout : public layouts::cartesian_layout
     {
         apply_if_not_coordinate(c,
                                 layouts::cartesian_layout::east(c) ?
-                                    layouts::cartesian_layout::south(*layouts::cartesian_layout::east(c)) :
+                                    layouts::cartesian_layout::south(layouts::cartesian_layout::east(c).value()) :
                                     std::nullopt,
                                 fn);
         apply_if_not_coordinate(c, layouts::cartesian_layout::south(c), fn);
         apply_if_not_coordinate(c,
                                 layouts::cartesian_layout::west(c) ?
-                                    layouts::cartesian_layout::south(*layouts::cartesian_layout::west(c)) :
+                                    layouts::cartesian_layout::south(layouts::cartesian_layout::west(c).value()) :
                                     std::nullopt,
                                 fn);
     }
@@ -936,7 +935,7 @@ class wiring_reduction_impl
     void run()
     {
         // measure run time
-        mockturtle::stopwatch stop{pst.time_total};
+        const mockturtle::stopwatch stop{pst.time_total};
 
         // record initial layout statistics
         pst.num_wires_before = plyt.num_wires();
@@ -1135,11 +1134,11 @@ inline void wiring_reduction(fiction::layouts::gate_level_layout<fiction::layout
         });
     // initialize stats for runtime measurement
     wiring_reduction_stats        st{};
-    detail::wiring_reduction_impl p{lyt, ps, st};
+    detail::wiring_reduction_impl p{lyt, std::move(ps), st};
 
     p.run();
 
-    if (pst)
+    if (pst != nullptr)
     {
         *pst = st;
     }

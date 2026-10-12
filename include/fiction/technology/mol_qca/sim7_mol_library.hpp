@@ -22,7 +22,6 @@
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/mol_qca/layout.hpp"
-#include "fiction/traits.hpp"
 
 #include <phmap.h>
 

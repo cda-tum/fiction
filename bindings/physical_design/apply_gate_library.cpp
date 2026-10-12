@@ -26,7 +26,6 @@
 #include <fiction/technology/mol_qca/sim7_mol_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/utils/progress.hpp>
 
 #include <fmt/format.h>

@@ -18,7 +18,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/networks/extract_layout_network.hpp>
-#include <fiction/traits.hpp>
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>

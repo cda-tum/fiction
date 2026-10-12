@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -469,7 +470,7 @@ TEST_CASE("FGL requires layout, clocking, placement, and signal fields", "[read-
         }
         REQUIRE(parent != nullptr);
     }
-    const auto missing = parent->FirstChildElement(field);
+    auto* const missing = parent->FirstChildElement(field);
     REQUIRE(missing != nullptr);
     if (std::string_view{field} == "fgl")
     {

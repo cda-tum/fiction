@@ -17,7 +17,6 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/progress.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/post_layout_optimization.hpp>
 

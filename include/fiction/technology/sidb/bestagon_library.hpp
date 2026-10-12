@@ -27,7 +27,6 @@
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
-#include "fiction/traits.hpp"
 
 #include <phmap.h>
 

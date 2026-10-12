@@ -20,7 +20,6 @@
 
 #include <fiction/physical_design/color_routing.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/utils/graph/graph_coloring.hpp>
 
 #include <cstdint>

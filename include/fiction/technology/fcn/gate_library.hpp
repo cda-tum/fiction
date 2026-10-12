@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "fiction/layouts/layout_base.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
 

@@ -22,7 +22,6 @@
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <algorithm>

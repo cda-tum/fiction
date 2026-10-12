@@ -32,7 +32,6 @@
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/physical_design/wiring_reduction.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -304,7 +303,7 @@ check_and_optimize_po_positions(fiction::layouts::gate_level_layout<fiction::lay
         if (t.x == x_max - 1 && lyt.is_empty_tile({x_max, t.y}))
         {
             extend_output_position(lyt, id, {x_max, t.y});
-            if (moved_gates)
+            if (moved_gates != 0)
             {
                 --moved_gates;
             }
@@ -312,7 +311,7 @@ check_and_optimize_po_positions(fiction::layouts::gate_level_layout<fiction::lay
         else if (t.y == y_max - 1 && lyt.is_empty_tile({t.x, y_max}))
         {
             extend_output_position(lyt, id, {t.x, y_max});
-            if (moved_gates)
+            if (moved_gates != 0)
             {
                 --moved_gates;
             }
@@ -494,11 +493,11 @@ class post_layout_optimization_impl
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
 
-        double area_percentage_difference = area_before == 0 ?
-                                                0.0 :
-                                                (static_cast<double>(area_before) - static_cast<double>(area_after)) /
-                                                    static_cast<double>(area_before) * 100.0;
-        pst.area_improvement              = std::round(area_percentage_difference * 100) / 100.0;
+        const double area_percentage_difference =
+            area_before == 0 ? 0.0 :
+                               (static_cast<double>(area_before) - static_cast<double>(area_after)) /
+                                   static_cast<double>(area_before) * 100.0;
+        pst.area_improvement = std::round(area_percentage_difference * 100) / 100.0;
 
         pst.num_wires_after     = plyt.num_wires();
         pst.num_crossings_after = plyt.num_crossings();
@@ -568,12 +567,12 @@ class post_layout_optimization_impl
      * @param lyt Layout. @param position Gate coordinate. @return Routes adjacent to the gate.
      * @throws std::invalid_argument If an intermediate wire is disconnected or cyclic.
      */
-    [[nodiscard]] fanin_fanout_data
+    [[nodiscard]] static fanin_fanout_data
     get_fanin_and_fanouts(const fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
                           const fiction::layouts::layout_base::coordinate&                               position)
     {
         fanin_fanout_data data{};
-        const auto        gate = *lyt.find_object(position);
+        const auto        gate = lyt.find_object(position).value();
         const auto        wire = [&](const auto id) { return lyt.is_wire(id) && lyt.fanout_size(id) == 1; };
         lyt.foreach_fanin(gate,
                           [&](const auto source, const auto index)
@@ -651,7 +650,7 @@ class post_layout_optimization_impl
         astar_params.crossings = !ps.planar_optimization;
 
         const auto path = physical_design::path_finding::a_star<layout_coordinate_path>(
-            lyt, {start_tile, end_tile}, dist(), cost(), astar_params, search_obstructions);
+            lyt, {.source = start_tile, .target = end_tile}, dist(), cost(), astar_params, search_obstructions);
 
         // obstruct the tiles along the computed path.
         for (const auto& tile : path)
@@ -691,7 +690,7 @@ class post_layout_optimization_impl
             return true;
         }
         ++attempts;
-        const auto id = *lyt.find_object(current);
+        const auto id = lyt.find_object(current).value();
         lyt.move_object(id, candidate);
         search_obstructions.clear_obstructed_coordinate(current);
         search_obstructions.clear_obstructed_coordinate({current.x, current.y, 1});
@@ -734,7 +733,7 @@ class post_layout_optimization_impl
                                  const fiction::layouts::layout_base::coordinate&                         original,
                                  const fanin_fanout_data&                                                 data)
     {
-        lyt.move_object(*lyt.find_object(current), original);
+        lyt.move_object(lyt.find_object(current).value(), original);
         for (std::size_t index{}; index < data.routes.size(); ++index)
         {
             route_path(lyt, data.routes[index], data.destinations[index]);
@@ -766,7 +765,7 @@ class post_layout_optimization_impl
                 return false;
             }
         }
-        const auto gate = *lyt.find_object(original);
+        const auto gate = lyt.find_object(original).value();
         for (const auto& t : data.to_clear)
         {
             lyt.clear_tile(t);
@@ -786,7 +785,7 @@ class post_layout_optimization_impl
             for (int64_t x{}; x <= diagonal; ++x)
             {
                 const auto y = diagonal - x;
-                if (x >= lyt.width() || y >= lyt.height())
+                if (std::cmp_greater_equal(x, lyt.width()) || std::cmp_greater_equal(y, lyt.height()))
                 {
                     continue;
                 }
@@ -887,7 +886,7 @@ inline void post_layout_optimization(fiction::layouts::gate_level_layout<fiction
         });
     // initialize stats for runtime measurement
     post_layout_optimization_stats        st{};
-    detail::post_layout_optimization_impl p{lyt, ps, st};
+    detail::post_layout_optimization_impl p{lyt, std::move(ps), st};
 
     p.run();
 

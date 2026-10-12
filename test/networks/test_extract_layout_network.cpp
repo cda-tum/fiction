@@ -17,6 +17,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>

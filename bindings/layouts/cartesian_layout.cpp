@@ -20,7 +20,6 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/io/print_layout.hpp>
-#include <fiction/traits.hpp>
 
 #include <cstdint>
 #include <optional>
