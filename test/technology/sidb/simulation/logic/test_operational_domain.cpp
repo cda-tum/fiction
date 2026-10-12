@@ -127,8 +127,6 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
         });
 }
 
-// NOLINTNEXTLINE(*-function-size)
-
 TEST_CASE("Test parameter point", "[operational-domain]")
 {
     // Test default constructor
@@ -462,6 +460,7 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
     check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 }
 
+// NOLINTNEXTLINE(*-function-size): Sections share the BDL wire and compare operational-domain algorithms.
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
 
