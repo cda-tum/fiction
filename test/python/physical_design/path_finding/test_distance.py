@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from mnt.pyfiction.layouts import coordinate
@@ -18,6 +20,26 @@ from mnt.pyfiction.physical_design.path_finding import (
     squared_euclidean_distance,
     twoddwave_distance,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+
+@pytest.mark.parametrize(
+    "metric",
+    [manhattan_distance, euclidean_distance, squared_euclidean_distance, twoddwave_distance, chebyshev_distance],
+)
+@pytest.mark.parametrize(("source", "target"), [((0, 0), (3, 4)), ((0, 0, -2), (3, 4, 5))])
+def test_distance_tuple_inputs(
+    metric: Callable[
+        [coordinate | tuple[int, int] | tuple[int, int, int], coordinate | tuple[int, int] | tuple[int, int, int]],
+        int | float,
+    ],
+    source: tuple[int, int] | tuple[int, int, int],
+    target: tuple[int, int] | tuple[int, int, int],
+) -> None:
+    """Convert two- and three-axis tuple inputs to coordinates for every metric."""
+    assert metric(source, target) == metric(coordinate(source), coordinate(target))
 
 
 def test_manhattan() -> None:
