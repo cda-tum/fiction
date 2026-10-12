@@ -101,7 +101,7 @@ jobs:
       # check just failed downloads and commits, so it has to be uploaded before the step that
       # fails the job.
       - name: Upload the regenerated docstrings as an artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pyfiction-docstrings
           path: ${{ github.workspace }}/${{ env.DOCSTRINGS }}
