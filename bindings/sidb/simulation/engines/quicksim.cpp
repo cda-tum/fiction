@@ -15,12 +15,10 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <optional>
 

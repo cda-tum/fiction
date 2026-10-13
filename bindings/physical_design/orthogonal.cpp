@@ -154,7 +154,7 @@ void register_orthogonal(nb::module_& m)
         [](const py_tec_network&, const nb::handle, fiction::physical_design::orthogonal_physical_design_stats*,
            const decltype(orthogonal_physical_design_options{}.number_of_clock_phases),
            const decltype(orthogonal_physical_design_options{}.layout_arrangement),
-           const decltype(orthogonal_physical_design_options{}.on_progress)) -> nb::object
+           const decltype(orthogonal_physical_design_options{}.on_progress)&) -> nb::object
         { throw nb::type_error("layout_type must be a supported registered gate layout class"); },
         nb::arg("network"), nb::kw_only(), nb::arg("layout_type"), nb::arg("statistics") = nullptr,
         nb::arg("number_of_clock_phases") = orthogonal_physical_design_options{}.number_of_clock_phases,

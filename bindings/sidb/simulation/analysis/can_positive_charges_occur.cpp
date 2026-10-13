@@ -15,7 +15,6 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>

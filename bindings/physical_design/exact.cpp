@@ -236,7 +236,7 @@ void register_exact(nb::module_& m)
     m.def(
         "exact",
         [](const py_tec_network&, const nb::handle, fiction::physical_design::exact_physical_design_stats*,
-           const decltype(exact_physical_design_options{}.scheme),
+           const decltype(exact_physical_design_options{}.scheme)&,
            const decltype(exact_physical_design_options{}.layout_arrangement),
            const decltype(exact_physical_design_options{}.upper_bound_area),
            const decltype(exact_physical_design_options{}.upper_bound_x),
@@ -252,8 +252,8 @@ void register_exact(nb::module_& m)
            const decltype(exact_physical_design_options{}.minimize_crossings),
            const decltype(exact_physical_design_options{}.timeout),
            const decltype(exact_physical_design_options{}.technology_specifics),
-           const decltype(exact_physical_design_options{}.on_progress),
-           const decltype(exact_physical_design_options{}.on_worker_progress)) -> nb::object
+           const decltype(exact_physical_design_options{}.on_progress)&,
+           const decltype(exact_physical_design_options{}.on_worker_progress)&) -> nb::object
         { throw nb::type_error("layout_type must be a supported registered gate layout class"); },
         nb::arg("network"), nb::kw_only(), nb::arg("layout_type"), nb::arg("statistics") = nullptr,
         nb::arg("scheme")                   = exact_physical_design_options{}.scheme,

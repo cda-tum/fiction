@@ -15,9 +15,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp>
 #include <fiction/technology/sidb/simulation/domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>

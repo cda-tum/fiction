@@ -15,7 +15,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 

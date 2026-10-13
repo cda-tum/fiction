@@ -92,7 +92,7 @@ void register_wiring_reduction(nb::module_& m)
             params.timeout     = timeout;
             params.on_progress = on_progress;
             const nb::gil_scoped_release release{};
-            return fiction::physical_design::wiring_reduction(layout, params, statistics);
+            fiction::physical_design::wiring_reduction(layout, params, statistics);
         },
         nb::arg("layout"), nb::kw_only(), nb::arg("timeout") = wiring_reduction_options{}.timeout,
         nb::arg("on_progress").none() = nb::none(), nb::arg("statistics") = nullptr,

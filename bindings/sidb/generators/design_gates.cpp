@@ -90,6 +90,7 @@ void register_design_gates(nb::module_& m)
         .value("ALL_COMBINATIONS_ENUMERATED", design_gates_options::termination_condition::ALL_COMBINATIONS_ENUMERATED);
     m.def(
         "design_sidb_gates",
+        // NOLINTNEXTLINE(performance-unnecessary-value-param): Copy Python inputs before releasing the GIL.
         [](const layout skeleton, const std::vector<py_tt> spec,
            const decltype(design_gates_options{}.operational_params.timeout)              timeout,
            const decltype(design_gates_options{}.operational_params.sim_params.base)      base,
