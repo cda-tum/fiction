@@ -11,8 +11,11 @@ default-constructed coordinate is the origin. Every signed 32-bit value is repre
 Each layout exposes the coordinate type as `coordinate`, and gate-level layouts also as `tile`.
 The frame is an `extent{width, height, layers}` with nonnegative counts. It contains coordinates
 whose axes lie in `[0, width)`, `[0, height)`, and `[0, layers)`. Two axes describe one layer;
-the default extent is empty. Each count can reach $2^{31}$, so the final included coordinate
-still fits a signed 32-bit axis. `width()`, `height()`, and `layers()` return counts;
+the default extent is empty. Width and height can reach $2^{31}$, so the final included coordinate
+still fits a signed 32-bit axis. Layouts accept at most two layers: the ground layer at `z = 0`
+and the crossing layer at `z = 1`. Construction and resize reject valid extents with larger layer counts with
+`std::out_of_range` in C++ and `IndexError` in Python. A rejected resize preserves the dimensions.
+`width()`, `height()`, and `layers()` return counts;
 `get_extent()` returns the extent and `last_coordinate()` returns the optional final coordinate.
 
 Gate-level layouts store object identity separately from placement coordinates. An editing object
@@ -73,10 +76,6 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 ```
 
-```{doxygenfunction} fiction::layouts::volume_of
-
-```
-
 :::
 
 :::{tab-item} Python
@@ -84,8 +83,6 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 ```{eval-rst}
 .. autofunction:: mnt.pyfiction.layouts.area
-
-.. autofunction:: mnt.pyfiction.layouts.volume
 ```
 
 :::

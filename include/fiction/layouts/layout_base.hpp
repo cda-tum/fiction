@@ -275,9 +275,14 @@ class layout_base
      * @param size Sizes to check.
      * @return Checked extent.
      * @throws std::invalid_argument If a size exceeds `INT32_MAX + 1`.
+     * @throws std::out_of_range If the layer count exceeds two.
      */
     static constexpr extent checked(const extent& size)
     {
+        if (size.layers > 2)
+        {
+            throw std::out_of_range("A layout supports only the ground and crossing layers");
+        }
         return {size.width, size.height, size.layers};
     }
 
@@ -298,6 +303,7 @@ class layout_base
          * @param size Half-open bounds.
          * @param start First coordinate, or the end state.
          * @throws std::invalid_argument If a size exceeds the coordinate domain.
+         * @throws std::out_of_range If the layer count exceeds two.
          */
         constexpr explicit coordinate_iterator(const extent&                   size,
                                                const std::optional<coordinate> start = std::nullopt) :
@@ -405,21 +411,6 @@ inline std::ostream& operator<<(std::ostream& os, const layout_base::coordinate&
 constexpr uint64_t area_of(const layout_base::extent& size) noexcept
 {
     return static_cast<uint64_t>(size.width) * size.height;
-}
-/**
- * Computes width times height times layers with checked multiplication.
- * @param size Axis sizes.
- * @return Volume.
- * @throws std::overflow_error If the volume exceeds `uint64_t`.
- */
-constexpr uint64_t volume_of(const layout_base::extent& size)
-{
-    const auto area = area_of(size);
-    if (size.layers != 0 && area > std::numeric_limits<uint64_t>::max() / size.layers)
-    {
-        throw std::overflow_error("The layout volume exceeds the unsigned 64-bit range");
-    }
-    return area * size.layers;
 }
 
 }  // namespace fiction::layouts

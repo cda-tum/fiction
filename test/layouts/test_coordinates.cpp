@@ -200,12 +200,8 @@ TEST_CASE("Extent sizes validate the coordinate domain", "[coordinates][size-con
     CHECK_THROWS_AS((extent{uint64_t{2147483649}, 1}), std::invalid_argument);
     CHECK_THROWS_AS((extent{1, std::numeric_limits<uint64_t>::max()}), std::invalid_argument);
     CHECK(area_of(extent{2, 3, 4}) == 6);
-    CHECK(volume_of(extent{2, 3, 4}) == 24);
     CHECK(area_of(extent{}) == 0);
-    CHECK(volume_of(extent{2, 3, 0}) == 0);
     CHECK(area_of(extent{2147483648ull, 2147483648ull}) == 4611686018427387904ull);
-    CHECK_THROWS_AS(volume_of(extent{2147483648ull, 2147483648ull, 4}), std::overflow_error);
-    CHECK(volume_of(extent{2147483648ull, 2147483648ull, 3}) == 13835058055282163712ull);
     auto edited  = extent{};
     edited.width = std::numeric_limits<uint32_t>::max();
     CHECK_THROWS_AS(cartesian_layout{edited}, std::invalid_argument);
@@ -227,7 +223,6 @@ TEMPLATE_TEST_CASE("Geometry sizes and value copies", "[coordinates][size-contra
 {
     const auto empty = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, {});
     CHECK(empty.area() == 0);
-    CHECK(empty.volume() == 0);
     CHECK(empty.coordinates().empty());
     CHECK(empty.ground_coordinates().empty());
     CHECK(!empty.contains_coordinate({0, 0, 0}));
@@ -237,12 +232,12 @@ TEMPLATE_TEST_CASE("Geometry sizes and value copies", "[coordinates][size-contra
     CHECK(!empty.southern_border_of({0, 0}));
     CHECK(!empty.western_border_of({0, 0}));
     CHECK(!empty.is_at_any_border({0, 0}));
-    const auto original = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, {5, 4, 3});
+    const auto original = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, {5, 4, 2});
     auto       copy     = original;
-    copy.resize({10, 9, 8});
-    CHECK(original.get_extent() == layout_base::extent{5, 4, 3});
+    copy.resize({10, 9, 1});
+    CHECK(original.get_extent() == layout_base::extent{5, 4, 2});
     CHECK(original.clone().get_extent() == original.get_extent());
-    CHECK(copy.get_extent() == layout_base::extent{10, 9, 8});
+    CHECK(copy.get_extent() == layout_base::extent{10, 9, 1});
     auto zero_layers = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, {5, 5, 0});
     auto layered     = zero_layers.clone();
     layered.resize({10, 10, 1});
@@ -250,14 +245,14 @@ TEMPLATE_TEST_CASE("Geometry sizes and value copies", "[coordinates][size-contra
     CHECK(layered.get_extent() == layout_base::extent{10, 10, 1});
     CHECK(original.width() == 5);
     CHECK(original.height() == 4);
-    CHECK(original.layers() == 3);
-    CHECK(original.last_coordinate() == layout_base::coordinate{4, 3, 2});
+    CHECK(original.layers() == 2);
+    CHECK(original.last_coordinate() == layout_base::coordinate{4, 3, 1});
     CHECK(original.coord(-1, 2, 7) == layout_base::coordinate{-1, 2, 7});
     CHECK(!original.contains_coordinate({5, 0}));
     CHECK(!original.contains_coordinate({0, 4}));
     CHECK(!original.contains_coordinate({0, 0, 3}));
     CHECK(!original.contains_coordinate({-1, 0}));
-    for (const auto sizes : {layout_base::extent{0, 4, 3}, layout_base::extent{5, 0, 3}, layout_base::extent{5, 4, 0}})
+    for (const auto sizes : {layout_base::extent{0, 4, 2}, layout_base::extent{5, 0, 2}, layout_base::extent{5, 4, 0}})
     {
         const auto layout = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, sizes);
         CHECK(!layout.last_coordinate());

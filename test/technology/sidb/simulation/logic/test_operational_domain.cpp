@@ -1220,8 +1220,9 @@ TEST_CASE("Domain algorithms share one budget across parameter points", "[operat
     const std::vector<tt>     spec{create_or_tt()};
     operational_domain_params params{};
     operational_domain_stats  stats{};
-    stats.num_evaluated_parameter_combinations = 42;
-    params.operational_params.timeout          = 0;
+    stats.num_evaluated_parameter_combinations                                                      = 42;
+    params.operational_params.timeout                                                               = 0;
+    params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
     CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
     CHECK_THROWS_AS(operational_domain_random_sampling(lyt, spec, 0, params, &stats), utils::timeout_error);

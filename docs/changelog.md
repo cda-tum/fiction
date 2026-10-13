@@ -225,7 +225,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate-level layouts now use `create_gate`, `object_function`, `move_object`, and `foreach_object`.
     Layout assignment printers use object terminology; update callers to these names.
   - **Breaking:** Gate-level layouts now store placed objects with generation-checked IDs and typed ports. Replace tile-valued signals with object lookup and explicit input connections; copies are independent.
-  - **Breaking:** Layouts expose their frame through `get_extent()` in C++ and Python; Python constructors, `resize`, `area`, and `volume` use the `extent` keyword. Extent values use `ex` rather than `ar`.
+  - **Breaking:** Layouts expose their frame through `get_extent()` in C++ and Python; Python constructors, `resize`, and `area` use the `extent` keyword. Extent values use `ex` rather than `ar`.
   - **Breaking:** Layout frames now use width, height, and layer counts. Replace maximum coordinates with extent counts; missing neighbors and empty bounds return optional values.
   - **Breaking:** Gate-level layouts own clocking, synchronization, and obstructions. Instantiate them directly on coordinate layouts; remove `clocked_layout`, `synchronization_element_layout`, `obstruction_layout`, and `tile_based_layout` wrappers.
   - **Breaking:** QCA, molQCA, and iNML have dedicated layout types, `qca::layout`, `mol_qca::layout`, and
@@ -382,7 +382,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Breaking:** The coordinate helpers adopt one naming rule: a bare noun is a type, everything
   else is an operation on one. `coord_iterator` becomes `layout_base::coordinate_iterator`, and
-  `area` and `volume` become `area_of` and `volume_of`
+  `area` becomes `area_of`
 
 - **Breaking:** `fiction::constants` is gone. `ERROR_MARGIN`, the floating-point comparison
   tolerance, is `fiction::utils::math::ERROR_MARGIN`; `ELEMENTARY_CHARGE`, `K_E`,
@@ -456,9 +456,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     first argument. One class per family replaces the per-arrangement classes, and `exact` and `orthogonal` parameters
     expose `layout_arrangement`.
 
-  - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` and `offset_volume` become `area_of` and
-    `volume_of`, in `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor
-    are gone. `stacked_cartesian_layout` is an alias of `cartesian_layout`.
+  - **Breaking:** `offset_coordinate` becomes `coordinate`, and `offset_area` becomes `area`, in
+    `mnt.pyfiction.layouts`. `cube_coordinate`, `cube_area`, `cube_volume`, and the `int_repr` constructor
+    are gone.
 
   - **Breaking:** `coordinate()` denotes the origin, and coordinates accept the full signed 32-bit range. Layout extents
     use `extent(width, height, layers)` counts. Missing neighbors and empty bounds return `None`; `is_valid()` and coordinate
@@ -487,6 +487,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 
+  - **Breaking:** Removed layout `volume()` and `volume_of`. Use `area() * layers()` to count coordinates.
+  - **Breaking:** Layouts now reject more than two layers. Use one ground layer and an optional crossing layer;
+    empty layouts remain supported.
   - **Breaking:** The traits `is_clocked_layout_v`, `has_synchronization_elements_v`, `is_tile_based_layout_v`, and
     the capability traits that every gate-level layout satisfies: the clocked-zone traits
     `has_is_incoming_clocked_v`, `has_is_outgoing_clocked_v`, `has_foreach_incoming_clocked_zone_v`, and
@@ -513,6 +516,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
 - Python bindings:
 
+  - **Breaking:** Removed the `volume` function and layout methods. Use `area() * layers()` to count coordinates.
+  - **Breaking:** Removed `stacked_cartesian_layout`. Use `cartesian_layout` with at most two layers.
   - The `report` methods of the statistics classes that took a C++ output stream, which no Python
     call could satisfy; `repr()` returns the same text.
   - **Breaking:** The classes `clocked_cartesian_layout`, `clocked_shifted_cartesian_layout`,

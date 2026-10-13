@@ -686,7 +686,7 @@ TEMPLATE_TEST_CASE("Crossings count routing wires rather than identity terminals
 TEMPLATE_TEST_CASE("Crossing counts follow edits on both layers and value copies", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       lyt   = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 2, 3});
+    auto       lyt   = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 2, 2});
     const auto upper = lyt.create_buf({0, 0, 1});
     CHECK(lyt.num_crossings() == 0);
     const auto lower = lyt.create_pi("a", {0, 0, 0});
