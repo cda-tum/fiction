@@ -19,7 +19,6 @@ from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.sidb.simulation.analysis import (
     critical_temperature_gate_based,
     critical_temperature_non_gate_based,
-    critical_temperature_params,
     critical_temperature_stats,
 )
 
@@ -29,7 +28,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
+from ._common import ENGINES, _active_sidb_layout, _engine_argument, _physical_arguments, _physical_options
 
 
 def _temp_arguments(parser: Parser) -> None:
@@ -61,22 +60,24 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     the erroneous states are those with a wrong output.
     """
     layout = _active_sidb_layout(session)
-    params = critical_temperature_params()
-    params.on_progress = session.report_progress
-    params.on_worker_progress = session.report_worker_progress
-    params.confidence_level = args.confidence
-    params.max_temperature = args.max_temperature
-    params.operational_params.sim_engine = ENGINES[args.engine]
-    parameters = _apply_physical(params.operational_params.simulation_parameters, args)
+    options = {
+        "on_progress": session.report_progress,
+        "on_worker_progress": session.report_worker_progress,
+        "confidence_level": args.confidence,
+        "max_temperature": args.max_temperature,
+        "sim_engine": ENGINES[args.engine],
+    }
+    parameters = _physical_options(args)
+    options.update(parameters)
     stats = critical_temperature_stats()
     if args.gate_based:
         if layout.num_pis() == 0 or layout.num_pos() == 0:
             msg = "gate-based simulation needs a layout with input and output dots"
             raise CommandError(msg)
         spec = [session.truth_tables.current()]
-        temperature = critical_temperature_gate_based(layout, spec, params, stats)
+        temperature = critical_temperature_gate_based(layout, spec, stats=stats, **options)
     else:
-        temperature = critical_temperature_non_gate_based(layout, params, stats)
+        temperature = critical_temperature_non_gate_based(layout, stats=stats, **options)
 
     # the statistics leave the energy gap at infinity when no erroneous state exists, and JSON has no infinity
     energy_gap = stats.energy_between_ground_state_and_first_erroneous

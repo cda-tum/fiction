@@ -218,6 +218,26 @@ features that are not (yet) available in _pyfiction_, please open
 an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 :::
 
+### Algorithm Options
+
+Python algorithms accept options as keyword-only arguments. Replace parameter-object construction and
+member assignments with keywords on the algorithm call; omitted options use the C++ defaults.
+Nested options use their leaf names. Circuit design distinguishes `timeout` from `design_gate_timeout`;
+`time_to_solution` distinguishes `timeout` and `on_progress` from `quicksim_timeout` and `quicksim_on_progress`.
+
+```python
+from mnt.pyfiction.sidb.simulation.engines import quickexact
+from mnt.pyfiction.synthesis import and_or_not, technology_mapping
+
+result = quickexact(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
+mapped = technology_mapping(network, **and_or_not())
+```
+
+SiDB computational inputs use the scalar keywords `base`, `mu_minus`, `epsilon_r`, and `lambda_tf`.
+`sidb_simulation_parameters` describes physical model data returned by `result.simulation_parameters`
+and `potential_landscape.params()`. Its keyword-only constructor uses `base_number`, `mu_minus`,
+`relative_permittivity`, and `screening_distance`; algorithms do not accept this object as an option.
+
 ### Virtual Environment Setup
 
 In order to set up a virtual environment on UNIX-like systems, you can use the following commands:

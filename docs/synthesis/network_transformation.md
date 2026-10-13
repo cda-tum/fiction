@@ -30,9 +30,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.synthesis.network_balancing_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.synthesis.network_balancing
 
 .. autofunction:: mnt.pyfiction.synthesis.is_balanced
@@ -66,9 +63,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.synthesis.fanout_substitution_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.synthesis.substitution_strategy
    :members:
 
@@ -134,9 +128,6 @@
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.synthesis.missing_required_gates_exception
-   :members:
-
-.. autoclass:: mnt.pyfiction.synthesis.technology_mapping_params
    :members:
 
 .. autofunction:: mnt.pyfiction.synthesis.and_or_not

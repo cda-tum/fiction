@@ -46,9 +46,6 @@ $$
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.hexagonalization_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.physical_design.hexagonalization_stats
    :members:
 

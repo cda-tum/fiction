@@ -28,9 +28,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.mol_qca.io.write_mol_qca_layout_svg_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.mol_qca.io.write_mol_qca_layout_svg
 ```
 

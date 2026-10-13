@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-    from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 
 
 ENGINES = {name.lower(): member for name, member in sidb_simulation_engine.__members__.items()}
@@ -62,20 +61,16 @@ def _physical_arguments(parser: Parser, *, base: bool, base_default: int = 2, po
         )
 
 
-def _apply_physical(params: sidb_simulation_parameters, args: argparse.Namespace) -> dict[str, object]:
-    """Copy the physical parameters of ``args`` into a ``sidb_simulation_parameters`` and describe them."""
-    params.epsilon_r = args.epsilon_r
-    params.lambda_tf = args.lambda_tf
-    params.mu_minus = args.mu_minus
-    description: dict[str, object] = {
+def _physical_options(args: argparse.Namespace) -> dict[str, float | int]:
+    """Return physical simulation keywords and their CLI report values."""
+    options: dict[str, float | int] = {
         "epsilon_r": args.epsilon_r,
         "lambda_tf": args.lambda_tf,
         "mu_minus": args.mu_minus,
     }
     if hasattr(args, "base"):
-        params.base = args.base
-        description["base"] = args.base
-    return description
+        options["base"] = args.base
+    return options
 
 
 def _active_sidb_layout(session: Session) -> sidb_layout:
