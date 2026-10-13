@@ -70,13 +70,11 @@ void normalize_layout_coordinates(nanobind::module_& m)
 
 /**
  * @brief Registers signed random coordinate generation.
- * @tparam Lyt Layout type.
  * @param m Python module.
  */
-template <typename Lyt>
 void random_coordinate(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
     m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
           py::arg("corner1"), py::arg("corner2"), DOC(fiction_layouts_random_coordinate));
@@ -100,7 +98,7 @@ void layout_utils(nanobind::module_& m)
     detail::normalize_layout_coordinates<fiction::mol_qca::layout>(m);
     detail::normalize_layout_coordinates<fiction::inml::layout>(m);
 
-    detail::random_coordinate<py_cartesian_gate_layout>(m);
+    detail::random_coordinate(m);
 }
 
 }  // namespace pyfiction
