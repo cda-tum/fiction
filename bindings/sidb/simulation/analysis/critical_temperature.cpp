@@ -17,6 +17,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -100,11 +101,7 @@ inline void register_critical_temperature_functions(nb::module_& m)
            critical_temperature_stats*                                       stats)
         {
             critical_temperature_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.operational_params.timeout    = timeout;
             params.operational_params.sim_engine = sim_engine;
             params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
@@ -201,11 +198,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
            critical_temperature_stats*                                       stats)
         {
             critical_temperature_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.operational_params.timeout    = timeout;
             params.operational_params.sim_engine = sim_engine;
             params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
@@ -318,11 +311,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
            critical_temperature_stats*                                       stats)
         {
             critical_temperature_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.operational_params.timeout    = timeout;
             params.operational_params.sim_engine = sim_engine;
             params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =

@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -49,11 +50,7 @@ void register_can_positive_charges_occur(nb::module_& m)
            const decltype(simulation_model{}.mu_minus) mu_minus, const decltype(simulation_model{}.epsilon_r) epsilon_r,
            const decltype(simulation_model{}.lambda_tf) lambda_tf)
         {
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            simulation_model sim_params{base, mu_minus, epsilon_r, lambda_tf};
+            const auto sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             return fiction::sidb::simulation::analysis::can_positive_charges_occur(lyt, sim_params);
         },
         nb::arg("lyt"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,

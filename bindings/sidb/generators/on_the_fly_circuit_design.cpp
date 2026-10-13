@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -141,12 +142,8 @@ void register_on_the_fly_circuit_design(nb::module_& m)
                               .influence_radius_charged_defects) influence_radius_charged_defects)
         {
             on_the_fly_circuit_design_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
             params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params =
-                fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+                make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout = timeout;
             params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.timeout =
                 design_gate_timeout;

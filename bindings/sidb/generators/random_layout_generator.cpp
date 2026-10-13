@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -74,11 +75,7 @@ void register_random_layout_generator(nb::module_& m)
            const decltype(generate_random_layout_options{}.on_progress)          on_progress)
         {
             generate_random_layout_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params       = fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.coordinate_pair  = coordinate_pair;
             params.number_of_sidbs  = number_of_sidbs;
             params.positive_sidbs   = positive_sidbs;
@@ -138,11 +135,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const decltype(generate_random_layout_options{}.on_progress)          on_progress)
         {
             generate_random_layout_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params       = fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.coordinate_pair  = coordinate_pair;
             params.number_of_sidbs  = number_of_sidbs;
             params.positive_sidbs   = positive_sidbs;

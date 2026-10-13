@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -54,11 +55,7 @@ void register_exhaustive_ground_state_simulation(nb::module_& m)
            const decltype(simulation_model{}.mu_minus) mu_minus, const decltype(simulation_model{}.epsilon_r) epsilon_r,
            const decltype(simulation_model{}.lambda_tf) lambda_tf, const fiction::utils::progress_callback& on_progress)
         {
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            simulation_model             params{base, mu_minus, epsilon_r, lambda_tf};
+            const auto                   params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, params, on_progress);
         },

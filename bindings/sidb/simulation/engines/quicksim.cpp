@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
@@ -61,11 +62,7 @@ void register_quicksim(nb::module_& m)
            const decltype(quicksim_options{}.on_worker_progress)            on_worker_progress)
         {
             quicksim_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params      = fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params      = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.iteration_steps = iteration_steps;
             params.alpha           = alpha;
             if (number_threads)
