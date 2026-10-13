@@ -8,8 +8,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
+from mnt.pyfiction.networks.io import read_technology_network
 from mnt.pyfiction.physical_design import (
     gold_cost_objective,
     gold_effort_mode,
@@ -19,15 +22,20 @@ from mnt.pyfiction.physical_design import (
 )
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def test_graph_oriented_layout_design(mux21):
+    from mnt.pyfiction.networks import technology_network
+
+
+def test_graph_oriented_layout_design(mux21: technology_network) -> None:
     layout = graph_oriented_layout_design(mux21)
     assert layout is not None
 
     assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_parameters(mux21):
+def test_graph_oriented_layout_design_with_parameters(mux21: technology_network) -> None:
     params = graph_oriented_layout_design_params()
     params.return_first = True
 
@@ -37,7 +45,7 @@ def test_graph_oriented_layout_design_with_parameters(mux21):
     assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_stats(mux21):
+def test_graph_oriented_layout_design_with_stats(mux21: technology_network) -> None:
     stats = graph_oriented_layout_design_stats()
 
     layout = graph_oriented_layout_design(mux21, statistics=stats)
@@ -46,7 +54,7 @@ def test_graph_oriented_layout_design_with_stats(mux21):
     assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_stats_and_parameters(mux21):
+def test_graph_oriented_layout_design_with_stats_and_parameters(mux21: technology_network) -> None:
     params = graph_oriented_layout_design_params()
     params.return_first = True
 
@@ -58,7 +66,7 @@ def test_graph_oriented_layout_design_with_stats_and_parameters(mux21):
     assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_different_parameters(mux21):
+def test_graph_oriented_layout_design_with_different_parameters(mux21: technology_network) -> None:
     params = graph_oriented_layout_design_params()
     params.return_first = True
     params.mode = gold_effort_mode.HIGH_EFFORT
@@ -102,7 +110,7 @@ def test_graph_oriented_layout_design_rejects_pi_spacing_outside_of_its_range(mu
         graph_oriented_layout_design(mux21, params)
 
 
-def test_graph_oriented_layout_design_with_custom_cost_function(mux21):
+def test_graph_oriented_layout_design_with_custom_cost_function(mux21: technology_network) -> None:
     params = graph_oriented_layout_design_params()
     params.return_first = True
     params.mode = gold_effort_mode.HIGH_EFFORT
@@ -117,7 +125,7 @@ def test_graph_oriented_layout_design_with_custom_cost_function(mux21):
     assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_multithreading(mux21):
+def test_graph_oriented_layout_design_with_multithreading(mux21: technology_network) -> None:
     params = graph_oriented_layout_design_params()
     params.return_first = True
     params.mode = gold_effort_mode.HIGH_EFFORT
@@ -127,3 +135,19 @@ def test_graph_oriented_layout_design_with_multithreading(mux21):
     assert layout is not None
 
     assert equivalence_checking(mux21, layout) != eq_type.NO
+
+
+def test_gold_preserves_declared_interface_order(tmp_path: Path) -> None:
+    """GOLD retains unused inputs and terminal names in a serial result."""
+    source = tmp_path / "ordered.blif"
+    source.write_text(".model ordered\n.inputs unused a b\n.outputs less\n.names b a less\n01 1\n.end\n")
+    ntk = read_technology_network(str(source))
+    params = graph_oriented_layout_design_params()
+    params.enable_multithreading = False
+    params.return_first = True
+    params.timeout = 10000
+    layout = graph_oriented_layout_design(ntk, params)
+    assert layout is not None
+    assert layout.num_pis() == 3
+    assert [layout.get_name(layout.pi_at(i)) for i in range(3)] == ["unused", "a", "b"]
+    assert layout.get_output_name(0) == "less"

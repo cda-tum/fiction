@@ -219,7 +219,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
 }
 
 TEST_CASE("Test the determination of all combinations of distributing k entities on n positions",
-          "[determine_all_combinations_of_distributing_k_entities_on_n_positions]")
+          "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
     SECTION("k = 0, n = 0")
     {

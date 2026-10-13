@@ -12,21 +12,7 @@ from typing import overload
 
 import mnt.pyfiction.layouts
 
-@overload
 def manhattan_distance(
-    layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> int: ...
-@overload
-def manhattan_distance(
-    layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> int: ...
-@overload
-def manhattan_distance(
-    layout: mnt.pyfiction.layouts.hexagonal_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> int:
@@ -37,33 +23,14 @@ def manhattan_distance(
     :math:`D = |x_1 - x_2| + |y_1 - y_2|`
 
     Args:
-        lyt: Layout.
         source: Source coordinate.
         target: Target coordinate.
-
-    Template Args:
-        Lyt: Coordinate layout type.
-        Dist: Integral type for the distance.
 
     Returns:
         Manhattan distance between `source` and `target`.
     """
 
-@overload
 def euclidean_distance(
-    layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> float: ...
-@overload
-def euclidean_distance(
-    layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> float: ...
-@overload
-def euclidean_distance(
-    layout: mnt.pyfiction.layouts.hexagonal_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> float:
@@ -74,33 +41,14 @@ def euclidean_distance(
     :math:`D = \\sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}`
 
     Args:
-        lyt: Layout.
         source: Source coordinate.
         target: Target coordinate.
-
-    Template Args:
-        Lyt: Coordinate layout type.
-        Dist: Floating-point type for the distance.
 
     Returns:
         Euclidean distance between `source` and `target`.
     """
 
-@overload
 def squared_euclidean_distance(
-    layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> int: ...
-@overload
-def squared_euclidean_distance(
-    layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> int: ...
-@overload
-def squared_euclidean_distance(
-    layout: mnt.pyfiction.layouts.hexagonal_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> int:
@@ -117,33 +65,17 @@ def squared_euclidean_distance(
     square root operation.
 
     Args:
-        lyt: Layout.
         source: Source coordinate.
         target: Target coordinate.
 
-    Template Args:
-        Lyt: Coordinate layout type.
-        Dist: Integral type for the distance.
-
     Returns:
         Squared euclidean distance between `source` and `target`.
+
+    Precondition:
+        The squared distance is representable by `uint64_t`.
     """
 
-@overload
 def twoddwave_distance(
-    layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> int: ...
-@overload
-def twoddwave_distance(
-    layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> int: ...
-@overload
-def twoddwave_distance(
-    layout: mnt.pyfiction.layouts.hexagonal_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> int:
@@ -158,13 +90,8 @@ def twoddwave_distance(
     y_2`.
 
     Args:
-        lyt: Layout.
         source: Source coordinate.
         target: Target coordinate.
-
-    Template Args:
-        Lyt: Coordinate layout type.
-        Dist: Integral type for the distance.
 
     Returns:
         2DDWave distance between `source` and `target`.
@@ -176,21 +103,7 @@ def twoddwave_distance(
         when adding distances in the default `uint64_t` number range.
     """
 
-@overload
 def chebyshev_distance(
-    layout: mnt.pyfiction.layouts.cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> int: ...
-@overload
-def chebyshev_distance(
-    layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
-    source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-) -> int: ...
-@overload
-def chebyshev_distance(
-    layout: mnt.pyfiction.layouts.hexagonal_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> int:
@@ -204,13 +117,8 @@ def chebyshev_distance(
     cost for diagonal moves as it does for horizontal and vertical ones.
 
     Args:
-        lyt: Layout.
         source: Source coordinate.
         target: Target coordinate.
-
-    Template Args:
-        Lyt: Coordinate layout type.
-        Dist: Integral type for the distance.
 
     Returns:
         Chebyshev distance between `source` and `target`.
@@ -317,7 +225,7 @@ def a_star(
     ```
     {.cpp}
     using clk_lyt = gate_level_layout<cartesian_layout>;
-    using path = layout_coordinate_path<cartesian_layout>;
+    using path = layout_coordinate_path;
     clk_lyt layout = ...;
     auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
     ```
@@ -363,42 +271,42 @@ def a_star_distance(
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
-) -> float: ...
+) -> int: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.cartesian_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
-) -> float: ...
+) -> int: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
-) -> float: ...
+) -> int: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
-) -> float: ...
+) -> int: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
-) -> float: ...
+) -> int: ...
 @overload
 def a_star_distance(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     obstructions: mnt.pyfiction.layouts.obstructions = ...,
-) -> float:
+) -> int:
     """
     A distance function that does not approximate but compute the actual
     minimum path length on the given layout via A* traversal. Naturally,
@@ -406,9 +314,7 @@ def a_star_distance(
     the polynomial complexity of A*.
 
     If no path between `source` and `target` exists in `layout`, the
-    returned distance is `std::numeric_limits<Dist>::infinity()` for
-    floating-point types or `std::numeric_limits<Dist>::max()` for
-    integral types.
+    returned distance is `std::numeric_limits<uint64_t>::max()`.
 
     Args:
         layout: The layout in which the distance between `source` and
@@ -420,7 +326,6 @@ def a_star_distance(
 
     Template Args:
         Lyt: Coordinate layout type.
-        Dist: Distance type.
 
     Returns:
         Minimum path length between `source` and `target` in `layout`.
@@ -531,7 +436,7 @@ def yen_k_shortest_paths(
     ```
     {.cpp}
     using clk_lyt = gate_level_layout<cartesian_layout>;
-    using path = layout_coordinate_path<cartesian_layout>;
+    using path = layout_coordinate_path;
     clk_lyt layout = ...;
     auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
     ```
@@ -658,7 +563,7 @@ def enumerate_all_paths(
     ```
     {.cpp}
     using clk_lyt = gate_level_layout<cartesian_layout>;
-    using path = layout_coordinate_path<cartesian_layout>;
+    using path = layout_coordinate_path;
     clk_lyt layout = ...;
     auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
     ```

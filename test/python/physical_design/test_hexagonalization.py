@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from mnt.pyfiction.physical_design import (
     hexagonalization,
     hexagonalization_io_pin_extension_mode,
@@ -17,8 +19,11 @@ from mnt.pyfiction.physical_design import (
 )
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
 
-def test_hexagonalization_default(mux21):
+
+def test_hexagonalization_default(mux21: technology_network) -> None:
     cart_layout = orthogonal(mux21)
     assert equivalence_checking(mux21, cart_layout) == eq_type.STRONG
     hex_layout = hexagonalization(cart_layout)
@@ -26,7 +31,7 @@ def test_hexagonalization_default(mux21):
     assert equivalence_checking(cart_layout, hex_layout) == eq_type.STRONG
 
 
-def test_hexagonalization_with_parameters(mux21):
+def test_hexagonalization_with_parameters(mux21: technology_network) -> None:
     cart_layout = orthogonal(mux21)
     assert equivalence_checking(mux21, cart_layout) == eq_type.STRONG
     params = hexagonalization_params()
@@ -35,7 +40,7 @@ def test_hexagonalization_with_parameters(mux21):
     assert equivalence_checking(cart_layout, hex_layout) == eq_type.STRONG
 
 
-def test_hexagonalization_with_stats(mux21):
+def test_hexagonalization_with_stats(mux21: technology_network) -> None:
     cart_layout = orthogonal(mux21)
     assert equivalence_checking(mux21, cart_layout) == eq_type.STRONG
     stats = hexagonalization_stats()
@@ -45,7 +50,7 @@ def test_hexagonalization_with_stats(mux21):
     assert stats.time_total.total_seconds() > 0
 
 
-def test_hexagonalization_with_stats_and_parameters(mux21):
+def test_hexagonalization_with_stats_and_parameters(mux21: technology_network) -> None:
     cart_layout = orthogonal(mux21)
     assert equivalence_checking(mux21, cart_layout) == eq_type.STRONG
 
@@ -58,7 +63,7 @@ def test_hexagonalization_with_stats_and_parameters(mux21):
     assert equivalence_checking(cart_layout, hex_layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
     for pi in hex_layout.pis():
-        assert pi.y == 0
+        assert hex_layout.get_tile(pi).y == 0
 
     params.input_pin_extension = hexagonalization_io_pin_extension_mode.NONE
     params.output_pin_extension = hexagonalization_io_pin_extension_mode.EXTEND
@@ -68,7 +73,7 @@ def test_hexagonalization_with_stats_and_parameters(mux21):
     assert equivalence_checking(cart_layout, hex_layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
     for po in hex_layout.pos():
-        assert po.y == hex_layout.y()
+        assert hex_layout.get_tile(po).y == hex_layout.height() - 1
 
     params.input_pin_extension = hexagonalization_io_pin_extension_mode.EXTEND
     params.output_pin_extension = hexagonalization_io_pin_extension_mode.EXTEND
@@ -78,9 +83,9 @@ def test_hexagonalization_with_stats_and_parameters(mux21):
     assert equivalence_checking(cart_layout, hex_layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
     for pi in hex_layout.pis():
-        assert pi.y == 0
+        assert hex_layout.get_tile(pi).y == 0
     for po in hex_layout.pos():
-        assert po.y == hex_layout.y()
+        assert hex_layout.get_tile(po).y == hex_layout.height() - 1
 
     params.input_pin_extension = hexagonalization_io_pin_extension_mode.EXTEND_PLANAR
     params.output_pin_extension = hexagonalization_io_pin_extension_mode.NONE
@@ -90,7 +95,7 @@ def test_hexagonalization_with_stats_and_parameters(mux21):
     assert equivalence_checking(cart_layout, hex_layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
     for pi in hex_layout.pis():
-        assert pi.y == 0
+        assert hex_layout.get_tile(pi).y == 0
 
     params.input_pin_extension = hexagonalization_io_pin_extension_mode.NONE
     params.output_pin_extension = hexagonalization_io_pin_extension_mode.EXTEND_PLANAR
@@ -100,7 +105,7 @@ def test_hexagonalization_with_stats_and_parameters(mux21):
     assert equivalence_checking(cart_layout, hex_layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
     for po in hex_layout.pos():
-        assert po.y == hex_layout.y()
+        assert hex_layout.get_tile(po).y == hex_layout.height() - 1
 
     params.input_pin_extension = hexagonalization_io_pin_extension_mode.EXTEND_PLANAR
     params.output_pin_extension = hexagonalization_io_pin_extension_mode.EXTEND_PLANAR
@@ -110,6 +115,6 @@ def test_hexagonalization_with_stats_and_parameters(mux21):
     assert equivalence_checking(cart_layout, hex_layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
     for pi in hex_layout.pis():
-        assert pi.y == 0
+        assert hex_layout.get_tile(pi).y == 0
     for po in hex_layout.pos():
-        assert po.y == hex_layout.y()
+        assert hex_layout.get_tile(po).y == hex_layout.height() - 1

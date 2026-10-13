@@ -66,8 +66,10 @@ void fanout_substitution(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::synthesis::fanout_substitution_params>(m, "fanout_substitution_params",
-                                                               DOC(fiction_synthesis_fanout_substitution_params))
+    py::class_<fiction::synthesis::fanout_substitution_params>(
+        m, "fanout_substitution_params",
+        pyfiction::progress_type_slots<fiction::synthesis::fanout_substitution_params>(),
+        DOC(fiction_synthesis_fanout_substitution_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::synthesis::fanout_substitution_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,

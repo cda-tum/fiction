@@ -25,8 +25,11 @@
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // time measurements
 
+#include <concepts>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
 #include <string>
 
@@ -36,15 +39,25 @@ using namespace fiction::layouts::io;
 using namespace fiction::physical_design;
 using namespace fiction::verification;
 
+/**
+ * @brief Assigns clock zero to every tile in the declared frame.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout whose clock numbers are cleared.
+ * @throws std::bad_alloc If an override cannot be allocated.
+ */
 template <typename Lyt>
-void remove_clocking(Lyt& lyt) noexcept
+void remove_clocking(Lyt& lyt)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     // NOTE: you have to download the respective files from MNTBench. Select Fontes18 and Trindade16, all clocking
     // schemes, obtained with NanoPlaceR
@@ -83,9 +96,9 @@ int main()  // NOLINT
                 fmt::print("[i] processing {}\n", benchmark);
 
                 // obtain layout characteristics
-                const auto width  = static_cast<uint64_t>(original_layout.x()) + 1;
-                const auto height = static_cast<uint64_t>(original_layout.y()) + 1;
-                const auto area   = width * height;
+                const auto width  = original_layout.width();
+                const auto height = original_layout.height();
+                const auto area   = original_layout.area();
 
                 // deep-copy the original layout
                 auto newly_clocked_layout = original_layout.clone();
@@ -104,7 +117,7 @@ int main()  // NOLINT
                 const auto eq_result = equivalence_checking(original_layout, newly_clocked_layout) != eq_type::NO;
 
                 // log results
-                clock_number_assignment_exp(original_layout.get_clocking_scheme().name(), benchmark,
+                clock_number_assignment_exp(std::string{original_layout.get_clocking_scheme().name()}, benchmark,
                                             original_layout.num_pis(), original_layout.num_pos(), width, height, area,
                                             mockturtle::to_seconds(stats.time_total), eq_result);
 
@@ -115,4 +128,16 @@ int main()  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
+}
+catch (...)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed with an unknown exception\n", stderr));
+    return EXIT_FAILURE;
 }

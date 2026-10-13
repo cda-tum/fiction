@@ -20,6 +20,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
+
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
@@ -27,7 +29,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
@@ -55,7 +56,7 @@ TEST_CASE("On-the-fly SiDB gate mapping rejects column arrangements", "[paramete
 {
     const auto a = GENERATE(arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    hex_gate_clk_lyt gate_layout{a, {0, 2}, clocking::twoddwave()};
+    hex_gate_clk_lyt gate_layout{a, {1, 3}, clocking::twoddwave()};
     const auto       input = gate_layout.create_pi("x", {0, 0});
     const auto       wire  = gate_layout.create_buf(input, {0, 1});
     gate_layout.create_po(wire, "y", {0, 2});
@@ -69,7 +70,7 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
     for (const bool crossing : std::array{false, true})
     {
         CAPTURE(crossing);
-        hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {2, 2, 1}, clocking::row()};
+        hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
         const auto       input1 = gate_layout.create_pi("input1", {0, 0});
         const auto       input2 = gate_layout.create_pi("input2", {1, 0});
         const auto       wire1  = gate_layout.create_buf(input1, {1, 1, 0});
@@ -108,10 +109,10 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
     {
         for (const bool with_defects : std::array{false, true})
         {
-            hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {2, 2}, clocking::row()};
+            hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
             const auto       input1 = gate_layout.create_pi("input1", {0, 0});
             const auto       input2 = gate_layout.create_pi("input2", {1, 0});
-            const auto       gate   = gate_layout.create_node({input1, input2}, function, {1, 1});
+            const auto       gate   = gate_layout.create_gate({input1, input2}, function, {1, 1});
             gate_layout.create_po(gate, "output", {0, 2});
 
             on_the_fly_gate_library_params params{};
@@ -130,9 +131,9 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
                 static_cast<void>(on_the_fly_gate_library::set_up_gate(gate_layout, {1, 1}, params, surface));
                 FAIL("Two canvas SiDBs cannot fit on one available site");
             }
-            catch (const gate_design_exception<hex_gate_clk_lyt>& error)
+            catch (const gate_design_exception& error)
             {
-                CHECK(error.which_tile() == tile<hex_gate_clk_lyt>{1, 1});
+                CHECK(error.which_tile() == fiction::layouts::layout_base::coordinate{1, 1});
                 CHECK(error.which_truth_table() == function);
                 CHECK(error.which_port_list().inp.size() == 2);
                 CHECK(error.which_port_list().out.size() == 1);

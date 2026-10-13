@@ -15,6 +15,7 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -22,7 +23,6 @@
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
-#include <fiction/traits.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -40,6 +40,11 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Registers the number of adjacent coordinates for a geometry.
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
 void num_adjacent_coordinates(nanobind::module_& m)
 {
@@ -49,6 +54,11 @@ void num_adjacent_coordinates(nanobind::module_& m)
           DOC(fiction_layouts_num_adjacent_coordinates));
 }
 
+/**
+ * @brief Registers occupied coordinate normalization for a cell layout.
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
 void normalize_layout_coordinates(nanobind::module_& m)
 {
@@ -58,17 +68,24 @@ void normalize_layout_coordinates(nanobind::module_& m)
           DOC(fiction_layouts_normalize_layout_coordinates));
 }
 
-template <typename Lyt>
+/**
+ * @brief Registers signed random coordinate generation.
+ * @param m Python module.
+ */
 void random_coordinate(nanobind::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;
 
-    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::coordinate<Lyt>>, py::arg("coordinate1"),
-          py::arg("coordinate_2"), DOC(fiction_layouts_random_coordinate));
+    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
+          py::arg("corner1"), py::arg("corner2"), DOC(fiction_layouts_random_coordinate));
 }
 
 }  // namespace detail
 
+/**
+ * @brief Registers layout coordinate utilities.
+ * @param m Python module.
+ */
 void layout_utils(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
@@ -81,7 +98,7 @@ void layout_utils(nanobind::module_& m)
     detail::normalize_layout_coordinates<fiction::mol_qca::layout>(m);
     detail::normalize_layout_coordinates<fiction::inml::layout>(m);
 
-    detail::random_coordinate<py_cartesian_gate_layout>(m);
+    detail::random_coordinate(m);
 }
 
 }  // namespace pyfiction

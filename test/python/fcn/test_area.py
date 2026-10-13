@@ -18,13 +18,13 @@ from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 
 def test_qca_area() -> None:
     """QCA layout dimensions determine physical area."""
-    lyt = qca_layout((4, 4))
+    lyt = qca_layout((5, 5))
     assert area(lyt) == pytest.approx(9604.0, abs=1e-7)
 
 
 def test_inml_area() -> None:
     """iNML layout dimensions determine physical area."""
-    lyt = inml_layout((4, 4))
+    lyt = inml_layout((5, 5))
     assert area(lyt) == pytest.approx(174000.0, abs=1e-7)
 
 

@@ -13,12 +13,14 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from mnt.pyfiction.inml import inml_layout
 from mnt.pyfiction.layouts import (
     arrangement,
     cartesian_gate_layout,
     hexagonal_gate_layout,
     shifted_cartesian_gate_layout,
 )
+from mnt.pyfiction.qca import qca_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -49,6 +51,55 @@ def test_layout_coordinate_access(make_layout):
         assert t in [(1, 1), (1, 2), (2, 1), (3, 2), (2, 3)]
 
 
+@pytest.mark.parametrize(
+    "layout",
+    [
+        pytest.param(cartesian_gate_layout, id="cartesian_gate_layout"),
+        pytest.param(
+            partial(shifted_cartesian_gate_layout, arrangement.ODD_COLUMN), id="shifted_cartesian_gate_layout"
+        ),
+        pytest.param(partial(hexagonal_gate_layout, arrangement.EVEN_ROW), id="hexagonal_gate_layout"),
+    ],
+)
+def test_fetch_clocking_scheme(layout: Callable[..., Any]) -> None:
+    """Construct known clocking schemes and reject unknown names with ValueError."""
+    layout((1, 1), "USE")
+    layout((2, 2), "2DDWave")
+    layout((3, 3), "RES")
+    layout((4, 4), "ESR")
+    layout((5, 5), "BANCS")
+
+    with pytest.raises(ValueError, match="clocking scheme"):
+        layout((1, 2), "3DDWave")
+    with pytest.raises(ValueError, match="clocking scheme"):
+        layout((1, 2), "SUE")
+    with pytest.raises(ValueError, match="clocking scheme"):
+        layout((1, 2), "PES")
+
+
+@pytest.mark.parametrize("layout_type", [cartesian_gate_layout, qca_layout, inml_layout])
+@pytest.mark.parametrize("scheme", ["2DDWave", "USE", "BANCS"])
+def test_clocking_scheme_name(layout_type: Callable[..., Any], scheme: str) -> None:
+    layout = layout_type((2, 2), scheme)
+    name = layout.get_clocking_scheme_name()
+    assert name == scheme.upper()
+    assert layout.is_clocking_scheme(name)
+    layout.replace_clocking_scheme("RES")
+    assert name == scheme.upper()
+    assert not layout.is_clocking_scheme(name)
+    assert layout.get_clocking_scheme_name() == "RES"
+
+
+@pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
+def test_clock_number_applies_to_every_layer(make_layout: Callable[[], Any]) -> None:
+    layout = make_layout()
+    layout.assign_clock_number((1, 1, 0), 3)
+    assert layout.get_clock_number((1, 1, 1)) == 3
+
+    layout.assign_clock_number((0, 1, 1), 2)
+    assert layout.get_clock_number((0, 1, 0)) == 2
+
+
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
 def test_clock_zone_iteration(make_layout):
     layout = make_layout()
@@ -60,48 +111,6 @@ def test_clock_zone_iteration(make_layout):
 
     for icz in layout.outgoing_clocked_zones((1, 1)):
         assert icz in [layout.coord(1, 2), layout.coord(2, 1)]
-
-
-@pytest.mark.parametrize(
-    "layout",
-    [
-        pytest.param(cartesian_gate_layout, id="cartesian_gate_layout"),
-        pytest.param(
-            partial(shifted_cartesian_gate_layout, arrangement.ODD_COLUMN), id="shifted_cartesian_gate_layout"
-        ),
-        pytest.param(partial(hexagonal_gate_layout, arrangement.EVEN_ROW), id="hexagonal_gate_layout"),
-    ],
-)
-def test_fetch_clocking_scheme(layout):
-    layout((1, 1), "USE")
-    layout((2, 2), "2DDWave")
-    layout((3, 3), "RES")
-    layout((4, 4), "ESR")
-    layout((5, 5), "BANCS")
-
-    with pytest.raises(RuntimeError):
-        layout((1, 2), "3DDWave")
-    with pytest.raises(RuntimeError):
-        layout((1, 2), "SUE")
-    with pytest.raises(RuntimeError):
-        layout((1, 2), "PES")
-
-
-def test_clocking_scheme_name() -> None:
-    layout = cartesian_gate_layout((2, 2), "2DDWave")
-    assert layout.get_clocking_scheme_name() == "2DDWAVE"
-    assert layout.is_clocking_scheme("2DDWAVE")
-    assert not layout.is_clocking_scheme("USE")
-
-
-@pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
-def test_clock_number_applies_to_every_layer(make_layout: Callable[[], Any]) -> None:
-    layout = make_layout()
-    layout.assign_clock_number((1, 1, 0), 3)
-    assert layout.get_clock_number((1, 1, 1)) == 3
-
-    layout.assign_clock_number((0, 1, 1), 2)
-    assert layout.get_clock_number((0, 1, 0)) == 2
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)

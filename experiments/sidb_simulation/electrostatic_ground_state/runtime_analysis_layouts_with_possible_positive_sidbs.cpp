@@ -26,7 +26,9 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <numeric>
 #include <vector>
 
@@ -40,7 +42,9 @@ using namespace fiction::sidb::simulation::engines;
 // generated layouts that may contain positively charged SiDBs (`can_positive_charges_occur` returns `true`). The number
 // of SiDBs in the layout varies from 5 to 20.
 
-int main()  // NOLINT
+/** @brief Runs the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     experiments::experiment<std::size_t, std::size_t, double, double, double> simulation_exp{
         "Benchmark",
@@ -108,4 +112,11 @@ int main()  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

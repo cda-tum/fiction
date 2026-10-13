@@ -24,15 +24,21 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/post_layout_optimization.hpp>
+#include <fiction/physical_design/routing_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cstdint>
+#include <limits>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -42,10 +48,10 @@ using namespace fiction::physical_design;
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(ntk, {});
+    auto layout = orthogonal<Lyt>(ntk, {});
 
     post_layout_optimization_stats stats{};
-    post_layout_optimization<Lyt>(layout, {}, &stats);
+    post_layout_optimization(layout, {}, &stats);
 
     check_eq(ntk, layout);
 
@@ -109,7 +115,18 @@ static void check_layout_equiv_all()
     }
 }
 
-TEST_CASE("Layout equivalence", "[post_layout_optimization]")
+TEST_CASE("Post-layout optimization counts physical wires without terminals", "[post-layout-optimization]")
+{
+    gate_level_layout<cartesian_layout> layout{{2, 1}, clocking::twoddwave()};
+    const auto                          input = layout.create_pi("a", {0, 0});
+    layout.create_po(input, "f", {1, 0});
+    post_layout_optimization_stats stats{};
+    post_layout_optimization(layout, {}, &stats);
+    CHECK(stats.num_wires_before == 0);
+    CHECK(stats.num_wires_after == 0);
+}
+
+TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 {
     SECTION("Cartesian layouts")
     {
@@ -124,49 +141,49 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         SECTION("optimization_layout_corner_case_outputs_1")
         {
-            const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
+            auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
             post_layout_optimization_stats stats_corner_case_1{};
-            post_layout_optimization<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
+            post_layout_optimization(layout_corner_case_1, {}, &stats_corner_case_1);
             check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
         }
 
         SECTION("optimization_layout_corner_case_outputs_2")
         {
-            const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
+            auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
             post_layout_optimization_stats stats_corner_case_2{};
-            post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
+            post_layout_optimization(layout_corner_case_2, {}, &stats_corner_case_2);
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
         }
 
         SECTION("optimization_layout_corner_case_outputs_3")
         {
-            const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
+            auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<gate_layout>();
             post_layout_optimization_stats stats_corner_case_3{};
-            post_layout_optimization<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
+            post_layout_optimization(layout_corner_case_3, {}, &stats_corner_case_3);
             check_eq(blueprints::optimization_layout_corner_case_outputs_3<gate_layout>(), layout_corner_case_3);
         }
 
         SECTION("optimization_layout_corner_case_outputs_4")
         {
-            const auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
+            auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<gate_layout>();
             post_layout_optimization_stats stats_corner_case_4{};
-            post_layout_optimization<gate_layout>(layout_corner_case_4, {}, &stats_corner_case_4);
+            post_layout_optimization(layout_corner_case_4, {}, &stats_corner_case_4);
             check_eq(blueprints::optimization_layout_corner_case_outputs_4<gate_layout>(), layout_corner_case_4);
         }
 
         SECTION("optimization_layout_corner_case_outputs_5")
         {
-            const auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
+            auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<gate_layout>();
             post_layout_optimization_stats stats_corner_case_5{};
-            post_layout_optimization<gate_layout>(layout_corner_case_5, {}, &stats_corner_case_5);
+            post_layout_optimization(layout_corner_case_5, {}, &stats_corner_case_5);
             check_eq(blueprints::optimization_layout_corner_case_outputs_5<gate_layout>(), layout_corner_case_5);
         }
 
         SECTION("optimization_layout_corner_case_inputs")
         {
-            const auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
+            auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<gate_layout>();
             post_layout_optimization_stats stats_corner_case_3{};
-            post_layout_optimization<gate_layout>(layout_corner_case_3, {}, &stats_corner_case_3);
+            post_layout_optimization(layout_corner_case_3, {}, &stats_corner_case_3);
             check_eq(blueprints::optimization_layout_corner_case_inputs<gate_layout>(), layout_corner_case_3);
         }
     }
@@ -177,12 +194,12 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
         {
-            const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+            auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
             post_layout_optimization_stats  stats{};
             post_layout_optimization_params params{};
             params.max_gate_relocations = max_gate_relocations;
-            post_layout_optimization<gate_layout>(layout, params, &stats);
+            post_layout_optimization(layout, params, &stats);
 
             check_eq(blueprints::mux21_network<technology_network>(), layout);
         }
@@ -192,12 +209,12 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.optimize_pos_only = true;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
     }
@@ -206,12 +223,12 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.timeout = 1000000;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
     }
@@ -220,12 +237,12 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.timeout = 0;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
         CHECK(stats.area_improvement == 0);
@@ -235,71 +252,75 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = blueprints::planar_unoptimized_layout<gate_layout>();
+        auto layout = blueprints::planar_unoptimized_layout<gate_layout>();
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.planar_optimization = true;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
+        post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::planar_unoptimized_layout<gate_layout>(), layout);
-        CHECK(layout.z() == 0);
+        CHECK(layout.layers() == 1);
     }
 
     SECTION("Planar optimization with crossing layout")
     {
         using gate_layout = gate_level_layout<cartesian_layout>;
 
-        const auto layout = blueprints::planar_optimization_layout<gate_layout>();
+        auto layout = blueprints::planar_optimization_layout<gate_layout>();
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
 
         params.planar_optimization = true;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
-        CHECK(!layout.is_inv(layout.get_node({1, 0})));
+        post_layout_optimization(layout, params, &stats);
+        /** @brief Object at the position whose inverter has been moved. */
+        const auto planar_object = layout.find_object({1, 0});
+        CHECK((planar_object.has_value() && !layout.is_inv(*planar_object)));
 
         params.planar_optimization = false;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
-        CHECK(layout.is_inv(layout.get_node({1, 0})));
+        post_layout_optimization(layout, params, &stats);
+        /** @brief Object at the position whose inverter has been restored. */
+        const auto crossing_object = layout.find_object({1, 0});
+        CHECK((crossing_object.has_value() && layout.is_inv(*crossing_object)));
     }
 }
 
-TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
+TEST_CASE("Wrong clocking scheme", "[post-layout-optimization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
-    auto       obstr_lyt = gate_layout(layout);
+    auto layout    = blueprints::use_and_gate_layout<gate_layout>();
+    auto obstr_lyt = gate_layout(layout);
 
     SECTION("Call functions")
     {
         post_layout_optimization_stats stats_wrong_clocking_scheme{};
 
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme));
+        CHECK_THROWS_AS(post_layout_optimization(obstr_lyt, {}, &stats_wrong_clocking_scheme), std::invalid_argument);
     }
 }
 
-TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
+TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
-    SECTION("Invalid layout with PI not in borders")
+    SECTION("Interior primary input")
     {
         auto layout = blueprints::pi_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+        CHECK_NOTHROW(post_layout_optimization(layout));
     }
 
-    SECTION("Invalid layout with PO not in borders")
+    SECTION("Interior primary output")
     {
         auto layout = blueprints::po_not_in_border_optimization_layout<gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(layout));
+        CHECK_NOTHROW(post_layout_optimization(layout));
     }
 
     SECTION("PO have to be moved to borders during optimization")
     {
         auto layout = blueprints::po_have_to_be_moved_to_border_optimization_layout<gate_layout>();
-        post_layout_optimization<gate_layout>(layout);
+        post_layout_optimization(layout);
 
         layout.foreach_pi(
             [&layout](const auto& pi) noexcept
@@ -311,24 +332,24 @@ TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
         layout.foreach_po(
             [&layout](const auto& po) noexcept
             {
-                const auto tile = layout.get_tile(layout.get_node(po));
+                const auto tile = layout.get_tile(po);
                 CHECK((layout.is_at_eastern_border(tile) || layout.is_at_southern_border(tile)));
             });
     }
 }
 
-TEST_CASE("Post-layout optimization reports progress", "[post_layout_optimization]")
+TEST_CASE("Post-layout optimization reports progress", "[post-layout-optimization]")
 {
     using gate_layout = gate_level_layout<cartesian_layout>;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();
-    const auto layout = orthogonal<gate_layout>(ntk);
+    auto       layout = orthogonal<gate_layout>(ntk);
 
     progress_recorder               rec{};
     post_layout_optimization_params params{};
     params.on_progress = rec.callback();
 
-    post_layout_optimization<gate_layout>(layout, params);
+    post_layout_optimization(layout, params);
 
     check_eq(ntk, layout);
 
@@ -336,4 +357,89 @@ TEST_CASE("Post-layout optimization reports progress", "[post_layout_optimizatio
     CHECK(rec.is_consistent("gate relocations"));
     // the nested wiring reduction reports through the same callback
     CHECK(rec.is_consistent("wire paths"));
+}
+
+TEST_CASE("Post-layout optimization edits its caller and preserves terminal identities", "[post-layout-optimization]")
+{
+    gate_level_layout<cartesian_layout> layout{{6, 3}, layouts::clocking::twoddwave()};
+    const auto                          a           = layout.create_pi("a", {0, 0});
+    const auto                          wire        = layout.create_buf(a, {1, 0});
+    const auto                          po          = layout.create_po(wire, "f", {5, 0});
+    const auto                          independent = layout;
+    post_layout_optimization_params     params{};
+    params.timeout = 0;
+    post_layout_optimization_stats stats{};
+    post_layout_optimization(layout, params, &stats);
+    CHECK(layout.contains(a));
+    CHECK(layout.contains(po));
+    CHECK(layout.source({po, 0}) == wire);
+    CHECK(layout.width() == 6);
+    CHECK(layout.height() == 1);
+    CHECK(independent.height() == 3);
+    CHECK(stats.y_size_before == 3);
+    CHECK(stats.y_size_after == 1);
+}
+
+TEST_CASE("Post-layout optimization rejects outside objects without mutation", "[post-layout-optimization]")
+{
+    gate_level_layout<cartesian_layout> layout{{4, 4}, layouts::clocking::twoddwave()};
+    const auto                          pi = layout.create_pi("a", {-1, 1});
+    const auto                          po = layout.create_po(pi, "f", {3, 1});
+    CHECK_THROWS_AS(post_layout_optimization(layout), std::invalid_argument);
+    CHECK(layout.get_tile(pi) == gate_level_layout<cartesian_layout>::tile{-1, 1});
+    CHECK(layout.source({po, 0}) == pi);
+    CHECK(layout.height() == 4);
+}
+
+TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-layout-optimization]")
+{
+    gate_level_layout<cartesian_layout> layout{{4, 4, 2}, layouts::clocking::twoddwave()};
+    const auto                          a    = layout.create_pi("a", {0, 0});
+    const auto                          b    = layout.create_pi("b", {0, 2});
+    auto                                left = a;
+    for (const gate_level_layout<cartesian_layout>::tile t :
+         {gate_level_layout<cartesian_layout>::tile{1, 0}, {2, 0}, {3, 0}, {3, 1}})
+    {
+        left = layout.create_buf(left, t);
+    }
+    const auto                      right = layout.create_buf(layout.create_buf(b, {1, 2}), {2, 2});
+    const auto                      gate  = layout.create_lt(left, right, {3, 2});
+    const auto                      po    = layout.create_po(gate, "f", {3, 3});
+    post_layout_optimization_params params{};
+    params.max_gate_relocations = 20;
+    post_layout_optimization(layout, params);
+    CHECK(layout.contains(gate));
+    CHECK(layout.contains(po));
+    CHECK(layout.is_lt(gate));
+    const auto objectives = extract_routing_objectives(layout);
+    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(a), layout.get_tile(gate), 0}) !=
+          objectives.end());
+    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(b), layout.get_tile(gate), 1}) !=
+          objectives.end());
+    CHECK(layout.area() <= 16);
+}
+
+TEST_CASE("Output border extension handles the full signed coordinate domain", "[post-layout-optimization]")
+{
+    /** Largest representable coordinate. */
+    constexpr auto maximum = std::numeric_limits<int32_t>::max();
+    /** Sparse geometry whose width includes the maximum coordinate. */
+    gate_level_layout<cartesian_layout> layout{{static_cast<uint64_t>(maximum) + 1, 3}};
+    /** Input and output adjacent to the eastern border. */
+    const auto input  = layout.create_pi("a", {maximum - 2, 1});
+    const auto output = layout.create_po(input, "f", {maximum - 1, 1});
+    /** Relocation count remains zero when the output extension adds a wire. */
+    uint64_t moved_gates{};
+
+    physical_design::detail::check_and_optimize_po_positions(layout, moved_gates);
+
+    CHECK(layout.get_tile(output) == layout_base::coordinate{maximum, 1});
+    CHECK(layout.width() == static_cast<uint64_t>(maximum) + 1);
+    /** Inserted wire drives the relocated output. */
+    const auto source = layout.source({output, 0});
+    REQUIRE(source.has_value());
+    /** Wire occupies the former output coordinate. */
+    const layout_base::coordinate former_output{maximum - 1, 1};
+    CHECK(layout.get_tile(*source) ==  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
+          former_output);
 }

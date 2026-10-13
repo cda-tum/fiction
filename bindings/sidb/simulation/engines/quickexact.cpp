@@ -47,7 +47,8 @@ void quickexact(nanobind::module_& m)
         .value("OFF", quickexact_params::automatic_base_number_detection::OFF,
                DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection_OFF));
 
-    py::class_<quickexact_params>(m, "quickexact_params", DOC(fiction_sidb_simulation_engines_quickexact_params))
+    py::class_<quickexact_params>(m, "quickexact_params", pyfiction::progress_type_slots<quickexact_params>(),
+                                  DOC(fiction_sidb_simulation_engines_quickexact_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &quickexact_params::sim_params,
                 DOC(fiction_sidb_simulation_engines_quickexact_params_sim_params))

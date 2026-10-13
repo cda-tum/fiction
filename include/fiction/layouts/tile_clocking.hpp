@@ -117,23 +117,19 @@ class tile_clocking
      * The clock zone that contains a cell: its tile on layer 0. Negative axes use floor division.
      *
      * @param c Cell position.
-     * @return Clock zone of `c`, or the invalid clock zone if `c` is invalid.
+     * @return Clock zone of `c`.
      */
     [[nodiscard]] clock_zone get_clock_zone(const layout_base::coordinate& c) const noexcept
     {
-        if (!c.is_valid())
-        {
-            return {};
-        }
-
         return {floor_div(c.x, tile_x), floor_div(c.y, tile_y)};
     }
     /**
      * Replaces the clocking scheme.
      *
      * @param scheme New clocking scheme over clock zones.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
+    void replace_clocking_scheme(const clocking_scheme_t& scheme)
     {
         clocking.replace_clocking_scheme(scheme);
     }
@@ -142,8 +138,9 @@ class tile_clocking
      *
      * @param cz Clock zone.
      * @param cn Clock number.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
+    void assign_clock_number(const clock_zone& cz, const clock_number_t cn)
     {
         clocking.assign_clock_number(cz, cn);
     }
@@ -189,8 +186,9 @@ class tile_clocking
      * A copy of the clocking scheme.
      *
      * @return Clocking scheme.
+     * @throws std::bad_alloc If allocation fails.
      */
-    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const noexcept
+    [[nodiscard]] clocking_scheme_t get_clocking_scheme() const
     {
         return clocking.get_clocking_scheme();
     }

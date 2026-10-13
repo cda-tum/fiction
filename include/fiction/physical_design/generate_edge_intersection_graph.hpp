@@ -16,16 +16,16 @@
 
 #pragma once
 
+#include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/physical_design/path_finding/enumerate_all_paths.hpp"
 #include "fiction/physical_design/path_finding/k_shortest_paths.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
-#include <phmap.h>
 
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -43,9 +43,8 @@ namespace fiction::physical_design
  * Each node (vertex) is identified via a unique ID whereas each edge is an undirected pair of such IDs. Since the
  * implementation demands it, each edge, additionally, is associated with a data field that represents its ID.
  */
-template <typename Lyt>
 using edge_intersection_graph =
-    undirected_graph<std::size_t, layout_coordinate_path<Lyt>, undirected_pair<std::size_t>, std::size_t>;
+    undirected_graph<std::size_t, layout_coordinate_path, undirected_pair<std::size_t>, std::size_t>;
 
 /**
  * Parameters for the edge intersection graph generation algorithm.
@@ -80,6 +79,10 @@ struct generate_edge_intersection_graph_stats
      */
     std::vector<std::vector<std::size_t>> cliques{};
     /**
+     * @brief Routing objective index for each vertex ID.
+     */
+    std::vector<std::size_t> objective_indices{};
+    /**
      * Stores the size of the generated edge intersection graph.
      */
     std::size_t num_vertices, num_edges;
@@ -88,11 +91,22 @@ struct generate_edge_intersection_graph_stats
 namespace detail
 {
 
+/**
+ * @brief Construct candidate paths and their intersection graph.
+ * @tparam Lyt Gate layout type.
+ */
 template <typename Lyt>
 class generate_edge_intersection_graph_impl
 {
   public:
-    generate_edge_intersection_graph_impl(const Lyt& lyt, const std::vector<routing_objective<Lyt>>& obj,
+    /**
+     * @brief Set the layout, objectives, parameters, and statistics.
+     * @param lyt Gate layout.
+     * @param obj Routing objectives.
+     * @param p Parameters.
+     * @param st Statistics.
+     */
+    generate_edge_intersection_graph_impl(const Lyt& lyt, const std::vector<routing_objective>& obj,
                                           const generate_edge_intersection_graph_params& p,
                                           generate_edge_intersection_graph_stats&        st) :
             layout{lyt},
@@ -101,7 +115,8 @@ class generate_edge_intersection_graph_impl
             pst{st}
     {}
 
-    edge_intersection_graph<Lyt> run()
+    /** @brief Generate the graph. @return Candidate paths and their intersections. */
+    edge_intersection_graph run()
     {
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
@@ -125,7 +140,8 @@ class generate_edge_intersection_graph_impl
                                   }
 
                                   // assign a unique label to each path and create a corresponding node in the graph
-                                  initiate_objective_nodes(obj_paths);
+                                  initiate_objective_nodes(obj_paths,
+                                                           static_cast<std::size_t>(&obj - objectives.data()));
 
                                   // if there are no paths, the objective could not be fulfilled
                                   if (obj_paths.empty())
@@ -160,7 +176,7 @@ class generate_edge_intersection_graph_impl
     /**
      * The routing objectives.
      */
-    const std::vector<routing_objective<Lyt>> objectives;
+    const std::vector<routing_objective> objectives;
     /**
      * Parameters.
      */
@@ -172,58 +188,35 @@ class generate_edge_intersection_graph_impl
     /**
      * The edge intersection graph to be created.
      */
-    edge_intersection_graph<Lyt> graph{};
+    edge_intersection_graph graph{};
     /**
      * IDs for nodes and edges.
      */
     std::size_t node_id{0}, edge_id{0};
-    /**
-     * Extends the layout_coordinate_path to additionally to the vector representation of the path also hold a set that
-     * allows fast lookup needed to find intersections (O(log n)). Additionally, a label is assigned to each path to
-     * identify it in the edge intersection graph.
-     */
-    class labeled_layout_coordinate_lookup_path : public layout_coordinate_path<Lyt>
+    /** @brief A coordinate path with its graph vertex label. */
+    class labeled_layout_coordinate_path : public layout_coordinate_path
     {
       public:
         /**
-         * Overwrites the append function to additionally store the given coordinate in a set.
-         *
-         * @param c Coordinate to append to the path.
-         */
-        void append(const coordinate<Lyt>& c) noexcept
-        {
-            path_elements.insert(c);
-            layout_coordinate_path<Lyt>::append(c);
-        }
-        /**
-         * Given another path, this function checks if they are not disjoint, i.e., it looks for at least one coordinate
-         * that both paths share.
-         *
-         * If, at some point, the set approach is not to be used anymore, std::find_first_of offers the same
-         * functionality on any kind of range.
+         * @brief Check whether this path shares an interior coordinate of the other path.
          *
          * @tparam Path Type of other path.
          * @param other The other path.
-         * @return `true` iff this path and the given one are not disjoint, i.e., share at least one coordinate.
+         * @return `true` iff this path contains an interior coordinate of the other path.
          */
         template <typename Path>
         bool has_intersection_with(const Path& other) const noexcept
         {
-            // if source and target are identical, an intersection was found
-            if (this->source() == other.source() && this->target() == other.target())
+            if (other.size() <= 2)
             {
-                return true;
+                return false;
             }
-
-            // else, check if any of the remaining coordinates occur in the stored path
-            return std::ranges::any_of(std::cbegin(other) + 1, std::cend(other) - 1,
-                                       [this](const auto& c) { return path_elements.count(c) > 0; });
+            // Pairwise scanning costs O(|p||q|); long-route workloads can use a query-local coordinate index.
+            return std::ranges::find_first_of(std::cbegin(other) + 1, std::cend(other) - 1, std::cbegin(*this),
+                                              std::cend(*this)) != std::cend(other) - 1;
         }
         /**
-         * Like has_intersection_with but allows paths to share crossings, i.e., single-tile intersections.
-         *
-         * Similar to has_intersection_with, this function also returns `true` if source and target are matching in both
-         * paths.
+         * @brief Check for a shared segment, allowing single-tile intersections as crossings.
          *
          * @tparam Path Type of other path.
          * @param other The other path.
@@ -233,13 +226,7 @@ class generate_edge_intersection_graph_impl
         template <typename Path>
         bool has_overlap_with(const Path& other) const noexcept
         {
-            // if source and target are identical, an intersection was found
-            if (this->source() == other.source() && this->target() == other.target())
-            {
-                return true;
-            }
-
-            // else, check if any of the coordinates (including I/Os) form a shared segment in the stored path
+            // Include endpoints when checking for a shared segment.
             return fiction::utils::stl::find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this),
                                                           std::cend(*this)) != std::cend(other);
         }
@@ -249,27 +236,18 @@ class generate_edge_intersection_graph_impl
         std::size_t label{};
 
       protected:
-        using base = layout_coordinate_path<Lyt>;
+        using base = layout_coordinate_path;
 
       public:
         // make all inherited constructors available
         using base::base;
-
-      private:
-        /**
-         * Uniquely identify path elements in a set to make them searchable in O(1).
-         */
-        phmap::flat_hash_set<coordinate<Lyt>> path_elements{};
     };
     /**
      * Alias for the path type.
      */
-    using clk_path = labeled_layout_coordinate_lookup_path;
+    using clk_path = labeled_layout_coordinate_path;
     /**
-     * Stores a collection of all annotated paths (labeled_layout_coordinate_lookup_path objects) computed thus far to
-     * find intersections with new ones. The edge intersection graph stores plain paths without the extra set and label.
-     * Therefore, after the generate_edge_intersection_graph function terminates, the extra memory overhead is being
-     * released again.
+     * Stores labeled paths to find intersections with each new objective. The graph stores plain paths.
      */
     path_collection<clk_path> all_paths{};
     /**
@@ -280,16 +258,19 @@ class generate_edge_intersection_graph_impl
      * additionally stores their node IDs in the statistics.
      *
      * @param objective_paths Collection of paths belonging to the same objective.
+     * @param objective_index Index of the routing objective.
+     * @throws std::bad_alloc If storage allocation fails.
      */
-    void initiate_objective_nodes(path_collection<clk_path>& objective_paths) noexcept
+    void initiate_objective_nodes(path_collection<clk_path>& objective_paths, const std::size_t objective_index)
     {
         std::vector<std::size_t> clique{};
 
         std::ranges::for_each(objective_paths,
-                              [this, &clique](auto& p)
+                              [this, &clique, objective_index](auto& p)
                               {
                                   p.label = node_id++;
                                   graph.insert_vertex(p.label, p);
+                                  pst.objective_indices.push_back(objective_index);
                                   clique.push_back(p.label);
                               });
 
@@ -303,8 +284,9 @@ class generate_edge_intersection_graph_impl
      * graph between each pair of corresponding nodes, thus, forming a clique (complete sub-graph).
      *
      * @param objective_paths Collection of paths belonging to the same objective.
+     * @throws std::bad_alloc If storage allocation fails.
      */
-    void connect_clique(path_collection<clk_path>& objective_paths) noexcept
+    void connect_clique(path_collection<clk_path>& objective_paths)
     {
         combinations::for_each_combination(objective_paths.begin(), objective_paths.begin() + 2, objective_paths.end(),
                                            [this](const auto begin, [[maybe_unused]] const auto end)
@@ -320,8 +302,9 @@ class generate_edge_intersection_graph_impl
      * with it, i.e., that share at least one coordinate.
      *
      * @param objective_paths Collection of paths belonging to the same objective.
+     * @throws std::bad_alloc If storage allocation fails.
      */
-    void create_intersection_edges(path_collection<clk_path>& objective_paths) noexcept
+    void create_intersection_edges(path_collection<clk_path>& objective_paths)
     {
         std::ranges::for_each(objective_paths,
                               [this](const auto& obj_p)
@@ -351,18 +334,20 @@ class generate_edge_intersection_graph_impl
  *
  * @tparam Lyt Type of the clocked layout.
  * @param lyt The layout to generate the edge intersection graph for.
- * @param objectives A list of routing objectives given as source-target pairs.
+ * @param objectives Source coordinates and indexed destination inputs.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
  */
 template <typename Lyt>
-edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&                                 lyt,
-                                                              const std::vector<routing_objective<Lyt>>& objectives,
-                                                              generate_edge_intersection_graph_params    ps  = {},
-                                                              generate_edge_intersection_graph_stats*    pst = nullptr)
+edge_intersection_graph generate_edge_intersection_graph(const Lyt&                              lyt,
+                                                         const std::vector<routing_objective>&   objectives,
+                                                         generate_edge_intersection_graph_params ps  = {},
+                                                         generate_edge_intersection_graph_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a clocked layout");
 
     generate_edge_intersection_graph_stats st{};
 

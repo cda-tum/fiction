@@ -16,18 +16,20 @@
 
 #pragma once
 
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <stdexcept>
 
 namespace fiction::physical_design::path_finding
 {
@@ -50,8 +52,16 @@ template <typename Path, typename Lyt>
 class yen_k_shortest_paths_impl
 {
   public:
-    yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const uint32_t k,
-                              const yen_k_shortest_paths_params& p, const layouts::obstructions& extra) :
+    /**
+     * @brief Initializes the k-shortest-path search.
+     * @param lyt Layout to search.
+     * @param obj Routing endpoints.
+     * @param k Maximum number of paths.
+     * @param p Search parameters.
+     * @param extra Additional routing obstructions.
+     */
+    yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective obj, const uint32_t k,
+                              const yen_k_shortest_paths_params p, const layouts::obstructions& extra) :
             layout{lyt},
             initial_obstructions{extra},
             search_obstructions{extra},
@@ -60,8 +70,8 @@ class yen_k_shortest_paths_impl
             params{p}
     {
         // start by determining the shortest path between source and target
-        k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor<Lyt, uint64_t>(),
-                                                unit_cost_functor<Lyt, uint8_t>(), params.astar_params,
+        k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor(),
+                                                unit_cost_functor<uint8_t>(), params.astar_params,
                                                 search_obstructions));
     }
 
@@ -70,13 +80,12 @@ class yen_k_shortest_paths_impl
      *
      * @return A collection of up to k shortest paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run() noexcept
+    [[nodiscard]] path_collection<Path> run()
     {
-        assert(objective.source.is_valid() && objective.target.is_valid() &&
-               "Neither source nor target coordinate can be dead");
-
-        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
-               "Both source and target coordinate have to be within the layout bounds");
+        if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
+        {
+            throw std::invalid_argument("Routing endpoints must lie within the layout extent");
+        }
 
         // if there was no path to begin with, abort
         if (k_shortest_paths.back().empty())
@@ -120,8 +129,8 @@ class yen_k_shortest_paths_impl
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
                 if (const auto spur_path =
-                        a_star<Path>(layout, {spur, objective.target}, manhattan_distance_functor<Lyt, uint64_t>(),
-                                     unit_cost_functor<Lyt, uint8_t>(), params.astar_params, search_obstructions);
+                        a_star<Path>(layout, {spur, objective.target}, manhattan_distance_functor(),
+                                     unit_cost_functor<uint8_t>(), params.astar_params, search_obstructions);
                     !spur_path.empty())
                 {
                     // the final path will be a concatenation of the root path and the spur path
@@ -171,7 +180,7 @@ class yen_k_shortest_paths_impl
     /**
      * Source and target coordinates.
      */
-    const routing_objective<Lyt> objective;
+    const routing_objective objective;
     /**
      * The number of paths to determine, i.e., k.
      */
@@ -196,14 +205,14 @@ class yen_k_shortest_paths_impl
      * @param p Path whose costs are to be calculated.
      * @return Costs of path p.
      */
-    static std::size_t path_cost(const Path& p) noexcept
+    static std::size_t path_cost(const Path& p)
     {
         return p.size();
     }
     /**
      * Resets all temporary obstructions to the caller's obstructions.
      */
-    void reset_temporary_obstructions() noexcept
+    void reset_temporary_obstructions()
     {
         // copying costs O(|caller obstructions|) per spur node; undo only the spur's own marks if that ever dominates
         search_obstructions = initial_obstructions;
@@ -238,7 +247,7 @@ class yen_k_shortest_paths_impl
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
  * using clk_lyt = gate_level_layout<cartesian_layout>;
- * using path = layout_coordinate_path<cartesian_layout>;
+ * using path = layout_coordinate_path;
  * clk_lyt layout = ...;
  * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
  * @endcode
@@ -257,12 +266,11 @@ class yen_k_shortest_paths_impl
  * `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                                                         const uint32_t                     k,
-                                                         const yen_k_shortest_paths_params& params       = {},
-                                                         const layouts::obstructions&       obstructions = {}) noexcept
+[[nodiscard]] path_collection<Path>
+yen_k_shortest_paths(const Lyt& layout, const routing_objective& objective, const uint32_t k,
+                     const yen_k_shortest_paths_params& params = {}, const layouts::obstructions& obstructions = {})
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
     if (k == 0)
     {

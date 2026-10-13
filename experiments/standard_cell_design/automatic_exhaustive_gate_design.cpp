@@ -30,7 +30,9 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <string>
 #include <utility>
 #include <vector>
@@ -49,7 +51,9 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 
-int main()  // NOLINT
+/** @brief Runs the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     // "d" describes the number of canvas SiDBs used to design the gates.
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t> simulation_exp{
@@ -194,4 +198,11 @@ int main()  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

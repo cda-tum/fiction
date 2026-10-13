@@ -87,6 +87,15 @@ def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
 
 
 @pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.parametrize("topology", ["cartesian", "shifted_cartesian", "hexagonal"])
+def test_exact_unknown_clocking_scheme(mux21_shell: Shell, topology: str) -> None:
+    """Unknown schemes produce the CLI's clocking diagnostic for every geometry."""
+    message = mux21_shell.fails(f"exact --topology {topology} -s nope")
+    assert "'nope' is not a clocking scheme" in message
+    assert len(mux21_shell.session.gate_layouts) == 0
+
+
+@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
 def test_exact_topolinano(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s columnar --topolinano -t 60')
     assert isinstance(shell.session.gate_layouts.current(), shifted_cartesian_gate_layout)

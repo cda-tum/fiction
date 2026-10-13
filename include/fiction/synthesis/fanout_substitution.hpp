@@ -26,12 +26,12 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <queue>
 #include <random>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -67,11 +67,11 @@ struct fanout_substitution_params
      */
     substitution_strategy strategy = substitution_strategy::BREADTH;
     /**
-     * Maximum output degree of each fan-out node.
+     * Maximum output degree of each fan-out node. Must be at least two.
      */
     uint32_t degree = 2ul;
     /**
-     * Maximum number of outputs any gate is allowed to have before substitution applies.
+     * Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
      */
     uint32_t threshold = 1ul;
     /**
@@ -158,6 +158,13 @@ class fanout_substitution_impl
                                            if (!ntk_topo.is_constant(fn))
                                            {
                                                child = get_fanout(substituted, fn, child);
+                                               if (const auto duplicate = std::ranges::find(children, child);
+                                                   duplicate != children.cend())
+                                               {
+                                                   // Reserve a distinct branch before cloning the consumer's inputs.
+                                                   *duplicate = substituted.create_buf(child);
+                                                   child      = get_fanout(substituted, fn, old2new[fn]);
+                                               }
                                            }
 
                                            children.push_back(child);
@@ -217,6 +224,12 @@ class fanout_substitution_impl
      */
     std::optional<rng_state> rng;
 
+    /**
+     * @brief Creates enough fanout branches to meet the source's output threshold.
+     * @param substituted Partially constructed destination network.
+     * @param n Original source node.
+     * @param old2new Mapping from original nodes to destination signals.
+     */
     void generate_fanout_tree(NtkDest& substituted, const mockturtle::node<NtkSrc>& n, const old2new_map& old2new)
     {
         // skip fanout tree generation if n is a proper fanout node
@@ -228,10 +241,10 @@ class fanout_substitution_impl
             }
         }
 
-        auto num_fanouts = static_cast<uint32_t>(
-            std::ceil(static_cast<double>(std::max(
-                          static_cast<int32_t>(ntk_topo.fanout_size(n)) - static_cast<int32_t>(ps.threshold), 0)) /
-                      static_cast<double>(std::max(static_cast<int32_t>(ps.degree) - 1, 1))));
+        const uint32_t fanouts     = ntk_topo.fanout_size(n);
+        const auto     excess      = fanouts > ps.threshold ? fanouts - ps.threshold : 0u;
+        const auto     gain        = ps.degree - 1;
+        const auto     num_fanouts = (excess / gain) + static_cast<uint32_t>(excess % gain != 0);
 
         auto child = old2new[n];
 
@@ -262,26 +275,26 @@ class fanout_substitution_impl
         }
     }
 
+    /**
+     * @brief Selects an output branch with capacity without changing the original source signal.
+     * @param substituted Partially constructed destination network.
+     * @param n Original source node.
+     * @param child Original source signal in the destination network.
+     * @return The source signal or an available fanout branch.
+     */
     mockturtle::signal<NtkDest> get_fanout(const NtkDest& substituted, const mockturtle::node<NtkSrc>& n,
-                                           mockturtle::signal<NtkDest>& child)
+                                           mockturtle::signal<NtkDest> child)
     {
         if (substituted.fanout_size(substituted.get_node(child)) >= ps.threshold)
         {
-            if (auto fanouts = available_fanouts[n]; !fanouts.empty())
+            auto& fanouts = available_fanouts[n];
+            while (!fanouts.empty() && substituted.fanout_size(substituted.get_node(fanouts.front())) >= ps.degree)
             {
-                // find non-overfull fanout node
-                while (true)
-                {
-                    child = fanouts.front();
-                    if (substituted.fanout_size(substituted.get_node(child)) >= ps.degree)
-                    {
-                        fanouts.pop();
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+                fanouts.pop();
+            }
+            if (!fanouts.empty())
+            {
+                child = fanouts.front();
             }
         }
 
@@ -325,7 +338,7 @@ class fanout_substitution_impl
             q.pop();
             child = substituted.create_buf(child);
 
-            for (auto i = 0u; i < ps.degree; ++i)
+            for (auto i = 0u; i < std::min(ps.degree, static_cast<uint32_t>(ntk_topo.fanout_size(n))); ++i)
             {
                 q.push(child);
             }
@@ -361,8 +374,8 @@ class fanout_substitution_impl
 
             const auto new_buf = substituted.create_buf(selected);
 
-            // add 'ps.degree' copies of the new buffer into available_vec
-            for (auto i = 0u; i < ps.degree; ++i)
+            // Add at most one candidate copy per source consumer.
+            for (auto i = 0u; i < std::min(ps.degree, static_cast<uint32_t>(ntk_topo.fanout_size(n))); ++i)
             {
                 available_vec.push_back(new_buf);
             }
@@ -442,13 +455,14 @@ class is_fanout_substituted_impl
 /**
  * Substitutes high-output degrees in a logic network with fanout nodes that compute the identity function. For this
  * purpose, `create_buf` is utilized. Therefore, `NtkDest` should support identity nodes. If it does not, no new nodes
- * will in fact be created. In either case, the returned network will be logically equivalent to the input one.
+ * will in fact be created. A destination that elides buffer nodes may exceed the requested fanout degrees.
+ * The returned network is logically equivalent to the input network.
  *
- * The process is rather naive with two possible strategies to pick from: breath-first and depth-first. The former
- * creates partially balanced fanout trees while the latter leads to fanout chains. Further parameterization includes
- * thresholds for the maximum number of output each node and fanout is allowed to have.
+ * The algorithm builds breadth-first, depth-first, or random fanout trees. Parameters set the maximum output degrees
+ * of ordinary nodes and fanout nodes.
  *
  * The returned network is newly created from scratch because its type `NtkDest` may differ from `NtkSrc`.
+ * Repeated nonconstant inputs use distinct routing branches when `NtkDest` preserves buffer nodes.
  *
  * @note The physical design algorithms natively provided in fiction do not require their input networks to be
  * fanout-substituted. If that is necessary, they will do it themselves. Providing already substituted networks does
@@ -459,10 +473,16 @@ class is_fanout_substituted_impl
  * @param ntk_src The input logic network.
  * @param ps Parameters.
  * @return A fanout-substituted logic network of type `NtkDest` that is logically equivalent to `ntk_src`.
+ * @throws std::invalid_argument If `ps.degree` is less than two or `ps.threshold` is zero.
  */
 template <typename NtkDest, typename NtkSrc>
 NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps = {})
 {
+    if (ps.degree < 2 || ps.threshold == 0)
+    {
+        throw std::invalid_argument("Fanout degree must be at least two and threshold must be at least one");
+    }
+
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
     static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
 

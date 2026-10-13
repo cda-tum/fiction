@@ -12,7 +12,7 @@ from mnt.pyfiction.layouts import cartesian_layout
 
 
 def test_coordinate_iteration():
-    layout = cartesian_layout((9, 9, 1))
+    layout = cartesian_layout((10, 10, 2))
 
     for t in layout.coordinates():
         assert t <= (9, 9, 1)

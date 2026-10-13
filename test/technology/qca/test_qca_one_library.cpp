@@ -15,20 +15,29 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
+#include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/verification/design_rule_violations.hpp>
 
+#include <cstdint>
+#include <sstream>
 #include <type_traits>
 
 using namespace fiction;
 using namespace fiction::layouts;
+using namespace fiction::physical_design;
+using namespace fiction::verification;
 using namespace fiction::qca;
 
 TEST_CASE("QCA ONE library traits", "[qca-one-library]")
@@ -179,4 +188,76 @@ TEST_CASE("Setting up fanouts", "[qca-one-library]")
     CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_180(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 1}) == qca_one_library::rotate_90(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(bent_wire));
+}
+
+TEST_CASE("QCA ONE rejects primary-input fanout", "[qca-one-library]")
+{
+    gate_level_layout<cartesian_layout> lyt{{2, 3}};
+    const auto                          pi = lyt.create_pi("a", {0, 1});
+    lyt.create_po(pi, "north", {0, 0});
+    lyt.create_po(pi, "east", {1, 1});
+    lyt.create_po(pi, "south", {0, 2});
+    lyt.assign_clock_number({0, 1}, 0);
+    lyt.assign_clock_number({0, 0}, 1);
+    lyt.assign_clock_number({1, 1}, 1);
+    lyt.assign_clock_number({0, 2}, 1);
+
+    std::ostringstream    report{};
+    gate_level_drv_params ps{};
+    ps.out = &report;
+    gate_level_drv_stats st{};
+    gate_level_drvs(lyt, ps, &st);
+    INFO(report.str());
+    REQUIRE(st.drvs == 0);
+
+    CHECK_THROWS_AS(apply_gate_library<qca_one_library>(lyt),
+                    fcn::unsupported_gate_type_exception<fiction::layouts::layout_base::coordinate>);
+}
+
+TEST_CASE("QCA ONE rejects an unoccupied tile", "[qca-one-library]")
+{
+    const gate_level_layout<cartesian_layout> layout{{2, 2}};
+    CHECK_THROWS_AS(qca_one_library::set_up_gate(layout, {0, 0}),
+                    fcn::unsupported_gate_type_exception<cartesian_layout::coordinate>);
+}
+
+TEST_CASE("QCA ONE vias in a sparse frame", "[qca-one-library]")
+{
+    /** Sparse geometry spanning the complete nonnegative x domain. */
+    qca::layout layout{{uint32_t{1} << 31u, 8, 2}};
+    layout.assign_cell_type({4, 1, 1}, cell_type::NORMAL);
+    layout.assign_cell_type({4, 2, 1}, cell_type::NORMAL);
+    layout.assign_cell_type({4, 3, 1}, cell_type::NORMAL);
+    layout.assign_cell_type({4, 1, 0}, cell_type::OUTPUT);
+    layout.assign_cell_type({-1, 1, 1}, cell_type::NORMAL);
+    layout.assign_cell_type({4, 8, 1}, cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2, 3}, cell_type::NORMAL);
+
+    for (int32_t x = 16; x < 136; x += 3)
+    {
+        layout.assign_cell_type({x, 5, 1}, cell_type::NORMAL);
+    }
+
+    qca_one_library::post_layout_optimization(layout);
+
+    CHECK(layout.get_cell_mode({4, 1, 1}) == cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({4, 3, 1}) == cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({4, 2, 1}) == cell_mode::NORMAL);
+    CHECK(layout.get_cell_type({4, 1, 0}) == cell_type::NORMAL);
+    CHECK(layout.get_cell_type({4, 3, 0}) == cell_type::NORMAL);
+    CHECK(layout.get_cell_mode({4, 1, 0}) == cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({4, 3, 0}) == cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({-1, 1, 1}) == cell_mode::NORMAL);
+    CHECK(layout.get_cell_type({-1, 1, 0}) == cell_type::EMPTY);
+    CHECK(layout.get_cell_mode({4, 8, 1}) == cell_mode::NORMAL);
+    CHECK(layout.get_cell_type({4, 8, 1}) == cell_type::OUTPUT);
+    CHECK(layout.get_cell_type({4, 8, 0}) == cell_type::EMPTY);
+    CHECK(layout.get_cell_mode({4, 2, 3}) == cell_mode::NORMAL);
+    CHECK(layout.get_cell_type({4, 2, 0}) == cell_type::EMPTY);
+    for (int32_t x = 16; x < 136; x += 3)
+    {
+        CHECK(layout.get_cell_mode({x, 5, 1}) == cell_mode::VERTICAL);
+        CHECK(layout.get_cell_type({x, 5, 0}) == cell_type::NORMAL);
+        CHECK(layout.get_cell_mode({x, 5, 0}) == cell_mode::VERTICAL);
+    }
 }

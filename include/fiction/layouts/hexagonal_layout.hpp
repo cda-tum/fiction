@@ -25,13 +25,14 @@
 
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <concepts>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <limits>
-#include <memory>
+#include <optional>
 #include <ranges>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -124,7 +125,9 @@ class hexagonal_layout : public layout_base
   public:
 #pragma region Types and constructors
 
-    using layout_base::aspect_ratio;
+    /** Axis sizes. */
+    using layout_base::extent;
+    /** Signed coordinate values. */
     using layout_base::coordinate;
 
     /**
@@ -184,70 +187,28 @@ class hexagonal_layout : public layout_base
         }
     };
 
-    /**
-     * State that all copies of a layout share.
-     */
-    struct hexagonal_layout_storage
-    {
-        /**
-         * Creates the storage of a layout.
-         *
-         * @param ar Highest possible position in the layout.
-         * @param a Arrangement of the shifted rows or columns.
-         */
-        hexagonal_layout_storage(const aspect_ratio& ar, const layouts::arrangement a) noexcept :
-                dimension{ar},
-                shift{a}
-        {}
-
-        /**
-         * Highest possible position in the layout.
-         */
-        aspect_ratio dimension;
-        /**
-         * Whether a gate-level layout shares these dimensions and limits the z extent to 1.
-         */
-        bool two_layers_only{false};
-        /**
-         * Arrangement of the shifted rows or columns.
-         */
-        layouts::arrangement shift;
-    };
-
+    /** Minimum number of incoming neighbors. */
     static constexpr auto min_fanin_size = 0u;  // NOLINT(readability-identifier-naming): mockturtle requirement
+    /** Maximum number of incoming neighbors. */
     static constexpr auto max_fanin_size = 5u;  // NOLINT(readability-identifier-naming): mockturtle requirement
 
+    /** Geometry base type. */
     using base_type = hexagonal_layout;
 
-    using storage = std::shared_ptr<hexagonal_layout_storage>;
-
     /**
-     * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
-     * in the `arrangement::EVEN_COLUMN` ASCII layout representation above `ar = (3,2)`. Consequently, with
-     * `ar = (0,0)`, the layout has exactly one coordinate.
-     *
-     * @param a Arrangement of the shifted rows or columns. It cannot change after construction.
-     * @param ar Highest possible position in the layout.
-     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
+     * Creates geometry with half-open, zero-origin bounds. The default extent is empty.
+     * @param a Arrangement of shifted rows or columns.
+     * @param size Axis sizes.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain.
      */
-    explicit hexagonal_layout(const layouts::arrangement a, const aspect_ratio& ar = {0, 0}) :
-            strg{std::make_shared<hexagonal_layout_storage>(checked(ar), a)}
+    explicit hexagonal_layout(const layouts::arrangement a, const extent& size = {}) :
+            layout_extent{checked(size)},
+            shift{a}
     {}
-    /**
-     * Constructor that takes ownership of an existing storage, so that the new layout shares the coordinates of the
-     * one the storage came from.
-     *
-     * @param s Storage to adopt.
-     */
-    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s) : strg{std::move(s)} {}
-    /**
-     * Clones the layout returning a deep copy.
-     *
-     * @return Deep copy of the layout.
-     */
+    /** @return Independent copy of the geometry. */
     [[nodiscard]] hexagonal_layout clone() const noexcept
     {
-        return hexagonal_layout(std::make_shared<hexagonal_layout_storage>(*strg));
+        return *this;
     }
     /**
      * Returns the arrangement of the shifted rows or columns.
@@ -256,7 +217,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] layouts::arrangement get_arrangement() const noexcept
     {
-        return strg->shift;
+        return shift;
     }
     /**
      * Creates and returns a coordinate in the layout from the given x-, y-, and z-values.
@@ -281,60 +242,59 @@ class hexagonal_layout : public layout_base
 #pragma endregion
 
 #pragma region Structural properties
-    /**
-     * Returns the layout's x-dimension, i.e., returns the biggest x-value that still belongs to the layout.
-     *
-     * @return x-dimension.
-     */
-    [[nodiscard]] int32_t x() const noexcept
+    /** @return Number of coordinates along x. */
+    [[nodiscard]] uint32_t width() const noexcept
     {
-        return strg->dimension.x;
+        return layout_extent.width;
     }
-    /**
-     * Returns the layout's y-dimension, i.e., returns the biggest y-value that still belongs to the layout.
-     *
-     * @return y-dimension.
-     */
-    [[nodiscard]] int32_t y() const noexcept
+    /** @return Number of coordinates along y. */
+    [[nodiscard]] uint32_t height() const noexcept
     {
-        return strg->dimension.y;
+        return layout_extent.height;
     }
-    /**
-     * Returns the layout's z-dimension, i.e., returns the biggest z-value that still belongs to the layout.
-     *
-     * @return z-dimension.
-     */
-    [[nodiscard]] int32_t z() const noexcept
+    /** @return Number of layers. */
+    [[nodiscard]] uint32_t layers() const noexcept
     {
-        return strg->dimension.z;
+        return layout_extent.layers;
     }
-    /**
-     * Returns the layout's number of faces depending on the coordinate type.
-     *
-     * @return Area of layout.
-     */
+    /** @return Independent value of the layout extent. */
+    [[nodiscard]] extent get_extent() const noexcept
+    {
+        return layout_extent;
+    }
+    /** @return Width times height. */
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return fiction::layouts::area_of(strg->dimension);
+        return area_of(layout_extent);
+    }
+    /** @return Volume. @throws std::overflow_error If the volume exceeds `uint64_t`. */
+    [[nodiscard]] uint64_t volume() const
+    {
+        return volume_of(layout_extent);
     }
     /**
-     * Updates the layout's dimensions, effectively resizing it.
-     *
-     * @param ar New aspect ratio.
-     * @throws std::invalid_argument If an axis of `ar` is negative or larger than \f$2^{30} - 1\f$.
-     * @throws std::out_of_range If shared gate geometry limits the z extent to 1 and `ar.z` exceeds 1.
+     * Changes the geometry's axis sizes.
+     * @param size Axis sizes.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain.
      */
-    void resize(const aspect_ratio& ar)
+    void resize(const extent& size)
     {
-        strg->dimension = checked(ar, strg->two_layers_only);
+        layout_extent = checked(size);
     }
-
+    /** @return Last coordinate in iteration order, or no value for empty geometry. */
+    [[nodiscard]] std::optional<coordinate> last_coordinate() const noexcept
+    {
+        if (width() == 0 || height() == 0 || layers() == 0)
+        {
+            return std::nullopt;
+        }
+        return coordinate{width() - 1, height() - 1, layers() - 1};
+    }
 #pragma endregion
 
 #pragma region row / column detection
-    // The neighbor and border queries below do not read the layout, but every layout type exposes them as members: the
-    // generic algorithms and `is_coordinate_layout_v` call them on a layout instance.
-    // NOLINTBEGIN(readability-convert-member-functions-to-static)
+    // Coordinate predicates belong to the layout interface used by generic algorithms.
+    // NOLINTBEGIN(readability-convert-member-functions-to-static): generic algorithms use the layout member interface
     /**
      * Checks if the given coordinate is located in a row with an odd index.
      *
@@ -380,208 +340,116 @@ class hexagonal_layout : public layout_base
 
 #pragma region Cardinal operations
     /**
-     * Returns the coordinate that is directly adjacent in northern direction of a given coordinate `c`, i.e., the face
-     * whose y-dimension is lower by 1. If `c`'s y-dimension is already at minimum, `c` is returned instead.
-     *
-     * @param c Coordinate whose northern counterpart is desired.
-     * @return Coordinate adjacent and north of `c`.
+     * Returns the north neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] constexpr coordinate north(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> north(const coordinate& c) const noexcept
     {
-        if (c.y <= 0)
-        {
-            return c;
-        }
-
-        auto nc = c;
-        --nc.y;
-
-        return nc;
+        return bounded_neighbor(c, 0, -1, 0);
     }
     /**
-     * Returns the coordinate that is located in north-eastern direction of a given coordinate `c`. Depending on the
-     * arrangement of the layout, the dimension values of the returned coordinate may differ.
-     *
-     * @param c Coordinate whose north-eastern counterpart is desired.
-     * @return Coordinate directly north-eastern of `c`; `c` itself if the neighbor lies outside of the layout.
+     * Returns the north-east neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] coordinate north_east(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> north_east(const coordinate& c) const noexcept
     {
-        if (!c.is_valid())
+        if (!contains_coordinate(c))
         {
-            return c;
+            return std::nullopt;
         }
-
-        const auto ne = bounded_offset(offset_axes(to_cube_coordinate(c) + cube_coordinate{+1, 0, -1}), c.z);
-
-        return ne.is_valid() ? ne : c;
+        const auto step = cube_coordinate{+1, 0, -1};
+        return bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
     }
     /**
-     * Returns the coordinate that is directly adjacent in eastern direction of a given coordinate `c`, i.e., the face
-     * whose x-dimension is higher by 1. If `c`'s x-dimension is already at maximum, `c` is returned instead.
-     *
-     * @param c Coordinate whose eastern counterpart is desired.
-     * @return Coordinate adjacent and east of `c`.
+     * Returns the east neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] coordinate east(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> east(const coordinate& c) const noexcept
     {
-        auto ec = c;
-
-        if (c.x < 0 || c.x > x())
-        {
-            return coordinate{};
-        }
-
-        if (c.x < x())
-        {
-            ++ec.x;
-        }
-
-        return ec;
+        return bounded_neighbor(c, 1, 0, 0);
     }
     /**
-     * Returns the coordinate that is located in south-eastern direction of a given coordinate `c`. Depending on the
-     * arrangement of the layout, the dimension values of the returned coordinate may differ.
-     *
-     * @param c Coordinate whose south-eastern counterpart is desired.
-     * @return Coordinate directly south-eastern of `c`; `c` itself if the neighbor lies outside of the layout.
+     * Returns the south-east neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] coordinate south_east(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> south_east(const coordinate& c) const noexcept
     {
-        if (!c.is_valid())
+        if (!contains_coordinate(c))
         {
-            return c;
+            return std::nullopt;
         }
-
         const auto step =
             is_row_arrangement(get_arrangement()) ? cube_coordinate{0, -1, +1} : cube_coordinate{+1, -1, 0};
-
-        const auto se = bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
-
-        return se.is_valid() ? se : c;
+        return bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
     }
     /**
-     * Returns the coordinate that is directly adjacent in southern direction of a given coordinate `c`, i.e., the face
-     * whose y-dimension is higher by 1. If `c`'s y-dimension is already at maximum, `c` is returned instead.
-     *
-     * @param c Coordinate whose southern counterpart is desired.
-     * @return Coordinate adjacent and south of `c`.
+     * Returns the south neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] coordinate south(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> south(const coordinate& c) const noexcept
     {
-        auto sc = c;
-
-        if (c.y < 0 || c.y > y())
-        {
-            return coordinate{};
-        }
-
-        if (c.y < y())
-        {
-            ++sc.y;
-        }
-
-        return sc;
+        return bounded_neighbor(c, 0, 1, 0);
     }
     /**
-     * Returns the coordinate that is located in south-western direction of a given coordinate `c`. Depending on the
-     * arrangement of the layout, the dimension values of the returned coordinate may differ.
-     *
-     * @param c Coordinate whose south-western counterpart is desired.
-     * @return Coordinate directly south-western of `c`; `c` itself if the neighbor lies outside of the layout.
+     * Returns the south-west neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] coordinate south_west(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> south_west(const coordinate& c) const noexcept
     {
-        if (!c.is_valid())
+        if (!contains_coordinate(c))
         {
-            return c;
+            return std::nullopt;
         }
-
-        const auto sw = bounded_offset(offset_axes(to_cube_coordinate(c) + cube_coordinate{-1, 0, +1}), c.z);
-
-        return sw.is_valid() ? sw : c;
+        const auto step = cube_coordinate{-1, 0, +1};
+        return bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
     }
     /**
-     * Returns the coordinate that is directly adjacent in western direction of a given coordinate `c`, i.e., the face
-     * whose x-dimension is lower by 1. If `c`'s x-dimension is already at minimum, `c` is returned instead.
-     *
-     * @param c Coordinate whose western counterpart is desired.
-     * @return Coordinate adjacent and west of `c`.
+     * Returns the west neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] constexpr coordinate west(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> west(const coordinate& c) const noexcept
     {
-        if (c.x <= 0)
-        {
-            return c;
-        }
-
-        auto wc = c;
-        --wc.x;
-
-        return wc;
+        return bounded_neighbor(c, -1, 0, 0);
     }
     /**
-     * Returns the coordinate that is located in north-western direction of a given coordinate `c`. Depending on the
-     * arrangement of the layout, the dimension values of the returned coordinate may differ.
-     *
-     * @param c Coordinate whose north-western counterpart is desired.
-     * @return Coordinate directly north-western of `c`; `c` itself if the neighbor lies outside of the layout.
+     * Returns the north-west neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] coordinate north_west(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> north_west(const coordinate& c) const noexcept
     {
-        if (!c.is_valid())
+        if (!contains_coordinate(c))
         {
-            return c;
+            return std::nullopt;
         }
-
         const auto step =
             is_row_arrangement(get_arrangement()) ? cube_coordinate{0, +1, -1} : cube_coordinate{-1, +1, 0};
-
-        const auto nw = bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
-
-        return nw.is_valid() ? nw : c;
+        return bounded_offset(offset_axes(to_cube_coordinate(c) + step), c.z);
     }
     /**
-     * Returns the coordinate that is directly above a given coordinate `c`, i.e., the face whose z-dimension is higher
-     * by 1. If `c`'s z-dimension is already at maximum, `c` is returned instead.
-     *
-     * @param c Coordinate whose above counterpart is desired.
-     * @return Coordinate directly above `c`.
+     * Returns the above neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] coordinate above(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> above(const coordinate& c) const noexcept
     {
-        auto ac = c;
-
-        if (c.z < 0 || c.z > z())
-        {
-            return coordinate{};
-        }
-
-        if (c.z < z())
-        {
-            ++ac.z;
-        }
-
-        return ac;
+        return bounded_neighbor(c, 0, 0, 1);
     }
     /**
-     * Returns the coordinate that is directly below a given coordinate `c`, i.e., the face whose z-dimension is lower
-     * by 1. If `c`'s z-dimension is already at minimum, `c` is returned instead.
-     *
-     * @param c Coordinate whose below counterpart is desired.
-     * @return Coordinate directly below `c`.
+     * Returns the below neighbor when both coordinates lie inside the geometry.
+     * @param c Base coordinate.
+     * @return Neighbor, or no value at a boundary or outside the geometry.
      */
-    [[nodiscard]] constexpr coordinate below(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> below(const coordinate& c) const noexcept
     {
-        if (c.z <= 0)
-        {
-            return c;
-        }
-
-        auto bc = c;
-        --bc.z;
-
-        return bc;
+        return bounded_neighbor(c, 0, 0, -1);
     }
     /**
      * Returns `true` iff coordinate `c2` is directly north of coordinate `c1`.
@@ -592,7 +460,8 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] constexpr bool is_north_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && north(c1) == c2;
+        return static_cast<int64_t>(c2.x) - c1.x == 0 && static_cast<int64_t>(c2.y) - c1.y == -1 &&
+               static_cast<int64_t>(c2.z) - c1.z == 0;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly east of coordinate `c1`.
@@ -601,9 +470,10 @@ class hexagonal_layout : public layout_base
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly east of `c1`.
      */
-    [[nodiscard]] bool is_east_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_east_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c2.is_valid() && c1 != c2 && east(c1) == c2;
+        return static_cast<int64_t>(c2.x) - c1.x == 1 && static_cast<int64_t>(c2.y) - c1.y == 0 &&
+               static_cast<int64_t>(c2.z) - c1.z == 0;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly south of coordinate `c1`.
@@ -612,9 +482,10 @@ class hexagonal_layout : public layout_base
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly south of `c1`.
      */
-    [[nodiscard]] bool is_south_of(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_south_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c2.is_valid() && c1 != c2 && south(c1) == c2;
+        return static_cast<int64_t>(c2.x) - c1.x == 0 && static_cast<int64_t>(c2.y) - c1.y == 1 &&
+               static_cast<int64_t>(c2.z) - c1.z == 0;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly west of coordinate `c1`.
@@ -625,7 +496,8 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] constexpr bool is_west_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && west(c1) == c2;
+        return static_cast<int64_t>(c2.x) - c1.x == -1 && static_cast<int64_t>(c2.y) - c1.y == 0 &&
+               static_cast<int64_t>(c2.z) - c1.z == 0;
     }
     /**
      * Returns `true` iff coordinate `c2` is either north, north-east, east, south-east, south, south-west, west, or
@@ -638,18 +510,9 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_adjacent_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        bool is_adjacent = false;
-
-        foreach_adjacent_coordinate(c1,
-                                    [&c2, &is_adjacent](const auto& ac1)
-                                    {
-                                        if (ac1 == c2)
-                                        {
-                                            is_adjacent = true;
-                                        }
-                                    });
-
-        return is_adjacent;
+        const auto a = to_cube_coordinate(c1);
+        const auto b = to_cube_coordinate(c2);
+        return c1.z == c2.z && std::max({std::abs(a.x - b.x), std::abs(a.y - b.y), std::abs(a.z - b.z)}) == 1;
     }
     /**
      * Similar to is_adjacent_of but also considers `c1`'s elevation, i.e., if `c2` is adjacent to `above(c1)` or
@@ -661,7 +524,8 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_adjacent_elevation_of(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
+        const auto dz = static_cast<int64_t>(c2.z) - c1.z;
+        return dz >= -1 && dz <= 1 && is_adjacent_of(c1, coordinate{c2.x, c2.y, c1.z});
     }
     /**
      * Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
@@ -670,9 +534,10 @@ class hexagonal_layout : public layout_base
      * @param c2 Coordinate to test for its location in relation to `c1`.
      * @return `true` iff `c2` is directly above `c1`.
      */
-    [[nodiscard]] bool is_above(const coordinate& c1, const coordinate& c2) const noexcept
+    [[nodiscard]] constexpr bool is_above(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c2.is_valid() && c1 != c2 && above(c1) == c2;
+        return static_cast<int64_t>(c2.x) - c1.x == 0 && static_cast<int64_t>(c2.y) - c1.y == 0 &&
+               static_cast<int64_t>(c2.z) - c1.z == 1;
     }
     /**
      * Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
@@ -683,7 +548,8 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] constexpr bool is_below(const coordinate& c1, const coordinate& c2) const noexcept
     {
-        return c1 != c2 && below(c1) == c2;
+        return static_cast<int64_t>(c2.x) - c1.x == 0 && static_cast<int64_t>(c2.y) - c1.y == 0 &&
+               static_cast<int64_t>(c2.z) - c1.z == -1;
     }
     /**
      * Returns `true` iff coordinate `c2` is somewhere north of coordinate `c1`.
@@ -735,9 +601,9 @@ class hexagonal_layout : public layout_base
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's northern border.
      */
-    [[nodiscard]] constexpr bool is_at_northern_border(const coordinate& c) const noexcept
+    [[nodiscard]] bool is_at_northern_border(const coordinate& c) const noexcept
     {
-        return c.y == 0;
+        return contains_coordinate(c) && c.y == 0;
     }
     /**
      * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
@@ -747,7 +613,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_at_eastern_border(const coordinate& c) const noexcept
     {
-        return c.x == x();
+        return contains_coordinate(c) && static_cast<uint32_t>(c.x) + 1 == width();
     }
     /**
      * Returns whether the given coordinate is located at the layout's southern border where y is maximal.
@@ -757,7 +623,7 @@ class hexagonal_layout : public layout_base
      */
     [[nodiscard]] bool is_at_southern_border(const coordinate& c) const noexcept
     {
-        return c.y == y();
+        return contains_coordinate(c) && static_cast<uint32_t>(c.y) + 1 == height();
     }
     /**
      * Returns whether the given coordinate is located at the layout's western border where x is minimal.
@@ -765,9 +631,9 @@ class hexagonal_layout : public layout_base
      * @param c Coordinate to check for border location.
      * @return `true` iff `c` is located at the layout's western border.
      */
-    [[nodiscard]] constexpr bool is_at_western_border(const coordinate& c) const noexcept
+    [[nodiscard]] bool is_at_western_border(const coordinate& c) const noexcept
     {
-        return c.x == 0;
+        return contains_coordinate(c) && c.x == 0;
     }
     /**
      * Returns whether the given coordinate is located at any of the layout's borders where x or y are either minimal or
@@ -782,48 +648,60 @@ class hexagonal_layout : public layout_base
                is_at_western_border(c);
     }
     /**
-     * Returns the coordinate with the same x and z values as a given coordinate but that is located at the layout's
-     * northern border.
-     *
-     * @param c Coordinate whose border counterpart is desired.
-     * @return The northern border equivalent of `c`.
+     * Projects a coordinate to the northern border.
+     * @param c Coordinate to project.
+     * @return Projection, or no value if the projection lies outside the geometry.
      */
-    [[nodiscard]] coordinate northern_border_of(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> northern_border_of(const coordinate& c) const noexcept
     {
-        return {c.x, 0, c.z};
+        if (!last_coordinate())
+        {
+            return std::nullopt;
+        }
+        const coordinate projected{c.x, 0, c.z};
+        return contains_coordinate(projected) ? std::optional{projected} : std::nullopt;
     }
     /**
-     * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
-     * eastern border.
-     *
-     * @param c Coordinate whose border counterpart is desired.
-     * @return The eastern border equivalent of `c`.
+     * Projects a coordinate to the eastern border.
+     * @param c Coordinate to project.
+     * @return Projection, or no value if the projection lies outside the geometry.
      */
-    [[nodiscard]] coordinate eastern_border_of(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> eastern_border_of(const coordinate& c) const noexcept
     {
-        return {x(), c.y, c.z};
+        if (!last_coordinate())
+        {
+            return std::nullopt;
+        }
+        const coordinate projected{static_cast<int32_t>(width() - 1), c.y, c.z};
+        return contains_coordinate(projected) ? std::optional{projected} : std::nullopt;
     }
     /**
-     * Returns the coordinate with the same x and z values as a given coordinate but that is located at the layout's
-     * southern border.
-     *
-     * @param c Coordinate whose border counterpart is desired.
-     * @return The southern border equivalent of `c`.
+     * Projects a coordinate to the southern border.
+     * @param c Coordinate to project.
+     * @return Projection, or no value if the projection lies outside the geometry.
      */
-    [[nodiscard]] coordinate southern_border_of(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> southern_border_of(const coordinate& c) const noexcept
     {
-        return {c.x, y(), c.z};
+        if (!last_coordinate())
+        {
+            return std::nullopt;
+        }
+        const coordinate projected{c.x, static_cast<int32_t>(height() - 1), c.z};
+        return contains_coordinate(projected) ? std::optional{projected} : std::nullopt;
     }
     /**
-     * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
-     * western border.
-     *
-     * @param c Coordinate whose border counterpart is desired.
-     * @return The western border equivalent of `c`.
+     * Projects a coordinate to the western border.
+     * @param c Coordinate to project.
+     * @return Projection, or no value if the projection lies outside the geometry.
      */
-    [[nodiscard]] coordinate western_border_of(const coordinate& c) const noexcept
+    [[nodiscard]] std::optional<coordinate> western_border_of(const coordinate& c) const noexcept
     {
-        return {0, c.y, c.z};
+        if (!last_coordinate())
+        {
+            return std::nullopt;
+        }
+        const coordinate projected{0, c.y, c.z};
+        return contains_coordinate(projected) ? std::optional{projected} : std::nullopt;
     }
     /**
      * Returns whether the given coordinate is located in the ground layer where z is minimal.
@@ -852,9 +730,15 @@ class hexagonal_layout : public layout_base
      * @param c Coordinate to check for boundary.
      * @return `true` iff `c` is located within the layout bounds.
      */
-    [[nodiscard]] constexpr bool is_within_bounds(const coordinate& c) const noexcept
+    [[nodiscard]] bool contains_coordinate(const coordinate& c) const noexcept
     {
-        return c.x >= 0 && c.x <= x() && c.y >= 0 && c.y <= y() && c.z >= 0 && c.z <= z();
+        return c.x >= 0 && static_cast<uint32_t>(c.x) < width() && c.y >= 0 && static_cast<uint32_t>(c.y) < height() &&
+               c.z >= 0 && static_cast<uint32_t>(c.z) < layers();
+    }
+    /** @param c Coordinate. @return Whether the geometry contains the coordinate. */
+    [[nodiscard]] bool is_within_bounds(const coordinate& c) const noexcept
+    {
+        return contains_coordinate(c);
     }
 
 #pragma endregion
@@ -872,10 +756,12 @@ class hexagonal_layout : public layout_base
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate is used as
      * a default.
      */
-    [[nodiscard]] auto coordinates(const coordinate& start = {}, const coordinate& stop = {}) const
+    [[nodiscard]] auto coordinates(const std::optional<coordinate> start = std::nullopt,
+                                   const std::optional<coordinate> stop  = std::nullopt) const
     {
-        return std::ranges::subrange{coordinate_iterator{strg->dimension, !start.is_valid() ? coordinate{0, 0} : start},
-                                     coordinate_iterator{strg->dimension, !stop.is_valid() ? coordinate{} : stop}};
+        const coordinate_iterator first{layout_extent, start.value_or(coordinate{})};
+        const coordinate_iterator last{layout_extent, stop};
+        return std::ranges::subrange{first < last ? first : last, last};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -887,29 +773,33 @@ class hexagonal_layout : public layout_base
      * @param stop Last coordinate (exclusive) to include in the range of all coordinates.
      */
     template <typename Fn>
-    void foreach_coordinate(Fn&& fn, const coordinate& start = {}, const coordinate& stop = {}) const
+    void foreach_coordinate(Fn&& fn, const std::optional<coordinate> start = std::nullopt,
+                            const std::optional<coordinate> stop = std::nullopt) const
     {
-        mockturtle::detail::foreach_element(
-            coordinate_iterator{strg->dimension, !start.is_valid() ? coordinate{0, 0} : start},
-            coordinate_iterator{strg->dimension, !stop.is_valid() ? coordinate{} : stop}, std::forward<Fn>(fn));
+        const auto range = coordinates(start, stop);
+        mockturtle::detail::foreach_element(range.begin(), range.end(), std::forward<Fn>(fn));
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
-     * iteration order is the same as for the coordinates function but without the z dimension.
+     * iteration order is the same as for the coordinates function but without the z axis.
      *
      * @param start First coordinate to include in the range of all ground coordinates.
      * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
      * @return An iterator range from `start` to `stop`. If they are not provided, the first/last coordinate in the
      * ground layer is used as a default.
+     * @throws std::invalid_argument If a range bound lies outside layer zero.
      */
-    [[nodiscard]] auto ground_coordinates(const coordinate& start = {}, const coordinate& stop = {}) const
+    [[nodiscard]] auto ground_coordinates(const std::optional<coordinate> start = std::nullopt,
+                                          const std::optional<coordinate> stop  = std::nullopt) const
     {
-        assert((!start.is_valid() || start.z == 0) && (!stop.is_valid() || stop.z == 0));
-
-        auto ground_layer = aspect_ratio{x(), y(), 0};
-
-        return std::ranges::subrange{coordinate_iterator{ground_layer, !start.is_valid() ? coordinate{0, 0} : start},
-                                     coordinate_iterator{ground_layer, !stop.is_valid() ? coordinate{} : stop}};
+        if ((start && start->z != 0) || (stop && stop->z != 0))
+        {
+            throw std::invalid_argument("A ground coordinate range requires layer zero");
+        }
+        const extent              ground_layer{width(), height(), layers() == 0 ? 0u : 1u};
+        const coordinate_iterator first{ground_layer, start.value_or(coordinate{})};
+        const coordinate_iterator last{ground_layer, stop};
+        return std::ranges::subrange{first < last ? first : last, last};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -919,17 +809,14 @@ class hexagonal_layout : public layout_base
      * @param fn Functor to apply to each coordinate in the range.
      * @param start First coordinate to include in the range of all ground coordinates.
      * @param stop Last coordinate (exclusive) to include in the range of all ground coordinates.
+     * @throws std::invalid_argument If a range bound lies outside layer zero.
      */
     template <typename Fn>
-    void foreach_ground_coordinate(Fn&& fn, const coordinate& start = {}, const coordinate& stop = {}) const
+    void foreach_ground_coordinate(Fn&& fn, const std::optional<coordinate> start = std::nullopt,
+                                   const std::optional<coordinate> stop = std::nullopt) const
     {
-        assert((!start.is_valid() || start.z == 0) && (!stop.is_valid() || stop.z == 0));
-
-        auto ground_layer = aspect_ratio{x(), y(), 0};
-
-        mockturtle::detail::foreach_element(
-            coordinate_iterator{ground_layer, !start.is_valid() ? coordinate{0, 0} : start},
-            coordinate_iterator{ground_layer, !stop.is_valid() ? coordinate{} : stop}, std::forward<Fn>(fn));
+        const auto range = ground_coordinates(start, stop);
+        mockturtle::detail::foreach_element(range.begin(), range.end(), std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal
@@ -942,7 +829,7 @@ class hexagonal_layout : public layout_base
      * @param c Coordinate whose adjacent ones are desired.
      * @return A container that contains all of `c`'s adjacent coordinates.
      */
-    [[nodiscard]] auto adjacent_coordinates(const coordinate& c) const noexcept
+    [[nodiscard]] auto adjacent_coordinates(const coordinate& c) const
     {
         std::vector<coordinate> cnt{};
         cnt.reserve(max_fanin_size + 1);  // reserve memory
@@ -960,12 +847,13 @@ class hexagonal_layout : public layout_base
      *
      * @tparam Fn Functor type.
      * @param c Coordinate whose adjacent ones are desired.
-     * @param fn Functor to apply to each of `c`'s adjacent coordinates.
+     * @param fn Functor invoked as an lvalue for each of `c`'s adjacent coordinates.
      */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_adjacent_coordinate(const coordinate& c, Fn&& fn) const
     {
-        if (!c.is_valid())
+        if (!contains_coordinate(c))
         {
             return;
         }
@@ -979,9 +867,9 @@ class hexagonal_layout : public layout_base
                               [this, &c, &fn](const auto& dir)
                               {
                                   auto neighbor = bounded_offset(offset_axes(to_cube_coordinate(c) + dir), c.z);
-                                  if (neighbor.is_valid())
+                                  if (neighbor)
                                   {
-                                      std::invoke(std::forward<Fn>(fn), std::move(neighbor));
+                                      std::invoke(fn, *neighbor);
                                   }
                               });
     }
@@ -1001,7 +889,7 @@ class hexagonal_layout : public layout_base
      * @param c Coordinate whose opposite ones are desired.
      * @return A container that contains pairs of `c`'s opposing coordinates.
      */
-    [[nodiscard]] auto adjacent_opposite_coordinates(const coordinate& c) const noexcept
+    [[nodiscard]] auto adjacent_opposite_coordinates(const coordinate& c) const
     {
         std::vector<std::pair<coordinate, coordinate>> cnt{};
         cnt.reserve((max_fanin_size + 1) / 2);  // reserve memory
@@ -1025,30 +913,31 @@ class hexagonal_layout : public layout_base
      *
      * @tparam Fn Functor type.
      * @param c Coordinate whose opposite adjacent ones are desired.
-     * @param fn Functor to apply to each of `c`'s opposite adjacent coordinate pairs.
+     * @param fn Functor invoked as an lvalue for each of `c`'s opposite adjacent coordinate pairs.
      */
     template <typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
     void foreach_adjacent_opposite_coordinates(const coordinate& c, Fn&& fn) const
     {
-        const auto apply_if_not_c = [&c, &fn](auto cardinal1, auto cardinal2) noexcept
+        const auto apply_if_present = [&fn](auto cardinal1, auto cardinal2)
         {
-            if (cardinal1 != c && cardinal2 != c)
+            if (cardinal1 && cardinal2)
             {
-                std::invoke(std::forward<Fn>(fn), std::make_pair(std::move(cardinal1), std::move(cardinal2)));
+                std::invoke(fn, std::make_pair(*cardinal1, *cardinal2));
             }
         };
 
         if (is_row_arrangement(get_arrangement()))
         {
-            apply_if_not_c(east(c), west(c));
+            apply_if_present(east(c), west(c));
         }
         else  // column arrangement, flat top
         {
-            apply_if_not_c(north(c), south(c));
+            apply_if_present(north(c), south(c));
         }
 
-        apply_if_not_c(north_east(c), south_west(c));
-        apply_if_not_c(north_west(c), south_east(c));
+        apply_if_present(north_east(c), south_west(c));
+        apply_if_present(north_west(c), south_east(c));
     }
 
 #pragma endregion
@@ -1092,9 +981,9 @@ class hexagonal_layout : public layout_base
      * This implementation is adapted from https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
      *
      * @param cube_coord Cube coordinate to convert.
-     * @return Offset coordinate representing `cube_coord`, or the invalid coordinate if an axis exceeds 32 bits.
+     * @return Offset coordinate representing `cube_coord`, or no value if an axis exceeds 32 bits.
      */
-    [[nodiscard]] coordinate to_offset_coordinate(const cube_coordinate& cube_coord) const noexcept
+    [[nodiscard]] std::optional<coordinate> to_offset_coordinate(const cube_coordinate& cube_coord) const noexcept
     {
         const bool row          = is_row_arrangement(get_arrangement());
         const auto fixed_axis   = row ? cube_coord.z : cube_coord.x;
@@ -1111,22 +1000,10 @@ class hexagonal_layout : public layout_base
         {
             return {};
         }
-        return {static_cast<int32_t>(x), static_cast<int32_t>(y)};
+        return coordinate{static_cast<int32_t>(x), static_cast<int32_t>(y)};
     }
 
 #pragma endregion
-
-  protected:
-    /**
-     * Limits the shared geometry to the two layers represented by gate-level signals.
-     *
-     * @throws std::out_of_range If the z extent exceeds 1.
-     */
-    void restrict_to_two_layers()
-    {
-        static_cast<void>(checked(strg->dimension, true));
-        strg->two_layers_only = true;
-    }
 
   private:
     /**
@@ -1167,21 +1044,48 @@ class hexagonal_layout : public layout_base
      *
      * @param axes Signed 64-bit offset axes.
      * @param layer Coordinate layer.
-     * @return Coordinate in the layout, or the invalid coordinate.
+     * @return Coordinate in the layout, or no value.
      */
-    [[nodiscard]] coordinate bounded_offset(const std::pair<int64_t, int64_t>& axes, const int32_t layer) const noexcept
+    [[nodiscard]] std::optional<coordinate> bounded_offset(const std::pair<int64_t, int64_t>& axes,
+                                                           const int32_t                      layer) const noexcept
     {
         const auto [nx, ny] = axes;
-        if (nx < 0 || nx > x() || ny < 0 || ny > y() || layer < 0 || layer > z())
+        if (nx < 0 || std::cmp_greater_equal(nx, width()) || ny < 0 || std::cmp_greater_equal(ny, height()) ||
+            layer < 0 || static_cast<uint32_t>(layer) >= layers())
         {
             return {};
         }
-        return {static_cast<int32_t>(nx), static_cast<int32_t>(ny), layer};
+        return coordinate{nx, ny, layer};
     }
     /**
-     * Shared storage for the layout dimensions and arrangement.
+     * Computes a Cartesian step with wide arithmetic and checks both positions against the geometry.
+     * @param c Base coordinate.
+     * @param dx x step.
+     * @param dy y step.
+     * @param dz z step.
+     * @return Neighbor, or no value outside the geometry.
      */
-    storage strg;
+    [[nodiscard]] std::optional<coordinate> bounded_neighbor(const coordinate& c, const int32_t dx, const int32_t dy,
+                                                             const int32_t dz) const noexcept
+    {
+        if (!contains_coordinate(c))
+        {
+            return std::nullopt;
+        }
+        const auto nx = static_cast<int64_t>(c.x) + dx;
+        const auto ny = static_cast<int64_t>(c.y) + dy;
+        const auto nz = static_cast<int64_t>(c.z) + dz;
+        if (nx < 0 || std::cmp_greater_equal(nx, width()) || ny < 0 || std::cmp_greater_equal(ny, height()) || nz < 0 ||
+            std::cmp_greater_equal(nz, layers()))
+        {
+            return std::nullopt;
+        }
+        return coordinate{nx, ny, nz};
+    }
+    /** Independent axis sizes. */
+    extent layout_extent{};
+    /** Arrangement of shifted rows or columns. */
+    layouts::arrangement shift;
 };
 
 }  // namespace fiction::layouts

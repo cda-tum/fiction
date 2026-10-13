@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -22,7 +23,6 @@
 #include <fiction/physical_design/path_finding/cost.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/traits.hpp>
 
 #include <vector>
 
@@ -48,21 +48,21 @@ void a_star_impl(nanobind::module_& m)
 
     m.def(
         "a_star",
-        [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
+        [](const Lyt& lyt, const fiction::layouts::layout_base::coordinate& source,
+           const fiction::layouts::layout_base::coordinate&             target,
            const fiction::physical_design::path_finding::a_star_params& params,
            const fiction::layouts::obstructions&                        obstructions)
         {
-            return static_cast<std::vector<fiction::coordinate<Lyt>>>(
-                fiction::physical_design::path_finding::a_star<fiction::physical_design::layout_coordinate_path<Lyt>,
-                                                               Lyt>(
-                    lyt, {source, target}, fiction::physical_design::path_finding::manhattan_distance_functor<Lyt>(),
-                    fiction::physical_design::path_finding::unit_cost_functor<Lyt>(), params, obstructions));
+            return static_cast<std::vector<fiction::layouts::layout_base::coordinate>>(
+                fiction::physical_design::path_finding::a_star<fiction::physical_design::layout_coordinate_path, Lyt>(
+                    lyt, {source, target}, fiction::physical_design::path_finding::manhattan_distance_functor(),
+                    fiction::physical_design::path_finding::unit_cost_functor<>(), params, obstructions));
         },
         py::arg("layout"), py::arg("source"), py::arg("target"),
         py::arg("params")       = fiction::physical_design::path_finding::a_star_params{},
         py::arg("obstructions") = fiction::layouts::obstructions{}, DOC(fiction_physical_design_path_finding_a_star));
 
-    m.def("a_star_distance", &fiction::physical_design::path_finding::a_star_distance<Lyt, double>, py::arg("layout"),
+    m.def("a_star_distance", &fiction::physical_design::path_finding::a_star_distance<Lyt>, py::arg("layout"),
           py::arg("source"), py::arg("target"), py::arg("obstructions") = fiction::layouts::obstructions{},
           DOC(fiction_physical_design_path_finding_a_star_distance));
 }

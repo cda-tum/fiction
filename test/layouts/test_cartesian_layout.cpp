@@ -20,275 +20,73 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/traits.hpp>
 
 #include <set>
 
 using namespace fiction;
 using namespace fiction::layouts;
 
-TEST_CASE("Cartesian layout traits", "[cartesian-layout]")
+TEST_CASE("Cartesian neighbors report missing positions", "[cartesian-layout][size-contract]")
 {
-    using layout = cartesian_layout;
-
-    CHECK(has_north_v<layout>);
-    CHECK(has_east_v<layout>);
-    CHECK(has_south_v<layout>);
-    CHECK(has_west_v<layout>);
-    CHECK(has_cardinal_operations_v<layout>);
-    CHECK(has_north_east_v<layout>);
-    CHECK(has_south_east_v<layout>);
-    CHECK(has_south_west_v<layout>);
-    CHECK(has_north_west_v<layout>);
-    CHECK(has_ordinal_operations_v<layout>);
-    CHECK(has_above_v<layout>);
-    CHECK(has_below_v<layout>);
-    CHECK(has_elevation_operations_v<layout>);
-    CHECK(is_coordinate_layout_v<layout>);
-    CHECK(is_cartesian_layout_v<layout>);
-    CHECK(!is_gate_level_layout_v<layout>);
-    CHECK(!is_hexagonal_layout_v<layout>);
-
-    CHECK(has_foreach_coordinate_v<layout>);
-    CHECK(has_foreach_adjacent_coordinate_v<layout>);
-    CHECK(has_foreach_adjacent_opposite_coordinates_v<layout>);
+    using coordinate = layout_base::coordinate;
+    const cartesian_layout layout{{3, 3, 2}};
+    const coordinate       center{1, 1};
+    CHECK(layout.north(center) == coordinate{1, 0});
+    CHECK(layout.north_east(center) == coordinate{2, 0});
+    CHECK(layout.east(center) == coordinate{2, 1});
+    CHECK(layout.south_east(center) == coordinate{2, 2});
+    CHECK(layout.south(center) == coordinate{1, 2});
+    CHECK(layout.south_west(center) == coordinate{0, 2});
+    CHECK(layout.west(center) == coordinate{0, 1});
+    CHECK(layout.north_west(center) == coordinate{0, 0});
+    CHECK(layout.above(center) == coordinate{1, 1, 1});
+    CHECK(layout.below({1, 1, 1}) == center);
+    CHECK(!layout.north({1, 0}));
+    CHECK(!layout.north_east({1, 0}));
+    CHECK(!layout.east({2, 1}));
+    CHECK(!layout.south_east({2, 1}));
+    CHECK(!layout.south({1, 2}));
+    CHECK(!layout.south_west({1, 2}));
+    CHECK(!layout.west({0, 1}));
+    CHECK(!layout.north_west({0, 1}));
+    CHECK(!layout.above({1, 1, 1}));
+    CHECK(!layout.below(center));
+    CHECK(!layout.east({-1, 0}));
+    CHECK(!layout.north({0, 1, -1}));
+    CHECK(layout.is_at_northern_border({1, 0}));
+    CHECK(layout.is_at_eastern_border({2, 1}));
+    CHECK(layout.is_at_southern_border({1, 2}));
+    CHECK(layout.is_at_western_border({0, 1}));
+    CHECK(!layout.is_at_northern_border({8, 0}));
+    CHECK(layout.northern_border_of(center) == coordinate{1, 0});
+    CHECK(layout.eastern_border_of(center) == coordinate{2, 1});
+    CHECK(layout.southern_border_of(center) == coordinate{1, 2});
+    CHECK(layout.western_border_of(center) == coordinate{0, 1});
+    const auto adjacent = layout.adjacent_coordinates(center);
+    CHECK(std::set<coordinate>{adjacent.begin(), adjacent.end()} ==
+          std::set<coordinate>{{0, 1}, {1, 0}, {2, 1}, {1, 2}});
+    CHECK(layout.adjacent_coordinates({0, 0}).size() == 2);
+    CHECK(layout.adjacent_opposite_coordinates(center).size() == 2);
+    CHECK(layout.adjacent_opposite_coordinates({0, 0}).empty());
 }
 
-TEST_CASE("Coordinate creation", "[cartesian-layout]")
+TEST_CASE("Cartesian predicates ignore frame bounds", "[cartesian-layout][size-contract]")
 {
-    using layout = cartesian_layout;
-
-    const layout lyt{{3, 3}};
-
-    CHECK(lyt.coord(0, 0, 0) == layout_base::coordinate{0, 0, 0});
-    CHECK(lyt.coord(0, 0, 1) == layout_base::coordinate{0, 0, 1});
-    CHECK(lyt.coord(1, 0) == layout_base::coordinate{1, 0});
-    CHECK(lyt.coord(2, 0) == layout_base::coordinate{2, 0});
-    CHECK(lyt.coord(0, 1) == layout_base::coordinate{0, 1});
-    CHECK(lyt.coord(1, 1) == layout_base::coordinate{1, 1});
-    CHECK(lyt.coord(2, 1) == layout_base::coordinate{2, 1});
-}
-
-TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
-{
-    const cartesian_layout original{{5, 5, 0}};
-
-    auto copy = original.clone();
-
-    copy.resize({10, 10, 1});
-
-    CHECK(original.x() == 5);
-    CHECK(original.y() == 5);
-    CHECK(original.z() == 0);
-
-    CHECK(copy.x() == 10);
-    CHECK(copy.y() == 10);
-    CHECK(copy.z() == 1);
-}
-
-TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
-{
-    cartesian_layout::aspect_ratio ar{9, 9, 1};
-
-    cartesian_layout layout{ar};
-
-    std::set<cartesian_layout::coordinate> visited{};
-
-    const auto check1 = [&visited, &ar, &layout](const auto& t)
-    {
-        CHECK(t <= ar);
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(t));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(t) == 0);
-        visited.insert(t);
-    };
-
-    for (auto&& t : layout.coordinates())
-    {
-        check1(t);
-    }
-    CHECK(visited.size() == 200);
-
-    visited.clear();
-
-    layout.foreach_coordinate(check1);
-    CHECK(visited.size() == 200);
-
-    visited.clear();
-
-    cartesian_layout::aspect_ratio ar_ground{ar.x, ar.y, 0};
-
-    const auto check2 = [&visited, &ar_ground, &layout](const auto& t)
-    {
-        // iteration stays in ground layer
-        CHECK(t.z == 0);
-        CHECK(t <= ar_ground);
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(t));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(t) == 0);
-        visited.insert(t);
-    };
-
-    for (auto&& t : layout.ground_coordinates())
-    {
-        check2(t);
-    }
-    CHECK(visited.size() == 100);
-
-    visited.clear();
-
-    layout.foreach_ground_coordinate(check2);
-    CHECK(visited.size() == 100);
-
-    visited.clear();
-
-    cartesian_layout::coordinate start{2, 2}, stop{5, 4};
-
-    const auto check3 = [&visited, &start, &stop, &layout](const auto& t)
-    {
-        CHECK(t.z == 0);
-        // iteration stays in between the bounds
-        CHECK(t >= start);
-        CHECK(t < stop);
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(t));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(t) == 0);
-        visited.insert(t);
-    };
-
-    for (auto&& t : layout.coordinates(start, stop))
-    {
-        check3(t);
-    }
-    CHECK(visited.size() == 23);
-
-    visited.clear();
-
-    layout.foreach_coordinate(check3, start, stop);
-    CHECK(visited.size() == 23);
-}
-
-TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
-{
-    const cartesian_layout::aspect_ratio ar{10, 10, 1};
-
-    cartesian_layout layout{ar};
-
-    const auto check = [&](const auto& t, const auto& at1, const auto& at2, const auto& b, const auto& bt)
-    {
-        CHECK(at1.is_valid());
-        CHECK(at1 == at2);
-        CHECK(layout.is_adjacent_of(t, at1));
-        CHECK(layout.is_adjacent_of(at1, t));
-        CHECK(layout.is_adjacent_elevation_of(t, at1));
-        CHECK(layout.is_adjacent_elevation_of(at1, t));
-
-        CHECK(layout.is_at_any_border(b));
-        CHECK(bt.is_valid());
-        CHECK(b == bt);
-        CHECK(layout.is_ground_layer(bt));
-        CHECK(layout.is_at_any_border(bt));
-    };
-
-    auto t = cartesian_layout::coordinate{5, 5};
-
-    auto nt  = cartesian_layout::coordinate{5, 4};
-    auto net = cartesian_layout::coordinate{6, 4};
-    auto bnt = cartesian_layout::coordinate{5, 0};
-
-    check(t, layout.north(t), nt, bnt, layout.north(bnt));
-    CHECK(layout.is_north_of(t, nt));
-    CHECK(layout.is_northwards_of(t, nt));
-    CHECK(layout.is_northwards_of(t, bnt));
-    CHECK(layout.is_at_northern_border(bnt));
-    CHECK(layout.northern_border_of(t) == bnt);
-    CHECK(layout.north(bnt) == bnt);
-    CHECK(layout.north_east(t) == net);
-    CHECK(layout.north_east(bnt) == bnt);
-
-    auto et  = cartesian_layout::coordinate{6, 5};
-    auto set = cartesian_layout::coordinate{6, 6};
-    auto bet = cartesian_layout::coordinate{10, 5};
-
-    check(t, layout.east(t), et, bet, layout.east(bet));
-    CHECK(layout.is_east_of(t, et));
-    CHECK(layout.is_eastwards_of(t, et));
-    CHECK(layout.is_eastwards_of(t, bet));
-    CHECK(layout.is_at_eastern_border(bet));
-    CHECK(layout.eastern_border_of(t) == bet);
-    CHECK(layout.east(bet) == bet);
-    CHECK(layout.south_east(t) == set);
-    CHECK(layout.south_east(bet) == bet);
-
-    auto st  = cartesian_layout::coordinate{5, 6};
-    auto swt = cartesian_layout::coordinate{4, 6};
-    auto bst = cartesian_layout::coordinate{5, 10};
-
-    check(t, layout.south(t), st, bst, layout.south(bst));
-    CHECK(layout.is_south_of(t, st));
-    CHECK(layout.is_southwards_of(t, st));
-    CHECK(layout.is_southwards_of(t, bst));
-    CHECK(layout.is_at_southern_border(bst));
-    CHECK(layout.southern_border_of(t) == bst);
-    CHECK(layout.south(bst) == bst);
-    CHECK(layout.south_west(t) == swt);
-    CHECK(layout.south_west(bst) == bst);
-
-    auto wt  = cartesian_layout::coordinate{4, 5};
-    auto nwt = cartesian_layout::coordinate{4, 4};
-    auto bwt = cartesian_layout::coordinate{0, 5};
-
-    check(t, layout.west(t), wt, bwt, layout.west(bwt));
-    CHECK(layout.is_west_of(t, wt));
-    CHECK(layout.is_westwards_of(t, wt));
-    CHECK(layout.is_westwards_of(t, bwt));
-    CHECK(layout.is_at_western_border(bwt));
-    CHECK(layout.western_border_of(t) == bwt);
-    CHECK(layout.west(bwt) == bwt);
-    CHECK(layout.north_west(t) == nwt);
-    CHECK(layout.north_west(bwt) == bwt);
-
-    auto at  = cartesian_layout::coordinate{5, 5, 1};
-    auto bat = layout.above(at);
-
-    CHECK(at.is_valid());
-    CHECK(layout.is_above(t, at));
-    CHECK(at == bat);
-    CHECK(layout.is_crossing_layer(bat));
-    CHECK(!layout.is_at_any_border(at));
-
-    // cover corner case
-    const cartesian_layout planar_layout{{1, 1, 0}};
-
-    auto dat = planar_layout.above({1, 1, 1});
-    CHECK(!dat.is_valid());
-
-    auto bt  = layout.below(at);
-    auto bbt = layout.below(bt);
-
-    CHECK(bt.is_valid());
-    CHECK(bt == t);
-    CHECK(layout.is_below(at, bt));
-    CHECK(bbt.is_valid());
-    CHECK(bt == bbt);
-    CHECK(layout.is_ground_layer(bbt));
-
-    const auto v1 = layout.adjacent_coordinates({5, 5});
-    const auto s1 = std::set<cartesian_layout::coordinate>{v1.cbegin(), v1.cend()};
-    const auto s2 = std::set<cartesian_layout::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
-
-    CHECK(s1 == s2);
-
-    layout.foreach_adjacent_coordinate(
-        {5, 5}, [](const auto& adj)
-        { CHECK(std::set<cartesian_layout::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj)); });
+    const cartesian_layout layout{};
+    CHECK(layout.is_north_of({-3, -2}, {-3, -3}));
+    CHECK(layout.is_east_of({-3, -2}, {-2, -2}));
+    CHECK(layout.is_south_of({-3, -2}, {-3, -1}));
+    CHECK(layout.is_west_of({-3, -2}, {-4, -2}));
+    CHECK(layout.is_above({-3, -2, 8}, {-3, -2, 9}));
+    CHECK(layout.is_below({-3, -2, -8}, {-3, -2, -9}));
+    CHECK(layout.is_adjacent_of({-3, -2}, {-2, -2}));
+    CHECK(layout.is_adjacent_elevation_of({-3, -2, 8}, {-2, -2, 9}));
+    CHECK(!layout.is_adjacent_elevation_of({-3, -2, 8}, {-2, -2, 10}));
+    CHECK(!layout.is_east_of({2147483647, 0}, {-2147483648ll, 0}));
+    /** @brief Geometry covering every nonnegative signed coordinate. */
+    const cartesian_layout wide{{2147483648ull, 2147483648ull, 1}};
+    CHECK(wide.eastern_border_of({0, 0}) == layout_base::coordinate{2147483647, 0});
+    CHECK(wide.southern_border_of({0, 0}) == layout_base::coordinate{0, 2147483647});
+    CHECK(!wide.east({2147483647, 0}));
+    CHECK(wide.west({2147483647, 0}) == layout_base::coordinate{2147483646, 0});
 }

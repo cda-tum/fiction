@@ -15,6 +15,7 @@
  * @author Benjamin Hien (hibenj)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -25,7 +26,6 @@
 #include <fiction/technology/mol_qca/sim7_mol_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/utils/progress.hpp>
 
 #include <fmt/format.h>
@@ -69,16 +69,16 @@ typename GateLibrary::layout checked_apply_gate_library(const GateLyt&          
     {
         return fiction::physical_design::apply_gate_library<GateLibrary>(layout, on_progress);
     }
-    catch (const fiction::fcn::unsupported_gate_type_exception<fiction::tile<GateLyt>>& error)
+    catch (const fiction::fcn::unsupported_gate_type_exception<fiction::layouts::layout_base::coordinate>& error)
     {
         throw std::invalid_argument(fmt::format("unsupported gate type at tile {}", error.where()));
     }
-    catch (const fiction::fcn::unsupported_gate_orientation_exception<fiction::tile<GateLyt>,
+    catch (const fiction::fcn::unsupported_gate_orientation_exception<fiction::layouts::layout_base::coordinate,
                                                                       fiction::fcn::port_position>& error)
     {
         throw std::invalid_argument(fmt::format("unsupported gate orientation at tile {}", error.where()));
     }
-    catch (const fiction::fcn::unsupported_gate_orientation_exception<fiction::tile<GateLyt>,
+    catch (const fiction::fcn::unsupported_gate_orientation_exception<fiction::layouts::layout_base::coordinate,
                                                                       fiction::fcn::port_direction>& error)
     {
         throw std::invalid_argument(fmt::format("unsupported gate orientation at tile {}", error.where()));

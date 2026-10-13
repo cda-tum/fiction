@@ -27,8 +27,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <functional>
 #include <limits>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -64,6 +66,8 @@ class scheme
      * Degree of a scheme that imposes no bound beyond the fan-in of the layout topology.
      */
     static constexpr degree UNBOUNDED = std::numeric_limits<degree>::max();
+    /** @brief Creates a four-phase OPEN scheme without allocating storage. */
+    scheme() noexcept = default;
     /**
      * Standard constructor.
      *
@@ -113,6 +117,29 @@ class scheme
             cells.insert(cells.cend(), row.cbegin(), row.cend());
         }
     }
+    /** @brief Copies the complete clocking scheme. */
+    scheme(const scheme&) = default;
+    /** @brief Moves the clocking scheme. */
+    scheme(scheme&&) noexcept = default;
+    /**
+     * @brief Replaces the scheme with an independent copy. Copy failure preserves this scheme.
+     * @param other Scheme to copy.
+     * @return This scheme.
+     * @throws std::bad_alloc If allocation fails.
+     */
+    scheme& operator=(const scheme& other)
+    {
+        if (this != &other)
+        {
+            auto copy = other;
+            *this     = std::move(copy);
+        }
+        return *this;
+    }
+    /** @brief Moves the clocking scheme. @return This scheme. */
+    scheme& operator=(scheme&&) noexcept = default;
+    /** @brief Releases owned clocking state. */
+    ~scheme() = default;
     /**
      * Returns the clock number of the tile at \f$(x, y)\f$: its overridden clock number if one exists, and the
      * repeated cutout entry otherwise.
@@ -131,7 +158,8 @@ class scheme
             }
         }
 
-        return cells[static_cast<std::size_t>((floor_mod(y, height) * width) + floor_mod(x, width))];
+        return cells.empty() ? 0 :
+                               cells[static_cast<std::size_t>((floor_mod(y, height) * width) + floor_mod(x, width))];
     }
     /**
      * Overrides the clock number of the tile at \f$(x, y)\f$. An overridden scheme is irregular.
@@ -139,8 +167,9 @@ class scheme
      * @param x x-coordinate of the tile.
      * @param y y-coordinate of the tile.
      * @param cn Clock number to assign. The scheme stores `cn % num_clocks()`.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void override_clock_number(const int64_t x, const int64_t y, const clock_number cn) noexcept
+    void override_clock_number(const int64_t x, const int64_t y, const clock_number cn)
     {
         overrides[{x, y}] = static_cast<clock_number>(cn % phases);
     }
@@ -156,11 +185,14 @@ class scheme
     /**
      * Name of the clocking scheme.
      *
+     * The view borrows storage from this scheme. Keep the scheme alive and unchanged while using the view,
+     * or copy it with `std::string{scheme.name()}`.
+     *
      * @return The canonical name, e.g., `"2DDWAVE"`, without a phase-count suffix.
      */
-    [[nodiscard]] const std::string& name() const noexcept
+    [[nodiscard]] std::string_view name() const noexcept
     {
-        return scheme_name;
+        return cells.empty() ? std::string_view{"OPEN"} : std::string_view{scheme_name};
     }
     /**
      * Number of clock phases in this scheme.
@@ -195,21 +227,41 @@ class scheme
      * @param other Scheme to compare against.
      * @return `true` iff both schemes are equal.
      */
-    [[nodiscard]] bool operator==(const scheme& other) const = default;
+    [[nodiscard]] bool operator==(const scheme& other) const
+    {
+        return name() == other.name() && width == other.width && height == other.height && phases == other.phases &&
+               in_degree == other.in_degree && out_degree == other.out_degree && regular_flag == other.regular_flag &&
+               std::ranges::equal(cutout(), other.cutout()) && overrides == other.overrides;
+    }
+
+    /**
+     * Visits manually overridden clock numbers.
+     * @tparam Fn Callable accepting x, y, and clock number.
+     * @param fn Callback for each override.
+     */
+    template <typename Fn>
+    void foreach_override(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
+    {
+        for (const auto& [position, number] : overrides)
+        {
+            std::invoke(fn, position.first, position.second, number);
+        }
+    }
 
   private:
     /**
      * Canonical name.
      */
-    std::string scheme_name;
+    std::string scheme_name{};
     /**
      * Cutout width.
      */
-    int64_t width;
+    int64_t width{1};
     /**
      * Cutout height.
      */
-    int64_t height;
+    int64_t height{1};
     /**
      * Cutout entries in row-major order.
      */
@@ -217,23 +269,30 @@ class scheme
     /**
      * Number of clock phases.
      */
-    clock_number phases;
+    clock_number phases{4};
     /**
      * Maximum in-degree.
      */
-    degree in_degree;
+    degree in_degree{UNBOUNDED};
     /**
      * Maximum out-degree.
      */
-    degree out_degree;
+    degree out_degree{UNBOUNDED};
     /**
      * Defines the clocking as regular and well-defined by the cutout.
      */
-    bool regular_flag;
+    bool regular_flag{false};
     /**
      * Overridden clock numbers by tile position.
      */
     phmap::flat_hash_map<std::pair<int64_t, int64_t>, clock_number> overrides{};
+    /** @brief Returns the explicit cutout or the implicit OPEN cell. */
+    [[nodiscard]] std::span<const clock_number> cutout() const noexcept
+    {
+        /** @brief Single implicit cell of default OPEN clocking. */
+        static constexpr clock_number open_cell{0};
+        return cells.empty() ? std::span<const clock_number>{&open_cell, 1} : std::span<const clock_number>{cells};
+    }
     /**
      * Modulo that rounds toward negative infinity, so that a cutout repeats seamlessly at negative coordinates.
      *
@@ -329,6 +388,10 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
  */
 [[nodiscard]] inline scheme open(const num_clks n = num_clks::FOUR)
 {
+    if (n == num_clks::FOUR)
+    {
+        return {};
+    }
     return scheme{OPEN_NAME, {{0}}, detail::count(n), scheme::UNBOUNDED, scheme::UNBOUNDED, false};
 }
 /**

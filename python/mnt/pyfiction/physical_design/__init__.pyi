@@ -61,8 +61,8 @@ class exact_params:
             If `upper_bound_area` and (either) `upper_bound_x` or
             `upper_bound_y` are set, the imposed search space restrictions are
             cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x
-            == 4`, all aspect ratios with an x-dimension of more than 4 *and*
-            a total area of more than 20 will be skipped.
+            == 4`, all aspect ratios with a width of more than 4 *and* a total
+            area of more than 20 will be skipped.
         """
 
     @upper_bound_area.setter
@@ -195,11 +195,17 @@ class exact_stats:
     @property
     def y_size(self) -> int: ...
     @property
-    def num_gates(self) -> int: ...
+    def num_gates(self) -> int:
+        """Number of logic gates, excluding primary inputs and outputs."""
+
     @property
-    def num_wires(self) -> int: ...
+    def num_wires(self) -> int:
+        """Number of physical wires, excluding primary inputs and outputs."""
+
     @property
-    def num_crossings(self) -> int: ...
+    def num_crossings(self) -> int:
+        """Number of crossing-layer wires above occupied ground-layer tiles."""
+
     @property
     def num_aspect_ratios(self) -> int: ...
 
@@ -253,10 +259,10 @@ def exact_cartesian(
     possible on various layout topologies and clocking schemes.
 
     The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
+    necessary functions to comply with `is_network_type` and concrete
+    gate-level layouts, respectively. It is, thereby, mostly technology-
+    independent but can make certain assumptions if needed, for instance
+    for ToPoliNano-compliant circuits.
 
     This approach requires the Z3 SMT solver to be installed on the
     system. Due to this circumstance, it is excluded from (CLI)
@@ -337,10 +343,10 @@ def exact_shifted_cartesian(
     possible on various layout topologies and clocking schemes.
 
     The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
+    necessary functions to comply with `is_network_type` and concrete
+    gate-level layouts, respectively. It is, thereby, mostly technology-
+    independent but can make certain assumptions if needed, for instance
+    for ToPoliNano-compliant circuits.
 
     This approach requires the Z3 SMT solver to be installed on the
     system. Due to this circumstance, it is excluded from (CLI)
@@ -421,10 +427,10 @@ def exact_hexagonal(
     possible on various layout topologies and clocking schemes.
 
     The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and
-    `is_gate_level_layout`, respectively. It is, thereby, mostly
-    technology-independent but can make certain assumptions if needed, for
-    instance for ToPoliNano-compliant circuits.
+    necessary functions to comply with `is_network_type` and concrete
+    gate-level layouts, respectively. It is, thereby, mostly technology-
+    independent but can make certain assumptions if needed, for instance
+    for ToPoliNano-compliant circuits.
 
     This approach requires the Z3 SMT solver to be installed on the
     system. Due to this circumstance, it is excluded from (CLI)
@@ -504,11 +510,16 @@ class orthogonal_stats:
     @property
     def y_size(self) -> int: ...
     @property
-    def num_gates(self) -> int: ...
+    def num_gates(self) -> int:
+        """Number of logic gates, excluding primary inputs and outputs."""
+
     @property
-    def num_wires(self) -> int: ...
+    def num_wires(self) -> int:
+        """Number of physical wires, excluding primary inputs and outputs."""
+
     @property
-    def num_crossings(self) -> int: ...
+    def num_crossings(self) -> int:
+        """Number of crossing-layer wires above occupied ground-layer tiles."""
 
 def orthogonal(
     network: mnt.pyfiction.networks.technology_network,
@@ -903,7 +914,7 @@ class graph_oriented_layout_design_stats:
 
     @property
     def num_wires(self) -> int:
-        """Number of wires."""
+        """Number of physical wires, excluding primary inputs and outputs."""
 
     @property
     def num_crossings(self) -> int:
@@ -987,7 +998,7 @@ def apply_qca_one_library(
     level clocking, and, if it has synchronization elements, each clock
     zone receives the synchronization delay of its gate tile. The delay
     therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their nodes. An
+    via cells. Input and output cells carry the names of their objects. An
     SiDB layout lies on the H-Si(100)-2x1 lattice.
 
     May pass through, and thereby throw, an
@@ -996,12 +1007,12 @@ def apply_qca_one_library(
 
     Args:
         lyt: The gate-level layout.
-        on_progress: Optional callback reporting completed nonconstant
-                     gate mappings.
+        on_progress: Optional callback reporting completed object
+                     mappings.
 
     Template Args:
         GateLibrary: Type of the gate library to apply.
-        GateLyt: Type of the gate-level layout to apply the library to.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A layout that implements `lyt`'s gate types with building blocks
@@ -1024,7 +1035,7 @@ def apply_sim7_mol_library(
     level clocking, and, if it has synchronization elements, each clock
     zone receives the synchronization delay of its gate tile. The delay
     therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their nodes. An
+    via cells. Input and output cells carry the names of their objects. An
     SiDB layout lies on the H-Si(100)-2x1 lattice.
 
     May pass through, and thereby throw, an
@@ -1033,12 +1044,12 @@ def apply_sim7_mol_library(
 
     Args:
         lyt: The gate-level layout.
-        on_progress: Optional callback reporting completed nonconstant
-                     gate mappings.
+        on_progress: Optional callback reporting completed object
+                     mappings.
 
     Template Args:
         GateLibrary: Type of the gate library to apply.
-        GateLyt: Type of the gate-level layout to apply the library to.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A layout that implements `lyt`'s gate types with building blocks
@@ -1062,7 +1073,7 @@ def apply_topolinano_library(
     level clocking, and, if it has synchronization elements, each clock
     zone receives the synchronization delay of its gate tile. The delay
     therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their nodes. An
+    via cells. Input and output cells carry the names of their objects. An
     SiDB layout lies on the H-Si(100)-2x1 lattice.
 
     May pass through, and thereby throw, an
@@ -1071,12 +1082,12 @@ def apply_topolinano_library(
 
     Args:
         lyt: The gate-level layout.
-        on_progress: Optional callback reporting completed nonconstant
-                     gate mappings.
+        on_progress: Optional callback reporting completed object
+                     mappings.
 
     Template Args:
         GateLibrary: Type of the gate library to apply.
-        GateLyt: Type of the gate-level layout to apply the library to.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A layout that implements `lyt`'s gate types with building blocks
@@ -1099,7 +1110,7 @@ def apply_bestagon_library(
     level clocking, and, if it has synchronization elements, each clock
     zone receives the synchronization delay of its gate tile. The delay
     therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their nodes. An
+    via cells. Input and output cells carry the names of their objects. An
     SiDB layout lies on the H-Si(100)-2x1 lattice.
 
     May pass through, and thereby throw, an
@@ -1108,12 +1119,12 @@ def apply_bestagon_library(
 
     Args:
         lyt: The gate-level layout.
-        on_progress: Optional callback reporting completed nonconstant
-                     gate mappings.
+        on_progress: Optional callback reporting completed object
+                     mappings.
 
     Template Args:
         GateLibrary: Type of the gate library to apply.
-        GateLyt: Type of the gate-level layout to apply the library to.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A layout that implements `lyt`'s gate types with building blocks
@@ -1214,6 +1225,7 @@ def color_routing(
         tuple[
             mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
             mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            int,
         ]
     ],
     params: color_routing_params = ...,
@@ -1225,6 +1237,7 @@ def color_routing(
         tuple[
             mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
             mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            int,
         ]
     ],
     params: color_routing_params = ...,
@@ -1236,6 +1249,7 @@ def color_routing(
         tuple[
             mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
             mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
+            int,
         ]
     ],
     params: color_routing_params = ...,
@@ -1283,8 +1297,8 @@ def color_routing(
 
     Args:
         lyt: A gate-level layout to route.
-        objectives: The routing objectives as source-target pairs to
-                    fulfill.
+        objectives: The routing objectives as source coordinates and
+                    indexed destination inputs to fulfill.
         ps: Parameters.
         pst: Statistics.
 
@@ -1372,7 +1386,7 @@ class hexagonalization_stats:
 
     @property
     def num_wires(self) -> int:
-        """Number of wires."""
+        """Number of physical wires, excluding primary inputs and outputs."""
 
     @property
     def num_crossings(self) -> int:
@@ -1402,6 +1416,12 @@ def hexagonalization(
 
     Returns:
         Hexagonal representation of the Cartesian layout.
+
+    Raises:
+        std::invalid_argument: If clocking or placed geometry does not
+                               satisfy the input contract.
+        std::overflow_error: If the transformed coordinates exceed the
+                             signed coordinate range.
     """
 
 class post_layout_optimization_params:
@@ -1544,12 +1564,21 @@ def post_layout_optimization(
         ps: Parameters.
         pst: Statistics.
 
-    Template Args:
-        Lyt: Cartesian gate-level layout type.
+    Raises:
+        std::invalid_argument: If clocking or occupied geometry is
+                               invalid.
+        std::overflow_error: If the extent leaves no room for signed
+                             routing coordinates.
 
     Note:
         This function requires the gate-level layout to be 2DDWave-
         clocked!
+
+    Note:
+        Exceptions may leave a partially edited layout. Object identities,
+        occupancy, and connection storage remain structurally valid;
+        logical equivalence and physical validity are not guaranteed after
+        failure.
     """
 
 class wiring_reduction_params:
@@ -1652,8 +1681,11 @@ def wiring_reduction(
         ps: Parameters.
         pst: Statistics.
 
-    Template Args:
-        Lyt: Cartesian gate-level layout type.
+    Raises:
+        std::invalid_argument: If clocking or occupied geometry is
+                               invalid.
+        std::overflow_error: If the extent leaves no room for signed
+                             routing coordinates.
     """
 
 @overload
@@ -1706,71 +1738,76 @@ def is_crossable_wire(
 def route_path(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
     path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
+    destination: mnt.pyfiction.layouts.layout_input_port,
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
+    destination: mnt.pyfiction.layouts.layout_input_port,
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
+    destination: mnt.pyfiction.layouts.layout_input_port,
 ) -> None:
     """
-    Establishes a wire routing along the given path in the given layout.
-    To this end, the given path's source and target coordinates are
-    assumed to be populated by other gates or wires that the new path
-    shall connect to.
+    Routes a path to one explicit logical input without changing other
+    input slots.
 
-    If `path` contains a tile that is allocated already, it will instead
-    switch to the crossing layer. If path contains exactly source and
-    target, no wires are created, but the source and target are connected.
+    Occupied intermediate ground coordinates use their free crossing
+    layer. Endpoints and all intermediate placements are checked before
+    mutation. A failed allocation removes newly created wires.
 
     Args:
-        lyt: Gate-level layout in which a wire path is to be established.
-        path: Path to route wires along.
+        lyt: Layout to edit.
+        path: Path containing at least its occupied source and target
+              coordinates.
+        destination: Ordered destination input.
 
     Template Args:
-        Lyt: Gate-level layout type.
-        Path: Path type.
+        Geometry: Coordinate geometry of the gate-level layout.
+        Path: Coordinate path type.
+
+    Raises:
+        std::invalid_argument: If an endpoint or intermediate placement is
+                               unavailable.
+        std::out_of_range: If the destination input index is invalid.
     """
 
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]: ...
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate, int]]: ...
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]: ...
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate, int]]: ...
 @overload
 def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate]]:
+) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate, int]]:
     """
-    Extracts all routing objectives from the given layout. To this end,
-    all routing paths in the layout are traversed, starting at each PI.
-    Whenever the next regular node (non-IO, non-constant, non-wire) is
-    encountered, this connection is added to the list of all objectives.
+    Extracts connections between retained gates, fanouts, and terminals
+    with destination input indices.
 
-    For example, let a layout have connections from `(0,0)` to `(2,3)` via
-    a cascade of wires and a direct connection from `(2,2)` to `(2,3)`.
-    The list of routing objectives extracted from that layout would
-    contain `{(0,0), (2,3)}` and `{(2,2), (2,3)}`.
-
-    In other words, if all wires were removed from the layout and all
-    connections ripped-up, an equivalent layout could be recreated from
-    the list of routing objectives.
+    Intermediate single-sink wires are followed through declared topology.
+    Missing inputs produce no objective; disconnected input slots keep
+    their indices. Cycles of intermediate wires reject.
 
     Args:
-        lyt: Layout whose routing objectives are to be extracted.
+        lyt: Layout to inspect.
 
     Template Args:
         Lyt: Gate-level layout type.
 
     Returns:
-        List of all routing objectives in the given layout.
+        Routing objectives that preserve logical input numbering.
+
+    Raises:
+        std::invalid_argument: If an intermediate wire chain contains a
+                               cycle.
     """
 
 @overload
@@ -1780,31 +1817,14 @@ def clear_routing(lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout) -> N
 @overload
 def clear_routing(lyt: mnt.pyfiction.layouts.hexagonal_gate_layout) -> None:
     """
-    Removes the entire wire routing from the passed layout. This involves
-    deleting all wire segments that have been placed on any tile as well
-    as removing stored connections (children pointers) from all gates.
+    Removes routing wires and disconnects retained objects while
+    preserving identities and input indices.
 
     Args:
-        lyt: The layout whose routing is to be deleted.
+        lyt: Layout to edit.
 
     Template Args:
-        Lyt: Gate-level Layout type.
-    """
-
-@overload
-def reserve_input_nodes(
-    lyt: mnt.pyfiction.layouts.cartesian_gate_layout, ntk: mnt.pyfiction.networks.technology_network
-) -> dict[int, int]: ...
-@overload
-def reserve_input_nodes(
-    lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout, ntk: mnt.pyfiction.networks.technology_network
-) -> dict[int, int]: ...
-@overload
-def reserve_input_nodes(
-    lyt: mnt.pyfiction.layouts.hexagonal_gate_layout, ntk: mnt.pyfiction.networks.technology_network
-) -> dict[int, int]:
-    """
-    Reserves input nodes and returns their source-node to layout-node mapping.
+        Geometry: Coordinate geometry of the gate-level layout.
     """
 
 @overload
@@ -1813,102 +1833,106 @@ def place(
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-) -> int: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-) -> int: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-    b: int,
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
     c: bool | None,
-) -> int: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-    b: int,
-    c: int,
-) -> int: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
+    c: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-) -> int: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-) -> int: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-    b: int,
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
     c: bool | None,
-) -> int: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-    b: int,
-    c: int,
-) -> int: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
+    c: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-) -> int: ...
+) -> mnt.pyfiction.layouts.layout_object_id:
+    """
+    Places a primary input at the given coordinate and returns its output port.
+    """
+
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-) -> int: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-    b: int,
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
     c: bool | None,
-) -> int: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: int,
-    b: int,
-    c: int,
-) -> int: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
+    c: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...

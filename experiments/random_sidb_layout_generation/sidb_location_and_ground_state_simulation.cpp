@@ -21,7 +21,9 @@
 #include "fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp"
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
 #include <iostream>
 #include <span>
@@ -53,7 +55,8 @@ using namespace fiction::sidb::simulation::io;
  *   To simulate layouts from the "random_sidb_layouts/" folder with a µ (mu) value of -0.32:
  *   ./sidb_location_and_ground_state_state_simulation --folder_name random_sidb_layouts/ --mu_minus -0.32
  */
-int main(int argc, const char* argv[])  // NOLINT
+int main(int argc, const char* argv[])
+try
 {
 
     std::unordered_map<std::string, std::string> options{{"--folder_name", "layout_random/"}, {"--mu_minus", "-0.32"}};
@@ -156,4 +159,11 @@ int main(int argc, const char* argv[])  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

@@ -23,19 +23,22 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
-#include <fiction/traits.hpp>
 
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
+
+#include <concepts>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
 template <typename Lyt>
-void remove_clocking(Lyt& lyt) noexcept
+void remove_clocking(Lyt& lyt)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }

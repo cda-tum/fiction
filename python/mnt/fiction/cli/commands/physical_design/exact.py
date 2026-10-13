@@ -34,8 +34,7 @@ from ._common import _added, _seconds_to_ms
 def _clocking_scheme(name: str, topology: str) -> str:
     """Return a clocking scheme name the library knows for a topology.
 
-    The library owns the list of schemes, so it is asked rather than a table here that would drift
-    away from it: a one-tile clocked layout of the topology accepts exactly the supported names.
+    Constructing an empty layout validates the native scheme name for the topology.
 
     Args:
         name: The name the user typed.
@@ -50,7 +49,7 @@ def _clocking_scheme(name: str, topology: str) -> str:
     scheme = name.upper()
     try:
         make_gate_layout(topology, (0, 0), scheme)
-    except RuntimeError as error:
+    except ValueError as error:
         msg = f"'{name}' is not a clocking scheme for {topology} layouts; see the CLI documentation for the list"
         raise CommandError(msg) from error
     return scheme

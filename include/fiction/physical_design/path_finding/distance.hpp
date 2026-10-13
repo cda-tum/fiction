@@ -17,11 +17,10 @@
 
 #pragma once
 
-#include "fiction/traits.hpp"
+#include "fiction/layouts/layout_base.hpp"
 
 #include <algorithm>
 #include <cmath>
-#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -34,42 +33,37 @@ namespace fiction::physical_design::path_finding
  *
  * \f$D = |x_1 - x_2| + |y_1 - y_2|\f$
  *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Integral type for the distance.
- * @param lyt Layout.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return Manhattan distance between `source` and `target`.
  */
-template <typename Lyt, typename Dist = uint64_t>
-    requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
-[[nodiscard]] constexpr Dist manhattan_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
-                                                const coordinate<Lyt>& target) noexcept
+[[nodiscard]] constexpr uint64_t manhattan_distance(const layouts::layout_base::coordinate& source,
+                                                    const layouts::layout_base::coordinate& target) noexcept
 {
-    return static_cast<Dist>(std::abs(static_cast<int64_t>(source.x) - static_cast<int64_t>(target.x)) +
-                             std::abs(static_cast<int64_t>(source.y) - static_cast<int64_t>(target.y)));
+    /** Signed column difference. */
+    const auto dx = static_cast<int64_t>(source.x) - target.x;
+    /** Signed row difference. */
+    const auto dy = static_cast<int64_t>(source.y) - target.y;
+    return static_cast<uint64_t>((dx < 0 ? -dx : dx) + (dy < 0 ? -dy : dy));
 }
 /**
  * The Euclidean distance \f$D\f$ between two layout coordinates \f$(x_1, y_1)\f$ and \f$(x_2, y_2)\f$ given by
  *
  * \f$D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}\f$
  *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Floating-point type for the distance.
- * @param lyt Layout.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return Euclidean distance between `source` and `target`.
  */
-template <typename Lyt, typename Dist = double>
-    requires is_coordinate_layout_v<Lyt> && std::floating_point<Dist>
-[[nodiscard]] constexpr Dist euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
-                                                const coordinate<Lyt>& target) noexcept
+[[nodiscard]] inline double euclidean_distance(const layouts::layout_base::coordinate& source,
+                                               const layouts::layout_base::coordinate& target) noexcept
 {
+    /** Column difference. */
     const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
+    /** Row difference. */
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
-    return static_cast<Dist>(std::hypot(x, y));
+    return std::sqrt((x * x) + (y * y));
 }
 /**
  * The squared Euclidean distance \f$D\f$ between two layout coordinates \f$(x_1, y_1)\f$ and \f$(x_2, y_2)\f$ given by
@@ -79,22 +73,27 @@ template <typename Lyt, typename Dist = double>
  * In contrast to the regular Euclidean distance, this function is differentiable and can be used in optimization
  * algorithms that require gradients. Additionally, it is computationally cheaper by omitting the square root operation.
  *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Integral type for the distance.
- * @param lyt Layout.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return Squared euclidean distance between `source` and `target`.
+ * @pre The squared distance is representable by `uint64_t`.
  */
-template <typename Lyt, typename Dist = uint64_t>
-    requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
-[[nodiscard]] constexpr Dist squared_euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
-                                                        const coordinate<Lyt>& target) noexcept
+[[nodiscard]] constexpr uint64_t squared_euclidean_distance(const layouts::layout_base::coordinate& source,
+                                                            const layouts::layout_base::coordinate& target) noexcept
 {
-    const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
-    const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
-
-    return static_cast<Dist>((x * x) + (y * y));
+    /** Signed column difference, widened before subtraction. */
+    const auto dx = static_cast<int64_t>(source.x) - target.x;
+    /** Signed row difference, widened before subtraction. */
+    const auto dy = static_cast<int64_t>(source.y) - target.y;
+    /** Absolute column difference within the unsigned 32-bit range. */
+    const auto x = static_cast<uint64_t>(dx < 0 ? -dx : dx);
+    /** Absolute row difference. */
+    const auto y = static_cast<uint64_t>(dy < 0 ? -dy : dy);
+    /** Squared column difference; signed 32-bit coordinates keep each square representable. */
+    const auto x_squared = x * x;
+    /** Squared row difference. */
+    const auto y_squared = y * y;
+    return x_squared + y_squared;
 }
 /**
  * The 2DDWave distance \f$D\f$ between two layout coordinates \f$s = (x_1, y_1)\f$ and \f$t = (x_2, y_2)\f$ given
@@ -107,20 +106,15 @@ template <typename Lyt, typename Dist = uint64_t>
  * @note To represent \f$\infty\f$, `std::numeric_limits<uint32_t>::max()` is returned for distances of infinite
  * length. We are using `uint32_t` to prevent overflows when adding distances in the default `uint64_t` number range.
  *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Integral type for the distance.
- * @param lyt Layout.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return 2DDWave distance between `source` and `target`.
  */
-template <typename Lyt, typename Dist = uint64_t>
-    requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
-[[nodiscard]] constexpr Dist twoddwave_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
-                                                const coordinate<Lyt>& target) noexcept
+[[nodiscard]] constexpr uint64_t twoddwave_distance(const layouts::layout_base::coordinate& source,
+                                                    const layouts::layout_base::coordinate& target) noexcept
 {
-    return source.x <= target.x && source.y <= target.y ? manhattan_distance<Lyt, Dist>(lyt, source, target) :
-                                                          static_cast<Dist>(std::numeric_limits<uint32_t>::max());
+    return source.x <= target.x && source.y <= target.y ? manhattan_distance(source, target) :
+                                                          static_cast<uint64_t>(std::numeric_limits<uint32_t>::max());
 }
 /**
  * The Chebyshev distance \f$D\f$ between two layout coordinates \f$(x_1, y_1)\f$ and \f$(x_2, y_2)\f$ given by
@@ -130,20 +124,18 @@ template <typename Lyt, typename Dist = uint64_t>
  * In contrast to the Manhattan distance, this function assumes the same cost for diagonal moves as it does for
  * horizontal and vertical ones.
  *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Integral type for the distance.
- * @param lyt Layout.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @return Chebyshev distance between `source` and `target`.
  */
-template <typename Lyt, typename Dist = uint64_t>
-    requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
-[[nodiscard]] constexpr Dist chebyshev_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
-                                                const coordinate<Lyt>& target) noexcept
+[[nodiscard]] constexpr uint64_t chebyshev_distance(const layouts::layout_base::coordinate& source,
+                                                    const layouts::layout_base::coordinate& target) noexcept
 {
-    return static_cast<Dist>(std::max(std::abs(static_cast<int64_t>(source.x) - static_cast<int64_t>(target.x)),
-                                      std::abs(static_cast<int64_t>(source.y) - static_cast<int64_t>(target.y))));
+    /** Signed column difference. */
+    const auto dx = static_cast<int64_t>(source.x) - target.x;
+    /** Signed row difference. */
+    const auto dy = static_cast<int64_t>(source.y) - target.y;
+    return static_cast<uint64_t>(std::max(dx < 0 ? -dx : dx, dy < 0 ? -dy : dy));
 }
 
 // NOLINTBEGIN(*-special-member-functions): virtual destructor is prudent
@@ -153,10 +145,9 @@ template <typename Lyt, typename Dist = uint64_t>
  * algorithms with a standardized signature. This class is intended to be instantiated with concrete distance functions
  * passed to the constructor.
  *
- * @tparam Lyt Coordinate layout type.
  * @tparam Dist Distance value type.
  */
-template <typename Lyt, typename Dist>
+template <typename Dist>
 class distance_functor
 {
   public:
@@ -165,12 +156,10 @@ class distance_functor
      *
      * @param dist_fn A function that maps from layout coordinates to a distance value.
      */
-    explicit distance_functor(
-        const std::function<Dist(const Lyt&, const coordinate<Lyt>&, const coordinate<Lyt>&)>& dist_fn) :
+    explicit distance_functor(const std::function<Dist(const layouts::layout_base::coordinate&,
+                                                       const layouts::layout_base::coordinate&)>& dist_fn) :
             distance_function{dist_fn}
-    {
-        static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    }
+    {}
     /**
      * Destructor.
      */
@@ -178,85 +167,70 @@ class distance_functor
     /**
      * Operator to call the distance function.
      *
-     * @param lyt Layout.
      * @param source Source coordinate.
      * @param target Target coordinate.
      * @return Distance between source and target.
      */
-    [[nodiscard]] virtual Dist operator()(const Lyt& lyt, const coordinate<Lyt>& source,
-                                          const coordinate<Lyt>& target) const
+    [[nodiscard]] virtual Dist operator()(const layouts::layout_base::coordinate& source,
+                                          const layouts::layout_base::coordinate& target) const
     {
-        return static_cast<Dist>(std::invoke(distance_function, lyt, source, target));
+        return std::invoke(distance_function, source, target);
     }
 
   protected:
     /**
      * Distance function.
      */
-    const std::function<Dist(const Lyt&, const coordinate<Lyt>&, const coordinate<Lyt>&)> distance_function;
+    const std::function<Dist(const layouts::layout_base::coordinate&, const layouts::layout_base::coordinate&)>
+        distance_function;
 };
 
 // NOLINTEND(*-special-member-functions)
 
 /**
  * A pre-defined distance functor that uses the Manhattan distance.
- *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Integral distance type.
  */
-template <typename Lyt, typename Dist = uint64_t>
-class manhattan_distance_functor : public distance_functor<Lyt, Dist>
+class manhattan_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    manhattan_distance_functor() : distance_functor<Lyt, Dist>(&manhattan_distance<Lyt, Dist>) {}
+    /** @brief Constructs the coordinate distance functor. */
+    manhattan_distance_functor() : distance_functor<uint64_t>(&manhattan_distance) {}
 };
 /**
  * A pre-defined distance functor that uses the Euclidean distance.
- *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Floating-point distance type.
  */
-template <typename Lyt, typename Dist = double>
-class euclidean_distance_functor : public distance_functor<Lyt, Dist>
+class euclidean_distance_functor : public distance_functor<double>
 {
   public:
-    euclidean_distance_functor() : distance_functor<Lyt, Dist>(&euclidean_distance<Lyt, Dist>) {}
+    /** @brief Constructs the coordinate distance functor. */
+    euclidean_distance_functor() : distance_functor<double>(&euclidean_distance) {}
 };
 /**
  * A pre-defined distance functor that uses the squared Euclidean distance.
- *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Integral distance type.
  */
-template <typename Lyt, typename Dist = uint64_t>
-class squared_euclidean_distance_functor : public distance_functor<Lyt, Dist>
+class squared_euclidean_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    squared_euclidean_distance_functor() : distance_functor<Lyt, Dist>(&squared_euclidean_distance<Lyt, Dist>) {}
+    /** @brief Constructs the coordinate distance functor. */
+    squared_euclidean_distance_functor() : distance_functor<uint64_t>(&squared_euclidean_distance) {}
 };
 /**
  * A pre-defined distance functor that uses the 2DDWave distance.
- *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Integral distance type.
  */
-template <typename Lyt, typename Dist = uint64_t>
-class twoddwave_distance_functor : public distance_functor<Lyt, Dist>
+class twoddwave_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    twoddwave_distance_functor() : distance_functor<Lyt, Dist>(&twoddwave_distance<Lyt, Dist>) {}
+    /** @brief Constructs the coordinate distance functor. */
+    twoddwave_distance_functor() : distance_functor<uint64_t>(&twoddwave_distance) {}
 };
 /**
  * A pre-defined distance functor that uses the Chebyshev distance.
- *
- * @tparam Lyt Coordinate layout type.
- * @tparam Dist Integral distance type.
  */
-template <typename Lyt, typename Dist = uint64_t>
-class chebyshev_distance_functor : public distance_functor<Lyt, Dist>
+class chebyshev_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    chebyshev_distance_functor() : distance_functor<Lyt, Dist>(&chebyshev_distance<Lyt, Dist>) {}
+    /** @brief Constructs the coordinate distance functor. */
+    chebyshev_distance_functor() : distance_functor<uint64_t>(&chebyshev_distance) {}
 };
 
 }  // namespace fiction::physical_design::path_finding
