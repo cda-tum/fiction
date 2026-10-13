@@ -546,7 +546,7 @@ try:
     domain.to_numpy()
 except ImportError as error:
     if sys.argv[1] == "numpy":
-        assert "uv pip install 'mnt.pyfiction[plot]'" in str(error), str(error)
+        assert "uv pip install 'mnt-pyfiction[plot]'" in str(error), str(error)
     elif sys.argv[1] == "numpy._core":
         assert isinstance(error, ModuleNotFoundError) and error.name == "numpy._core", repr(error)
     else:

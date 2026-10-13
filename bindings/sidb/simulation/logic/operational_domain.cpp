@@ -410,7 +410,7 @@ void operational_domain(nanobind::module_& m)
                     if (error.matches(PyExc_ModuleNotFoundError) && error.value().attr("name").equal(py::str("numpy")))
                     {
                         throw py::import_error("operational_domain.to_numpy() requires NumPy; install it with "
-                                               "uv pip install 'mnt.pyfiction[plot]'");
+                                               "uv pip install 'mnt-pyfiction[plot]'");
                     }
                     throw;
                 }
@@ -453,7 +453,8 @@ void operational_domain(nanobind::module_& m)
             },
             "Returns the domain as NumPy arrays: a float64 array of shape (points, dimensions) holding the sampled "
             "parameter values in dimension order, and a boolean array of length points that is True where the "
-            "point is operational. Requires NumPy; install it with uv pip install 'mnt.pyfiction[plot]'.\n\n"
+            "point is operational. Point order is unspecified. Requires NumPy; install it with "
+            "uv pip install 'mnt-pyfiction[plot]'.\n\n"
             "Raises:\n"
             "    ImportError: NumPy is not installed or cannot be imported.\n"
             "    ValueError: A point does not match the domain dimension count.")
