@@ -188,7 +188,7 @@ def _requested_colors(args: argparse.Namespace) -> list[str]:
     Returns:
         The explicit operational and non-operational colors.
     """
-    return [color for color in (args.operational_color, args.non_operational_color) if color]
+    return [color for color in (args.operational_color, args.non_operational_color) if color is not None]
 
 
 def _colors(args: argparse.Namespace) -> tuple[str, str]:

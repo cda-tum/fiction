@@ -204,6 +204,10 @@ def test_default_png(resource: Callable[[str], str], tmp_path: Path, monkeypatch
         "--plot out.html --dpi 0",
         "--plot out.png --operational-color invalid",
         "--plot out.html --non-operational-color invalid",
+        '--plot out.png --operational-color ""',
+        '--plot out.png --non-operational-color ""',
+        '--plot out.html --operational-color ""',
+        '--plot out.html --non-operational-color ""',
     ],
 )
 def test_plot_preflight_errors(xor_gate: Shell, tmp_path: Path, flags: str) -> None:
