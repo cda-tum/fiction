@@ -24,6 +24,11 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -32,16 +37,14 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void read_surface_defects(nanobind::module_& m)
+void read_surface_defects(nb::module_& m)
 {
-    namespace py = nanobind;
-
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translators with the module; they are not meant to be thrown here
-    py::exception<fiction::sidb::io::unsupported_defect_index_exception>(
+    nb::exception<fiction::sidb::io::unsupported_defect_index_exception>(
         m, "unsupported_defect_index_exception",
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
-    py::exception<fiction::sidb::io::missing_position_exception>(
+    nb::exception<fiction::sidb::io::missing_position_exception>(
         m, "missing_position_exception",
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
@@ -50,8 +53,8 @@ void read_surface_defects(nanobind::module_& m)
     fiction::sidb::layout (*const read_surface_defects_function_pointer)(
         const std::string_view&, const std::string_view&) = &fiction::sidb::io::read_surface_defects;
 
-    m.def("read_surface_defects", read_surface_defects_function_pointer, py::arg("filename"),
-          py::arg("layout_name") = "", DOC(fiction_sidb_io_read_surface_defects_2));
+    m.def("read_surface_defects", read_surface_defects_function_pointer, nb::arg("filename"),
+          nb::arg("layout_name") = "", DOC(fiction_sidb_io_read_surface_defects_2));
 }
 
 }  // namespace pyfiction

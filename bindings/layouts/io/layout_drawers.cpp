@@ -37,6 +37,11 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -78,10 +83,8 @@ void draw(const Lyt& lyt, const std::string_view& filename, const fiction::utils
 }
 
 template <typename Lyt>
-void write_dot_layout(nanobind::module_& m)
+void write_dot_layout(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "write_dot_layout",
         [](const Lyt& lyt, const std::string_view& filename, const bool clock_colors, const bool indexes,
@@ -104,14 +107,14 @@ void write_dot_layout(nanobind::module_& m)
                 draw<Lyt, false, false>(lyt, filename, on_progress);
             }
         },
-        py::arg("layout"), py::arg("filename"), py::arg("clock_colors") = false, py::arg("indexes") = false,
-        py::arg("on_progress").none() = py::none(), DOC(fiction_layouts_io_write_dot_layout),
-        py::call_guard<py::gil_scoped_release>());
+        nb::arg("layout"), nb::arg("filename"), nb::arg("clock_colors") = false, nb::arg("indexes") = false,
+        nb::arg("on_progress").none() = nb::none(), DOC(fiction_layouts_io_write_dot_layout),
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
-void layout_drawers(nanobind::module_& m)
+void layout_drawers(nb::module_& m)
 {
     detail::write_dot_layout<py_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);

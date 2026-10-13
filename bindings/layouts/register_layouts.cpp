@@ -18,25 +18,30 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void coordinate(nanobind::module_& m);
-void coordinate_utility(nanobind::module_& m);
-void arrangement(nanobind::module_& m);
-void cartesian_layout(nanobind::module_& m);
-void shifted_cartesian_layout(nanobind::module_& m);
-void hexagonal_layout(nanobind::module_& m);
-void gate_level_layout(nanobind::module_& m);
-void obstructions(nanobind::module_& m);
-void layout_utils(nanobind::module_& m);
+void coordinate(nb::module_& m);
+void coordinate_utility(nb::module_& m);
+void arrangement(nb::module_& m);
+void cartesian_layout(nb::module_& m);
+void shifted_cartesian_layout(nb::module_& m);
+void hexagonal_layout(nb::module_& m);
+void gate_level_layout(nb::module_& m);
+void obstructions(nb::module_& m);
+void layout_utils(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.layouts.io` submodule.
  *
  * @param m Python submodule.
  */
-void register_layouts_io(nanobind::module_& m);
+void register_layouts_io(nb::module_& m);
 
 }  // namespace pyfiction
 

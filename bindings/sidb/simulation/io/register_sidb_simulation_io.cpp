@@ -16,14 +16,19 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void write_sqd_sim_result(nanobind::module_& m);
-void write_operational_domain(nanobind::module_& m);
-void write_location_and_ground_state(nanobind::module_& m);
+void write_sqd_sim_result(nb::module_& m);
+void write_operational_domain(nb::module_& m);
+void write_location_and_ground_state(nb::module_& m);
 
-void register_sidb_simulation_io(nanobind::module_& m)
+void register_sidb_simulation_io(nb::module_& m)
 {
     write_sqd_sim_result(m);
     write_operational_domain(m);

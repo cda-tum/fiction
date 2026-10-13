@@ -26,6 +26,11 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -33,29 +38,25 @@ namespace detail
 {
 
 template <typename Ntk>
-void network_balancing_impl(nanobind::module_& m)
+void network_balancing_impl(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, Ntk>, nb::arg("network"),
+          nb::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_network_balancing),
+          nb::call_guard<nb::gil_scoped_release>());
 
-    m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_network_balancing),
-          py::call_guard<py::gil_scoped_release>());
-
-    m.def("is_balanced", &fiction::synthesis::is_balanced<Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_is_balanced),
-          py::call_guard<py::gil_scoped_release>());
+    m.def("is_balanced", &fiction::synthesis::is_balanced<Ntk>, nb::arg("network"),
+          nb::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_is_balanced),
+          nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
-void network_balancing(nanobind::module_& m)
+void network_balancing(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::class_<fiction::synthesis::network_balancing_params>(
+    nb::class_<fiction::synthesis::network_balancing_params>(
         m, "network_balancing_params", pyfiction::progress_type_slots<fiction::synthesis::network_balancing_params>(),
         DOC(fiction_synthesis_network_balancing_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::synthesis::network_balancing_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 "Receives completed work and the phase total.")

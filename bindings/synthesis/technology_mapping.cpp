@@ -29,6 +29,11 @@
 #include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner): Required by nanobind return-value conversion.
 #include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -36,31 +41,27 @@ namespace detail
 {
 
 template <typename Ntk>
-void technology_mapping_impl(nanobind::module_& m)
+void technology_mapping_impl(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("technology_mapping", &fiction::synthesis::technology_mapping<Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::technology_mapping_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_synthesis_technology_mapping), py::call_guard<py::gil_scoped_release>());
+    m.def("technology_mapping", &fiction::synthesis::technology_mapping<Ntk>, nb::arg("network"),
+          nb::arg("params") = fiction::synthesis::technology_mapping_params{}, nb::arg("stats") = nullptr,
+          DOC(fiction_synthesis_technology_mapping), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
-void technology_mapping(nanobind::module_& m)
+void technology_mapping(nb::module_& m)
 {
-    namespace py = nanobind;
-
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
-    py::exception<fiction::synthesis::missing_required_gates_exception>(
+    nb::exception<fiction::synthesis::missing_required_gates_exception>(
         m, "missing_required_gates_exception",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    py::class_<fiction::synthesis::technology_mapping_params>(m, "technology_mapping_params",
+    nb::class_<fiction::synthesis::technology_mapping_params>(m, "technology_mapping_params",
                                                               DOC(fiction_synthesis_technology_mapping_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
 
         .def_rw("decay", &fiction::synthesis::technology_mapping_params::decay,
                 DOC(fiction_synthesis_technology_mapping_params_decay))
@@ -110,7 +111,7 @@ void technology_mapping(nanobind::module_& m)
 
         ;
 
-    py::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
+    nb::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
         .def_ro("mapping_error", &mockturtle::emap_stats::mapping_error)
         .def_ro("area", &mockturtle::emap_stats::area)
         .def_ro("delay", &mockturtle::emap_stats::delay)
@@ -121,28 +122,28 @@ void technology_mapping(nanobind::module_& m)
         .def_ro("time_total", &mockturtle::emap_stats::time_total)
         .def_ro("round_stats", &mockturtle::emap_stats::round_stats);
 
-    py::class_<fiction::synthesis::technology_mapping_stats>(m, "technology_mapping_stats",
+    nb::class_<fiction::synthesis::technology_mapping_stats>(m, "technology_mapping_stats",
                                                              DOC(fiction_synthesis_technology_mapping_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def("report", &fiction::synthesis::technology_mapping_stats::report,
              DOC(fiction_synthesis_technology_mapping_stats_report))
         .def_ro("mapper_stats", &fiction::synthesis::technology_mapping_stats::mapper_stats,
                 DOC(fiction_synthesis_technology_mapping_stats_mapper_stats));
 
     m.def("and_or_not", &fiction::synthesis::and_or_not, DOC(fiction_synthesis_and_or_not),
-          py::call_guard<py::gil_scoped_release>());
+          nb::call_guard<nb::gil_scoped_release>());
 
     m.def("and_or_not_maj", &fiction::synthesis::and_or_not_maj, DOC(fiction_synthesis_and_or_not_maj),
-          py::call_guard<py::gil_scoped_release>());
+          nb::call_guard<nb::gil_scoped_release>());
 
     m.def("all_standard_2_input_functions", &fiction::synthesis::all_standard_2_input_functions,
-          DOC(fiction_synthesis_all_standard_2_input_functions), py::call_guard<py::gil_scoped_release>());
+          DOC(fiction_synthesis_all_standard_2_input_functions), nb::call_guard<nb::gil_scoped_release>());
 
     m.def("all_standard_3_input_functions", &fiction::synthesis::all_standard_3_input_functions,
-          DOC(fiction_synthesis_all_standard_3_input_functions), py::call_guard<py::gil_scoped_release>());
+          DOC(fiction_synthesis_all_standard_3_input_functions), nb::call_guard<nb::gil_scoped_release>());
 
     m.def("all_supported_standard_functions", &fiction::synthesis::all_supported_standard_functions,
-          DOC(fiction_synthesis_all_supported_standard_functions), py::call_guard<py::gil_scoped_release>());
+          DOC(fiction_synthesis_all_supported_standard_functions), nb::call_guard<nb::gil_scoped_release>());
 
     detail::technology_mapping_impl<py_tec_network>(m);
     detail::technology_mapping_impl<py_aig_network>(m);

@@ -16,12 +16,17 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void write_qll_layout(nanobind::module_& m);
+void write_qll_layout(nb::module_& m);
 
-void register_fcn_io(nanobind::module_& m)
+void register_fcn_io(nb::module_& m)
 {
     write_qll_layout(m);
 }

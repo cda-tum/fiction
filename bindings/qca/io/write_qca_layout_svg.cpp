@@ -33,37 +33,38 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 namespace detail
 {
 
-void write_qca_layout_svg_impl(nanobind::module_& m)
+void write_qca_layout_svg_impl(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     // QCA plot
     // NOLINTNEXTLINE(misc-const-correctness)
     void (*const write_qca_layout_svg_pointer)(const fiction::qca::layout&, const std::string_view&,
                                                const fiction::qca::io::write_qca_layout_svg_params&) =
         &fiction::qca::io::write_qca_layout_svg;
 
-    m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("params") = fiction::qca::io::write_qca_layout_svg_params{}, DOC(fiction_qca_io_write_qca_layout_svg),
-          py::call_guard<py::gil_scoped_release>());
+    m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, nb::arg("layout"), nb::arg("filename"),
+          nb::arg("params") = fiction::qca::io::write_qca_layout_svg_params{}, DOC(fiction_qca_io_write_qca_layout_svg),
+          nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
-void write_qca_layout_svg(nanobind::module_& m)
+void write_qca_layout_svg(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::class_<fiction::qca::io::write_qca_layout_svg_params>(
+    nb::class_<fiction::qca::io::write_qca_layout_svg_params>(
         m, "write_qca_layout_svg_params",
         pyfiction::progress_type_slots<fiction::qca::io::write_qca_layout_svg_params>(),
         DOC(fiction_qca_io_write_qca_layout_svg_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::qca::io::write_qca_layout_svg_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
         .def_rw("simple", &fiction::qca::io::write_qca_layout_svg_params::simple,

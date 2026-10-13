@@ -29,6 +29,11 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -36,26 +41,22 @@ namespace detail
 {
 
 template <typename Ntk>
-void fanout_substitution_impl(nanobind::module_& m)
+void fanout_substitution_impl(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_tec_network, Ntk>, nb::arg("network"),
+          nb::arg("params") = fiction::synthesis::fanout_substitution_params{},
+          DOC(fiction_synthesis_fanout_substitution), nb::call_guard<nb::gil_scoped_release>());
 
-    m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_tec_network, Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::fanout_substitution_params{},
-          DOC(fiction_synthesis_fanout_substitution), py::call_guard<py::gil_scoped_release>());
-
-    m.def("is_fanout_substituted", &fiction::synthesis::is_fanout_substituted<Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::fanout_substitution_params{},
-          DOC(fiction_synthesis_is_fanout_substituted), py::call_guard<py::gil_scoped_release>());
+    m.def("is_fanout_substituted", &fiction::synthesis::is_fanout_substituted<Ntk>, nb::arg("network"),
+          nb::arg("params") = fiction::synthesis::fanout_substitution_params{},
+          DOC(fiction_synthesis_is_fanout_substituted), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
-void fanout_substitution(nanobind::module_& m)
+void fanout_substitution(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::enum_<fiction::synthesis::fanout_substitution_params::substitution_strategy>(
+    nb::enum_<fiction::synthesis::fanout_substitution_params::substitution_strategy>(
         m, "substitution_strategy", DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy))
         .value("BREADTH", fiction::synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
                DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_BREADTH))
@@ -66,11 +67,11 @@ void fanout_substitution(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::synthesis::fanout_substitution_params>(
+    nb::class_<fiction::synthesis::fanout_substitution_params>(
         m, "fanout_substitution_params",
         pyfiction::progress_type_slots<fiction::synthesis::fanout_substitution_params>(),
         DOC(fiction_synthesis_fanout_substitution_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::synthesis::fanout_substitution_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 "Receives completed work and the phase total.")

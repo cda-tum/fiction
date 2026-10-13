@@ -21,10 +21,15 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void truth_tables(nanobind::module_& m)
+void truth_tables(nb::module_& m)
 {
     m.def("create_id_tt", &fiction::synthesis::create_id_tt, DOC(fiction_synthesis_create_id_tt));
     m.def("create_not_tt", &fiction::synthesis::create_not_tt, DOC(fiction_synthesis_create_not_tt));

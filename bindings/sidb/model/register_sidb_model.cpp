@@ -16,15 +16,20 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void defect(nanobind::module_& m);
-void charge_state(nanobind::module_& m);
-void simulation_parameters(nanobind::module_& m);
-void potential_to_distance_conversion(nanobind::module_& m);
+void defect(nb::module_& m);
+void charge_state(nb::module_& m);
+void simulation_parameters(nb::module_& m);
+void potential_to_distance_conversion(nb::module_& m);
 
-void register_sidb_model(nanobind::module_& m)
+void register_sidb_model(nb::module_& m)
 {
     defect(m);
     charge_state(m);

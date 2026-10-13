@@ -27,6 +27,11 @@
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -35,16 +40,14 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void write_mol_qca_layout_svg(nanobind::module_& m)
+void write_mol_qca_layout_svg(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::mol_qca::io::write_mol_qca_layout_svg_params;
 
-    py::class_<write_mol_qca_layout_svg_params>(m, "write_mol_qca_layout_svg_params",
+    nb::class_<write_mol_qca_layout_svg_params>(m, "write_mol_qca_layout_svg_params",
                                                 pyfiction::progress_type_slots<write_mol_qca_layout_svg_params>(),
                                                 DOC(fiction_mol_qca_io_write_mol_qca_layout_svg_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("on_progress", &write_mol_qca_layout_svg_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
                 pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
         .def_rw("simple", &write_mol_qca_layout_svg_params::simple,
@@ -55,9 +58,9 @@ void write_mol_qca_layout_svg(nanobind::module_& m)
                                 const write_mol_qca_layout_svg_params&) =
         &fiction::mol_qca::io::write_mol_qca_layout_svg;
 
-    m.def("write_mol_qca_layout_svg", write_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("params") = write_mol_qca_layout_svg_params{}, DOC(fiction_mol_qca_io_write_mol_qca_layout_svg),
-          py::call_guard<py::gil_scoped_release>());
+    m.def("write_mol_qca_layout_svg", write_pointer, nb::arg("layout"), nb::arg("filename"),
+          nb::arg("params") = write_mol_qca_layout_svg_params{}, DOC(fiction_mol_qca_io_write_mol_qca_layout_svg),
+          nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

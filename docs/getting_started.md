@@ -249,12 +249,12 @@ bindings/
 ├── physical_design/
 │   ├── register_physical_design.cpp               # NB_MODULE(physical_design, m): exact(m), ...
 │   └── path_finding/
-│       ├── a_star.cpp                             # defines a_star(nanobind::module_&)
+│       ├── a_star.cpp                             # defines a_star(nb::module_&)
 │       └── register_path_finding.cpp              # calls a_star(m), distance(m), ...
 ├── sidb/
 │   ├── register_sidb.cpp                          # NB_MODULE(sidb, m): lattice(m), ...
 │   └── simulation/engines/
-│       ├── quickexact.cpp                         # defines quickexact(nanobind::module_&)
+│       ├── quickexact.cpp                         # defines quickexact(nb::module_&)
 │       └── register_sidb_simulation_engines.cpp   # calls quickexact(m), quicksim(m), ...
 └── ...
 python/mnt/pyfiction/
@@ -270,8 +270,9 @@ Each nested namespace is a submodule of it. For example, import the coordinate t
 `from mnt.pyfiction.layouts import coordinate`. The directories under `bindings/`
 follow the same tree, so a binding sits in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
 
+Binding files declare `namespace nb = nanobind;` after their includes.
 Each leaf `.cpp` file defines exactly one binding function named after the file (e.g.
-`void a_star(nanobind::module_& m)`) that binds a single class, function, or closely related group thereof. Each
+`void a_star(nb::module_& m)`) that binds a single class, function, or closely related group thereof. Each
 directory that holds binding sources has exactly one `register_<path>.cpp`, named after the directory, that
 forward-declares and calls the binding functions beside it. In a top-level directory, that file holds the
 `NB_MODULE` block. The block imports the modules whose types it names in signatures or default arguments, calls the

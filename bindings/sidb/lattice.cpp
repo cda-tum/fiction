@@ -31,6 +31,11 @@
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -39,15 +44,13 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void lattice(nanobind::module_& m)
+void lattice(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::class_<fiction::sidb::lattice_site>(m, "lattice_site", DOC(fiction_sidb_lattice_site))
-        .def(py::init<>(), DOC(fiction_sidb_lattice_site_lattice_site))
-        .def(py::init<int32_t, int32_t, int8_t>(), py::arg("x"), py::arg("y"), py::arg("z"),
+    nb::class_<fiction::sidb::lattice_site>(m, "lattice_site", DOC(fiction_sidb_lattice_site))
+        .def(nb::init<>(), DOC(fiction_sidb_lattice_site_lattice_site))
+        .def(nb::init<int32_t, int32_t, int8_t>(), nb::arg("x"), nb::arg("y"), nb::arg("z"),
              DOC(fiction_sidb_lattice_site_lattice_site_2))
-        .def(py::init<int32_t, int32_t>(), py::arg("x"), py::arg("y"), DOC(fiction_sidb_lattice_site_lattice_site_3))
+        .def(nb::init<int32_t, int32_t>(), nb::arg("x"), nb::arg("y"), DOC(fiction_sidb_lattice_site_lattice_site_3))
         .def_rw("x", &fiction::sidb::lattice_site::x, DOC(fiction_sidb_lattice_site_x))
         .def_rw("y", &fiction::sidb::lattice_site::y, DOC(fiction_sidb_lattice_site_y))
         .def_prop_rw(
@@ -62,14 +65,14 @@ void lattice(nanobind::module_& m)
             },
             DOC(fiction_sidb_lattice_site_z))
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
-        .def(py::self == py::self, DOC(fiction_sidb_lattice_site_operator_eq))
-        .def(py::self != py::self)
-        .def(py::self < py::self, DOC(fiction_sidb_lattice_site_operator_le))
-        .def(py::self <= py::self)
-        .def(py::self > py::self)
-        .def(py::self >= py::self)
-        .def(py::self + py::self, DOC(fiction_sidb_lattice_site_operator_add))
-        .def(py::self - py::self, DOC(fiction_sidb_lattice_site_operator_sub))
+        .def(nb::self == nb::self, DOC(fiction_sidb_lattice_site_operator_eq))
+        .def(nb::self != nb::self)
+        .def(nb::self < nb::self, DOC(fiction_sidb_lattice_site_operator_le))
+        .def(nb::self <= nb::self)
+        .def(nb::self > nb::self)
+        .def(nb::self >= nb::self)
+        .def(nb::self + nb::self, DOC(fiction_sidb_lattice_site_operator_add))
+        .def(nb::self - nb::self, DOC(fiction_sidb_lattice_site_operator_sub))
         // NOLINTEND(misc-redundant-expression)
         .def("__hash__",
              [](const fiction::sidb::lattice_site& s) { return std::hash<fiction::sidb::lattice_site>{}(s); })
@@ -77,29 +80,29 @@ void lattice(nanobind::module_& m)
 
         ;
 
-    m.def("row_of", &fiction::sidb::row_of, py::arg("site"), DOC(fiction_sidb_row_of));
-    m.def("site_at_row", &fiction::sidb::site_at_row, py::arg("x"), py::arg("row"), DOC(fiction_sidb_site_at_row));
-    m.def("sites_in_area", &fiction::sidb::sites_in_area, py::arg("first_corner"), py::arg("second_corner"),
+    m.def("row_of", &fiction::sidb::row_of, nb::arg("site"), DOC(fiction_sidb_row_of));
+    m.def("site_at_row", &fiction::sidb::site_at_row, nb::arg("x"), nb::arg("row"), DOC(fiction_sidb_site_at_row));
+    m.def("sites_in_area", &fiction::sidb::sites_in_area, nb::arg("first_corner"), nb::arg("second_corner"),
           DOC(fiction_sidb_sites_in_area));
 
-    py::class_<fiction::sidb::lattice>(m, "lattice", DOC(fiction_sidb_lattice))
-        .def(py::init<>(), "Default constructor.")
-        .def(py::init<const std::string&, const fiction::sidb::lattice::vector&, const fiction::sidb::lattice::vector&,
+    nb::class_<fiction::sidb::lattice>(m, "lattice", DOC(fiction_sidb_lattice))
+        .def(nb::init<>(), "Default constructor.")
+        .def(nb::init<const std::string&, const fiction::sidb::lattice::vector&, const fiction::sidb::lattice::vector&,
                       const std::array<fiction::sidb::lattice::vector, 2>&>(),
-             py::arg("name"), py::arg("a1"), py::arg("a2"), py::arg("basis"), DOC(fiction_sidb_lattice))
+             nb::arg("name"), nb::arg("a1"), nb::arg("a2"), nb::arg("basis"), DOC(fiction_sidb_lattice))
         .def_static("si_100_2x1", &fiction::sidb::lattice::si_100_2x1, DOC(fiction_sidb_lattice_si_100_2x1))
         .def_static("si_111_1x1", &fiction::sidb::lattice::si_111_1x1, DOC(fiction_sidb_lattice_si_111_1x1))
         .def_rw("name", &fiction::sidb::lattice::name, DOC(fiction_sidb_lattice_name))
         .def_rw("a1", &fiction::sidb::lattice::a1, DOC(fiction_sidb_lattice_a1))
         .def_rw("a2", &fiction::sidb::lattice::a2, DOC(fiction_sidb_lattice_a2))
         .def_rw("basis", &fiction::sidb::lattice::basis, DOC(fiction_sidb_lattice_basis))
-        .def("nm_position", &fiction::sidb::lattice::nm_position, py::arg("site"),
+        .def("nm_position", &fiction::sidb::lattice::nm_position, nb::arg("site"),
              DOC(fiction_sidb_lattice_nm_position))
-        .def("nm_distance", &fiction::sidb::lattice::nm_distance, py::arg("source"), py::arg("target"),
+        .def("nm_distance", &fiction::sidb::lattice::nm_distance, nb::arg("source"), nb::arg("target"),
              DOC(fiction_sidb_lattice_nm_distance))
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
-        .def(py::self == py::self, DOC(fiction_sidb_lattice_operator_eq))
-        .def(py::self != py::self)
+        .def(nb::self == nb::self, DOC(fiction_sidb_lattice_operator_eq))
+        .def(nb::self != nb::self)
         // NOLINTEND(misc-redundant-expression)
         .def("__repr__", [](const fiction::sidb::lattice& lat) { return lat.name; })
 

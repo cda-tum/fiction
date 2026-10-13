@@ -399,6 +399,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python bindings use the `nb` namespace alias for nanobind.
   - The C++ test suite and the experiments now open the namespaces they use, one
     `using namespace` directive per namespace, rather than qualifying every symbol below
     `fiction`. That removes about 14,000 qualifier tokens. `fiction::layouts::clocking`

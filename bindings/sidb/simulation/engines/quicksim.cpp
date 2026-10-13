@@ -31,18 +31,21 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void quicksim(nanobind::module_& m)
+void quicksim(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::simulation::engines::quicksim_params;
 
-    py::class_<quicksim_params>(m, "quicksim_params", pyfiction::progress_type_slots<quicksim_params>(),
+    nb::class_<quicksim_params>(m, "quicksim_params", pyfiction::progress_type_slots<quicksim_params>(),
                                 DOC(fiction_sidb_simulation_engines_quicksim_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &quicksim_params::sim_params,
                 DOC(fiction_sidb_simulation_engines_quicksim_params_sim_params))
         .def_rw("iteration_steps", &quicksim_params::iteration_steps,
@@ -60,8 +63,8 @@ void quicksim(nanobind::module_& m)
     std::optional<fiction::sidb::simulation::result> (*const quicksim_pointer)(
         const fiction::sidb::layout&, const quicksim_params&) = &fiction::sidb::simulation::engines::quicksim;
 
-    m.def("quicksim", quicksim_pointer, py::arg("lyt"), py::arg("params") = quicksim_params{},
-          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quicksim));
+    m.def("quicksim", quicksim_pointer, nb::arg("lyt"), nb::arg("params") = quicksim_params{},
+          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quicksim));
 }
 
 }  // namespace pyfiction

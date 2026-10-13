@@ -25,16 +25,19 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void read_sqd_layout(nanobind::module_& m)
+void read_sqd_layout(nb::module_& m)
 {
-    namespace py = nanobind;
-
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
-    py::exception<fiction::sidb::io::sqd_parsing_error>(
+    nb::exception<fiction::sidb::io::sqd_parsing_error>(
         m, "sqd_parsing_error",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
@@ -42,8 +45,8 @@ void read_sqd_layout(nanobind::module_& m)
     m.def("read_sqd_layout",
           static_cast<fiction::sidb::layout (*)(const std::string_view&, const std::string_view&)>(
               &fiction::sidb::io::read_sqd_layout),
-          py::arg("filename"), py::arg("layout_name") = "", DOC(fiction_sidb_io_read_sqd_layout_2),
-          py::call_guard<py::gil_scoped_release>());
+          nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_sidb_io_read_sqd_layout_2),
+          nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

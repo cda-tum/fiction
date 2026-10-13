@@ -45,6 +45,11 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -93,12 +98,10 @@ typename GateLibrary::layout checked_apply_gate_library(const GateLyt&          
  * @param lib_name Library name.
  */
 template <typename GateLibrary, typename GateLyt>
-void apply_gate_library(nanobind::module_& m, const std::string& lib_name)
+void apply_gate_library(nb::module_& m, const std::string& lib_name)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(fmt::format("apply_{}_library", lib_name).c_str(), &checked_apply_gate_library<GateLibrary, GateLyt>,
-          py::arg("layout"), py::arg("on_progress").none() = py::none(), py::call_guard<py::gil_scoped_release>(),
+          nb::arg("layout"), nb::arg("on_progress").none() = nb::none(), nb::call_guard<nb::gil_scoped_release>(),
           DOC(fiction_physical_design_apply_gate_library));
 }
 
@@ -107,7 +110,7 @@ void apply_gate_library(nanobind::module_& m, const std::string& lib_name)
 /** Register the four supported gate libraries.
  * @param m Python module.
  */
-void apply_gate_library(nanobind::module_& m)
+void apply_gate_library(nb::module_& m)
 {
     detail::apply_gate_library<fiction::qca::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
     detail::apply_gate_library<fiction::mol_qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");

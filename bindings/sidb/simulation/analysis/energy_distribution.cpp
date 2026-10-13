@@ -33,15 +33,18 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void energy_distribution(nanobind::module_& m)
+void energy_distribution(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    py::class_<fiction::sidb::simulation::analysis::energy_state>(m, "energy_state")
-        .def(py::init<double, uint64_t>(), py::arg("electrostatic_potential_energy"), py::arg("degeneracy"),
+    nb::class_<fiction::sidb::simulation::analysis::energy_state>(m, "energy_state")
+        .def(nb::init<double, uint64_t>(), nb::arg("electrostatic_potential_energy"), nb::arg("degeneracy"),
              DOC(fiction_sidb_simulation_analysis_energy_state))
         .def_rw("electrostatic_potential_energy",
                 &fiction::sidb::simulation::analysis::energy_state::electrostatic_potential_energy,
@@ -49,14 +52,14 @@ void energy_distribution(nanobind::module_& m)
         .def_rw("degeneracy", &fiction::sidb::simulation::analysis::energy_state::degeneracy,
                 DOC(fiction_sidb_simulation_analysis_energy_state_degeneracy));
 
-    py::class_<fiction::sidb::simulation::analysis::energy_distribution>(m, "energy_distribution")
-        .def(py::init<>(), "Default constructor.")
+    nb::class_<fiction::sidb::simulation::analysis::energy_distribution>(m, "energy_distribution")
+        .def(nb::init<>(), "Default constructor.")
         .def("get_nth_state", &fiction::sidb::simulation::analysis::energy_distribution::get_nth_state,
-             py::arg("state_index"), DOC(fiction_sidb_simulation_analysis_energy_distribution_get_nth_state))
-        .def("degeneracy", &fiction::sidb::simulation::analysis::energy_distribution::degeneracy, py::arg("energy"),
+             nb::arg("state_index"), DOC(fiction_sidb_simulation_analysis_energy_distribution_get_nth_state))
+        .def("degeneracy", &fiction::sidb::simulation::analysis::energy_distribution::degeneracy, nb::arg("energy"),
              DOC(fiction_sidb_simulation_analysis_energy_distribution_degeneracy))
         .def("add_energy_state", &fiction::sidb::simulation::analysis::energy_distribution::add_energy_state,
-             py::arg("state"), DOC(fiction_sidb_simulation_analysis_energy_distribution_add_energy_state))
+             nb::arg("state"), DOC(fiction_sidb_simulation_analysis_energy_distribution_add_energy_state))
         .def("size", &fiction::sidb::simulation::analysis::energy_distribution::size,
              DOC(fiction_sidb_simulation_analysis_energy_distribution_size))
         .def("empty", &fiction::sidb::simulation::analysis::energy_distribution::empty,
@@ -73,7 +76,7 @@ void energy_distribution(nanobind::module_& m)
         const std::vector<fiction::sidb::charge_distribution>&) =
         &fiction::sidb::simulation::analysis::calculate_energy_distribution;
 
-    m.def("calculate_energy_distribution", energy_distribution_pointer, py::arg("charge_distributions"),
+    m.def("calculate_energy_distribution", energy_distribution_pointer, nb::arg("charge_distributions"),
           DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
 }
 

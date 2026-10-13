@@ -42,21 +42,19 @@
 namespace pyfiction
 {
 
-void exact(nanobind::module_& m)
+void exact(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::enum_<fiction::physical_design::technology_constraints>(m, "technology_constraints",
+    nb::enum_<fiction::physical_design::technology_constraints>(m, "technology_constraints",
                                                                 DOC(fiction_physical_design_technology_constraints))
         .value("NONE", fiction::physical_design::technology_constraints::NONE,
                DOC(fiction_physical_design_technology_constraints_NONE))
         .value("TOPOLINANO", fiction::physical_design::technology_constraints::TOPOLINANO,
                DOC(fiction_physical_design_technology_constraints_TOPOLINANO));
 
-    py::class_<fiction::physical_design::exact_physical_design_params>(
+    nb::class_<fiction::physical_design::exact_physical_design_params>(
         m, "exact_params", pyfiction::progress_type_slots<fiction::physical_design::exact_physical_design_params>(),
         DOC(fiction_physical_design_exact_physical_design_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("scheme", &fiction::physical_design::exact_physical_design_params::scheme,
                 DOC(fiction_physical_design_exact_physical_design_params_scheme))
         .def_rw("layout_arrangement", &fiction::physical_design::exact_physical_design_params::layout_arrangement,
@@ -96,9 +94,9 @@ void exact(nanobind::module_& m)
                 pyfiction::ON_WORKER_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_exact_physical_design_params_on_worker_progress));
 
-    py::class_<fiction::physical_design::exact_physical_design_stats>(
+    nb::class_<fiction::physical_design::exact_physical_design_stats>(
         m, "exact_stats", DOC(fiction_physical_design_exact_physical_design_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::physical_design::exact_physical_design_stats& stats)
@@ -124,18 +122,18 @@ void exact(nanobind::module_& m)
                 DOC(fiction_physical_design_exact_physical_design_stats_num_aspect_ratios));
 
     m.def("exact_cartesian", &fiction::physical_design::exact<py_cartesian_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          nb::arg("network"), nb::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
           DOC(fiction_physical_design_exact));
 
     m.def("exact_shifted_cartesian", &fiction::physical_design::exact<py_shifted_cartesian_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          nb::arg("network"), nb::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
           DOC(fiction_physical_design_exact));
 
     m.def("exact_hexagonal", &fiction::physical_design::exact<py_hexagonal_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          nb::arg("network"), nb::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
           DOC(fiction_physical_design_exact));
 }
 
@@ -145,13 +143,18 @@ void exact(nanobind::module_& m)
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 /**
  * Disable SMT-based exact physical design.
  */
-void exact([[maybe_unused]] nanobind::module_& m) {}
+void exact([[maybe_unused]] nb::module_& m) {}
 
 }  // namespace pyfiction
 

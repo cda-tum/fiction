@@ -16,17 +16,22 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void write_mol_qca_layout_svg(nanobind::module_& m);
+void write_mol_qca_layout_svg(nb::module_& m);
 
 /**
  * @brief Registers the molQCA writers.
  *
  * @param m Python module.
  */
-void register_mol_qca_io(nanobind::module_& m)
+void register_mol_qca_io(nb::module_& m)
 {
     write_mol_qca_layout_svg(m);
 }

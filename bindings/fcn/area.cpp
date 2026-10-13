@@ -30,6 +30,11 @@
 #include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -44,7 +49,7 @@ namespace detail
  * @param doc Docstring of the bound `area` overload.
  */
 template <typename Lyt>
-void area(nanobind::module_& m, const char* doc)
+void area(nb::module_& m, const char* doc)
 {
     m.def(
         "area",
@@ -57,8 +62,8 @@ void area(nanobind::module_& m, const char* doc)
                 fiction::fcn::area_params<Lyt>{.width = width, .height = height, .hspace = hspace, .vspace = vspace},
                 &stats);
         },
-        nanobind::arg("layout"), nanobind::arg("width") = Lyt::CELL_WIDTH, nanobind::arg("height") = Lyt::CELL_HEIGHT,
-        nanobind::arg("hspace") = Lyt::CELL_HSPACE, nanobind::arg("vspace") = Lyt::CELL_VSPACE, doc);
+        nb::arg("layout"), nb::arg("width") = Lyt::CELL_WIDTH, nb::arg("height") = Lyt::CELL_HEIGHT,
+        nb::arg("hspace") = Lyt::CELL_HSPACE, nb::arg("vspace") = Lyt::CELL_VSPACE, doc);
 }
 
 }  // namespace detail
@@ -68,7 +73,7 @@ void area(nanobind::module_& m, const char* doc)
  *
  * @param m Python module.
  */
-void area(nanobind::module_& m)
+void area(nb::module_& m)
 {
     detail::area<fiction::qca::layout>(m, DOC(fiction_fcn_area));
     detail::area<fiction::mol_qca::layout>(m, DOC(fiction_fcn_area));

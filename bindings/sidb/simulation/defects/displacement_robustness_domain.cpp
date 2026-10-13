@@ -32,19 +32,22 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void displacement_robustness_domain(nanobind::module_& m)
+void displacement_robustness_domain(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::layout;
     using fiction::sidb::simulation::defects::displacement_robustness_domain;
     using fiction::sidb::simulation::defects::displacement_robustness_domain_params;
     using fiction::sidb::simulation::defects::displacement_robustness_domain_stats;
 
-    py::enum_<displacement_robustness_domain_params::dimer_displacement_policy>(
+    nb::enum_<displacement_robustness_domain_params::dimer_displacement_policy>(
         m, "dimer_displacement_policy",
         DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_displacement_policy))
         .value(
@@ -55,7 +58,7 @@ void displacement_robustness_domain(nanobind::module_& m)
             "ALLOW_OTHER_DIMER", displacement_robustness_domain_params::dimer_displacement_policy::ALLOW_OTHER_DIMER,
             DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_dimer_displacement_policy_ALLOW_OTHER_DIMER));
 
-    py::enum_<displacement_robustness_domain_params::displacement_analysis_mode>(
+    nb::enum_<displacement_robustness_domain_params::displacement_analysis_mode>(
         m, "displacement_analysis_mode",
         DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode))
         .value(
@@ -65,11 +68,11 @@ void displacement_robustness_domain(nanobind::module_& m)
             "RANDOM", displacement_robustness_domain_params::displacement_analysis_mode::RANDOM,
             DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode_RANDOM));
 
-    py::class_<displacement_robustness_domain_params>(
+    nb::class_<displacement_robustness_domain_params>(
         m, "displacement_robustness_domain_params",
         pyfiction::progress_type_slots<displacement_robustness_domain_params>(),
         DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("analysis_mode", &displacement_robustness_domain_params::analysis_mode,
                 DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_analysis_mode))
         .def_rw(
@@ -90,10 +93,10 @@ void displacement_robustness_domain(nanobind::module_& m)
                 pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params_on_progress));
 
-    py::class_<displacement_robustness_domain_stats>(
+    nb::class_<displacement_robustness_domain_stats>(
         m, "displacement_robustness_domain_stats",
         DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("time_total", &displacement_robustness_domain_stats::time_total,
                 DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_stats_time_total))
         .def_rw(
@@ -105,9 +108,9 @@ void displacement_robustness_domain(nanobind::module_& m)
             &displacement_robustness_domain_stats::num_non_operational_sidb_displacements,
             DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_non_operational_sidb_displacements));
 
-    py::class_<displacement_robustness_domain>(m, "displacement_robustness_domain",
+    nb::class_<displacement_robustness_domain>(m, "displacement_robustness_domain",
                                                DOC(fiction_sidb_simulation_defects_displacement_robustness_domain))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("influence_information", &displacement_robustness_domain::operational_values,
                 DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_operational_values));
 
@@ -119,8 +122,8 @@ void displacement_robustness_domain(nanobind::module_& m)
             return fiction::sidb::simulation::defects::determine_displacement_robustness_domain(lyt, spec, params,
                                                                                                 stats);
         },
-        py::arg("layout"), py::arg("spec"), py::arg("params") = displacement_robustness_domain_params{},
-        py::arg("stats") = nullptr, py::call_guard<py::gil_scoped_release>(),
+        nb::arg("layout"), nb::arg("spec"), nb::arg("params") = displacement_robustness_domain_params{},
+        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_defects_determine_displacement_robustness_domain));
 }
 

@@ -27,6 +27,11 @@
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts the filename argument.
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -35,20 +40,20 @@ namespace detail
 
 /** @brief Register a layout type's FGL writer. @tparam Lyt Layout type. @param m Layout I/O module. */
 template <typename Lyt>
-void write_fgl_layout(nanobind::module_& m)
+void write_fgl_layout(nb::module_& m)
 {
     m.def(
         "write_fgl_layout",
         [](const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
-        { fiction::layouts::io::write_fgl_layout(lyt, filename, on_progress); }, nanobind::arg("layout"),
-        nanobind::arg("filename"), nanobind::arg("on_progress").none() = nanobind::none(),
-        DOC(fiction_layouts_io_write_fgl_layout_2), nanobind::call_guard<nanobind::gil_scoped_release>());
+        { fiction::layouts::io::write_fgl_layout(lyt, filename, on_progress); }, nb::arg("layout"), nb::arg("filename"),
+        nb::arg("on_progress").none() = nb::none(), DOC(fiction_layouts_io_write_fgl_layout_2),
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
 /** @brief Register FGL writers for supported layout topologies. @param m Layout I/O module. */
-void write_fgl_layout(nanobind::module_& m)
+void write_fgl_layout(nb::module_& m)
 {
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);

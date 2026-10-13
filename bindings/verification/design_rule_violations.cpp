@@ -31,6 +31,11 @@
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner): enables return-value conversion
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -39,7 +44,7 @@ namespace detail
 
 /** @brief Binds object layout design rule checks. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
-void gate_level_drvs_impl(nanobind::module_& m)
+void gate_level_drvs_impl(nb::module_& m)
 {
     m.def(
         "gate_level_drvs",
@@ -52,13 +57,13 @@ void gate_level_drvs_impl(nanobind::module_& m)
             fiction::verification::gate_level_drv_stats stats{};
 
             {
-                const nanobind::gil_scoped_release release{};
+                const nb::gil_scoped_release release{};
                 fiction::verification::gate_level_drvs(lyt, params, &stats);
             }
 
             if (print_report)
             {
-                nanobind::print(report_stream.str().c_str());
+                nb::print(report_stream.str().c_str());
             }
 
             if (statistics != nullptr)
@@ -68,22 +73,19 @@ void gate_level_drvs_impl(nanobind::module_& m)
 
             return {stats.warnings, stats.drvs};
         },
-        nanobind::arg("layout"), nanobind::arg("params") = fiction::verification::gate_level_drv_params{},
-        nanobind::arg("print_report") = false, nanobind::arg("statistics") = nullptr,
-        DOC(fiction_verification_gate_level_drvs));
+        nb::arg("layout"), nb::arg("params") = fiction::verification::gate_level_drv_params{},
+        nb::arg("print_report") = false, nb::arg("statistics") = nullptr, DOC(fiction_verification_gate_level_drvs));
 }
 
 }  // namespace detail
 
 /** @brief Registers design rule checks and reports. @param m Python module. */
-void design_rule_violations(nanobind::module_& m)
+void design_rule_violations(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::class_<fiction::verification::gate_level_drv_params>(
+    nb::class_<fiction::verification::gate_level_drv_params>(
         m, "gate_level_drv_params", pyfiction::progress_type_slots<fiction::verification::gate_level_drv_params>(),
         DOC(fiction_verification_gate_level_drv_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::verification::gate_level_drv_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 "Receives completed work and the phase total.")
@@ -106,9 +108,9 @@ void design_rule_violations(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::verification::gate_level_drv_stats>(m, "gate_level_drv_stats",
+    nb::class_<fiction::verification::gate_level_drv_stats>(m, "gate_level_drv_stats",
                                                             DOC(fiction_verification_gate_level_drv_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_ro("drvs", &fiction::verification::gate_level_drv_stats::drvs,
                 DOC(fiction_verification_gate_level_drv_stats_drvs))
         .def_ro("warnings", &fiction::verification::gate_level_drv_stats::warnings,

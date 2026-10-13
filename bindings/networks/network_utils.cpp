@@ -34,6 +34,11 @@
 #include <nanobind/stl/set.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -41,23 +46,19 @@ namespace detail
 {
 
 template <typename Ntk>
-void has_high_degree_fanin_nodes(nanobind::module_& m)
+void has_high_degree_fanin_nodes(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<Ntk>, py::arg("ntk"),
-          py::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
+    m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<Ntk>, nb::arg("ntk"),
+          nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
 }
 
 }  // namespace detail
 
-void network_utils(nanobind::module_& m)
+void network_utils(nb::module_& m)
 {
-    namespace py = nanobind;
-
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
-    py::exception<fiction::networks::high_degree_fanin_exception>(
+    nb::exception<fiction::networks::high_degree_fanin_exception>(
         m, "high_degree_fanin_exception",
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
@@ -81,7 +82,7 @@ void network_utils(nanobind::module_& m)
             network.set_network_name(std::to_string(seed));
             return network;
         },
-        py::arg("inputs"), py::arg("gates"), py::arg("seed"), "Generate a native random AIG network.");
+        nb::arg("inputs"), nb::arg("gates"), nb::arg("seed"), "Generate a native random AIG network.");
 
     m.def(
         "random_xag_network",
@@ -99,7 +100,7 @@ void network_utils(nanobind::module_& m)
             network.set_network_name(std::to_string(seed));
             return network;
         },
-        py::arg("inputs"), py::arg("gates"), py::arg("seed"), "Generate a native random XAG network.");
+        nb::arg("inputs"), nb::arg("gates"), nb::arg("seed"), "Generate a native random XAG network.");
 
     m.def(
         "random_mig_network",
@@ -117,7 +118,7 @@ void network_utils(nanobind::module_& m)
             network.set_network_name(std::to_string(seed));
             return network;
         },
-        py::arg("inputs"), py::arg("gates"), py::arg("seed"), "Generate a native random MIG network.");
+        nb::arg("inputs"), nb::arg("gates"), nb::arg("seed"), "Generate a native random MIG network.");
 
     m.def(
         "random_tec_network",
@@ -135,7 +136,7 @@ void network_utils(nanobind::module_& m)
             network.set_network_name(std::to_string(seed));
             return network;
         },
-        py::arg("inputs"), py::arg("gates"), py::arg("seed"), "Generate a native random TEC network.");
+        nb::arg("inputs"), nb::arg("gates"), nb::arg("seed"), "Generate a native random TEC network.");
 }
 
 }  // namespace pyfiction

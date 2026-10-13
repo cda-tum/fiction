@@ -18,20 +18,25 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void logic_networks(nanobind::module_& m);
-void name_utils(nanobind::module_& m);
-void network_utils(nanobind::module_& m);
-void logic_simulation(nanobind::module_& m);
+void logic_networks(nb::module_& m);
+void name_utils(nb::module_& m);
+void network_utils(nb::module_& m);
+void logic_simulation(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.networks.io` submodule.
  *
  * @param m Python submodule.
  */
-void register_networks_io(nanobind::module_& m);
+void register_networks_io(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -43,7 +48,7 @@ NB_MODULE(networks, m)
     m.doc() = "Logic networks and their simulation.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
+    nb::module_::import_("mnt.pyfiction.layouts");
 
     // Overloads on the cell-level layouts of `qca`, `mol_qca`, `inml`, and `sidb` import nothing: those
     // modules come later in the import chain, and an argument of their type implies that they are loaded.

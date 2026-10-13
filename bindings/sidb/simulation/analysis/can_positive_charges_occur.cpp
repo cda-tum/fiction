@@ -23,18 +23,21 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void can_positive_charges_occur(nanobind::module_& m)
+void can_positive_charges_occur(nb::module_& m)
 {
-    namespace py = nanobind;
-
     m.def(
         "can_positive_charges_occur",
         [](const fiction::sidb::layout& lyt, const fiction::sidb::model::simulation_parameters& sim_params)
-        { return fiction::sidb::simulation::analysis::can_positive_charges_occur(lyt, sim_params); }, py::arg("lyt"),
-        py::arg("sim_params"), DOC(fiction_sidb_simulation_analysis_can_positive_charges_occur_2));
+        { return fiction::sidb::simulation::analysis::can_positive_charges_occur(lyt, sim_params); }, nb::arg("lyt"),
+        nb::arg("sim_params"), DOC(fiction_sidb_simulation_analysis_can_positive_charges_occur_2));
 }
 
 }  // namespace pyfiction

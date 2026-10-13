@@ -27,6 +27,11 @@
 #include <nanobind/stl/string.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -35,39 +40,37 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void charge_distribution(nanobind::module_& m)
+void charge_distribution(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::charge_distribution;
 
     auto charge_distribution_class =
-        py::class_<charge_distribution>(m, "charge_distribution", DOC(fiction_sidb_charge_distribution))
-            .def(py::init<>(), DOC(fiction_sidb_charge_distribution_charge_distribution))
-            .def(py::init<const fiction::sidb::layout&, fiction::sidb::model::charge_state>(), py::arg("layout"),
-                 py::arg("charge_state") = fiction::sidb::model::charge_state::NEGATIVE,
+        nb::class_<charge_distribution>(m, "charge_distribution", DOC(fiction_sidb_charge_distribution))
+            .def(nb::init<>(), DOC(fiction_sidb_charge_distribution_charge_distribution))
+            .def(nb::init<const fiction::sidb::layout&, fiction::sidb::model::charge_state>(), nb::arg("layout"),
+                 nb::arg("charge_state") = fiction::sidb::model::charge_state::NEGATIVE,
                  DOC(fiction_sidb_charge_distribution_charge_distribution_2))
             .def("sites", &charge_distribution::sites, DOC(fiction_sidb_charge_distribution_sites))
             .def("size", &charge_distribution::size, DOC(fiction_sidb_charge_distribution_size))
             .def("empty", &charge_distribution::empty, DOC(fiction_sidb_charge_distribution_empty))
-            .def("index_of", &charge_distribution::index_of, py::arg("site"),
+            .def("index_of", &charge_distribution::index_of, nb::arg("site"),
                  DOC(fiction_sidb_charge_distribution_index_of))
-            .def("get_charge_state", &charge_distribution::get_charge_state, py::arg("site"),
+            .def("get_charge_state", &charge_distribution::get_charge_state, nb::arg("site"),
                  DOC(fiction_sidb_charge_distribution_get_charge_state))
-            .def("get_charge_state_by_index", &charge_distribution::get_charge_state_by_index, py::arg("index"),
+            .def("get_charge_state_by_index", &charge_distribution::get_charge_state_by_index, nb::arg("index"),
                  DOC(fiction_sidb_charge_distribution_get_charge_state_by_index))
-            .def("assign_charge_state", &charge_distribution::assign_charge_state, py::arg("site"),
-                 py::arg("charge_state"), DOC(fiction_sidb_charge_distribution_assign_charge_state))
-            .def("assign_charge_state_by_index", &charge_distribution::assign_charge_state_by_index, py::arg("index"),
-                 py::arg("charge_state"), DOC(fiction_sidb_charge_distribution_assign_charge_state_by_index))
-            .def("assign_all_charge_states", &charge_distribution::assign_all_charge_states, py::arg("charge_state"),
+            .def("assign_charge_state", &charge_distribution::assign_charge_state, nb::arg("site"),
+                 nb::arg("charge_state"), DOC(fiction_sidb_charge_distribution_assign_charge_state))
+            .def("assign_charge_state_by_index", &charge_distribution::assign_charge_state_by_index, nb::arg("index"),
+                 nb::arg("charge_state"), DOC(fiction_sidb_charge_distribution_assign_charge_state_by_index))
+            .def("assign_all_charge_states", &charge_distribution::assign_all_charge_states, nb::arg("charge_state"),
                  DOC(fiction_sidb_charge_distribution_assign_all_charge_states))
             .def("charge_states", &charge_distribution::charge_states,
                  DOC(fiction_sidb_charge_distribution_charge_states))
             .def("energy", &charge_distribution::energy, DOC(fiction_sidb_charge_distribution_energy))
-            .def("assign_energy", &charge_distribution::assign_energy, py::arg("energy"),
+            .def("assign_energy", &charge_distribution::assign_energy, nb::arg("energy"),
                  DOC(fiction_sidb_charge_distribution_assign_energy))
-            .def("charge_exists", &charge_distribution::charge_exists, py::arg("charge_state"),
+            .def("charge_exists", &charge_distribution::charge_exists, nb::arg("charge_state"),
                  DOC(fiction_sidb_charge_distribution_charge_exists))
             .def("num_negative_sidbs", &charge_distribution::num_negative_sidbs,
                  DOC(fiction_sidb_charge_distribution_num_negative_sidbs))
@@ -75,21 +78,21 @@ void charge_distribution(nanobind::module_& m)
                  DOC(fiction_sidb_charge_distribution_num_neutral_sidbs))
             .def("num_positive_sidbs", &charge_distribution::num_positive_sidbs,
                  DOC(fiction_sidb_charge_distribution_num_positive_sidbs))
-            .def("charge_index", &charge_distribution::charge_index, py::arg("base"),
+            .def("charge_index", &charge_distribution::charge_index, nb::arg("base"),
                  DOC(fiction_sidb_charge_distribution_charge_index))
-            .def("same_charge_states", &charge_distribution::same_charge_states, py::arg("other"),
+            .def("same_charge_states", &charge_distribution::same_charge_states, nb::arg("other"),
                  DOC(fiction_sidb_charge_distribution_same_charge_states))
-            // nanobind uses `py::self` on both sides to declare same-type operators.
-            .def(py::self == py::self,  // NOLINT(misc-redundant-expression)
+            // nanobind uses `nb::self` on both sides to declare same-type operators.
+            .def(nb::self == nb::self,  // NOLINT(misc-redundant-expression)
                  DOC(fiction_sidb_charge_distribution_operator_eq))
-            .def(py::self != py::self)  // NOLINT(misc-redundant-expression)
+            .def(nb::self != nb::self)  // NOLINT(misc-redundant-expression)
             .def("__len__", &charge_distribution::size)
             .def("__repr__", [](const charge_distribution& cd)
                  { return fiction::sidb::model::charge_configuration_to_string(cd.charge_states()); })
 
         ;
 
-    charge_distribution_class.attr("__hash__") = py::none();
+    charge_distribution_class.attr("__hash__") = nb::none();
 }
 
 }  // namespace pyfiction

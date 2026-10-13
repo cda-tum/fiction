@@ -16,6 +16,11 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -23,13 +28,13 @@ namespace pyfiction
  * @brief Register the dynamic truth-table type.
  * @param m Python module.
  */
-void dynamic_truth_table(nanobind::module_& m);
+void dynamic_truth_table(nb::module_& m);
 
-void truth_tables(nanobind::module_& m);
-void fanout_substitution(nanobind::module_& m);
-void network_balancing(nanobind::module_& m);
-void technology_mapping(nanobind::module_& m);
-void network_conversion(nanobind::module_& m);
+void truth_tables(nb::module_& m);
+void fanout_substitution(nb::module_& m);
+void network_balancing(nb::module_& m);
+void technology_mapping(nb::module_& m);
+void network_conversion(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -41,7 +46,7 @@ NB_MODULE(synthesis, m)
     m.doc() = "Truth tables and logic network transformations.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.networks");
+    nb::module_::import_("mnt.pyfiction.networks");
 
     pyfiction::dynamic_truth_table(m);
     pyfiction::truth_tables(m);

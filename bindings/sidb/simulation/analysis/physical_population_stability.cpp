@@ -29,6 +29,11 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -40,15 +45,13 @@ namespace detail
  *
  * @param m The module.
  */
-inline void physical_population_stability_functions(nanobind::module_& m)
+inline void physical_population_stability_functions(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::simulation::analysis::population_stability_information;
 
-    py::class_<population_stability_information>(m, "population_stability_information",
+    nb::class_<population_stability_information>(m, "population_stability_information",
                                                  DOC(fiction_sidb_simulation_analysis_population_stability_information))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("critical_dot", &population_stability_information::critical_dot,
                 DOC(fiction_sidb_simulation_analysis_population_stability_information_critical_dot))
         .def_rw("transition_potentials", &population_stability_information::transition_potentials,
@@ -61,18 +64,16 @@ inline void physical_population_stability_functions(nanobind::module_& m)
                 DOC(fiction_sidb_simulation_analysis_population_stability_information_system_energy));
 
     m.def("physical_population_stability", &fiction::sidb::simulation::analysis::physical_population_stability,
-          py::arg("lyt"),
-          py::arg("params") = fiction::sidb::simulation::analysis::physical_population_stability_params{},
+          nb::arg("lyt"),
+          nb::arg("params") = fiction::sidb::simulation::analysis::physical_population_stability_params{},
           DOC(fiction_sidb_simulation_analysis_physical_population_stability));
 }
 
 }  // namespace detail
 
-void physical_population_stability(nanobind::module_& m)
+void physical_population_stability(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    py::enum_<fiction::sidb::simulation::analysis::transition_type>(
+    nb::enum_<fiction::sidb::simulation::analysis::transition_type>(
         m, "transition_type", DOC(fiction_sidb_simulation_analysis_transition_type))
         .value("NEUTRAL_TO_NEGATIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_NEGATIVE,
                DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_NEGATIVE))
@@ -86,10 +87,10 @@ void physical_population_stability(nanobind::module_& m)
     /**
      * Parameters.
      */
-    py::class_<fiction::sidb::simulation::analysis::physical_population_stability_params>(
+    nb::class_<fiction::sidb::simulation::analysis::physical_population_stability_params>(
         m, "physical_population_stability_params",
         DOC(fiction_sidb_simulation_analysis_physical_population_stability_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::sidb::simulation::analysis::physical_population_stability_params::timeout,
                 DOC(fiction_sidb_simulation_analysis_physical_population_stability_params_timeout))
         .def_rw("simulation_parameters",

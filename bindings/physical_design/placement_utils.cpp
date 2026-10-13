@@ -26,6 +26,11 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner): Accepts None for the optional constant input.
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -35,20 +40,19 @@ namespace detail
 /** @brief Bind placement at a known coordinate. @tparam Lyt Gate layout. @tparam Ntk Network. @param m Python module.
  */
 template <typename Lyt, typename Ntk>
-void place(nanobind::module_& m)
+void place(nb::module_& m)
 {
     m.def(
         "place",
         [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
-        { return fiction::physical_design::place(lyt, t, ntk, n); }, nanobind::arg("lyt"), nanobind::arg("t"),
-        nanobind::arg("ntk"), nanobind::arg("n"),
-        "Places a primary input at the given coordinate and returns its output port.");
+        { return fiction::physical_design::place(lyt, t, ntk, n); }, nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"),
+        nb::arg("n"), "Places a primary input at the given coordinate and returns its output port.");
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const typename Lyt::object_id& a) { return fiction::physical_design::place(lyt, t, ntk, n, a); },
-        nanobind::arg("lyt"), nanobind::arg("t"), nanobind::arg("ntk"), nanobind::arg("n"), nanobind::arg("a"));
+        nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"));
 
     m.def(
         "place",
@@ -56,22 +60,20 @@ void place(nanobind::module_& m)
            const typename Lyt::object_id& a, const typename Lyt::object_id& b,
            const std::optional<bool>& c = std::nullopt)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
-        nanobind::arg("lyt"), nanobind::arg("t"), nanobind::arg("ntk"), nanobind::arg("n"), nanobind::arg("a"),
-        nanobind::arg("b"), nanobind::arg("c"));
+        nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"), nb::arg("b"), nb::arg("c"));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const typename Lyt::object_id& a, const typename Lyt::object_id& b, const typename Lyt::object_id& c)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
-        nanobind::arg("lyt"), nanobind::arg("t"), nanobind::arg("ntk"), nanobind::arg("n"), nanobind::arg("a"),
-        nanobind::arg("b"), nanobind::arg("c"));
+        nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"), nb::arg("b"), nb::arg("c"));
 }
 
 }  // namespace detail
 
 /** @brief Register placed gate creation. @param m Python module. */
-void placement_utils(nanobind::module_& m)
+void placement_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
