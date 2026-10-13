@@ -35,9 +35,6 @@ network specifications under constraints. This approach finds exact results but 
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.exact_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.physical_design.exact
 ```
 

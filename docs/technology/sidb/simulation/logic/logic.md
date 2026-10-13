@@ -35,9 +35,6 @@
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_input_iterator_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_input_iterator
    :members:
 
@@ -221,9 +218,6 @@ flood fill or contour tracing in three dimensions.
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.is_operational_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.is_operational
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_input_patterns
@@ -245,9 +239,6 @@ flood fill or contour tracing in three dimensions.
    :members:
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_value_range
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_params
    :members:
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_stats
@@ -281,9 +272,6 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_flood_fill
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_contour_tracing
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_ratio_params
-   :members:
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_ratio
 ```
@@ -321,9 +309,6 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_pair
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_pairs_params
    :members:
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_pairs
@@ -366,9 +351,6 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_wire_selection
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_wires_params
    :members:
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_wire

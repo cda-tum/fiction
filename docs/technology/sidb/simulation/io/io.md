@@ -28,9 +28,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.io.write_operational_domain_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.sidb.simulation.io.sample_writing_mode
    :members:
 

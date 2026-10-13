@@ -35,9 +35,6 @@ relocating outputs to more favorable positions.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.post_layout_optimization_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.physical_design.post_layout_optimization_stats
    :members:
 

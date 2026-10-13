@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.parsing import integer, seed
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
-from mnt.pyfiction.synthesis import fanout_substitution, fanout_substitution_params, substitution_strategy
+from mnt.pyfiction.synthesis import fanout_substitution, substitution_strategy
 
 if TYPE_CHECKING:
     import argparse
@@ -52,13 +52,14 @@ def fanouts(session: Session, args: argparse.Namespace) -> Result:
 
     Physical design does this with default settings; run it beforehand to choose the settings.
     """
-    params = fanout_substitution_params()
-    params.on_progress = session.report_progress
-    params.degree = args.degree
-    params.threshold = args.threshold
-    params.strategy = getattr(substitution_strategy, args.strategy.upper())
+    options = {
+        "on_progress": session.report_progress,
+        "degree": args.degree,
+        "threshold": args.threshold,
+        "strategy": getattr(substitution_strategy, args.strategy.upper()),
+    }
     if args.seed is not None:
-        params.seed = args.seed
-    network = fanout_substitution(session.as_technology_network(session.networks.current()), params)
+        options["seed"] = args.seed
+    network = fanout_substitution(session.as_technology_network(session.networks.current()), **options)
     session.networks.add(network)
     return {"network": describe(network)}

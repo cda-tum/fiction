@@ -17,7 +17,10 @@ logic/logic
 SiDB timeouts use milliseconds: `2**64 - 1` (default) is unlimited; `0` expires immediately.
 Nested calls and workers share the enclosing deadline without extending it.
 
-| Application | Budget in its parameters |
+The table names C++ parameter members. Python uses the keyword `timeout` for these bound applications;
+circuit design also accepts `design_gate_timeout` for each gate search.
+
+| Application | C++ budget member |
 | --- | --- |
 | Gate design | `operational_params.timeout` |
 | Circuit design, including defect-aware placement and routing | `timeout` |
@@ -34,8 +37,8 @@ last operation or callback overruns the deadline. Circuit design aborts on a gat
 only a completed, unsuccessful gate search triggers defect-aware placement-and-routing retries.
 
 Finite budgets support QuickExact, ExGS, and QuickSim. ClusterComplete rejects them with
-`std::invalid_argument` (`ValueError` in Python). QuickSim's `quicksim_params.timeout`
-remains a separate per-attempt limit in time-to-solution measurements.
+`std::invalid_argument` (`ValueError` in Python). QuickSim's `quicksim_params.timeout` in C++ and
+`quicksim_timeout` in Python set a separate per-attempt limit in time-to-solution measurements.
 
 Cancellation is cooperative: individual operations and callbacks can overrun the budget before
 the next check, and cleanup callbacks can run afterward. Use a separate process for a hard deadline.
@@ -58,11 +61,9 @@ const auto domain = fiction::sidb::simulation::logic::operational_domain_grid_se
 :sync: python
 
 ```python
-from mnt.pyfiction.sidb.simulation.logic import operational_domain_grid_search, operational_domain_params
+from mnt.pyfiction.sidb.simulation.logic import operational_domain_grid_search
 
-params = operational_domain_params()
-params.operational_params.timeout = 5_000
-domain = operational_domain_grid_search(layout, spec, params)
+domain = operational_domain_grid_search(layout, spec, timeout=5_000)
 ```
 
 :::

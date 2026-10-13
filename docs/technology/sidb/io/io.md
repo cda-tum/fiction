@@ -144,9 +144,6 @@
 
 ```{eval-rst}
 
-.. autoclass:: mnt.pyfiction.sidb.io.write_sidb_layout_svg_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.sidb.io.sidb_lattice_mode
    :members:
 

@@ -428,6 +428,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** Python algorithms accept keyword-only options; replace parameter objects with keyword arguments.
+    SiDB physics inputs use `base`, `mu_minus`, `epsilon_r`, and `lambda_tf`; physical result data remains typed.
+
   - **Breaking:** Use `read_network`, `read_fgl_layout`, `random_network`, `exact`, and `orthogonal`
     with keyword `network_type` or `layout_type`. Specialized function names were removed.
 

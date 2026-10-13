@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction.sidb.simulation.engines import quickexact, quickexact_params
+from mnt.pyfiction.sidb.simulation.engines import quickexact
 
 if TYPE_CHECKING:
     import argparse
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import _active_sidb_layout, _apply_physical, _physical_arguments, _store_result
+from ._common import _active_sidb_layout, _physical_arguments, _physical_options, _store_result
 
 
 def _quickexact_arguments(parser: Parser) -> None:
@@ -43,9 +43,9 @@ def quickexact_command(session: Session, args: argparse.Namespace) -> Result:
     The number of charge states per SiDB (2 or 3) is detected automatically.
     """
     layout = _active_sidb_layout(session)
-    params = quickexact_params()
-    params.on_progress = session.report_progress
-    parameters = _apply_physical(params.simulation_parameters, args)
-    params.global_potential = args.global_potential
+    parameters = _physical_options(args)
+    result = quickexact(
+        layout, on_progress=session.report_progress, global_potential=args.global_potential, **parameters
+    )
     parameters["global_potential"] = args.global_potential
-    return _store_result(session, layout, quickexact(layout, params), parameters)
+    return _store_result(session, layout, result, parameters)
