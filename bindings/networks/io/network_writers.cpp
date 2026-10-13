@@ -47,7 +47,7 @@ namespace detail
  * @param m Python module.
  */
 template <typename Ntk>
-void bind_network_writers(nb::module_& m)
+void register_network_writers(nb::module_& m)
 {
     m.def(
         "write_verilog",
@@ -95,12 +95,12 @@ void bind_network_writers(nb::module_& m)
  * @brief Register network writer overloads.
  * @param m Python module.
  */
-void bind_network_writers(nb::module_& m)
+void register_network_writers(nb::module_& m)
 {
-    detail::bind_network_writers<py_tec_network>(m);
-    detail::bind_network_writers<py_aig_network>(m);
-    detail::bind_network_writers<py_xag_network>(m);
-    detail::bind_network_writers<py_mig_network>(m);
+    detail::register_network_writers<py_tec_network>(m);
+    detail::register_network_writers<py_aig_network>(m);
+    detail::register_network_writers<py_xag_network>(m);
+    detail::register_network_writers<py_mig_network>(m);
 
     // AIGER encodes AND gates and inverted edges; other network types require conversion to an AIG.
     m.def(

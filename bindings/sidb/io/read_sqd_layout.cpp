@@ -37,7 +37,7 @@ namespace pyfiction
  * @brief Binds read sqd layout helpers.
  * @param m Python module.
  */
-void bind_read_sqd_layout(nb::module_& m)
+void register_read_sqd_layout(nb::module_& m)
 {
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here

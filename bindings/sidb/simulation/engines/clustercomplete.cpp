@@ -43,7 +43,7 @@ namespace pyfiction
  * @brief Binds clustercomplete helpers.
  * @param m Python module.
  */
-void bind_clustercomplete(nb::module_& m)
+void register_clustercomplete(nb::module_& m)
 {
     using fiction::sidb::simulation::engines::clustercomplete_params;
 
@@ -107,7 +107,7 @@ namespace pyfiction
  * @brief Disable ClusterComplete.
  * @param m Python module.
  */
-void bind_clustercomplete([[maybe_unused]] nb::module_& m) {}
+void register_clustercomplete([[maybe_unused]] nb::module_& m) {}
 
 }  // namespace pyfiction
 

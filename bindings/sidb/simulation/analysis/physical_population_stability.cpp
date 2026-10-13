@@ -45,7 +45,7 @@ namespace detail
  *
  * @param m The module.
  */
-inline void bind_physical_population_stability_functions(nb::module_& m)
+inline void register_physical_population_stability_functions(nb::module_& m)
 {
     using fiction::sidb::simulation::analysis::population_stability_information;
 
@@ -75,7 +75,7 @@ inline void bind_physical_population_stability_functions(nb::module_& m)
  * @brief Binds physical population stability helpers.
  * @param m Python module.
  */
-void bind_physical_population_stability(nb::module_& m)
+void register_physical_population_stability(nb::module_& m)
 {
     nb::enum_<fiction::sidb::simulation::analysis::transition_type>(
         m, "transition_type", DOC(fiction_sidb_simulation_analysis_transition_type))
@@ -107,7 +107,7 @@ void bind_physical_population_stability(nb::module_& m)
             DOC(fiction_sidb_simulation_analysis_physical_population_stability_params_precision_for_distance_corresponding_to_potential));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::bind_physical_population_stability_functions(m);
+    detail::register_physical_population_stability_functions(m);
 }
 
 }  // namespace pyfiction

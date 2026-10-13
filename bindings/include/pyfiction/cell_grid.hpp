@@ -57,7 +57,7 @@ namespace pyfiction::detail
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void bind_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
 {
     using cell = typename Lyt::cell;
 
@@ -136,7 +136,7 @@ void bind_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void bind_tile_clocking(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_tile_clocking(nb::class_<Lyt, py_cartesian_layout>& cls)
 {
     cls.def("get_tile_size_x", &Lyt::get_tile_size_x, DOC(fiction_layouts_tile_clocking_get_tile_size_x))
         .def("set_tile_size_x", &Lyt::set_tile_size_x, nb::arg("size"),
@@ -182,7 +182,7 @@ void bind_tile_clocking(nb::class_<Lyt, py_cartesian_layout>& cls)
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void bind_clocked_constructors(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_clocked_constructors(nb::class_<Lyt, py_cartesian_layout>& cls)
 {
     cls.def(nb::init<>())
         .def(nb::init<const typename Lyt::extent&>(), nb::arg("extent"))

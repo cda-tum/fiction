@@ -28,11 +28,11 @@ namespace pyfiction
  * @brief Binds write qll layout helpers.
  * @param m Python module.
  */
-void bind_write_qll_layout(nb::module_& m);
+void register_write_qll_layout(nb::module_& m);
 
 void register_fcn_io(nb::module_& m)
 {
-    bind_write_qll_layout(m);
+    register_write_qll_layout(m);
 }
 
 }  // namespace pyfiction

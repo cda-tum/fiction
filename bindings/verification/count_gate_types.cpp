@@ -38,7 +38,7 @@ namespace detail
 /** @brief Binds gate classification for an operand. @tparam NtkOrLyt Network or layout type. @param m Python module.
  */
 template <typename NtkOrLyt>
-void bind_count_gate_types(nb::module_& m)
+void register_count_gate_types(nb::module_& m)
 {
     m.def(
         "count_gate_types",
@@ -54,7 +54,7 @@ void bind_count_gate_types(nb::module_& m)
 }  // namespace detail
 
 /** @brief Registers gate type counts and reports. @param m Python module. */
-void bind_count_gate_types(nb::module_& m)
+void register_count_gate_types(nb::module_& m)
 {
     /** @brief Bound gate type statistics. */
     using stats = fiction::verification::count_gate_types_stats;
@@ -95,13 +95,13 @@ void bind_count_gate_types(nb::module_& m)
         .def_ro("num_and_xor", &stats::num_and_xor)
         .def_ro("num_other", &stats::num_other);
 
-    detail::bind_count_gate_types<py_tec_network>(m);
-    detail::bind_count_gate_types<py_aig_network>(m);
-    detail::bind_count_gate_types<py_xag_network>(m);
-    detail::bind_count_gate_types<py_mig_network>(m);
-    detail::bind_count_gate_types<py_cartesian_gate_layout>(m);
-    detail::bind_count_gate_types<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_count_gate_types<py_hexagonal_gate_layout>(m);
+    detail::register_count_gate_types<py_tec_network>(m);
+    detail::register_count_gate_types<py_aig_network>(m);
+    detail::register_count_gate_types<py_xag_network>(m);
+    detail::register_count_gate_types<py_mig_network>(m);
+    detail::register_count_gate_types<py_cartesian_gate_layout>(m);
+    detail::register_count_gate_types<py_shifted_cartesian_gate_layout>(m);
+    detail::register_count_gate_types<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

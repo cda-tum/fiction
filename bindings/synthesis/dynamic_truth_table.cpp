@@ -69,7 +69,7 @@ inline void check_alphabet(const std::string& text, const std::string_view alpha
  * @brief Register dynamic truth tables and their constructors.
  * @param m Python module.
  */
-void bind_dynamic_truth_table(nb::module_& m)
+void register_dynamic_truth_table(nb::module_& m)
 {
     nb::class_<py_tt>(m, "dynamic_truth_table")
         .def(

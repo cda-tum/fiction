@@ -142,7 +142,7 @@ C++ docstrings.
 
 A few things must be noted when adding new bindings:
 
-- Name C++ binding helpers `bind_<name>`, including internal template helpers. Keep the `register_*` aggregator names.
+- Name C++ binding helpers `register_<name>`, including internal template helpers. Use the same prefix for module registries.
 
 - Do not use `""_a` literals in the bindings. Instead, use `nb::arg` to specify the argument names.
 - Regenerate the type stubs with `nox -s stubs` and commit them.

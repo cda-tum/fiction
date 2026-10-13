@@ -44,7 +44,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void bind_potential_landscape(nb::module_& m)
+void register_potential_landscape(nb::module_& m)
 {
     using fiction::sidb::simulation::potential_landscape;
 

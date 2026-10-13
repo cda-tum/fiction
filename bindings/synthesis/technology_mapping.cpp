@@ -46,7 +46,7 @@ namespace detail
  * @tparam Ntk Network type.
  */
 template <typename Ntk>
-void bind_technology_mapping_impl(nb::module_& m)
+void register_technology_mapping_impl(nb::module_& m)
 {
     m.def("technology_mapping", &fiction::synthesis::technology_mapping<Ntk>, nb::arg("network"),
           nb::arg("params") = fiction::synthesis::technology_mapping_params{}, nb::arg("stats") = nullptr,
@@ -59,7 +59,7 @@ void bind_technology_mapping_impl(nb::module_& m)
  * @brief Binds technology mapping helpers.
  * @param m Python module.
  */
-void bind_technology_mapping(nb::module_& m)
+void register_technology_mapping(nb::module_& m)
 {
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
@@ -154,10 +154,10 @@ void bind_technology_mapping(nb::module_& m)
     m.def("all_supported_standard_functions", &fiction::synthesis::all_supported_standard_functions,
           DOC(fiction_synthesis_all_supported_standard_functions), nb::call_guard<nb::gil_scoped_release>());
 
-    detail::bind_technology_mapping_impl<py_tec_network>(m);
-    detail::bind_technology_mapping_impl<py_aig_network>(m);
-    detail::bind_technology_mapping_impl<py_xag_network>(m);
-    detail::bind_technology_mapping_impl<py_mig_network>(m);
+    detail::register_technology_mapping_impl<py_tec_network>(m);
+    detail::register_technology_mapping_impl<py_aig_network>(m);
+    detail::register_technology_mapping_impl<py_xag_network>(m);
+    detail::register_technology_mapping_impl<py_mig_network>(m);
 }
 
 }  // namespace pyfiction

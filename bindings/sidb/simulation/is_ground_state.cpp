@@ -33,7 +33,7 @@ namespace pyfiction
  * @brief Binds is ground state helpers.
  * @param m Python module.
  */
-void bind_is_ground_state(nb::module_& m)
+void register_is_ground_state(nb::module_& m)
 {
     m.def("is_ground_state",
           static_cast<bool (*)(const fiction::sidb::simulation::result&, const fiction::sidb::simulation::result&)>(

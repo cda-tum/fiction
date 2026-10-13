@@ -40,7 +40,7 @@ namespace detail
 /** @brief Bind placement at a known coordinate. @tparam Lyt Gate layout. @tparam Ntk Network. @param m Python module.
  */
 template <typename Lyt, typename Ntk>
-void bind_place(nb::module_& m)
+void register_place(nb::module_& m)
 {
     m.def(
         "place",
@@ -73,13 +73,13 @@ void bind_place(nb::module_& m)
 }  // namespace detail
 
 /** @brief Register placed gate creation. @param m Python module. */
-void bind_placement_utils(nb::module_& m)
+void register_placement_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::bind_place<py_cartesian_gate_layout, py_tec_network>(m);
-    detail::bind_place<py_shifted_cartesian_gate_layout, py_tec_network>(m);
-    detail::bind_place<py_hexagonal_gate_layout, py_tec_network>(m);
+    detail::register_place<py_cartesian_gate_layout, py_tec_network>(m);
+    detail::register_place<py_shifted_cartesian_gate_layout, py_tec_network>(m);
+    detail::register_place<py_hexagonal_gate_layout, py_tec_network>(m);
 }
 
 }  // namespace pyfiction

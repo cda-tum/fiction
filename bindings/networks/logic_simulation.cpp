@@ -54,7 +54,7 @@ namespace detail
 /** @brief Bind ordered truth-table simulation. @tparam NtkOrLyt Network or layout. @param m Module. @param type_name
  * Argument name. */
 template <typename NtkOrLyt>
-void bind_logic_simulation_impl(nb::module_& m, const std::string& type_name)
+void register_logic_simulation_impl(nb::module_& m, const std::string& type_name)
 {
     /**
      * @brief Simulate outputs in declaration order, including repeated labels.
@@ -118,15 +118,15 @@ void bind_logic_simulation_impl(nb::module_& m, const std::string& type_name)
 }  // namespace detail
 
 /** @brief Register network and layout simulation. @param m Module. */
-void bind_logic_simulation(nb::module_& m)
+void register_logic_simulation(nb::module_& m)
 {
-    detail::bind_logic_simulation_impl<py_tec_network>(m, "network");
-    detail::bind_logic_simulation_impl<py_aig_network>(m, "network");
-    detail::bind_logic_simulation_impl<py_xag_network>(m, "network");
-    detail::bind_logic_simulation_impl<py_mig_network>(m, "network");
-    detail::bind_logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");
-    detail::bind_logic_simulation_impl<py_shifted_cartesian_gate_layout>(m, "layout");
-    detail::bind_logic_simulation_impl<py_hexagonal_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<py_tec_network>(m, "network");
+    detail::register_logic_simulation_impl<py_aig_network>(m, "network");
+    detail::register_logic_simulation_impl<py_xag_network>(m, "network");
+    detail::register_logic_simulation_impl<py_mig_network>(m, "network");
+    detail::register_logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<py_shifted_cartesian_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<py_hexagonal_gate_layout>(m, "layout");
 }
 
 }  // namespace pyfiction

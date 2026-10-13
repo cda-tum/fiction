@@ -46,7 +46,7 @@ namespace pyfiction
  * @brief Binds bdl input iterator helpers.
  * @param m Python module.
  */
-void bind_bdl_input_iterator(nb::module_& m)
+void register_bdl_input_iterator(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_input_iterator;

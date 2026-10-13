@@ -33,7 +33,7 @@ namespace pyfiction
  *
  * @param m Target Python module.
  */
-void bind_check_simulation_results_for_equivalence(nb::module_& m)
+void register_check_simulation_results_for_equivalence(nb::module_& m)
 {
     m.def("check_simulation_results_for_equivalence",
           &fiction::sidb::simulation::check_simulation_results_for_equivalence, nb::arg("result1"), nb::arg("result2"),

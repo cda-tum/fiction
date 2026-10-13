@@ -39,7 +39,7 @@ namespace pyfiction
  * @brief Binds print sidb layout helpers.
  * @param m Python module.
  */
-void bind_print_sidb_layout(nb::module_& m)
+void register_print_sidb_layout(nb::module_& m)
 {
     m.def(
         "print_sidb_layout",

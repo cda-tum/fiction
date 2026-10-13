@@ -40,7 +40,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void bind_write_mol_qca_layout_svg(nb::module_& m)
+void register_write_mol_qca_layout_svg(nb::module_& m)
 {
     using fiction::mol_qca::io::write_mol_qca_layout_svg_params;
 

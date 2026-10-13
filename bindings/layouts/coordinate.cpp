@@ -58,7 +58,7 @@ void set_axis(py_coordinate& self, int32_t py_coordinate::* axis, const int64_t 
  * @brief Registers signed coordinates and checked size extents.
  * @param m Python layouts module.
  */
-void bind_coordinate(nb::module_& m)
+void register_coordinate(nb::module_& m)
 {
     nb::class_<py_coordinate>(m, "coordinate", DOC(fiction_layouts_layout_base_coordinate))
         .def(nb::init<>(), DOC(fiction_layouts_layout_base_coordinate_coordinate))
@@ -165,7 +165,7 @@ void bind_coordinate(nb::module_& m)
  * @brief Registers the area function for size extents.
  * @param m Python layouts module.
  */
-void bind_coordinate_utility(nb::module_& m)
+void register_coordinate_utility(nb::module_& m)
 {
     m.def("area", &fiction::layouts::area_of, nb::arg("extent"), extent_doc(DOC(fiction_layouts_area_of)).c_str());
 }

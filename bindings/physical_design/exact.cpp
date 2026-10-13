@@ -52,7 +52,7 @@ namespace pyfiction
  * @brief Binds exact helpers.
  * @param m Python module.
  */
-void bind_exact(nb::module_& m)
+void register_exact(nb::module_& m)
 {
     nb::enum_<fiction::physical_design::technology_constraints>(m, "technology_constraints",
                                                                 DOC(fiction_physical_design_technology_constraints))
@@ -158,7 +158,7 @@ namespace pyfiction
  * @brief Disable SMT-based exact physical design.
  * @param m Python module.
  */
-void bind_exact([[maybe_unused]] nb::module_& m) {}
+void register_exact([[maybe_unused]] nb::module_& m) {}
 
 }  // namespace pyfiction
 

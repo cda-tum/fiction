@@ -44,7 +44,7 @@ namespace detail
  * @param m Python module.
  */
 template <typename Spec, typename Impl>
-void bind_equivalence_checking_impl(nb::module_& m)
+void register_equivalence_checking_impl(nb::module_& m)
 {
     m.def(
         "equivalence_checking",
@@ -71,12 +71,12 @@ void bind_equivalence_checking_impl(nb::module_& m)
  * @param m Python module.
  */
 template <typename Spec>
-void bind_equivalence_checking_for(nb::module_& m)
+void register_equivalence_checking_for(nb::module_& m)
 {
-    bind_equivalence_checking_impl<Spec, py_tec_network>(m);
-    bind_equivalence_checking_impl<Spec, py_cartesian_gate_layout>(m);
-    bind_equivalence_checking_impl<Spec, py_shifted_cartesian_gate_layout>(m);
-    bind_equivalence_checking_impl<Spec, py_hexagonal_gate_layout>(m);
+    register_equivalence_checking_impl<Spec, py_tec_network>(m);
+    register_equivalence_checking_impl<Spec, py_cartesian_gate_layout>(m);
+    register_equivalence_checking_impl<Spec, py_shifted_cartesian_gate_layout>(m);
+    register_equivalence_checking_impl<Spec, py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace detail
@@ -85,7 +85,7 @@ void bind_equivalence_checking_for(nb::module_& m)
  * @brief Register equivalence checking, its result enum, and statistics.
  * @param m Python module.
  */
-void bind_equivalence_checking(nb::module_& m)
+void register_equivalence_checking(nb::module_& m)
 {
     /**
      * Result type for equivalence checking.
@@ -119,10 +119,10 @@ void bind_equivalence_checking(nb::module_& m)
 
         ;
 
-    detail::bind_equivalence_checking_for<py_tec_network>(m);
-    detail::bind_equivalence_checking_for<py_cartesian_gate_layout>(m);
-    detail::bind_equivalence_checking_for<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_equivalence_checking_for<py_hexagonal_gate_layout>(m);
+    detail::register_equivalence_checking_for<py_tec_network>(m);
+    detail::register_equivalence_checking_for<py_cartesian_gate_layout>(m);
+    detail::register_equivalence_checking_for<py_shifted_cartesian_gate_layout>(m);
+    detail::register_equivalence_checking_for<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

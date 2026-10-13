@@ -44,7 +44,7 @@ namespace pyfiction
  * @brief Binds write qcc layout helpers.
  * @param m Python module.
  */
-void bind_write_qcc_layout(nb::module_& m)
+void register_write_qcc_layout(nb::module_& m)
 {
     nb::class_<fiction::inml::io::write_qcc_layout_params>(
         m, "write_qcc_layout_params", pyfiction::progress_type_slots<fiction::inml::io::write_qcc_layout_params>(),

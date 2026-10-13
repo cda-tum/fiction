@@ -28,11 +28,11 @@ namespace pyfiction
  * @brief Binds displacement robustness domain helpers.
  * @param m Python module.
  */
-void bind_displacement_robustness_domain(nb::module_& m);
+void register_displacement_robustness_domain(nb::module_& m);
 
 void register_sidb_simulation_defects(nb::module_& m)
 {
-    bind_displacement_robustness_domain(m);
+    register_displacement_robustness_domain(m);
 }
 
 }  // namespace pyfiction

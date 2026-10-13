@@ -43,7 +43,7 @@ namespace detail
  * @tparam Ntk Network type.
  */
 template <typename Ntk>
-void bind_network_balancing_impl(nb::module_& m)
+void register_network_balancing_impl(nb::module_& m)
 {
     m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, Ntk>, nb::arg("network"),
           nb::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_network_balancing),
@@ -60,7 +60,7 @@ void bind_network_balancing_impl(nb::module_& m)
  * @brief Binds network balancing helpers.
  * @param m Python module.
  */
-void bind_network_balancing(nb::module_& m)
+void register_network_balancing(nb::module_& m)
 {
     nb::class_<fiction::synthesis::network_balancing_params>(
         m, "network_balancing_params", pyfiction::progress_type_slots<fiction::synthesis::network_balancing_params>(),
@@ -74,7 +74,7 @@ void bind_network_balancing(nb::module_& m)
 
         ;
 
-    detail::bind_network_balancing_impl<py_tec_network>(m);
+    detail::register_network_balancing_impl<py_tec_network>(m);
 }
 
 }  // namespace pyfiction

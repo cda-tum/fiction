@@ -42,7 +42,7 @@ namespace detail
 
 /** @brief Registers crossing queries. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
-void bind_is_crossable_wire(nb::module_& m)
+void register_is_crossable_wire(nb::module_& m)
 {
     m.def("is_crossable_wire", &fiction::physical_design::is_crossable_wire<Lyt>, nb::arg("lyt"), nb::arg("src"),
           nb::arg("successor"), DOC(fiction_physical_design_is_crossable_wire));
@@ -50,7 +50,7 @@ void bind_is_crossable_wire(nb::module_& m)
 
 /** @brief Registers routing to explicit destination input ports. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
-void bind_route_path(nb::module_& m)
+void register_route_path(nb::module_& m)
 {
     m.def(
         "route_path",
@@ -66,7 +66,7 @@ void bind_route_path(nb::module_& m)
 
 /** @brief Registers objectives including logical input indices. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
-void bind_extract_routing_objectives(nb::module_& m)
+void register_extract_routing_objectives(nb::module_& m)
 {
     m.def(
         "extract_routing_objectives",
@@ -90,7 +90,7 @@ void bind_extract_routing_objectives(nb::module_& m)
 
 /** @brief Registers removal of routing wires and connections. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
-void bind_clear_routing(nb::module_& m)
+void register_clear_routing(nb::module_& m)
 {
     m.def(
         "clear_routing", [](Lyt& lyt) { fiction::physical_design::clear_routing(lyt); }, nb::arg("lyt"),
@@ -100,25 +100,25 @@ void bind_clear_routing(nb::module_& m)
 }  // namespace detail
 
 /** @brief Registers routing helpers. @param m Python module. */
-void bind_routing_utils(nb::module_& m)
+void register_routing_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::bind_is_crossable_wire<py_cartesian_gate_layout>(m);
-    detail::bind_is_crossable_wire<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_is_crossable_wire<py_hexagonal_gate_layout>(m);
+    detail::register_is_crossable_wire<py_cartesian_gate_layout>(m);
+    detail::register_is_crossable_wire<py_shifted_cartesian_gate_layout>(m);
+    detail::register_is_crossable_wire<py_hexagonal_gate_layout>(m);
 
-    detail::bind_route_path<py_cartesian_gate_layout>(m);
-    detail::bind_route_path<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_route_path<py_hexagonal_gate_layout>(m);
+    detail::register_route_path<py_cartesian_gate_layout>(m);
+    detail::register_route_path<py_shifted_cartesian_gate_layout>(m);
+    detail::register_route_path<py_hexagonal_gate_layout>(m);
 
-    detail::bind_extract_routing_objectives<py_cartesian_gate_layout>(m);
-    detail::bind_extract_routing_objectives<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_extract_routing_objectives<py_hexagonal_gate_layout>(m);
+    detail::register_extract_routing_objectives<py_cartesian_gate_layout>(m);
+    detail::register_extract_routing_objectives<py_shifted_cartesian_gate_layout>(m);
+    detail::register_extract_routing_objectives<py_hexagonal_gate_layout>(m);
 
-    detail::bind_clear_routing<py_cartesian_gate_layout>(m);
-    detail::bind_clear_routing<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_clear_routing<py_hexagonal_gate_layout>(m);
+    detail::register_clear_routing<py_cartesian_gate_layout>(m);
+    detail::register_clear_routing<py_shifted_cartesian_gate_layout>(m);
+    detail::register_clear_routing<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

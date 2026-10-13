@@ -28,35 +28,35 @@ namespace pyfiction
  * @brief Binds engine helpers.
  * @param m Python module.
  */
-void bind_engine(nb::module_& m);
+void register_engine(nb::module_& m);
 /**
  * @brief Binds potential landscape helpers.
  * @param m Python module.
  */
-void bind_potential_landscape(nb::module_& m);
+void register_potential_landscape(nb::module_& m);
 /**
  * @brief Binds result helpers.
  * @param m Python module.
  */
-void bind_result(nb::module_& m);
+void register_result(nb::module_& m);
 /**
  * @brief Binds is ground state helpers.
  * @param m Python module.
  */
-void bind_is_ground_state(nb::module_& m);
+void register_is_ground_state(nb::module_& m);
 /**
  * @brief Binds check simulation results for equivalence helpers.
  * @param m Python module.
  */
-void bind_check_simulation_results_for_equivalence(nb::module_& m);
+void register_check_simulation_results_for_equivalence(nb::module_& m);
 
 void register_sidb_simulation(nb::module_& m)
 {
-    bind_engine(m);
-    bind_potential_landscape(m);
-    bind_result(m);
-    bind_is_ground_state(m);
-    bind_check_simulation_results_for_equivalence(m);
+    register_engine(m);
+    register_potential_landscape(m);
+    register_result(m);
+    register_is_ground_state(m);
+    register_check_simulation_results_for_equivalence(m);
 }
 
 }  // namespace pyfiction

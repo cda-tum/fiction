@@ -37,7 +37,7 @@ namespace pyfiction
  * @brief Binds minimum energy helpers.
  * @param m Python module.
  */
-void bind_minimum_energy(nb::module_& m)
+void register_minimum_energy(nb::module_& m)
 {
     m.def(
         "minimum_energy",

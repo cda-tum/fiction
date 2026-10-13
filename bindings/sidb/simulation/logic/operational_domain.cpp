@@ -64,7 +64,7 @@ namespace detail
  *
  * @param m The module.
  */
-inline void bind_operational_domain_functions(nb::module_& m)
+inline void register_operational_domain_functions(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::operational_domain_params;
@@ -156,7 +156,7 @@ inline void bind_operational_domain_functions(nb::module_& m)
  * @brief Binds operational domain helpers.
  * @param m Python module.
  */
-void bind_operational_domain(nb::module_& m)
+void register_operational_domain(nb::module_& m)
 {
     nb::class_<fiction::sidb::simulation::logic::parameter_point>(m, "parameter_point",
                                                                   DOC(fiction_sidb_simulation_logic_parameter_point))
@@ -444,7 +444,7 @@ void bind_operational_domain(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::bind_operational_domain_functions(m);
+    detail::register_operational_domain_functions(m);
 }
 
 }  // namespace pyfiction

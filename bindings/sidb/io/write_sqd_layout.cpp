@@ -39,7 +39,7 @@ namespace pyfiction
  * @brief Binds write sqd layout helpers.
  * @param m Python module.
  */
-void bind_write_sqd_layout(nb::module_& m)
+void register_write_sqd_layout(nb::module_& m)
 {
     m.def(
         "write_sqd_layout",

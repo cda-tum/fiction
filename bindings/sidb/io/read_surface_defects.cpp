@@ -37,7 +37,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void bind_read_surface_defects(nb::module_& m)
+void register_read_surface_defects(nb::module_& m)
 {
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translators with the module; they are not meant to be thrown here

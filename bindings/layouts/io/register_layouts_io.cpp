@@ -28,23 +28,23 @@ namespace pyfiction
  * @brief Binds layout drawers helpers.
  * @param m Python module.
  */
-void bind_layout_drawers(nb::module_& m);
+void register_layout_drawers(nb::module_& m);
 /**
  * @brief Binds write fgl layout helpers.
  * @param m Python module.
  */
-void bind_write_fgl_layout(nb::module_& m);
+void register_write_fgl_layout(nb::module_& m);
 /**
  * @brief Binds read fgl layout helpers.
  * @param m Python module.
  */
-void bind_read_fgl_layout(nb::module_& m);
+void register_read_fgl_layout(nb::module_& m);
 
 void register_layouts_io(nb::module_& m)
 {
-    bind_layout_drawers(m);
-    bind_write_fgl_layout(m);
-    bind_read_fgl_layout(m);
+    register_layout_drawers(m);
+    register_write_fgl_layout(m);
+    register_read_fgl_layout(m);
 }
 
 }  // namespace pyfiction

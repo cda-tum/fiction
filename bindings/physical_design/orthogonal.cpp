@@ -48,7 +48,7 @@ namespace pyfiction
  * @brief Binds orthogonal helpers.
  * @param m Python module.
  */
-void bind_orthogonal(nb::module_& m)
+void register_orthogonal(nb::module_& m)
 {
     nb::enum_<fiction::layouts::clocking::num_clks>(m, "num_clks", DOC(fiction_layouts_clocking_num_clks))
         .value("THREE", fiction::layouts::clocking::num_clks::THREE, DOC(fiction_layouts_clocking_num_clks_THREE))

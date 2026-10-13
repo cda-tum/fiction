@@ -47,7 +47,7 @@ namespace pyfiction
  * @brief Binds operational domain ratio helpers.
  * @param m Python module.
  */
-void bind_operational_domain_ratio(nb::module_& m)
+void register_operational_domain_ratio(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::operational_domain_ratio_params;

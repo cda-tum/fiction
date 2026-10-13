@@ -36,7 +36,7 @@ namespace pyfiction
  * @brief Binds write sqd sim result helpers.
  * @param m Python module.
  */
-void bind_write_sqd_sim_result(nb::module_& m)
+void register_write_sqd_sim_result(nb::module_& m)
 {
     m.def("write_sqd_sim_result",
           static_cast<void (*)(const fiction::sidb::simulation::result&, const std::string_view&)>(

@@ -51,7 +51,7 @@ namespace detail
  * @brief Binds write operational domain helpers.
  * @param m Python module.
  */
-void bind_write_operational_domain(nb::module_& m)
+void register_write_operational_domain(nb::module_& m)
 {
     // Function pointer for writing to a file
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -80,7 +80,7 @@ void bind_write_operational_domain(nb::module_& m)
  * @brief Binds write critical temperature domain helpers.
  * @param m Python module.
  */
-void bind_write_critical_temperature_domain(nb::module_& m)
+void register_write_critical_temperature_domain(nb::module_& m)
 {
     // Function pointer for writing to a file
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -111,7 +111,7 @@ void bind_write_critical_temperature_domain(nb::module_& m)
  * @brief Binds write operational domain helpers.
  * @param m Python module.
  */
-void bind_write_operational_domain(nb::module_& m)
+void register_write_operational_domain(nb::module_& m)
 {
     nb::enum_<fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode>(
         m, "sample_writing_mode", DOC(fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode))
@@ -135,8 +135,8 @@ void bind_write_operational_domain(nb::module_& m)
         .def_rw("writing_mode", &fiction::sidb::simulation::io::write_operational_domain_params::writing_mode,
                 DOC(fiction_sidb_simulation_io_write_operational_domain_params_writing_mode));
 
-    detail::bind_write_operational_domain(m);
-    detail::bind_write_critical_temperature_domain(m);
+    detail::register_write_operational_domain(m);
+    detail::register_write_critical_temperature_domain(m);
 }
 
 }  // namespace pyfiction

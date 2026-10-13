@@ -40,7 +40,7 @@ namespace pyfiction
  * @brief Binds write qca layout helpers.
  * @param m Python module.
  */
-void bind_write_qca_layout(nb::module_& m)
+void register_write_qca_layout(nb::module_& m)
 {
     nb::class_<fiction::qca::io::write_qca_layout_params>(
         m, "write_qca_layout_params", pyfiction::progress_type_slots<fiction::qca::io::write_qca_layout_params>(),

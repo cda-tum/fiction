@@ -28,11 +28,11 @@ namespace pyfiction
  * @brief Binds write qcc layout helpers.
  * @param m Python module.
  */
-void bind_write_qcc_layout(nb::module_& m);
+void register_write_qcc_layout(nb::module_& m);
 
 void register_inml_io(nb::module_& m)
 {
-    bind_write_qcc_layout(m);
+    register_write_qcc_layout(m);
 }
 
 }  // namespace pyfiction

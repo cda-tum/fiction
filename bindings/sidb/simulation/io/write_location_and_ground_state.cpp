@@ -36,7 +36,7 @@ namespace pyfiction
  * @brief Binds write location and ground state helpers.
  * @param m Python module.
  */
-void bind_write_location_and_ground_state(nb::module_& m)
+void register_write_location_and_ground_state(nb::module_& m)
 {
     // NOLINTNEXTLINE(misc-const-correctness)
     void (*const write_pointer)(const fiction::sidb::simulation::result&, const std::string_view&) =

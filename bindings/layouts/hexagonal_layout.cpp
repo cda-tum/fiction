@@ -53,7 +53,7 @@ namespace detail
  * @param name Python class name.
  */
 template <typename Lyt>
-void bind_hexagonal_layout(nb::module_& m, const char* name)
+void register_hexagonal_layout(nb::module_& m, const char* name)
 {
     /**
      * Hexagonal layout.
@@ -202,9 +202,9 @@ void bind_hexagonal_layout(nb::module_& m, const char* name)
  * @brief Register the hexagonal layout.
  * @param m Python module.
  */
-void bind_hexagonal_layout(nb::module_& m)
+void register_hexagonal_layout(nb::module_& m)
 {
-    detail::bind_hexagonal_layout<py_hexagonal_layout>(m, "hexagonal_layout");
+    detail::register_hexagonal_layout<py_hexagonal_layout>(m, "hexagonal_layout");
 }
 
 }  // namespace pyfiction

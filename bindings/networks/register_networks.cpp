@@ -30,22 +30,22 @@ namespace pyfiction
  * @brief Binds logic networks helpers.
  * @param m Python module.
  */
-void bind_logic_networks(nb::module_& m);
+void register_logic_networks(nb::module_& m);
 /**
  * @brief Binds name utils helpers.
  * @param m Python module.
  */
-void bind_name_utils(nb::module_& m);
+void register_name_utils(nb::module_& m);
 /**
  * @brief Binds network utils helpers.
  * @param m Python module.
  */
-void bind_network_utils(nb::module_& m);
+void register_network_utils(nb::module_& m);
 /**
  * @brief Binds logic simulation helpers.
  * @param m Python module.
  */
-void bind_logic_simulation(nb::module_& m);
+void register_logic_simulation(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.networks.io` submodule.
@@ -69,10 +69,10 @@ NB_MODULE(networks, m)
     // Overloads on the cell-level layouts of `qca`, `mol_qca`, `inml`, and `sidb` import nothing: those
     // modules come later in the import chain, and an argument of their type implies that they are loaded.
 
-    pyfiction::bind_logic_networks(m);
-    pyfiction::bind_name_utils(m);
-    pyfiction::bind_network_utils(m);
-    pyfiction::bind_logic_simulation(m);
+    pyfiction::register_logic_networks(m);
+    pyfiction::register_name_utils(m);
+    pyfiction::register_network_utils(m);
+    pyfiction::register_logic_simulation(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers, writers, and drawers of logic networks.");
     pyfiction::register_networks_io(io);
 }

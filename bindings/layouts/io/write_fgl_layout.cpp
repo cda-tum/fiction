@@ -40,7 +40,7 @@ namespace detail
 
 /** @brief Register a layout type's FGL writer. @tparam Lyt Layout type. @param m Layout I/O module. */
 template <typename Lyt>
-void bind_write_fgl_layout(nb::module_& m)
+void register_write_fgl_layout(nb::module_& m)
 {
     m.def(
         "write_fgl_layout",
@@ -53,11 +53,11 @@ void bind_write_fgl_layout(nb::module_& m)
 }  // namespace detail
 
 /** @brief Register FGL writers for supported layout topologies. @param m Layout I/O module. */
-void bind_write_fgl_layout(nb::module_& m)
+void register_write_fgl_layout(nb::module_& m)
 {
-    detail::bind_write_fgl_layout<py_cartesian_gate_layout>(m);
-    detail::bind_write_fgl_layout<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_write_fgl_layout<py_hexagonal_gate_layout>(m);
+    detail::register_write_fgl_layout<py_cartesian_gate_layout>(m);
+    detail::register_write_fgl_layout<py_shifted_cartesian_gate_layout>(m);
+    detail::register_write_fgl_layout<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

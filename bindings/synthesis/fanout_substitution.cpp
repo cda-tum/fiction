@@ -46,7 +46,7 @@ namespace detail
  * @tparam Ntk Network type.
  */
 template <typename Ntk>
-void bind_fanout_substitution_impl(nb::module_& m)
+void register_fanout_substitution_impl(nb::module_& m)
 {
     m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_tec_network, Ntk>, nb::arg("network"),
           nb::arg("params") = fiction::synthesis::fanout_substitution_params{},
@@ -63,7 +63,7 @@ void bind_fanout_substitution_impl(nb::module_& m)
  * @brief Binds fanout substitution helpers.
  * @param m Python module.
  */
-void bind_fanout_substitution(nb::module_& m)
+void register_fanout_substitution(nb::module_& m)
 {
     nb::enum_<fiction::synthesis::fanout_substitution_params::substitution_strategy>(
         m, "substitution_strategy", DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy))
@@ -95,7 +95,7 @@ void bind_fanout_substitution(nb::module_& m)
 
         ;
 
-    detail::bind_fanout_substitution_impl<py_tec_network>(m);
+    detail::register_fanout_substitution_impl<py_tec_network>(m);
 }
 
 }  // namespace pyfiction

@@ -28,7 +28,7 @@ namespace pyfiction
  * @brief Binds write mol qca layout svg helpers.
  * @param m Python module.
  */
-void bind_write_mol_qca_layout_svg(nb::module_& m);
+void register_write_mol_qca_layout_svg(nb::module_& m);
 
 /**
  * @brief Registers the molQCA writers.
@@ -37,7 +37,7 @@ void bind_write_mol_qca_layout_svg(nb::module_& m);
  */
 void register_mol_qca_io(nb::module_& m)
 {
-    bind_write_mol_qca_layout_svg(m);
+    register_write_mol_qca_layout_svg(m);
 }
 
 }  // namespace pyfiction

@@ -46,7 +46,7 @@ namespace pyfiction
  * @brief Binds detect bdl wires helpers.
  * @param m Python module.
  */
-void bind_detect_bdl_wires(nb::module_& m)
+void register_detect_bdl_wires(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_wire;

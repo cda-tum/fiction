@@ -28,23 +28,23 @@ namespace pyfiction
  * @brief Binds network reader helpers.
  * @param m Python module.
  */
-void bind_network_reader(nb::module_& m);
+void register_network_reader(nb::module_& m);
 /**
  * @brief Binds network writers helpers.
  * @param m Python module.
  */
-void bind_network_writers(nb::module_& m);
+void register_network_writers(nb::module_& m);
 /**
  * @brief Binds dot drawers helpers.
  * @param m Python module.
  */
-void bind_dot_drawers(nb::module_& m);
+void register_dot_drawers(nb::module_& m);
 
 void register_networks_io(nb::module_& m)
 {
-    bind_network_reader(m);
-    bind_network_writers(m);
-    bind_dot_drawers(m);
+    register_network_reader(m);
+    register_network_writers(m);
+    register_dot_drawers(m);
 }
 
 }  // namespace pyfiction

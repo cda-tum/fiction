@@ -34,7 +34,7 @@ namespace pyfiction
 {
 
 /** @brief Register FGL readers and their parsing exception. @param m Layout I/O module. */
-void bind_read_fgl_layout(nb::module_& m)
+void register_read_fgl_layout(nb::module_& m)
 {
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here

@@ -35,7 +35,7 @@ namespace pyfiction
  * @brief Binds can positive charges occur helpers.
  * @param m Python module.
  */
-void bind_can_positive_charges_occur(nb::module_& m)
+void register_can_positive_charges_occur(nb::module_& m)
 {
     m.def(
         "can_positive_charges_occur",

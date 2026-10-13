@@ -42,7 +42,7 @@ namespace pyfiction
  * @brief Binds quickexact helpers.
  * @param m Python module.
  */
-void bind_quickexact(nb::module_& m)
+void register_quickexact(nb::module_& m)
 {
     using fiction::sidb::simulation::engines::quickexact_params;
 

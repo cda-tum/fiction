@@ -30,7 +30,7 @@ namespace pyfiction
  * @brief Binds qca layout helpers.
  * @param m Python module.
  */
-void bind_qca_layout(nb::module_& m);
+void register_qca_layout(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.qca.io` submodule.
@@ -51,7 +51,7 @@ NB_MODULE(qca, m)
     // Registers the types this module names in signatures and default arguments.
     nb::module_::import_("mnt.pyfiction.layouts");
 
-    pyfiction::bind_qca_layout(m);
+    pyfiction::register_qca_layout(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers and writers of QCA cell-level layouts.");
     pyfiction::register_qca_io(io);
 }

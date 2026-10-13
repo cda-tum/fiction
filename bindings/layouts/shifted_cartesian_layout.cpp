@@ -53,7 +53,7 @@ namespace detail
  * @param name Python class name.
  */
 template <typename Lyt>
-void bind_shifted_cartesian_layout(nb::module_& m, const char* name)
+void register_shifted_cartesian_layout(nb::module_& m, const char* name)
 {
     /**
      * Shifted Cartesian layout.
@@ -278,9 +278,9 @@ void bind_shifted_cartesian_layout(nb::module_& m, const char* name)
  * @brief Register the shifted Cartesian layout.
  * @param m Python module.
  */
-void bind_shifted_cartesian_layout(nb::module_& m)
+void register_shifted_cartesian_layout(nb::module_& m)
 {
-    detail::bind_shifted_cartesian_layout<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout");
+    detail::register_shifted_cartesian_layout<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout");
 }
 
 }  // namespace pyfiction

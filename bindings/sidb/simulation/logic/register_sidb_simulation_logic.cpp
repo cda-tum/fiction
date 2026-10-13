@@ -28,41 +28,41 @@ namespace pyfiction
  * @brief Binds bdl input iterator helpers.
  * @param m Python module.
  */
-void bind_bdl_input_iterator(nb::module_& m);
+void register_bdl_input_iterator(nb::module_& m);
 /**
  * @brief Binds detect bdl pairs helpers.
  * @param m Python module.
  */
-void bind_detect_bdl_pairs(nb::module_& m);
+void register_detect_bdl_pairs(nb::module_& m);
 /**
  * @brief Binds detect bdl wires helpers.
  * @param m Python module.
  */
-void bind_detect_bdl_wires(nb::module_& m);
+void register_detect_bdl_wires(nb::module_& m);
 /**
  * @brief Binds is operational helpers.
  * @param m Python module.
  */
-void bind_is_operational(nb::module_& m);
+void register_is_operational(nb::module_& m);
 /**
  * @brief Binds operational domain helpers.
  * @param m Python module.
  */
-void bind_operational_domain(nb::module_& m);
+void register_operational_domain(nb::module_& m);
 /**
  * @brief Binds operational domain ratio helpers.
  * @param m Python module.
  */
-void bind_operational_domain_ratio(nb::module_& m);
+void register_operational_domain_ratio(nb::module_& m);
 
 void register_sidb_simulation_logic(nb::module_& m)
 {
-    bind_bdl_input_iterator(m);
-    bind_detect_bdl_pairs(m);
-    bind_detect_bdl_wires(m);
-    bind_is_operational(m);
-    bind_operational_domain(m);
-    bind_operational_domain_ratio(m);
+    register_bdl_input_iterator(m);
+    register_detect_bdl_pairs(m);
+    register_detect_bdl_wires(m);
+    register_is_operational(m);
+    register_operational_domain(m);
+    register_operational_domain_ratio(m);
 }
 
 }  // namespace pyfiction

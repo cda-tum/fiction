@@ -35,7 +35,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void bind_inml_layout(nb::module_& m)
+void register_inml_layout(nb::module_& m)
 {
     using fiction::inml::layout;
     using fiction::inml::magnet_type;
@@ -56,9 +56,9 @@ void bind_inml_layout(nb::module_& m)
 
     nb::class_<layout, py_cartesian_layout> cls(m, "inml_layout", DOC(fiction_inml_layout));
 
-    detail::bind_clocked_constructors(cls);
-    detail::bind_cell_grid(cls);
-    detail::bind_tile_clocking(cls);
+    detail::register_clocked_constructors(cls);
+    detail::register_cell_grid(cls);
+    detail::register_tile_clocking(cls);
 
     cls.def("assign_cell_type", &layout::assign_cell_type, nb::arg("c"), nb::arg("ct"),
             DOC(fiction_layouts_cell_grid_assign_cell_type));

@@ -38,7 +38,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void bind_mol_qca_layout(nb::module_& m)
+void register_mol_qca_layout(nb::module_& m)
 {
     using fiction::mol_qca::cell_type;
     using fiction::mol_qca::layout;
@@ -62,7 +62,7 @@ void bind_mol_qca_layout(nb::module_& m)
         .def(nb::init<const layout::extent&, std::string>(), nb::arg("extent"), nb::arg("layout_name") = "",
              extent_doc(DOC(fiction_mol_qca_layout_layout)).c_str());
 
-    detail::bind_cell_grid(cls);
+    detail::register_cell_grid(cls);
 
     cls.def("assign_cell_type", &layout::assign_cell_type, nb::arg("c"), nb::arg("ct"),
             DOC(fiction_layouts_cell_grid_assign_cell_type));

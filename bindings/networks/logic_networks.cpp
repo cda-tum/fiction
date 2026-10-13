@@ -53,7 +53,7 @@ namespace detail
  * @tparam Ntk Network type.
  */
 template <typename Ntk>
-void bind_network(nb::module_& m, const char* network_name, const char* doc)
+void register_network(nb::module_& m, const char* network_name, const char* doc)
 {
     // Network node: mockturtle::node<Ntk> is a plain uint64_t, which nanobind already represents
     // as a Python int via its built-in integer type caster -- no separate class binding needed
@@ -216,14 +216,15 @@ void bind_network(nb::module_& m, const char* network_name, const char* doc)
  * @brief Binds logic networks helpers.
  * @param m Python module.
  */
-void bind_logic_networks(nb::module_& m)
+void register_logic_networks(nb::module_& m)
 {
-    detail::bind_network<py_tec_network>(m, "technology_network", DOC(fiction_networks_technology_network));
-    detail::bind_network<py_aig_network>(m, "aig_network", "An AND-inverter graph (AIG) with node and output names.");
-    detail::bind_network<py_xag_network>(m, "xag_network",
-                                         "An XOR-AND-inverter graph (XAG) with node and output names.");
-    detail::bind_network<py_mig_network>(m, "mig_network",
-                                         "A majority-inverter graph (MIG) with node and output names.");
+    detail::register_network<py_tec_network>(m, "technology_network", DOC(fiction_networks_technology_network));
+    detail::register_network<py_aig_network>(m, "aig_network",
+                                             "An AND-inverter graph (AIG) with node and output names.");
+    detail::register_network<py_xag_network>(m, "xag_network",
+                                             "An XOR-AND-inverter graph (XAG) with node and output names.");
+    detail::register_network<py_mig_network>(m, "mig_network",
+                                             "A majority-inverter graph (MIG) with node and output names.");
 }
 
 }  // namespace pyfiction

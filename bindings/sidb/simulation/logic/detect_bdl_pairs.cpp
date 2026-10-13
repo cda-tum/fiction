@@ -46,7 +46,7 @@ namespace pyfiction
  * @brief Binds detect bdl pairs helpers.
  * @param m Python module.
  */
-void bind_detect_bdl_pairs(nb::module_& m)
+void register_detect_bdl_pairs(nb::module_& m)
 {
     using fiction::sidb::lattice_site;
     using fiction::sidb::layout;

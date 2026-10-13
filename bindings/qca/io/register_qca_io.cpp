@@ -28,17 +28,17 @@ namespace pyfiction
  * @brief Binds write qca layout helpers.
  * @param m Python module.
  */
-void bind_write_qca_layout(nb::module_& m);
+void register_write_qca_layout(nb::module_& m);
 /**
  * @brief Binds write qca layout svg helpers.
  * @param m Python module.
  */
-void bind_write_qca_layout_svg(nb::module_& m);
+void register_write_qca_layout_svg(nb::module_& m);
 
 void register_qca_io(nb::module_& m)
 {
-    bind_write_qca_layout(m);
-    bind_write_qca_layout_svg(m);
+    register_write_qca_layout(m);
+    register_write_qca_layout_svg(m);
 }
 
 }  // namespace pyfiction

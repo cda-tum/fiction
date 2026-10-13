@@ -51,7 +51,7 @@ namespace detail
  * @tparam Ntk Network type.
  */
 template <typename Ntk>
-void bind_has_high_degree_fanin_nodes(nb::module_& m)
+void register_has_high_degree_fanin_nodes(nb::module_& m)
 {
     m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<Ntk>, nb::arg("ntk"),
           nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
@@ -63,7 +63,7 @@ void bind_has_high_degree_fanin_nodes(nb::module_& m)
  * @brief Binds network utils helpers.
  * @param m Python module.
  */
-void bind_network_utils(nb::module_& m)
+void register_network_utils(nb::module_& m)
 {
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
@@ -74,7 +74,7 @@ void bind_network_utils(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::bind_has_high_degree_fanin_nodes<py_tec_network>(m);
+    detail::register_has_high_degree_fanin_nodes<py_tec_network>(m);
     m.def(
         "random_aig_network",
         [](const uint32_t inputs, const uint32_t gates, const uint64_t seed)

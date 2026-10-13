@@ -247,15 +247,15 @@ bindings/
 ├── CMakeLists.txt                                 # one extension module per top-level namespace
 ├── include/pyfiction/                             # shared type aliases, docstrings, helpers
 ├── physical_design/
-│   ├── register_physical_design.cpp               # NB_MODULE(physical_design, m): bind_exact(m), ...
+│   ├── register_physical_design.cpp               # NB_MODULE(physical_design, m): register_exact(m), ...
 │   └── path_finding/
-│       ├── a_star.cpp                             # defines bind_a_star(nb::module_&)
-│       └── register_path_finding.cpp              # calls bind_a_star(m), bind_distance(m), ...
+│       ├── a_star.cpp                             # defines register_a_star(nb::module_&)
+│       └── register_path_finding.cpp              # calls register_a_star(m), register_distance(m), ...
 ├── sidb/
-│   ├── register_sidb.cpp                          # NB_MODULE(sidb, m): bind_lattice(m), ...
+│   ├── register_sidb.cpp                          # NB_MODULE(sidb, m): register_lattice(m), ...
 │   └── simulation/engines/
-│       ├── quickexact.cpp                         # defines bind_quickexact(nb::module_&)
-│       └── register_sidb_simulation_engines.cpp   # calls bind_quickexact(m), bind_quicksim(m), ...
+│       ├── quickexact.cpp                         # defines register_quickexact(nb::module_&)
+│       └── register_sidb_simulation_engines.cpp   # calls register_quickexact(m), register_quicksim(m), ...
 └── ...
 python/mnt/pyfiction/
 ├── __init__.py                                    # loads the submodules lazily
@@ -271,10 +271,10 @@ Each nested namespace is a submodule of it. For example, import the coordinate t
 follow the same tree, so a binding sits in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
 
 Binding files declare `namespace nb = nanobind;` after their includes.
-Each leaf `.cpp` file defines public binding helpers with a `bind_` prefix (e.g.
-`void bind_a_star(nb::module_& m)`) that binds a class, function, or related group. Internal template helpers use the same prefix. Each
+Each leaf `.cpp` file defines public binding helpers with a `register_` prefix (e.g.
+`void register_a_star(nb::module_& m)`) that binds a class, function, or related group. Internal template helpers use the same prefix. Each
 directory that holds binding sources has exactly one `register_<path>.cpp`, named after the directory, that
-forward-declares and calls the binding helpers beside it. The `register_*` aggregators keep their names. In a top-level directory, that file holds the
+forward-declares and calls the binding helpers beside it. Module registries use the same prefix. In a top-level directory, that file holds the
 `NB_MODULE` block. The block imports the modules whose types it names in signatures or default arguments, calls the
 binding functions of its directory, and creates each nested submodule with `pyfiction::def_submodule` before calling
 the submodule's registry.

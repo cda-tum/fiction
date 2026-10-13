@@ -38,7 +38,7 @@ namespace detail
 
 /** @brief Binds iterative physical timing analysis. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
-void bind_critical_path_length_and_throughput_impl(nb::module_& m)
+void register_critical_path_length_and_throughput_impl(nb::module_& m)
 {
     m.def(
         "critical_path_length_and_throughput",
@@ -55,11 +55,11 @@ void bind_critical_path_length_and_throughput_impl(nb::module_& m)
 }  // namespace detail
 
 /** @brief Registers layout timing analysis. @param m Python module. */
-void bind_critical_path_length_and_throughput(nb::module_& m)
+void register_critical_path_length_and_throughput(nb::module_& m)
 {
-    detail::bind_critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
-    detail::bind_critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_critical_path_length_and_throughput_impl<py_hexagonal_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

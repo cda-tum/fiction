@@ -36,7 +36,7 @@ namespace pyfiction
 {
 
 /** @brief Registers explicit routing constraints on offset coordinates. @param m Python module. */
-void bind_obstructions(nb::module_& m)
+void register_obstructions(nb::module_& m)
 {
     using data = fiction::layouts::obstructions;
 

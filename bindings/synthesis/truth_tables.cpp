@@ -33,7 +33,7 @@ namespace pyfiction
  * @brief Binds truth tables helpers.
  * @param m Python module.
  */
-void bind_truth_tables(nb::module_& m)
+void register_truth_tables(nb::module_& m)
 {
     m.def("create_id_tt", &fiction::synthesis::create_id_tt, DOC(fiction_synthesis_create_id_tt));
     m.def("create_not_tt", &fiction::synthesis::create_not_tt, DOC(fiction_synthesis_create_not_tt));

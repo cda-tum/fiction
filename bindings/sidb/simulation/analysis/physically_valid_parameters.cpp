@@ -47,7 +47,7 @@ namespace pyfiction
  * @brief Binds physically valid parameters helpers.
  * @param m Python module.
  */
-void bind_physically_valid_parameters(nb::module_& m)
+void register_physically_valid_parameters(nb::module_& m)
 {
     nb::class_<fiction::sidb::simulation::domain<fiction::sidb::simulation::logic::parameter_point, uint64_t>>(
         m, "physically_valid_parameters_domain")

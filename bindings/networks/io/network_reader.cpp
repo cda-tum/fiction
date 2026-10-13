@@ -46,7 +46,7 @@ namespace detail
  * @param function_name Exported reader name.
  */
 template <typename Ntk>
-void bind_network_reader(nb::module_& m, const char* function_name)
+void register_network_reader(nb::module_& m, const char* function_name)
 {
     m.def(
         function_name,
@@ -77,12 +77,12 @@ void bind_network_reader(nb::module_& m, const char* function_name)
  * @brief Register readers for the supported logic network types.
  * @param m Python module.
  */
-void bind_network_reader(nb::module_& m)
+void register_network_reader(nb::module_& m)
 {
-    detail::bind_network_reader<py_tec_network>(m, "read_technology_network");
-    detail::bind_network_reader<py_aig_network>(m, "read_aig_network");
-    detail::bind_network_reader<py_xag_network>(m, "read_xag_network");
-    detail::bind_network_reader<py_mig_network>(m, "read_mig_network");
+    detail::register_network_reader<py_tec_network>(m, "read_technology_network");
+    detail::register_network_reader<py_aig_network>(m, "read_aig_network");
+    detail::register_network_reader<py_xag_network>(m, "read_xag_network");
+    detail::register_network_reader<py_mig_network>(m, "read_mig_network");
 }
 
 }  // namespace pyfiction

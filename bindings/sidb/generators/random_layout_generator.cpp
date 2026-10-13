@@ -42,7 +42,7 @@ namespace pyfiction
  * @brief Binds random layout generator helpers.
  * @param m Python module.
  */
-void bind_random_layout_generator(nb::module_& m)
+void register_random_layout_generator(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::generators::generate_random_layout_params;

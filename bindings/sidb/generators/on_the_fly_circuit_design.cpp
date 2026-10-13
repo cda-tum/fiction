@@ -42,7 +42,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void bind_on_the_fly_circuit_design(nb::module_& m)
+void register_on_the_fly_circuit_design(nb::module_& m)
 {
     /**
      * Parameters for the individual SiDB gate designs.

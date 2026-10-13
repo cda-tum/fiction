@@ -52,7 +52,7 @@ namespace detail
  * @tparam Lyt Layout type.
  */
 template <typename Lyt>
-void bind_a_star_impl(nb::module_& m)
+void register_a_star_impl(nb::module_& m)
 {
     m.def(
         "a_star",
@@ -81,7 +81,7 @@ void bind_a_star_impl(nb::module_& m)
  * @brief Binds a star helpers.
  * @param m Python module.
  */
-void bind_a_star(nb::module_& m)
+void register_a_star(nb::module_& m)
 {
     nb::class_<fiction::physical_design::path_finding::a_star_params>(
         m, "a_star_params", DOC(fiction_physical_design_path_finding_a_star_params))
@@ -89,12 +89,12 @@ void bind_a_star(nb::module_& m)
         .def_rw("crossings", &fiction::physical_design::path_finding::a_star_params::crossings,
                 DOC(fiction_physical_design_path_finding_a_star_params_crossings));
 
-    detail::bind_a_star_impl<py_cartesian_gate_layout>(m);
-    detail::bind_a_star_impl<py_cartesian_layout>(m);
-    detail::bind_a_star_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::bind_a_star_impl<py_shifted_cartesian_layout>(m);
-    detail::bind_a_star_impl<py_hexagonal_gate_layout>(m);
-    detail::bind_a_star_impl<py_hexagonal_layout>(m);
+    detail::register_a_star_impl<py_cartesian_gate_layout>(m);
+    detail::register_a_star_impl<py_cartesian_layout>(m);
+    detail::register_a_star_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::register_a_star_impl<py_shifted_cartesian_layout>(m);
+    detail::register_a_star_impl<py_hexagonal_gate_layout>(m);
+    detail::register_a_star_impl<py_hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

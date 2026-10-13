@@ -48,7 +48,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void bind_write_sidb_layout_svg(nb::module_& m)
+void register_write_sidb_layout_svg(nb::module_& m)
 {
     nb::enum_<fiction::sidb::io::write_sidb_layout_svg_params::color_mode>(
         m, "color_mode", DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode))

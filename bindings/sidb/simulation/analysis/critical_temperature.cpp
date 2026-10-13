@@ -56,7 +56,7 @@ namespace detail
  *
  * @param m The module.
  */
-inline void bind_critical_temperature_functions(nb::module_& m)
+inline void register_critical_temperature_functions(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::analysis::critical_temperature_params;
@@ -101,7 +101,7 @@ inline void bind_critical_temperature_functions(nb::module_& m)
  * @brief Binds critical temperature helpers.
  * @param m Python module.
  */
-void bind_critical_temperature(nb::module_& m)
+void register_critical_temperature(nb::module_& m)
 {
     /**
      * Critical temperature statistics.
@@ -155,7 +155,7 @@ void bind_critical_temperature(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::bind_critical_temperature_functions(m);
+    detail::register_critical_temperature_functions(m);
 }
 
 }  // namespace pyfiction

@@ -43,7 +43,7 @@ namespace pyfiction
  * @brief Binds quicksim helpers.
  * @param m Python module.
  */
-void bind_quicksim(nb::module_& m)
+void register_quicksim(nb::module_& m)
 {
     using fiction::sidb::simulation::engines::quicksim_params;
 
