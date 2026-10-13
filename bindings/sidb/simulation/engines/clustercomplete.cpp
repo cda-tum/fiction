@@ -17,11 +17,6 @@
 
 #include <nanobind/nanobind.h>
 
-/**
- * @brief Namespace alias for nanobind.
- */
-namespace nb = nanobind;
-
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "pyfiction/documentation.hpp"
@@ -35,6 +30,11 @@ namespace nb = nanobind;
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
@@ -95,6 +95,11 @@ void clustercomplete(nb::module_& m)
 }  // namespace pyfiction
 
 #else  // FICTION_ALGLIB_ENABLED
+
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
