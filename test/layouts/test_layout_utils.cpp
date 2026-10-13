@@ -33,6 +33,7 @@
 #include <concepts>
 #include <cstdint>
 #include <future>
+#include <latch>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -139,11 +140,14 @@ TEST_CASE("Concurrent random-coordinate calls stay inside their bounds", "[layou
 {
     /** @brief Concurrent samplers report whether every coordinate stayed in bounds. */
     std::array<std::future<bool>, 4> samplers{};
+    /** @brief Starts every sampler after all worker threads are ready. */
+    std::latch start{samplers.size()};
     for (auto& sampler : samplers)
     {
         sampler = std::async(std::launch::async,
-                             []
+                             [&start]
                              {
+                                 start.arrive_and_wait();
                                  for (uint32_t sample = 0; sample < 1000; ++sample)
                                  {
                                      /** @brief Coordinate sampled concurrently with the other workers. */

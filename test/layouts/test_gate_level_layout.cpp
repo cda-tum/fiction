@@ -757,6 +757,8 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]
     lyt.assign_clock_number({2, 2}, 1);
     CHECK((lyt.template outgoing_data_flow<true>({2, 1}) ==
            std::vector{layout_base::coordinate{2, 2}, layout_base::coordinate{2, 2}}));
+    lyt.assign_clock_number({2, 2}, 0);
+    CHECK(lyt.template outgoing_data_flow<true>({2, 1}).empty());
 }
 
 TEMPLATE_TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",

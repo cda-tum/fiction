@@ -396,6 +396,8 @@ def test_gate_function_owns_truth_table_and_preserves_input_holes(make_layout: C
     layout.assign_clock_number((1, 0), 0)
     layout.assign_clock_number((1, 1), 1)
     assert layout.outgoing_data_flow((1, 0)) == [coordinate(1, 1), coordinate(1, 1)]
+    layout.assign_clock_number((1, 1), 0)
+    assert layout.outgoing_data_flow((1, 0)) == []
     layout.connect(b, layout_input_port(gate, 2))
     with pytest.raises(IndexError, match="arity"):
         layout.connect(a, layout_input_port(gate, 3))
