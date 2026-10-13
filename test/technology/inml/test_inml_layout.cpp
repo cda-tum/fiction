@@ -27,7 +27,7 @@ TEST_CASE("iNML layouts hold planar, clocked magnets", "[inml-layout]")
 {
     layout lyt{{7, 7, 1}, clocking::twoddwave(clocking::num_clks::THREE), "inverter", 4, 4};
 
-    CHECK(lyt.z() == 0);
+    CHECK(lyt.layers() == 1);
     CHECK(lyt.num_clocks() == 3);
     CHECK(lyt.get_tile_size_x() == 4);
 

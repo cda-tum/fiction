@@ -224,10 +224,10 @@ class write_qca_layout_impl
     void write_cell_layers()
     {
         utils::progress_reporter progress{ps.on_progress, "writing rows",
-                                          static_cast<std::size_t>(lyt.y() + 1) *
-                                              static_cast<std::size_t>(lyt.z() + 1)};
+                                          static_cast<std::size_t>(lyt.height()) *
+                                              static_cast<std::size_t>(lyt.layers())};
         // for each layer
-        for (decltype(lyt.z()) z = 0; z <= lyt.z(); ++z)
+        for (uint32_t z = 0; z < lyt.layers(); ++z)
         {
             write_via_cells();
 
@@ -240,10 +240,10 @@ class write_qca_layout_impl
                << '\n';
 
             // for each row
-            for (decltype(lyt.y()) y = 0; y <= lyt.y(); ++y)
+            for (uint32_t y = 0; y < lyt.height(); ++y)
             {
                 // for each cell
-                for (decltype(lyt.x()) x = 0; x <= lyt.x(); ++x)
+                for (uint32_t x = 0; x < lyt.width(); ++x)
                 {
                     const qca::layout::cell c{x, y, z};
 

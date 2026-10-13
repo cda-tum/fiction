@@ -270,9 +270,9 @@ class write_mol_qca_layout_svg_impl
             });
 
         const double viewbox_x =
-            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.x() + 1) * svg::CELL_DISTANCE);
+            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.width()) * svg::CELL_DISTANCE);
         const double viewbox_y =
-            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.y() + 1) * svg::CELL_DISTANCE);
+            (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.height()) * svg::CELL_DISTANCE);
 
         os << fmt::format(fcn::io::detail::svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
                           cell_descriptions.str());

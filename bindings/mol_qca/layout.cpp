@@ -56,8 +56,8 @@ void mol_qca_layout(nanobind::module_& m)
     py::class_<layout, py_cartesian_layout> cls(m, "mol_qca_layout", DOC(fiction_mol_qca_layout));
 
     cls.def(py::init<>())
-        .def(py::init<const layout::aspect_ratio&, std::string>(), py::arg("dimension"), py::arg("layout_name") = "",
-             DOC(fiction_mol_qca_layout_layout));
+        .def(py::init<const layout::extent&, std::string>(), py::arg("extent"), py::arg("layout_name") = "",
+             extent_doc(DOC(fiction_mol_qca_layout_layout)).c_str());
 
     detail::bind_cell_grid(cls);
 

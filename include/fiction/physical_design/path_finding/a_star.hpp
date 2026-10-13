@@ -17,11 +17,12 @@
 
 #pragma once
 
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 
 #include <phmap.h>
@@ -32,6 +33,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -56,8 +58,17 @@ template <typename Path, typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {
   public:
-    a_star_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const distance_functor<Lyt, Dist>& dist_fn,
-                const cost_functor<Lyt, Cost>& cost_fn, const a_star_params& p, const layouts::obstructions& extra) :
+    /**
+     * @brief Initializes the A* search.
+     * @param lyt Layout to search.
+     * @param obj Routing endpoints.
+     * @param dist_fn Distance heuristic.
+     * @param cost_fn Step cost.
+     * @param p Search parameters.
+     * @param extra Additional routing obstructions.
+     */
+    a_star_impl(const Lyt& lyt, const routing_objective obj, const distance_functor<Dist>& dist_fn,
+                const cost_functor<Cost>& cost_fn, const a_star_params p, const layouts::obstructions& extra) :
             layout{lyt},
             search_obstructions{extra},
             objective{obj},
@@ -73,13 +84,12 @@ class a_star_impl
      *
      * @return The shortest path in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] Path run() noexcept
+    [[nodiscard]] Path run()
     {
-        assert(objective.source.is_valid() && objective.target.is_valid() &&
-               "Neither source nor target coordinate can be dead");
-
-        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
-               "Both source and target coordinate have to be within the layout bounds");
+        if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
+        {
+            throw std::invalid_argument("Routing endpoints must lie within the layout extent");
+        }
 
         while (!open_list.empty())  // until the open list is empty
         {
@@ -111,15 +121,15 @@ class a_star_impl
     /**
      * The source-target coordinate pair.
      */
-    const routing_objective<Lyt> objective;
+    const routing_objective objective;
     /**
      * The distance functor that implements the heuristic estimation function.
      */
-    const distance_functor<Lyt, Dist> distance;
+    const distance_functor<Dist>& distance;
     /**
      * The cost functor that implements the cost function.
      */
-    const cost_functor<Lyt, Cost> cost;
+    const cost_functor<Cost>& cost;
     /**
      * Routing parameters.
      */
@@ -137,7 +147,8 @@ class a_star_impl
         /**
          * Coordinate.
          */
-        coordinate<Lyt> coord;  // cannot be const because operator= is required by std::priority_queue
+        fiction::layouts::layout_base::coordinate
+            coord;  // cannot be const because operator= is required by std::priority_queue
         /**
          * f-value of the coordinate.
          */
@@ -171,8 +182,7 @@ class a_star_impl
      * C++ is weird at times...
      */
     using a_star_priority_queue =
-        fiction::utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>,
-                                                       std::greater<coordinate_f>>;
+        fiction::utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<>>;
     /**
      * Open list that contains all coordinates to process next sorted by their f-value.
      */
@@ -180,21 +190,22 @@ class a_star_impl
     /**
      * Closed list that acts as a set of already visited coordinates.
      */
-    phmap::flat_hash_set<coordinate<Lyt>> closed_list{};
+    phmap::flat_hash_set<fiction::layouts::layout_base::coordinate> closed_list{};
     /**
      * Stores the g-cost for each coordinate c, i.e., the length of the shortest path from source to c found so far.
      */
-    phmap::parallel_flat_hash_map<coordinate<Lyt>, g_f_type> g_values{};
+    phmap::parallel_flat_hash_map<fiction::layouts::layout_base::coordinate, g_f_type> g_values{};
     /**
      * Tracks the origin of each coordinate to recreate the path.
      */
-    phmap::parallel_flat_hash_map<coordinate<Lyt>, coordinate<Lyt>> came_from{};
+    phmap::parallel_flat_hash_map<fiction::layouts::layout_base::coordinate, fiction::layouts::layout_base::coordinate>
+        came_from{};
     /**
      * Fetches and pops the coordinate with the lowest f-value from the open list priority queue.
      *
      * @return Coordinate with the lowest f-value from the open list.
      */
-    coordinate<Lyt> get_lowest_f_coord() noexcept
+    fiction::layouts::layout_base::coordinate get_lowest_f_coord()
     {
         const auto current = open_list.top().coord;
         open_list.pop();
@@ -206,9 +217,9 @@ class a_star_impl
      *
      * @param current Coordinate that is currently examined.
      */
-    void expand(const coordinate<Lyt>& current) noexcept
+    void expand(const fiction::layouts::layout_base::coordinate& current)
     {
-        const auto explore_successor = [this, current](const auto& adjacent) noexcept
+        const auto explore_successor = [this, current](const auto& adjacent)
         {
             const auto next = physical_design::detail::routing_successor(layout, current, adjacent, objective.target,
                                                                          params.crossings, search_obstructions);
@@ -239,7 +250,7 @@ class a_star_impl
             set_g(successor, tentative_g);
 
             // compute new f-value
-            const auto f = tentative_g + static_cast<g_f_type>(distance(layout, successor, objective.target));
+            const auto f = tentative_g + static_cast<g_f_type>(distance(successor, objective.target));
 
             // if successor is contained in the open list (frontier)
             if (it != open_list.end())
@@ -254,7 +265,7 @@ class a_star_impl
             }
         };
 
-        if constexpr (is_gate_level_layout_v<Lyt>)
+        if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
         {
             // recurse for all outgoing clock zones
             layout.foreach_outgoing_clocked_zone(current, explore_successor);
@@ -271,7 +282,7 @@ class a_star_impl
      * @param c Coordinate to check.
      * @return `true` iff c has already been visited.
      */
-    bool is_visited(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] bool is_visited(const fiction::layouts::layout_base::coordinate& c) const
     {
         return closed_list.count(c) > 0;
     }
@@ -281,7 +292,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is desired.
      * @return g-value of coordinate c or 0 if no value has been stored.
      */
-    g_f_type g(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] g_f_type g(const fiction::layouts::layout_base::coordinate& c) const
     {
         if (const auto it = g_values.find(c); it != g_values.cend())
         {
@@ -296,7 +307,7 @@ class a_star_impl
      * @param c Coordinate whose g-value is to be updated to g_val.
      * @param g_val New g-value for c.
      */
-    void set_g(const coordinate<Lyt>& c, const g_f_type g_val) noexcept
+    void set_g(const fiction::layouts::layout_base::coordinate& c, const g_f_type g_val)
     {
         g_values.insert_or_assign(c, g_val);
     }
@@ -308,7 +319,7 @@ class a_star_impl
      * @param g_val g-value to compare to c's.
      * @return `true` iff the given g-value does not mean an improvement for the given coordinate.
      */
-    bool no_improvement(const coordinate<Lyt>& c, const g_f_type g_val) noexcept
+    bool no_improvement(const fiction::layouts::layout_base::coordinate& c, const g_f_type g_val)
     {
         return g_val >= g(c);
     }
@@ -317,7 +328,7 @@ class a_star_impl
      *
      * @return The shortest path connecting source and target.
      */
-    Path reconstruct_path() const noexcept
+    [[nodiscard]] Path reconstruct_path() const
     {
         Path path{};
 
@@ -360,7 +371,7 @@ class a_star_impl
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
  * using clk_lyt = gate_level_layout<cartesian_layout>;
- * using path = layout_coordinate_path<cartesian_layout>;
+ * using path = layout_coordinate_path;
  * clk_lyt layout = ...;
  * auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
@@ -383,11 +394,11 @@ class a_star_impl
  * @return The shortest loop-less path in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
-    requires is_coordinate_layout_v<Lyt>
-[[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
-                          const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, uint64_t>(),
-                          const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, uint8_t>(),
-                          const a_star_params& params = {}, const layouts::obstructions& obstructions = {}) noexcept
+    requires std::derived_from<Lyt, fiction::layouts::layout_base>
+[[nodiscard]] Path a_star(const Lyt& layout, const routing_objective& objective,
+                          const distance_functor<Dist>& dist_fn = manhattan_distance_functor(),
+                          const cost_functor<Cost>&     cost_fn = unit_cost_functor<uint8_t>(),
+                          const a_star_params& params = {}, const layouts::obstructions& obstructions = {})
 {
     return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
 }
@@ -397,54 +408,46 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * of A*.
  *
  * If no path between `source` and `target` exists in `layout`, the returned distance is
- * `std::numeric_limits<Dist>::infinity()` for floating-point types or `std::numeric_limits<Dist>::max()` for integral
- * types.
+ * `std::numeric_limits<uint64_t>::max()`.
  *
  * @tparam Lyt Coordinate layout type.
- * @tparam Dist Distance type.
  * @param layout The layout in which the distance between `source` and `target` is to be determined.
  * @param source Source coordinate.
  * @param target Target coordinate.
  * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return Minimum path length between `source` and `target` in `layout`.
  */
-template <typename Lyt, typename Dist = uint64_t>
-    requires is_coordinate_layout_v<Lyt> && (std::integral<Dist> || std::floating_point<Dist>)
-[[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
-                                   const layouts::obstructions& obstructions = {}) noexcept
+template <typename Lyt>
+    requires std::derived_from<Lyt, fiction::layouts::layout_base>
+[[nodiscard]] uint64_t a_star_distance(const Lyt& layout, const fiction::layouts::layout_base::coordinate& source,
+                                       const fiction::layouts::layout_base::coordinate& target,
+                                       const layouts::obstructions&                     obstructions = {})
 {
-    const auto path_length =
-        a_star<layout_coordinate_path<Lyt>>(layout, {source, target}, manhattan_distance_functor<Lyt>(),
-                                            unit_cost_functor<Lyt>(), {}, obstructions)
-            .size();
+    const auto path_length = a_star<layout_coordinate_path>(layout, {source, target}, manhattan_distance_functor(),
+                                                            unit_cost_functor<>(), {}, obstructions)
+                                 .size();
 
     if (path_length == 0ul)
     {
-        if constexpr (std::is_floating_point_v<Dist>)
-        {
-            return std::numeric_limits<Dist>::infinity();
-        }
-        else
-        {
-            return std::numeric_limits<Dist>::max();
-        }
+        return std::numeric_limits<uint64_t>::max();
     }
 
-    return static_cast<Dist>(path_length - 1);
+    return static_cast<uint64_t>(path_length - 1);
 }
 /**
  * A pre-defined distance functor that uses the A* distance.
  *
  * @tparam Lyt Coordinate layout type.
- * @tparam Dist Distance type.
  */
-template <typename Lyt, typename Dist = uint64_t>
-class a_star_distance_functor : public distance_functor<Lyt, Dist>
+template <typename Lyt>
+class a_star_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    a_star_distance_functor() :
-            distance_functor<Lyt, Dist>([](const Lyt& lyt, const coordinate<Lyt>& source, const coordinate<Lyt>& target)
-                                        { return a_star_distance<Lyt, Dist>(lyt, source, target); })
+    /** @brief Computes distances in the borrowed layout. @param lyt Layout that outlives this functor. */
+    explicit a_star_distance_functor(const Lyt& lyt) :
+            distance_functor<uint64_t>(
+                [&lyt](const layouts::layout_base::coordinate& source, const layouts::layout_base::coordinate& target)
+                { return a_star_distance<Lyt>(lyt, source, target); })
     {}
 };
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Coordinate conversion, normalization, and sampling helpers.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
@@ -18,17 +19,22 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <random>
 #include <stdexcept>
-#include <utility>
 
 namespace fiction::layouts
 {
@@ -43,7 +49,7 @@ namespace fiction::layouts
 template <typename Lyt>
 void require_arrangement([[maybe_unused]] const std::optional<arrangement>& a)
 {
-    if constexpr (!is_cartesian_layout_v<Lyt>)
+    if constexpr (!std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
     {
         if (!a.has_value())
         {
@@ -57,24 +63,24 @@ void require_arrangement([[maybe_unused]] const std::optional<arrangement>& a)
  *
  * @tparam Lyt Gate-level layout type.
  * @param a Arrangement of the shifted rows or columns. Shifted Cartesian and hexagonal layouts require it.
- * @param ar Highest possible position in the layout.
+ * @param ex Axis sizes of the layout.
  * @param scheme Clocking scheme to apply to the layout.
  * @return Empty layout.
  * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `a` is empty.
  */
 template <typename Lyt>
 [[nodiscard]] Lyt make_gate_level_layout([[maybe_unused]] const std::optional<arrangement>& a,
-                                         const typename Lyt::aspect_ratio& ar, const clocking::scheme& scheme)
+                                         const typename Lyt::extent& ex, const clocking::scheme& scheme)
 {
     require_arrangement<Lyt>(a);
 
-    if constexpr (is_cartesian_layout_v<Lyt>)
+    if constexpr (std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
     {
-        return Lyt{ar, scheme};
+        return Lyt{ex, scheme};
     }
     else
     {
-        return Lyt{*a, ar, scheme};
+        return Lyt{*a, ex, scheme};
     }
 }
 
@@ -88,9 +94,10 @@ template <typename Lyt>
  * @return Number of `c`'s adjacent coordinates.
  */
 template <typename Lyt>
-[[nodiscard]] uint8_t num_adjacent_coordinates(const Lyt& lyt, const coordinate<Lyt>& c) noexcept
+[[nodiscard]] uint8_t num_adjacent_coordinates(const Lyt&                                       lyt,
+                                               const fiction::layouts::layout_base::coordinate& c) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
     return static_cast<uint8_t>(lyt.adjacent_coordinates(c).size());
 }
@@ -112,10 +119,13 @@ template <typename Lyt>
  * @throws std::overflow_error If the absolute cell is outside the signed 32-bit coordinate range.
  */
 template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coordinate>
-[[nodiscard]] Coordinate relative_to_absolute_cell_position(const GateLyt& gate_lyt, const tile<GateLyt>& t,
-                                                            const Coordinate& relative_c)
+[[nodiscard]] Coordinate relative_to_absolute_cell_position(const GateLyt&                                   gate_lyt,
+                                                            const fiction::layouts::layout_base::coordinate& t,
+                                                            const Coordinate&                                relative_c)
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
+        "GateLyt is not a gate-level layout");
 
     if (relative_c.x < 0 || relative_c.x >= GateSizeX || relative_c.y < 0 || relative_c.y >= GateSizeY)
     {
@@ -125,11 +135,19 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
     int64_t x = static_cast<int64_t>(t.x) * GateSizeX;
     int64_t y = static_cast<int64_t>(t.y) * GateSizeY;
 
-    if constexpr (is_shifted_cartesian_layout_v<GateLyt> || is_hexagonal_layout_v<GateLyt>)
+    if constexpr (std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout> ||
+                  (std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
+                   !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>))
     {
         // hexagons nest into each other, so their tiles are 3/4 as far apart perpendicular to the shift
-        constexpr auto step_x = is_hexagonal_layout_v<GateLyt> ? GateSizeX * 3 / 4 : GateSizeX;
-        constexpr auto step_y = is_hexagonal_layout_v<GateLyt> ? GateSizeY * 3 / 4 : GateSizeY;
+        constexpr auto step_x = (std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
+                                 !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>) ?
+                                    GateSizeX * 3 / 4 :
+                                    GateSizeX;
+        constexpr auto step_y = (std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
+                                 !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>) ?
+                                    GateSizeY * 3 / 4 :
+                                    GateSizeY;
 
         const auto a   = gate_lyt.get_arrangement();
         const auto odd = is_odd_arrangement(a);
@@ -157,7 +175,8 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
     }
     else
     {
-        static_assert(is_cartesian_layout_v<GateLyt>, "GateLyt does not have a supported geometry");
+        static_assert(std::derived_from<GateLyt, fiction::layouts::cartesian_layout>,
+                      "GateLyt does not have a supported geometry");
     }
 
     return Coordinate{x + relative_c.x, y + relative_c.y, t.z};
@@ -173,13 +192,14 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
  * @param lyt Coordinate layout.
  * @param c Coordinate to consider.
  * @param port Port direction.
- * @return Absolute coordinate specified by a coordinate `c` in layout `lyt` and a port direction.
+ * @return Adjacent coordinate, or no coordinate when the neighbor lies outside the layout.
  */
 template <typename Lyt>
-[[nodiscard]] coordinate<Lyt> port_direction_to_coordinate(const Lyt& lyt, const coordinate<Lyt>& c,
-                                                           const fcn::port_direction& port) noexcept
+[[nodiscard]] std::optional<fiction::layouts::layout_base::coordinate>
+port_direction_to_coordinate(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& c,
+                             const fcn::port_direction& port) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
     switch (port.dir)
     {
@@ -227,45 +247,62 @@ template <typename Lyt>
 /**
  * Returns a copy of the given cell grid layout whose cells are shifted towards the origin, so that the smallest
  * occupied x- and y-coordinates become 0. Cell types, names, and, where the layout has them, cell modes move with their
- * cells; layers, the layout name, and the clocking stay unchanged. The dimensions shrink by the shift.
+ * cells. Layer coordinates, the layout name, and the clocking stay unchanged. The extent preserves trailing padding
+ * and encloses translated x/y coordinates and occupied nonnegative layers.
  *
  * @tparam Lyt Cell grid layout type, e.g., `qca::layout`, `mol_qca::layout`, or `inml::layout`.
  * @param lyt The layout to normalize.
  * @return Normalized copy of `lyt`.
+ * @throws std::invalid_argument If the normalized extent exceeds the signed coordinate domain.
  */
 template <typename Lyt>
 [[nodiscard]] Lyt normalize_layout_coordinates(const Lyt& lyt)
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::cartesian_layout>, "Lyt is not a Cartesian layout");
 
     if (lyt.is_empty())
     {
         return lyt;
     }
 
-    auto x_offset = lyt.x();
-    auto y_offset = lyt.y();
+    /** Smallest occupied column. */
+    int64_t x_offset = std::numeric_limits<int64_t>::max();
+    /** Smallest occupied row. */
+    int64_t y_offset = std::numeric_limits<int64_t>::max();
+    /** Exclusive upper column bound, including frame padding. */
+    int64_t x_end = lyt.width();
+    /** Exclusive upper row bound, including frame padding. */
+    int64_t y_end = lyt.height();
+    /** Exclusive upper layer bound, including frame padding. */
+    int64_t z_end = lyt.layers();
 
     lyt.foreach_cell(
-        [&x_offset, &y_offset](const auto& c)
+        [&](const auto& c)
         {
             x_offset = std::min(x_offset, static_cast<decltype(x_offset)>(c.x));
             y_offset = std::min(y_offset, static_cast<decltype(y_offset)>(c.y));
+            x_end    = std::max(x_end, static_cast<int64_t>(c.x) + 1);
+            y_end    = std::max(y_end, static_cast<int64_t>(c.y) + 1);
+            z_end    = std::max(z_end, static_cast<int64_t>(c.z) + 1);
         });
 
-    constexpr bool has_cell_modes =
-        requires(Lyt& l, const coordinate<Lyt>& c) { l.assign_cell_mode(c, l.get_cell_mode(c)); };
+    /** Whether this layout stores cell modes. */
+    constexpr bool has_cell_modes = requires(Lyt& l, const fiction::layouts::layout_base::coordinate& c) {
+        l.assign_cell_mode(c, l.get_cell_mode(c));
+    };
 
+    /** Copy retaining layout metadata while cells move. */
     Lyt normalized{lyt};
 
     lyt.foreach_cell([&normalized](const auto& c) { normalized.assign_cell_type(c, Lyt::cell_type::EMPTY); });
 
-    normalized.resize({lyt.x() - x_offset, lyt.y() - y_offset, lyt.z()});
+    normalized.resize({x_end - x_offset, y_end - y_offset, z_end});
 
     lyt.foreach_cell(
         [&normalized, &lyt, x_offset, y_offset](const auto& c)
         {
-            const coordinate<Lyt> shifted{c.x - x_offset, c.y - y_offset, c.z};
+            /** Cell coordinate translated by the occupied minima. */
+            const fiction::layouts::layout_base::coordinate shifted{c.x - x_offset, c.y - y_offset, c.z};
 
             normalized.assign_cell_type(shifted, lyt.get_cell_type(c));
             normalized.assign_cell_name(shifted, lyt.get_cell_name(c));
@@ -279,28 +316,24 @@ template <typename Lyt>
     return normalized;
 }
 /**
- * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
- * top left corner and the bottom right corner of the spanned region.
+ * Generates a random coordinate with each axis inside the inclusive region spanned by two coordinates.
  *
- * @tparam CoordinateType The coordinate implementation to be used.
- * @param coordinate1 Top left Coordinate.
- * @param coordinate2 Bottom right Coordinate (coordinate order is not important, automatically swapped if
- * necessary).
- * @return Randomly generated coordinate.
+ * @tparam CoordinateType Coordinate type to generate.
+ * @param corner1 One corner of the region.
+ * @param corner2 Opposite corner of the region; axes may appear in either order.
+ * @return Random coordinate between the corresponding corner axes.
  */
 template <typename CoordinateType>
-CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coordinate2) noexcept
+CoordinateType random_coordinate(const CoordinateType corner1, const CoordinateType corner2) noexcept
 {
-    static std::mt19937_64 generator(std::random_device{}());
-
-    if (coordinate1 > coordinate2)
-    {
-        std::swap(coordinate1, coordinate2);
-    }
-
-    std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
-    std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
-    std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
+    /** Pseudorandom generator seeded from the platform's random device. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
+    /** Inclusive column distribution. */
+    std::uniform_int_distribution<> dist_x(std::min(corner1.x, corner2.x), std::max(corner1.x, corner2.x));
+    /** Inclusive row distribution. */
+    std::uniform_int_distribution<> dist_y(std::min(corner1.y, corner2.y), std::max(corner1.y, corner2.y));
+    /** Inclusive layer distribution. */
+    std::uniform_int_distribution<> dist_z(std::min(corner1.z, corner2.z), std::max(corner1.z, corner2.z));
 
     return {dist_x(generator), dist_y(generator), dist_z(generator)};
 }

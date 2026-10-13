@@ -66,7 +66,7 @@ TEST_CASE("BDL Input Iterator Traits", "[bdl-input-iterator]")
     CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator>::difference_type, int64_t>);
 }
 
-TEST_CASE("Operators", "[bdl-input-iterators]")
+TEST_CASE("Operators", "[bdl-input-iterator]")
 {
 
     const layout lyt{};

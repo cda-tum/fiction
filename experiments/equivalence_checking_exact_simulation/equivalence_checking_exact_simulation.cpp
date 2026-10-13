@@ -29,7 +29,9 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <iterator>
 #include <mutex>
@@ -48,7 +50,9 @@ using namespace fiction::utils::math;
 // 4 SiDBs within an 11x11 spanned area. The simulation is then executed using both simulators, and the results
 // are compared.
 
-int main()  // NOLINT
+/** @brief Runs the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     const auto all_sites_in_region = sites_in_area(site_at_row(0, 0), site_at_row(10, 10));
 
@@ -136,4 +140,11 @@ int main()  // NOLINT
                              quickexact_non_equivalence_counter, clustercomplete_non_equivalence_counter);
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

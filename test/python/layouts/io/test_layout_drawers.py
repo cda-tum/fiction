@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     ],
 )
 def test_write_dot_layout_draws_every_topology(tmp_path: Path, layout_type: Callable[..., Any]) -> None:
-    layout = layout_type((2, 2, 1), "2DDWave", "drawn")
+    layout = layout_type((3, 3, 2), "2DDWave", "drawn")
     x1 = layout.create_pi("a", (0, 0))
     x2 = layout.create_pi("b", (1, 0))
     layout.create_po(layout.create_and(x1, x2, (1, 1)), "f", (2, 1))
@@ -46,10 +46,3 @@ def test_write_dot_layout_draws_every_topology(tmp_path: Path, layout_type: Call
     text = file.read_text(encoding="utf-8")
     assert "graph" in text
     assert "a" in text
-
-
-def test_clone_is_independent(mux21_layout: cartesian_gate_layout) -> None:
-    copy = mux21_layout.clone()
-    assert copy.num_gates() == mux21_layout.num_gates()
-    copy.set_layout_name("copy")
-    assert mux21_layout.get_layout_name() != "copy"

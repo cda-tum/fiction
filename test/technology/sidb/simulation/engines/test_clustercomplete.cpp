@@ -41,6 +41,9 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+
 #include <algorithm>
 #include <any>
 #include <cstdint>
@@ -119,282 +122,6 @@ static bool verify_clustercomplete_result_by_charge_indices(const charge_distrib
                                [&](const auto& cc_cd) { return cc_cd.charge_index(3) == qe_cd.charge_index(3); });
 }
 
-TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]")
-{
-    layout lyt{};
-    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({4, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
-
-    SECTION("Base 2")
-    {
-        const result& qe_res = quickexact(
-            lyt, quickexact_params{.sim_params            = simulation_parameters{2},
-                                   .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
-        const result& cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{2}});
-
-        REQUIRE(qe_res.charge_distributions.size() == 1);
-        CHECK(cc_res.charge_distributions.size() == 1);
-
-        for (const auto& cds : qe_res.charge_distributions)
-        {
-            CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
-            CHECK(verify_clustercomplete_result_by_charge_indices(cds, cc_res.charge_distributions));
-        }
-    }
-
-    SECTION("Base 3")
-    {
-        const result& qe_res = quickexact(
-            lyt, quickexact_params{.sim_params            = simulation_parameters{3},
-                                   .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
-        const result& cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{3}});
-
-        REQUIRE(qe_res.charge_distributions.size() == 2);
-        CHECK(cc_res.charge_distributions.size() == 2);
-
-        for (const auto& cds : qe_res.charge_distributions)
-        {
-            CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
-            CHECK(verify_clustercomplete_result_by_charge_indices(cds, cc_res.charge_distributions));
-        }
-    }
-}
-
-TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]")
-{
-    hex_gate_clk_lyt gate_lyt{arrangement::EVEN_ROW, {2, 2}};
-    gate_lyt.create_nand({}, {}, {0, 0});
-    gate_lyt.create_nand({}, {}, {2, 2});
-
-    const auto cell_lyt = (apply_gate_library<bestagon_library>(gate_lyt));
-
-    clustercomplete_params params{.sim_params = simulation_parameters{2}};
-
-    SECTION("Base 2, multiple threads")
-    {
-        const result& res = clustercomplete(cell_lyt, params);
-
-        CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, ERROR_MARGIN));
-    }
-
-    SECTION("Base 3, multiple threads")
-    {
-        params.sim_params.base = 3;
-
-        const result& res = clustercomplete(cell_lyt, params);
-
-        CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, ERROR_MARGIN));
-    }
-
-    // from now on, we use only one thread
-    params.available_threads = 1;
-
-    SECTION("Base 2, single thread")
-    {
-        params.sim_params.base = 2;
-
-        const result& res = clustercomplete(cell_lyt, params);
-
-        CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, ERROR_MARGIN));
-    }
-
-    SECTION("Base 3, single thread")
-    {
-        params.sim_params.base = 3;
-
-        const result& res = clustercomplete(cell_lyt, params);
-
-        CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, ERROR_MARGIN));
-    }
-}
-
-TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 under varying physical parameters",
-          "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
-
-    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.28}};
-
-    SECTION("Check if ClusterComplete is deterministic")
-    {
-        std::set<double>   ground_state{};
-        std::set<uint64_t> charge_index{};
-#ifdef NDEBUG
-        for (auto i = 0; i < 10000; i++)
-#else
-        for (auto i = 0; i < 100; i++)
-#endif
-        {
-            const auto  simulation_results = clustercomplete(lyt, params);
-            const auto& charge_lyt_first   = simulation_results.charge_distributions.front();
-            ground_state.insert(round_to_n_decimal_places(charge_lyt_first.energy(), 6));
-            charge_index.insert(charge_lyt_first.charge_index(3));
-        }
-        CHECK(ground_state.size() == 1);
-        CHECK(charge_index.size() == 1);
-    }
-
-    SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
-    {
-        params.sim_params.base = 3;
-        lyt.assign_sidb({15, 2, 1}, dot_tag::NORMAL);
-        lyt.assign_sidb({15, 2, 0}, dot_tag::NORMAL);
-
-        const auto simulation_results = clustercomplete(lyt, params);
-        // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state =
-            std::ranges::min_element(simulation_results.charge_distributions,
-                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
-
-        CHECK(ground_state->num_positive_sidbs() > 0);
-    }
-
-    SECTION("Standard Physical Parameters")
-    {
-        const auto simulation_results = clustercomplete(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
-    }
-
-    SECTION("Increased mu_minus")
-    {
-        params.sim_params.mu_minus = -0.1;
-
-        const auto simulation_results = clustercomplete(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.061037632, ERROR_MARGIN));
-    }
-
-    SECTION("Decreased mu_minus")
-    {
-        params.sim_params.mu_minus = -0.7;
-
-        const auto simulation_results = clustercomplete(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(2.069954113, ERROR_MARGIN));
-    }
-
-    SECTION("Decreased lambda_tf")
-    {
-        params.sim_params.lambda_tf = 1;
-
-        const auto simulation_results = clustercomplete(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.5432404075, ERROR_MARGIN));
-    }
-
-    SECTION("Increased lambda_tf")
-    {
-        params.sim_params.lambda_tf = 10;
-
-        const auto simulation_results = clustercomplete(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.2930574885, ERROR_MARGIN));
-    }
-
-    SECTION("Increased epsilon_r")
-    {
-        params.sim_params.epsilon_r = 10;
-
-        const auto simulation_results = clustercomplete(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.505173434, ERROR_MARGIN));
-    }
-}
-
 TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (default initialization) in proximity",
     "[clustercomplete]")
@@ -441,30 +168,6 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one negatively charge def
     REQUIRE(simulation_results.charge_distributions.size() == 1);
     CHECK(simulation_results.lyt.num_defects() == 1);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == charge_state::POSITIVE);
-}
-
-TEST_CASE("four SiDBs ClusterComplete simulation with one negatively charge defect (changed mu_minus) in proximity",
-          "[clustercomplete]")
-{
-    layout lyt{};
-    lyt.assign_sidb({-2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.15}};
-
-    lyt.assign_defect({0, 0, 1},
-                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(simulation_results.charge_distributions.size() == 1);
-    CHECK(simulation_results.lyt.num_defects() == 1);
-    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == charge_state::NEUTRAL);
-    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(1) == charge_state::NEUTRAL);
-    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(2) == charge_state::NEUTRAL);
-    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(3) == charge_state::NEUTRAL);
 }
 
 TEST_CASE("Single SiDB ClusterComplete simulation with one highly negatively charge defect in proximity",
@@ -593,6 +296,23 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == charge_state::NEGATIVE);
 }
 
+TEST_CASE("ClusterComplete with one SiDB and one negatively charged defect in proximity", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
+    lyt.assign_defect({-1, -1, 1},
+                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEUTRAL);
+}
+
 TEST_CASE("ClusterComplete simulation of a BDL pair", "[clustercomplete]")
 {
     layout lyt{};
@@ -624,364 +344,31 @@ TEST_CASE("ClusterComplete simulation of a BDL pair", "[clustercomplete]")
     }
 }
 
-TEST_CASE("ClusterComplete simulation of a two-pair BDL wire with one perturber", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({11, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({13, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({17, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({19, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-    auto       size_before        = simulation_results.charge_distributions.size();
-
-    const auto simulation_results_new = clustercomplete(lyt, params);
-    auto       size_after             = simulation_results_new.charge_distributions.size();
-
-    CHECK(size_before == 1);
-    CHECK(size_after == 1);
-
-    REQUIRE(!simulation_results_new.charge_distributions.empty());
-
-    const auto& charge_lyt_first = simulation_results_new.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({5, 0, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({11, 0, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({13, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({17, 0, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == charge_state::NEGATIVE);
-
-    CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.2460493219, ERROR_MARGIN));
-}
-
-TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({15, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
-
-    const auto simulation_results = clustercomplete(lyt, sim_params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({5, 0, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({15, 0, 0}) == charge_state::NEGATIVE);
-
-    CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.1152677452, ERROR_MARGIN));
-}
-
-TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({-11, -2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({-10, -1, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({-4, -1, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({-3, -2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({-7, 0, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({-7, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({-7, 3, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
-
-    const auto simulation_results = clustercomplete(lyt, sim_params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({-11, -2, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({-10, -1, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({-3, -2, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({-4, -1, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({-7, 0, 1}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({-7, 1, 1}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == charge_state::NEGATIVE);
-
-    CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.3191788254, ERROR_MARGIN));
-}
-
-TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
-          "distribution",
+TEST_CASE("ClusterComplete simulation of two SiDBs placed directly next to each other with non-realistic relative "
+          "permittivity",
           "[clustercomplete]")
 {
     layout lyt{};
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
 
-    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    SECTION("Base 2")
+    {
+        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 1.0e-3}};
 
-    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
+        const auto simulation_results = clustercomplete(lyt, params);
 
-    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+        CHECK(simulation_results.charge_distributions.empty());
+    }
 
-    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    SECTION("Base 3")
+    {
+        const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32, 1.0e-3}};
 
-    const clustercomplete_params sim_params{.sim_params = simulation_parameters{2, -0.28}};
+        const auto simulation_results = clustercomplete(lyt, params);
 
-    const auto simulation_results = clustercomplete(lyt, sim_params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-
-    CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
-}
-
-TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and local external potential at "
-          "perturber",
-          "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
-
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.local_external_potential.insert({{{6, 2, 0}, -0.5}});
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
-}
-
-TEST_CASE("ClusterComplete simulation  of a Y-shape SiDB OR gate with input 01 and global external potential",
-          "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
-
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.global_potential = -0.5;
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-}
-
-TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and global external potential (high)",
-          "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
-
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.global_potential = -2;
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::POSITIVE);
-    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::POSITIVE);
-}
-
-TEST_CASE("ClusterComplete simulation of four SiDBs (far away)", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({20, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == charge_state::NEGATIVE);
-}
-
-TEST_CASE("ClusterComplete with one SiDB and one negatively charged defect in proximity", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
-    lyt.assign_defect({-1, -1, 1},
-                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEUTRAL);
-}
-
-TEST_CASE("ClusterComplete simulation  of four SiDBs (far away) with one negatively charged defects in proximity",
-          "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-    lyt.assign_defect({1, 0, 0},
-                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({10, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({20, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == charge_state::NEGATIVE);
-}
-
-TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with two negatively charged defects in proximity",
-          "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-
-    lyt.assign_defect({1, 0, 0},
-                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
-    lyt.assign_defect({31, 0, 0},
-                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    CHECK(simulation_results.lyt.num_defects() == 2);
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({10, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({20, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == charge_state::NEUTRAL);
-}
-
-TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with one negatively and positively charged "
-          "defect in proximity",
-          "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-
-    lyt.assign_defect({1, 0, 0},
-                      defect{defect_type::UNKNOWN, 1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
-    lyt.assign_defect({31, 0, 0},
-                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    CHECK(simulation_results.lyt.num_defects() == 2);
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({10, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({20, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == charge_state::NEUTRAL);
+        CHECK(simulation_results.charge_distributions.size() == 2);
+    }
 }
 
 TEST_CASE("three DBs next to each other", "[clustercomplete]")
@@ -1030,144 +417,6 @@ TEST_CASE("three DBs next to each other, small mu-", "[clustercomplete]")
     CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == charge_state::NEGATIVE);
 }
 
-TEST_CASE("four DBs next to each other, small mu-", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(simulation_results.charge_distributions.size() == 4);
-
-    const auto excited_state =
-        *std::ranges::max_element(simulation_results.charge_distributions,
-                                  [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
-    CHECK_THAT(excited_state.energy(), Catch::Matchers::WithinAbs(0, ERROR_MARGIN));
-}
-
-TEST_CASE("seven DBs next to each other, small mu-", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({4, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({5, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({6, 3, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(simulation_results.charge_distributions.size() == 10);
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-    CHECK(charge_lyt_first.energy() < 0.08);
-    CHECK(charge_lyt_first.energy() > -2.74);
-}
-
-TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    CHECK(simulation_results.charge_distributions.size() == 17);
-}
-
-TEST_CASE("7 DBs next to each other | only one physically valid charge distribution with only one neutrally charged DB",
-          "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({-6, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 4, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({4, 6, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 3, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({-8, -3, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({-1, -1, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({0, 2, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    CHECK(simulation_results.charge_distributions.size() == 1);
-}
-
-TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.1}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    CHECK(simulation_results.charge_distributions.size() == 2);
-}
-
-TEST_CASE("6 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({-1, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    CHECK(lyt.num_dots() == 6);
-
-    CHECK(simulation_results.charge_distributions.size() == 3);
-}
-
-TEST_CASE("4 DBs close to each other", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({3, 0, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({5, 0, 1}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    CHECK(!simulation_results.charge_distributions.empty());
-}
-
 TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
 {
 
@@ -1185,44 +434,6 @@ TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clusterco
     {
         CHECK(round_to_n_decimal_places(layout.energy(), 1) <= 0);
     }
-}
-
-TEST_CASE("13 DBs which are all negatively charged", "[clustercomplete]")
-{
-    layout lyt{};
-
-    lyt.assign_sidb({26, 10, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({23, 19, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({0, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({38, 10, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({11, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({13, 2, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({40, 19, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({16, 9, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({19, 16, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({5, 8, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({8, 15, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({39, 9, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({30, 15, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    REQUIRE(!simulation_results.charge_distributions.empty());
-
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-    charge_lyt_first.foreach_dot([&](const auto& cell)
-                                 { CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE); });
-
-    CHECK(lyt.num_dots() == 13);
 }
 
 TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
@@ -1447,31 +658,416 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
     }
 }
 
-TEST_CASE("ClusterComplete simulation of two SiDBs placed directly next to each other with non-realistic relative "
-          "permittivity",
-          "[clustercomplete]")
+TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]")
 {
     layout lyt{};
-    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
 
     SECTION("Base 2")
     {
-        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 1.0e-3}};
+        const result& qe_res = quickexact(
+            lyt, quickexact_params{.sim_params            = simulation_parameters{2},
+                                   .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
+        const result& cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{2}});
 
-        const auto simulation_results = clustercomplete(lyt, params);
+        REQUIRE(qe_res.charge_distributions.size() == 1);
+        CHECK(cc_res.charge_distributions.size() == 1);
 
-        CHECK(simulation_results.charge_distributions.empty());
+        for (const auto& cds : qe_res.charge_distributions)
+        {
+            CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
+            CHECK(verify_clustercomplete_result_by_charge_indices(cds, cc_res.charge_distributions));
+        }
     }
 
     SECTION("Base 3")
     {
-        const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32, 1.0e-3}};
+        const result& qe_res = quickexact(
+            lyt, quickexact_params{.sim_params            = simulation_parameters{3},
+                                   .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
+        const result& cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{3}});
 
-        const auto simulation_results = clustercomplete(lyt, params);
+        REQUIRE(qe_res.charge_distributions.size() == 2);
+        CHECK(cc_res.charge_distributions.size() == 2);
 
-        CHECK(simulation_results.charge_distributions.size() == 2);
+        for (const auto& cds : qe_res.charge_distributions)
+        {
+            CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
+            CHECK(verify_clustercomplete_result_by_charge_indices(cds, cc_res.charge_distributions));
+        }
     }
+}
+
+TEST_CASE("ClusterComplete simulation of four SiDBs (far away)", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({20, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == charge_state::NEGATIVE);
+}
+
+TEST_CASE("four DBs next to each other, small mu-", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 4);
+
+    const auto excited_state =
+        *std::ranges::max_element(simulation_results.charge_distributions,
+                                  [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+    CHECK_THAT(excited_state.energy(), Catch::Matchers::WithinAbs(0, ERROR_MARGIN));
+}
+
+TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.1}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.size() == 2);
+}
+
+TEST_CASE("4 DBs close to each other", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 1}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    CHECK(!simulation_results.charge_distributions.empty());
+}
+
+TEST_CASE("four SiDBs ClusterComplete simulation with one negatively charge defect (changed mu_minus) in proximity",
+          "[clustercomplete]")
+{
+    layout lyt{};
+    lyt.assign_sidb({-2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.15}};
+
+    lyt.assign_defect({0, 0, 1},
+                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.lyt.num_defects() == 1);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == charge_state::NEUTRAL);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(1) == charge_state::NEUTRAL);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(2) == charge_state::NEUTRAL);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(3) == charge_state::NEUTRAL);
+}
+
+TEST_CASE("ClusterComplete simulation  of four SiDBs (far away) with one negatively charged defects in proximity",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
+    lyt.assign_defect({1, 0, 0},
+                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({20, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == charge_state::NEGATIVE);
+}
+
+TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with two negatively charged defects in proximity",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
+
+    lyt.assign_defect({1, 0, 0},
+                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
+    lyt.assign_defect({31, 0, 0},
+                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    CHECK(simulation_results.lyt.num_defects() == 2);
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({20, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == charge_state::NEUTRAL);
+}
+
+TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with one negatively and positively charged "
+          "defect in proximity",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({30, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
+
+    lyt.assign_defect({1, 0, 0},
+                      defect{defect_type::UNKNOWN, 1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
+    lyt.assign_defect({31, 0, 0},
+                      defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    CHECK(simulation_results.lyt.num_defects() == 2);
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({20, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == charge_state::NEUTRAL);
+}
+
+TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({15, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
+
+    const auto simulation_results = clustercomplete(lyt, sim_params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({5, 0, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({15, 0, 0}) == charge_state::NEGATIVE);
+
+    CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.1152677452, ERROR_MARGIN));
+}
+
+TEST_CASE("ClusterComplete simulation of a two-pair BDL wire with one perturber", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({11, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({13, 0, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({17, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({19, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+    auto       size_before        = simulation_results.charge_distributions.size();
+
+    const auto simulation_results_new = clustercomplete(lyt, params);
+    auto       size_after             = simulation_results_new.charge_distributions.size();
+
+    CHECK(size_before == 1);
+    CHECK(size_after == 1);
+
+    REQUIRE(!simulation_results_new.charge_distributions.empty());
+
+    const auto& charge_lyt_first = simulation_results_new.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({5, 0, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({7, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({11, 0, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({13, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({17, 0, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == charge_state::NEGATIVE);
+
+    CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.2460493219, ERROR_MARGIN));
+}
+
+TEST_CASE("6 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({-1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    CHECK(lyt.num_dots() == 6);
+
+    CHECK(simulation_results.charge_distributions.size() == 3);
+}
+
+TEST_CASE("seven DBs next to each other, small mu-", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 3, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 10);
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+    CHECK(charge_lyt_first.energy() < 0.08);
+    CHECK(charge_lyt_first.energy() > -2.74);
+}
+
+TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.size() == 17);
+}
+
+TEST_CASE("7 DBs next to each other | only one physically valid charge distribution with only one neutrally charged DB",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({-6, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 4, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({4, 6, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({-8, -3, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({-1, -1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({0, 2, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.size() == 1);
+}
+
+TEST_CASE("13 DBs which are all negatively charged", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({26, 10, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({23, 19, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({0, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({38, 10, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({11, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({13, 2, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({40, 19, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 9, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({19, 16, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 8, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({8, 15, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({39, 9, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({30, 15, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    charge_lyt_first.foreach_dot([&](const auto& cell)
+                                 { CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE); });
+
+    CHECK(lyt.num_dots() == 13);
 }
 
 TEST_CASE("ClusterComplete simulation of positively charged SiDBs", "[clustercomplete]")
@@ -1494,6 +1090,541 @@ TEST_CASE("ClusterComplete simulation of positively charged SiDBs", "[clustercom
     const auto simulation_results = clustercomplete(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 4);
+}
+
+TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({-11, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-10, -1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-4, -1, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({-3, -2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({-7, 0, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({-7, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({-7, 3, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
+
+    const auto simulation_results = clustercomplete(lyt, sim_params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({-11, -2, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({-10, -1, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({-3, -2, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({-4, -1, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({-7, 0, 1}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({-7, 1, 1}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == charge_state::NEGATIVE);
+
+    CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.3191788254, ERROR_MARGIN));
+}
+
+TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
+          "distribution",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+
+    const clustercomplete_params sim_params{.sim_params = simulation_parameters{2, -0.28}};
+
+    const auto simulation_results = clustercomplete(lyt, sim_params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
+
+    CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
+}
+
+TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and local external potential at "
+          "perturber",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
+
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
+    params.local_external_potential.insert({{{6, 2, 0}, -0.5}});
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
+}
+
+TEST_CASE("ClusterComplete simulation  of a Y-shape SiDB OR gate with input 01 and global external potential",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
+
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
+    params.global_potential = -0.5;
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
+}
+
+TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and global external potential (high)",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
+
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
+    params.global_potential = -2;
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::POSITIVE);
+    CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::POSITIVE);
+}
+
+TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 under varying physical parameters",
+          "[clustercomplete]")
+{
+    layout lyt{};
+
+    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({12, 3, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({14, 2, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 5, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({10, 6, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
+
+    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.28}};
+
+    SECTION("Check if ClusterComplete is deterministic")
+    {
+        std::set<double>   ground_state{};
+        std::set<uint64_t> charge_index{};
+#ifdef NDEBUG
+        for (auto i = 0; i < 10000; i++)
+#else
+        for (auto i = 0; i < 100; i++)
+#endif
+        {
+            const auto  simulation_results = clustercomplete(lyt, params);
+            const auto& charge_lyt_first   = simulation_results.charge_distributions.front();
+            ground_state.insert(round_to_n_decimal_places(charge_lyt_first.energy(), 6));
+            charge_index.insert(charge_lyt_first.charge_index(3));
+        }
+        CHECK(ground_state.size() == 1);
+        CHECK(charge_index.size() == 1);
+    }
+
+    SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
+    {
+        params.sim_params.base = 3;
+        lyt.assign_sidb({15, 2, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({15, 2, 0}, dot_tag::NORMAL);
+
+        const auto simulation_results = clustercomplete(lyt, params);
+        // find the ground state, which is the charge distribution with the lowest energy
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+
+        CHECK(ground_state->num_positive_sidbs() > 0);
+    }
+
+    SECTION("Standard Physical Parameters")
+    {
+        const auto simulation_results = clustercomplete(lyt, params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
+
+        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
+    }
+
+    SECTION("Increased mu_minus")
+    {
+        params.sim_params.mu_minus = -0.1;
+
+        const auto simulation_results = clustercomplete(lyt, params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
+
+        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.061037632, ERROR_MARGIN));
+    }
+
+    SECTION("Decreased mu_minus")
+    {
+        params.sim_params.mu_minus = -0.7;
+
+        const auto simulation_results = clustercomplete(lyt, params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
+
+        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(2.069954113, ERROR_MARGIN));
+    }
+
+    SECTION("Decreased lambda_tf")
+    {
+        params.sim_params.lambda_tf = 1;
+
+        const auto simulation_results = clustercomplete(lyt, params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
+
+        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.5432404075, ERROR_MARGIN));
+    }
+
+    SECTION("Increased lambda_tf")
+    {
+        params.sim_params.lambda_tf = 10;
+
+        const auto simulation_results = clustercomplete(lyt, params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
+
+        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.2930574885, ERROR_MARGIN));
+    }
+
+    SECTION("Increased epsilon_r")
+    {
+        params.sim_params.epsilon_r = 10;
+
+        const auto simulation_results = clustercomplete(lyt, params);
+
+        REQUIRE(!simulation_results.charge_distributions.empty());
+        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
+
+        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.505173434, ERROR_MARGIN));
+    }
+}
+
+TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]")
+{
+    hex_gate_clk_lyt gate_lyt{arrangement::EVEN_ROW, {3, 3}};
+    /** @brief NAND function with two declared input slots. */
+    kitty::dynamic_truth_table nand_function{2};
+    kitty::create_from_hex_string(nand_function, "7");
+    gate_lyt.create_gate({}, nand_function, {0, 0});
+    gate_lyt.create_gate({}, nand_function, {2, 2});
+
+    REQUIRE(gate_lyt.num_gates() == 2);
+    gate_lyt.foreach_gate(
+        [&gate_lyt](const auto id)
+        {
+            REQUIRE(gate_lyt.is_nand(id));
+            REQUIRE(gate_lyt.input_count(id) == 2);
+            CHECK_FALSE(gate_lyt.source({id, 0}).has_value());
+            CHECK_FALSE(gate_lyt.source({id, 1}).has_value());
+        });
+
+    const auto cell_lyt = apply_gate_library<bestagon_library>(gate_lyt);
+
+    clustercomplete_params params{.sim_params = simulation_parameters{2}};
+
+    SECTION("Base 2, multiple threads")
+    {
+        const result& res = clustercomplete(cell_lyt, params);
+
+        CHECK(res.charge_distributions.size() == 81);
+        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, ERROR_MARGIN));
+    }
+
+    SECTION("Base 3, multiple threads")
+    {
+        params.sim_params.base = 3;
+
+        const result& res = clustercomplete(cell_lyt, params);
+
+        CHECK(res.charge_distributions.size() == 81);
+        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, ERROR_MARGIN));
+    }
+
+    // from now on, we use only one thread
+    params.available_threads = 1;
+
+    SECTION("Base 2, single thread")
+    {
+        params.sim_params.base = 2;
+
+        const result& res = clustercomplete(cell_lyt, params);
+
+        CHECK(res.charge_distributions.size() == 81);
+        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, ERROR_MARGIN));
+    }
+
+    SECTION("Base 3, single thread")
+    {
+        params.sim_params.base = 3;
+
+        const result& res = clustercomplete(cell_lyt, params);
+
+        CHECK(res.charge_distributions.size() == 81);
+        CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, ERROR_MARGIN));
+    }
+}
+
+TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[clustercomplete]")
+{
+    layout lyt{lattice::si_111_1x1()};
+    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({1, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 2, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({6, 1, 1}, dot_tag::NORMAL);
+    lyt.assign_sidb({5, 2, 1}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({4, 8, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({4, 10, 0}, dot_tag::NORMAL);
+
+    lyt.assign_sidb({4, 14, 0}, dot_tag::NORMAL);
+
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    const auto ground_state = simulation_results.groundstates();
+    REQUIRE(ground_state.size() == 1);
+
+    CHECK(ground_state.front().get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({1, 1, 1}) == charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({2, 2, 1}) == charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({8, 0, 0}) == charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({6, 1, 1}) == charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({5, 2, 1}) == charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({4, 8, 0}) == charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({4, 10, 0}) == charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({4, 14, 0}) == charge_state::NEGATIVE);
+}
+
+TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomplete]")
+{
+    SECTION("no input applied")
+    {
+        const auto                   lyt = blueprints::and_gate_111();
+        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
+
+        const auto simulation_results = clustercomplete(lyt, params);
+
+        const auto ground_state = simulation_results.groundstates();
+        REQUIRE(ground_state.size() == 1);
+
+        CHECK(ground_state.front().get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({1, 1, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({25, 0, 0}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({23, 1, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({4, 4, 0}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 4, 0}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({5, 5, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({19, 5, 1}) == charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({17, 8, 0}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({8, 8, 0}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({9, 9, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({15, 9, 1}) == charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({10, 18, 0}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({13, 17, 0}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({16, 18, 0}) == charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({15, 21, 1}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({17, 23, 0}) == charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({19, 25, 1}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 27, 0}) == charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({23, 29, 1}) == charge_state::NEGATIVE);
+    }
+
+    SECTION("10 input applied")
+    {
+        auto lyt = blueprints::and_gate_111();
+        lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
+        lyt.assign_sidb({23, 1, 1}, dot_tag::EMPTY);
+
+        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
+
+        const auto simulation_results = clustercomplete(lyt, params);
+        CHECK(simulation_results.charge_distributions.size() == 7);
+
+        const auto ground_state = simulation_results.groundstates();
+
+        REQUIRE(ground_state.size() == 1);
+
+        CHECK(ground_state.front().get_charge_state({1, 1, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({25, 0, 0}) == charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({4, 4, 0}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 4, 0}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({5, 5, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({19, 5, 1}) == charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({8, 8, 0}) == charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({17, 8, 0}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({9, 9, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({15, 9, 1}) == charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({10, 18, 0}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({13, 17, 0}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({16, 18, 0}) == charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({15, 21, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({17, 23, 0}) == charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({19, 25, 1}) == charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({21, 27, 0}) == charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({23, 29, 1}) == charge_state::NEGATIVE);
+    }
 }
 
 TEST_CASE("Special test cases", "[clustercomplete]")
@@ -1701,121 +1832,6 @@ TEST_CASE("Special test cases", "[clustercomplete]")
                           [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         CHECK(cc_res.charge_distributions.size() == 2);
-    }
-}
-
-TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[clustercomplete]")
-{
-    layout lyt{lattice::si_111_1x1()};
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({1, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({2, 2, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({6, 1, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({5, 2, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({4, 8, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({4, 10, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({4, 14, 0}, dot_tag::NORMAL);
-
-    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
-
-    const auto simulation_results = clustercomplete(lyt, params);
-
-    const auto ground_state = simulation_results.groundstates();
-    REQUIRE(ground_state.size() == 1);
-
-    CHECK(ground_state.front().get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(ground_state.front().get_charge_state({1, 1, 1}) == charge_state::NEUTRAL);
-    CHECK(ground_state.front().get_charge_state({2, 2, 1}) == charge_state::NEGATIVE);
-    CHECK(ground_state.front().get_charge_state({8, 0, 0}) == charge_state::NEGATIVE);
-    CHECK(ground_state.front().get_charge_state({6, 1, 1}) == charge_state::NEUTRAL);
-    CHECK(ground_state.front().get_charge_state({5, 2, 1}) == charge_state::NEGATIVE);
-    CHECK(ground_state.front().get_charge_state({4, 8, 0}) == charge_state::NEUTRAL);
-    CHECK(ground_state.front().get_charge_state({4, 10, 0}) == charge_state::NEGATIVE);
-    CHECK(ground_state.front().get_charge_state({4, 14, 0}) == charge_state::NEGATIVE);
-}
-
-TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomplete]")
-{
-    SECTION("no input applied")
-    {
-        const auto                   lyt = blueprints::and_gate_111();
-        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
-
-        const auto simulation_results = clustercomplete(lyt, params);
-
-        const auto ground_state = simulation_results.groundstates();
-        REQUIRE(ground_state.size() == 1);
-
-        CHECK(ground_state.front().get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({1, 1, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({25, 0, 0}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({23, 1, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({4, 4, 0}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({21, 4, 0}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({5, 5, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({19, 5, 1}) == charge_state::NEGATIVE);
-
-        CHECK(ground_state.front().get_charge_state({17, 8, 0}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({8, 8, 0}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({9, 9, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({15, 9, 1}) == charge_state::NEGATIVE);
-
-        CHECK(ground_state.front().get_charge_state({10, 18, 0}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({13, 17, 0}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({16, 18, 0}) == charge_state::NEGATIVE);
-
-        CHECK(ground_state.front().get_charge_state({15, 21, 1}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({17, 23, 0}) == charge_state::NEGATIVE);
-
-        CHECK(ground_state.front().get_charge_state({19, 25, 1}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({21, 27, 0}) == charge_state::NEGATIVE);
-
-        CHECK(ground_state.front().get_charge_state({23, 29, 1}) == charge_state::NEGATIVE);
-    }
-
-    SECTION("10 input applied")
-    {
-        auto lyt = blueprints::and_gate_111();
-        lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
-        lyt.assign_sidb({23, 1, 1}, dot_tag::EMPTY);
-
-        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
-
-        const auto simulation_results = clustercomplete(lyt, params);
-        CHECK(simulation_results.charge_distributions.size() == 7);
-
-        const auto ground_state = simulation_results.groundstates();
-
-        REQUIRE(ground_state.size() == 1);
-
-        CHECK(ground_state.front().get_charge_state({1, 1, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({25, 0, 0}) == charge_state::NEGATIVE);
-
-        CHECK(ground_state.front().get_charge_state({4, 4, 0}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({21, 4, 0}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({5, 5, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({19, 5, 1}) == charge_state::NEUTRAL);
-
-        CHECK(ground_state.front().get_charge_state({8, 8, 0}) == charge_state::NEUTRAL);
-        CHECK(ground_state.front().get_charge_state({17, 8, 0}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({9, 9, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({15, 9, 1}) == charge_state::NEUTRAL);
-
-        CHECK(ground_state.front().get_charge_state({10, 18, 0}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({13, 17, 0}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({16, 18, 0}) == charge_state::NEUTRAL);
-
-        CHECK(ground_state.front().get_charge_state({15, 21, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({17, 23, 0}) == charge_state::NEUTRAL);
-
-        CHECK(ground_state.front().get_charge_state({19, 25, 1}) == charge_state::NEGATIVE);
-        CHECK(ground_state.front().get_charge_state({21, 27, 0}) == charge_state::NEUTRAL);
-
-        CHECK(ground_state.front().get_charge_state({23, 29, 1}) == charge_state::NEGATIVE);
     }
 }
 

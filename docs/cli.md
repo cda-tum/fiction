@@ -59,9 +59,9 @@ Each command uses one row, including parallel executions. Counts combine all wor
 iterations, `opdom` reports fixed samples or dynamic point counts, and `clustercomplete` reports compositions.
 `temp` retains its outer phase progress. Nested simulations do not add rows.
 
-`exact` shows the tile dimensions of the most recently started active solver candidate on its aggregate row.
-The dimensions remain visible when the aspect-ratio count advances. `gold` shows total search-graph expansions
-and the dimensions and selected-objective cost of the best accepted solution. Neither search claims a completion
+`exact` shows the extent in tiles of the most recently started active solver candidate on its aggregate row.
+The extent remains visible when the aspect-ratio count advances. `gold` shows total search-graph expansions
+and the extent and selected-objective cost of the best accepted solution. Neither search claims a completion
 percentage. The `gold --progress` flag remains accepted for compatibility; Rich controls the display.
 
 ## Stores

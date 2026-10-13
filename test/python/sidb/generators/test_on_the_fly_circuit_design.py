@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 @pytest.fixture
 def and_circuit() -> hexagonal_gate_layout:
     """Return a placed AND circuit with two inputs and one output."""
-    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "ROW", "AND")
+    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "ROW", "AND")
     first = layout.create_pi("a", (0, 0, 0))
     second = layout.create_pi("b", (1, 0, 0))
     gate = layout.create_and(first, second, (1, 1, 0))
@@ -88,7 +88,9 @@ def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) 
 
     assert and_circuit.num_pis() == 2
     assert and_circuit.num_pos() == 1
-    assert and_circuit.is_and(and_circuit.get_node((1, 1, 0)))
+    gate = and_circuit.find_object((1, 1, 0))
+    assert gate is not None
+    assert and_circuit.is_and(gate)
     assert (gates.operational_params.timeout if per_gate else params.timeout) == 0
 
 
@@ -105,7 +107,7 @@ def test_invalid_timeout(timeout: float) -> None:
 @pytest.mark.parametrize("shift", [arrangement.ODD_COLUMN, arrangement.EVEN_COLUMN])
 def test_column_arrangements(shift: arrangement) -> None:
     """Circuit design rejects flat-top layouts instead of dropping their north/south wires."""
-    layout = hexagonal_gate_layout(shift, (0, 2, 0), "2DDWave")
+    layout = hexagonal_gate_layout(shift, (1, 3, 1), "2DDWave")
     first = layout.create_pi("x", (0, 0, 0))
     wire = layout.create_buf(first, (0, 1, 0))
     layout.create_po(wire, "y", (0, 2, 0))
@@ -134,7 +136,9 @@ def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -
     assert read_sqd_layout(str(output)).num_dots() == result.num_dots()
     assert and_circuit.num_pis() == 2
     assert and_circuit.num_pos() == 1
-    assert and_circuit.is_and(and_circuit.get_node((1, 1, 0)))
+    gate = and_circuit.find_object((1, 1, 0))
+    assert gate is not None
+    assert and_circuit.is_and(gate)
 
 
 def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:
@@ -149,8 +153,9 @@ def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:
 
 def test_unsupported_gate() -> None:
     """A majority gate reports its unsupported type and tile."""
-    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (1, 1, 0), "ROW")
-    layout.create_maj(0, 0, 0, (1, 1, 0))
+    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 1), "ROW")
+    first = layout.create_pi("a", (0, 0, 0))
+    layout.create_maj(first, first, first, (1, 1, 0))
     with pytest.raises(ValueError, match="Unsupported gate type at tile"):
         on_the_fly_sidb_circuit_design(layout)
 

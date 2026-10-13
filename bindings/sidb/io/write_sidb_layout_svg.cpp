@@ -61,8 +61,10 @@ void write_sidb_layout_svg(nanobind::module_& m)
         .value("HIDE_LATTICE", fiction::sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode_HIDE_LATTICE));
 
-    py::class_<fiction::sidb::io::write_sidb_layout_svg_params>(m, "write_sidb_layout_svg_params",
-                                                                DOC(fiction_sidb_io_write_sidb_layout_svg_params))
+    py::class_<fiction::sidb::io::write_sidb_layout_svg_params>(
+        m, "write_sidb_layout_svg_params",
+        pyfiction::progress_type_slots<fiction::sidb::io::write_sidb_layout_svg_params>(),
+        DOC(fiction_sidb_io_write_sidb_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::sidb::io::write_sidb_layout_svg_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER, "Receives serialization progress.")

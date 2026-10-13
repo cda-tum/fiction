@@ -23,7 +23,9 @@
 #include <fmt/format.h>
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <filesystem>
 #include <iostream>
 #include <span>
@@ -67,7 +69,8 @@ using namespace fiction::sidb::model;
  *   ./random_sidb_layout_generation --folder_name my_layouts --NW_x 0 --NW_y 0 --SE_x 20 --SE_y 20 --positive_charges
  * ALLOWED --lower 5 --upper 10 --num_layouts 10 --step 1
  */
-int main(int argc, const char* argv[])  // NOLINT
+int main(int argc, const char* argv[])
+try
 {
     std::unordered_map<std::string, std::string> options{{"--folder_name", "random_sidb_layouts/"},
                                                          {"--NW_x", "0"},
@@ -227,4 +230,11 @@ int main(int argc, const char* argv[])  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

@@ -67,6 +67,7 @@ void displacement_robustness_domain(nanobind::module_& m)
 
     py::class_<displacement_robustness_domain_params>(
         m, "displacement_robustness_domain_params",
+        pyfiction::progress_type_slots<displacement_robustness_domain_params>(),
         DOC(fiction_sidb_simulation_defects_displacement_robustness_domain_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("analysis_mode", &displacement_robustness_domain_params::analysis_mode,

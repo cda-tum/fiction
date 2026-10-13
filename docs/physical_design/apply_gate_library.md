@@ -16,7 +16,7 @@ surface take the surface as a `sidb::layout` and return one, carrying the surfac
 
 **Header:** `fiction/physical_design/apply_gate_library.hpp`
 
-```{doxygenfunction} fiction::physical_design::apply_gate_library(const GateLyt& lyt, utils::progress_callback on_progress = {})
+```{doxygenfunction} fiction::physical_design::apply_gate_library(const fiction::layouts::gate_level_layout<Geometry>& lyt, utils::progress_callback on_progress = {})
 
 ```
 
@@ -24,15 +24,15 @@ surface take the surface as a `sidb::layout` and return one, carrying the surfac
 
 ```
 
-```{doxygenfunction} fiction::physical_design::apply_gate_library_to_defective_surface(const GateLyt& lyt, const sidb::layout& defect_surface)
+```{doxygenfunction} fiction::physical_design::apply_gate_library_to_defective_surface(const fiction::layouts::gate_level_layout<Geometry>& lyt, const sidb::layout& defect_surface)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library(const GateLyt& lyt, const Params& params)
+```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library(const fiction::layouts::gate_level_layout<Geometry>& lyt, const Params& params)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library_to_defective_surface(const GateLyt& lyt, const Params& params, const sidb::layout& defect_surface)
+```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library_to_defective_surface(const fiction::layouts::gate_level_layout<Geometry>& lyt, const Params& params, const sidb::layout& defect_surface)
 
 ```
 

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from mnt.pyfiction.networks import technology_network
 
 
-def test_post_layout_optimization_default(mux21):
+def test_post_layout_optimization_default(mux21: technology_network) -> None:
     layout = orthogonal(mux21)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
@@ -34,7 +34,7 @@ def test_post_layout_optimization_default(mux21):
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-def test_post_layout_optimization_with_parameters(mux21):
+def test_post_layout_optimization_with_parameters(mux21: technology_network) -> None:
     layout = orthogonal(mux21)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
@@ -57,10 +57,10 @@ def test_post_layout_optimization_with_stats(mux21: technology_network) -> None:
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
-    assert stats.x_size_before == before.x() + 1
-    assert stats.y_size_before == before.y() + 1
-    assert stats.x_size_after == layout.x() + 1
-    assert stats.y_size_after == layout.y() + 1
+    assert stats.x_size_before == before.width()
+    assert stats.y_size_before == before.height()
+    assert stats.x_size_after == layout.width()
+    assert stats.y_size_after == layout.height()
     assert layout.area() < before.area()
     assert stats.area_improvement == pytest.approx(100 * (1 - layout.area() / before.area()), abs=0.01)
 
@@ -81,9 +81,9 @@ def test_post_layout_optimization_with_stats_and_parameters(mux21: technology_ne
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0
-    assert stats.x_size_before == before.x() + 1
-    assert stats.y_size_before == before.y() + 1
-    assert stats.x_size_after == layout.x() + 1
-    assert stats.y_size_after == layout.y() + 1
+    assert stats.x_size_before == before.width()
+    assert stats.y_size_before == before.height()
+    assert stats.x_size_after == layout.width()
+    assert stats.y_size_after == layout.height()
     assert layout.area() < before.area()
     assert stats.area_improvement == pytest.approx(100 * (1 - layout.area() / before.area()), abs=0.01)

@@ -59,8 +59,10 @@ void write_qca_layout_svg(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::qca::io::write_qca_layout_svg_params>(m, "write_qca_layout_svg_params",
-                                                              DOC(fiction_qca_io_write_qca_layout_svg_params))
+    py::class_<fiction::qca::io::write_qca_layout_svg_params>(
+        m, "write_qca_layout_svg_params",
+        pyfiction::progress_type_slots<fiction::qca::io::write_qca_layout_svg_params>(),
+        DOC(fiction_qca_io_write_qca_layout_svg_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::qca::io::write_qca_layout_svg_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER, "Receives serialization progress.")

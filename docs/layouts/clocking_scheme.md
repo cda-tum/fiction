@@ -20,8 +20,7 @@ can be overridden.
 ```{doxygenenum} fiction::layouts::clocking::num_clks
 ```
 
-```{doxygenenum} fiction::layouts::arrangement
-```
+The {doc}`hexagonal_layout` page documents the `arrangement` type.
 
 ## Pre-defined schemes
 
@@ -151,10 +150,6 @@ can be overridden.
 
 ```
 
-```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view scheme_name, const std::optional<arrangement> hex)
-
-```
-
-```{doxygenfunction} fiction::layouts::clocking::get_scheme(const std::string_view scheme_name)
+```{doxygenfunction} fiction::layouts::clocking::get_scheme
 
 ```
