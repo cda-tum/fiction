@@ -416,9 +416,6 @@ def gate_specification(
             raise CommandError(msg)
         spec = []
         for expression in args.expression:
-            if any("a" <= char <= "p" and ord(char) - ord("a") >= len(inputs) for char in expression):
-                msg = "an expression references an input absent from the layout"
-                raise CommandError(msg)
             table = synthesis.dynamic_truth_table(len(inputs))
             table.create_from_expression(expression)
             spec.append(table)
