@@ -570,9 +570,9 @@ TEST_CASE("Hexagonal empty geometry and signed edge arithmetic", "[hexagonal-lay
     CHECK(empty.adjacent_coordinates({0, 0}).empty());
     CHECK(empty.is_above({-1, -2, 7}, {-1, -2, 8}));
     auto copy = empty;
-    copy.resize({3, 4, 7});
+    copy.resize({3, 4, 2});
     CHECK(empty.get_extent() == layout_base::extent{});
-    CHECK(copy.get_extent() == layout_base::extent{3, 4, 7});
+    CHECK(copy.get_extent() == layout_base::extent{3, 4, 2});
     for (const auto x : {-2147483648ll, -2147483647ll, -7ll, -6ll, -5ll, -4ll, -3ll, -2ll, -1ll, 0ll, 1ll, 2ll, 3ll,
                          4ll, 5ll, 6ll, 7ll, 2147483647ll})
     {
