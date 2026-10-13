@@ -83,79 +83,9 @@ def exact(
     on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = ...,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout | None:
     """
-    An exact placement & routing approach using SMT solving as originally
-    proposed in \\"An Exact Method for Design Exploration of Quantum-dot
-    Cellular Automata\\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
-    and R. Drechsler in DATE 2018. A more extensive description can be
-    found in \\"Design Automation for Field-coupled Nanotechnologies\\" by
-    M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
-    Springer Nature in 2022.
-
-    Via incremental SMT calls, an optimal gate-level layout for a given
-    logic network will be found under constraints. Starting with :math:`n`
-    tiles, where :math:`n` is the number of logic network nodes, each
-    possible layout aspect ratio will be examined by factorization and
-    tested for routability with the SMT solver Z3. When no upper bound is
-    given, this approach will run until it finds a solution to the
-    placement & routing problem instance.
-
-    Note that there a combinations of constraints for which no valid
-    solution under the given parameters exist for the given logic network.
-    Such combinations cannot be detected automatically. It is, thus,
-    recommended to always set a timeout. Recommended settings include the
-    use of I/O pins located at the layout borders for better integration.
-    Most networks are not realizable without crossings enabled. Specifying
-    a regular clocking scheme SIGNIFICANTLY speeds up the process. 2DDWave
-    allows for the strictest constraints and, thereby, finds a solution
-    the quickest. However, for high input degree networks, no valid
-    solution exists when border I/Os are to be used unless global
-    synchronization is disabled. Generally, solutions are found the
-    fastest with the following settings: Crossings enabled, de-
-    synchronization enabled, and 2DDWave clocking given. Multi-threading
-    can sometimes speed up the process, especially for large networks.
-    Note that the more threads are being used, the less information can be
-    shared across the individual solver runs which destroys the benefits
-    of incremental solving and thereby, comparatively, slows down each
-    run.
-
-    The SMT instance works with a single layer of variables even though it
-    is possible to allow crossings in the solution. The reduced number of
-    variables saves a considerable amount of runtime. That's why
-    `layout.foreach_ground_tile()` is used even though the model will be
-    mapped to a 3-dimensional layout afterwards. Generally, the algorithm
-    incorporates quite a few encoding optimizations to be as performant as
-    possible on various layout topologies and clocking schemes.
-
-    The approach applies to any data structures that implement the
-    necessary functions to comply with `is_network_type` and concrete
-    gate-level layouts, respectively. It is, thereby, mostly technology-
-    independent but can make certain assumptions if needed, for instance
-    for ToPoliNano-compliant circuits.
-
-    This approach requires the Z3 SMT solver to be installed on the
-    system. Due to this circumstance, it is excluded from (CLI)
-    compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
-    cmake call.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in too large to be handled by the specified clocking
-    scheme.
-
-    Args:
-        ntk: The network that is to place and route.
-        pst: Statistics.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit if one is found under the given parameters;
-        `std::nullopt`, otherwise.
-
-    Raises:
-        std::invalid_argument: If `Lyt` is a shifted Cartesian or
-                               hexagonal layout and
-                               `layout_arrangement` is empty.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Place and route a technology network with SMT solving.
+    The layout_type keyword selects a registered gate-layout class.
+    Returns a layout or None when the search finds no solution within its bounds.
     """
 
 @overload
@@ -212,27 +142,36 @@ def exact(
 def exact(
     network: mnt.pyfiction.networks.technology_network,
     *,
-    layout_type: object,
+    layout_type: type[
+        mnt.pyfiction.layouts.cartesian_gate_layout
+        | mnt.pyfiction.layouts.shifted_cartesian_gate_layout
+        | mnt.pyfiction.layouts.hexagonal_gate_layout
+    ],
     statistics: exact_stats | None = None,
-    scheme: str = "2DDWave",
-    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = None,
-    upper_bound_area: int = 65535,
-    upper_bound_x: int = 65535,
-    upper_bound_y: int = 65535,
-    fixed_size: bool = False,
-    num_threads: int = 1,
-    synchronization_elements: bool = False,
-    crossings: bool = False,
-    border_io: bool = False,
-    straight_inverters: bool = False,
-    desynchronize: bool = False,
-    minimize_wires: bool = False,
-    minimize_crossings: bool = False,
-    timeout: int = 4294967,
+    scheme: str = ...,
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ...,
+    upper_bound_area: int = ...,
+    upper_bound_x: int = ...,
+    upper_bound_y: int = ...,
+    fixed_size: bool = ...,
+    num_threads: int = ...,
+    synchronization_elements: bool = ...,
+    crossings: bool = ...,
+    border_io: bool = ...,
+    straight_inverters: bool = ...,
+    desynchronize: bool = ...,
+    minimize_wires: bool = ...,
+    minimize_crossings: bool = ...,
+    timeout: int = ...,
     technology_specifics: technology_constraints = ...,
-    on_progress: Callable[[str, int, int], None] | None = None,
-    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
-) -> object: ...
+    on_progress: Callable[[str, int, int], None] | None = ...,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = ...,
+) -> (
+    mnt.pyfiction.layouts.cartesian_gate_layout
+    | mnt.pyfiction.layouts.shifted_cartesian_gate_layout
+    | mnt.pyfiction.layouts.hexagonal_gate_layout
+    | None
+): ...
 
 class num_clks(enum.Enum):
     """Number of clock phases of a clocking scheme."""
@@ -276,57 +215,9 @@ def orthogonal(
     on_progress: Callable[[str, int, int], None] | None = ...,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout:
     """
-    A scalable placement & routing approach based on orthogonal graph
-    drawing as originally proposed in \\"Scalable Design for Field-coupled
-    Nanocomputing Circuits\\" by M. Walter, R. Wille, F. Sill Torres, D.
-    Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
-    can be found in \\"Design Automation for Field-coupled
-    Nanotechnologies\\" by M. Walter, R. Wille, F. Sill Torres, and R.
-    Drechsler published by Springer Nature in 2022.
-
-    Via certain restrictions to the degrees of freedom in FCN physical
-    design, this algorithm achieves a polynomial time complexity. However,
-    these restrictions lead to an overall approximation of optimal layout
-    quality within several factors. Therefore, this algorithm produces
-    valid layouts within a short amount of time, its results are far from
-    being optimal in terms of area.
-
-    The imposed restrictions are that the input logic network has to be a
-    3-graph, i.e., cannot have any node exceeding degree 3 (combined input
-    and output), and that the resulting layout is always 2DDWave-clocked.
-
-    This algorithm is based on a modification of \\"Improved orthogonal
-    drawings of 3-graphs\\" by Therese C. Biedl in Canadian Conference on
-    Computational Geometry 1996. Biedl's original algorithm works for
-    undirected graphs only while this modification respects information
-    flow of directed logic networks. To this end, the edge directions of
-    the logic network directly used instead of relabeling the edges
-    according to its DFS tree, ordering the vertices using topological
-    sorting instead of DFS, and adding an extra placement rule for nodes
-    without predecessors.
-
-    The algorithm works in polynomial time :math:`\\mathcal{O}(3|N| + |L|)`
-    where :math:`|N|` is the number of nodes the given network and
-    :math:`|L|` is the resulting layout size given by :math:`x \\cdot y`,
-    which approaches :math:`(\\frac{|N|}{2})^2` asymptotically.
-
-    May throw a high_degree_fanin_exception if `ntk` contains any node
-    with a fan-in larger than 2.
-
-    Args:
-        ntk: The network that is to place and route.
-        pst: Statistics.
-
-    Returns:
-        A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-        circuit.
-
-    Raises:
-        std::invalid_argument: If `Lyt` is a shifted Cartesian or
-                               hexagonal layout and
-                               `layout_arrangement` is empty.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Place and route a technology network with orthogonal graph drawing.
+    The layout_type keyword selects Cartesian or hexagonal gate layouts.
+    The keyword options select clock phases, arrangement, and progress reporting.
     """
 
 @overload
@@ -343,12 +234,12 @@ def orthogonal(
 def orthogonal(
     network: mnt.pyfiction.networks.technology_network,
     *,
-    layout_type: object,
+    layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout],
     statistics: orthogonal_stats | None = None,
     number_of_clock_phases: num_clks = ...,
-    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = None,
-    on_progress: Callable[[str, int, int], None] | None = None,
-) -> object: ...
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ...,
+    on_progress: Callable[[str, int, int], None] | None = ...,
+) -> mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout: ...
 
 class gold_effort_mode(enum.Enum):
     """
@@ -488,55 +379,8 @@ def graph_oriented_layout_design(
     custom_cost_objective: Callable[[mnt.pyfiction.layouts.cartesian_gate_layout], int] | None = None,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout | None:
     """
-    A scalable and efficient placement & routing approach based on
-    spanning a search space graph of partial layouts and finding a path to
-    one of its leaves, i.e., a complete layout.
-
-    The search space graph starts with an empty layout and then expands it
-    based on where the first node in a topological sort of the logic
-    network can be placed. Based on the position of this first node, a
-    cost is assigned to each expansion based on the position of the placed
-    node. The vertex with the lowest cost, which is the smallest layout
-    w.r.t. the cost objective (e.g. area), is then chosen for the next
-    expansion. This iterative process continues until a leaf node is
-    found, which is a layout with all nodes placed. The algorithm then
-    continues to backtrack through the search space graph to find other
-    complete layouts with lower cost.
-
-    Exclusively generates 2DDWave-clocked layouts.
-
-    This algorithm was proposed in \\"A* is Born: Efficient and Scalable
-    Physical Design for Field-coupled Nanocomputing\\" by S. Hofmann, M.
-    Walter, and R. Wille in IEEE NANO 2024
-    (https://ieeexplore.ieee.org/document/10628808) and extended in
-    \\"Physical Design for Field-coupled Nanocomputing with Discretionary
-    Cost Objectives\\" by S. Hofmann, M. Walter, and R. Wille in LASCAS
-    2025 (https://ieeexplore.ieee.org/document/10966234).
-
-    Args:
-        ntk: The network to be placed and routed.
-        pst: A pointer to a statistics object to record execution details.
-             Defaults to nullptr.
-        custom_cost_objective: A custom cost objective that is evaluated
-                               at every expansion of the search space
-                               graph. Should be a function that can be
-                               calculated based on the current partial
-                               layout and returns an uint64_t that should
-                               be minimized.
-
-    Returns:
-        The smallest layout yielded by the graph-oriented layout design
-        algorithm under the given parameters.
-
-    Raises:
-        networks::high_degree_fanin_exception: If `ntk` has a node with
-                                               more than two fanins.
-        std::invalid_argument: If the cost objective is `CUSTOM` and no
-                               custom cost objective is provided, or if
-                               `tiles_to_skip_between_pis` does not lie
-                               in :math:`[0, 2^{20}]`.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Place and route a technology network by searching partial gate layouts.
+    The keyword options control search effort, clocking, and progress reporting.
     """
 
 def apply_qca_one_library(
@@ -689,10 +533,7 @@ def apply_bestagon_library(
     """
 
 class graph_coloring_engine(enum.Enum):
-    """
-    An enumeration of coloring engines to use for the graph coloring. All
-    but SAT are using the graph-coloring library by Brian Crites.
-    """
+    """Graph-coloring engines used for routing."""
 
     MCS = 0
     """
@@ -783,57 +624,8 @@ def color_routing(
     partial_sat: bool = False,
 ) -> bool:
     """
-    A multi-path signal routing approach based on coloring of edge
-    intersection graphs as originally proposed in \\"Efficient Multi-Path
-    Signal Routing for Field-coupled Nanotechnologies\\" by M. Walter and
-    R. Wille in NANOARCH 2022.
-
-    Given a gate-level layout and a set of routing objectives, this
-    algorithm tries to fulfill all objectives by routing several conflict-
-    free wire paths. To this end, a plethora of possible paths are
-    enumerated in the given layout and an edge-intersection graph of paths
-    on a grid (EPG) created from them. In an EPG, each vertex represents a
-    path and each edge conflicts between them. When two vertices are
-    connected by an edge, they cannot be routed together conflict-free in
-    the layout. To determine a (maximum) set of routable paths, a vertex
-    coloring is computed on the EPG. Finally, all vertices that are
-    colored identically can be routed together. The biggest such set is
-    applied to the layout.
-
-    Multiple parameters can be set to specify the behavior of the
-    algorithm. For instance, whether crossings should be enabled and
-    whether a partial routing should be conducted if not all objectives
-    could be fulfilled. Furthermore, the path enumeration and the coloring
-    can be parameterized in the first place. By default, all paths are
-    enumerated for each objective. While this guarantees completeness on
-    small layouts, it quickly becomes intractable. Therefore, a path limit
-    can be set that restricts the number of paths to the :math:`k`
-    shortest. Additionally, for the coloring process, SAT solving is used
-    by default, which, again, guarantees completeness, but becomes
-    infeasible rather quickly. However, powerful symmetry breaking is
-    applied that assists the solving process, e.g., it is known that all
-    vertices that are belonging to the same objective are forming a
-    clique, which can be pre-colored. Additionally, lexicographical
-    orderings are enforced. For a more scalable (yet incomplete) approach,
-    several coloring heuristics are available, from which can be chosen
-    (see determine_vertex_coloring).
-
-    This function will return `true` if all objectives could be satisfied
-    or if the partial routing parameter was set. In the case of `true`
-    being returned, all determined paths have been routed in the given
-    layout.
-
-    Args:
-        lyt: A gate-level layout to route.
-        objectives: The routing objectives as source coordinates and
-                    indexed destination inputs to fulfill.
-        pst: Statistics.
-
-    Returns:
-        `true` iff routing was successful, i.e., iff all objectives could
-        be satisfied.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Route the supplied connections by coloring their path intersections.
+    Returns the paths found with the keyword routing options.
     """
 
 class hexagonalization_io_pin_routing_error(RuntimeError): ...
@@ -895,27 +687,8 @@ def hexagonalization(
     statistics: hexagonalization_stats | None = None,
 ) -> mnt.pyfiction.layouts.hexagonal_gate_layout:
     """
-    Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
-    row clocked layout suitable for SiDBs by remapping all gates and wires
-    as originally proposed in \\"Scalable Physical Design for Silicon
-    Dangling Bond Logic: How a 45° Turn Prevents the Reinvention of the
-    Wheel\\" by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2023
-    (https://ieeexplore.ieee.org/document/10231278).
-
-    Args:
-        lyt: 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
-        stats: Statistics.
-
-    Returns:
-        Hexagonal representation of the Cartesian layout.
-
-    Raises:
-        std::invalid_argument: If clocking or placed geometry does not
-                               satisfy the input contract.
-        std::overflow_error: If the transformed coordinates exceed the
-                             signed coordinate range.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Convert a 2DDWave-clocked Cartesian gate layout to an even-row hexagonal layout.
+    The keyword options select input and output pin extension and progress reporting.
     """
 
 class post_layout_optimization_stats:
@@ -978,53 +751,8 @@ def post_layout_optimization(
     statistics: post_layout_optimization_stats | None = None,
 ) -> None:
     """
-    A post-layout optimization algorithm as originally proposed in \\"Post-
-    Layout Optimization for Field-coupled Nanotechnologies\\" by S.
-    Hofmann, M. Walter, and R. Wille in NANOARCH 2023
-    (https://dl.acm.org/doi/10.1145/3611315.3633247) and extended in
-    \\"Efficient and Scalable Post-Layout Optimization for Field-coupled
-    Nanotechnologies\\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
-    (https://ieeexplore.ieee.org/document/10916761). It can be used to
-    reduce the area of a given sub-optimal Cartesian gate-level layout
-    created by heuristics or machine learning. This optimization utilizes
-    the distinct characteristics of the 2DDWave clocking scheme, which
-    only allows information flow from top to bottom and left to right,
-    therefore only aforementioned clocking scheme is supported.
-
-    To reduce the layout area, first, gates are moved up and to the left
-    as far as possible, including rerouting. This creates more compact
-    layouts by freeing up space to the right and bottom, as all gates were
-    moved to the top left corner.
-
-    After moving all gates, this algorithm also checks if excess wiring
-    exists on the layout using the `wiring_reduction` algorithm (cf.
-    `wiring_reduction.hpp`)
-
-    As outputs have to lay on the border of a layout for better
-    accessibility, they are also moved to new borders determined based on
-    the location of all other gates.
-
-    Args:
-        lyt: 2DDWave-clocked Cartesian gate-level layout to optimize.
-        pst: Statistics.
-
-    Raises:
-        std::invalid_argument: If clocking or occupied geometry is
-                               invalid.
-        std::overflow_error: If the extent leaves no room for signed
-                             routing coordinates.
-
-    Note:
-        This function requires the gate-level layout to be 2DDWave-
-        clocked!
-
-    Note:
-        Exceptions may leave a partially edited layout. Object identities,
-        occupancy, and connection storage remain structurally valid;
-        logical equivalence and physical validity are not guaranteed after
-        failure.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Optimize a 2DDWave-clocked Cartesian gate layout in place.
+    The keyword options bound relocations and runtime; statistics receives the completed result.
     """
 
 class wiring_reduction_stats:
@@ -1077,38 +805,8 @@ def wiring_reduction(
     statistics: wiring_reduction_stats | None = None,
 ) -> None:
     """
-    A scalable wiring reduction algorithm for 2DDWave-clocked layouts
-    based on A* path finding as originally proposed in \\"Late Breaking
-    Results: Wiring Reduction for Field-coupled Nanotechnologies\\" by S.
-    Hofmann, M. Walter, and R. Wille in DAC 2024
-    (https://dl.acm.org/doi/10.1145/3649329.3663491) and extended in
-    \\"Efficient and Scalable Post-Layout Optimization for Field-coupled
-    Nanotechnologies\\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
-    (https://ieeexplore.ieee.org/document/10916761).
-
-    The core concept revolves around the selective removal of excess
-    wiring by cutting them from a layout, contingent upon the ability to
-    restore functional correctness by realigning the remaining layout
-    fragments. Given the complexity of identifying these cuts,
-    obstructions are strategically inserted into the layout to safeguard
-    against the inadvertent deletion of standard gates or wire segments
-    essential for the layout's integrity. Leveraging the obstructed layout
-    as a basis, A* Search is employed to systematically identify feasible
-    cuts either from left to right or top to bottom. Subsequently, these
-    identified cuts are removed from the layout to minimize not only the
-    number of wire segments, but also the area and critical path length.
-
-    Args:
-        lyt: The 2DDWave-clocked layout whose wiring is to be reduced.
-        pst: Statistics.
-
-    Raises:
-        std::invalid_argument: If clocking or occupied geometry is
-                               invalid.
-        std::overflow_error: If the extent leaves no room for signed
-                             routing coordinates.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Reduce wires in a 2DDWave-clocked gate layout in place with A* routing.
+    The keyword options bound runtime and report progress.
     """
 
 @overload

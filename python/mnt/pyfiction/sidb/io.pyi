@@ -101,23 +101,7 @@ def write_sidb_layout_svg(
     sidb_border_width: float = 0.3,
     color_background: color_mode = ...,
     lattice_mode: sidb_lattice_mode = ...,
-) -> None:
-    """
-    Writes an `sidb::layout` as an SVG image. See the stream overload for
-    the image's content.
-
-    Args:
-        lyt: Layout to draw.
-        filename: File to write into.
-
-    Raises:
-        std::ofstream::failure: if the file cannot be opened.
-        std::out_of_range: if padding exceeds the lattice-site coordinate
-                           range.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
-
+) -> None: ...
 @overload
 def write_sidb_layout_svg(
     layout: mnt.pyfiction.sidb.sidb_layout,
@@ -132,20 +116,8 @@ def write_sidb_layout_svg(
     lattice_mode: sidb_lattice_mode = ...,
 ) -> None:
     """
-    Writes an `sidb::layout` with a charge distribution as an SVG image.
-    See the stream overload for the image's content.
-
-    Args:
-        lyt: Layout to draw.
-        cd: Charge distribution over the layout's SiDBs.
-        filename: File to write into.
-
-    Raises:
-        std::invalid_argument: if the charge distribution sites differ
-                               from the layout.
-        std::ofstream::failure: if the file cannot be opened.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Write an SVG representation of the SiDB layout to the supplied filename.
+    The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
     """
 
 @overload
@@ -158,24 +130,7 @@ def write_sidb_layout_svg_to_string(
     sidb_border_width: float = 0.3,
     color_background: color_mode = ...,
     lattice_mode: sidb_lattice_mode = ...,
-) -> str:
-    """
-    Writes an `sidb::layout` as an SVG image to a stream: the lattice
-    points of the layout's bounding box, if the parameters ask for them,
-    and every SiDB at its position on the layout's lattice. Surface
-    defects are not drawn.
-
-    Args:
-        lyt: Layout to draw.
-        os: Output stream to write into.
-
-    Raises:
-        std::out_of_range: if padding exceeds the lattice-site coordinate
-                           range.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
-
+) -> str: ...
 @overload
 def write_sidb_layout_svg_to_string(
     layout: mnt.pyfiction.sidb.sidb_layout,
@@ -189,20 +144,8 @@ def write_sidb_layout_svg_to_string(
     lattice_mode: sidb_lattice_mode = ...,
 ) -> str:
     """
-    Writes an `sidb::layout` with a charge distribution as an SVG image to
-    a stream: as the layout overload, with every SiDB colored by its
-    charge state.
-
-    Args:
-        lyt: Layout to draw.
-        cd: Charge distribution over the layout's SiDBs.
-        os: Output stream to write into.
-
-    Raises:
-        std::invalid_argument: if the charge distribution sites differ
-                               from the layout.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Return an SVG representation of the SiDB layout.
+    The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
     """
 
 def print_sidb_layout(

@@ -20,15 +20,6 @@ def write_qcc_layout(
     use_filename_as_component_name: bool = False,
 ) -> None:
     """
-    Writes a cell-level iNML layout to a qcc file that is used by
-    ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
-    physical simulator for the iNML technology platform.
-
-    This overload uses an output stream to write into.
-
-    Args:
-        lyt: The layout to be written.
-        os: The output stream to write into.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Write the iNML layout to the supplied ToPoliNano and MagCAD filename.
+    use_filename_as_component_name selects the component name; on_progress reports writing progress.
     """

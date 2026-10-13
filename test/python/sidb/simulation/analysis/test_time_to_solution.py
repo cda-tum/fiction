@@ -105,3 +105,15 @@ def test_time_to_solution_with_simulation_results() -> None:
         # To avoid division by zero, ensure st.acc is not 1.0
         tts_calculated = st.mean_single_runtime * math.log(1.0 - 0.997) / math.log(1.0 - st.acc / 100)
         assert st.time_to_solution == pytest.approx(tts_calculated, abs=1e-6)
+
+
+def test_independent_quicksim_and_tts_timeouts() -> None:
+    """The one-SiDB fast path completes within its heuristic budget; the whole-search deadline raises."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    stats = time_to_solution_stats()
+    time_to_solution(layout, quicksim_timeout=0, timeout=10000, repetitions=2, ps=stats)
+    assert stats.acc == 100
+    assert stats.time_to_solution > 0
+    with pytest.raises(TimeoutError):
+        time_to_solution(layout, quicksim_timeout=10000, timeout=0, repetitions=2)

@@ -176,25 +176,7 @@ def generate_bdl_input_pattern_layouts(
     minimum_distance: float = 0.75,
     maximum_distance: float = 1.5,
     input_bdl_config: input_bdl_configuration = ...,
-) -> list[mnt.pyfiction.sidb.sidb_layout]:
-    """
-    Applies every input pattern to the input BDL pairs of a layout and
-    returns the resulting layouts, pattern `0` first; the input wires are
-    detected first.
-
-    Args:
-        lyt: The layout.
-
-    Returns:
-        One layout per input pattern.
-
-    Raises:
-        std::invalid_argument: if the layout has more than 63 input BDL
-                               pairs.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
-
+) -> list[mnt.pyfiction.sidb.sidb_layout]: ...
 @overload
 def generate_bdl_input_pattern_layouts(
     lyt: mnt.pyfiction.sidb.sidb_layout,
@@ -206,22 +188,8 @@ def generate_bdl_input_pattern_layouts(
     input_bdl_config: input_bdl_configuration = ...,
 ) -> list[mnt.pyfiction.sidb.sidb_layout]:
     """
-    Applies every input pattern to the input BDL pairs of a layout and
-    returns the resulting layouts, pattern `0` first, with the input wires
-    given by the caller.
-
-    Args:
-        lyt: The layout.
-        input_wires: The input wires of `lyt`.
-
-    Returns:
-        One layout per input pattern.
-
-    Raises:
-        std::invalid_argument: if the layout has more than 63 input BDL
-                               pairs.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Return one SiDB layout per input pattern, starting with pattern zero.
+    The keyword options select BDL detection and input encoding; supplied wires bypass detection.
     """
 
 class bdl_pair:
@@ -301,25 +269,8 @@ def detect_bdl_pairs(
     maximum_distance: float = 1.5,
 ) -> list[bdl_pair]:
     """
-    Detects the BDL pairs of an SiDB layout. Dots with the given tag are
-    uniquely paired in increasing distance. The closest unpaired dots
-    within `[minimum_distance, maximum_distance]` (defaults
-    of 0.75 nm and 1.5 nm) form a pair. The lower bound keeps, e.g., the
-    SiDBs of an atomic wire from being paired; the upper bound prevents
-    unlikely pairings and bounds the work. Distances follow the layout's
-    lattice. The pairs are returned sorted.
-
-    Args:
-        lyt: The layout to detect BDL pairs in.
-        type: Optional dot tag to restrict the detection to (`INPUT`,
-              `OUTPUT`, `NORMAL`, ...). If omitted, the BDL pairs of the
-              input, output, and normal SiDBs are detected and returned in
-              that order.
-
-    Returns:
-        The detected BDL pairs.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Detect uniquely paired SiDBs with the selected tag in increasing distance.
+    The keyword minimum_distance and maximum_distance bound the pair separation in nm.
     """
 
 class bdl_wire_selection(enum.Enum):
@@ -490,19 +441,8 @@ def detect_bdl_wires(
     wire_selection: bdl_wire_selection = ...,
 ) -> list[bdl_wire]:
     """
-    Detects the BDL wires of an SiDB layout: the BDL pairs of all types
-    are chained into wires along the layout's lattice whenever two pairs
-    lie within `threshold_bdl_interdistance` of each other.
-
-    Args:
-        lyt: The layout.
-        wire_selection: Which wires to return: all, input, or output
-                        wires.
-
-    Returns:
-        The detected wires.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Chain BDL pairs into wires along the SiDB lattice.
+    The keyword options select pair-distance bounds, inter-pair distance, and wire types.
     """
 
 class operational_status(enum.Enum):
@@ -602,26 +542,7 @@ def is_operational(
     input_bdl_config: input_bdl_configuration = ...,
     op_condition: operational_condition = ...,
     strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
-) -> tuple[operational_status, int]:
-    """
-    Determines whether an SiDB layout implements the given Boolean
-    function(s). Every input pattern is applied to the input BDL pairs,
-    the ground states are simulated with the configured engine, and the
-    charge states of the output BDL pairs are compared with the expected
-    truth-table entries. If the layout carries logic dots, they form the
-    canvas of the pruning filters that run before any simulation whenever
-    the parameters ask for filtering and reject kinks.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-
-    Returns:
-        The operational status and the number of simulator invocations.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
-
+) -> tuple[operational_status, int]: ...
 @overload
 def is_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
@@ -642,24 +563,7 @@ def is_operational(
     op_condition: operational_condition = ...,
     strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
-) -> tuple[operational_status, int]:
-    """
-    Like the overload above, with the BDL wires and, optionally, the
-    canvas given by the caller.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        input_bdl_wire: The input BDL wires of `lyt`.
-        output_bdl_wire: The output BDL wires of `lyt`.
-        canvas_lyt: The canvas; defaults to the logic dots of `lyt`.
-
-    Returns:
-        The operational status and the number of simulator invocations.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
-
+) -> tuple[operational_status, int]: ...
 @overload
 def is_operational(
     input_pattern_layouts: Sequence[mnt.pyfiction.sidb.sidb_layout],
@@ -682,26 +586,9 @@ def is_operational(
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> tuple[operational_status, int]:
     """
-    Like the overloads above, but with one layout per input pattern given
-    by the caller instead of applying the patterns to the input BDL pairs.
-
-    Args:
-        input_pattern_layouts: One layout per input pattern, pattern `0`
-                               first.
-        spec: The Boolean function(s) to implement.
-        input_bdl_wire: The input BDL wires.
-        output_bdl_wire: The output BDL wires.
-        canvas_lyt: The canvas; defaults to the logic dots of the first
-                    layout.
-
-    Returns:
-        The operational status and the number of simulator invocations.
-
-    Raises:
-        std::invalid_argument: if `spec` is empty or the number of layouts
-                               does not match the number of patterns.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+    Overloads accept supplied wires or one layout per input pattern.
     """
 
 @overload
@@ -721,20 +608,7 @@ def operational_input_patterns(
     input_bdl_config: input_bdl_configuration = ...,
     op_condition: operational_condition = ...,
     strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
-) -> set[int]:
-    """
-    Determines the input patterns for which the layout is operational.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-
-    Returns:
-        The operational input patterns.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
-
+) -> set[int]: ...
 @overload
 def operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
@@ -757,20 +631,8 @@ def operational_input_patterns(
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> set[int]:
     """
-    Like the overload above, with the BDL wires and, optionally, the
-    canvas given by the caller.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        input_bdl_wire: The input BDL wires of `lyt`.
-        output_bdl_wire: The output BDL wires of `lyt`.
-        canvas_lyt: The canvas; defaults to none.
-
-    Returns:
-        The operational input patterns.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Return the input patterns for which the SiDB layout implements the truth tables.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
     """
 
 @overload
@@ -790,21 +652,7 @@ def kink_induced_non_operational_input_patterns(
     input_bdl_config: input_bdl_configuration = ...,
     op_condition: operational_condition = ...,
     strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
-) -> set[int]:
-    """
-    Determines the input patterns for which kinks render the layout non-
-    operational.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-
-    Returns:
-        The kink-induced non-operational input patterns.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
-
+) -> set[int]: ...
 @overload
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
@@ -827,20 +675,8 @@ def kink_induced_non_operational_input_patterns(
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> set[int]:
     """
-    Like the overload above, with the BDL wires and, optionally, the
-    canvas given by the caller.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        input_bdl_wire: The input BDL wires of `lyt`.
-        output_bdl_wire: The output BDL wires of `lyt`.
-        canvas_lyt: The canvas; defaults to none.
-
-    Returns:
-        The kink-induced non-operational input patterns.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Return the input patterns for which kinks render the SiDB layout non-operational.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
     """
 
 @overload
@@ -860,20 +696,7 @@ def is_kink_induced_non_operational(
     input_bdl_config: input_bdl_configuration = ...,
     op_condition: operational_condition = ...,
     strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
-) -> bool:
-    """
-    Determines whether kinks are the reason the layout is non-operational.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-
-    Returns:
-        `true` if the layout is non-operational because of kinks.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
-
+) -> bool: ...
 @overload
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
@@ -896,20 +719,8 @@ def is_kink_induced_non_operational(
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> bool:
     """
-    Like the overload above, with the BDL wires and, optionally, the
-    canvas given by the caller.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        input_bdl_wire: The input BDL wires of `lyt`.
-        output_bdl_wire: The output BDL wires of `lyt`.
-        canvas_lyt: The canvas; defaults to none.
-
-    Returns:
-        `true` if the layout is non-operational because of kinks.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Check whether kinks cause the SiDB layout to be non-operational.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
     """
 
 class parameter_point:
@@ -1243,42 +1054,8 @@ def operational_domain_grid_search(
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
-    Computes the operational domain of the given SiDB layout. The
-    operational domain is the set of all parameter combinations for which
-    the layout is logically operational. Logical operation is defined as
-    the layout implementing the given truth table. The input BDL pairs of
-    the layout are assumed to be in the same order as the inputs of the
-    truth table.
-
-    This algorithm uses a grid search to find the operational domain. The
-    grid search is performed by exhaustively sweeping all sweep
-    dimensions. Since grid search is exhaustive, the algorithm is
-    guaranteed to find the operational domain, if it exists within the
-    parameter range. However, the algorithm performs one operational check
-    per parameter combination, i.e., the product of the step counts of all
-    sweep dimensions, where each operational check consists of up to
-    :math:`2^n` exact ground state simulations, where :math:`n` is the
-    number of inputs of the layout. Each exact ground state simulation has
-    exponential complexity in of itself. Therefore, the algorithm is only
-    feasible for small layouts with few inputs.
-
-    Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean functions, one dynamic truth table per
-              output.
-        stats: Statistics of the process.
-
-    Returns:
-        The operational domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Any number of
-                               sweep dimensions is accepted.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the operational domain by exhaustively sweeping every parameter combination.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
     """
 
 def operational_domain_random_sampling(
@@ -1305,41 +1082,8 @@ def operational_domain_random_sampling(
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
-    Computes the operational domain of the given SiDB layout. The
-    operational domain is the set of all parameter combinations for which
-    the layout is logically operational. Logical operation is defined as
-    the layout implementing the given truth table. The input BDL pairs of
-    the layout are assumed to be in the same order as the inputs of the
-    truth table.
-
-    This algorithm uses random sampling to find a part of the operational
-    domain that might not be complete. It performs a total of `samples`
-    uniformly-distributed random samples within the parameter range. For
-    each sample, the algorithm performs one operational check on the
-    layout, where each operational check consists of up to :math:`2^n`
-    exact ground state simulations, where :math:`n` is the number of
-    inputs of the layout. Each exact ground state simulation has
-    exponential complexity in of itself. Therefore, the algorithm is only
-    feasible for small layouts with few inputs.
-
-    Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The operational domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Any number of
-                               sweep dimensions is accepted.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the operational domain by randomly sampling parameter combinations.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
     """
 
 def operational_domain_flood_fill(
@@ -1366,57 +1110,8 @@ def operational_domain_flood_fill(
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
-    Computes the operational domain of the given SiDB layout. The
-    operational domain is the set of all parameter combinations for which
-    the layout is logically operational. Logical operation is defined as
-    the layout implementing the given truth table. The input BDL pairs of
-    the layout are assumed to be in the same order as the inputs of the
-    truth table.
-
-    This algorithm first uses random sampling to find several operational
-    points within the parameter range. From there, it employs the "flood
-    fill" algorithm to explore the operational domain. The algorithm is
-    guaranteed to determine all operational "islands" in their entirety if
-    the initial random sampling found at least one operational point
-    within them. Thereby, this algorithm works for disconnected
-    operational domains.
-
-    It performs `samples` uniformly-distributed random samples within the
-    parameter range. From there, it performs another number of samples
-    equal to the number of points within the operational domain plus the
-    first non-operational point in each direction. For each sample, the
-    algorithm performs one operational check on the layout, where each
-    operational check consists of up to :math:`2^n` exact ground state
-    simulations, where :math:`n` is the number of inputs of the layout.
-    Each exact ground state simulation has exponential complexity in of
-    itself. Therefore, the algorithm is only feasible for small layouts
-    with few inputs.
-
-    This flavor of operational domain computation was proposed in
-    \\"Reducing the Complexity of Operational Domain Computation in Silicon
-    Dangling Bond Logic\\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
-    Walus, and R. Wille in NANOARCH 2023.
-
-    Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The operational domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Flood fill and
-                               contour tracing additionally require at
-                               least two sweep dimensions; grid search and
-                               random sampling accept any number.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the operational domain by expanding from sampled operational points.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
     """
 
 def operational_domain_contour_tracing(
@@ -1443,55 +1138,8 @@ def operational_domain_contour_tracing(
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
-    Computes the operational domain of the given SiDB layout. The
-    operational domain is the set of all parameter combinations for which
-    the layout is logically operational. Logical operation is defined as
-    the layout implementing the given truth table. The input BDL pairs of
-    the layout are assumed to be in the same order as the inputs of the
-    truth table.
-
-    This algorithm first uses random sampling to find a set of operational
-    point within the parameter range. From there, it traverses outwards to
-    find the edge of the operational area and performs Moore neighborhood
-    contour tracing to explore the contour of the operational domain. This
-    is repeated for all initially sampled points that do not lie within a
-    contour. The algorithm is guaranteed to determine the contours of all
-    operational "islands" if the initial random sampling found at least
-    one operational point within them. Thereby, this algorithm works for
-    disconnected operational domains.
-
-    It performs `samples` uniformly-distributed random samples within the
-    parameter range. For each thusly discovered operational island, it
-    performs another number of samples equal to the distance to an edge of
-    each operational area. Finally, it performs up to 8 samples for each
-    contour point (however, the actual number is usually lower). For each
-    sample, the algorithm performs one operational check on the layout,
-    where each operational check consists of up to :math:`2^n` exact
-    ground state simulations, where :math:`n` is the number of inputs of
-    the layout. Each exact ground state simulation has exponential
-    complexity in of itself. Therefore, the algorithm is only feasible for
-    small layouts with few inputs.
-
-    Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The operational domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Flood fill and
-                               contour tracing additionally require at
-                               least two sweep dimensions; grid search and
-                               random sampling accept any number.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the operational domain by tracing operational boundaries.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
     """
 
 def critical_temperature_domain_grid_search(
@@ -1517,40 +1165,8 @@ def critical_temperature_domain_grid_search(
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
-    Computes the critical temperature domain of the given SiDB layout. The
-    critical temperature domain consists of all parameter combinations for
-    which the layout is logically operational, along with the critical
-    temperature for each specific parameter point.
-
-    This algorithm uses a grid search to find the operational domain. The
-    grid search is performed by exhaustively sweeping all sweep
-    dimensions. Since grid search is exhaustive, the algorithm is
-    guaranteed to find the operational domain, if it exists within the
-    parameter range. However, the algorithm performs one operational check
-    per parameter combination, i.e., the product of the step counts of all
-    sweep dimensions, where each operational check consists of up to
-    :math:`2^n` exact ground state simulations, where :math:`n` is the
-    number of inputs of the layout. Each exact ground state simulation has
-    exponential complexity in of itself. Therefore, the algorithm is only
-    feasible for small layouts with few inputs.
-
-    Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected vector of truth tables of the layout. Each truth
-              table represents an output of the Boolean function.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The critical temperature domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Any number of
-                               sweep dimensions is accepted.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the critical-temperature domain by exhaustively sweeping every parameter combination.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
     """
 
 def critical_temperature_domain_random_sampling(
@@ -1577,39 +1193,8 @@ def critical_temperature_domain_random_sampling(
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
-    Computes the critical temperature domain of the given SiDB layout. The
-    critical temperature domain consists of all parameter combinations for
-    which the layout is logically operational, along with the critical
-    temperature for each specific parameter point.
-
-    This algorithm uses random sampling to find a part of the operational
-    domain that might not be complete. It performs a total of `samples`
-    uniformly-distributed random samples within the parameter range. For
-    each sample, the algorithm performs one operational check on the
-    layout, where each operational check consists of up to :math:`2^n`
-    exact ground state simulations, where :math:`n` is the number of
-    inputs of the layout. Each exact ground state simulation has
-    exponential complexity in of itself. Therefore, the algorithm is only
-    feasible for small layouts with few inputs.
-
-    Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The critical temperature domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Any number of
-                               sweep dimensions is accepted.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the critical-temperature domain by randomly sampling parameter combinations.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
     """
 
 def critical_temperature_domain_flood_fill(
@@ -1636,50 +1221,8 @@ def critical_temperature_domain_flood_fill(
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
-    Computes the critical temperature domain of the given SiDB layout. The
-    critical temperature domain consists of all parameter combinations for
-    which the layout is logically operational, along with the critical
-    temperature for each specific parameter point.
-
-    This algorithm first uses random sampling to find several operational
-    points within the parameter range. From there, it employs the "flood
-    fill" algorithm to explore the operational domain. The algorithm is
-    guaranteed to determine all operational "islands" in their entirety if
-    the initial random sampling found at least one operational point
-    within them. Thereby, this algorithm works for disconnected
-    operational domains.
-
-    It performs `samples` uniformly-distributed random samples within the
-    parameter range. From there, it performs another number of samples
-    equal to the number of points within the operational domain plus the
-    first non-operational point in each direction. For each sample, the
-    algorithm performs one operational check on the layout, where each
-    operational check consists of up to :math:`2^n` exact ground state
-    simulations, where :math:`n` is the number of inputs of the layout.
-    Each exact ground state simulation has exponential complexity in of
-    itself. Therefore, the algorithm is only feasible for small layouts
-    with few inputs.
-
-    Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The critical temperature domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Flood fill and
-                               contour tracing additionally require at
-                               least two sweep dimensions; grid search and
-                               random sampling accept any number.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the critical-temperature domain by expanding from sampled operational points.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
     """
 
 def critical_temperature_domain_contour_tracing(
@@ -1706,54 +1249,8 @@ def critical_temperature_domain_contour_tracing(
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
-    Computes the critical temperature domain of the given SiDB layout. The
-    critical temperature domain consists of all parameter combinations for
-    which the layout is logically operational, along with the critical
-    temperature for each specific parameter point.
-
-    This algorithm first uses random sampling to find a set of operational
-    point within the parameter range. From there, it traverses outwards to
-    find the edge of the operational area and performs Moore neighborhood
-    contour tracing to explore the contour of the operational domain. This
-    is repeated for all initially sampled points that do not lie within a
-    contour. The algorithm is guaranteed to determine the contours of all
-    operational "islands" if the initial random sampling found at least
-    one operational point within them. Thereby, this algorithm works for
-    disconnected operational domains. The critical temperature is computed
-    for each operational point.
-
-    It performs `samples` uniformly-distributed random samples within the
-    parameter range. For each thusly discovered operational island, it
-    performs another number of samples equal to the distance to an edge of
-    each operational area. Finally, it performs up to 8 samples for each
-    contour point (however, the actual number is usually lower). For each
-    sample, the algorithm performs one operational check on the layout,
-    where each operational check consists of up to :math:`2^n` exact
-    ground state simulations, where :math:`n` is the number of inputs of
-    the layout. Each exact ground state simulation has exponential
-    complexity in of itself. Therefore, the algorithm is only feasible for
-    small layouts with few inputs.
-
-    Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The critical temperature domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Flood fill and
-                               contour tracing additionally require at
-                               least two sweep dimensions; grid search and
-                               random sampling accept any number.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the critical-temperature domain by tracing operational boundaries.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
     """
 
 def operational_domain_ratio(
@@ -1779,34 +1276,6 @@ def operational_domain_ratio(
     on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
 ) -> float:
     """
-    Calculates the ratio of operational parameter points surrounding a
-    specified parameter point to the total number of parameter points in
-    the given parameter space. This function is useful for assessing how
-    robust a gate design is to variations in its parameters.
-
-    A ratio close to 1 indicates that the gate is robust, meaning it
-    functions correctly across a broad range of parameter values. A ratio
-    close to 0 indicates that the gate is highly sensitive to parameter
-    variations and may fail to operate correctly.
-
-    Args:
-        lyt: The SiDB layout for which to compute the ratio of operational
-             parameter points surrounding a specified parameter point to
-             the total number of parameter points.
-        spec: The expected Boolean function of the layout, provided as a
-              multi-output truth table.
-        pp: The specific parameter point around which the operational
-            ratio is computed.
-
-    Returns:
-        The ratio of operational parameter points to the total number of
-        parameter points in the parameter space.
-
-    Raises:
-        std::invalid_argument: if the sweep has fewer than two dimensions,
-                               a range is invalid, or the seed is non-
-                               finite, outside the grid, or has the wrong
-                               dimension count.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the fraction of operational parameter points surrounding the given point.
+    The keyword options select the sweep, sampling, physical values, operational analysis, and progress.
     """

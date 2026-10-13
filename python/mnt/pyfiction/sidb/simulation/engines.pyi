@@ -43,36 +43,8 @@ def quickexact(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result:
     """
-    *QuickExact* is a quick and exact physical simulation algorithm
-    designed specifically for SiDB layouts. It was proposed in \\"The Need
-    for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic\\"
-    by J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2024
-    (https://ieeexplore.ieee.org/document/10473946). It determines all
-    physically valid charge configurations of a given SiDB layout,
-    providing a significant performance advantage of more than three
-    orders of magnitude over *ExGS*.
-
-    The performance improvement stems from the use of physically informed
-    search space pruning: SiDBs whose local potential forces them negative
-    are removed from the enumeration and modeled as fixed negative
-    charges, one SiDB's charge state follows from the others, and
-    positively charged SiDBs are enumerated only where they can occur.
-    Charged surface defects of the layout and external potentials enter
-    the potential landscape.
-
-    Args:
-        lyt: Layout to simulate.
-
-    Returns:
-        Simulation result: every physically valid charge distribution of
-        `lyt`.
-
-    Raises:
-        std::out_of_range: if a site has an invalid lattice basis index.
-        utils::timeout_error: if the shared caller deadline expires. No
-                              partial result is returned.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Simulate the SiDB layout with QuickExact.
+    The keyword options select physical values, base detection, external potentials, and progress reporting.
     """
 
 def quicksim(
@@ -90,32 +62,9 @@ def quicksim(
     on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result | None:
     """
-    *QuickSim* is a heuristic ground-state simulation of SiDB layouts
-    proposed in \\"QuickSim: Efficient and Accurate Physical Simulation of
-    Silicon Dangling Bond Logic\\" by J. Drewniok, M. Walter, S. S. H. Ng,
-    K. Walus, and R. Wille in IEEE NANO 2023
-    (https://ieeexplore.ieee.org/document/10231266). It grows candidate
-    charge distributions from the SiDBs that have to be negative by
-    repeatedly charging the neutral SiDB farthest from every negative one,
-    keeping the physically valid intermediate states. Every worker thread
-    owns one simulation state and shares the layout's potential landscape.
-    Charged surface defects are not supported: a layout that holds any
-    yields `std::nullopt`.
-
-    Args:
-        lyt: Layout to simulate.
-
-    Returns:
-        The physically valid charge distributions found, or `std::nullopt`
-        if the layout is empty, holds charged defects, the iteration count
-        is zero, the timeout was hit, or no valid distribution was found.
-
-    Raises:
-        std::out_of_range: if a site has an invalid lattice basis index.
-        utils::timeout_error: if the shared caller deadline expires. No
-                              partial result is returned.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Search for low-energy charge distributions with QuickSim.
+    The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
+    Returns None when the heuristic search finds no physically valid charge distribution.
     """
 
 def exhaustive_ground_state_simulation(
@@ -128,30 +77,8 @@ def exhaustive_ground_state_simulation(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result:
     """
-    *Exhaustive Ground State Simulation* (*ExGS*) which was proposed in
-    \\"Computer-Aided Design of Atomic Silicon Quantum Dots and
-    Computational Applications\\" by S. S. H. Ng
-    (https://dx.doi.org/10.14288/1.0392909) enumerates every charge
-    distribution of the layout in base 2 or 3 and keeps the physically
-    valid ones. Charged surface defects of the layout enter the potential
-    landscape.
-
-    Args:
-        lyt: Layout to simulate.
-        on_progress: Callback that receives the number of enumerated
-                     charge configurations.
-        deadline: Shared caller deadline. `time_point::max()` leaves the
-                  simulation unlimited.
-
-    Returns:
-        The physically valid charge distributions.
-
-    Raises:
-        std::out_of_range: if a site has an invalid lattice basis index.
-        utils::timeout_error: if the shared caller deadline expires. No
-                              partial result is returned.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Find all minimum-energy charge distributions by exhaustive simulation.
+    The physical model is supplied by the scalar keyword values.
     """
 
 class ground_state_space_reporting(enum.Enum):
@@ -194,45 +121,6 @@ def clustercomplete(
     validity_witness_partitioning_max_cluster_size_gss: int = 6,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result:
     """
-    *ClusterComplete* is an instantiation of a general solution to
-    exhaustive state assignment searching for which all local predicates
-    hold, given respective local evaluations that may be aggregated from
-    individual inter-variable interactions. Applied to the problem of
-    exact physical simulation of SiDBs, it is able to efficiently consider
-    positive charges that are rare to occur, but drastically blow up exact
-    simulation runtimes when hierarchical pruning methods are not applied.
-    In fact, the exponential growth in problem complexity for added SiDBs
-    is tamed by *ClusterComplete*, as SiDB layouts to simulate in practise
-    amount to a high pruning efficacy, resulting in a layout-dependent
-    reduction of the simulation base. This amounts to an effective
-    simulation base in the real number range :math:`[1,b]`, where
-    :math:`b\\in\\{2,3\\}` is the given simulation base.
-
-    The part of the *ClusterComplete* algorithm that is implemented in
-    this file is the destructive phase of the procedure that employs the
-    duality of construction and destruction, folding and unfolding. The
-    phase preceding it is the key ingredient to the achieved efficiency:
-    the *Ground State Space* algorithm, which constructs a minimized
-    hierarchical search space of charge configurations that adhere to the
-    critical population stability criterion. In particular, it generalizes
-    physically informed space pruning that contributes to the capabilities
-    of the *QuickExact* simulator, now applying to all charge states
-    equally, and, most importantly, it lifts the associated potential
-    equations to higher order, allowing us to reason over potential bounds
-    in a cluster hierarchy.
-
-    *ClusterComplete* was proposed in \\"Mastering the Exponential
-    Complexity of Exact Physical Simulation of Silicon Dangling Bonds\\" by
-    W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
-
-    Args:
-        lyt: Layout to simulate.
-
-    Returns:
-        Simulation results.
-
-    Raises:
-        std::out_of_range: if a site has an invalid lattice basis index.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Simulate the SiDB layout with ClusterComplete.
+    The keyword options select physical values, clustering, witness searches, and available threads.
     """

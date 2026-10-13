@@ -333,40 +333,8 @@ def fanout_substitution(
     seed: int | None = None,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Substitutes high-output degrees in a logic network with fanout nodes
-    that compute the identity function. For this purpose, `create_buf` is
-    utilized. Therefore, `NtkDest` should support identity nodes. If it
-    does not, no new nodes will in fact be created. A destination that
-    elides buffer nodes may exceed the requested fanout degrees. The
-    returned network is logically equivalent to the input network.
-
-    The algorithm builds breadth-first, depth-first, or random fanout
-    trees. Parameters set the maximum output degrees of ordinary nodes and
-    fanout nodes.
-
-    The returned network is newly created from scratch because its type
-    `NtkDest` may differ from `NtkSrc`. Repeated nonconstant inputs use
-    distinct routing branches when `NtkDest` preserves buffer nodes.
-
-    Args:
-        ntk_src: The input logic network.
-
-    Returns:
-        A fanout-substituted logic network of type `NtkDest` that is
-        logically equivalent to `ntk_src`.
-
-    Raises:
-        std::invalid_argument: If `degree` is less than two or
-                               `threshold` is zero.
-
-    Note:
-        The physical design algorithms natively provided in fiction do not
-        require their input networks to be fanout-substituted. If that is
-        necessary, they will do it themselves. Providing already
-        substituted networks does however allow for the control over
-        maximum output degrees.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Insert identity nodes so the network respects the keyword fanout limits.
+    Returns a fresh technology network that is logically equivalent to the input.
     """
 
 def is_fanout_substituted(
@@ -378,20 +346,7 @@ def is_fanout_substituted(
     threshold: int = 1,
     seed: int | None = None,
 ) -> bool:
-    """
-    Checks if a logic network is properly fanout-substituted with regard
-    to the keyword options, i.e., if no node exceeds the specified
-    fanout limits.
-
-    Args:
-        ntk: The logic network to check.
-
-    Returns:
-        `true` iff `ntk` is properly fanout-substituted with regard to
-        the keyword options.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
-    """
+    """Check whether every network node respects the keyword fanout limits."""
 
 def network_balancing(
     network: mnt.pyfiction.networks.technology_network,
@@ -400,11 +355,9 @@ def network_balancing(
     unify_outputs: bool = False,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Balance the network paths by inserting buffer nodes.
-
-    The returned technology network is logically equivalent to the input.
-    Set unify_outputs to place all outputs at the same logic depth.
-    Options are keyword-only; on_progress reports completed work.
+    Insert identity nodes to balance network paths.
+    Returns a fresh technology network that is logically equivalent to the input.
+    Set unify_outputs to place every output at the same logic depth.
     """
 
 def is_balanced(
@@ -414,16 +367,8 @@ def is_balanced(
     unify_outputs: bool = False,
 ) -> bool:
     """
-    Checks if a logic network is properly path-balanced with regard to the
-    keyword options.
-
-    Args:
-        ntk: The logic network to check.
-
-    Returns:
-        `true` iff `ntk` is properly path-balanced with regard to the keyword options.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Check whether network paths are balanced.
+    Set unify_outputs to require every output at the same logic depth.
     """
 
 class missing_required_gates_exception(RuntimeError): ...
@@ -463,50 +408,20 @@ class technology_mapping_stats:
     def mapper_stats(self) -> mnt.pyfiction.synthesis.mapper_stats:
         """Statistics for mockturtle's mapper."""
 
-def and_or_not() -> dict:
-    """
-    Auxiliary function to create technology mapping parameters for AND,
-    OR, and NOT gates.
+def and_or_not() -> dict[str, bool]:
+    """Return boolean mapping keywords for AND, OR, and NOT gates."""
 
-    Returns:
-        Technology mapping parameters.
-    """
+def and_or_not_maj() -> dict[str, bool]:
+    """Return boolean mapping keywords for AND, OR, NOT, and MAJ gates."""
 
-def and_or_not_maj() -> dict:
-    """
-    Auxiliary function to create technology mapping parameters for AND,
-    OR, NOT, and MAJ gates.
+def all_standard_2_input_functions() -> dict[str, bool]:
+    """Return boolean mapping keywords for standard two-input functions."""
 
-    Returns:
-        Technology mapping parameters.
-    """
+def all_standard_3_input_functions() -> dict[str, bool]:
+    """Return boolean mapping keywords for standard three-input functions."""
 
-def all_standard_2_input_functions() -> dict:
-    """
-    Auxiliary function to create technology mapping parameters for AND,
-    OR, NAND, NOR, XOR, XNOR, and NOT gates.
-
-    Returns:
-        Technology mapping parameters.
-    """
-
-def all_standard_3_input_functions() -> dict:
-    """
-    Auxiliary function to create technology mapping parameters for AND3,
-    XOR_AND, OR_AND, ONEHOT, MAJ3, GAMBLE, DOT, MUX, and AND_XOR gates.
-
-    Returns:
-        Technology mapping parameters.
-    """
-
-def all_supported_standard_functions() -> dict:
-    """
-    Auxiliary function to create technology mapping parameters for all
-    supported standard functions.
-
-    Returns:
-        Technology mapping parameters.
-    """
+def all_supported_standard_functions() -> dict[str, bool]:
+    """Return boolean mapping keywords for all supported standard functions."""
 
 @overload
 def technology_mapping(
@@ -617,28 +532,10 @@ def technology_mapping(
     stats: technology_mapping_stats | None = None,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Performs technology mapping on the given network. Technology mapping
-    is the process of replacing the gates in a network with gates from a
-    given technology library. This function utilizes `mockturtle::emap` to
-    perform the technology mapping. This function is a wrapper around that
-    interface to provide a more convenient usage.
-
-    Args:
-        ntk: Input logic network.
-        pst: Technology mapping statistics.
-
-    Returns:
-        Mapped network exclusively using gates from the provided library.
-
-    Raises:
-        missing_required_gates_exception: if the technology library does
-                                          not contain required gates for
-                                          the base network type (e.g., AIG
-                                          requires INV and AND; XAG
-                                          requires INV, AND, and XOR; MIG
-                                          requires INV and MAJ).
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Map the input network to the gates enabled by the boolean keyword options.
+    No gates are enabled by default; missing required gates raise missing_required_gates_exception.
+    Returns a technology network; stats receives mapper statistics when supplied.
+    Gate-set factory dictionaries can be expanded into these keywords.
     """
 
 class network_target(enum.Enum):

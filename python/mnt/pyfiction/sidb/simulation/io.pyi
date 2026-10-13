@@ -51,46 +51,8 @@ def write_operational_domain(
     writing_mode: sample_writing_mode = ...,
 ) -> None:
     """
-    Writes a CSV representation of an operational domain to the specified
-     output stream. The data are written as rows, each corresponding to
-     one set of simulation parameters and their corresponding operational
-     status.
-
-     The output CSV format is e.g. as follows:
-    ```
-    embed:rst
-    .. code-block:: RST
-
-    epsilon_r, lambda_tf, operational status
-    0.0, 0.0, 0
-    0.1, 0.0, 1
-    ... subsequent rows for each set of simulation parameters
-    ```
-
-
-
-
-     The operational status is a binary value represented by specified
-     tags in the keyword options indicating whether the simulation parameters are
-     within the operational domain or not.
-
-    Args:
-        opdom: The operational domain to be written. It represents a
-               mapping between sets of simulation parameters (one to three
-               sweep parameters, written as the X, Y, and Z columns) and a
-               tuple containing detailed information about the SiDB layout
-               associated with those simulation parameters.
-        os: The output stream where the CSV representation of the
-            operational domain is written to.
-
-    Raises:
-        std::invalid_argument: if the number of dimensions in the
-                               operational domain is 0 or greater than 3.
-                               Three is the number of enumerators of
-                               `sweep_parameter`, so a fourth dimension
-                               could only repeat one of them.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Write the operational domain to the supplied filename as CSV.
+    The keyword options select the parameter and operational-status labels.
     """
 
 def write_operational_domain_to_string(
@@ -108,21 +70,7 @@ def write_critical_temperature_domain(
     non_operational_tag: str = "0",
     writing_mode: sample_writing_mode = ...,
 ) -> None:
-    """
-    The `critical_temperature_domain` class collects the critical
-    temperature and the operational status for a range of different
-    physical parameters of a given SiDB layout. It allows for the
-    evaluation of how the critical temperature depends on variations in
-    the underlying parameter points. This enables simulations to explore
-    the critical temperature's behavior across different conditions and
-    configurations.
-
-    It was proposed in \\"The Operational Domain Explorer: A Comprehensive
-    Framework to Unveil the Thermal Landscape of Silicon Dangling Bond
-    Logic Beyond Conventional Operability\\" by M. Walter, J. Drewniok, and
-    R. Wille in IEEE-NANO 2025
-    (https://ieeexplore.ieee.org/abstract/document/11113672).
-    """
+    """Write critical-temperature samples to a CSV file."""
 
 def write_critical_temperature_domain_to_string(
     opdom: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain,
