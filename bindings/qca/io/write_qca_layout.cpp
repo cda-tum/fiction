@@ -19,7 +19,6 @@
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
 
-#include <optional>
 #include <string_view>
 
 #include <nanobind/nanobind.h>

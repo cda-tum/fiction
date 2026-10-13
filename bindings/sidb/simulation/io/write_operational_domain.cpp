@@ -20,7 +20,6 @@
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
-#include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>

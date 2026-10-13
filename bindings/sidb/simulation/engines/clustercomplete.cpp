@@ -63,9 +63,6 @@ void register_clustercomplete(nb::module_& m)
         .value("OFF", clustercomplete_options::ground_state_space_reporting::OFF,
                DOC(fiction_sidb_simulation_engines_clustercomplete_params_ground_state_space_reporting_OFF));
 
-    /**
-     * ClusterComplete parameters.
-     */
     m.def(
         "clustercomplete",
         [](const fiction::sidb::layout& lyt, const decltype(clustercomplete_options{}.sim_params.base) base,
@@ -117,6 +114,7 @@ void register_clustercomplete(nb::module_& m)
             clustercomplete_options{}.validity_witness_partitioning_max_cluster_size_gss,
         R"doc(Simulate the SiDB layout with ClusterComplete.
 The keyword options select physical values, clustering, witness searches, and available threads.
+Raises ValueError when base is neither 2 nor 3.
 )doc");
 }
 

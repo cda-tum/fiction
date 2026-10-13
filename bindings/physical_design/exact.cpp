@@ -134,6 +134,7 @@ void register_exact(nb::module_& m, const char* signature)
               nb::sig(signature), R"doc(Place and route a technology network with SMT solving.
 The layout_type keyword selects a registered gate-layout class.
 Returns a layout or None when the search finds no solution within its bounds.
+Raises ValueError when a shifted Cartesian or hexagonal layout requires layout_arrangement and none is supplied.
 )doc");
     }
     else

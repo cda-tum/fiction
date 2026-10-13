@@ -23,7 +23,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -209,7 +208,8 @@ void register_bdl_input_iterator(nb::module_& m)
         nb::arg("maximum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
         nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
         R"doc(Return one SiDB layout per input pattern, starting with pattern zero.
-The keyword options select BDL detection and input encoding; supplied wires bypass detection.
+The keyword options select BDL detection and input encoding.
+The overload with input_wires bypasses automatic wire detection.
 )doc");
     m.def(
         "generate_bdl_input_pattern_layouts",
@@ -236,7 +236,8 @@ The keyword options select BDL detection and input encoding; supplied wires bypa
         nb::arg("maximum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
         nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
         R"doc(Return one SiDB layout per input pattern, starting with pattern zero.
-The keyword options select BDL detection and input encoding; supplied wires bypass detection.
+The keyword options select BDL detection and input encoding.
+The overload with input_wires bypasses automatic wire detection.
 )doc");
 }
 

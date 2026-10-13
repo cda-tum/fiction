@@ -48,9 +48,6 @@ namespace pyfiction
 /** @brief Native options constructed for each Python call. */
 using is_operational_options = fiction::sidb::simulation::logic::is_operational_params;
 
-/** @brief Native options constructed for each Python call. */
-using simulation_model = fiction::sidb::model::simulation_parameters;
-
 namespace detail
 {
 

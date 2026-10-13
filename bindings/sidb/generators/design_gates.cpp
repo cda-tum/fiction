@@ -22,7 +22,6 @@
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 
-#include <optional>
 #include <sstream>
 #include <vector>
 
@@ -46,7 +45,7 @@ namespace pyfiction
 using design_gates_options = fiction::sidb::generators::design_gates_params;
 
 /**
- * @brief Registers SiDB gate design, its parameters, and statistics.
+ * @brief Registers SiDB gate design, and statistics.
  *
  * @param m Python module.
  */

@@ -20,7 +20,6 @@
 
 #include <fiction/physical_design/post_layout_optimization.hpp>
 
-#include <optional>
 #include <sstream>
 
 #include <nanobind/nanobind.h>
@@ -110,6 +109,8 @@ void register_post_layout_optimization(nb::module_& m)
         nb::arg("statistics") = nullptr,
         R"doc(Optimize a 2DDWave-clocked Cartesian gate layout in place.
 The keyword options bound relocations and runtime; statistics receives the completed result.
+Raises ValueError for unsupported clocking or invalid occupied geometry.
+Raises OverflowError when the extent exceeds signed routing coordinates.
 )doc");
 }
 

@@ -19,7 +19,6 @@
 #include <fiction/technology/mol_qca/io/write_mol_qca_layout_svg.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 
-#include <optional>
 #include <string_view>
 
 #include <nanobind/nanobind.h>
@@ -40,7 +39,7 @@ namespace pyfiction
 using write_mol_qca_layout_svg_options = fiction::mol_qca::io::write_mol_qca_layout_svg_params;
 
 /**
- * @brief Registers the molQCA SVG writer and its parameters.
+ * @brief Registers the molQCA SVG writer.
  *
  * @param m Python module.
  */

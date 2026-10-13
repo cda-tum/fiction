@@ -21,7 +21,6 @@
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <cstddef>
-#include <optional>
 #include <sstream>
 #include <utility>
 
@@ -59,8 +58,8 @@ void register_gate_level_drvs_impl(nb::module_& m)
            const decltype(gate_level_drv_options{}.crossing_gates)           crossing_gates,
            const decltype(gate_level_drv_options{}.clocked_data_flow)        clocked_data_flow,
            const decltype(gate_level_drv_options{}.has_io)                   has_io,
-           const decltype(gate_level_drv_options{}.border_io) border_io, const bool print_report = false,
-           fiction::verification::gate_level_drv_stats* statistics = nullptr) -> std::pair<std::size_t, std::size_t>
+           const decltype(gate_level_drv_options{}.border_io) border_io, const bool print_report,
+           fiction::verification::gate_level_drv_stats* statistics) -> std::pair<std::size_t, std::size_t>
         {
             gate_level_drv_options params{};
             params.on_progress              = on_progress;
@@ -103,7 +102,7 @@ void register_gate_level_drvs_impl(nb::module_& m)
         nb::arg("has_io") = gate_level_drv_options{}.has_io, nb::arg("border_io") = gate_level_drv_options{}.border_io,
         nb::arg("print_report") = false, nb::arg("statistics") = nullptr,
         R"doc(Count design-rule violations in the gate-level layout.
-The keyword options select which checks run and stats receives their counts.
+The keyword options select which checks run and statistics receives their counts.
 )doc");
 }
 

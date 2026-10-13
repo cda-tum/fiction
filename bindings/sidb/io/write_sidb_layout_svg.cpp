@@ -20,7 +20,6 @@
 #include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 
-#include <optional>
 #include <sstream>
 #include <string_view>
 

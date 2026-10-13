@@ -85,6 +85,7 @@ void register_yen_k_shortest_paths_impl(nb::module_& m)
         nb::arg("crossings")    = yen_k_shortest_paths_options{}.astar_params.crossings,
         nb::arg("obstructions") = nb::none(), R"doc(Find up to k shortest loop-free paths from source to target.
 The keyword options select obstructions and crossing constraints.
+Raises ValueError when source or target lies outside the layout extent.
 )doc");
 }
 
