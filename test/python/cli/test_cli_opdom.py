@@ -272,21 +272,24 @@ def test_timeout_failures(resource: Callable[[str], str], tmp_path: Path, option
     assert not csv.exists()
 
 
+@pytest.mark.parametrize("dependency", ["plotly", "numpy"])
 def test_missing_plot_dependency_is_reported_before_computation(
-    xor_gate: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    xor_gate: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, dependency: str
 ) -> None:
     """Unavailable plotting packages do not leave an expensive computation's CSV behind."""
 
     original_import = builtins.__import__
 
-    def without_plotly(name: str, *args: Any, **kwargs: Any) -> object:
-        if name.startswith("plotly"):
+    def without_dependency(name: str, *args: Any, **kwargs: Any) -> object:
+        if name.startswith(dependency):
             raise ModuleNotFoundError(name)
         return original_import(name, *args, **kwargs)
 
-    monkeypatch.setattr(builtins, "__import__", without_plotly)
+    monkeypatch.setattr(builtins, "__import__", without_dependency)
     csv = tmp_path / "domain.csv"
-    assert "mnt-pyfiction[plot]" in xor_gate.fails(f'opdom "{csv}" --plot "{tmp_path / "plot.html"}"')
+    assert "mnt-pyfiction[plot]" in xor_gate.fails(
+        f'opdom "{csv}" --plot "{tmp_path / "plot.html"}" ' + " ".join(SMALL_SWEEP)
+    )
     assert not csv.exists()
 
 

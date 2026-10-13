@@ -110,6 +110,7 @@ def validate_outputs(args: argparse.Namespace, *, log_path: Path | None = None) 
             msg = "plot outputs require .png, .svg, .pdf, or .html"
             raise CommandError(msg)
         try:
+            __import__("numpy")
             _validate_colors(args, html=path.suffix.lower() == ".html")
         except ImportError as error:
             msg = "plotting requires uv tool install 'mnt-pyfiction[plot]' (or uv pip install in a virtual environment)"
