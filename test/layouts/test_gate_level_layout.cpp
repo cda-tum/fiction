@@ -739,6 +739,17 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]
     CHECK_FALSE(lyt.source({gate, 3}).has_value());
     CHECK(lyt.source({gate, 4}) == pis[4]);
     CHECK_THROWS_AS(lyt.source({gate, 5}), std::out_of_range);
+
+    lyt.connect(pis[0], {gate, 3});
+    CHECK(lyt.fanout_size(pis[0]) == 2);
+    /** @brief Destination input ports driven by the first primary input. */
+    std::set<typename gate_level_layout<TestType>::input_port> sinks{};
+    lyt.foreach_sink(pis[0], [&](const auto port) { sinks.insert(port); });
+    CHECK((sinks == std::set<typename gate_level_layout<TestType>::input_port>{{gate, 0}, {gate, 3}}));
+    /** @brief Destination objects visited once per connected input port. */
+    std::vector<typename gate_level_layout<TestType>::object_id> destinations{};
+    lyt.foreach_fanout(pis[0], [&](const auto destination) { destinations.push_back(destination); });
+    CHECK((destinations == std::vector{gate, gate}));
 }
 
 TEMPLATE_TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",
