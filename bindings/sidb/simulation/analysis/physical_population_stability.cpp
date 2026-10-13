@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 
@@ -81,11 +82,7 @@ inline void register_physical_population_stability_functions(nb::module_& m)
             physical_population_stability_options params{};
             params.precision_for_distance_corresponding_to_potential =
                 precision_for_distance_corresponding_to_potential;
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             return fiction::sidb::simulation::analysis::physical_population_stability(lyt, params);
         },

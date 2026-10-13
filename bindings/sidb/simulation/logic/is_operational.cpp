@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -88,11 +89,7 @@ inline void register_is_operational_functions(nb::module_& m)
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
@@ -161,11 +158,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
@@ -233,11 +226,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
@@ -312,11 +301,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
@@ -379,11 +364,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
@@ -450,11 +431,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
@@ -518,11 +495,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
@@ -591,11 +564,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
@@ -658,11 +627,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
             params.sim_engine = sim_engine;
             params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;

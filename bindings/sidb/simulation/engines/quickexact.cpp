@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
@@ -68,11 +69,7 @@ void register_quickexact(nb::module_& m)
            const decltype(quickexact_options{}.on_progress)                             on_progress)
         {
             quickexact_options params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params            = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.base_number_detection = base_number_detection;
             if (local_external_potential)
             {

@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -134,12 +135,7 @@ void register_displacement_robustness_domain(nb::module_& m)
         {
             displacement_robustness_domain_options params{};
             params.percentage_of_analyzed_displaced_layouts = percentage_of_analyzed_displaced_layouts;
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.operational_params.sim_params =
-                fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.analysis_mode                 = analysis_mode;
             params.displacement_variations       = displacement_variations;
             params.operational_params.timeout    = timeout;

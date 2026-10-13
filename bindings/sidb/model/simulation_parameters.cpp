@@ -14,6 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "pyfiction/simulation_parameters.hpp"
+
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -46,11 +48,8 @@ void register_simulation_parameters(nb::module_& m)
             [](fiction::sidb::model::simulation_parameters* self, const uint8_t base_number, const double mu_minus,
                const double relative_permittivity, const double screening_distance)
             {
-                if (base_number != 2 && base_number != 3)
-                {
-                    throw nb::value_error("base must be 2 or 3");
-                }
-                std::construct_at(self, base_number, mu_minus, relative_permittivity, screening_distance);
+                std::construct_at(
+                    self, make_simulation_parameters(base_number, mu_minus, relative_permittivity, screening_distance));
             },
             nb::kw_only(), nb::arg("base_number") = 3, nb::arg("mu_minus") = -0.32,
             nb::arg("relative_permittivity") = 5.6, nb::arg("screening_distance") = 5.0)

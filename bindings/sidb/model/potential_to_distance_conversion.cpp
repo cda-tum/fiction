@@ -16,6 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/model/potential_to_distance_conversion.hpp>
 
@@ -47,11 +48,7 @@ void register_potential_to_distance_conversion(nb::module_& m)
            const decltype(simulation_model{}.mu_minus) mu_minus, const decltype(simulation_model{}.epsilon_r) epsilon_r,
            const decltype(simulation_model{}.lambda_tf) lambda_tf)
         {
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            simulation_model params{base, mu_minus, epsilon_r, lambda_tf};
+            const auto params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             return fiction::sidb::model::potential_to_distance_conversion(potential, params, precision);
         },
         nb::arg("potential"), nb::arg("precision"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,

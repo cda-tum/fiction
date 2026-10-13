@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/time_to_solution.hpp>
@@ -107,11 +108,7 @@ void register_time_to_solution(nb::module_& m)
            fiction::sidb::simulation::analysis::time_to_solution_stats*     ps)
         {
             quicksim_options qs_params{};
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            qs_params.sim_params = fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            qs_params.sim_params      = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             qs_params.iteration_steps = iteration_steps;
             qs_params.alpha           = alpha;
             if (number_threads)

@@ -28,6 +28,7 @@ namespace nb = nanobind;
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
@@ -85,11 +86,7 @@ void register_clustercomplete(nb::module_& m)
             clustercomplete_options params{};
             params.validity_witness_partitioning_max_cluster_size_gss =
                 validity_witness_partitioning_max_cluster_size_gss;
-            if (base != 2 && base != 3)
-            {
-                throw nb::value_error("base must be 2 or 3");
-            }
-            params.sim_params = fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             if (local_external_potential)
             {
                 params.local_external_potential = *local_external_potential;

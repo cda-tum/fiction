@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -79,11 +80,7 @@ void register_potential_landscape(nb::module_& m)
                const std::optional<std::unordered_map<fiction::sidb::lattice_site, double>>& local_external_potential,
                double                                                                        global_external_potential)
             {
-                if (base != 2 && base != 3)
-                {
-                    throw nb::value_error("base must be 2 or 3");
-                }
-                simulation_model params{base, mu_minus, epsilon_r, lambda_tf};
+                const auto params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
                 std::construct_at(
                     self, layout, params,
                     local_external_potential.value_or(std::unordered_map<fiction::sidb::lattice_site, double>{}),
