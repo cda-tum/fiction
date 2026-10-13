@@ -750,6 +750,9 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]
     std::vector<typename gate_level_layout<TestType>::object_id> destinations{};
     lyt.foreach_fanout(pis[0], [&](const auto destination) { destinations.push_back(destination); });
     CHECK((destinations == std::vector{gate, gate}));
+    lyt.move_object(pis[0], {2, 1});
+    CHECK((lyt.template outgoing_data_flow<false>({2, 1}) ==
+           std::vector{layout_base::coordinate{2, 2}, layout_base::coordinate{2, 2}}));
 }
 
 TEMPLATE_TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",

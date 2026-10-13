@@ -427,7 +427,9 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
 
         .def(
             "outgoing_data_flow", [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
-            { return layout.template outgoing_data_flow<true>(tile); }, py::arg("t"))
+            { return layout.template outgoing_data_flow<true>(tile); }, py::arg("t"),
+            "Returns adjacent, outgoing-clocked destination coordinates once per connected input port. "
+            "Multiple connected inputs on one destination yield repeated coordinates; order is unspecified.")
 
         .def(
             "is_incoming_signal",

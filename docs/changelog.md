@@ -426,7 +426,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** Layout value classes now use `extent`, `layout_object_id`, and `layout_input_port` names.
 
-  - **Breaking:** `random_coordinate` now names its region bounds `corner1` and `corner2` in C++ and Python.
+  - **Breaking:** Python keyword calls to `random_coordinate` now use `corner1` and `corner2` for the region bounds.
 
   - **Breaking:** `mnt.pyfiction` has one submodule per C++ namespace, such as `mnt.pyfiction.layouts` and
     `mnt.pyfiction.sidb.simulation.engines`; import each name from its submodule. The package root

@@ -834,8 +834,13 @@ class gate_level_layout : public CoordinateLayout
         }
         return result;
     }
-    /** @brief Returns destination-object coordinates of output connections, filtered by adjacency and optionally
-     * clocking. */
+    /**
+     * @brief Returns adjacent destination coordinates once per connected input port.
+     * Multiple connected inputs on one destination yield repeated coordinates.
+     * @tparam RespectClocking Require outgoing clocking in addition to adjacency; enabled by default.
+     * @param t Source-object coordinate.
+     * @return Destination coordinates of the selected connections, in unspecified order.
+     */
     template <bool RespectClocking = true>
     [[nodiscard]] std::vector<tile> outgoing_data_flow(const tile& t) const
     {
