@@ -157,7 +157,7 @@ illegal XML control characters are rejected before writing. Editing checkpoints 
 ::::
 
 Python selects the FGL output representation with a keyword-only registered class. The file
-supplies the layout arrangement.
+supplies the layout arrangement. Pass the exact registered class; subclasses are not supported.
 
 ```python
 from mnt.pyfiction.layouts import hexagonal_gate_layout

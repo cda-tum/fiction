@@ -71,7 +71,9 @@
 ::::
 
 Python network readers and random generation accept a keyword-only `network_type` class.
-Both default to `technology_network`; AIG, XAG, and MIG retain their native readers and generators.
+Both default to `technology_network`; `aig_network`, `xag_network`, and `mig_network` select
+their native representations. Pass the exact registered class; subclasses are not supported.
+BLIF input supports `technology_network` only.
 
 ```python
 from mnt.pyfiction.networks import aig_network, random_network

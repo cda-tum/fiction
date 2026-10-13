@@ -18,6 +18,9 @@ from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import orthogonal, orthogonal_params, orthogonal_stats
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
+
 
 def test_orthogonal_default(mux21):
     layout = orthogonal(mux21)
@@ -93,7 +96,3 @@ def test_orthogonal_rejects_invalid_selectors(mux21: technology_network, selecto
     """Orthogonal supports only Cartesian and hexagonal output classes."""
     with pytest.raises(TypeError):
         orthogonal(mux21, layout_type=selector)
-
-
-if TYPE_CHECKING:
-    from mnt.pyfiction.networks import technology_network

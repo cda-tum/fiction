@@ -21,6 +21,9 @@ from mnt.pyfiction.physical_design import (
 )
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network
+
 
 def test_exact_cartesian_default(mux21):
     layout = exact(mux21)
@@ -135,7 +138,3 @@ def test_exact_unsatisfiable_result(mux21: technology_network) -> None:
 def test_physical_design_specialization_names_are_removed(name: str) -> None:
     """Expose one name per physical design algorithm."""
     assert not hasattr(physical_design, name)
-
-
-if TYPE_CHECKING:
-    from mnt.pyfiction.networks import technology_network

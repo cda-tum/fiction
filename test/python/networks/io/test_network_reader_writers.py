@@ -80,6 +80,17 @@ def test_reader_reports_diagnostics(tmp_path: Path) -> None:
         read_network(str(broken))
 
 
+@pytest.mark.parametrize("cls", [aig_network, xag_network, mig_network])
+def test_reader_rejects_blif_for_specialized_networks(
+    tmp_path: Path, cls: type[aig_network | xag_network | mig_network]
+) -> None:
+    """BLIF input supports the technology network representation only."""
+    source = tmp_path / "one.blif"
+    source.write_text(".model one\n.inputs a b\n.outputs y\n.names a b y\n11 1\n.end\n", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="do not support the full feature set of BLIF"):
+        read_network(str(source), network_type=cls)
+
+
 @pytest.mark.parametrize("target", ["TEC", "AIG", "XAG", "MIG"])
 @pytest.mark.parametrize("suffix", ["v", "blif"])
 def test_network_writer_round_trip(
