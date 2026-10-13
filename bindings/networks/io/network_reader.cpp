@@ -49,6 +49,7 @@ namespace detail
 template <typename Ntk>
 void register_network_reader(nb::module_& m, const char* signature)
 {
+    /** @brief Read the selected registered network representation. */
     const auto read = [](const std::string& filename, const std::string& format, const nb::handle network_type) -> Ntk
     {
         if (!network_type.is(nb::type<Ntk>()))

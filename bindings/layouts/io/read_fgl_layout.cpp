@@ -45,6 +45,7 @@ namespace detail
 template <typename Lyt>
 void register_read_fgl_layout(nb::module_& m, const char* signature)
 {
+    /** @brief Read the selected registered layout representation. */
     const auto read =
         [](const std::string_view& filename, const std::string_view& layout_name, const nb::handle layout_type)
     {

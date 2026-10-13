@@ -60,6 +60,7 @@ namespace detail
 template <typename Lyt>
 void register_exact(nb::module_& m, const char* signature)
 {
+    /** @brief Compute exact physical design for the selected layout representation. */
     const auto design =
         [](const py_tec_network& network, const fiction::physical_design::exact_physical_design_params& parameters,
            fiction::physical_design::exact_physical_design_stats* statistics, const nb::handle layout_type)

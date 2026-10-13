@@ -67,6 +67,7 @@ void register_has_high_degree_fanin_nodes(nb::module_& m)
 template <typename Ntk>
 void register_random_network(nb::module_& m, const char* signature)
 {
+    /** @brief Generate the selected registered network representation. */
     const auto generate =
         [](const uint32_t inputs, const uint32_t gates, const uint64_t seed, const nb::handle network_type)
     {

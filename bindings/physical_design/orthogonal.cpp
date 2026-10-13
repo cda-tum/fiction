@@ -56,6 +56,7 @@ namespace detail
 template <typename Lyt>
 void register_orthogonal(nb::module_& m, const char* signature)
 {
+    /** @brief Compute orthogonal physical design for the selected layout representation. */
     const auto design =
         [](const py_tec_network& network, const fiction::physical_design::orthogonal_physical_design_params& parameters,
            fiction::physical_design::orthogonal_physical_design_stats* statistics, const nb::handle layout_type)
