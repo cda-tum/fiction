@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
     Gate mapping, network passes, design-rule checks, and layout writers report counted phases.
   - Python: `operational_domain.to_numpy()` returns sampled coordinates and operational flags as NumPy arrays.
-    The `plot` extra supplies NumPy; the method reports an installation hint when NumPy is missing.
+    The method rejects mismatched dimensions and reports an installation hint when NumPy is missing.
 
 - CLI:
 
@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     random sampling, flood fill, and contour tracing. `--sketch` adds filter-only analysis to any method.
   - Added `fiction-opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or
     interactive plots, including Sketch. Install `mnt-pyfiction[plot]` for plotting support.
+  - Operational domain plots validate NumPy and colors before computation. Viewer failures retain exports and statistics.
   - `uv tool install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
     completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
@@ -636,9 +637,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
-  - Operational domain plots now check NumPy before computation and output writes.
-  - Operational domain plots now reject empty marker colors before computation and output writes.
-  - Operational domain commands now retain every export and statistics when a plot viewer cannot start.
   - Parallel commands now use one aggregate progress row; `exact` retains candidate dimensions at count checkpoints.
   - Store listings and command summaries skip layout timing analysis; `ps -g` computes it on request.
   - Store and statistics displays use readable topology names.
@@ -760,7 +758,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - NumPy operational domain export now rejects points with mismatched dimensions.
   - Cell-grid clocking names now remain valid when converted to Python strings.
   - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
     Mutable extents are unhashable.
