@@ -8,6 +8,8 @@ directed: blocking `a` to `b` does not block `b` to `a`.
 
 Use separate obstruction data for search constraints. A*, path enumeration, and Yen's
 algorithm combine this data with the layout's obstructions without changing either input.
+The standalone Python `obstructions` class supplies these temporary search constraints;
+use the gate layout's own obstruction methods for persistent assignments.
 The same data works with bare coordinate grids. Search data contains no layout or occupancy.
 `foreach_obstructed_coordinate` and `foreach_obstructed_connection` enumerate manual assignments.
 Python exposes these assignments through `obstructed_coordinates()` and `obstructed_connections()`.

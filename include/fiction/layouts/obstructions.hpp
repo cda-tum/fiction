@@ -26,7 +26,10 @@
 namespace fiction::layouts
 {
 /**
- * @brief Explicit obstructions stored by layouts or supplied to a routing search.
+ * @brief Layout-independent coordinate and directed-connection constraints for routing searches.
+ *
+ * Gate layouts expose persistent obstruction methods directly. Routing algorithms accept this separate
+ * object for temporary constraints and combine it with the layout's persistent obstructions and occupancy.
  * Copies are independent. This object contains no layout or occupancy information.
  */
 class obstructions

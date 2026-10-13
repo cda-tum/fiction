@@ -37,7 +37,8 @@ void obstructions(nanobind::module_& m)
     using data   = fiction::layouts::obstructions;
 
     py::class_<data>(m, "obstructions", DOC(fiction_layouts_obstructions))
-        .def(py::init<>(), "Creates empty routing constraints.")
+        .def(py::init<>(), "Creates layout-independent routing-search constraints. Gate layouts own persistent "
+                          "obstructions and expose their obstruction methods directly.")
         .def("obstruct_coordinate", &data::obstruct_coordinate, py::arg("c"),
              DOC(fiction_layouts_obstructions_obstruct_coordinate))
         .def("obstruct_connection", &data::obstruct_connection, py::arg("src"), py::arg("tgt"),
