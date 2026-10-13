@@ -72,7 +72,7 @@ void register_random_layout_generator(nb::module_& m)
                               .number_of_unique_generated_layouts)               number_of_unique_generated_layouts,
            const decltype(generate_random_layout_options{}
                               .maximal_attempts_for_multiple_layouts)            maximal_attempts_for_multiple_layouts,
-           const decltype(generate_random_layout_options{}.on_progress)          on_progress)
+           const decltype(generate_random_layout_options{}.on_progress)&         on_progress)
         {
             generate_random_layout_options params{};
             params.sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
@@ -100,21 +100,9 @@ void register_random_layout_generator(nb::module_& m)
         nb::arg("maximal_attempts_for_multiple_layouts") =
             generate_random_layout_options{}.maximal_attempts_for_multiple_layouts,
         nb::arg("on_progress").none() = nb::none(),
-        R"doc(Generates a random SiDB layout by placing SiDBs at random sites of an
-area, optionally on top of a skeleton. The skeleton's lattice, dots,
-and defects carry over; sites that hold a defect or that a neutral
-defect affects are left empty. Depending on the positive charge
-policy, SiDBs that would allow positive charges are removed again, or
-the generation is repeated until positive charges are possible.
-
-Args:
-    skeleton: The skeleton to place SiDBs on, if any.
-
-Returns:
-    The generated layout, or `std::nullopt` if not all SiDBs could be
-    placed within the attempt limit.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Generate a random SiDB layout within coordinate_pair, optionally extending lyt_skeleton.
+The keyword options select physical values, charge restrictions, and attempt limits.
+Returns None when the attempt limit does not produce a layout.
 )doc");
 
     m.def(
@@ -132,7 +120,7 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .number_of_unique_generated_layouts)               number_of_unique_generated_layouts,
            const decltype(generate_random_layout_options{}
                               .maximal_attempts_for_multiple_layouts)            maximal_attempts_for_multiple_layouts,
-           const decltype(generate_random_layout_options{}.on_progress)          on_progress)
+           const decltype(generate_random_layout_options{}.on_progress)&         on_progress)
         {
             generate_random_layout_options params{};
             params.sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
@@ -160,17 +148,9 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("maximal_attempts_for_multiple_layouts") =
             generate_random_layout_options{}.maximal_attempts_for_multiple_layouts,
         nb::arg("on_progress").none() = nb::none(),
-        R"doc(Generates several unique random SiDB layouts with
-`generate_random_layout`.
-
-Args:
-    skeleton: The skeleton to place SiDBs on, if any.
-
-Returns:
-    The layouts, or `std::nullopt` if none could be generated within
-    the attempt limit.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Generate distinct random SiDB layouts, optionally extending lyt_skeleton.
+The keyword options select the area, physical values, requested count, and attempt limits.
+Returns None when the attempt limit does not produce the requested layouts.
 )doc");
 }
 

@@ -76,46 +76,8 @@ void register_write_operational_domain(nb::module_& m)
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,
         nb::arg("non_operational_tag") = write_operational_domain_options{}.non_operational_tag,
         nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode,
-        R"doc( Writes a CSV representation of an operational domain to the specified
- output stream. The data are written as rows, each corresponding to
- one set of simulation parameters and their corresponding operational
- status.
-
- The output CSV format is e.g. as follows:
-```
-embed:rst
-.. code-block:: RST
-
-epsilon_r, lambda_tf, operational status
-0.0, 0.0, 0
-0.1, 0.0, 1
-... subsequent rows for each set of simulation parameters
-```
-
-
-
-
- The operational status is a binary value represented by specified
- tags in the keyword options indicating whether the simulation parameters are
- within the operational domain or not.
-
-Args:
-    opdom: The operational domain to be written. It represents a
-           mapping between sets of simulation parameters (one to three
-           sweep parameters, written as the X, Y, and Z columns) and a
-           tuple containing detailed information about the SiDB layout
-           associated with those simulation parameters.
-    os: The output stream where the CSV representation of the
-        operational domain is written to.
-
-Raises:
-    std::invalid_argument: if the number of dimensions in the
-                           operational domain is 0 or greater than 3.
-                           Three is the number of enumerators of
-                           `sweep_parameter`, so a fourth dimension
-                           could only repeat one of them.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Write the operational domain to the supplied filename as CSV.
+The keyword options select the parameter and operational-status labels.
 )doc");
 
     m.def(
@@ -165,7 +127,7 @@ void register_write_critical_temperature_domain(nb::module_& m)
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,
         nb::arg("non_operational_tag") = write_operational_domain_options{}.non_operational_tag,
         nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode,
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain));
+        "Write critical-temperature samples to a CSV file.");
 
     m.def(
         "write_critical_temperature_domain_to_string",

@@ -98,13 +98,13 @@ void register_time_to_solution(nb::module_& m)
            const decltype(quicksim_options{}.alpha)                         alpha,
            const std::optional<decltype(quicksim_options{}.number_threads)> number_threads,
            const decltype(quicksim_options{}.timeout)                       quicksim_timeout,
-           const decltype(quicksim_options{}.on_progress)                   quicksim_on_progress,
-           const decltype(quicksim_options{}.on_worker_progress)            on_worker_progress,
+           const decltype(quicksim_options{}.on_progress)&                  quicksim_on_progress,
+           const decltype(quicksim_options{}.on_worker_progress)&           on_worker_progress,
            const decltype(time_to_solution_options{}.timeout)               timeout,
            const decltype(time_to_solution_options{}.engine)                engine,
            const decltype(time_to_solution_options{}.repetitions)           repetitions,
            const decltype(time_to_solution_options{}.confidence_level)      confidence_level,
-           const decltype(time_to_solution_options{}.on_progress)           on_progress,
+           const decltype(time_to_solution_options{}.on_progress)&          on_progress,
            fiction::sidb::simulation::analysis::time_to_solution_stats*     ps)
         {
             quicksim_options qs_params{};
@@ -138,19 +138,10 @@ void register_time_to_solution(nb::module_& m)
         nb::arg("repetitions")        = time_to_solution_options{}.repetitions,
         nb::arg("confidence_level")   = time_to_solution_options{}.confidence_level,
         nb::arg("on_progress").none() = nb::none(), nb::arg("ps") = nullptr,
-        R"doc(Computes the time-to-solution (TTS) of *QuickSim* for a layout: the
-layout is simulated once with the exact engine of the parameters and
-`tts_params.repetitions` times with *QuickSim*, and the runs are
-combined with `time_to_solution_for_given_simulation_results`.
-
-Failed attempts contribute elapsed wall time; successful attempts
-retain the engine runtime.
-
-Args:
-    lyt: The layout to simulate.
-    qs_params: *QuickSim* parameters.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Compute QuickSim time-to-solution from one exact run and repetitions heuristic runs.
+quicksim_timeout bounds each heuristic run; timeout bounds the complete evaluation.
+Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
+ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
 )doc");
     m.def("time_to_solution_for_given_simulation_results",
           &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, nb::arg("results_exact"),
@@ -168,7 +159,6 @@ Args:
     results_heuristic: The results of the heuristic runs.
     confidence_level: Confidence level for the TTS computation.
 
-Algorithm options are keyword-only; the signature lists their defaults.
 )doc");
 }
 

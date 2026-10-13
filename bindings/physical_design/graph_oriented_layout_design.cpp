@@ -114,11 +114,11 @@ void register_graph_oriented_layout_design(nb::module_& m)
            const decltype(graph_oriented_layout_design_options{}.straight_inverters)        straight_inverters,
            const decltype(graph_oriented_layout_design_options{}.tiles_to_skip_between_pis) tiles_to_skip_between_pis,
            const decltype(graph_oriented_layout_design_options{}
-                              .randomize_tiles_to_skip_between_pis)           randomize_tiles_to_skip_between_pis,
-           const decltype(graph_oriented_layout_design_options{}.on_progress) on_progress,
-           const decltype(graph_oriented_layout_design_options{}.on_worker_progress) on_worker_progress,
-           fiction::physical_design::graph_oriented_layout_design_stats*             statistics,
-           std::function<uint64_t(const py_cartesian_gate_layout&)>                  custom_cost_objective)
+                              .randomize_tiles_to_skip_between_pis)            randomize_tiles_to_skip_between_pis,
+           const decltype(graph_oriented_layout_design_options{}.on_progress)& on_progress,
+           const decltype(graph_oriented_layout_design_options{}.on_worker_progress)& on_worker_progress,
+           fiction::physical_design::graph_oriented_layout_design_stats*              statistics,
+           std::function<uint64_t(const py_cartesian_gate_layout&)>                   custom_cost_objective)
         {
             graph_oriented_layout_design_options params{};
             params.timeout                             = timeout;
@@ -156,55 +156,8 @@ void register_graph_oriented_layout_design(nb::module_& m)
             graph_oriented_layout_design_options{}.randomize_tiles_to_skip_between_pis,
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("statistics") = nullptr, nb::arg("custom_cost_objective") = nullptr,
-        R"doc(A scalable and efficient placement & routing approach based on
-spanning a search space graph of partial layouts and finding a path to
-one of its leaves, i.e., a complete layout.
-
-The search space graph starts with an empty layout and then expands it
-based on where the first node in a topological sort of the logic
-network can be placed. Based on the position of this first node, a
-cost is assigned to each expansion based on the position of the placed
-node. The vertex with the lowest cost, which is the smallest layout
-w.r.t. the cost objective (e.g. area), is then chosen for the next
-expansion. This iterative process continues until a leaf node is
-found, which is a layout with all nodes placed. The algorithm then
-continues to backtrack through the search space graph to find other
-complete layouts with lower cost.
-
-Exclusively generates 2DDWave-clocked layouts.
-
-This algorithm was proposed in \"A* is Born: Efficient and Scalable
-Physical Design for Field-coupled Nanocomputing\" by S. Hofmann, M.
-Walter, and R. Wille in IEEE NANO 2024
-(https://ieeexplore.ieee.org/document/10628808) and extended in
-\"Physical Design for Field-coupled Nanocomputing with Discretionary
-Cost Objectives\" by S. Hofmann, M. Walter, and R. Wille in LASCAS
-2025 (https://ieeexplore.ieee.org/document/10966234).
-
-Args:
-    ntk: The network to be placed and routed.
-    pst: A pointer to a statistics object to record execution details.
-         Defaults to nullptr.
-    custom_cost_objective: A custom cost objective that is evaluated
-                           at every expansion of the search space
-                           graph. Should be a function that can be
-                           calculated based on the current partial
-                           layout and returns an uint64_t that should
-                           be minimized.
-
-Returns:
-    The smallest layout yielded by the graph-oriented layout design
-    algorithm under the given parameters.
-
-Raises:
-    networks::high_degree_fanin_exception: If `ntk` has a node with
-                                           more than two fanins.
-    std::invalid_argument: If the cost objective is `CUSTOM` and no
-                           custom cost objective is provided, or if
-                           `tiles_to_skip_between_pis` does not lie
-                           in :math:`[0, 2^{20}]`.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Place and route a technology network by searching partial gate layouts.
+The keyword options control search effort, clocking, and progress reporting.
 )doc");
 }
 

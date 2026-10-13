@@ -54,28 +54,8 @@ void register_potential_to_distance_conversion(nb::module_& m)
         nb::arg("potential"), nb::arg("precision"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
         nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
         nb::arg("lambda_tf") = simulation_model{}.lambda_tf,
-        R"doc(The electrostatic potential on hydrogen-passivated silicon is
-typically modeled using a screened Coulomb potential. This
-electrostatic potential is commonly employed to determine the
-electrostatic potential for a given distance (between SiDB and point
-under consideration) and given physical parameters. However, the
-function provided here serves the inverse purpose by calculating the
-distance for a given potential and given physical parameters.
-
-Args:
-    potential: The electrostatic potential (unit: V) to be converted
-               to a distance.
-    precision: The precision level for the conversion, specifying the
-               number of decimal places.
-
-Returns:
-    The distance (unit: nm) corresponding to the given electrostatic
-    potential.
-
-Note:
-    Runtime depends exponentially on the provided precision.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Compute the distance corresponding to the potential with the requested precision.
+The physical model is supplied by the scalar keyword values.
 )doc");
 }
 

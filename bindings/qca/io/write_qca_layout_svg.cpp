@@ -56,8 +56,8 @@ void register_write_qca_layout_svg_impl(nb::module_& m)
     m.def(
         "write_qca_layout_svg",
         [](const fiction::qca::layout& layout, const std::string_view& filename,
-           const decltype(write_qca_layout_svg_options{}.on_progress) on_progress,
-           const decltype(write_qca_layout_svg_options{}.simple)      simple)
+           const decltype(write_qca_layout_svg_options{}.on_progress)& on_progress,
+           const decltype(write_qca_layout_svg_options{}.simple)       simple)
         {
             write_qca_layout_svg_options params{};
             params.on_progress = on_progress;
@@ -67,22 +67,8 @@ void register_write_qca_layout_svg_impl(nb::module_& m)
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("simple") = write_qca_layout_svg_options{}.simple,
-        R"doc(Writes an SVG representation of a QCA layout into an output stream.
-Both tile- and cell-based layouts are supported. For tile-based
-layouts, QCA layouts of tile size :math:`5 \times 5` are supported
-exclusively so far.
-
-The utilized color scheme is based on the standard scheme used in
-QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Write an SVG representation of the QCA layout to the supplied filename.
+simple selects a compact drawing; on_progress reports writing progress.
 )doc");
 }
 

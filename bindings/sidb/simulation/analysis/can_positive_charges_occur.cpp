@@ -56,21 +56,7 @@ void register_can_positive_charges_occur(nb::module_& m)
         nb::arg("lyt"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
         nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
         nb::arg("lambda_tf") = simulation_model{}.lambda_tf,
-        R"doc(Checks whether positively charged SiDBs can occur in a layout under
-the given physical parameters. See the `potential_landscape` overload.
-
-Args:
-    lyt: The layout to check.
-
-Returns:
-    `true` if at least one SiDB can be positively charged, `false`
-    otherwise.
-
-Raises:
-    std::out_of_range: if a SiDB or defect site has an invalid lattice
-                       basis index.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Check whether positively charged SiDBs can occur under the scalar physical model.
 )doc");
 }
 

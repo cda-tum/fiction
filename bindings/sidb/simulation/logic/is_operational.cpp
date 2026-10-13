@@ -16,7 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/simulation_parameters.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -89,15 +89,11 @@ inline void register_is_operational_functions(nb::module_& m)
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
             return fiction::sidb::simulation::logic::is_operational(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -116,22 +112,9 @@ inline void register_is_operational_functions(nb::module_& m)
         nb::arg("op_condition")     = is_operational_options{}.op_condition,
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
-        R"doc(Determines whether an SiDB layout implements the given Boolean
-function(s). Every input pattern is applied to the input BDL pairs,
-the ground states are simulated with the configured engine, and the
-charge states of the output BDL pairs are compared with the expected
-truth-table entries. If the layout carries logic dots, they form the
-canvas of the pruning filters that run before any simulation whenever
-the parameters ask for filtering and reject kinks.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-
-Returns:
-    The operational status and the number of simulator invocations.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+Overloads accept supplied wires or one layout per input pattern.
 )doc");
     m.def(
         "is_operational",
@@ -158,15 +141,11 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
             return fiction::sidb::simulation::logic::is_operational(lyt, spec, params, in, out, canvas_lyt);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"), nb::kw_only(),
@@ -186,20 +165,10 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("op_condition")     = is_operational_options{}.op_condition,
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
-        nb::arg("canvas_lyt") = std::nullopt, R"doc(Like the overload above, with the BDL wires and, optionally, the
-canvas given by the caller.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-    input_bdl_wire: The input BDL wires of `lyt`.
-    output_bdl_wire: The output BDL wires of `lyt`.
-    canvas_lyt: The canvas; defaults to the logic dots of `lyt`.
-
-Returns:
-    The operational status and the number of simulator invocations.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        nb::arg("canvas_lyt") = std::nullopt,
+        R"doc(Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+Overloads accept supplied wires or one layout per input pattern.
 )doc");
     m.def(
         "is_operational",
@@ -226,15 +195,10 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::is_operational(input_pattern_layouts, spec, params, in, out,
                                                                     canvas_lyt);
@@ -257,26 +221,9 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
         nb::arg("canvas_lyt") = std::nullopt,
-        R"doc(Like the overloads above, but with one layout per input pattern given
-by the caller instead of applying the patterns to the input BDL pairs.
-
-Args:
-    input_pattern_layouts: One layout per input pattern, pattern `0`
-                           first.
-    spec: The Boolean function(s) to implement.
-    input_bdl_wire: The input BDL wires.
-    output_bdl_wire: The output BDL wires.
-    canvas_lyt: The canvas; defaults to the logic dots of the first
-                layout.
-
-Returns:
-    The operational status and the number of simulator invocations.
-
-Raises:
-    std::invalid_argument: if `spec` is empty or the number of layouts
-                           does not match the number of patterns.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+Overloads accept supplied wires or one layout per input pattern.
 )doc");
     m.def(
         "operational_input_patterns",
@@ -301,15 +248,11 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
             return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -328,16 +271,8 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("op_condition")     = is_operational_options{}.op_condition,
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
-        R"doc(Determines the input patterns for which the layout is operational.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-
-Returns:
-    The operational input patterns.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Return the input patterns for which the SiDB layout implements the truth tables.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 )doc");
     m.def(
         "operational_input_patterns",
@@ -364,15 +299,10 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params, in, out, canvas_lyt);
         },
@@ -393,20 +323,9 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("op_condition")     = is_operational_options{}.op_condition,
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
-        nb::arg("canvas_lyt") = std::nullopt, R"doc(Like the overload above, with the BDL wires and, optionally, the
-canvas given by the caller.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-    input_bdl_wire: The input BDL wires of `lyt`.
-    output_bdl_wire: The output BDL wires of `lyt`.
-    canvas_lyt: The canvas; defaults to none.
-
-Returns:
-    The operational input patterns.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        nb::arg("canvas_lyt") = std::nullopt,
+        R"doc(Return the input patterns for which the SiDB layout implements the truth tables.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
@@ -431,15 +350,11 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
             return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -458,17 +373,8 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("op_condition")     = is_operational_options{}.op_condition,
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
-        R"doc(Determines the input patterns for which kinks render the layout non-
-operational.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-
-Returns:
-    The kink-induced non-operational input patterns.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Return the input patterns for which kinks render the SiDB layout non-operational.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
@@ -495,15 +401,10 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params, in,
                                                                                                  out, canvas_lyt);
@@ -526,20 +427,8 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
         nb::arg("canvas_lyt") = std::nullopt,
-        R"doc(Like the overload above, with the BDL wires and, optionally, the
-canvas given by the caller.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-    input_bdl_wire: The input BDL wires of `lyt`.
-    output_bdl_wire: The output BDL wires of `lyt`.
-    canvas_lyt: The canvas; defaults to none.
-
-Returns:
-    The kink-induced non-operational input patterns.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Return the input patterns for which kinks render the SiDB layout non-operational.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 )doc");
     m.def(
         "is_kink_induced_non_operational",
@@ -564,15 +453,11 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
             return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -591,16 +476,8 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("op_condition")     = is_operational_options{}.op_condition,
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
-        R"doc(Determines whether kinks are the reason the layout is non-operational.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-
-Returns:
-    `true` if the layout is non-operational because of kinks.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Check whether kinks cause the SiDB layout to be non-operational.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 )doc");
     m.def(
         "is_kink_induced_non_operational",
@@ -627,15 +504,10 @@ Algorithm options are keyword-only; the signature lists their defaults.
            const std::optional<layout>&                                canvas_lyt)
         {
             is_operational_options params{};
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
-            params.sim_engine = sim_engine;
-            params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-            params.op_condition                                                                = op_condition;
-            params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params, in, out,
                                                                                      canvas_lyt);
@@ -657,20 +529,8 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("op_condition")     = is_operational_options{}.op_condition,
         nb::arg("strategy_to_analyze_operational_status") =
             is_operational_options{}.strategy_to_analyze_operational_status,
-        nb::arg("canvas_lyt") = std::nullopt, R"doc(Like the overload above, with the BDL wires and, optionally, the
-canvas given by the caller.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-    input_bdl_wire: The input BDL wires of `lyt`.
-    output_bdl_wire: The output BDL wires of `lyt`.
-    canvas_lyt: The canvas; defaults to none.
-
-Returns:
-    `true` if the layout is non-operational because of kinks.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        nb::arg("canvas_lyt") = std::nullopt, R"doc(Check whether kinks cause the SiDB layout to be non-operational.
+The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 )doc");
 }
 

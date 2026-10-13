@@ -52,7 +52,7 @@ void register_gate_level_drvs_impl(nb::module_& m)
 {
     m.def(
         "gate_level_drvs",
-        [](const Lyt& lyt, const decltype(gate_level_drv_options{}.on_progress) on_progress,
+        [](const Lyt& lyt, const decltype(gate_level_drv_options{}.on_progress)& on_progress,
            const decltype(gate_level_drv_options{}.outside_extent)           outside_extent,
            const decltype(gate_level_drv_options{}.non_adjacent_connections) non_adjacent_connections,
            const decltype(gate_level_drv_options{}.missing_connections)      missing_connections,
@@ -102,30 +102,8 @@ void register_gate_level_drvs_impl(nb::module_& m)
         nb::arg("clocked_data_flow")        = gate_level_drv_options{}.clocked_data_flow,
         nb::arg("has_io") = gate_level_drv_options{}.has_io, nb::arg("border_io") = gate_level_drv_options{}.border_io,
         nb::arg("print_report") = false, nb::arg("statistics") = nullptr,
-        R"doc(Performs design rule violation (DRV) checking on the given gate-level
-layout. The implementation of gate_level_layout allows for layouts
-with structural defects like the connection of non-adjacent tiles or
-connections that defy the clocking scheme. This function checks for
-such violations and documents them in the statistics. A brief report
-can be printed and more in-depth information including with error
-sites can be obtained from a generated json object.
-
-Furthermore, this function does not only find and log DRVs but can
-also warn for instances that are not per se errors but defy best
-practices of layout generation, e.g., I/Os not being placed at the
-layout borders.
-
-The checker inspects every live object through public ordered ports,
-including placements outside the extent. Unplaced objects, placed dead
-objects, empty terminals, and gate terminals cannot occur in the
-placed-object API and have no corresponding checks.
-
-Args:
-    lyt: The gate-level layout that is to be examined for DRVs and
-         warnings.
-    pst: Statistics.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Count design-rule violations in the gate-level layout.
+The keyword options select which checks run and stats receives their counts.
 )doc");
 }
 

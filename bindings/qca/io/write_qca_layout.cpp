@@ -49,7 +49,7 @@ void register_write_qca_layout(nb::module_& m)
     m.def(
         "write_qca_layout",
         [](const fiction::qca::layout& layout, const std::string_view& filename,
-           const decltype(write_qca_layout_options{}.on_progress)                  on_progress,
+           const decltype(write_qca_layout_options{}.on_progress)&                 on_progress,
            const decltype(write_qca_layout_options{}.create_inter_layer_via_cells) create_inter_layer_via_cells)
         {
             write_qca_layout_options params{};
@@ -60,17 +60,8 @@ void register_write_qca_layout(nb::module_& m)
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("create_inter_layer_via_cells") = write_qca_layout_options{}.create_inter_layer_via_cells,
-        R"doc(Writes a QCA layout to a qca file that is used by QCADesigner
-(https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
-the QCA technology platform.
-
-This overload uses an output stream to write into.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Write the QCA layout to the supplied QCADesigner filename.
+create_inter_layer_via_cells controls via cells; on_progress reports writing progress.
 )doc");
 }
 

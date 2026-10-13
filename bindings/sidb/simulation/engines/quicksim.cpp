@@ -58,8 +58,8 @@ void register_quicksim(nb::module_& m)
            const decltype(quicksim_options{}.alpha)                         alpha,
            const std::optional<decltype(quicksim_options{}.number_threads)> number_threads,
            const decltype(quicksim_options{}.timeout)                       timeout,
-           const decltype(quicksim_options{}.on_progress)                   on_progress,
-           const decltype(quicksim_options{}.on_worker_progress)            on_worker_progress)
+           const decltype(quicksim_options{}.on_progress)&                  on_progress,
+           const decltype(quicksim_options{}.on_worker_progress)&           on_worker_progress)
         {
             quicksim_options params{};
             params.sim_params      = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
@@ -82,32 +82,9 @@ void register_quicksim(nb::module_& m)
         nb::arg("iteration_steps") = quicksim_options{}.iteration_steps, nb::arg("alpha") = quicksim_options{}.alpha,
         nb::arg("number_threads") = nb::none(), nb::arg("timeout") = quicksim_options{}.timeout,
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        R"doc(*QuickSim* is a heuristic ground-state simulation of SiDB layouts
-proposed in \"QuickSim: Efficient and Accurate Physical Simulation of
-Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng,
-K. Walus, and R. Wille in IEEE NANO 2023
-(https://ieeexplore.ieee.org/document/10231266). It grows candidate
-charge distributions from the SiDBs that have to be negative by
-repeatedly charging the neutral SiDB farthest from every negative one,
-keeping the physically valid intermediate states. Every worker thread
-owns one simulation state and shares the layout's potential landscape.
-Charged surface defects are not supported: a layout that holds any
-yields `std::nullopt`.
-
-Args:
-    lyt: Layout to simulate.
-
-Returns:
-    The physically valid charge distributions found, or `std::nullopt`
-    if the layout is empty, holds charged defects, the iteration count
-    is zero, the timeout was hit, or no valid distribution was found.
-
-Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
-    utils::timeout_error: if the shared caller deadline expires. No
-                          partial result is returned.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Search for low-energy charge distributions with QuickSim.
+The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
+Returns None when the heuristic search finds no physically valid charge distribution.
 )doc");
 }
 

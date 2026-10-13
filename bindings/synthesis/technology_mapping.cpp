@@ -41,6 +41,38 @@ namespace detail
 {
 
 /**
+ * @brief Convert native gate choices to Python mapping keywords.
+ * @param params Native gate choices.
+ * @return Boolean keyword options accepted by technology_mapping.
+ */
+inline nb::dict technology_mapping_keywords(const fiction::synthesis::technology_mapping_params& params)
+{
+    nb::dict options{};
+    options["decay"]   = params.decay;
+    options["inv"]     = params.inv;
+    options["and2"]    = params.and2;
+    options["nand2"]   = params.nand2;
+    options["or2"]     = params.or2;
+    options["nor2"]    = params.nor2;
+    options["xor2"]    = params.xor2;
+    options["xnor2"]   = params.xnor2;
+    options["lt2"]     = params.lt2;
+    options["gt2"]     = params.gt2;
+    options["le2"]     = params.le2;
+    options["ge2"]     = params.ge2;
+    options["and3"]    = params.and3;
+    options["xor_and"] = params.xor_and;
+    options["or_and"]  = params.or_and;
+    options["onehot"]  = params.onehot;
+    options["maj3"]    = params.maj3;
+    options["gamble"]  = params.gamble;
+    options["dot"]     = params.dot;
+    options["mux"]     = params.mux;
+    options["and_xor"] = params.and_xor;
+    return options;
+}
+
+/**
  * @brief Binds technology mapping helpers.
  * @param m Python module.
  * @tparam Ntk Network type.
@@ -119,28 +151,10 @@ void register_technology_mapping_impl(nb::module_& m)
         nb::arg("dot")     = fiction::synthesis::technology_mapping_params{}.dot,
         nb::arg("mux")     = fiction::synthesis::technology_mapping_params{}.mux,
         nb::arg("and_xor") = fiction::synthesis::technology_mapping_params{}.and_xor, nb::arg("stats") = nullptr,
-        R"doc(Performs technology mapping on the given network. Technology mapping
-is the process of replacing the gates in a network with gates from a
-given technology library. This function utilizes `mockturtle::emap` to
-perform the technology mapping. This function is a wrapper around that
-interface to provide a more convenient usage.
-
-Args:
-    ntk: Input logic network.
-    pst: Technology mapping statistics.
-
-Returns:
-    Mapped network exclusively using gates from the provided library.
-
-Raises:
-    missing_required_gates_exception: if the technology library does
-                                      not contain required gates for
-                                      the base network type (e.g., AIG
-                                      requires INV and AND; XAG
-                                      requires INV, AND, and XOR; MIG
-                                      requires INV and MAJ).
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Map the input network to the gates enabled by the boolean keyword options.
+No gates are enabled by default; missing required gates raise missing_required_gates_exception.
+Returns a technology network; stats receives mapper statistics when supplied.
+Gate-set factory dictionaries can be expanded into these keywords.
 )doc");
 }
 
@@ -183,155 +197,49 @@ void register_technology_mapping(nb::module_& m)
         []()
         {
             const auto params = fiction::synthesis::and_or_not();
-            nb::dict   options{};
-            options["decay"]   = params.decay;
-            options["inv"]     = params.inv;
-            options["and2"]    = params.and2;
-            options["nand2"]   = params.nand2;
-            options["or2"]     = params.or2;
-            options["nor2"]    = params.nor2;
-            options["xor2"]    = params.xor2;
-            options["xnor2"]   = params.xnor2;
-            options["lt2"]     = params.lt2;
-            options["gt2"]     = params.gt2;
-            options["le2"]     = params.le2;
-            options["ge2"]     = params.ge2;
-            options["and3"]    = params.and3;
-            options["xor_and"] = params.xor_and;
-            options["or_and"]  = params.or_and;
-            options["onehot"]  = params.onehot;
-            options["maj3"]    = params.maj3;
-            options["gamble"]  = params.gamble;
-            options["dot"]     = params.dot;
-            options["mux"]     = params.mux;
-            options["and_xor"] = params.and_xor;
-            return options;
+            return detail::technology_mapping_keywords(params);
         },
-        DOC(fiction_synthesis_and_or_not));
+        nb::sig("def and_or_not() -> dict[str, bool]"), "Return boolean mapping keywords for AND, OR, and NOT gates.");
 
     m.def(
         "and_or_not_maj",
         []()
         {
             const auto params = fiction::synthesis::and_or_not_maj();
-            nb::dict   options{};
-            options["decay"]   = params.decay;
-            options["inv"]     = params.inv;
-            options["and2"]    = params.and2;
-            options["nand2"]   = params.nand2;
-            options["or2"]     = params.or2;
-            options["nor2"]    = params.nor2;
-            options["xor2"]    = params.xor2;
-            options["xnor2"]   = params.xnor2;
-            options["lt2"]     = params.lt2;
-            options["gt2"]     = params.gt2;
-            options["le2"]     = params.le2;
-            options["ge2"]     = params.ge2;
-            options["and3"]    = params.and3;
-            options["xor_and"] = params.xor_and;
-            options["or_and"]  = params.or_and;
-            options["onehot"]  = params.onehot;
-            options["maj3"]    = params.maj3;
-            options["gamble"]  = params.gamble;
-            options["dot"]     = params.dot;
-            options["mux"]     = params.mux;
-            options["and_xor"] = params.and_xor;
-            return options;
+            return detail::technology_mapping_keywords(params);
         },
-        DOC(fiction_synthesis_and_or_not_maj));
+        nb::sig("def and_or_not_maj() -> dict[str, bool]"),
+        "Return boolean mapping keywords for AND, OR, NOT, and MAJ gates.");
 
     m.def(
         "all_standard_2_input_functions",
         []()
         {
             const auto params = fiction::synthesis::all_standard_2_input_functions();
-            nb::dict   options{};
-            options["decay"]   = params.decay;
-            options["inv"]     = params.inv;
-            options["and2"]    = params.and2;
-            options["nand2"]   = params.nand2;
-            options["or2"]     = params.or2;
-            options["nor2"]    = params.nor2;
-            options["xor2"]    = params.xor2;
-            options["xnor2"]   = params.xnor2;
-            options["lt2"]     = params.lt2;
-            options["gt2"]     = params.gt2;
-            options["le2"]     = params.le2;
-            options["ge2"]     = params.ge2;
-            options["and3"]    = params.and3;
-            options["xor_and"] = params.xor_and;
-            options["or_and"]  = params.or_and;
-            options["onehot"]  = params.onehot;
-            options["maj3"]    = params.maj3;
-            options["gamble"]  = params.gamble;
-            options["dot"]     = params.dot;
-            options["mux"]     = params.mux;
-            options["and_xor"] = params.and_xor;
-            return options;
+            return detail::technology_mapping_keywords(params);
         },
-        DOC(fiction_synthesis_all_standard_2_input_functions));
+        nb::sig("def all_standard_2_input_functions() -> dict[str, bool]"),
+        "Return boolean mapping keywords for standard two-input functions.");
 
     m.def(
         "all_standard_3_input_functions",
         []()
         {
             const auto params = fiction::synthesis::all_standard_3_input_functions();
-            nb::dict   options{};
-            options["decay"]   = params.decay;
-            options["inv"]     = params.inv;
-            options["and2"]    = params.and2;
-            options["nand2"]   = params.nand2;
-            options["or2"]     = params.or2;
-            options["nor2"]    = params.nor2;
-            options["xor2"]    = params.xor2;
-            options["xnor2"]   = params.xnor2;
-            options["lt2"]     = params.lt2;
-            options["gt2"]     = params.gt2;
-            options["le2"]     = params.le2;
-            options["ge2"]     = params.ge2;
-            options["and3"]    = params.and3;
-            options["xor_and"] = params.xor_and;
-            options["or_and"]  = params.or_and;
-            options["onehot"]  = params.onehot;
-            options["maj3"]    = params.maj3;
-            options["gamble"]  = params.gamble;
-            options["dot"]     = params.dot;
-            options["mux"]     = params.mux;
-            options["and_xor"] = params.and_xor;
-            return options;
+            return detail::technology_mapping_keywords(params);
         },
-        DOC(fiction_synthesis_all_standard_3_input_functions));
+        nb::sig("def all_standard_3_input_functions() -> dict[str, bool]"),
+        "Return boolean mapping keywords for standard three-input functions.");
 
     m.def(
         "all_supported_standard_functions",
         []()
         {
             const auto params = fiction::synthesis::all_supported_standard_functions();
-            nb::dict   options{};
-            options["decay"]   = params.decay;
-            options["inv"]     = params.inv;
-            options["and2"]    = params.and2;
-            options["nand2"]   = params.nand2;
-            options["or2"]     = params.or2;
-            options["nor2"]    = params.nor2;
-            options["xor2"]    = params.xor2;
-            options["xnor2"]   = params.xnor2;
-            options["lt2"]     = params.lt2;
-            options["gt2"]     = params.gt2;
-            options["le2"]     = params.le2;
-            options["ge2"]     = params.ge2;
-            options["and3"]    = params.and3;
-            options["xor_and"] = params.xor_and;
-            options["or_and"]  = params.or_and;
-            options["onehot"]  = params.onehot;
-            options["maj3"]    = params.maj3;
-            options["gamble"]  = params.gamble;
-            options["dot"]     = params.dot;
-            options["mux"]     = params.mux;
-            options["and_xor"] = params.and_xor;
-            return options;
+            return detail::technology_mapping_keywords(params);
         },
-        DOC(fiction_synthesis_all_supported_standard_functions));
+        nb::sig("def all_supported_standard_functions() -> dict[str, bool]"),
+        "Return boolean mapping keywords for all supported standard functions.");
 
     detail::register_technology_mapping_impl<py_tec_network>(m);
     detail::register_technology_mapping_impl<py_aig_network>(m);

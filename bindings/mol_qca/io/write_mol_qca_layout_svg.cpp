@@ -49,8 +49,8 @@ void register_write_mol_qca_layout_svg(nb::module_& m)
     m.def(
         "write_mol_qca_layout_svg",
         [](const fiction::mol_qca::layout& layout, const std::string_view& filename,
-           const decltype(write_mol_qca_layout_svg_options{}.on_progress) on_progress,
-           const decltype(write_mol_qca_layout_svg_options{}.simple)      simple)
+           const decltype(write_mol_qca_layout_svg_options{}.on_progress)& on_progress,
+           const decltype(write_mol_qca_layout_svg_options{}.simple)       simple)
         {
             write_mol_qca_layout_svg_options params{};
             params.on_progress = on_progress;
@@ -60,17 +60,8 @@ void register_write_mol_qca_layout_svg(nb::module_& m)
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("simple") = write_mol_qca_layout_svg_options{}.simple,
-        R"doc(Writes an SVG representation of a molQCA layout to an output stream.
-Each regular cell is colored by its clock phase.
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Write an SVG representation of the molQCA layout to the supplied filename.
+simple selects a compact drawing; on_progress reports writing progress.
 )doc");
 }
 

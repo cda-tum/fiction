@@ -64,7 +64,7 @@ void register_orthogonal(nb::module_& m, const char* signature)
            fiction::physical_design::orthogonal_physical_design_stats*                 statistics,
            const decltype(orthogonal_physical_design_options{}.number_of_clock_phases) number_of_clock_phases,
            const decltype(orthogonal_physical_design_options{}.layout_arrangement)     layout_arrangement,
-           const decltype(orthogonal_physical_design_options{}.on_progress)            on_progress)
+           const decltype(orthogonal_physical_design_options{}.on_progress)&           on_progress)
     {
         if (!layout_type.is(nb::type<Lyt>()))
         {
@@ -84,57 +84,9 @@ void register_orthogonal(nb::module_& m, const char* signature)
               nb::arg("number_of_clock_phases") = orthogonal_physical_design_options{}.number_of_clock_phases,
               nb::arg("layout_arrangement")     = orthogonal_physical_design_options{}.layout_arrangement,
               nb::arg("on_progress").none()     = nb::none(), nb::sig(signature),
-              R"doc(A scalable placement & routing approach based on orthogonal graph
-drawing as originally proposed in \"Scalable Design for Field-coupled
-Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
-Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
-can be found in \"Design Automation for Field-coupled
-Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R.
-Drechsler published by Springer Nature in 2022.
-
-Via certain restrictions to the degrees of freedom in FCN physical
-design, this algorithm achieves a polynomial time complexity. However,
-these restrictions lead to an overall approximation of optimal layout
-quality within several factors. Therefore, this algorithm produces
-valid layouts within a short amount of time, its results are far from
-being optimal in terms of area.
-
-The imposed restrictions are that the input logic network has to be a
-3-graph, i.e., cannot have any node exceeding degree 3 (combined input
-and output), and that the resulting layout is always 2DDWave-clocked.
-
-This algorithm is based on a modification of \"Improved orthogonal
-drawings of 3-graphs\" by Therese C. Biedl in Canadian Conference on
-Computational Geometry 1996. Biedl's original algorithm works for
-undirected graphs only while this modification respects information
-flow of directed logic networks. To this end, the edge directions of
-the logic network directly used instead of relabeling the edges
-according to its DFS tree, ordering the vertices using topological
-sorting instead of DFS, and adding an extra placement rule for nodes
-without predecessors.
-
-The algorithm works in polynomial time :math:`\mathcal{O}(3|N| + |L|)`
-where :math:`|N|` is the number of nodes the given network and
-:math:`|L|` is the resulting layout size given by :math:`x \cdot y`,
-which approaches :math:`(\frac{|N|}{2})^2` asymptotically.
-
-May throw a high_degree_fanin_exception if `ntk` contains any node
-with a fan-in larger than 2.
-
-Args:
-    ntk: The network that is to place and route.
-    pst: Statistics.
-
-Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit.
-
-Raises:
-    std::invalid_argument: If `Lyt` is a shifted Cartesian or
-                           hexagonal layout and
-                           `layout_arrangement` is empty.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+              R"doc(Place and route a technology network with orthogonal graph drawing.
+The layout_type keyword selects Cartesian or hexagonal gate layouts.
+The keyword options select clock phases, arrangement, and progress reporting.
 )doc");
     }
     else
@@ -197,16 +149,21 @@ void register_orthogonal(nb::module_& m)
         "on_progress: Callable[[str, int, int], None] | None = ...) -> mnt.pyfiction.layouts.hexagonal_gate_layout");
     m.def(
         "orthogonal",
-        [](const py_tec_network& network, const nb::handle layout_type,
-           fiction::physical_design::orthogonal_physical_design_stats*                 statistics,
-           const decltype(orthogonal_physical_design_options{}.number_of_clock_phases) number_of_clock_phases,
-           const decltype(orthogonal_physical_design_options{}.layout_arrangement)     layout_arrangement,
-           const decltype(orthogonal_physical_design_options{}.on_progress)            on_progress) -> nb::object
+        [](const py_tec_network&, const nb::handle, fiction::physical_design::orthogonal_physical_design_stats*,
+           const decltype(orthogonal_physical_design_options{}.number_of_clock_phases),
+           const decltype(orthogonal_physical_design_options{}.layout_arrangement),
+           const decltype(orthogonal_physical_design_options{}.on_progress)) -> nb::object
         { throw nb::type_error("layout_type must be a supported registered gate layout class"); },
         nb::arg("network"), nb::kw_only(), nb::arg("layout_type"), nb::arg("statistics") = nullptr,
         nb::arg("number_of_clock_phases") = orthogonal_physical_design_options{}.number_of_clock_phases,
         nb::arg("layout_arrangement")     = orthogonal_physical_design_options{}.layout_arrangement,
-        nb::arg("on_progress").none()     = nb::none());
+        nb::arg("on_progress").none()     = nb::none(),
+        nb::sig(
+            "def orthogonal(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
+            "type[mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout], "
+            "statistics: orthogonal_stats | None = None, number_of_clock_phases: num_clks = ..., layout_arrangement: "
+            "mnt.pyfiction.layouts.arrangement | None = ..., on_progress: Callable[[str, int, int], None] | None = "
+            "...) -> mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout"));
 }
 
 }  // namespace pyfiction

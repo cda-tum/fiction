@@ -99,7 +99,7 @@ void register_hexagonalization(nb::module_& m)
         [](const py_cartesian_gate_layout&                                 layout,
            const decltype(hexagonalization_options{}.input_pin_extension)  input_pin_extension,
            const decltype(hexagonalization_options{}.output_pin_extension) output_pin_extension,
-           const decltype(hexagonalization_options{}.on_progress)          on_progress,
+           const decltype(hexagonalization_options{}.on_progress)&         on_progress,
            fiction::physical_design::hexagonalization_stats*               statistics)
         {
             hexagonalization_options params{};
@@ -114,27 +114,8 @@ void register_hexagonalization(nb::module_& m)
         nb::arg("input_pin_extension")  = hexagonalization_options{}.input_pin_extension,
         nb::arg("output_pin_extension") = hexagonalization_options{}.output_pin_extension,
         nb::arg("on_progress").none() = nb::none(), nb::arg("statistics") = nullptr,
-        R"doc(Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
-row clocked layout suitable for SiDBs by remapping all gates and wires
-as originally proposed in \"Scalable Physical Design for Silicon
-Dangling Bond Logic: How a 45° Turn Prevents the Reinvention of the
-Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2023
-(https://ieeexplore.ieee.org/document/10231278).
-
-Args:
-    lyt: 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
-    stats: Statistics.
-
-Returns:
-    Hexagonal representation of the Cartesian layout.
-
-Raises:
-    std::invalid_argument: If clocking or placed geometry does not
-                           satisfy the input contract.
-    std::overflow_error: If the transformed coordinates exceed the
-                         signed coordinate range.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Convert a 2DDWave-clocked Cartesian gate layout to an even-row hexagonal layout.
+The keyword options select input and output pin extension and progress reporting.
 )doc");
 }
 
