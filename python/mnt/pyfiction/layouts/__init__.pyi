@@ -2181,11 +2181,14 @@ class cartesian_gate_layout(cartesian_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. Visitors may edit coordinates, names, and capabilities. Object
-    and terminal visitors must not create or remove objects, change
-    terminal order, or replace the layout during traversal. Connection
-    visitors must also preserve the traversed input or sink connections,
-    as specified on each visitor.
+    state. A sink is a destination input port driven by a source object's
+    output. One destination object may receive the same source at several
+    input indices; each connected input port is a distinct sink. Visitors
+    may edit coordinates, names, and capabilities. Object and terminal
+    visitors must not create or remove objects, change terminal order, or
+    replace the layout during traversal. Connection visitors must also
+    preserve the traversed input or sink connections, as specified on each
+    visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -2692,7 +2695,12 @@ class cartesian_gate_layout(cartesian_layout):
         """Counts connected input slots, irrespective of physical legality."""
 
     def fanout_size(self, object: layout_object_id) -> int:
-        """Counts sink input ports, including multiple ports on one object."""
+        """
+        Counts destination input ports driven by this object's output.
+
+        Each connected input port is a sink, including multiple ports on the
+        same destination object.
+        """
 
     def input_count(self, object: layout_object_id) -> int:
         """Returns the number of input slots, including disconnected slots."""
@@ -3147,11 +3155,14 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. Visitors may edit coordinates, names, and capabilities. Object
-    and terminal visitors must not create or remove objects, change
-    terminal order, or replace the layout during traversal. Connection
-    visitors must also preserve the traversed input or sink connections,
-    as specified on each visitor.
+    state. A sink is a destination input port driven by a source object's
+    output. One destination object may receive the same source at several
+    input indices; each connected input port is a distinct sink. Visitors
+    may edit coordinates, names, and capabilities. Object and terminal
+    visitors must not create or remove objects, change terminal order, or
+    replace the layout during traversal. Connection visitors must also
+    preserve the traversed input or sink connections, as specified on each
+    visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -3659,7 +3670,12 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         """Counts connected input slots, irrespective of physical legality."""
 
     def fanout_size(self, object: layout_object_id) -> int:
-        """Counts sink input ports, including multiple ports on one object."""
+        """
+        Counts destination input ports driven by this object's output.
+
+        Each connected input port is a sink, including multiple ports on the
+        same destination object.
+        """
 
     def input_count(self, object: layout_object_id) -> int:
         """Returns the number of input slots, including disconnected slots."""
@@ -4114,11 +4130,14 @@ class hexagonal_gate_layout(hexagonal_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. Visitors may edit coordinates, names, and capabilities. Object
-    and terminal visitors must not create or remove objects, change
-    terminal order, or replace the layout during traversal. Connection
-    visitors must also preserve the traversed input or sink connections,
-    as specified on each visitor.
+    state. A sink is a destination input port driven by a source object's
+    output. One destination object may receive the same source at several
+    input indices; each connected input port is a distinct sink. Visitors
+    may edit coordinates, names, and capabilities. Object and terminal
+    visitors must not create or remove objects, change terminal order, or
+    replace the layout during traversal. Connection visitors must also
+    preserve the traversed input or sink connections, as specified on each
+    visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -4626,7 +4645,12 @@ class hexagonal_gate_layout(hexagonal_layout):
         """Counts connected input slots, irrespective of physical legality."""
 
     def fanout_size(self, object: layout_object_id) -> int:
-        """Counts sink input ports, including multiple ports on one object."""
+        """
+        Counts destination input ports driven by this object's output.
+
+        Each connected input port is a sink, including multiple ports on the
+        same destination object.
+        """
 
     def input_count(self, object: layout_object_id) -> int:
         """Returns the number of input slots, including disconnected slots."""
@@ -5076,9 +5100,12 @@ class hexagonal_gate_layout(hexagonal_layout):
 
 class obstructions:
     """
-    Explicit obstructions stored by layouts or supplied to a routing
-    search.
+    Layout-independent coordinate and directed-connection constraints for
+    routing searches.
 
+    Gate layouts expose persistent obstruction methods directly. Routing
+    algorithms accept this separate object for temporary constraints and
+    combine it with the layout's persistent obstructions and occupancy.
     Copies are independent. This object contains no layout or occupancy
     information.
     """
@@ -5255,9 +5282,9 @@ def random_coordinate(
     region spanned by two coordinates.
 
     Args:
-        coordinate1: One corner of the region.
-        coordinate2: Opposite corner of the region; axes may appear in
-                     either order.
+        corner1: One corner of the region.
+        corner2: Opposite corner of the region; axes may appear in either
+                 order.
 
     Template Args:
         CoordinateType: Coordinate type to generate.

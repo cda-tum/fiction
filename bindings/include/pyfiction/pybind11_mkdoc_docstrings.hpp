@@ -2733,11 +2733,14 @@ R"doc(Placed FCN objects, ordered ports, clocking, and obstructions.
 Objects have stable identities independent of their coordinates.
 Connections describe declared topology; physical validation checks
 adjacency, clocking, and geometry separately. Copies own independent
-state. Visitors may edit coordinates, names, and capabilities. Object
-and terminal visitors must not create or remove objects, change
-terminal order, or replace the layout during traversal. Connection
-visitors must also preserve the traversed input or sink connections,
-as specified on each visitor.
+state. A sink is a destination input port driven by a source object's
+output. One destination object may receive the same source at several
+input indices; each connected input port is a distinct sink. Visitors
+may edit coordinates, names, and capabilities. Object and terminal
+visitors must not create or remove objects, change terminal order, or
+replace the layout during traversal. Connection visitors must also
+preserve the traversed input or sink connections, as specified on each
+visitor.
 
 Template Args:
     CoordinateLayout: Coordinate geometry used for placement.)doc";
@@ -2945,7 +2948,13 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_ensure_functions = 
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_fanin_size = R"doc(Counts connected input slots, irrespective of physical legality.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_fanout_size = R"doc(Counts sink input ports, including multiple ports on one object.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_fanout_size =
+R"doc(Counts destination input ports driven by this object's output.
+
+Each connected input port is a sink, including multiple ports on the
+same destination object.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_find_object = R"doc(Finds the object at a coordinate; empty coordinates have no identity.)doc";
 
@@ -3087,11 +3096,24 @@ replace the layout.
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_sink =
-R"doc(Visits sink input ports of an output, irrespective of physical
-legality.
+R"doc(Visits destination input ports driven by the source object's output.
 
-Sink order is unspecified. Callbacks must not remove the source object
-or change its sink connections.
+Each sink is an `input_port` naming a destination object and its
+truth-table argument index.
+
+Connecting one source to several inputs of the same destination yields
+a sink for each input.
+
+Connections need not be physically legal, and sink order is
+unspecified.
+
+Callbacks must not remove the source object or change its sink
+connections.
+
+Args:
+    src: Source object whose output drives the visited input ports.
+    fn: Callable accepting an input port and optionally its traversal
+        index.
 
 )doc";
 
@@ -3133,7 +3155,9 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_free_edge = R"doc(F
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_free_object = R"doc(First reusable object slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_functions = R"doc(Deduplicated cold truth-table payloads.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_functions =
+R"doc(Deduplicated truth tables stored outside object records and referenced
+by function literals.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout = R"doc(Creates an empty layout with the given geometry and name.)doc";
 
@@ -3734,7 +3758,9 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_live_object_bits = 
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_move_object = R"doc(Moves an object without changing its identity or connections.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_names = R"doc(Sparse cold names.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_names =
+R"doc(Names stored outside object records, with entries only for named
+objects.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_num_clocks =
 R"doc(Returns the number of clock phases in the layout. Each clock cycle is
@@ -3778,7 +3804,9 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_REMOVED
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_WIRE = R"doc(Identity wire.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record = R"doc(Hot object data. Names and truth-table payloads are stored separately.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record =
+R"doc(Object data used for placement and topology traversal; names and
+truth-table payloads are separate.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_first_sink = R"doc(First reverse connection, or next free object when removed.)doc";
 
@@ -3788,7 +3816,9 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_gener
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_input_count = R"doc(Number of input ports, including disconnected ports.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_inputs = R"doc(Inline input-index to connection mapping for every built-in gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_inputs =
+R"doc(Inline input-index to connection mapping sized for built-in gate
+arities, independent of geometry.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_kind = R"doc(Physical role.)doc";
 
@@ -3861,8 +3891,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_outgoing_data_flow =
-R"doc(Returns coordinates of declared sinks; optionally filters physical
-clocking and adjacency.
+R"doc(Returns destination-object coordinates of output connections, filtered
+by adjacency and optionally clocking.
 
 )doc";
 
@@ -3913,8 +3943,8 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_size = R"doc(Counts
 static const char *mkd_doc_fiction_layouts_gate_level_layout_source = R"doc(Returns the declared source of an input, or no source if disconnected.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_spilled_inputs =
-R"doc(Input-index to connection mapping for objects with more than three
-inputs.)doc";
+R"doc(Full input-index to connection mappings for objects whose arity
+exceeds the inline capacity.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_swap_owned_state = R"doc(Swaps owned state without changing geometry.)doc";
 
@@ -5885,9 +5915,12 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_obstructions =
-R"doc(Explicit obstructions stored by layouts or supplied to a routing
-search.
+R"doc(Layout-independent coordinate and directed-connection constraints for
+routing searches.
 
+Gate layouts expose persistent obstruction methods directly. Routing
+algorithms accept this separate object for temporary constraints and
+combine it with the layout's persistent obstructions and occupancy.
 Copies are independent. This object contains no layout or occupancy
 information.)doc";
 
@@ -6035,9 +6068,9 @@ R"doc(Generates a random coordinate with each axis inside the inclusive
 region spanned by two coordinates.
 
 Args:
-    coordinate1: One corner of the region.
-    coordinate2: Opposite corner of the region; axes may appear in
-                 either order.
+    corner1: One corner of the region.
+    corner2: Opposite corner of the region; axes may appear in either
+             order.
 
 Template Args:
     CoordinateType: Coordinate type to generate.
