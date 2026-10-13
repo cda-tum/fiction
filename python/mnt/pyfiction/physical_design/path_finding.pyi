@@ -181,6 +181,7 @@ def a_star(
     """
     Find a shortest loop-free path from source to target in the layout.
     The keyword options select obstructions and crossing constraints.
+    Raises ValueError when source or target lies outside the layout extent.
     """
 
 @overload
@@ -312,6 +313,7 @@ def yen_k_shortest_paths(
     """
     Find up to k shortest loop-free paths from source to target.
     The keyword options select obstructions and crossing constraints.
+    Raises ValueError when source or target lies outside the layout extent.
     """
 
 @overload

@@ -45,6 +45,7 @@ def quickexact(
     """
     Simulate the SiDB layout with QuickExact.
     The keyword options select physical values, base detection, external potentials, and progress reporting.
+    Raises ValueError when base is neither 2 nor 3.
     """
 
 def quicksim(
@@ -65,6 +66,7 @@ def quicksim(
     Search for low-energy charge distributions with QuickSim.
     The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
     Returns None when the heuristic search finds no physically valid charge distribution.
+    Raises ValueError when base is neither 2 nor 3.
     """
 
 def exhaustive_ground_state_simulation(
@@ -123,4 +125,5 @@ def clustercomplete(
     """
     Simulate the SiDB layout with ClusterComplete.
     The keyword options select physical values, clustering, witness searches, and available threads.
+    Raises ValueError when base is neither 2 nor 3.
     """

@@ -86,6 +86,7 @@ def exact(
     Place and route a technology network with SMT solving.
     The layout_type keyword selects a registered gate-layout class.
     Returns a layout or None when the search finds no solution within its bounds.
+    Raises ValueError when a shifted Cartesian or hexagonal layout requires layout_arrangement and none is supplied.
     """
 
 @overload
@@ -218,6 +219,8 @@ def orthogonal(
     Place and route a technology network with orthogonal graph drawing.
     The layout_type keyword selects Cartesian or hexagonal gate layouts.
     The keyword options select clock phases, arrangement, and progress reporting.
+    Raises ValueError when a shifted Cartesian or hexagonal layout requires layout_arrangement and none is supplied.
+    Raises high_degree_fanin_exception for network nodes with more than two inputs.
     """
 
 @overload
@@ -381,6 +384,7 @@ def graph_oriented_layout_design(
     """
     Place and route a technology network by searching partial gate layouts.
     The keyword options control search effort, clocking, and progress reporting.
+    tiles_to_skip_between_pis must lie in [0, 2**20]; values outside this range raise ValueError.
     """
 
 def apply_qca_one_library(
@@ -753,6 +757,8 @@ def post_layout_optimization(
     """
     Optimize a 2DDWave-clocked Cartesian gate layout in place.
     The keyword options bound relocations and runtime; statistics receives the completed result.
+    Raises ValueError for unsupported clocking or invalid occupied geometry.
+    Raises OverflowError when the extent exceeds signed routing coordinates.
     """
 
 class wiring_reduction_stats:
@@ -807,6 +813,8 @@ def wiring_reduction(
     """
     Reduce wires in a 2DDWave-clocked gate layout in place with A* routing.
     The keyword options bound runtime and report progress.
+    Raises ValueError for unsupported clocking or invalid occupied geometry.
+    Raises OverflowError when the extent exceeds signed routing coordinates.
     """
 
 @overload
