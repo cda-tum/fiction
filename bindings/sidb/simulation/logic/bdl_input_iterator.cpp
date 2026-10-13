@@ -15,6 +15,7 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include "pyfiction/bdl_parameters.hpp"
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -78,6 +79,7 @@ void register_bdl_input_iterator(nb::module_& m)
                                   .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
                const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
             {
+                validate_bdl_pair_distances(minimum_distance, maximum_distance);
                 bdl_input_iterator_options params{};
                 params.bdl_wire_params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
                 params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
@@ -107,6 +109,7 @@ void register_bdl_input_iterator(nb::module_& m)
                                   .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
                const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
             {
+                validate_bdl_pair_distances(minimum_distance, maximum_distance);
                 bdl_input_iterator_options params{};
                 params.bdl_wire_params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
                 params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
@@ -194,6 +197,7 @@ void register_bdl_input_iterator(nb::module_& m)
                               .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
            const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
         {
+            validate_bdl_pair_distances(minimum_distance, maximum_distance);
             bdl_input_iterator_options params{};
             params.bdl_wire_params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
             params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
@@ -222,6 +226,7 @@ The overload with input_wires bypasses automatic wire detection.
                               .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
            const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
         {
+            validate_bdl_pair_distances(minimum_distance, maximum_distance);
             bdl_input_iterator_options params{};
             params.bdl_wire_params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
             params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;

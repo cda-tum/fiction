@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "pyfiction/bdl_parameters.hpp"
 #include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
@@ -42,7 +43,7 @@ using operational_options = fiction::sidb::simulation::logic::is_operational_par
  * @param op_condition Operational condition.
  * @param strategy_to_analyze_operational_status Operational analysis strategy.
  * @return Fresh native operational options with the supplied values.
- * @throws nb::value_error If base is neither 2 nor 3.
+ * @throws nb::value_error If base is neither 2 nor 3, or BDL bounds are NaN or reversed.
  */
 inline operational_options make_operational_parameters(
     const uint64_t timeout, const uint8_t base, const double mu_minus, const double epsilon_r, const double lambda_tf,
@@ -52,6 +53,7 @@ inline operational_options make_operational_parameters(
     const decltype(operational_options{}.op_condition)                               op_condition,
     const decltype(operational_options{}.strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
 {
+    validate_bdl_pair_distances(minimum_distance, maximum_distance);
     operational_options params{};
     params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
     params.timeout    = timeout;

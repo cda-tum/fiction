@@ -23,6 +23,7 @@ from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import potential_to_distance_conversion, sidb_simulation_parameters
 from mnt.pyfiction.sidb.simulation import potential_landscape
 from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact, quicksim
+from mnt.pyfiction.sidb.simulation.logic import detect_bdl_pairs
 from mnt.pyfiction.synthesis import (
     and_or_not,
     is_balanced,
@@ -245,11 +246,15 @@ def test_mapping_default_gate_set(mux21: technology_network) -> None:
     assert technology_mapping(mux21, **cast("dict[str, Any]", and_or_not())).num_gates() > 0
 
 
-def _assert_distance_rejection(call: str, exception_type: str, message: str = "") -> None:
+def _assert_native_rejection(call: str, exception_type: str, message: str = "") -> None:
     """Check native input rejection in a child that cannot hang the test suite."""
     script = f"""from mnt.pyfiction.sidb import sidb_layout
 from mnt.pyfiction.sidb.model import potential_to_distance_conversion
 from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability
+from mnt.pyfiction.sidb.simulation.logic import (
+    bdl_input_iterator, detect_bdl_pairs, detect_bdl_wires,
+    generate_bdl_input_pattern_layouts, is_operational,
+)
 try:
     {call}
 except {exception_type} as error:
@@ -263,13 +268,13 @@ else:
 @pytest.mark.parametrize("precision", [-1, 2.7])
 def test_distance_conversion_rejects_non_unsigned_precision(precision: float) -> None:
     """Precision preserves the native unsigned integer contract."""
-    _assert_distance_rejection(f"potential_to_distance_conversion(0.5, {precision!r})", "TypeError")
+    _assert_native_rejection(f"potential_to_distance_conversion(0.5, {precision!r})", "TypeError")
 
 
 @pytest.mark.parametrize("potential", [0.0, -0.1, float("nan"), -float("inf")])
 def test_distance_conversion_rejects_invalid_potential(potential: float) -> None:
     """Invalid potentials fail before entering the native distance scan."""
-    _assert_distance_rejection(
+    _assert_native_rejection(
         f"potential_to_distance_conversion(float({str(potential)!r}), 2)",
         "ValueError",
         "potential must be positive",
@@ -280,7 +285,7 @@ def test_distance_conversion_precision_and_infinite_potential() -> None:
     """Integer precision controls the scan step, including positive infinity."""
     assert potential_to_distance_conversion(0.01, 2, epsilon_r=2.0, lambda_tf=1.0) == pytest.approx(314 / 100)
     assert potential_to_distance_conversion(float("inf"), 3) == pytest.approx(0.001)
-    _assert_distance_rejection(
+    _assert_native_rejection(
         "potential_to_distance_conversion(0.5, 1000)",
         "ValueError",
         "precision must yield a positive finite step",
@@ -289,8 +294,41 @@ def test_distance_conversion_precision_and_infinite_potential() -> None:
 
 def test_population_stability_rejects_zero_distance_step() -> None:
     """Both native distance-conversion callers reject unusable precision."""
-    _assert_distance_rejection(
+    _assert_native_rejection(
         "physical_population_stability(sidb_layout(), precision_for_distance_corresponding_to_potential=1000)",
         "ValueError",
         "precision must yield a positive finite step",
     )
+
+
+@pytest.mark.parametrize(
+    "bounds",
+    ["minimum_distance=2.0, maximum_distance=1.0", "minimum_distance=float('nan')", "maximum_distance=float('nan')"],
+)
+@pytest.mark.parametrize(
+    "call",
+    [
+        "detect_bdl_pairs(sidb_layout(), {bounds})",
+        "detect_bdl_wires(sidb_layout(), {bounds})",
+        "bdl_input_iterator(sidb_layout(), {bounds})",
+        "bdl_input_iterator(sidb_layout(), [], {bounds})",
+        "generate_bdl_input_pattern_layouts(sidb_layout(), {bounds})",
+        "generate_bdl_input_pattern_layouts(sidb_layout(), [], {bounds})",
+        "is_operational(sidb_layout(), [], {bounds})",
+    ],
+)
+def test_bdl_distance_bounds_reject_invalid_intervals(call: str, bounds: str) -> None:
+    """BDL detection and shared algorithm options reject invalid intervals before native assertions."""
+    _assert_native_rejection(
+        call.format(bounds=bounds),
+        "ValueError",
+        "minimum_distance must not exceed maximum_distance and neither may be NaN",
+    )
+
+
+@pytest.mark.parametrize(
+    ("minimum", "maximum"), [(0.0, 0.0), (-2.0, -1.0), (float("-inf"), float("inf")), (float("inf"), float("inf"))]
+)
+def test_bdl_distance_bounds_preserve_ordered_intervals(minimum: float, maximum: float) -> None:
+    """Zero, negative, and infinite bounds preserve the native ordered interval contract."""
+    assert detect_bdl_pairs(sidb_layout(), minimum_distance=minimum, maximum_distance=maximum) == []
