@@ -16,10 +16,15 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void version_info(nanobind::module_& m);
+void version_info(nb::module_& m);
 
 }  // namespace pyfiction
 

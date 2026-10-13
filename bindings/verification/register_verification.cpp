@@ -16,13 +16,18 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void count_gate_types(nanobind::module_& m);
-void critical_path_length_and_throughput(nanobind::module_& m);
-void design_rule_violations(nanobind::module_& m);
-void equivalence_checking(nanobind::module_& m);
+void count_gate_types(nb::module_& m);
+void critical_path_length_and_throughput(nb::module_& m);
+void design_rule_violations(nb::module_& m);
+void equivalence_checking(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -34,8 +39,8 @@ NB_MODULE(verification, m)
     m.doc() = "Design rule, equivalence, and performance checks of gate-level layouts.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
-    nanobind::module_::import_("mnt.pyfiction.networks");
+    nb::module_::import_("mnt.pyfiction.layouts");
+    nb::module_::import_("mnt.pyfiction.networks");
 
     pyfiction::count_gate_types(m);
     pyfiction::critical_path_length_and_throughput(m);

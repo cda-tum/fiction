@@ -36,6 +36,11 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -147,7 +152,7 @@ struct type_caster<pyfiction::py_extent> : type_caster_base<pyfiction::py_extent
 template <typename Coordinate>
 struct coordinate_constructor_caster
 {
-    NB_TYPE_CASTER(nanobind::pointer_and_handle<Coordinate>, const_name<Coordinate>())
+    NB_TYPE_CASTER(nb::pointer_and_handle<Coordinate>, const_name<Coordinate>())
 
     /**
      * @brief Converts the constructor self argument, including uninitialized instances.
@@ -156,7 +161,7 @@ struct coordinate_constructor_caster
      * @param cleanup Temporary conversion storage.
      * @return Whether the instance belongs to the registered class.
      */
-    bool from_python(nanobind::handle src, std::uint32_t flags, cleanup_list* cleanup) noexcept
+    bool from_python(nb::handle src, std::uint32_t flags, cleanup_list* cleanup) noexcept
     {
         type_caster_base<Coordinate> caster;
         if (!caster.from_python(src, flags, cleanup))
@@ -172,14 +177,13 @@ struct coordinate_constructor_caster
  * @brief Preserves coordinate constructor dispatch.
  */
 template <>
-struct type_caster<nanobind::pointer_and_handle<pyfiction::py_coordinate>>
+struct type_caster<nb::pointer_and_handle<pyfiction::py_coordinate>>
         : coordinate_constructor_caster<pyfiction::py_coordinate>
 {};
 
 /** @brief Preserves extent constructor dispatch. */
 template <>
-struct type_caster<nanobind::pointer_and_handle<pyfiction::py_extent>>
-        : coordinate_constructor_caster<pyfiction::py_extent>
+struct type_caster<nb::pointer_and_handle<pyfiction::py_extent>> : coordinate_constructor_caster<pyfiction::py_extent>
 {};
 
 }  // namespace nanobind::detail

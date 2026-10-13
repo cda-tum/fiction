@@ -16,15 +16,20 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void distance(nanobind::module_& m);
-void a_star(nanobind::module_& m);
-void k_shortest_paths(nanobind::module_& m);
-void enumerate_all_paths(nanobind::module_& m);
+void distance(nb::module_& m);
+void a_star(nb::module_& m);
+void k_shortest_paths(nb::module_& m);
+void enumerate_all_paths(nb::module_& m);
 
-void register_path_finding(nanobind::module_& m)
+void register_path_finding(nb::module_& m)
 {
     distance(m);
     a_star(m);

@@ -36,6 +36,11 @@
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -47,10 +52,8 @@ namespace detail
  *
  * @param m The module.
  */
-inline void is_operational_functions(nanobind::module_& m)
+inline void is_operational_functions(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_wire;
     using fiction::sidb::simulation::logic::is_operational_params;
@@ -58,16 +61,16 @@ inline void is_operational_functions(nanobind::module_& m)
 
     m.def(
         "is_operational", [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params)
-        { return fiction::sidb::simulation::logic::is_operational(lyt, spec, params); }, py::arg("lyt"),
-        py::arg("spec"), py::arg("params") = is_operational_params{},
+        { return fiction::sidb::simulation::logic::is_operational(lyt, spec, params); }, nb::arg("lyt"),
+        nb::arg("spec"), nb::arg("params") = is_operational_params{},
         DOC(fiction_sidb_simulation_logic_is_operational));
     m.def(
         "is_operational",
         [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params, const wires& in,
            const wires& out, const std::optional<layout>& canvas_lyt)
         { return fiction::sidb::simulation::logic::is_operational(lyt, spec, params, in, out, canvas_lyt); },
-        py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
-        py::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_is_operational_2));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("params"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"),
+        nb::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_is_operational_2));
     m.def(
         "is_operational",
         [](const std::vector<layout>& input_pattern_layouts, const std::vector<py_tt>& spec,
@@ -77,14 +80,14 @@ inline void is_operational_functions(nanobind::module_& m)
             return fiction::sidb::simulation::logic::is_operational(input_pattern_layouts, spec, params, in, out,
                                                                     canvas_lyt);
         },
-        py::arg("input_pattern_layouts"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"),
-        py::arg("output_bdl_wire"), py::arg("canvas_lyt") = std::nullopt,
+        nb::arg("input_pattern_layouts"), nb::arg("spec"), nb::arg("params"), nb::arg("input_bdl_wire"),
+        nb::arg("output_bdl_wire"), nb::arg("canvas_lyt") = std::nullopt,
         DOC(fiction_sidb_simulation_logic_is_operational_3));
     m.def(
         "operational_input_patterns",
         [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params)
-        { return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params); }, py::arg("lyt"),
-        py::arg("spec"), py::arg("params") = is_operational_params{},
+        { return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params); }, nb::arg("lyt"),
+        nb::arg("spec"), nb::arg("params") = is_operational_params{},
         DOC(fiction_sidb_simulation_logic_operational_input_patterns));
     m.def(
         "operational_input_patterns",
@@ -93,13 +96,13 @@ inline void is_operational_functions(nanobind::module_& m)
         {
             return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params, in, out, canvas_lyt);
         },
-        py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
-        py::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_operational_input_patterns_2));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("params"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"),
+        nb::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_operational_input_patterns_2));
     m.def(
         "kink_induced_non_operational_input_patterns",
         [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params)
         { return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params); },
-        py::arg("lyt"), py::arg("spec"), py::arg("params") = is_operational_params{},
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("params") = is_operational_params{},
         DOC(fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns));
     m.def(
         "kink_induced_non_operational_input_patterns",
@@ -109,14 +112,14 @@ inline void is_operational_functions(nanobind::module_& m)
             return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params, in,
                                                                                                  out, canvas_lyt);
         },
-        py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
-        py::arg("canvas_lyt") = std::nullopt,
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("params"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"),
+        nb::arg("canvas_lyt") = std::nullopt,
         DOC(fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns_2));
     m.def(
         "is_kink_induced_non_operational",
         [](const layout& lyt, const std::vector<py_tt>& spec, const is_operational_params& params)
         { return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params); },
-        py::arg("lyt"), py::arg("spec"), py::arg("params") = is_operational_params{},
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("params") = is_operational_params{},
         DOC(fiction_sidb_simulation_logic_is_kink_induced_non_operational));
     m.def(
         "is_kink_induced_non_operational",
@@ -126,24 +129,22 @@ inline void is_operational_functions(nanobind::module_& m)
             return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params, in, out,
                                                                                      canvas_lyt);
         },
-        py::arg("lyt"), py::arg("spec"), py::arg("params"), py::arg("input_bdl_wire"), py::arg("output_bdl_wire"),
-        py::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_is_kink_induced_non_operational_2));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("params"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"),
+        nb::arg("canvas_lyt") = std::nullopt, DOC(fiction_sidb_simulation_logic_is_kink_induced_non_operational_2));
 }
 
 }  // namespace detail
 
-void is_operational(nanobind::module_& m)
+void is_operational(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    py::enum_<fiction::sidb::simulation::logic::operational_status>(
+    nb::enum_<fiction::sidb::simulation::logic::operational_status>(
         m, "operational_status", DOC(fiction_sidb_simulation_logic_operational_status))
         .value("OPERATIONAL", fiction::sidb::simulation::logic::operational_status::OPERATIONAL,
                DOC(fiction_sidb_simulation_logic_operational_status_OPERATIONAL))
         .value("NON_OPERATIONAL", fiction::sidb::simulation::logic::operational_status::NON_OPERATIONAL,
                DOC(fiction_sidb_simulation_logic_operational_status_NON_OPERATIONAL));
 
-    py::enum_<fiction::sidb::simulation::logic::is_operational_params::operational_condition>(
+    nb::enum_<fiction::sidb::simulation::logic::is_operational_params::operational_condition>(
         m, "operational_condition", DOC(fiction_sidb_simulation_logic_is_operational_params_operational_condition))
         .value("TOLERATE_KINKS",
                fiction::sidb::simulation::logic::is_operational_params::operational_condition::TOLERATE_KINKS,
@@ -152,7 +153,7 @@ void is_operational(nanobind::module_& m)
                fiction::sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS,
                DOC(fiction_sidb_simulation_logic_is_operational_params_operational_condition_REJECT_KINKS));
 
-    py::enum_<fiction::sidb::simulation::logic::is_operational_params::operational_analysis_strategy>(
+    nb::enum_<fiction::sidb::simulation::logic::is_operational_params::operational_analysis_strategy>(
         m, "operational_analysis_strategy",
         DOC(fiction_sidb_simulation_logic_is_operational_params_operational_analysis_strategy))
         .value("SIMULATION_ONLY",
@@ -167,9 +168,9 @@ void is_operational(nanobind::module_& m)
                 FILTER_THEN_SIMULATION,
             DOC(fiction_sidb_simulation_logic_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION));
 
-    py::class_<fiction::sidb::simulation::logic::is_operational_params>(
+    nb::class_<fiction::sidb::simulation::logic::is_operational_params>(
         m, "is_operational_params", DOC(fiction_sidb_simulation_logic_is_operational_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::sidb::simulation::logic::is_operational_params::timeout,
                 DOC(fiction_sidb_simulation_logic_is_operational_params_timeout))
         .def_rw("simulation_parameters", &fiction::sidb::simulation::logic::is_operational_params::sim_params,

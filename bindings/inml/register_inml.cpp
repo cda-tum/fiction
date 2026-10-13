@@ -18,17 +18,22 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void inml_layout(nanobind::module_& m);
+void inml_layout(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.inml.io` submodule.
  *
  * @param m Python submodule.
  */
-void register_inml_io(nanobind::module_& m);
+void register_inml_io(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -40,7 +45,7 @@ NB_MODULE(inml, m)
     m.doc() = "In-plane Nanomagnet Logic (iNML) cell-level layouts.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.layouts");
+    nb::module_::import_("mnt.pyfiction.layouts");
 
     pyfiction::inml_layout(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers and writers of iNML cell-level layouts.");

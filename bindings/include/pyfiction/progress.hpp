@@ -22,23 +22,28 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>  // NOLINT(misc-include-cleaner): exposes Python callback references
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 /**
  * @brief Types the getter of an `on_progress` member, which reads `None` while no callback is set.
  */
-inline const auto ON_PROGRESS_GETTER = nanobind::for_getter(
-    nanobind::sig("def on_progress(self, /) -> collections.abc.Callable[[str, int, int], None] | None"));
+inline const auto ON_PROGRESS_GETTER =
+    nb::for_getter(nb::sig("def on_progress(self, /) -> collections.abc.Callable[[str, int, int], None] | None"));
 /**
  * @brief Types the getter of an `on_worker_progress` member, which reads `None` while no callback is set.
  */
-inline const auto ON_WORKER_PROGRESS_GETTER = nanobind::for_getter(nanobind::sig(
+inline const auto ON_WORKER_PROGRESS_GETTER = nb::for_getter(nb::sig(
     "def on_worker_progress(self, /) -> collections.abc.Callable[[int, int, str, int, int, bool], None] | None"));
 /**
  * @brief Lets the setter of a callback member take `None`, which clears the callback.
  */
-inline const auto CALLBACK_SETTER = nanobind::for_setter(nanobind::arg("value").none());
+inline const auto CALLBACK_SETTER = nb::for_setter(nb::arg("value").none());
 
 namespace detail
 {
@@ -61,38 +66,37 @@ int progress_traverse(PyObject* self, visitproc visit, void* arg)
     Py_VISIT(Py_TYPE(self));
     // Borrowed reference_internal views can retain owner cycles through hidden keep_alive records.
     // Collecting those cycles requires a change to nested property ownership.
-    const auto [ready, owns_value] = nanobind::inst_state(self);
+    const auto [ready, owns_value] = nb::inst_state(self);
     if (!ready || !owns_value)
     {
         return 0;
     }
-    const auto& params = *nanobind::inst_ptr<Params>(nanobind::handle{self});
+    const auto& params = *nb::inst_ptr<Params>(nb::handle{self});
     if constexpr (requires { params.on_progress; })
     {
-        const auto callback = nanobind::find(params.on_progress);
+        const auto callback = nb::find(params.on_progress);
         Py_VISIT(callback.ptr());
     }
     if constexpr (requires { params.design_gate_params.on_progress; })
     {
-        const auto callback = nanobind::find(params.design_gate_params.on_progress);
+        const auto callback = nb::find(params.design_gate_params.on_progress);
         Py_VISIT(callback.ptr());
     }
     if constexpr (requires { params.sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress; })
     {
-        const auto callback =
-            nanobind::find(params.sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress);
+        const auto callback = nb::find(params.sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress);
         Py_VISIT(callback.ptr());
     }
     if constexpr (requires { params.op_domain_params.on_progress; })
     {
-        const auto callback        = nanobind::find(params.op_domain_params.on_progress);
-        const auto worker_callback = nanobind::find(params.op_domain_params.on_worker_progress);
+        const auto callback        = nb::find(params.op_domain_params.on_progress);
+        const auto worker_callback = nb::find(params.op_domain_params.on_worker_progress);
         Py_VISIT(callback.ptr());
         Py_VISIT(worker_callback.ptr());
     }
     if constexpr (requires { params.on_worker_progress; })
     {
-        const auto worker_callback = nanobind::find(params.on_worker_progress);
+        const auto worker_callback = nb::find(params.on_worker_progress);
         Py_VISIT(worker_callback.ptr());
     }
     return 0;
@@ -107,10 +111,10 @@ int progress_traverse(PyObject* self, visitproc visit, void* arg)
 template <typename Params>
 int progress_clear(PyObject* self)
 {
-    const auto [ready, owns_value] = nanobind::inst_state(self);
+    const auto [ready, owns_value] = nb::inst_state(self);
     if (ready && owns_value)
     {
-        auto& params = *nanobind::inst_ptr<Params>(nanobind::handle{self});
+        auto& params = *nb::inst_ptr<Params>(nb::handle{self});
         if constexpr (requires { params.on_progress; })
         {
             params.on_progress = nullptr;
@@ -144,7 +148,7 @@ int progress_clear(PyObject* self)
  * @return Garbage collection slots for the parameter type.
  */
 template <typename Params>
-nanobind::type_slots progress_type_slots()
+nb::type_slots progress_type_slots()
 {
     /**
      * @brief Garbage collection callbacks for this parameter type.
@@ -157,7 +161,7 @@ nanobind::type_slots progress_type_slots()
          {.slot = Py_tp_clear, .pfunc = reinterpret_cast<void*>(detail::progress_clear<Params>)},
          {.slot = 0, .pfunc = nullptr}}};
     // NOLINTEND(cppcoreguidelines-pro-type-reinterpret-cast)
-    return nanobind::type_slots{slots.data()};
+    return nb::type_slots{slots.data()};
 }
 
 }  // namespace pyfiction

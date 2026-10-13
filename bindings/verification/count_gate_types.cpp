@@ -24,6 +24,11 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner): enables return-value conversion
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -32,7 +37,7 @@ namespace detail
 
 /** @brief Binds gate classification for an operand. @tparam NtkOrLyt Network or layout type. @param m Python module. */
 template <typename NtkOrLyt>
-void count_gate_types(nanobind::module_& m)
+void count_gate_types(nb::module_& m)
 {
     m.def(
         "count_gate_types",
@@ -42,22 +47,20 @@ void count_gate_types(nanobind::module_& m)
             fiction::verification::count_gate_types(ntk_or_lyt, &stats);
             return stats;
         },
-        nanobind::arg("ntk_or_lyt"), DOC(fiction_verification_count_gate_types));
+        nb::arg("ntk_or_lyt"), DOC(fiction_verification_count_gate_types));
 }
 
 }  // namespace detail
 
 /** @brief Registers gate type counts and reports. @param m Python module. */
-void count_gate_types(nanobind::module_& m)
+void count_gate_types(nb::module_& m)
 {
-    namespace py = nanobind;
-
     /** @brief Bound gate type statistics. */
     using stats = fiction::verification::count_gate_types_stats;
 
-    py::class_<stats>(m, "count_gate_types_stats",
+    nb::class_<stats>(m, "count_gate_types_stats",
                       "Counts logic gates and placed wires, excluding primary terminals and network constants.")
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "report",
             [](const stats& st, const bool detailed)
@@ -66,7 +69,7 @@ void count_gate_types(nanobind::module_& m)
                 st.report(os, detailed);
                 return os.str();
             },
-            py::arg("detailed") = false, DOC(fiction_verification_count_gate_types_stats_report))
+            nb::arg("detailed") = false, DOC(fiction_verification_count_gate_types_stats_report))
         .def_ro("num_fanout", &stats::num_fanout)
         .def_ro("num_buf", &stats::num_buf)
         .def_ro("num_inv", &stats::num_inv)

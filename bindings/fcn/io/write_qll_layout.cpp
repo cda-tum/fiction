@@ -34,6 +34,11 @@
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -41,23 +46,21 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_qll_layout(nanobind::module_& m)
+void write_qll_layout(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     // NOLINTNEXTLINE(misc-const-correctness)
     void (*const write_qll_layout_function_pointer)(const Lyt&, const std::string_view&,
                                                     fiction::utils::progress_callback) =
         &fiction::fcn::io::write_qll_layout<Lyt>;
 
-    m.def("write_qll_layout", write_qll_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("on_progress").none() = py::none(), DOC(fiction_fcn_io_write_qll_layout),
-          py::call_guard<py::gil_scoped_release>());
+    m.def("write_qll_layout", write_qll_layout_function_pointer, nb::arg("layout"), nb::arg("filename"),
+          nb::arg("on_progress").none() = nb::none(), DOC(fiction_fcn_io_write_qll_layout),
+          nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
-void write_qll_layout(nanobind::module_& m)
+void write_qll_layout(nb::module_& m)
 {
     detail::write_qll_layout<fiction::qca::layout>(m);
     detail::write_qll_layout<fiction::inml::layout>(m);

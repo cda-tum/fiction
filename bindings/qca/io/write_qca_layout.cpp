@@ -28,17 +28,20 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void write_qca_layout(nanobind::module_& m)
+void write_qca_layout(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    py::class_<fiction::qca::io::write_qca_layout_params>(
+    nb::class_<fiction::qca::io::write_qca_layout_params>(
         m, "write_qca_layout_params", pyfiction::progress_type_slots<fiction::qca::io::write_qca_layout_params>(),
         DOC(fiction_qca_io_write_qca_layout_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::qca::io::write_qca_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
                 pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
         .def_rw("create_inter_layer_via_cells",
@@ -52,9 +55,9 @@ void write_qca_layout(nanobind::module_& m)
                                                     fiction::qca::io::write_qca_layout_params) =
         &fiction::qca::io::write_qca_layout;
 
-    m.def("write_qca_layout", write_qca_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("params") = fiction::qca::io::write_qca_layout_params{}, DOC(fiction_qca_io_write_qca_layout),
-          py::call_guard<py::gil_scoped_release>());
+    m.def("write_qca_layout", write_qca_layout_function_pointer, nb::arg("layout"), nb::arg("filename"),
+          nb::arg("params") = fiction::qca::io::write_qca_layout_params{}, DOC(fiction_qca_io_write_qca_layout),
+          nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

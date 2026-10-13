@@ -16,14 +16,19 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void network_reader(nanobind::module_& m);
-void network_writers(nanobind::module_& m);
-void dot_drawers(nanobind::module_& m);
+void network_reader(nb::module_& m);
+void network_writers(nb::module_& m);
+void dot_drawers(nb::module_& m);
 
-void register_networks_io(nanobind::module_& m)
+void register_networks_io(nb::module_& m)
 {
     network_reader(m);
     network_writers(m);

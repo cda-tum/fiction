@@ -35,6 +35,11 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -43,29 +48,27 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void write_sidb_layout_svg(nanobind::module_& m)
+void write_sidb_layout_svg(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::enum_<fiction::sidb::io::write_sidb_layout_svg_params::color_mode>(
+    nb::enum_<fiction::sidb::io::write_sidb_layout_svg_params::color_mode>(
         m, "color_mode", DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode))
         .value("LIGHT", fiction::sidb::io::write_sidb_layout_svg_params::color_mode::LIGHT,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode_LIGHT))
         .value("DARK", fiction::sidb::io::write_sidb_layout_svg_params::color_mode::DARK,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode_DARK));
 
-    py::enum_<fiction::sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode>(
+    nb::enum_<fiction::sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode>(
         m, "sidb_lattice_mode", DOC(fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode))
         .value("SHOW_LATTICE", fiction::sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode_SHOW_LATTICE))
         .value("HIDE_LATTICE", fiction::sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE,
                DOC(fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode_HIDE_LATTICE));
 
-    py::class_<fiction::sidb::io::write_sidb_layout_svg_params>(
+    nb::class_<fiction::sidb::io::write_sidb_layout_svg_params>(
         m, "write_sidb_layout_svg_params",
         pyfiction::progress_type_slots<fiction::sidb::io::write_sidb_layout_svg_params>(),
         DOC(fiction_sidb_io_write_sidb_layout_svg_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("on_progress", &fiction::sidb::io::write_sidb_layout_svg_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
         .def_rw("lattice_point_size", &fiction::sidb::io::write_sidb_layout_svg_params::lattice_point_size,
@@ -85,8 +88,8 @@ void write_sidb_layout_svg(nanobind::module_& m)
           static_cast<void (*)(const fiction::sidb::layout&, const std::string_view&,
                                const fiction::sidb::io::write_sidb_layout_svg_params&)>(
               &fiction::sidb::io::write_sidb_layout_svg),
-          py::arg("layout"), py::arg("filename"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-          DOC(fiction_sidb_io_write_sidb_layout_svg_2), py::call_guard<py::gil_scoped_release>());
+          nb::arg("layout"), nb::arg("filename"), nb::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+          DOC(fiction_sidb_io_write_sidb_layout_svg_2), nb::call_guard<nb::gil_scoped_release>());
 
     m.def(
         "write_sidb_layout_svg_to_string",
@@ -96,16 +99,16 @@ void write_sidb_layout_svg(nanobind::module_& m)
             fiction::sidb::io::write_sidb_layout_svg(layout, oss, params);
             return oss.str();
         },
-        py::arg("layout"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-        DOC(fiction_sidb_io_write_sidb_layout_svg), py::call_guard<py::gil_scoped_release>());
+        nb::arg("layout"), nb::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+        DOC(fiction_sidb_io_write_sidb_layout_svg), nb::call_guard<nb::gil_scoped_release>());
 
     m.def("write_sidb_layout_svg",
           static_cast<void (*)(const fiction::sidb::layout&, const fiction::sidb::charge_distribution&,
                                const std::string_view&, const fiction::sidb::io::write_sidb_layout_svg_params&)>(
               &fiction::sidb::io::write_sidb_layout_svg),
-          py::arg("layout"), py::arg("charge_distribution"), py::arg("filename"),
-          py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-          DOC(fiction_sidb_io_write_sidb_layout_svg_4), py::call_guard<py::gil_scoped_release>());
+          nb::arg("layout"), nb::arg("charge_distribution"), nb::arg("filename"),
+          nb::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+          DOC(fiction_sidb_io_write_sidb_layout_svg_4), nb::call_guard<nb::gil_scoped_release>());
 
     m.def(
         "write_sidb_layout_svg_to_string",
@@ -116,9 +119,9 @@ void write_sidb_layout_svg(nanobind::module_& m)
             fiction::sidb::io::write_sidb_layout_svg(layout, cd, oss, params);
             return oss.str();
         },
-        py::arg("layout"), py::arg("charge_distribution"),
-        py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{}, DOC(fiction_sidb_io_write_sidb_layout_svg_3),
-        py::call_guard<py::gil_scoped_release>());
+        nb::arg("layout"), nb::arg("charge_distribution"),
+        nb::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{}, DOC(fiction_sidb_io_write_sidb_layout_svg_3),
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

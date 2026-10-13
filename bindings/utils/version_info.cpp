@@ -19,10 +19,15 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void version_info(nanobind::module_& m)
+void version_info(nb::module_& m)
 {
     m.attr("__version__")       = fiction::FICTION_VERSION;
     m.attr("__repo__")          = fiction::FICTION_REPO;

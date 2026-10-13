@@ -35,21 +35,24 @@
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void operational_domain_ratio(nanobind::module_& m)
+void operational_domain_ratio(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::operational_domain_ratio_params;
     using fiction::sidb::simulation::logic::parameter_point;
 
-    py::class_<operational_domain_ratio_params>(m, "operational_domain_ratio_params",
+    nb::class_<operational_domain_ratio_params>(m, "operational_domain_ratio_params",
                                                 pyfiction::progress_type_slots<operational_domain_ratio_params>(),
                                                 DOC(fiction_sidb_simulation_logic_operational_domain_ratio_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("op_domain_params", &operational_domain_ratio_params::op_domain_params,
                 DOC(fiction_sidb_simulation_logic_operational_domain_ratio_params_op_domain_params));
 
@@ -58,8 +61,8 @@ void operational_domain_ratio(nanobind::module_& m)
         [](const layout& lyt, const std::vector<py_tt>& spec, const parameter_point& pp,
            const operational_domain_ratio_params& params)
         { return fiction::sidb::simulation::logic::operational_domain_ratio(lyt, spec, pp, params); },
-        py::arg("lyt"), py::arg("spec"), py::arg("pp"), py::arg("params") = operational_domain_ratio_params{},
-        py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_logic_operational_domain_ratio));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("pp"), nb::arg("params") = operational_domain_ratio_params{},
+        nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_logic_operational_domain_ratio));
 }
 
 }  // namespace pyfiction

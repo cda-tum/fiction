@@ -22,6 +22,11 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -30,14 +35,12 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void inml_layout(nanobind::module_& m)
+void inml_layout(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::inml::layout;
     using fiction::inml::magnet_type;
 
-    py::enum_<magnet_type>(m, "inml_magnet_type", DOC(fiction_inml_magnet_type))
+    nb::enum_<magnet_type>(m, "inml_magnet_type", DOC(fiction_inml_magnet_type))
         .value("EMPTY", magnet_type::EMPTY, DOC(fiction_inml_magnet_type_EMPTY))
         .value("NORMAL", magnet_type::NORMAL, DOC(fiction_inml_magnet_type_NORMAL))
         .value("INPUT", magnet_type::INPUT, DOC(fiction_inml_magnet_type_INPUT))
@@ -51,13 +54,13 @@ void inml_layout(nanobind::module_& m)
         .value("FANOUT_COUPLER_MAGNET", magnet_type::FANOUT_COUPLER_MAGNET,
                DOC(fiction_inml_magnet_type_FANOUT_COUPLER_MAGNET));
 
-    py::class_<layout, py_cartesian_layout> cls(m, "inml_layout", DOC(fiction_inml_layout));
+    nb::class_<layout, py_cartesian_layout> cls(m, "inml_layout", DOC(fiction_inml_layout));
 
     detail::bind_clocked_constructors(cls);
     detail::bind_cell_grid(cls);
     detail::bind_tile_clocking(cls);
 
-    cls.def("assign_cell_type", &layout::assign_cell_type, py::arg("c"), py::arg("ct"),
+    cls.def("assign_cell_type", &layout::assign_cell_type, nb::arg("c"), nb::arg("ct"),
             DOC(fiction_layouts_cell_grid_assign_cell_type));
 }
 

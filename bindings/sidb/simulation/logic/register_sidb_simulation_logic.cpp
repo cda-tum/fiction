@@ -16,17 +16,22 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void bdl_input_iterator(nanobind::module_& m);
-void detect_bdl_pairs(nanobind::module_& m);
-void detect_bdl_wires(nanobind::module_& m);
-void is_operational(nanobind::module_& m);
-void operational_domain(nanobind::module_& m);
-void operational_domain_ratio(nanobind::module_& m);
+void bdl_input_iterator(nb::module_& m);
+void detect_bdl_pairs(nb::module_& m);
+void detect_bdl_wires(nb::module_& m);
+void is_operational(nb::module_& m);
+void operational_domain(nb::module_& m);
+void operational_domain_ratio(nb::module_& m);
 
-void register_sidb_simulation_logic(nanobind::module_& m)
+void register_sidb_simulation_logic(nb::module_& m)
 {
     bdl_input_iterator(m);
     detect_bdl_pairs(m);

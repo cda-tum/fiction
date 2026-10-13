@@ -30,6 +30,11 @@
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -37,25 +42,21 @@ namespace detail
 {
 
 template <typename NtkOrLyt>
-void get_name(nanobind::module_& m)
+void get_name(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("get_name", &fiction::networks::get_name<NtkOrLyt>, py::arg("ntk_or_lyt"), DOC(fiction_networks_get_name));
+    m.def("get_name", &fiction::networks::get_name<NtkOrLyt>, nb::arg("ntk_or_lyt"), DOC(fiction_networks_get_name));
 }
 
 template <typename NtkOrLyt>
-void set_name(nanobind::module_& m)
+void set_name(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("set_name", &fiction::networks::set_name<NtkOrLyt>, py::arg("ntk_or_lyt"), py::arg("name"),
+    m.def("set_name", &fiction::networks::set_name<NtkOrLyt>, nb::arg("ntk_or_lyt"), nb::arg("name"),
           DOC(fiction_networks_set_name));
 }
 
 }  // namespace detail
 
-void name_utils(nanobind::module_& m)
+void name_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

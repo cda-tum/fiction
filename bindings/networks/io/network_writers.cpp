@@ -30,6 +30,11 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -42,10 +47,8 @@ namespace detail
  * @param m Python module.
  */
 template <typename Ntk>
-void network_writers(nanobind::module_& m)
+void network_writers(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "write_verilog",
         [](const Ntk& ntk, const std::string& filename)
@@ -72,18 +75,18 @@ void network_writers(nanobind::module_& m)
                                               [&](std::ostream& os) { mockturtle::write_verilog(ntk, os, params); });
             }
         },
-        py::arg("network"), py::arg("filename"),
+        nb::arg("network"), nb::arg("filename"),
         "Writes the network as a gate-level Verilog file whose module is named `top`, as the readers expect. A "
         "technology network is written as an equivalent XAG, because gate-level Verilog has no buffers or fan-out "
         "nodes. A file that cannot be written raises a `RuntimeError`.",
-        py::call_guard<py::gil_scoped_release>());
+        nb::call_guard<nb::gil_scoped_release>());
 
     m.def(
         "write_blif", [](const Ntk& ntk, const std::string& filename)
         { fiction::detail::atomic_write(filename, [&](std::ostream& os) { mockturtle::write_blif(ntk, os); }); },
-        py::arg("network"), py::arg("filename"),
+        nb::arg("network"), nb::arg("filename"),
         "Writes the network as a BLIF file. A file that cannot be written raises a `RuntimeError`.",
-        py::call_guard<py::gil_scoped_release>());
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -92,10 +95,8 @@ void network_writers(nanobind::module_& m)
  * @brief Register network writer overloads.
  * @param m Python module.
  */
-void network_writers(nanobind::module_& m)
+void network_writers(nb::module_& m)
 {
-    namespace py = nanobind;
-
     detail::network_writers<py_tec_network>(m);
     detail::network_writers<py_aig_network>(m);
     detail::network_writers<py_xag_network>(m);
@@ -105,10 +106,10 @@ void network_writers(nanobind::module_& m)
     m.def(
         "write_aiger", [](const py_aig_network& ntk, const std::string& filename)
         { fiction::detail::atomic_write(filename, [&](std::ostream& os) { mockturtle::write_aiger(ntk, os); }); },
-        py::arg("network"), py::arg("filename"),
+        nb::arg("network"), nb::arg("filename"),
         "Writes the AIG as a binary AIGER file, including its input, output, and network names. A file that "
         "cannot be written raises a `RuntimeError`.",
-        py::call_guard<py::gil_scoped_release>());
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

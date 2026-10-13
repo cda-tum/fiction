@@ -20,6 +20,11 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -28,11 +33,11 @@ namespace pyfiction
  *
  * @param m Target Python module.
  */
-void check_simulation_results_for_equivalence(nanobind::module_& m)
+void check_simulation_results_for_equivalence(nb::module_& m)
 {
     m.def("check_simulation_results_for_equivalence",
-          &fiction::sidb::simulation::check_simulation_results_for_equivalence, nanobind::arg("result1"),
-          nanobind::arg("result2"), DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
+          &fiction::sidb::simulation::check_simulation_results_for_equivalence, nb::arg("result1"), nb::arg("result2"),
+          DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
 }
 
 }  // namespace pyfiction

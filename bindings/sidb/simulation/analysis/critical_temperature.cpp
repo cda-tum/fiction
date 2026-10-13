@@ -40,6 +40,11 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -51,10 +56,8 @@ namespace detail
  *
  * @param m The module.
  */
-inline void critical_temperature_functions(nanobind::module_& m)
+inline void critical_temperature_functions(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::layout;
     using fiction::sidb::simulation::analysis::critical_temperature_params;
     using fiction::sidb::simulation::analysis::critical_temperature_stats;
@@ -66,8 +69,8 @@ inline void critical_temperature_functions(nanobind::module_& m)
         [](const layout& lyt, const std::vector<py_tt>& spec, const critical_temperature_params& params,
            critical_temperature_stats* stats)
         { return fiction::sidb::simulation::analysis::critical_temperature_gate_based(lyt, spec, params, stats); },
-        py::arg("lyt"), py::arg("spec"), py::arg("params") = critical_temperature_params{}, py::arg("stats") = nullptr,
-        py::call_guard<py::gil_scoped_release>(),
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("params") = critical_temperature_params{}, nb::arg("stats") = nullptr,
+        nb::call_guard<nb::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_analysis_critical_temperature_gate_based));
     m.def(
         "critical_temperature_gate_based",
@@ -79,31 +82,29 @@ inline void critical_temperature_functions(nanobind::module_& m)
             return fiction::sidb::simulation::analysis::critical_temperature_gate_based(
                 input_pattern_layouts, spec, params, output_bdl_pairs, input_bdl_wires, output_bdl_wires, stats);
         },
-        py::arg("input_pattern_layouts"), py::arg("spec"), py::arg("params"), py::arg("output_bdl_pairs"),
-        py::arg("input_bdl_wires"), py::arg("output_bdl_wires"), py::arg("stats") = nullptr,
-        py::call_guard<py::gil_scoped_release>(),
+        nb::arg("input_pattern_layouts"), nb::arg("spec"), nb::arg("params"), nb::arg("output_bdl_pairs"),
+        nb::arg("input_bdl_wires"), nb::arg("output_bdl_wires"), nb::arg("stats") = nullptr,
+        nb::call_guard<nb::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_analysis_critical_temperature_gate_based_2));
     m.def(
         "critical_temperature_non_gate_based",
         [](const layout& lyt, const critical_temperature_params& params, critical_temperature_stats* stats)
         { return fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(lyt, params, stats); },
-        py::arg("lyt"), py::arg("params") = critical_temperature_params{}, py::arg("stats") = nullptr,
-        py::call_guard<py::gil_scoped_release>(),
+        nb::arg("lyt"), nb::arg("params") = critical_temperature_params{}, nb::arg("stats") = nullptr,
+        nb::call_guard<nb::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_analysis_critical_temperature_non_gate_based));
 }
 
 }  // namespace detail
 
-void critical_temperature(nanobind::module_& m)
+void critical_temperature(nb::module_& m)
 {
-    namespace py = nanobind;
-
     /**
      * Critical temperature statistics.
      */
-    py::class_<fiction::sidb::simulation::analysis::critical_temperature_stats>(
+    nb::class_<fiction::sidb::simulation::analysis::critical_temperature_stats>(
         m, "critical_temperature_stats", DOC(fiction_sidb_simulation_analysis_critical_temperature_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::sidb::simulation::analysis::critical_temperature_stats& stats)
@@ -128,11 +129,11 @@ void critical_temperature(nanobind::module_& m)
     /**
      * Critical temperature parameters.
      */
-    py::class_<fiction::sidb::simulation::analysis::critical_temperature_params>(
+    nb::class_<fiction::sidb::simulation::analysis::critical_temperature_params>(
         m, "critical_temperature_params",
         pyfiction::progress_type_slots<fiction::sidb::simulation::analysis::critical_temperature_params>(),
         DOC(fiction_sidb_simulation_analysis_critical_temperature_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("operational_params",
                 &fiction::sidb::simulation::analysis::critical_temperature_params::operational_params,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_params))

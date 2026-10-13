@@ -26,6 +26,11 @@
 #include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -33,23 +38,19 @@ namespace detail
 {
 
 template <typename EngineType>
-void sidb_simulation_engine_name_impl(nanobind::module_& m)
+void sidb_simulation_engine_name_impl(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "sidb_simulation_engine_name",
         [](const EngineType& engine) -> std::string_view { return fiction::sidb::simulation::engine_name(engine); },
-        py::arg("engine"), DOC(fiction_sidb_simulation_engine_name));
+        nb::arg("engine"), DOC(fiction_sidb_simulation_engine_name));
 }
 
 }  // namespace detail
 
-void engine(nanobind::module_& m)
+void engine(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    py::enum_<fiction::sidb::simulation::engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
+    nb::enum_<fiction::sidb::simulation::engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
         .value("EXGS", fiction::sidb::simulation::engine::EXGS, DOC(fiction_sidb_simulation_engine_EXGS))
         .value("QUICKSIM", fiction::sidb::simulation::engine::QUICKSIM, DOC(fiction_sidb_simulation_engine_QUICKSIM))
         .value("QUICKEXACT", fiction::sidb::simulation::engine::QUICKEXACT,
@@ -61,7 +62,7 @@ void engine(nanobind::module_& m)
 
         ;
 
-    py::enum_<fiction::sidb::simulation::exact_engine>(m, "exact_sidb_simulation_engine",
+    nb::enum_<fiction::sidb::simulation::exact_engine>(m, "exact_sidb_simulation_engine",
                                                        DOC(fiction_sidb_simulation_exact_engine))
         .value("EXGS", fiction::sidb::simulation::exact_engine::EXGS, DOC(fiction_sidb_simulation_exact_engine_EXGS))
         .value("QUICKEXACT", fiction::sidb::simulation::exact_engine::QUICKEXACT,
@@ -73,7 +74,7 @@ void engine(nanobind::module_& m)
 
         ;
 
-    py::enum_<fiction::sidb::simulation::heuristic_engine>(m, "heuristic_sidb_simulation_engine",
+    nb::enum_<fiction::sidb::simulation::heuristic_engine>(m, "heuristic_sidb_simulation_engine",
                                                            DOC(fiction_sidb_simulation_heuristic_engine))
         .value("QUICKSIM", fiction::sidb::simulation::heuristic_engine::QUICKSIM,
                DOC(fiction_sidb_simulation_heuristic_engine_QUICKSIM))

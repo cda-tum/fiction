@@ -35,21 +35,24 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void hexagonalization(nanobind::module_& m)
+void hexagonalization(nb::module_& m)
 {
-    namespace py = nanobind;
-
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
-    py::exception<fiction::physical_design::hexagonalization_io_pin_routing_error>(
+    nb::exception<fiction::physical_design::hexagonalization_io_pin_routing_error>(
         m, "hexagonalization_io_pin_routing_error",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    py::enum_<fiction::physical_design::hexagonalization_params::io_pin_extension_mode>(
+    nb::enum_<fiction::physical_design::hexagonalization_params::io_pin_extension_mode>(
         m, "hexagonalization_io_pin_extension_mode",
         DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode))
         .value("NONE", fiction::physical_design::hexagonalization_params::io_pin_extension_mode::NONE,
@@ -59,11 +62,11 @@ void hexagonalization(nanobind::module_& m)
         .value("EXTEND_PLANAR", fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR));
 
-    py::class_<fiction::physical_design::hexagonalization_params>(
+    nb::class_<fiction::physical_design::hexagonalization_params>(
         m, "hexagonalization_params",
         pyfiction::progress_type_slots<fiction::physical_design::hexagonalization_params>(),
         DOC(fiction_physical_design_hexagonalization_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("input_pin_extension", &fiction::physical_design::hexagonalization_params::input_pin_extension,
                 DOC(fiction_physical_design_hexagonalization_params_input_pin_extension))
         .def_rw("output_pin_extension", &fiction::physical_design::hexagonalization_params::output_pin_extension,
@@ -72,9 +75,9 @@ void hexagonalization(nanobind::module_& m)
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_hexagonalization_params_on_progress));
 
-    py::class_<fiction::physical_design::hexagonalization_stats>(m, "hexagonalization_stats",
+    nb::class_<fiction::physical_design::hexagonalization_stats>(m, "hexagonalization_stats",
                                                                  DOC(fiction_physical_design_hexagonalization_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::physical_design::hexagonalization_stats& stats)
@@ -99,8 +102,8 @@ void hexagonalization(nanobind::module_& m)
 
     m.def("hexagonalization",
           &fiction::physical_design::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout>,
-          py::arg("layout"), py::arg("parameters") = fiction::physical_design::hexagonalization_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          nb::arg("layout"), nb::arg("parameters") = fiction::physical_design::hexagonalization_params{},
+          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
           DOC(fiction_physical_design_hexagonalization));
 }
 

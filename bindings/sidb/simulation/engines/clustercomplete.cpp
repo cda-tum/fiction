@@ -15,6 +15,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <nanobind/nanobind.h>
+
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "pyfiction/documentation.hpp"
@@ -24,25 +26,27 @@
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 
-#include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void clustercomplete(nanobind::module_& m)
+void clustercomplete(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::simulation::engines::clustercomplete_params;
 
     /**
      * Report *Ground State Space* stats.
      */
-    py::enum_<clustercomplete_params::ground_state_space_reporting>(
+    nb::enum_<clustercomplete_params::ground_state_space_reporting>(
         m, "ground_state_space_reporting",
         DOC(fiction_sidb_simulation_engines_clustercomplete_params_ground_state_space_reporting))
         .value("ON", clustercomplete_params::ground_state_space_reporting::ON,
@@ -53,10 +57,10 @@ void clustercomplete(nanobind::module_& m)
     /**
      * ClusterComplete parameters.
      */
-    py::class_<clustercomplete_params>(m, "clustercomplete_params",
+    nb::class_<clustercomplete_params>(m, "clustercomplete_params",
                                        pyfiction::progress_type_slots<clustercomplete_params>(),
                                        DOC(fiction_sidb_simulation_engines_clustercomplete_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &clustercomplete_params::sim_params,
                 DOC(fiction_sidb_simulation_engines_clustercomplete_params_sim_params))
         .def_rw("local_external_potential", &clustercomplete_params::local_external_potential,
@@ -84,15 +88,18 @@ void clustercomplete(nanobind::module_& m)
                                                                        const clustercomplete_params&) =
         &fiction::sidb::simulation::engines::clustercomplete;
 
-    m.def("clustercomplete", clustercomplete_pointer, py::arg("lyt"), py::arg("params") = clustercomplete_params{},
-          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_clustercomplete));
+    m.def("clustercomplete", clustercomplete_pointer, nb::arg("lyt"), nb::arg("params") = clustercomplete_params{},
+          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_clustercomplete));
 }
 
 }  // namespace pyfiction
 
 #else  // FICTION_ALGLIB_ENABLED
 
-#include <nanobind/nanobind.h>
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
@@ -100,7 +107,7 @@ namespace pyfiction
 /**
  * Disable ClusterComplete.
  */
-void clustercomplete([[maybe_unused]] nanobind::module_& m) {}
+void clustercomplete([[maybe_unused]] nb::module_& m) {}
 
 }  // namespace pyfiction
 

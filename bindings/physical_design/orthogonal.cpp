@@ -36,22 +36,25 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void orthogonal(nanobind::module_& m)
+void orthogonal(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::enum_<fiction::layouts::clocking::num_clks>(m, "num_clks", DOC(fiction_layouts_clocking_num_clks))
+    nb::enum_<fiction::layouts::clocking::num_clks>(m, "num_clks", DOC(fiction_layouts_clocking_num_clks))
         .value("THREE", fiction::layouts::clocking::num_clks::THREE, DOC(fiction_layouts_clocking_num_clks_THREE))
         .value("FOUR", fiction::layouts::clocking::num_clks::FOUR, DOC(fiction_layouts_clocking_num_clks_FOUR));
 
-    py::class_<fiction::physical_design::orthogonal_physical_design_params>(
+    nb::class_<fiction::physical_design::orthogonal_physical_design_params>(
         m, "orthogonal_params",
         pyfiction::progress_type_slots<fiction::physical_design::orthogonal_physical_design_params>(),
         DOC(fiction_physical_design_orthogonal_physical_design_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("number_of_clock_phases",
                 &fiction::physical_design::orthogonal_physical_design_params::number_of_clock_phases,
                 DOC(fiction_physical_design_orthogonal_physical_design_params_number_of_clock_phases))
@@ -61,9 +64,9 @@ void orthogonal(nanobind::module_& m)
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_orthogonal_physical_design_params_on_progress));
 
-    py::class_<fiction::physical_design::orthogonal_physical_design_stats>(
+    nb::class_<fiction::physical_design::orthogonal_physical_design_stats>(
         m, "orthogonal_stats", DOC(fiction_physical_design_orthogonal_physical_design_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::physical_design::orthogonal_physical_design_stats& stats)
@@ -87,12 +90,12 @@ void orthogonal(nanobind::module_& m)
                 DOC(fiction_physical_design_orthogonal_physical_design_stats_num_crossings));
 
     m.def("orthogonal", &fiction::physical_design::orthogonal<py_cartesian_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          nb::arg("network"), nb::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
+          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
           DOC(fiction_physical_design_orthogonal));
     m.def("orthogonal_hexagonal", &fiction::physical_design::orthogonal<py_hexagonal_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+          nb::arg("network"), nb::arg("parameters") = fiction::physical_design::orthogonal_physical_design_params{},
+          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
           DOC(fiction_physical_design_orthogonal));
 }
 

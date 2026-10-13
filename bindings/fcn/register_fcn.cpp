@@ -18,17 +18,22 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void area(nanobind::module_& m);
+void area(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.fcn.io` submodule.
  *
  * @param m Python submodule.
  */
-void register_fcn_io(nanobind::module_& m);
+void register_fcn_io(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -40,10 +45,10 @@ NB_MODULE(fcn, m)
     m.doc() = "Technology-independent FCN layout properties.";
 
     // Registers the types this module names in signatures and default arguments.
-    nanobind::module_::import_("mnt.pyfiction.qca");
-    nanobind::module_::import_("mnt.pyfiction.mol_qca");
-    nanobind::module_::import_("mnt.pyfiction.inml");
-    nanobind::module_::import_("mnt.pyfiction.sidb");
+    nb::module_::import_("mnt.pyfiction.qca");
+    nb::module_::import_("mnt.pyfiction.mol_qca");
+    nb::module_::import_("mnt.pyfiction.inml");
+    nb::module_::import_("mnt.pyfiction.sidb");
 
     pyfiction::area(m);
     auto io = pyfiction::def_submodule(m, "io", "Technology-independent readers and writers of cell-level layouts.");

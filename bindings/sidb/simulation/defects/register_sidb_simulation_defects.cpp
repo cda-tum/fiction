@@ -16,12 +16,17 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void displacement_robustness_domain(nanobind::module_& m);
+void displacement_robustness_domain(nb::module_& m);
 
-void register_sidb_simulation_defects(nanobind::module_& m)
+void register_sidb_simulation_defects(nb::module_& m)
 {
     displacement_robustness_domain(m);
 }

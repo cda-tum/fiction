@@ -26,6 +26,11 @@
 #include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -39,10 +44,8 @@ namespace detail
  * @param m Python module.
  */
 template <typename Spec, typename Impl>
-void equivalence_checking_impl(nanobind::module_& m)
+void equivalence_checking_impl(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "equivalence_checking",
         [](const Spec& spec, const Impl& impl,
@@ -58,8 +61,8 @@ void equivalence_checking_impl(nanobind::module_& m)
 
             return stats.eq;
         },
-        py::arg("specification"), py::arg("implementation"), py::arg("statistics") = nullptr,
-        DOC(fiction_verification_equivalence_checking), py::call_guard<py::gil_scoped_release>());
+        nb::arg("specification"), nb::arg("implementation"), nb::arg("statistics") = nullptr,
+        DOC(fiction_verification_equivalence_checking), nb::call_guard<nb::gil_scoped_release>());
 }
 
 /**
@@ -68,7 +71,7 @@ void equivalence_checking_impl(nanobind::module_& m)
  * @param m Python module.
  */
 template <typename Spec>
-void equivalence_checking_for(nanobind::module_& m)
+void equivalence_checking_for(nb::module_& m)
 {
     equivalence_checking_impl<Spec, py_tec_network>(m);
     equivalence_checking_impl<Spec, py_cartesian_gate_layout>(m);
@@ -81,23 +84,21 @@ void equivalence_checking_for(nanobind::module_& m)
 /** Register equivalence checking, its result enum, and statistics.
  * @param m Python module.
  */
-void equivalence_checking(nanobind::module_& m)
+void equivalence_checking(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     /**
      * Result type for equivalence checking.
      */
-    py::enum_<fiction::verification::eq_type>(m, "eq_type", DOC(fiction_verification_eq_type))
+    nb::enum_<fiction::verification::eq_type>(m, "eq_type", DOC(fiction_verification_eq_type))
         .value("NO", fiction::verification::eq_type::NO, DOC(fiction_verification_eq_type_NO))
         .value("WEAK", fiction::verification::eq_type::WEAK, DOC(fiction_verification_eq_type_WEAK))
         .value("STRONG", fiction::verification::eq_type::STRONG, DOC(fiction_verification_eq_type_STRONG))
 
         ;
 
-    py::class_<fiction::verification::equivalence_checking_stats>(m, "equivalence_checking_stats",
+    nb::class_<fiction::verification::equivalence_checking_stats>(m, "equivalence_checking_stats",
                                                                   DOC(fiction_verification_equivalence_checking_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_ro("eq", &fiction::verification::equivalence_checking_stats::eq,
                 DOC(fiction_verification_equivalence_checking_stats_eq))
         .def_ro("tp_spec", &fiction::verification::equivalence_checking_stats::tp_spec,

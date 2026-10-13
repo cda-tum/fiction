@@ -27,13 +27,16 @@
 #include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>    // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void print_sidb_layout(nanobind::module_& m)
+void print_sidb_layout(nb::module_& m)
 {
-    namespace py = nanobind;
-
     m.def(
         "print_sidb_layout",
         [](const fiction::sidb::layout& lyt, const std::optional<fiction::sidb::charge_distribution>& cd,
@@ -44,8 +47,8 @@ void print_sidb_layout(nanobind::module_& m)
                                                  draw_lattice);
             return os.str();
         },
-        py::arg("layout"), py::arg("charge_distribution") = py::none(), py::arg("lat_color") = true,
-        py::arg("crop_layout") = false, py::arg("draw_lattice") = true, DOC(fiction_sidb_io_print_sidb_layout));
+        nb::arg("layout"), nb::arg("charge_distribution") = nb::none(), nb::arg("lat_color") = true,
+        nb::arg("crop_layout") = false, nb::arg("draw_lattice") = true, DOC(fiction_sidb_io_print_sidb_layout));
 }
 
 }  // namespace pyfiction

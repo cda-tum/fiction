@@ -32,6 +32,11 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -40,16 +45,14 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void design_gates(nanobind::module_& m)
+void design_gates(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::layout;
     using fiction::sidb::generators::design_gates_params;
     using fiction::sidb::generators::design_gates_stats;
 
-    py::class_<design_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_sidb_generators_design_gates_stats))
-        .def(py::init<>(), "Default constructor.")
+    nb::class_<design_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_sidb_generators_design_gates_stats))
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const design_gates_stats& stats)
@@ -63,7 +66,7 @@ void design_gates(nanobind::module_& m)
     /**
      * Design approach selector type.
      */
-    py::enum_<design_gates_params::design_gates_mode>(
+    nb::enum_<design_gates_params::design_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_sidb_generators_design_gates_params_design_gates_mode))
         .value("QUICKCELL", design_gates_params::design_gates_mode::QUICKCELL,
                DOC(fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL))
@@ -78,17 +81,17 @@ void design_gates(nanobind::module_& m)
     /**
      * Termination condition selector type.
      */
-    py::enum_<design_gates_params::termination_condition>(m, "termination_condition")
+    nb::enum_<design_gates_params::termination_condition>(m, "termination_condition")
         .value("AFTER_FIRST_SOLUTION", design_gates_params::termination_condition::AFTER_FIRST_SOLUTION)
         .value("ALL_COMBINATIONS_ENUMERATED", design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED);
 
     /**
      * Parameters.
      */
-    py::class_<design_gates_params>(m, "design_sidb_gates_params",
+    nb::class_<design_gates_params>(m, "design_sidb_gates_params",
                                     pyfiction::progress_type_slots<design_gates_params>(),
                                     DOC(fiction_sidb_generators_design_gates_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("operational_params", &design_gates_params::operational_params,
                 DOC(fiction_sidb_generators_design_gates_params_operational_params))
         .def_rw("design_mode", &design_gates_params::design_mode,
@@ -113,7 +116,7 @@ void design_gates(nanobind::module_& m)
             design_gates_stats  local_stats{};
             std::vector<layout> result{};
             {
-                const py::gil_scoped_release release{};
+                const nb::gil_scoped_release release{};
                 result = fiction::sidb::generators::design_gates(skeleton, spec, params, &local_stats);
             }
             if (stats != nullptr)
@@ -122,7 +125,7 @@ void design_gates(nanobind::module_& m)
             }
             return result;
         },
-        py::arg("skeleton"), py::arg("spec"), py::arg("params") = design_gates_params{}, py::arg("stats") = nullptr,
+        nb::arg("skeleton"), nb::arg("spec"), nb::arg("params") = design_gates_params{}, nb::arg("stats") = nullptr,
         DOC(fiction_sidb_generators_design_gates));
 }
 

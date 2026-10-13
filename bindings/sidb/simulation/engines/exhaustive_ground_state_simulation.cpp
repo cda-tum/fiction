@@ -27,6 +27,11 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -35,17 +40,15 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void exhaustive_ground_state_simulation(nanobind::module_& m)
+void exhaustive_ground_state_simulation(nb::module_& m)
 {
-    namespace py = nanobind;
-
     m.def(
         "exhaustive_ground_state_simulation",
         [](const fiction::sidb::layout& lyt, const fiction::sidb::model::simulation_parameters& params,
            const fiction::utils::progress_callback& on_progress)
         { return fiction::sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, params, on_progress); },
-        py::arg("lyt"), py::arg("params") = fiction::sidb::model::simulation_parameters{},
-        py::arg("on_progress").none() = py::none(), py::call_guard<py::gil_scoped_release>(),
+        nb::arg("lyt"), nb::arg("params") = fiction::sidb::model::simulation_parameters{},
+        nb::arg("on_progress").none() = nb::none(), nb::call_guard<nb::gil_scoped_release>(),
         DOC(fiction_sidb_simulation_engines_exhaustive_ground_state_simulation));
 }
 

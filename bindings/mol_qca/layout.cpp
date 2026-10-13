@@ -25,6 +25,11 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -33,14 +38,12 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void mol_qca_layout(nanobind::module_& m)
+void mol_qca_layout(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::mol_qca::cell_type;
     using fiction::mol_qca::layout;
 
-    py::enum_<cell_type>(m, "mol_qca_cell_type", DOC(fiction_mol_qca_cell_type))
+    nb::enum_<cell_type>(m, "mol_qca_cell_type", DOC(fiction_mol_qca_cell_type))
         .value("EMPTY", cell_type::EMPTY, DOC(fiction_mol_qca_cell_type_EMPTY))
         .value("NORMAL1", cell_type::NORMAL1, DOC(fiction_mol_qca_cell_type_NORMAL1))
         .value("NORMAL2", cell_type::NORMAL2, DOC(fiction_mol_qca_cell_type_NORMAL2))
@@ -51,17 +54,17 @@ void mol_qca_layout(nanobind::module_& m)
         .value("CONST_0", cell_type::CONST_0, DOC(fiction_mol_qca_cell_type_CONST_0))
         .value("CONST_1", cell_type::CONST_1, DOC(fiction_mol_qca_cell_type_CONST_1));
 
-    m.def("mol_qca_clock_number", &fiction::mol_qca::clock_number, py::arg("ct"), DOC(fiction_mol_qca_clock_number));
+    m.def("mol_qca_clock_number", &fiction::mol_qca::clock_number, nb::arg("ct"), DOC(fiction_mol_qca_clock_number));
 
-    py::class_<layout, py_cartesian_layout> cls(m, "mol_qca_layout", DOC(fiction_mol_qca_layout));
+    nb::class_<layout, py_cartesian_layout> cls(m, "mol_qca_layout", DOC(fiction_mol_qca_layout));
 
-    cls.def(py::init<>())
-        .def(py::init<const layout::extent&, std::string>(), py::arg("extent"), py::arg("layout_name") = "",
+    cls.def(nb::init<>())
+        .def(nb::init<const layout::extent&, std::string>(), nb::arg("extent"), nb::arg("layout_name") = "",
              extent_doc(DOC(fiction_mol_qca_layout_layout)).c_str());
 
     detail::bind_cell_grid(cls);
 
-    cls.def("assign_cell_type", &layout::assign_cell_type, py::arg("c"), py::arg("ct"),
+    cls.def("assign_cell_type", &layout::assign_cell_type, nb::arg("c"), nb::arg("ct"),
             DOC(fiction_layouts_cell_grid_assign_cell_type));
 }
 

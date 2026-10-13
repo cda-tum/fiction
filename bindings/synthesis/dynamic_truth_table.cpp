@@ -30,6 +30,11 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -64,11 +69,9 @@ inline void check_alphabet(const std::string& text, const std::string_view alpha
  * @brief Register dynamic truth tables and their constructors.
  * @param m Python module.
  */
-void dynamic_truth_table(nanobind::module_& m)
+void dynamic_truth_table(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::class_<py_tt>(m, "dynamic_truth_table")
+    nb::class_<py_tt>(m, "dynamic_truth_table")
         .def(
             "__init__", [](py_tt* tt) { std::construct_at(tt, 0u); }, "Constructs the constant-zero truth table.")
         .def(
@@ -81,7 +84,7 @@ void dynamic_truth_table(nanobind::module_& m)
                 }
                 std::construct_at(tt, num_vars);
             },
-            py::arg("num_vars"), "Constructs a truth table with fewer than 38 variables.")
+            nb::arg("num_vars"), "Constructs a truth table with fewer than 38 variables.")
 
         .def("num_vars", &py_tt::num_vars)
         .def("num_blocks", &py_tt::num_blocks)
@@ -101,7 +104,7 @@ void dynamic_truth_table(nanobind::module_& m)
 
                 kitty::create_from_binary_string(tt, binary);
             },
-            py::arg("binary"),
+            nb::arg("binary"),
             "Sets the bits from a string of `0` and `1` characters, most significant bit first. The string must "
             "hold exactly `num_bits()` characters. Any other character raises a `ValueError`.")
         .def(
@@ -121,7 +124,7 @@ void dynamic_truth_table(nanobind::module_& m)
 
                 kitty::create_from_hex_string(tt, hex);
             },
-            py::arg("hex"),
+            nb::arg("hex"),
             "Sets the bits from a hexadecimal string, most significant digit first. The string must hold exactly "
             "`num_bits() / 4` digits, or one digit for fewer than two variables. Any non-hexadecimal character "
             "raises a `ValueError`.")
@@ -144,7 +147,7 @@ void dynamic_truth_table(nanobind::module_& m)
                 }
                 tt = std::move(parsed);
             },
-            py::arg("expression"),
+            nb::arg("expression"),
             "Sets the bits from a Boolean expression over the variables `a` to `p`: constants `0` and `1`, negation "
             "`!E`, conjunction `(E...E)`, disjunction `{E...E}`, exclusive OR `[E...E]`, and majority `<EEE>`. The "
             "truth table must have at least as many variables as the largest one the expression uses.")

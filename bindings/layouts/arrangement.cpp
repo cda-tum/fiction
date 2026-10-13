@@ -20,6 +20,11 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -28,13 +33,11 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void arrangement(nanobind::module_& m)
+void arrangement(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::layouts::arrangement;
 
-    py::enum_<arrangement>(m, "arrangement", DOC(fiction_layouts_arrangement))
+    nb::enum_<arrangement>(m, "arrangement", DOC(fiction_layouts_arrangement))
         .value("ODD_ROW", arrangement::ODD_ROW, DOC(fiction_layouts_arrangement_ODD_ROW))
         .value("EVEN_ROW", arrangement::EVEN_ROW, DOC(fiction_layouts_arrangement_EVEN_ROW))
         .value("ODD_COLUMN", arrangement::ODD_COLUMN, DOC(fiction_layouts_arrangement_ODD_COLUMN))

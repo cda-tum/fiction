@@ -16,15 +16,20 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void quickexact(nanobind::module_& m);
-void quicksim(nanobind::module_& m);
-void exhaustive_ground_state_simulation(nanobind::module_& m);
-void clustercomplete(nanobind::module_& m);
+void quickexact(nb::module_& m);
+void quicksim(nb::module_& m);
+void exhaustive_ground_state_simulation(nb::module_& m);
+void clustercomplete(nb::module_& m);
 
-void register_sidb_simulation_engines(nanobind::module_& m)
+void register_sidb_simulation_engines(nb::module_& m)
 {
     quickexact(m);
     quicksim(m);
