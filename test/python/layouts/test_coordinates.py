@@ -21,6 +21,7 @@ from mnt.pyfiction.layouts import (
     cartesian_layout,
     coordinate,
     hexagonal_layout,
+    random_coordinate,
     shifted_cartesian_layout,
     stacked_cartesian_layout,
     volume,
@@ -28,6 +29,17 @@ from mnt.pyfiction.layouts import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+
+@pytest.mark.parametrize("corners", [((-3, 4, 1), (2, -5, 0)), ((2, -5, 0), (-3, 4, 1))])
+def test_random_coordinate_corner_keywords(corners: tuple[tuple[int, int, int], tuple[int, int, int]]) -> None:
+    """Named corners accept either axis order and define inclusive bounds."""
+    for _ in range(20):
+        result = random_coordinate(corner1=corners[0], corner2=corners[1])
+        assert -3 <= result.x <= 2
+        assert -5 <= result.y <= 4
+        assert 0 <= result.z <= 1
+    assert random_coordinate(corner1=(1, -2, 0), corner2=(1, -2, 0)) == coordinate(1, -2, 0)
 
 
 def test_default_coordinate_is_origin() -> None:

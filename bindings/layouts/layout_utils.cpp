@@ -79,7 +79,7 @@ void random_coordinate(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
-          py::arg("coordinate1"), py::arg("coordinate_2"), DOC(fiction_layouts_random_coordinate));
+          py::arg("corner1"), py::arg("corner2"), DOC(fiction_layouts_random_coordinate));
 }
 
 }  // namespace detail

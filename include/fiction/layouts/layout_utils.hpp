@@ -319,24 +319,24 @@ template <typename Lyt>
  * Generates a random coordinate with each axis inside the inclusive region spanned by two coordinates.
  *
  * @tparam CoordinateType Coordinate type to generate.
- * @param coordinate1 One corner of the region.
- * @param coordinate2 Opposite corner of the region; axes may appear in either order.
+ * @param corner1 One corner of the region.
+ * @param corner2 Opposite corner of the region; axes may appear in either order.
  * @return Random coordinate between the corresponding corner axes.
  */
 template <typename CoordinateType>
-CoordinateType random_coordinate(const CoordinateType coordinate1, const CoordinateType coordinate2) noexcept
+CoordinateType random_coordinate(const CoordinateType corner1, const CoordinateType corner2) noexcept
 {
     /** Pseudorandom generator seeded from the platform's random device. */
     static std::mt19937_64 generator(std::random_device{}());
     /** Inclusive column distribution. */
-    std::uniform_int_distribution<> dist_x(std::min(coordinate1.x, coordinate2.x),
-                                           std::max(coordinate1.x, coordinate2.x));
+    std::uniform_int_distribution<> dist_x(std::min(corner1.x, corner2.x),
+                                           std::max(corner1.x, corner2.x));
     /** Inclusive row distribution. */
-    std::uniform_int_distribution<> dist_y(std::min(coordinate1.y, coordinate2.y),
-                                           std::max(coordinate1.y, coordinate2.y));
+    std::uniform_int_distribution<> dist_y(std::min(corner1.y, corner2.y),
+                                           std::max(corner1.y, corner2.y));
     /** Inclusive layer distribution. */
-    std::uniform_int_distribution<> dist_z(std::min(coordinate1.z, coordinate2.z),
-                                           std::max(coordinate1.z, coordinate2.z));
+    std::uniform_int_distribution<> dist_z(std::min(corner1.z, corner2.z),
+                                           std::max(corner1.z, corner2.z));
 
     return {dist_x(generator), dist_y(generator), dist_z(generator)};
 }
