@@ -152,7 +152,7 @@ class coordinate:
     def __hash__(self) -> int:
         """Returns a hash value of the coordinate."""
 
-class Extent:
+class extent:
     """Nonnegative width, height, and layer counts of a zero-origin layout."""
 
     @overload
@@ -166,7 +166,7 @@ class Extent:
         """
 
     @overload
-    def __init__(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None: ...
+    def __init__(self, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None: ...
     @overload
     def __init__(self, extent: tuple[int, int] | tuple[int, int, int]) -> None: ...
     @property
@@ -187,11 +187,11 @@ class Extent:
 
     @layers.setter
     def layers(self, arg: int, /) -> None: ...
-    def __eq__(self, other: Extent | tuple[int, int] | tuple[int, int, int]) -> bool: ...
+    def __eq__(self, other: extent | tuple[int, int] | tuple[int, int, int]) -> bool: ...
 
     __hash__: None = None
 
-def area(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
+def area(extent: extent | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes width times height.
 
@@ -202,7 +202,7 @@ def area(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
         Area.
     """
 
-def volume(extent: Extent | tuple[int, int] | tuple[int, int, int]) -> int:
+def volume(extent: extent | tuple[int, int] | tuple[int, int, int]) -> int:
     """
     Computes width times height times layers with checked multiplication.
 
@@ -259,7 +259,7 @@ class cartesian_layout:
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Creates geometry with half-open, zero-origin bounds. The default
         extent is empty.
@@ -306,7 +306,7 @@ class cartesian_layout:
     def layers(self) -> int:
         """Returns the layers count."""
 
-    def get_extent(self) -> Extent:
+    def get_extent(self) -> extent:
         """Returns the layout extent."""
 
     def last_coordinate(self) -> coordinate | None:
@@ -324,7 +324,7 @@ class cartesian_layout:
             Width times height.
         """
 
-    def resize(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Changes the geometry's axis sizes.
 
@@ -889,7 +889,7 @@ class shifted_cartesian_layout:
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(self, arrangement: arrangement, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, arrangement: arrangement, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Creates geometry with half-open, zero-origin bounds. The default
         extent is empty.
@@ -945,7 +945,7 @@ class shifted_cartesian_layout:
     def layers(self) -> int:
         """Returns the layers count."""
 
-    def get_extent(self) -> Extent:
+    def get_extent(self) -> extent:
         """Returns the layout extent."""
 
     def last_coordinate(self) -> coordinate | None:
@@ -963,7 +963,7 @@ class shifted_cartesian_layout:
             Width times height.
         """
 
-    def resize(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Changes the geometry's axis sizes.
 
@@ -1534,7 +1534,7 @@ class hexagonal_layout:
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(self, arrangement: arrangement, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, arrangement: arrangement, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Creates geometry with half-open, zero-origin bounds. The default
         extent is empty.
@@ -1590,7 +1590,7 @@ class hexagonal_layout:
     def layers(self) -> int:
         """Returns the layers count."""
 
-    def get_extent(self) -> Extent:
+    def get_extent(self) -> extent:
         """Returns the layout extent."""
 
     def last_coordinate(self) -> coordinate | None:
@@ -1608,7 +1608,7 @@ class hexagonal_layout:
             Width times height.
         """
 
-    def resize(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def resize(self, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """
         Changes the geometry's axis sizes.
 
@@ -2150,7 +2150,7 @@ class hexagonal_layout:
     def __deepcopy__(self, memo: dict) -> hexagonal_layout:
         """Returns an independent geometry copy."""
 
-class LayoutObjectId:
+class layout_object_id:
     """Layout-local generation-checked object identity."""
 
     def __init__(self, index: int, generation: int) -> None: ...
@@ -2158,18 +2158,20 @@ class LayoutObjectId:
     def index(self) -> int: ...
     @property
     def generation(self) -> int: ...
-    def __eq__(self, arg: LayoutObjectId, /) -> bool: ...
+    def __eq__(self, arg: layout_object_id, /) -> bool: ...
     def __hash__(self) -> int: ...
 
-class LayoutInputPort:
-    """An object's ordered input port."""
+class layout_input_port:
+    """
+    A destination input port, identified by its object and truth-table argument index. A connected input port is a sink of its source object's output.
+    """
 
-    def __init__(self, object: LayoutObjectId, index: int) -> None: ...
+    def __init__(self, object: layout_object_id, index: int) -> None: ...
     @property
-    def object(self) -> LayoutObjectId: ...
+    def object(self) -> layout_object_id: ...
     @property
     def index(self) -> int: ...
-    def __eq__(self, arg: LayoutInputPort, /) -> bool: ...
+    def __eq__(self, arg: layout_input_port, /) -> bool: ...
     def __hash__(self) -> int: ...
 
 class cartesian_gate_layout(cartesian_layout):
@@ -2192,13 +2194,13 @@ class cartesian_gate_layout(cartesian_layout):
     @overload
     def __init__(self) -> None: ...
     @overload
-    def __init__(self, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """Creates an empty layout with the given geometry and name."""
 
     @overload
     def __init__(
         self,
-        extent: Extent | tuple[int, int] | tuple[int, int, int],
+        extent: extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
@@ -2471,7 +2473,7 @@ class cartesian_gate_layout(cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """
         Creates a primary input at `t`. Occupied coordinates reject without
         mutation.
@@ -2479,18 +2481,18 @@ class cartesian_gate_layout(cartesian_layout):
 
     @overload
     def create_po(
-        self, s: LayoutObjectId, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, s: layout_object_id, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """Creates a primary output with its input disconnected."""
 
-    def is_pi(self, n: LayoutObjectId) -> bool:
+    def is_pi(self, n: layout_object_id) -> bool:
         """Returns whether an object is a primary input."""
 
-    def is_po(self, n: LayoutObjectId) -> bool:
+    def is_po(self, n: layout_object_id) -> bool:
         """Returns whether an object is a primary output."""
 
     def is_pi_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -2499,49 +2501,49 @@ class cartesian_gate_layout(cartesian_layout):
     def is_po_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Returns whether the coordinate hosts a po."""
 
-    def is_inv(self, arg: LayoutObjectId, /) -> bool:
+    def is_inv(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes INV."""
 
-    def is_and(self, arg: LayoutObjectId, /) -> bool:
+    def is_and(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes AND."""
 
-    def is_nand(self, arg: LayoutObjectId, /) -> bool:
+    def is_nand(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes NAND."""
 
-    def is_or(self, arg: LayoutObjectId, /) -> bool:
+    def is_or(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes OR."""
 
-    def is_nor(self, arg: LayoutObjectId, /) -> bool:
+    def is_nor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes NOR."""
 
-    def is_xor(self, arg: LayoutObjectId, /) -> bool:
+    def is_xor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes XOR."""
 
-    def is_xnor(self, arg: LayoutObjectId, /) -> bool:
+    def is_xnor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes XNOR."""
 
-    def is_lt(self, arg: LayoutObjectId, /) -> bool:
+    def is_lt(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes LT."""
 
-    def is_le(self, arg: LayoutObjectId, /) -> bool:
+    def is_le(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes LE."""
 
-    def is_gt(self, arg: LayoutObjectId, /) -> bool:
+    def is_gt(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes GT."""
 
-    def is_ge(self, arg: LayoutObjectId, /) -> bool:
+    def is_ge(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes GE."""
 
-    def is_maj(self, arg: LayoutObjectId, /) -> bool:
+    def is_maj(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes MAJ."""
 
-    def is_fanout(self, arg: LayoutObjectId, /) -> bool:
+    def is_fanout(self, arg: layout_object_id, /) -> bool:
         """Returns whether an identity object drives more than one input port."""
 
-    def is_buf(self, arg: LayoutObjectId, /) -> bool:
+    def is_buf(self, arg: layout_object_id, /) -> bool:
         """Returns whether an object computes the identity function."""
 
-    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+    def is_wire(self, arg: layout_object_id, /) -> bool:
         """Returns whether an object is a physical wire rather than a terminal."""
 
     def set_layout_name(self, name: str) -> None:
@@ -2575,77 +2577,81 @@ class cartesian_gate_layout(cartesian_layout):
     def get_output_name(self, index: int) -> str:
         """Returns the output name at an interface index."""
 
-    def get_name(self, object: LayoutObjectId) -> str:
+    def get_name(self, object: layout_object_id) -> str:
         """Returns an object's name, or an empty string for an unnamed object."""
 
     @overload
-    def create_buf(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_buf(
+        self, a: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """Creates a wire with its input disconnected."""
 
-    def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_not(
+        self, a: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NOT gate."""
 
     def create_and(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a AND gate."""
 
     def create_nand(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NAND gate."""
 
     def create_or(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a OR gate."""
 
     def create_nor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NOR gate."""
 
     def create_xor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a XOR gate."""
 
     def create_xnor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a XNOR gate."""
 
     def create_lt(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a LT gate."""
 
     def create_le(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a LE gate."""
 
     def create_gt(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a GT gate."""
 
     def create_ge(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a GE gate."""
 
     def create_maj(
         self,
-        a: LayoutObjectId,
-        b: LayoutObjectId,
-        c: LayoutObjectId,
+        a: layout_object_id,
+        b: layout_object_id,
+        c: layout_object_id,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutObjectId:
+    ) -> layout_object_id:
         """Creates a majority gate."""
 
     def num_pis(self) -> int:
@@ -2668,45 +2674,45 @@ class cartesian_gate_layout(cartesian_layout):
 
     def create_gate(
         self,
-        inputs: Sequence[LayoutObjectId],
+        inputs: Sequence[layout_object_id],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutObjectId:
+    ) -> layout_object_id:
         """
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+    def object_function(self, object: layout_object_id) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
     def size(self) -> int:
         """Counts live objects."""
 
-    def fanin_size(self, object: LayoutObjectId) -> int:
+    def fanin_size(self, object: layout_object_id) -> int:
         """Counts connected input slots, irrespective of physical legality."""
 
-    def fanout_size(self, object: LayoutObjectId) -> int:
+    def fanout_size(self, object: layout_object_id) -> int:
         """Counts sink input ports, including multiple ports on one object."""
 
-    def input_count(self, object: LayoutObjectId) -> int:
+    def input_count(self, object: layout_object_id) -> int:
         """Returns the number of input slots, including disconnected slots."""
 
-    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None:
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id | None:
         """Finds the object at a coordinate; empty coordinates have no identity."""
 
-    def contains(self, object: LayoutObjectId) -> bool:
+    def contains(self, object: layout_object_id) -> bool:
         """Returns whether this identity names a live object."""
 
-    def get_tile(self, object: LayoutObjectId) -> coordinate:
+    def get_tile(self, object: layout_object_id) -> coordinate:
         """
         Returns the object's coordinate. @throws std::invalid_argument If the
         identity is stale.
         """
 
-    def source(self, input: LayoutInputPort) -> LayoutObjectId | None:
+    def source(self, input: layout_input_port) -> layout_object_id | None:
         """Returns the declared source of an input, or no source if disconnected."""
 
-    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None:
+    def connect(self, source: layout_object_id, input: layout_input_port) -> None:
         """
         Connects an output to an ordered input, replacing the input's existing
         source.
@@ -2715,49 +2721,49 @@ class cartesian_gate_layout(cartesian_layout):
         geometry need not be valid during editing.
         """
 
-    def disconnect(self, input: LayoutInputPort) -> None:
+    def disconnect(self, input: layout_input_port) -> None:
         """Disconnects one input without changing the indices of other inputs."""
 
-    def remove(self, object: LayoutObjectId) -> None:
+    def remove(self, object: layout_object_id) -> None:
         """
         Removes an object and disconnects all inputs and sinks. Stale
         identities reject.
         """
 
     def move_object(
-        self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, object: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Moves an object without changing its identity or connections."""
 
-    def pi_at(self, index: int) -> LayoutObjectId:
+    def pi_at(self, index: int) -> layout_object_id:
         """Returns a primary input in declared interface order."""
 
-    def po_at(self, index: int) -> LayoutObjectId:
+    def po_at(self, index: int) -> layout_object_id:
         """Returns a primary output in declared interface order."""
 
-    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None:
+    def set_input_order(self, order: Sequence[layout_object_id]) -> None:
         """
         Sets the complete input permutation. Invalid orders reject without
         mutation.
         """
 
-    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None:
+    def set_output_order(self, order: Sequence[layout_object_id]) -> None:
         """
         Sets the complete output permutation. Invalid orders reject without
         mutation.
         """
 
-    def set_name(self, object: LayoutObjectId, name: str) -> None:
+    def set_name(self, object: layout_object_id, name: str) -> None:
         """Sets an object's name."""
 
-    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]:
+    def inputs(self, object: layout_object_id) -> list[layout_object_id | None]:
         """
         Returns input sources in port-index order, including None for disconnected ports.
         """
 
-    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
+    def sinks(self, object: layout_object_id) -> list[layout_input_port]:
         """
-        Returns the connected sink input ports, including repeated inputs of one object. Sink order is unspecified.
+        Returns the destination input ports driven by this object's output. Each sink identifies the destination object and its input index. If the source drives several inputs of one destination, each input is a separate sink. Connections need not be physically legal; order is unspecified.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
@@ -2772,10 +2778,10 @@ class cartesian_gate_layout(cartesian_layout):
     def is_empty_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Returns whether a coordinate has no occupant."""
 
-    def pis(self) -> list[LayoutObjectId]: ...
-    def pos(self) -> list[LayoutObjectId]: ...
-    def gates(self) -> list[LayoutObjectId]: ...
-    def wires(self) -> list[LayoutObjectId]: ...
+    def pis(self) -> list[layout_object_id]: ...
+    def pos(self) -> list[layout_object_id]: ...
+    def gates(self) -> list[layout_object_id]: ...
+    def wires(self) -> list[layout_object_id]: ...
     def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
     def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
     def is_incoming_signal(
@@ -3154,14 +3160,14 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(self, arrangement: arrangement, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, arrangement: arrangement, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """Creates an empty layout with shifted rows or columns."""
 
     @overload
     def __init__(
         self,
         arrangement: arrangement,
-        extent: Extent | tuple[int, int] | tuple[int, int, int],
+        extent: extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
@@ -3434,7 +3440,7 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """
         Creates a primary input at `t`. Occupied coordinates reject without
         mutation.
@@ -3442,18 +3448,18 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     @overload
     def create_po(
-        self, s: LayoutObjectId, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, s: layout_object_id, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """Creates a primary output with its input disconnected."""
 
-    def is_pi(self, n: LayoutObjectId) -> bool:
+    def is_pi(self, n: layout_object_id) -> bool:
         """Returns whether an object is a primary input."""
 
-    def is_po(self, n: LayoutObjectId) -> bool:
+    def is_po(self, n: layout_object_id) -> bool:
         """Returns whether an object is a primary output."""
 
     def is_pi_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -3462,49 +3468,49 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def is_po_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Returns whether the coordinate hosts a po."""
 
-    def is_inv(self, arg: LayoutObjectId, /) -> bool:
+    def is_inv(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes INV."""
 
-    def is_and(self, arg: LayoutObjectId, /) -> bool:
+    def is_and(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes AND."""
 
-    def is_nand(self, arg: LayoutObjectId, /) -> bool:
+    def is_nand(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes NAND."""
 
-    def is_or(self, arg: LayoutObjectId, /) -> bool:
+    def is_or(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes OR."""
 
-    def is_nor(self, arg: LayoutObjectId, /) -> bool:
+    def is_nor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes NOR."""
 
-    def is_xor(self, arg: LayoutObjectId, /) -> bool:
+    def is_xor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes XOR."""
 
-    def is_xnor(self, arg: LayoutObjectId, /) -> bool:
+    def is_xnor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes XNOR."""
 
-    def is_lt(self, arg: LayoutObjectId, /) -> bool:
+    def is_lt(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes LT."""
 
-    def is_le(self, arg: LayoutObjectId, /) -> bool:
+    def is_le(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes LE."""
 
-    def is_gt(self, arg: LayoutObjectId, /) -> bool:
+    def is_gt(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes GT."""
 
-    def is_ge(self, arg: LayoutObjectId, /) -> bool:
+    def is_ge(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes GE."""
 
-    def is_maj(self, arg: LayoutObjectId, /) -> bool:
+    def is_maj(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes MAJ."""
 
-    def is_fanout(self, arg: LayoutObjectId, /) -> bool:
+    def is_fanout(self, arg: layout_object_id, /) -> bool:
         """Returns whether an identity object drives more than one input port."""
 
-    def is_buf(self, arg: LayoutObjectId, /) -> bool:
+    def is_buf(self, arg: layout_object_id, /) -> bool:
         """Returns whether an object computes the identity function."""
 
-    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+    def is_wire(self, arg: layout_object_id, /) -> bool:
         """Returns whether an object is a physical wire rather than a terminal."""
 
     def set_layout_name(self, name: str) -> None:
@@ -3538,77 +3544,81 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def get_output_name(self, index: int) -> str:
         """Returns the output name at an interface index."""
 
-    def get_name(self, object: LayoutObjectId) -> str:
+    def get_name(self, object: layout_object_id) -> str:
         """Returns an object's name, or an empty string for an unnamed object."""
 
     @overload
-    def create_buf(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_buf(
+        self, a: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """Creates a wire with its input disconnected."""
 
-    def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_not(
+        self, a: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NOT gate."""
 
     def create_and(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a AND gate."""
 
     def create_nand(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NAND gate."""
 
     def create_or(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a OR gate."""
 
     def create_nor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NOR gate."""
 
     def create_xor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a XOR gate."""
 
     def create_xnor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a XNOR gate."""
 
     def create_lt(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a LT gate."""
 
     def create_le(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a LE gate."""
 
     def create_gt(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a GT gate."""
 
     def create_ge(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a GE gate."""
 
     def create_maj(
         self,
-        a: LayoutObjectId,
-        b: LayoutObjectId,
-        c: LayoutObjectId,
+        a: layout_object_id,
+        b: layout_object_id,
+        c: layout_object_id,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutObjectId:
+    ) -> layout_object_id:
         """Creates a majority gate."""
 
     def num_pis(self) -> int:
@@ -3631,45 +3641,45 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     def create_gate(
         self,
-        inputs: Sequence[LayoutObjectId],
+        inputs: Sequence[layout_object_id],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutObjectId:
+    ) -> layout_object_id:
         """
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+    def object_function(self, object: layout_object_id) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
     def size(self) -> int:
         """Counts live objects."""
 
-    def fanin_size(self, object: LayoutObjectId) -> int:
+    def fanin_size(self, object: layout_object_id) -> int:
         """Counts connected input slots, irrespective of physical legality."""
 
-    def fanout_size(self, object: LayoutObjectId) -> int:
+    def fanout_size(self, object: layout_object_id) -> int:
         """Counts sink input ports, including multiple ports on one object."""
 
-    def input_count(self, object: LayoutObjectId) -> int:
+    def input_count(self, object: layout_object_id) -> int:
         """Returns the number of input slots, including disconnected slots."""
 
-    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None:
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id | None:
         """Finds the object at a coordinate; empty coordinates have no identity."""
 
-    def contains(self, object: LayoutObjectId) -> bool:
+    def contains(self, object: layout_object_id) -> bool:
         """Returns whether this identity names a live object."""
 
-    def get_tile(self, object: LayoutObjectId) -> coordinate:
+    def get_tile(self, object: layout_object_id) -> coordinate:
         """
         Returns the object's coordinate. @throws std::invalid_argument If the
         identity is stale.
         """
 
-    def source(self, input: LayoutInputPort) -> LayoutObjectId | None:
+    def source(self, input: layout_input_port) -> layout_object_id | None:
         """Returns the declared source of an input, or no source if disconnected."""
 
-    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None:
+    def connect(self, source: layout_object_id, input: layout_input_port) -> None:
         """
         Connects an output to an ordered input, replacing the input's existing
         source.
@@ -3678,49 +3688,49 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         geometry need not be valid during editing.
         """
 
-    def disconnect(self, input: LayoutInputPort) -> None:
+    def disconnect(self, input: layout_input_port) -> None:
         """Disconnects one input without changing the indices of other inputs."""
 
-    def remove(self, object: LayoutObjectId) -> None:
+    def remove(self, object: layout_object_id) -> None:
         """
         Removes an object and disconnects all inputs and sinks. Stale
         identities reject.
         """
 
     def move_object(
-        self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, object: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Moves an object without changing its identity or connections."""
 
-    def pi_at(self, index: int) -> LayoutObjectId:
+    def pi_at(self, index: int) -> layout_object_id:
         """Returns a primary input in declared interface order."""
 
-    def po_at(self, index: int) -> LayoutObjectId:
+    def po_at(self, index: int) -> layout_object_id:
         """Returns a primary output in declared interface order."""
 
-    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None:
+    def set_input_order(self, order: Sequence[layout_object_id]) -> None:
         """
         Sets the complete input permutation. Invalid orders reject without
         mutation.
         """
 
-    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None:
+    def set_output_order(self, order: Sequence[layout_object_id]) -> None:
         """
         Sets the complete output permutation. Invalid orders reject without
         mutation.
         """
 
-    def set_name(self, object: LayoutObjectId, name: str) -> None:
+    def set_name(self, object: layout_object_id, name: str) -> None:
         """Sets an object's name."""
 
-    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]:
+    def inputs(self, object: layout_object_id) -> list[layout_object_id | None]:
         """
         Returns input sources in port-index order, including None for disconnected ports.
         """
 
-    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
+    def sinks(self, object: layout_object_id) -> list[layout_input_port]:
         """
-        Returns the connected sink input ports, including repeated inputs of one object. Sink order is unspecified.
+        Returns the destination input ports driven by this object's output. Each sink identifies the destination object and its input index. If the source drives several inputs of one destination, each input is a separate sink. Connections need not be physically legal; order is unspecified.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
@@ -3735,10 +3745,10 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def is_empty_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Returns whether a coordinate has no occupant."""
 
-    def pis(self) -> list[LayoutObjectId]: ...
-    def pos(self) -> list[LayoutObjectId]: ...
-    def gates(self) -> list[LayoutObjectId]: ...
-    def wires(self) -> list[LayoutObjectId]: ...
+    def pis(self) -> list[layout_object_id]: ...
+    def pos(self) -> list[layout_object_id]: ...
+    def gates(self) -> list[layout_object_id]: ...
+    def wires(self) -> list[layout_object_id]: ...
     def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
     def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
     def is_incoming_signal(
@@ -4117,14 +4127,14 @@ class hexagonal_gate_layout(hexagonal_layout):
     @overload
     def __init__(self, arrangement: arrangement) -> None: ...
     @overload
-    def __init__(self, arrangement: arrangement, extent: Extent | tuple[int, int] | tuple[int, int, int]) -> None:
+    def __init__(self, arrangement: arrangement, extent: extent | tuple[int, int] | tuple[int, int, int]) -> None:
         """Creates an empty layout with shifted rows or columns."""
 
     @overload
     def __init__(
         self,
         arrangement: arrangement,
-        extent: Extent | tuple[int, int] | tuple[int, int, int],
+        extent: extent | tuple[int, int] | tuple[int, int, int],
         clocking_scheme: str = "2DDWave",
         layout_name: str = "",
     ) -> None:
@@ -4397,7 +4407,7 @@ class hexagonal_gate_layout(hexagonal_layout):
             `true` iff the connection from `src` to `tgt` is obstructed.
         """
 
-    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_pi(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """
         Creates a primary input at `t`. Occupied coordinates reject without
         mutation.
@@ -4405,18 +4415,18 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     @overload
     def create_po(
-        self, s: LayoutObjectId, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, s: layout_object_id, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a primary output driven by `s` at `t`."""
 
     @overload
-    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_po(self, name: str, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """Creates a primary output with its input disconnected."""
 
-    def is_pi(self, n: LayoutObjectId) -> bool:
+    def is_pi(self, n: layout_object_id) -> bool:
         """Returns whether an object is a primary input."""
 
-    def is_po(self, n: LayoutObjectId) -> bool:
+    def is_po(self, n: layout_object_id) -> bool:
         """Returns whether an object is a primary output."""
 
     def is_pi_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -4425,49 +4435,49 @@ class hexagonal_gate_layout(hexagonal_layout):
     def is_po_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Returns whether the coordinate hosts a po."""
 
-    def is_inv(self, arg: LayoutObjectId, /) -> bool:
+    def is_inv(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes INV."""
 
-    def is_and(self, arg: LayoutObjectId, /) -> bool:
+    def is_and(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes AND."""
 
-    def is_nand(self, arg: LayoutObjectId, /) -> bool:
+    def is_nand(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes NAND."""
 
-    def is_or(self, arg: LayoutObjectId, /) -> bool:
+    def is_or(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes OR."""
 
-    def is_nor(self, arg: LayoutObjectId, /) -> bool:
+    def is_nor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes NOR."""
 
-    def is_xor(self, arg: LayoutObjectId, /) -> bool:
+    def is_xor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes XOR."""
 
-    def is_xnor(self, arg: LayoutObjectId, /) -> bool:
+    def is_xnor(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes XNOR."""
 
-    def is_lt(self, arg: LayoutObjectId, /) -> bool:
+    def is_lt(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes LT."""
 
-    def is_le(self, arg: LayoutObjectId, /) -> bool:
+    def is_le(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes LE."""
 
-    def is_gt(self, arg: LayoutObjectId, /) -> bool:
+    def is_gt(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes GT."""
 
-    def is_ge(self, arg: LayoutObjectId, /) -> bool:
+    def is_ge(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes GE."""
 
-    def is_maj(self, arg: LayoutObjectId, /) -> bool:
+    def is_maj(self, arg: layout_object_id, /) -> bool:
         """Returns whether the object computes MAJ."""
 
-    def is_fanout(self, arg: LayoutObjectId, /) -> bool:
+    def is_fanout(self, arg: layout_object_id, /) -> bool:
         """Returns whether an identity object drives more than one input port."""
 
-    def is_buf(self, arg: LayoutObjectId, /) -> bool:
+    def is_buf(self, arg: layout_object_id, /) -> bool:
         """Returns whether an object computes the identity function."""
 
-    def is_wire(self, arg: LayoutObjectId, /) -> bool:
+    def is_wire(self, arg: layout_object_id, /) -> bool:
         """Returns whether an object is a physical wire rather than a terminal."""
 
     def set_layout_name(self, name: str) -> None:
@@ -4501,77 +4511,81 @@ class hexagonal_gate_layout(hexagonal_layout):
     def get_output_name(self, index: int) -> str:
         """Returns the output name at an interface index."""
 
-    def get_name(self, object: LayoutObjectId) -> str:
+    def get_name(self, object: layout_object_id) -> str:
         """Returns an object's name, or an empty string for an unnamed object."""
 
     @overload
-    def create_buf(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_buf(
+        self, a: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a wire driven by `a`."""
 
     @overload
-    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_buf(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id:
         """Creates a wire with its input disconnected."""
 
-    def create_not(self, a: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId:
+    def create_not(
+        self, a: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NOT gate."""
 
     def create_and(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a AND gate."""
 
     def create_nand(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NAND gate."""
 
     def create_or(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a OR gate."""
 
     def create_nor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a NOR gate."""
 
     def create_xor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a XOR gate."""
 
     def create_xnor(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a XNOR gate."""
 
     def create_lt(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a LT gate."""
 
     def create_le(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a LE gate."""
 
     def create_gt(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a GT gate."""
 
     def create_ge(
-        self, a: LayoutObjectId, b: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, a: layout_object_id, b: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Creates a GE gate."""
 
     def create_maj(
         self,
-        a: LayoutObjectId,
-        b: LayoutObjectId,
-        c: LayoutObjectId,
+        a: layout_object_id,
+        b: layout_object_id,
+        c: layout_object_id,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutObjectId:
+    ) -> layout_object_id:
         """Creates a majority gate."""
 
     def num_pis(self) -> int:
@@ -4594,45 +4608,45 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     def create_gate(
         self,
-        inputs: Sequence[LayoutObjectId],
+        inputs: Sequence[layout_object_id],
         function: mnt.pyfiction.synthesis.dynamic_truth_table,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
-    ) -> LayoutObjectId:
+    ) -> layout_object_id:
         """
         Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be disconnected.
         """
 
-    def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table:
+    def object_function(self, object: layout_object_id) -> mnt.pyfiction.synthesis.dynamic_truth_table:
         """Returns the object's truth table."""
 
     def size(self) -> int:
         """Counts live objects."""
 
-    def fanin_size(self, object: LayoutObjectId) -> int:
+    def fanin_size(self, object: layout_object_id) -> int:
         """Counts connected input slots, irrespective of physical legality."""
 
-    def fanout_size(self, object: LayoutObjectId) -> int:
+    def fanout_size(self, object: layout_object_id) -> int:
         """Counts sink input ports, including multiple ports on one object."""
 
-    def input_count(self, object: LayoutObjectId) -> int:
+    def input_count(self, object: layout_object_id) -> int:
         """Returns the number of input slots, including disconnected slots."""
 
-    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> LayoutObjectId | None:
+    def find_object(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> layout_object_id | None:
         """Finds the object at a coordinate; empty coordinates have no identity."""
 
-    def contains(self, object: LayoutObjectId) -> bool:
+    def contains(self, object: layout_object_id) -> bool:
         """Returns whether this identity names a live object."""
 
-    def get_tile(self, object: LayoutObjectId) -> coordinate:
+    def get_tile(self, object: layout_object_id) -> coordinate:
         """
         Returns the object's coordinate. @throws std::invalid_argument If the
         identity is stale.
         """
 
-    def source(self, input: LayoutInputPort) -> LayoutObjectId | None:
+    def source(self, input: layout_input_port) -> layout_object_id | None:
         """Returns the declared source of an input, or no source if disconnected."""
 
-    def connect(self, source: LayoutObjectId, input: LayoutInputPort) -> None:
+    def connect(self, source: layout_object_id, input: layout_input_port) -> None:
         """
         Connects an output to an ordered input, replacing the input's existing
         source.
@@ -4641,49 +4655,49 @@ class hexagonal_gate_layout(hexagonal_layout):
         geometry need not be valid during editing.
         """
 
-    def disconnect(self, input: LayoutInputPort) -> None:
+    def disconnect(self, input: layout_input_port) -> None:
         """Disconnects one input without changing the indices of other inputs."""
 
-    def remove(self, object: LayoutObjectId) -> None:
+    def remove(self, object: layout_object_id) -> None:
         """
         Removes an object and disconnects all inputs and sinks. Stale
         identities reject.
         """
 
     def move_object(
-        self, object: LayoutObjectId, t: coordinate | tuple[int, int] | tuple[int, int, int]
-    ) -> LayoutObjectId:
+        self, object: layout_object_id, t: coordinate | tuple[int, int] | tuple[int, int, int]
+    ) -> layout_object_id:
         """Moves an object without changing its identity or connections."""
 
-    def pi_at(self, index: int) -> LayoutObjectId:
+    def pi_at(self, index: int) -> layout_object_id:
         """Returns a primary input in declared interface order."""
 
-    def po_at(self, index: int) -> LayoutObjectId:
+    def po_at(self, index: int) -> layout_object_id:
         """Returns a primary output in declared interface order."""
 
-    def set_input_order(self, order: Sequence[LayoutObjectId]) -> None:
+    def set_input_order(self, order: Sequence[layout_object_id]) -> None:
         """
         Sets the complete input permutation. Invalid orders reject without
         mutation.
         """
 
-    def set_output_order(self, order: Sequence[LayoutObjectId]) -> None:
+    def set_output_order(self, order: Sequence[layout_object_id]) -> None:
         """
         Sets the complete output permutation. Invalid orders reject without
         mutation.
         """
 
-    def set_name(self, object: LayoutObjectId, name: str) -> None:
+    def set_name(self, object: layout_object_id, name: str) -> None:
         """Sets an object's name."""
 
-    def inputs(self, object: LayoutObjectId) -> list[LayoutObjectId | None]:
+    def inputs(self, object: layout_object_id) -> list[layout_object_id | None]:
         """
         Returns input sources in port-index order, including None for disconnected ports.
         """
 
-    def sinks(self, object: LayoutObjectId) -> list[LayoutInputPort]:
+    def sinks(self, object: layout_object_id) -> list[layout_input_port]:
         """
-        Returns the connected sink input ports, including repeated inputs of one object. Sink order is unspecified.
+        Returns the destination input ports driven by this object's output. Each sink identifies the destination object and its input index. If the source drives several inputs of one destination, each input is a separate sink. Connections need not be physically legal; order is unspecified.
         """
 
     def clear_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
@@ -4698,10 +4712,10 @@ class hexagonal_gate_layout(hexagonal_layout):
     def is_empty_tile(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """Returns whether a coordinate has no occupant."""
 
-    def pis(self) -> list[LayoutObjectId]: ...
-    def pos(self) -> list[LayoutObjectId]: ...
-    def gates(self) -> list[LayoutObjectId]: ...
-    def wires(self) -> list[LayoutObjectId]: ...
+    def pis(self) -> list[layout_object_id]: ...
+    def pos(self) -> list[layout_object_id]: ...
+    def gates(self) -> list[layout_object_id]: ...
+    def wires(self) -> list[layout_object_id]: ...
     def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
     def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
     def is_incoming_signal(
@@ -5070,7 +5084,9 @@ class obstructions:
     """
 
     def __init__(self) -> None:
-        """Creates empty routing constraints."""
+        """
+        Creates layout-independent routing-search constraints. Gate layouts own persistent obstructions and expose their obstruction methods directly.
+        """
 
     def obstruct_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
@@ -5231,8 +5247,8 @@ def normalize_layout_coordinates(lyt: mnt.pyfiction.inml.inml_layout) -> mnt.pyf
     """
 
 def random_coordinate(
-    coordinate1: coordinate | tuple[int, int] | tuple[int, int, int],
-    coordinate_2: coordinate | tuple[int, int] | tuple[int, int, int],
+    corner1: coordinate | tuple[int, int] | tuple[int, int, int],
+    corner2: coordinate | tuple[int, int] | tuple[int, int, int],
 ) -> coordinate:
     """
     Generates a random coordinate with each axis inside the inclusive

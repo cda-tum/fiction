@@ -1738,19 +1738,19 @@ def is_crossable_wire(
 def route_path(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
     path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
-    destination: mnt.pyfiction.layouts.LayoutInputPort,
+    destination: mnt.pyfiction.layouts.layout_input_port,
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
-    destination: mnt.pyfiction.layouts.LayoutInputPort,
+    destination: mnt.pyfiction.layouts.layout_input_port,
 ) -> None: ...
 @overload
 def route_path(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     path: Sequence[mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]],
-    destination: mnt.pyfiction.layouts.LayoutInputPort,
+    destination: mnt.pyfiction.layouts.layout_input_port,
 ) -> None:
     """
     Routes a path to one explicit logical input without changing other
@@ -1833,77 +1833,77 @@ def place(
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-    b: mnt.pyfiction.layouts.LayoutObjectId,
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
     c: bool | None,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-    b: mnt.pyfiction.layouts.LayoutObjectId,
-    c: mnt.pyfiction.layouts.LayoutObjectId,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
+    c: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-    b: mnt.pyfiction.layouts.LayoutObjectId,
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
     c: bool | None,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-    b: mnt.pyfiction.layouts.LayoutObjectId,
-    c: mnt.pyfiction.layouts.LayoutObjectId,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
+    c: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-) -> mnt.pyfiction.layouts.LayoutObjectId:
+) -> mnt.pyfiction.layouts.layout_object_id:
     """
     Places a primary input at the given coordinate and returns its output port.
     """
@@ -1914,25 +1914,25 @@ def place(
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-    b: mnt.pyfiction.layouts.LayoutObjectId,
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
     c: bool | None,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+) -> mnt.pyfiction.layouts.layout_object_id: ...
 @overload
 def place(
     lyt: mnt.pyfiction.layouts.hexagonal_gate_layout,
     t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     ntk: mnt.pyfiction.networks.technology_network,
     n: int,
-    a: mnt.pyfiction.layouts.LayoutObjectId,
-    b: mnt.pyfiction.layouts.LayoutObjectId,
-    c: mnt.pyfiction.layouts.LayoutObjectId,
-) -> mnt.pyfiction.layouts.LayoutObjectId: ...
+    a: mnt.pyfiction.layouts.layout_object_id,
+    b: mnt.pyfiction.layouts.layout_object_id,
+    c: mnt.pyfiction.layouts.layout_object_id,
+) -> mnt.pyfiction.layouts.layout_object_id: ...
