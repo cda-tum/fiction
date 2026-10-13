@@ -108,12 +108,13 @@ def test_time_to_solution_with_simulation_results() -> None:
 
 
 def test_independent_quicksim_and_tts_timeouts() -> None:
-    """The one-SiDB fast path completes within its heuristic budget; the whole-search deadline raises."""
+    """Failed heuristic attempts publish statistics; the whole-search deadline raises."""
     layout = sidb_layout()
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    layout.assign_sidb(lattice_site(4, 0, 0), sidb_dot_tag.NORMAL)
     stats = time_to_solution_stats()
-    time_to_solution(layout, quicksim_timeout=0, timeout=10000, repetitions=2, ps=stats)
-    assert stats.acc == 100
-    assert stats.time_to_solution > 0
+    time_to_solution(layout, quicksim_timeout=0, timeout=10000, iteration_steps=0, repetitions=2, ps=stats)
+    assert stats.acc == 0
+    assert math.isinf(stats.time_to_solution)
     with pytest.raises(TimeoutError):
         time_to_solution(layout, quicksim_timeout=10000, timeout=0, repetitions=2)

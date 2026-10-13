@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any, cast
 import pytest
 
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
+from mnt.pyfiction.sidb.model import potential_to_distance_conversion, sidb_simulation_parameters
 from mnt.pyfiction.sidb.simulation import potential_landscape
 from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact, quicksim
 from mnt.pyfiction.synthesis import (
@@ -241,3 +241,25 @@ def test_mapping_default_gate_set(mux21: technology_network) -> None:
     with pytest.raises(missing_required_gates_exception, match="missing required gates"):
         technology_mapping(mux21)
     assert technology_mapping(mux21, **cast("dict[str, Any]", and_or_not())).num_gates() > 0
+
+
+@pytest.mark.parametrize("precision", [-1, 2.7])
+def test_distance_conversion_rejects_non_unsigned_precision(precision: float) -> None:
+    """Precision preserves the native unsigned integer contract."""
+    with pytest.raises(TypeError):
+        cast("Callable[..., Any]", potential_to_distance_conversion)(0.5, precision)
+
+
+@pytest.mark.parametrize("potential", [0.0, -0.1, float("nan"), -float("inf")])
+def test_distance_conversion_rejects_invalid_potential(potential: float) -> None:
+    """Invalid potentials fail before entering the native distance scan."""
+    with pytest.raises(ValueError, match="potential must be positive"):
+        potential_to_distance_conversion(potential, 2)
+
+
+def test_distance_conversion_precision_and_infinite_potential() -> None:
+    """Integer precision controls the scan step, including positive infinity."""
+    assert potential_to_distance_conversion(0.01, 2, epsilon_r=2.0, lambda_tf=1.0) == pytest.approx(314 / 100)
+    assert potential_to_distance_conversion(float("inf"), 3) == pytest.approx(0.001)
+    with pytest.raises(ValueError, match="precision must yield a positive finite step"):
+        potential_to_distance_conversion(0.5, 1000)

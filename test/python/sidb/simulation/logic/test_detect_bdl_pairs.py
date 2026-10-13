@@ -39,3 +39,13 @@ def test_detect_bdl_pairs(lat):
     assert len(input_bdl_pairs) == 0
     assert len(output_bdl_pairs) == 0
     assert len(normal_bdl_pairs) == 2
+
+
+def test_pair_distance_keywords() -> None:
+    """Both distance bounds select the detected BDL pairs."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
+    layout.assign_sidb(lattice_site(2, 1, 0), sidb_dot_tag.INPUT)
+    assert len(detect_bdl_pairs(layout, sidb_dot_tag.INPUT, minimum_distance=0.7, maximum_distance=1.3)) == 1
+    assert not detect_bdl_pairs(layout, sidb_dot_tag.INPUT, minimum_distance=1.3, maximum_distance=1.5)
+    assert not detect_bdl_pairs(layout, sidb_dot_tag.INPUT, minimum_distance=0.3, maximum_distance=1.0)
