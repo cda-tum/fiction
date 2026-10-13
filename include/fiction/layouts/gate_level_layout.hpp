@@ -1736,7 +1736,7 @@ class gate_level_layout : public CoordinateLayout
         object_kind kind{object_kind::REMOVED};
         /** @brief Number of input ports, including disconnected ports. */
         uint32_t input_count{};
-        /** @brief Inline input-index to connection mapping for every built-in gate. */
+        /** @brief Inline input-index to connection mapping sized for built-in gate arities, independent of geometry. */
         std::array<uint32_t, 3> inputs{NO_INDEX, NO_INDEX, NO_INDEX};
     };
     /** @brief Mutable connection with constant-time removal from the source's sink list. */
@@ -1757,7 +1757,7 @@ class gate_level_layout : public CoordinateLayout
     std::vector<object_record> objects{};
     /** @brief Live object membership, with one bit per retained storage slot. */
     std::vector<uint64_t> live_object_bits{};
-    /** @brief Input-index to connection mapping for objects with more than three inputs. */
+    /** @brief Full input-index to connection mappings for objects whose arity exceeds the inline capacity. */
     phmap::flat_hash_map<uint32_t, std::vector<uint32_t>> spilled_inputs{};
     /** @brief Reusable contiguous connection storage. */
     std::vector<edge_record> edges{};

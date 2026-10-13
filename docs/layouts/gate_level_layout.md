@@ -135,7 +135,9 @@ $O(H / 64 + L)$ for $H$ historical slots and $L$ live objects.
 
 The layout stores object records and mutable connections in contiguous reusable pools. Indexed sink lists
 permit constant-time unlinking. Every built-in gate keeps its ordered inputs inline; gates with more than
-three inputs use separate overflow storage. Names and truth-table payloads also live outside object records.
+three inputs use separate overflow storage. This capacity covers built-in gate arities and does not limit
+the number of inputs or depend on the coordinate geometry. Hexagonal layouts also store larger input lists
+in the overflow table. Names and truth-table payloads live outside object records.
 Removing an object releases its overflow inputs; the object and connection pools retain capacity for reuse.
 The live-object bitmap adds one bit per retained slot without enlarging object records.
 
