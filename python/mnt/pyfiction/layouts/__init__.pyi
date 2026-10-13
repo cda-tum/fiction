@@ -2791,7 +2791,11 @@ class cartesian_gate_layout(cartesian_layout):
     def gates(self) -> list[layout_object_id]: ...
     def wires(self) -> list[layout_object_id]: ...
     def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]:
+        """
+        Returns adjacent, outgoing-clocked destination coordinates once per connected input port. Multiple connected inputs on one destination yield repeated coordinates; order is unspecified.
+        """
+
     def is_incoming_signal(
         self,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
@@ -3766,7 +3770,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     def gates(self) -> list[layout_object_id]: ...
     def wires(self) -> list[layout_object_id]: ...
     def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]:
+        """
+        Returns adjacent, outgoing-clocked destination coordinates once per connected input port. Multiple connected inputs on one destination yield repeated coordinates; order is unspecified.
+        """
+
     def is_incoming_signal(
         self,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
@@ -4741,7 +4749,11 @@ class hexagonal_gate_layout(hexagonal_layout):
     def gates(self) -> list[layout_object_id]: ...
     def wires(self) -> list[layout_object_id]: ...
     def incoming_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
-    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]: ...
+    def outgoing_data_flow(self, t: coordinate | tuple[int, int] | tuple[int, int, int]) -> list[coordinate]:
+        """
+        Returns adjacent, outgoing-clocked destination coordinates once per connected input port. Multiple connected inputs on one destination yield repeated coordinates; order is unspecified.
+        """
+
     def is_incoming_signal(
         self,
         t: coordinate | tuple[int, int] | tuple[int, int, int],
@@ -5111,9 +5123,7 @@ class obstructions:
     """
 
     def __init__(self) -> None:
-        """
-        Creates layout-independent routing-search constraints. Gate layouts own persistent obstructions and expose their obstruction methods directly.
-        """
+        """Creates empty layout-independent routing-search constraints."""
 
     def obstruct_coordinate(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> None:
         """
