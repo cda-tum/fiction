@@ -84,9 +84,7 @@ void register_write_sidb_layout_svg(nb::module_& m)
             ps.color_background   = color_background;
             ps.lattice_mode       = lattice_mode;
             const nb::gil_scoped_release release{};
-            (static_cast<void (*)(const fiction::sidb::layout&, const std::string_view&,
-                                  const write_sidb_layout_svg_options&)>(&fiction::sidb::io::write_sidb_layout_svg))(
-                layout, filename, ps);
+            fiction::sidb::io::write_sidb_layout_svg(layout, filename, ps);
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("lattice_point_size") = fiction::sidb::io::write_sidb_layout_svg_params{}.lattice_point_size,
@@ -150,9 +148,7 @@ The keyword options select dot sizes, background coloring, lattice rendering, an
             ps.color_background   = color_background;
             ps.lattice_mode       = lattice_mode;
             const nb::gil_scoped_release release{};
-            (static_cast<void (*)(const fiction::sidb::layout&, const fiction::sidb::charge_distribution&,
-                                  const std::string_view&, const write_sidb_layout_svg_options&)>(
-                &fiction::sidb::io::write_sidb_layout_svg))(layout, charge_distribution, filename, ps);
+            fiction::sidb::io::write_sidb_layout_svg(layout, charge_distribution, filename, ps);
         },
         nb::arg("layout"), nb::arg("charge_distribution"), nb::arg("filename"), nb::kw_only(),
         nb::arg("on_progress").none() = nb::none(),
