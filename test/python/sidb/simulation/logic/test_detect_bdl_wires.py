@@ -46,3 +46,12 @@ def test_detect_bdl_wires_100_lattice():
     assert len(all_bdl_wires) == 3
     assert len(output_bdl_wires) == 2
     assert len(input_bdl_wires) == 1
+
+
+def test_wire_distance_keyword() -> None:
+    """The wire distance joins nearby BDL pairs or leaves separate wires."""
+    layout = sidb_layout()
+    for x, y in [(0, 0), (2, 1), (6, 2), (8, 3)]:
+        layout.assign_sidb(lattice_site(x, y, 0), sidb_dot_tag.INPUT)
+    assert len(detect_bdl_wires(layout, threshold_bdl_interdistance=0.9)) == 2
+    assert len(detect_bdl_wires(layout, threshold_bdl_interdistance=2.0)) == 1

@@ -15,15 +15,14 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/model/potential_to_distance_conversion.hpp>
 
-#include <optional>
+#include <cmath>
+#include <cstdint>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner): enables keyword options
 
 /**
  * @brief Namespace alias for nanobind.
@@ -44,10 +43,20 @@ void register_potential_to_distance_conversion(nb::module_& m)
 {
     m.def(
         "potential_to_distance_conversion",
-        [](double potential, double precision, const decltype(simulation_model{}.base) base,
+        [](const double potential, const uint64_t precision, const decltype(simulation_model{}.base) base,
            const decltype(simulation_model{}.mu_minus) mu_minus, const decltype(simulation_model{}.epsilon_r) epsilon_r,
            const decltype(simulation_model{}.lambda_tf) lambda_tf)
         {
+            if (std::isnan(potential) || potential <= 0)
+            {
+                throw nb::value_error("potential must be positive");
+            }
+            /** @brief Distance increment used by the native scan. */
+            const auto step = std::pow(10, -static_cast<double>(precision));
+            if (step == 0 || !std::isfinite(step))
+            {
+                throw nb::value_error("precision must yield a positive finite step");
+            }
             const auto params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             return fiction::sidb::model::potential_to_distance_conversion(potential, params, precision);
         },
@@ -56,6 +65,8 @@ void register_potential_to_distance_conversion(nb::module_& m)
         nb::arg("lambda_tf") = simulation_model{}.lambda_tf,
         R"doc(Compute the distance corresponding to the potential with the requested precision.
 The physical model is supplied by the scalar keyword values.
+Potential must be positive. Precision must be a non-negative integer yielding a
+positive finite step. Runtime grows exponentially with precision.
 )doc");
 }
 

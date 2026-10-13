@@ -347,7 +347,7 @@ class sidb_simulation_parameters:
 
 def potential_to_distance_conversion(
     potential: float,
-    precision: float,
+    precision: int,
     *,
     base: int = 3,
     mu_minus: float = -0.32,
@@ -357,4 +357,6 @@ def potential_to_distance_conversion(
     """
     Compute the distance corresponding to the potential with the requested precision.
     The physical model is supplied by the scalar keyword values.
+    Potential must be positive. Precision must be a non-negative integer yielding a
+    positive finite step. Runtime grows exponentially with precision.
     """
