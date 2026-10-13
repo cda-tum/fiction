@@ -14,10 +14,10 @@ import pytest
 
 from mnt.pyfiction.inml import inml_layout
 from mnt.pyfiction.layouts import (
-    layout_input_port,
     arrangement,
     cartesian_gate_layout,
     hexagonal_gate_layout,
+    layout_input_port,
     shifted_cartesian_gate_layout,
 )
 from mnt.pyfiction.networks.io import read_technology_network

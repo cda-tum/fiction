@@ -13,10 +13,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import (
-    layout_input_port,
     arrangement,
     cartesian_gate_layout,
     coordinate,
+    layout_input_port,
     shifted_cartesian_gate_layout,
 )
 from mnt.pyfiction.layouts.io import (

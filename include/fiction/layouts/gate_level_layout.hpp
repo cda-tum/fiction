@@ -834,7 +834,8 @@ class gate_level_layout : public CoordinateLayout
         }
         return result;
     }
-    /** @brief Returns destination-object coordinates of output connections, filtered by adjacency and optionally clocking. */
+    /** @brief Returns destination-object coordinates of output connections, filtered by adjacency and optionally
+     * clocking. */
     template <bool RespectClocking = true>
     [[nodiscard]] std::vector<tile> outgoing_data_flow(const tile& t) const
     {

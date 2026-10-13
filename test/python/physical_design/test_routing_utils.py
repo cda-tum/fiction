@@ -11,10 +11,10 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.layouts import (
-    layout_input_port,
     arrangement,
     cartesian_gate_layout,
     hexagonal_gate_layout,
+    layout_input_port,
     shifted_cartesian_gate_layout,
 )
 from mnt.pyfiction.physical_design import clear_routing, route_path

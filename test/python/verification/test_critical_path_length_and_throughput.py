@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import layout_input_port, cartesian_gate_layout
+from mnt.pyfiction.layouts import cartesian_gate_layout, layout_input_port
 from mnt.pyfiction.verification import critical_path_length_and_throughput
 
 

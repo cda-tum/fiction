@@ -15,10 +15,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import (
-    layout_object_id,
     cartesian_gate_layout,
     cartesian_layout,
     coordinate,
+    layout_object_id,
     stacked_cartesian_layout,
 )
 from mnt.pyfiction.physical_design import place, post_layout_optimization_params

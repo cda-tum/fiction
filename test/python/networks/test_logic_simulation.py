@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import layout_input_port, cartesian_gate_layout
+from mnt.pyfiction.layouts import cartesian_gate_layout, layout_input_port
 from mnt.pyfiction.networks import simulate, simulate_outputs
 from mnt.pyfiction.networks.io import read_technology_network
 from mnt.pyfiction.physical_design import exact_cartesian, exact_params

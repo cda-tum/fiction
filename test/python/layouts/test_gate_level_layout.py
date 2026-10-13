@@ -15,13 +15,13 @@ from typing import TYPE_CHECKING, cast
 import pytest
 
 from mnt.pyfiction.layouts import (
-    extent,
-    layout_input_port,
-    layout_object_id,
     arrangement,
     cartesian_gate_layout,
     coordinate,
+    extent,
     hexagonal_gate_layout,
+    layout_input_port,
+    layout_object_id,
     shifted_cartesian_gate_layout,
 )
 from mnt.pyfiction.synthesis import dynamic_truth_table

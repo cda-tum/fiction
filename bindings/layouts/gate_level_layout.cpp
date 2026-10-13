@@ -318,7 +318,8 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                 return lyt.object_function(id);
             },
             py::arg("object"),
-            py::sig("def object_function(self, object: layout_object_id) -> mnt.pyfiction.synthesis.dynamic_truth_table"),
+            py::sig(
+                "def object_function(self, object: layout_object_id) -> mnt.pyfiction.synthesis.dynamic_truth_table"),
             "Returns the object's truth table.")
         .def("size", &GateLyt::size, DOC(fiction_layouts_gate_level_layout_size))
         .def("fanin_size", &GateLyt::fanin_size, py::arg("object"), DOC(fiction_layouts_gate_level_layout_fanin_size))
@@ -592,8 +593,9 @@ void gate_level_layout(nanobind::module_& m)
         .def(
             "__eq__", [](const object_id a, const object_id b) { return a == b; }, py::is_operator())
         .def("__hash__", [](const object_id id) { return std::hash<object_id>{}(id); });
-    py::class_<input_port>(m, "layout_input_port", "A destination input port, identified by its object and truth-table argument index. "
-                                          "A connected input port is a sink of its source object's output.")
+    py::class_<input_port>(m, "layout_input_port",
+                           "A destination input port, identified by its object and truth-table argument index. "
+                           "A connected input port is a sink of its source object's output.")
         .def(py::init<object_id, uint32_t>(), py::arg("object"), py::arg("index"))
         .def_ro("object", &input_port::object)
         .def_ro("index", &input_port::index)

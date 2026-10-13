@@ -329,14 +329,11 @@ CoordinateType random_coordinate(const CoordinateType corner1, const CoordinateT
     /** Pseudorandom generator seeded from the platform's random device. */
     static std::mt19937_64 generator(std::random_device{}());
     /** Inclusive column distribution. */
-    std::uniform_int_distribution<> dist_x(std::min(corner1.x, corner2.x),
-                                           std::max(corner1.x, corner2.x));
+    std::uniform_int_distribution<> dist_x(std::min(corner1.x, corner2.x), std::max(corner1.x, corner2.x));
     /** Inclusive row distribution. */
-    std::uniform_int_distribution<> dist_y(std::min(corner1.y, corner2.y),
-                                           std::max(corner1.y, corner2.y));
+    std::uniform_int_distribution<> dist_y(std::min(corner1.y, corner2.y), std::max(corner1.y, corner2.y));
     /** Inclusive layer distribution. */
-    std::uniform_int_distribution<> dist_z(std::min(corner1.z, corner2.z),
-                                           std::max(corner1.z, corner2.z));
+    std::uniform_int_distribution<> dist_z(std::min(corner1.z, corner2.z), std::max(corner1.z, corner2.z));
 
     return {dist_x(generator), dist_y(generator), dist_z(generator)};
 }

@@ -10,7 +10,13 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import layout_input_port, arrangement, cartesian_gate_layout, coordinate, hexagonal_gate_layout
+from mnt.pyfiction.layouts import (
+    arrangement,
+    cartesian_gate_layout,
+    coordinate,
+    hexagonal_gate_layout,
+    layout_input_port,
+)
 from mnt.pyfiction.physical_design import color_routing, color_routing_params
 
 

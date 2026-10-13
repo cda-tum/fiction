@@ -15,11 +15,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import (
-    extent,
     area,
     arrangement,
     cartesian_layout,
     coordinate,
+    extent,
     hexagonal_layout,
     random_coordinate,
     shifted_cartesian_layout,

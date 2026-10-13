@@ -13,11 +13,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import (
-    layout_input_port,
     arrangement,
     cartesian_gate_layout,
     coordinate,
     hexagonal_gate_layout,
+    layout_input_port,
     obstructions,
     shifted_cartesian_gate_layout,
 )
