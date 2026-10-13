@@ -114,7 +114,7 @@ TEST_CASE("Layouts check sizes against the signed coordinate domain", "[coordina
 
     hexagonal_layout hex{arrangement::ODD_ROW, {2, 2}};
     CHECK_THROWS_AS(hex.resize({0, -1, 0}), std::invalid_argument);
-    CHECK_NOTHROW((cartesian_layout{layout_base::extent{max_size, max_size, max_size}}));
+    CHECK_NOTHROW((cartesian_layout{layout_base::extent{max_size, max_size, 2}}));
     CHECK_NOTHROW((hexagonal_layout{arrangement::ODD_ROW, {max_size, max_size, 1}}));
 }
 

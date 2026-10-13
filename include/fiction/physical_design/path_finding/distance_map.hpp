@@ -72,7 +72,7 @@ template <typename Lyt, typename Dist>
 
     // initialize distance map
     /** Number of coordinates across all layers. */
-    const auto         coordinate_count = lyt.volume();
+    const auto         coordinate_count = (lyt.area() * lyt.layers());
     distance_map<Dist> dist_map(coordinate_count, std::vector<Dist>(coordinate_count, Dist{}));
 
     // compute distances and store them via coordinate index
@@ -107,7 +107,7 @@ template <typename Lyt, typename Dist>
 
     // initialize distance map
     sparse_distance_map<Dist> dist_map{};
-    dist_map.reserve(lyt.volume() * lyt.volume());
+    dist_map.reserve((lyt.area() * lyt.layers()) * (lyt.area() * lyt.layers()));
 
     // compute distances and store them via coordinate lookup
     lyt.foreach_coordinate(

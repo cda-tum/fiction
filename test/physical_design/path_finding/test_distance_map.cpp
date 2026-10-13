@@ -127,11 +127,11 @@ TEST_CASE("Distance maps index every layer and reject coordinates outside the fr
     /** Lookup uses the same coordinate indices as initialization. */
     const distance_map_functor<uint64_t> lookup{layout.get_extent(), distances};
 
-    REQUIRE(distances.size() == layout.volume());
+    REQUIRE(distances.size() == layout.area() * layout.layers());
     layout.foreach_coordinate(
         [&](const auto& source, const auto source_index)
         {
-            REQUIRE(distances[source_index].size() == layout.volume());
+            REQUIRE(distances[source_index].size() == layout.area() * layout.layers());
             layout.foreach_coordinate(
                 [&](const auto& target, const auto target_index)
                 {

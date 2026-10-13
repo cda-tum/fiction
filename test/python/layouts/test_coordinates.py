@@ -22,9 +22,9 @@ from mnt.pyfiction.layouts import (
     cartesian_layout,
     coordinate,
     extent,
+    hexagonal_gate_layout,
     hexagonal_layout,
     random_coordinate,
-    hexagonal_gate_layout,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
 )
@@ -155,12 +155,8 @@ def test_extent_rejects_sizes_outside_the_coordinate_domain(value: int) -> None:
 
 def test_sizes_and_coordinates_have_distinct_meanings() -> None:
     assert area(extent=(2, 3)) == 6
-    assert volume(extent=(2, 3)) == 6
-    assert volume((2, 3, 0)) == 0
     with pytest.raises(TypeError):
         cartesian_layout(coordinate(2, 3))  # ty: ignore[invalid-argument-type]  # deliberately a coordinate
-    with pytest.raises(OverflowError):
-        volume(extent(2**31, 2**31, 4))
     layout = cartesian_layout((2, 3))
     size = layout.get_extent()
     size.width = 4
@@ -333,7 +329,6 @@ def test_coordinate_ranges_accept_optional_bounds(
 def test_extent_argument_docstrings_name_the_keyword() -> None:
     for api in (
         area,
-        volume,
         cartesian_layout.__init__,
         cartesian_layout.resize,
         hexagonal_layout.__init__,

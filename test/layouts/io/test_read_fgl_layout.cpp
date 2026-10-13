@@ -384,12 +384,12 @@ TEST_CASE("Read FGL layout takes the arrangement from the file", "[read-fgl-layo
 
 TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-layout]")
 {
-    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>2</z></size>
+    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>1</z></size>
       <clocking><name>2DDWave</name></clocking></layout></fgl>)"};
     const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
     CHECK(layout.width() == 1);
     CHECK(layout.height() == 1);
-    CHECK(layout.layers() == 3);
+    CHECK(layout.layers() == 2);
 }
 
 TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout]")
@@ -1294,16 +1294,6 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
         std::stringstream stream{xml};
         CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
     }
-}
-
-TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-layout]")
-{
-    std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>1</z></size>
-      <clocking><name>2DDWave</name></clocking></layout></fgl>)"};
-    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
-    CHECK(layout.width() == 1);
-    CHECK(layout.height() == 1);
-    CHECK(layout.layers() == 2);
 }
 
 TEST_CASE("FGL rejects more than two layers", "[read-fgl-layout]")
