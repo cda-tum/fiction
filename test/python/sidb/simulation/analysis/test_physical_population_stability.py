@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability
 
@@ -18,7 +20,7 @@ def test_three_sidbs_100_lattice() -> None:
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
-    options = {
+    options: dict[str, Any] = {
         "mu_minus": -0.25,
     }
     result = physical_population_stability(layout, **options)
@@ -38,7 +40,7 @@ def test_three_sidbs_111_lattice() -> None:
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
-    options = {
+    options: dict[str, Any] = {
         "mu_minus": -0.25,
     }
     result = physical_population_stability(layout, **options)

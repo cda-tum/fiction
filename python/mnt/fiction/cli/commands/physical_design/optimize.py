@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.parsing import integer, positive_float
 from mnt.fiction.cli.registry import Category, command
@@ -57,7 +57,7 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
     timeout = _seconds_to_ms(args.timeout)
     stats: post_layout_optimization_stats | wiring_reduction_stats
     if args.wiring_only:
-        wiring_options = {
+        wiring_options: dict[str, Any] = {
             "on_progress": session.report_progress,
         }
         if timeout is not None:
@@ -65,7 +65,7 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
         stats = wiring_reduction_stats()
         wiring_reduction(layout, statistics=stats, **wiring_options)
     else:
-        options = {
+        options: dict[str, Any] = {
             "on_progress": session.report_progress,
             "planar_optimization": args.planar,
         }

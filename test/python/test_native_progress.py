@@ -56,7 +56,7 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize("threads", [1, 4])
 def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> None:
     """Solver candidates use tile dimensions and leave no active worker after success."""
-    options = {
+    options: dict[str, Any] = {
         "num_threads": threads,
     }
     reports: list[tuple[int, int, str, int, int, bool]] = []
@@ -79,7 +79,7 @@ def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> N
 @pytest.mark.parametrize("parallel", [False, True])
 def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> None:
     """Stable graphs report expansions, accepted solutions, and their final inactive state."""
-    options = {
+    options: dict[str, Any] = {
         "enable_multithreading": parallel,
         "return_first": True,
         "seed": 7,
@@ -116,19 +116,19 @@ def test_counted_native_phases(mux21: technology_network, command: str) -> None:
         return reports.append(report)
 
     if command == "balance":
-        balancing_options = {
+        balancing_options: dict[str, Any] = {
             "on_progress": callback,
         }
         result = network_balancing(mux21, **balancing_options)
         assert equivalence_checking(mux21, result) != eq_type.NO
     elif command == "fanouts":
-        substitution_options = {
+        substitution_options: dict[str, Any] = {
             "on_progress": callback,
         }
         result = fanout_substitution(mux21, **substitution_options)
         assert equivalence_checking(mux21, result) != eq_type.NO
     else:
-        drv_options = {
+        drv_options: dict[str, Any] = {
             "on_progress": callback,
         }
         gate_level_drvs(orthogonal(mux21), **drv_options)
@@ -194,7 +194,7 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
 def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> None:
     """Serial and stolen compositions contribute to the same aggregate count."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
-    options = {
+    options: dict[str, Any] = {
         "available_threads": threads,
         "base": 2,
     }
@@ -212,7 +212,7 @@ def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> Non
 
 def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) -> None:
     """Candidates rejected by the area bound never appear as active solvers."""
-    options = {
+    options: dict[str, Any] = {
         "upper_bound_area": 1,
     }
     reports: list[tuple[int, int, str, int, int, bool]] = []
@@ -223,7 +223,7 @@ def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) ->
 
 def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
     """A timeout leaves no active candidate, whether it interrupts a solver or prevents its start."""
-    options = {
+    options: dict[str, Any] = {
         "num_threads": 4,
         "timeout": 1,
     }
@@ -237,7 +237,7 @@ def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
 def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
     """Temperature analysis keeps outer phases and forwards the active simulation's workers."""
     layout = read_sqd_layout(str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"))
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.CLUSTERCOMPLETE,
         "base": 2,
     }
@@ -292,7 +292,7 @@ def test_failed_mapping_retains_completed_count() -> None:
 
 def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path) -> None:
     """QCC callbacks count rows without changing the serialized layout."""
-    placement = {
+    placement: dict[str, Any] = {
         "scheme": "COLUMNAR3",
         "crossings": True,
         "border_io": True,
@@ -305,7 +305,7 @@ def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path)
     before = tmp_path / "before.qcc"
     after = tmp_path / "after.qcc"
     write_qcc_layout(layout, str(before))
-    options = {}
+    options: dict[str, Any] = {}
     reports: list[tuple[str, int, int]] = []
     options["on_progress"] = lambda *report: reports.append(report)
     write_qcc_layout(layout, str(after), **options)

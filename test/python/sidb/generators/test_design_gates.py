@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
@@ -79,7 +81,7 @@ def test_siqad_and_gate_skeleton_100():
 
     layout.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
-    options = {
+    options: dict[str, Any] = {
         "base": 2,
         "mu_minus": -0.28,
         "design_mode": design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
@@ -106,7 +108,7 @@ def test_siqad_and_gate_skeleton_100():
 
 def test_nor_gate_111(nor_gate_skeleton):
     layout = nor_gate_skeleton
-    options = {
+    options: dict[str, Any] = {
         "base": 2,
         "mu_minus": -0.32,
         "design_mode": design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
@@ -136,7 +138,7 @@ def test_nor_gate_111(nor_gate_skeleton):
 
 def test_nor_gate_111_quickcell(nor_gate_skeleton):
     layout = nor_gate_skeleton
-    options = {
+    options: dict[str, Any] = {
         "base": 2,
         "mu_minus": -0.32,
         "design_mode": design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,

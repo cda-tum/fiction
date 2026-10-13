@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.physical_design import (
@@ -57,7 +57,7 @@ def hex_command(session: Session, args: argparse.Namespace) -> Result:
         if args.planar
         else hexagonalization_io_pin_extension_mode.EXTEND
     )
-    options = {
+    options: dict[str, Any] = {
         "on_progress": session.report_progress,
     }
     if args.extend_inputs:

@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.pyfiction.physical_design import (
     hexagonalization,
@@ -52,7 +52,7 @@ def test_hexagonalization_with_stats_and_parameters(mux21: technology_network) -
     cart_layout = orthogonal(mux21)
     assert equivalence_checking(mux21, cart_layout) == eq_type.STRONG
 
-    options = {
+    options: dict[str, Any] = {
         "input_pin_extension": hexagonalization_io_pin_extension_mode.EXTEND,
         "output_pin_extension": hexagonalization_io_pin_extension_mode.NONE,
     }

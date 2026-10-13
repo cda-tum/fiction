@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.parsing import integer, seed
 from mnt.fiction.cli.registry import Category, command
@@ -52,7 +52,7 @@ def fanouts(session: Session, args: argparse.Namespace) -> Result:
 
     Physical design does this with default settings; run it beforehand to choose the settings.
     """
-    options = {
+    options: dict[str, Any] = {
         "on_progress": session.report_progress,
         "degree": args.degree,
         "threshold": args.threshold,

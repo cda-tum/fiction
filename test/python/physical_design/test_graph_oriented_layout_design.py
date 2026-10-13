@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -62,7 +62,7 @@ def test_graph_oriented_layout_design_with_stats_and_parameters(mux21: technolog
 
 
 def test_graph_oriented_layout_design_with_different_parameters(mux21: technology_network) -> None:
-    options = {
+    options: dict[str, Any] = {
         "return_first": True,
         "mode": gold_effort_mode.HIGH_EFFORT,
         "timeout": 10000,

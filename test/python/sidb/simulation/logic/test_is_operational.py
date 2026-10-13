@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
@@ -47,7 +49,7 @@ def test_is_operational():
 
     lyt.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
-    options = {"base": 2, "mu_minus": -0.28, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 2, "mu_minus": -0.28, "epsilon_r": 5.6, "lambda_tf": 5.0}
 
     [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], **options)
 
@@ -131,7 +133,7 @@ def test_input_pattern_layouts_yield_the_same_verdict(and_gate_with_bdl_wires, m
 
     input_pattern_layouts = generate_bdl_input_pattern_layouts(lyt, input_bdl_wires)
 
-    options = {"base": 2, "mu_minus": mu_minus, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 2, "mu_minus": mu_minus, "epsilon_r": 5.6, "lambda_tf": 5.0}
 
     [reference_status, reference_calls] = is_operational(
         lyt, [create_and_tt()], input_bdl_wires, output_bdl_wires, **options
@@ -157,7 +159,7 @@ def test_a_layout_list_that_does_not_match_the_specification_is_rejected(and_gat
 def test_and_gate_kinks(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
-    options = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
 
     [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], **options)
 
@@ -193,7 +195,7 @@ def test_and_gate_non_operational_input_patterns_due_to_kinks(resources_dir):
 def test_and_gate_111_lattice_11_input_pattern(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
-    options = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
 
     [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], **options)
 

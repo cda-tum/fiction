@@ -10,6 +10,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
@@ -80,7 +82,7 @@ def test_energies_and_validity():
 
 def test_external_potentials():
     layout = three_sidbs()
-    options = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     plain = potential_landscape(layout, **options)
     shifted = potential_landscape(
         layout, local_external_potential={lattice_site(0, 0, 0): 0.1}, global_external_potential=0.2, **options

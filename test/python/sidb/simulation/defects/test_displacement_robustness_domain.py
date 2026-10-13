@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.simulation.defects import (
     determine_displacement_robustness_domain,
@@ -38,7 +40,7 @@ def test_siqad_and_gate_100_lattice():
 
     layout.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
-    options = {}
+    options: dict[str, Any] = {}
 
     options["displacement_variations"] = (1, 1)
     options.update({"base": 2, "mu_minus": -0.28, "epsilon_r": 5.6, "lambda_tf": 5.0})

@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -47,7 +47,7 @@ def test_perturber_and_sidb_pair(lat: lattice) -> None:
     layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
-    options = {}
+    options: dict[str, Any] = {}
 
     options["sim_engine"] = sidb_simulation_engine.QUICKEXACT
 
@@ -66,7 +66,7 @@ def test_gate_based_simulation(resources_dir: Path) -> None:
         resources_dir: Directory that contains the test layout.
     """
     layout = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"), "xor_gate")
-    options = {}
+    options: dict[str, Any] = {}
 
     options["base"] = 2
 
@@ -91,7 +91,7 @@ def test_bestagon_inv(resources_dir: Path) -> None:
         "inverter_input_0",
     )
 
-    options = {}
+    options: dict[str, Any] = {}
 
     options["sim_engine"] = sidb_simulation_engine.QUICKSIM
     options["base"] = 2  # QuickSim simulates two charge states only
@@ -116,7 +116,7 @@ def test_bestagon_inv_with_different_mu(resources_dir: Path) -> None:
         "inverter_input_0",
     )
 
-    options = {
+    options: dict[str, Any] = {
         "base": 2,
         "mu_minus": -0.2,
     }
@@ -152,7 +152,7 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
 
     lyt.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
     }
     options.update({"base": 2, "mu_minus": -0.28, "epsilon_r": 5.6, "lambda_tf": 5.0})

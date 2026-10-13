@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -40,7 +40,7 @@ def and_circuit() -> hexagonal_gate_layout:
 @pytest.mark.parametrize("per_gate", [False, True])
 def test_circuit_timeout(and_circuit: hexagonal_gate_layout, *, per_gate: bool) -> None:
     """Circuit and nested gate budgets raise TimeoutError instead of returning a partial circuit."""
-    options = {}
+    options: dict[str, Any] = {}
 
     options["design_mode"] = design_sidb_gates_mode.QUICKCELL
     options["number_of_canvas_sidbs"] = 3
@@ -84,7 +84,7 @@ def test_column_arrangements(shift: arrangement) -> None:
 @pytest.mark.slow
 def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -> None:
     """A real circuit produces SiDBs without modifying its gate-level input."""
-    options = {}
+    options: dict[str, Any] = {}
 
     options["design_mode"] = design_sidb_gates_mode.QUICKCELL
     options["number_of_canvas_sidbs"] = 3
@@ -106,7 +106,7 @@ def test_design_and_export(and_circuit: hexagonal_gate_layout, tmp_path: Path) -
 
 def test_unsuccessful_design(and_circuit: hexagonal_gate_layout) -> None:
     """An insufficient canvas raises a useful error instead of returning a partial circuit."""
-    options = {}
+    options: dict[str, Any] = {}
 
     options["canvas"] = (site_at_row(24, 17), site_at_row(24, 17))
     options["number_of_canvas_sidbs"] = 2

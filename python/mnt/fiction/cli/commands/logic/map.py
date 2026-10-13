@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
@@ -94,7 +94,7 @@ def map_command(session: Session, args: argparse.Namespace) -> Result:
 
     Select at least one gate type, e.g. 'map --and --or --inv' for AND-OR-inverter networks.
     """
-    options = {}
+    options: dict[str, Any] = {}
     if args.all:
         options = all_supported_standard_functions()
     elif args.all3:

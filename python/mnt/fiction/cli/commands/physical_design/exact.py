@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import positive_float, positive_int
@@ -130,9 +130,9 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     return _added(session, layout, stats, verbose=args.verbose)
 
 
-def _exact_options(args: argparse.Namespace, scheme: str) -> dict[str, object]:
+def _exact_options(args: argparse.Namespace, scheme: str) -> dict[str, Any]:
     """Build exact placement options from validated command options."""
-    options = {
+    options: dict[str, Any] = {
         "scheme": scheme,
         "synchronization_elements": args.synchronization_elements,
         "crossings": args.crossings,

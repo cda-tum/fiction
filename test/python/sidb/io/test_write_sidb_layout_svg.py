@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
@@ -220,7 +222,7 @@ cds_light_mode = (
 
 def test_write_sidb_layout_to_svg(four_sidb_layout: sidb_layout) -> None:
     """SiDB layouts render the expected SVG in both color modes."""
-    options = {}
+    options: dict[str, Any] = {}
 
     options["color_background"] = color_mode.DARK
     generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(four_sidb_layout, **options)
@@ -239,7 +241,7 @@ def test_write_sidb_charge_distribution_to_svg(four_sidb_layout: sidb_layout) ->
     cd.assign_charge_state(lattice_site(1, 0, 0), sidb_charge_state.NEUTRAL)
     cd.assign_charge_state(lattice_site(3, 1, 1), sidb_charge_state.POSITIVE)
 
-    options = {}
+    options: dict[str, Any] = {}
 
     options["color_background"] = color_mode.DARK
     generated_svg_cds_dark_mode = write_sidb_layout_svg_to_string(four_sidb_layout, cd, **options)
