@@ -14,7 +14,7 @@ import pytest
 
 from mnt.pyfiction.inml import inml_layout
 from mnt.pyfiction.layouts import (
-    LayoutInputPort,
+    layout_input_port,
     arrangement,
     cartesian_gate_layout,
     hexagonal_gate_layout,
@@ -73,7 +73,7 @@ def test_update_gate_level_bounding_box() -> None:
 
     layout.clear_tile((4, 7))
     layout.move_object(output, (5, 6))
-    layout.connect(wire, LayoutInputPort(output, 0))
+    layout.connect(wire, layout_input_port(output, 0))
     min_coord, max_coord = layout.bounding_box()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 6)

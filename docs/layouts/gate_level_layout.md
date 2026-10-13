@@ -91,7 +91,7 @@ auto independent = lyt.clone();
 :sync: python
 
 ```python
-from mnt.pyfiction.layouts import LayoutInputPort, cartesian_gate_layout
+from mnt.pyfiction.layouts import layout_input_port, cartesian_gate_layout
 
 lyt = cartesian_gate_layout((4, 4), "2DDWave")
 lyt.assign_synchronization_element((1, 1), 2)
@@ -100,8 +100,8 @@ input_port = lyt.create_pi("a", (0, 0))
 wire = lyt.create_buf(input_port, (1, 0))
 lyt.create_po(wire, "f", (2, 0))
 lyt.move_object(wire, (1, 1))
-lyt.disconnect(LayoutInputPort(wire, 0))
-lyt.connect(input_port, LayoutInputPort(wire, 0))
+lyt.disconnect(layout_input_port(wire, 0))
+lyt.connect(input_port, layout_input_port(wire, 0))
 independent = lyt.clone()
 ```
 

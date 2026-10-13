@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction.layouts import LayoutInputPort, arrangement, cartesian_gate_layout, coordinate, hexagonal_gate_layout
+from mnt.pyfiction.layouts import layout_input_port, arrangement, cartesian_gate_layout, coordinate, hexagonal_gate_layout
 from mnt.pyfiction.physical_design import color_routing, color_routing_params
 
 
@@ -48,8 +48,8 @@ def test_crossings():
     lyt.create_buf(buf1, (2, 2))
 
     gate = lyt.create_and(x1, x2, (4, 2))
-    lyt.disconnect(LayoutInputPort(gate, 0))
-    lyt.disconnect(LayoutInputPort(gate, 1))
+    lyt.disconnect(layout_input_port(gate, 0))
+    lyt.disconnect(layout_input_port(gate, 1))
 
     params = color_routing_params()
     params.crossings = True

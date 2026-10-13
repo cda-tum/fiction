@@ -304,10 +304,10 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         // importing it during layouts registration would create a cycle through networks.
         .def("create_gate", &GateLyt::create_gate, py::arg("inputs"), py::arg("function"), py::arg("t"),
              py::sig(
-                 "def create_gate(self, inputs: collections.abc.Sequence[LayoutObjectId], function: "
+                 "def create_gate(self, inputs: collections.abc.Sequence[layout_object_id], function: "
                  "mnt.pyfiction.synthesis.dynamic_truth_table, t: mnt.pyfiction.layouts.coordinate | tuple[int, int] | "
                  "tuple[int, int, int]) -> "
-                 "LayoutObjectId"),
+                 "layout_object_id"),
              "Creates a placed gate. Input indices follow truth-table variable order; trailing inputs may be "
              "disconnected.")
         .def(
@@ -318,7 +318,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                 return lyt.object_function(id);
             },
             py::arg("object"),
-            py::sig("def object_function(self, object: LayoutObjectId) -> mnt.pyfiction.synthesis.dynamic_truth_table"),
+            py::sig("def object_function(self, object: layout_object_id) -> mnt.pyfiction.synthesis.dynamic_truth_table"),
             "Returns the object's truth table.")
         .def("size", &GateLyt::size, DOC(fiction_layouts_gate_level_layout_size))
         .def("fanin_size", &GateLyt::fanin_size, py::arg("object"), DOC(fiction_layouts_gate_level_layout_fanin_size))
@@ -585,14 +585,14 @@ void gate_level_layout(nanobind::module_& m)
     using object_id = fiction::layouts::layout_object_id;
     /** @brief Ordered input endpoint. */
     using input_port = fiction::layouts::layout_input_port;
-    py::class_<object_id>(m, "LayoutObjectId", "Layout-local generation-checked object identity.")
+    py::class_<object_id>(m, "layout_object_id", "Layout-local generation-checked object identity.")
         .def(py::init<uint32_t, uint32_t>(), py::arg("index"), py::arg("generation"))
         .def_ro("index", &object_id::index)
         .def_ro("generation", &object_id::generation)
         .def(
             "__eq__", [](const object_id a, const object_id b) { return a == b; }, py::is_operator())
         .def("__hash__", [](const object_id id) { return std::hash<object_id>{}(id); });
-    py::class_<input_port>(m, "LayoutInputPort", "A destination input port, identified by its object and truth-table argument index. "
+    py::class_<input_port>(m, "layout_input_port", "A destination input port, identified by its object and truth-table argument index. "
                                           "A connected input port is a sink of its source object's output.")
         .def(py::init<object_id, uint32_t>(), py::arg("object"), py::arg("index"))
         .def_ro("object", &input_port::object)

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import (
-    LayoutObjectId,
+    layout_object_id,
     cartesian_gate_layout,
     cartesian_layout,
     coordinate,
@@ -72,7 +72,7 @@ def test_placed_input_mapping(mux21: technology_network) -> None:
     layout = cartesian_gate_layout((network.num_pis(), 1))
     mapping = {source: place(layout, (index, 0), network, source) for index, source in enumerate(network.pis())}
     if TYPE_CHECKING:
-        assert_type(mapping, dict[int, LayoutObjectId])
+        assert_type(mapping, dict[int, layout_object_id])
     assert set(mapping) == set(network.pis())
     assert len(set(mapping.values())) == network.num_pis()
     assert layout.num_pis() == network.num_pis()

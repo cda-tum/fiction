@@ -15,9 +15,9 @@ from typing import TYPE_CHECKING, cast
 import pytest
 
 from mnt.pyfiction.layouts import (
-    Extent,
-    LayoutInputPort,
-    LayoutObjectId,
+    extent,
+    layout_input_port,
+    layout_object_id,
     arrangement,
     cartesian_gate_layout,
     coordinate,
@@ -36,10 +36,10 @@ GateLayout: TypeAlias = cartesian_gate_layout | shifted_cartesian_gate_layout | 
 
 def test_layout_input_port_value_keys() -> None:
     """Equal immutable input ports identify one set entry and dictionary key."""
-    port = LayoutInputPort(LayoutObjectId(3, 2), 1)
-    equal_port = LayoutInputPort(LayoutObjectId(3, 2), 1)
-    other_index = LayoutInputPort(LayoutObjectId(3, 2), 0)
-    other_generation = LayoutInputPort(LayoutObjectId(3, 3), 1)
+    port = layout_input_port(layout_object_id(3, 2), 1)
+    equal_port = layout_input_port(layout_object_id(3, 2), 1)
+    other_index = layout_input_port(layout_object_id(3, 2), 0)
+    other_generation = layout_input_port(layout_object_id(3, 3), 1)
     assert port == equal_port
     assert hash(port) == hash(equal_port)
     assert len({port, equal_port, other_index, other_generation}) == 3
@@ -49,21 +49,21 @@ def test_layout_input_port_value_keys() -> None:
 @pytest.mark.parametrize(
     ("value", "equal_value", "different_value"),
     [
-        pytest.param(LayoutObjectId(0, 1), LayoutObjectId(0, 1), LayoutObjectId(0, 2), id="object_id"),
+        pytest.param(layout_object_id(0, 1), layout_object_id(0, 1), layout_object_id(0, 2), id="object_id"),
         pytest.param(
-            LayoutInputPort(LayoutObjectId(0, 1), 0),
-            LayoutInputPort(LayoutObjectId(0, 1), 0),
-            LayoutInputPort(LayoutObjectId(0, 1), 1),
+            layout_input_port(layout_object_id(0, 1), 0),
+            layout_input_port(layout_object_id(0, 1), 0),
+            layout_input_port(layout_object_id(0, 1), 1),
             id="input_port",
         ),
-        pytest.param(Extent(1, 2), Extent(1, 2), Extent(2, 2), id="extent"),
+        pytest.param(extent(1, 2), extent(1, 2), extent(2, 2), id="extent"),
     ],
 )
 @pytest.mark.parametrize("unrelated", [None, 0, "identity", object()])
 def test_layout_values_compare_with_unrelated_values(
-    value: LayoutObjectId | LayoutInputPort | Extent,
-    equal_value: LayoutObjectId | LayoutInputPort | Extent,
-    different_value: LayoutObjectId | LayoutInputPort | Extent,
+    value: layout_object_id | layout_input_port | extent,
+    equal_value: layout_object_id | layout_input_port | extent,
+    different_value: layout_object_id | layout_input_port | extent,
     unrelated: object,
 ) -> None:
     """Layout values compare unequal to unrelated operands without raising."""
@@ -75,11 +75,11 @@ def test_layout_values_compare_with_unrelated_values(
 
 def test_mutable_layout_extent_is_unhashable() -> None:
     """Mutable extents cannot serve as hash keys."""
-    extent = Extent(1, 2)
-    extent.width = 3
-    assert extent.width == 3
+    size = extent(1, 2)
+    size.width = 3
+    assert size.width == 3
     with pytest.raises(TypeError, match="unhashable"):
-        hash(extent)
+        hash(size)
 
 
 @pytest.mark.parametrize(
@@ -136,16 +136,16 @@ def test_gate_creation_requires_placement_and_valid_ports() -> None:
     """Reject missing placement, duplicate placement, and invalid endpoints."""
     layout = cartesian_gate_layout((2, 1, 1))
     with pytest.raises(TypeError):
-        cast("Callable[..., LayoutObjectId]", layout.create_pi)("unplaced")
+        cast("Callable[..., layout_object_id]", layout.create_pi)("unplaced")
     source = layout.create_pi("a", (0, 0))
     with pytest.raises(ValueError, match="occupied"):
         layout.create_pi("occupied", (0, 0))
     with pytest.raises(TypeError):
-        layout.create_po(cast("LayoutObjectId", coordinate(0, 0)), "f", (1, 0))
+        layout.create_po(cast("layout_object_id", coordinate(0, 0)), "f", (1, 0))
     output = layout.create_po(source, "f", (1, 0))
     with pytest.raises(ValueError, match="identity"):
-        layout.get_tile(LayoutObjectId(source.index, 0))
-    assert layout.source(LayoutInputPort(output, 0)) == source
+        layout.get_tile(layout_object_id(source.index, 0))
+    assert layout.source(layout_input_port(output, 0)) == source
 
 
 def test_placed_constant_function() -> None:
@@ -324,7 +324,7 @@ def test_gate_level_layout_iteration(make_layout: Callable[[], GateLayout]) -> N
         (f1, coordinate(3, 1)),
         (f2, coordinate(3, 2)),
     ]:
-        assert isinstance(port, LayoutObjectId)
+        assert isinstance(port, layout_object_id)
         assert layout.find_object(position) == port
         assert layout.get_tile(port) == position
 
@@ -337,9 +337,9 @@ def test_gate_level_layout_iteration(make_layout: Callable[[], GateLayout]) -> N
     assert layout.inputs(a2) == [b1, b2]
 
     # Sink ports identify each destination input.
-    assert layout.sinks(x1) == [LayoutInputPort(a1, 0)]
+    assert layout.sinks(x1) == [layout_input_port(a1, 0)]
     assert layout.sinks(f1) == []
-    assert layout.sinks(a2) == [LayoutInputPort(f2, 0)]
+    assert layout.sinks(a2) == [layout_input_port(f2, 0)]
 
     cp, tp = critical_path_length_and_throughput(layout)
     assert cp == 4
@@ -373,28 +373,28 @@ def test_gate_function_owns_truth_table_and_preserves_input_holes(make_layout: C
     assert layout.object_function(gate).to_hex() == "ac"
     assert layout.input_count(gate) == 3
     assert layout.fanin_size(gate) == 1
-    assert layout.source(LayoutInputPort(gate, 0)) == a
-    assert layout.source(LayoutInputPort(gate, 1)) is None
-    assert layout.source(LayoutInputPort(gate, 2)) is None
-    layout.connect(b, LayoutInputPort(gate, 2))
-    layout.connect(c, LayoutInputPort(gate, 1))
-    layout.disconnect(LayoutInputPort(gate, 1))
+    assert layout.source(layout_input_port(gate, 0)) == a
+    assert layout.source(layout_input_port(gate, 1)) is None
+    assert layout.source(layout_input_port(gate, 2)) is None
+    layout.connect(b, layout_input_port(gate, 2))
+    layout.connect(c, layout_input_port(gate, 1))
+    layout.disconnect(layout_input_port(gate, 1))
     assert layout.input_count(gate) == 3
     assert layout.fanin_size(gate) == 2
-    assert layout.source(LayoutInputPort(gate, 0)) == a
-    assert layout.source(LayoutInputPort(gate, 1)) is None
-    assert layout.source(LayoutInputPort(gate, 2)) == b
+    assert layout.source(layout_input_port(gate, 0)) == a
+    assert layout.source(layout_input_port(gate, 1)) is None
+    assert layout.source(layout_input_port(gate, 2)) == b
     assert layout.inputs(gate) == [a, None, b]
-    layout.connect(a, LayoutInputPort(gate, 2))
+    layout.connect(a, layout_input_port(gate, 2))
     assert layout.inputs(gate) == [a, None, a]
     sinks = layout.sinks(a)
     assert len(sinks) == 2
-    assert LayoutInputPort(gate, 0) in sinks
-    assert LayoutInputPort(gate, 2) in sinks
-    layout.connect(b, LayoutInputPort(gate, 2))
+    assert layout_input_port(gate, 0) in sinks
+    assert layout_input_port(gate, 2) in sinks
+    layout.connect(b, layout_input_port(gate, 2))
     with pytest.raises(IndexError, match="arity"):
-        layout.connect(a, LayoutInputPort(gate, 3))
-    assert layout.source(LayoutInputPort(gate, 2)) == b
+        layout.connect(a, layout_input_port(gate, 3))
+    assert layout.source(layout_input_port(gate, 2)) == b
     assert layout.fanin_size(gate) == 2
 
 
@@ -408,19 +408,19 @@ def test_gate_move_and_removal_preserve_identity_contract() -> None:
     assert moved == wire
     assert layout.find_object((1, 0)) is None
     assert layout.find_object((-10, 20, 3)) == wire
-    assert layout.source(LayoutInputPort(output, 0)) == wire
-    assert layout.source(LayoutInputPort(wire, 0)) == source
+    assert layout.source(layout_input_port(output, 0)) == wire
+    assert layout.source(layout_input_port(wire, 0)) == source
     layout.remove(wire)
     assert not layout.contains(wire)
-    assert layout.source(LayoutInputPort(output, 0)) is None
+    assert layout.source(layout_input_port(output, 0)) is None
     replacement = layout.create_buf(source, (-10, 20, 3))
     assert replacement != wire
     with pytest.raises(ValueError, match="identity"):
         layout.get_tile(wire)
     with pytest.raises(ValueError, match="identity"):
-        layout.connect(wire, LayoutInputPort(output, 0))
-    layout.connect(replacement, LayoutInputPort(output, 0))
-    assert layout.source(LayoutInputPort(output, 0)) == replacement
+        layout.connect(wire, layout_input_port(output, 0))
+    layout.connect(replacement, layout_input_port(output, 0))
+    assert layout.source(layout_input_port(output, 0)) == replacement
 
 
 @pytest.mark.parametrize("copy_layout", [lambda layout: layout.clone(), copy.copy, copy.deepcopy])
@@ -438,8 +438,8 @@ def test_gate_interface_order_and_clone_ownership(copy_layout: Callable[[GateLay
     assert layout.pos() == [result, passthrough]
     assert [layout.get_input_name(i) for i in range(2)] == ["a", "b"]
     assert [layout.get_output_name(i) for i in range(2)] == ["compare", "pass"]
-    assert layout.source(LayoutInputPort(gate, 0)) == a
-    assert layout.source(LayoutInputPort(gate, 1)) == b
+    assert layout.source(layout_input_port(gate, 0)) == a
+    assert layout.source(layout_input_port(gate, 1)) == b
     with pytest.raises(ValueError, match="terminal"):
         layout.set_input_order([a, a])
     with pytest.raises(ValueError, match="terminal"):
@@ -448,10 +448,10 @@ def test_gate_interface_order_and_clone_ownership(copy_layout: Callable[[GateLay
     clone.set_layout_name("copy")
     clone.set_input_name(0, "copy_a")
     clone.set_output_name(0, "copy_compare")
-    clone.disconnect(LayoutInputPort(gate, 0))
+    clone.disconnect(layout_input_port(gate, 0))
     assert layout.get_layout_name() == "original"
     assert layout.get_input_name(0) == "a"
     assert layout.get_output_name(0) == "compare"
-    assert layout.source(LayoutInputPort(gate, 0)) == a
-    assert clone.source(LayoutInputPort(gate, 0)) is None
+    assert layout.source(layout_input_port(gate, 0)) == a
+    assert clone.source(layout_input_port(gate, 0)) is None
     assert clone.object_function(gate).to_hex() == layout.object_function(gate).to_hex()

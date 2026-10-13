@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import (
-    LayoutInputPort,
+    layout_input_port,
     arrangement,
     cartesian_gate_layout,
     coordinate,
@@ -181,8 +181,8 @@ def test_disconnect_and_move_update_implicit_obstructions(make_layout: Callable[
     output = layout.create_po(wire, "f", (1, 1))
     assert layout.is_obstructed_connection((0, 0), (1, 0))
     assert layout.is_obstructed_connection((1, 0), (1, 1))
-    layout.disconnect(LayoutInputPort(output, 0))
-    assert layout.source(LayoutInputPort(output, 0)) is None
+    layout.disconnect(layout_input_port(output, 0))
+    assert layout.source(layout_input_port(output, 0)) is None
     assert not layout.is_obstructed_connection((1, 0), (1, 1))
     assert layout.is_obstructed_coordinate((1, 1))
     layout.move_object(wire, (0, 1))
@@ -190,10 +190,10 @@ def test_disconnect_and_move_update_implicit_obstructions(make_layout: Callable[
     assert layout.is_obstructed_coordinate((0, 1))
     assert not layout.is_obstructed_connection((0, 0), (1, 0))
     assert layout.is_obstructed_connection((0, 0), (0, 1))
-    layout.connect(wire, LayoutInputPort(output, 0))
+    layout.connect(wire, layout_input_port(output, 0))
     assert layout.is_obstructed_connection((0, 1), (1, 1))
     layout.remove(wire)
-    assert layout.source(LayoutInputPort(output, 0)) is None
+    assert layout.source(layout_input_port(output, 0)) is None
     assert not layout.is_obstructed_coordinate((0, 1))
     assert not layout.is_obstructed_connection((0, 1), (1, 1))
 
@@ -209,10 +209,10 @@ def test_clearing_manual_obstructions_preserves_objects_and_ports(make_layout: C
     layout.clear_obstructed_coordinate((1, 0))
     layout.clear_obstructed_connection((0, 0), (1, 0))
     assert layout.contains(wire)
-    assert layout.source(LayoutInputPort(wire, 0)) == source
+    assert layout.source(layout_input_port(wire, 0)) == source
     assert layout.is_obstructed_coordinate((1, 0))
     assert layout.is_obstructed_connection((0, 0), (1, 0))
-    layout.disconnect(LayoutInputPort(wire, 0))
+    layout.disconnect(layout_input_port(wire, 0))
     assert not layout.is_obstructed_connection((0, 0), (1, 0))
     layout.remove(wire)
     assert not layout.is_obstructed_coordinate((1, 0))
@@ -277,9 +277,9 @@ def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
     assert layout.inputs(a2) == [b1, b2]
 
     # Sink ports identify each destination input.
-    assert layout.sinks(x1) == [LayoutInputPort(a1, 0)]
+    assert layout.sinks(x1) == [layout_input_port(a1, 0)]
     assert layout.sinks(f1) == []
-    assert layout.sinks(a2) == [LayoutInputPort(f2, 0)]
+    assert layout.sinks(a2) == [layout_input_port(f2, 0)]
 
     cp, tp = critical_path_length_and_throughput(layout)
     assert cp == 4
@@ -308,5 +308,5 @@ def test_clone_owns_obstructions_objects_and_connections(make_layout: Callable[[
     assert not clone.is_obstructed_connection((0, 0), (0, 1))
     assert layout.is_obstructed_coordinate((1, 0))
     assert not clone.is_obstructed_coordinate((1, 0))
-    assert layout.source(LayoutInputPort(output, 0)) == wire
-    assert clone.source(LayoutInputPort(output, 0)) is None
+    assert layout.source(layout_input_port(output, 0)) == wire
+    assert clone.source(layout_input_port(output, 0)) is None

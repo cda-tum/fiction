@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.layouts import (
-    LayoutInputPort,
+    layout_input_port,
     arrangement,
     cartesian_gate_layout,
     hexagonal_gate_layout,
@@ -27,7 +27,7 @@ def test_empty_layout() -> None:
     x1 = lyt.create_pi("x1", (0, 1))
     po = lyt.create_po(x1, "f1", (4, 1))
 
-    route_path(lyt, [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)], LayoutInputPort(po, 0))
+    route_path(lyt, [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1)], layout_input_port(po, 0))
 
     for x, y in [(1, 1), (2, 1), (3, 1)]:
         assert lyt.is_wire_tile((x, y))
@@ -39,7 +39,7 @@ def test_empty_layout_a_star() -> None:
     x1 = lyt.create_pi("x1", (0, 1))
     po = lyt.create_po(x1, "f1", (4, 1))
 
-    route_path(lyt, a_star(lyt, (0, 1), (4, 1)), LayoutInputPort(po, 0))
+    route_path(lyt, a_star(lyt, (0, 1), (4, 1)), layout_input_port(po, 0))
 
     for x, y in [(1, 1), (2, 1), (3, 1)]:
         assert lyt.is_wire_tile((x, y))
@@ -65,4 +65,4 @@ def test_clear_routing(layout: cartesian_gate_layout | shifted_cartesian_gate_la
     assert layout.find_object((1, 0)) is None
     assert layout.find_object((2, 0)) == output
     assert layout.input_count(output) == 1
-    assert layout.source(LayoutInputPort(output, 0)) is None
+    assert layout.source(layout_input_port(output, 0)) is None

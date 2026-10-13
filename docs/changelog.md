@@ -424,6 +424,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Layout value classes now use `extent`, `layout_object_id`, and `layout_input_port` names.
+
   - `random_coordinate` now names its region bounds `corner1` and `corner2` in C++ and Python.
 
   - **Breaking:** `mnt.pyfiction` has one submodule per C++ namespace, such as `mnt.pyfiction.layouts` and
@@ -452,7 +454,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     are gone. `stacked_cartesian_layout` is an alias of `cartesian_layout`.
 
   - **Breaking:** `coordinate()` denotes the origin, and coordinates accept the full signed 32-bit range. Layout extents
-    use `Extent(width, height, layers)` counts. Missing neighbors and empty bounds return `None`; `is_valid()` and coordinate
+    use `extent(width, height, layers)` counts. Missing neighbors and empty bounds return `None`; `is_valid()` and coordinate
     sentinels are gone.
 
 ### Removed
@@ -744,7 +746,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Cell-grid clocking names now remain valid when converted to Python strings.
   - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
     Mutable extents are unhashable.
-  - `LayoutInputPort` now hashes by object identity and input index for set and dictionary keys.
+  - `layout_input_port` now hashes by object identity and input index for set and dictionary keys.
   - Gate-layout editing methods expose their API contracts in Python docstrings.
   - Python port collections now reuse input counts and reserve sink storage.
   - Progress parameters now release unreachable callback cycles owned by parameter values.

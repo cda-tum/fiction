@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import (
-    Extent,
+    extent,
     area,
     arrangement,
     cartesian_layout,
@@ -128,10 +128,10 @@ def test_repr():
 
 
 def test_extent_tuple_conversion_and_checked_axes() -> None:
-    size = Extent(extent=(2, 3))
-    assert Extent(extent=size) == size
+    size = extent(extent=(2, 3))
+    assert extent(extent=size) == size
     assert (size.width, size.height, size.layers) == (2, 3, 1)
-    assert cartesian_layout(size).get_extent() == Extent((2, 3, 1))
+    assert cartesian_layout(size).get_extent() == extent((2, 3, 1))
     assert cartesian_layout((2, 3, 0)).coordinates() == []
     assert cartesian_layout((2**31, 1)).last_coordinate() == coordinate(2**31 - 1, 0, 0)
     with pytest.raises(ValueError, match=r"negative|coordinate domain"):
@@ -142,10 +142,10 @@ def test_extent_tuple_conversion_and_checked_axes() -> None:
 @pytest.mark.parametrize("value", [-1, 2**31 + 1])
 def test_extent_rejects_sizes_outside_the_coordinate_domain(value: int) -> None:
     with pytest.raises(ValueError, match=r"negative|coordinate domain"):
-        Extent(value, 1)
+        extent(value, 1)
     with pytest.raises(ValueError, match=r"negative|coordinate domain"):
-        Extent((1, value, 1))
-    size = Extent(2, 3)
+        extent((1, value, 1))
+    size = extent(2, 3)
     with pytest.raises(ValueError, match=r"negative|coordinate domain"):
         size.layers = value
     assert size.layers == 1
@@ -158,7 +158,7 @@ def test_sizes_and_coordinates_have_distinct_meanings() -> None:
     with pytest.raises(TypeError):
         cartesian_layout(coordinate(2, 3))  # ty: ignore[invalid-argument-type]  # deliberately a coordinate
     with pytest.raises(OverflowError):
-        volume(Extent(2**31, 2**31, 4))
+        volume(extent(2**31, 2**31, 4))
     layout = cartesian_layout((2, 3))
     size = layout.get_extent()
     size.width = 4

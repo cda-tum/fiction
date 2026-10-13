@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from mnt.pyfiction.layouts import (
-    LayoutInputPort,
+    layout_input_port,
     arrangement,
     cartesian_gate_layout,
     coordinate,
@@ -108,7 +108,7 @@ def test_fgl_failure_preserves_file(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="connected"):
         write_fgl_layout(layout, str(path))
     assert path.read_text(encoding="utf-8") == "sentinel"
-    layout.connect(wire, LayoutInputPort(wire, 0))
+    layout.connect(wire, layout_input_port(wire, 0))
     with pytest.raises(ValueError, match="acyclic"):
         write_fgl_layout(layout, str(path))
     assert path.read_text(encoding="utf-8") == "sentinel"

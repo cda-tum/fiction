@@ -122,7 +122,7 @@ void coordinate(nanobind::module_& m)
 
     py::implicitly_convertible<py::tuple, py_coordinate>();
 
-    py::class_<py_extent>(m, "Extent", "Nonnegative width, height, and layer counts of a zero-origin layout.")
+    py::class_<py_extent>(m, "extent", "Nonnegative width, height, and layer counts of a zero-origin layout.")
         .def(py::init<>(), "Creates an empty extent.")
         .def(
             "__init__",

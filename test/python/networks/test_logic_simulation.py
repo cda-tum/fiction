@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import LayoutInputPort, cartesian_gate_layout
+from mnt.pyfiction.layouts import layout_input_port, cartesian_gate_layout
 from mnt.pyfiction.networks import simulate, simulate_outputs
 from mnt.pyfiction.networks.io import read_technology_network
 from mnt.pyfiction.physical_design import exact_cartesian, exact_params
@@ -66,6 +66,6 @@ def test_layout_simulation_preserves_input_slots_and_unused_inputs() -> None:
     assert [name for name, _ in outputs] == ["same", "same"]
     assert outputs[0][1] == [False, True, False, False, False, True, False, False]
     assert outputs[1][1] == [True, False, True, False, True, False, True, False]
-    layout.disconnect(LayoutInputPort(less, 0))
+    layout.disconnect(layout_input_port(less, 0))
     with pytest.raises(ValueError, match="disconnected input"):
         simulate_outputs(layout)

@@ -45,7 +45,7 @@ may lie outside the frame; physical design-rule checks validate frame membership
 .. autoclass:: mnt.pyfiction.layouts.coordinate
    :members:
 
-.. autoclass:: mnt.pyfiction.layouts.Extent
+.. autoclass:: mnt.pyfiction.layouts.extent
    :members:
 ```
 
