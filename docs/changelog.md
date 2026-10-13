@@ -633,6 +633,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Operational domain plots now check NumPy before computation and output writes.
   - Operational domain plots now reject empty marker colors before computation and output writes.
+  - Operational domain commands now retain every export and statistics when a plot viewer cannot start.
   - Parallel commands now use one aggregate progress row; `exact` retains candidate dimensions at count checkpoints.
   - Store listings and command summaries skip layout timing analysis; `ps -g` computes it on request.
   - Store and statistics displays use readable topology names.

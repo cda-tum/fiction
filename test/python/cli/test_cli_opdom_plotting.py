@@ -16,6 +16,7 @@ from unittest.mock import patch
 
 import pytest
 
+from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import REGISTRY
 from mnt.pyfiction.sidb.simulation.logic import operational_domain, operational_status, parameter_point, sweep_parameter
 
@@ -196,6 +197,31 @@ def test_default_png(resource: Callable[[str], str], tmp_path: Path, monkeypatch
     assert (tmp_path / "hex_21_inputsdbp_xor_v1_opdom.png").read_bytes().startswith(b"\x89PNG")
 
 
+@pytest.mark.parametrize("failure", [OSError, CommandError])
+def test_viewer_failure_preserves_exports(
+    xor_gate: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: type[Exception]
+) -> None:
+    """Viewer failures retain every export and the computation statistics."""
+    csv, png, html = (tmp_path / name for name in ("domain.csv", "domain.png", "domain.html"))
+    xor_gate.session.log_path = tmp_path / "statistics.json"
+    shown: list[Path] = []
+
+    def viewer(path: Path) -> None:
+        shown.append(path)
+        msg = "viewer unavailable"
+        raise failure(msg)
+
+    monkeypatch.setattr("mnt.fiction.cli.drawing.open_viewer", viewer)
+    xor_gate.ok(f'opdom "{csv}" --plot "{png}" --plot "{html}" --show --x-min 5.6 --x-max 5.6 --y-min 5 --y-max 5')
+    assert csv.exists()
+    assert png.read_bytes().startswith(b"\x89PNG")
+    assert b"Plotly.newPlot" in html.read_bytes()
+    assert "Simulator calls" in xor_gate.stdout
+    assert "viewer unavailable" in xor_gate.stderr
+    assert shown == [png, html]
+    assert xor_gate.session.log[-1]["result"]["num_evaluated_parameter_combinations"] == 1
+
+
 @pytest.mark.parametrize(
     "flags",
     [
@@ -235,25 +261,14 @@ def test_invalid_plot_destinations(xor_gate: Shell, tmp_path: Path, kind: str) -
     assert not csv.exists()
 
 
-def test_show_and_existing_plot_permissions(
-    domain: operational_domain, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Replacing a plot preserves its mode and opens the viewer only on request."""
+def test_existing_plot_permissions(domain: operational_domain, tmp_path: Path) -> None:
+    """Replacing a plot preserves its mode."""
     plotting = importlib.import_module("mnt.fiction.cli.opdom_plotting")
     path = tmp_path / "domain.png"
     path.write_bytes(b"old plot")
     mode = path.stat().st_mode
-    shown: list[Path] = []
-
-    def viewer(saved: Path) -> None:
-        assert saved.read_bytes().startswith(b"\x89PNG")
-        shown.append(saved)
-
-    monkeypatch.setattr(plotting, "open_viewer", viewer)
     plotting.write_plot(domain, path, options())
-    assert not shown
-    plotting.write_plot(domain, path, options("--show"))
-    assert shown == [path]
+    assert path.read_bytes().startswith(b"\x89PNG")
     assert path.stat().st_mode == mode
 
 

@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 
 from rich.table import Table
 
+from mnt.fiction.cli import drawing
 from mnt.fiction.cli.commands.io.tt import _table_from_string
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.opdom_plotting import atomic_output, plot_arguments, validate_outputs, write_plot
@@ -251,6 +252,12 @@ def run_domain(session: Session, args: argparse.Namespace) -> Result:
             f"{stats.num_operational_parameter_combinations} of {stats.num_evaluated_parameter_combinations} "
             f"evaluated points are operational; wrote {args.file}"
         )
+    if args.show:
+        for path in args.plot:
+            try:
+                drawing.open_viewer(path)
+            except (CommandError, OSError) as error:  # ruff: ignore[try-except-in-loop] -- attempt each viewer after a failure
+                session.error(f"cannot open plot '{path}': {error}")
     return {
         **stats_to_dict(stats),
         "engine": args.engine,

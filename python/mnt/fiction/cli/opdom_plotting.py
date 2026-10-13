@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING
 
 from mnt.pyfiction.sidb.simulation.logic import sweep_parameter
 
-from .drawing import open_viewer
 from .errors import CommandError
 from .parsing import positive_float, positive_int
 
@@ -347,7 +346,7 @@ def write_plot(domain: operational_domain, path: Path, args: argparse.Namespace)
     Args:
         domain: The computed domain.
         path: PNG, SVG, PDF, or HTML destination.
-        args: Appearance and viewer options.
+        args: Appearance options.
     """
     with atomic_output(path) as temporary:
         if path.suffix.lower() == ".html":
@@ -360,5 +359,3 @@ def write_plot(domain: operational_domain, path: Path, args: argparse.Namespace)
                 figure.savefig(temporary, format=path.suffix[1:].lower(), dpi=args.dpi)
             finally:
                 figure.clear()
-    if args.show:
-        open_viewer(path)

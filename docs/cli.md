@@ -481,7 +481,8 @@ as overrides of its active truth table. Every specification must match the detec
 Each invocation computes one reconstruction method. Repeat `--plot FILE` to export the same domain
 as PNG, SVG, PDF, or HTML. The dedicated command writes `<input-stem>_opdom.png` in the current directory
 when no output paths are given. `--csv FILE` requests CSV; a CSV-only invocation needs no plotting packages.
-`--show` opens plots after saving. HTML files embed Plotly and work offline, with hover information,
+`--show` opens plots after all exports and statistics are written. Viewer failures report an error
+and preserve the exports and statistics. HTML files embed Plotly and work offline, with hover information,
 zoom, pan, 3D rotation, and legend toggles. Both backends draw the returned samples and leave missing
 samples blank. Sketch positives are labeled "Potentially operational". Each output is written atomically;
 if a later output fails, earlier outputs remain. The dedicated command rejects outputs or logs that would
