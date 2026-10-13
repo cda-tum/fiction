@@ -327,7 +327,7 @@ template <typename CoordinateType>
 CoordinateType random_coordinate(const CoordinateType corner1, const CoordinateType corner2) noexcept
 {
     /** Pseudorandom generator seeded from the platform's random device. */
-    static std::mt19937_64 generator(std::random_device{}());
+    static thread_local std::mt19937_64 generator(std::random_device{}());
     /** Inclusive column distribution. */
     std::uniform_int_distribution<> dist_x(std::min(corner1.x, corner2.x), std::max(corner1.x, corner2.x));
     /** Inclusive row distribution. */

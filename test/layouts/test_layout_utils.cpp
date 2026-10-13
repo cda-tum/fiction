@@ -29,8 +29,10 @@
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/types.hpp>
 
+#include <array>
 #include <concepts>
 #include <cstdint>
+#include <future>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -130,6 +132,34 @@ TEST_CASE("Random coordinates stay inside inclusive corner bounds", "[layout-uti
         CHECK(c.y <= maximum.y);
         CHECK(c.z >= minimum.z);
         CHECK(c.z <= maximum.z);
+    }
+}
+
+TEST_CASE("Concurrent random-coordinate calls stay inside their bounds", "[layout-utils]")
+{
+    /** @brief Concurrent samplers report whether every coordinate stayed in bounds. */
+    std::array<std::future<bool>, 4> samplers{};
+    for (auto& sampler : samplers)
+    {
+        sampler = std::async(std::launch::async,
+                             []
+                             {
+                                 for (uint32_t sample = 0; sample < 1000; ++sample)
+                                 {
+                                     /** @brief Coordinate sampled concurrently with the other workers. */
+                                     const auto c = random_coordinate(layout_base::coordinate{-3, 4, 1},
+                                                                      layout_base::coordinate{2, -5, 0});
+                                     if (c.x < -3 || c.x > 2 || c.y < -5 || c.y > 4 || c.z < 0 || c.z > 1)
+                                     {
+                                         return false;
+                                     }
+                                 }
+                                 return true;
+                             });
+    }
+    for (auto& sampler : samplers)
+    {
+        CHECK(sampler.get());
     }
 }
 
