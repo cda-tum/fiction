@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import contextlib
-import datetime
+import datetime as dt
 import json
 import math
 from enum import Enum
@@ -45,7 +45,7 @@ def stats_to_dict(stats: object) -> dict[str, object]:
             continue
         if callable(value):
             continue
-        if isinstance(value, datetime.timedelta):
+        if isinstance(value, dt.timedelta):
             result[f"{name}_s"] = value.total_seconds()
         else:
             if name == "report" and isinstance(value, str):
@@ -74,7 +74,7 @@ def json_value(value: object) -> object:
         return value
     if isinstance(value, Enum):
         return value.name
-    if isinstance(value, datetime.timedelta):
+    if isinstance(value, dt.timedelta):
         return value.total_seconds()
     if isinstance(value, Path):
         return str(value)
