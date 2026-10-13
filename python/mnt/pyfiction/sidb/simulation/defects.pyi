@@ -14,6 +14,7 @@ from collections.abc import Callable, Sequence
 from collections.abc import Set as AbstractSet
 
 import mnt.pyfiction.sidb
+import mnt.pyfiction.sidb.simulation
 import mnt.pyfiction.sidb.simulation.logic
 import mnt.pyfiction.synthesis
 
@@ -37,68 +38,6 @@ class displacement_analysis_mode(enum.Enum):
 
     RANDOM = 1
     """A random share of the displaced layouts is analyzed."""
-
-class displacement_robustness_domain_params:
-    """Parameters of the displacement robustness analysis."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def analysis_mode(self) -> displacement_analysis_mode:
-        """The analysis mode."""
-
-    @analysis_mode.setter
-    def analysis_mode(self, arg: displacement_analysis_mode, /) -> None: ...
-    @property
-    def percentage_of_analyzed_displaced_layouts(self) -> float:
-        """Share of the displaced layouts to analyze in `RANDOM` mode."""
-
-    @percentage_of_analyzed_displaced_layouts.setter
-    def percentage_of_analyzed_displaced_layouts(self, arg: float, /) -> None: ...
-    @property
-    def displacement_variations(self) -> tuple[int, int]:
-        """
-        Maximum displacement in columns and rows; the displaced sites must
-        remain representable.
-        """
-
-    @displacement_variations.setter
-    def displacement_variations(self, arg: tuple[int, int], /) -> None: ...
-    @property
-    def operational_params(self) -> mnt.pyfiction.sidb.simulation.logic.is_operational_params:
-        """
-        Operational parameters. Their timeout bounds the entire displacement
-        analysis across all layouts and workers. Finite budgets reject
-        ClusterComplete and throw `utils::timeout_error` on expiration.
-        """
-
-    @operational_params.setter
-    def operational_params(self, arg: mnt.pyfiction.sidb.simulation.logic.is_operational_params, /) -> None: ...
-    @property
-    def fixed_sidbs(self) -> set[mnt.pyfiction.sidb.lattice_site]:
-        """SiDBs that are not displaced."""
-
-    @fixed_sidbs.setter
-    def fixed_sidbs(self, arg: AbstractSet[mnt.pyfiction.sidb.lattice_site], /) -> None: ...
-    @property
-    def dimer_policy(self) -> dimer_displacement_policy:
-        """The dimer policy."""
-
-    @dimer_policy.setter
-    def dimer_policy(self, arg: dimer_displacement_policy, /) -> None: ...
-    @property
-    def number_of_threads(self) -> int:
-        """Number of threads to use."""
-
-    @number_of_threads.setter
-    def number_of_threads(self, arg: int, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Callback that receives the number of analyzed displaced layouts."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class displacement_robustness_domain_stats:
     """Statistics of the displacement robustness analysis."""
@@ -150,8 +89,27 @@ class displacement_robustness_domain:
 def determine_displacement_robustness_domain(
     layout: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: displacement_robustness_domain_params = ...,
+    *,
+    analysis_mode: displacement_analysis_mode = ...,
+    displacement_variations: tuple[int, int] = (1, 0),
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
+    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
+    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
+    fixed_sidbs: AbstractSet[mnt.pyfiction.sidb.lattice_site] | None = None,
+    dimer_policy: dimer_displacement_policy = ...,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
     stats: displacement_robustness_domain_stats | None = None,
+    percentage_of_analyzed_displaced_layouts: float = 1.0,
 ) -> displacement_robustness_domain:
     """
     During fabrication, SiDBs may not align precisely with their intended
@@ -167,7 +125,7 @@ def determine_displacement_robustness_domain(
     exponentially with the number of SiDBs. For small layouts, all
     displacements can be analyzed. For larger layouts, random sampling can
     be applied, controllable by the `analysis_mode` and
-    `percentage_of_analyzed_displaced_layouts` in `params`.
+    `percentage_of_analyzed_displaced_layouts` in the keyword options.
 
     Displaced layouts retain the layout name and the defects at their
     original positions.
@@ -175,7 +133,6 @@ def determine_displacement_robustness_domain(
     Args:
         lyt: The SiDB layout which is analyzed.
         spec: Vector of truth table specifications.
-        params: Parameters for the displacement robustness computation.
         stats: Statistics related to the displacement robustness
                computation.
 
@@ -185,4 +142,6 @@ def determine_displacement_robustness_domain(
     Raises:
         std::out_of_range: if a displacement exceeds the lattice-site
                            range.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """

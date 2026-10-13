@@ -16,11 +16,11 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): defines the nanobind coordinate type casters
 
 #include <fiction/physical_design/wiring_reduction.hpp>
 
+#include <optional>
 #include <sstream>
 
 #include <nanobind/nanobind.h>
@@ -43,19 +43,12 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using wiring_reduction_options = fiction::physical_design::wiring_reduction_params;
+
 /** @brief Registers mutable wiring_reduction operations. @param m Python module. */
 void register_wiring_reduction(nb::module_& m)
 {
-    nb::class_<fiction::physical_design::wiring_reduction_params>(
-        m, "wiring_reduction_params",
-        pyfiction::progress_type_slots<fiction::physical_design::wiring_reduction_params>(),
-        DOC(fiction_physical_design_wiring_reduction_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("timeout", &fiction::physical_design::wiring_reduction_params::timeout,
-                DOC(fiction_physical_design_wiring_reduction_params_timeout))
-        .def_rw("on_progress", &fiction::physical_design::wiring_reduction_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_physical_design_wiring_reduction_params_on_progress));
 
     nb::class_<fiction::physical_design::wiring_reduction_stats>(m, "wiring_reduction_stats",
                                                                  DOC(fiction_physical_design_wiring_reduction_stats))
@@ -90,9 +83,53 @@ void register_wiring_reduction(nb::module_& m)
 
         ;
 
-    m.def("wiring_reduction", &fiction::physical_design::wiring_reduction, nb::arg("layout"),
-          nb::arg("parameters") = fiction::physical_design::wiring_reduction_params{}, nb::arg("statistics") = nullptr,
-          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_physical_design_wiring_reduction));
+    m.def(
+        "wiring_reduction",
+        [](py_cartesian_gate_layout& layout, const decltype(wiring_reduction_options{}.timeout) timeout,
+           const decltype(wiring_reduction_options{}.on_progress) on_progress,
+           fiction::physical_design::wiring_reduction_stats*      statistics)
+        {
+            wiring_reduction_options params{};
+            params.timeout     = timeout;
+            params.on_progress = on_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::physical_design::wiring_reduction(layout, params, statistics);
+        },
+        nb::arg("layout"), nb::kw_only(), nb::arg("timeout") = wiring_reduction_options{}.timeout,
+        nb::arg("on_progress").none() = nb::none(), nb::arg("statistics") = nullptr,
+        R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
+based on A* path finding as originally proposed in \"Late Breaking
+Results: Wiring Reduction for Field-coupled Nanotechnologies\" by S.
+Hofmann, M. Walter, and R. Wille in DAC 2024
+(https://dl.acm.org/doi/10.1145/3649329.3663491) and extended in
+\"Efficient and Scalable Post-Layout Optimization for Field-coupled
+Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
+(https://ieeexplore.ieee.org/document/10916761).
+
+The core concept revolves around the selective removal of excess
+wiring by cutting them from a layout, contingent upon the ability to
+restore functional correctness by realigning the remaining layout
+fragments. Given the complexity of identifying these cuts,
+obstructions are strategically inserted into the layout to safeguard
+against the inadvertent deletion of standard gates or wire segments
+essential for the layout's integrity. Leveraging the obstructed layout
+as a basis, A* Search is employed to systematically identify feasible
+cuts either from left to right or top to bottom. Subsequently, these
+identified cuts are removed from the layout to minimize not only the
+number of wire segments, but also the area and critical path length.
+
+Args:
+    lyt: The 2DDWave-clocked layout whose wiring is to be reduced.
+    pst: Statistics.
+
+Raises:
+    std::invalid_argument: If clocking or occupied geometry is
+                           invalid.
+    std::overflow_error: If the extent leaves no room for signed
+                         routing coordinates.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
 }
 
 }  // namespace pyfiction

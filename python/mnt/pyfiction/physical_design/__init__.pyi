@@ -30,158 +30,6 @@ class technology_constraints(enum.Enum):
     TOPOLINANO = 1
     """ToPoLiNano technology-specific constraints."""
 
-class exact_params:
-    """Parameters for the exact physical design algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def scheme(self) -> str:
-        """Clocking scheme to be used."""
-
-    @scheme.setter
-    def scheme(self, arg: str, /) -> None: ...
-    @property
-    def layout_arrangement(self) -> mnt.pyfiction.layouts.arrangement | None:
-        """
-        Arrangement of the shifted rows or columns of the created layout.
-        Shifted Cartesian and hexagonal layouts require it, Cartesian layouts
-        ignore it.
-        """
-
-    @layout_arrangement.setter
-    def layout_arrangement(self, arg: mnt.pyfiction.layouts.arrangement | None, /) -> None: ...
-    @property
-    def upper_bound_area(self) -> int:
-        """
-        Number of total tiles to use as an upper bound.
-
-        Note:
-            If `upper_bound_area` and (either) `upper_bound_x` or
-            `upper_bound_y` are set, the imposed search space restrictions are
-            cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x
-            == 4`, all aspect ratios with a width of more than 4 *and* a total
-            area of more than 20 will be skipped.
-        """
-
-    @upper_bound_area.setter
-    def upper_bound_area(self, arg: int, /) -> None: ...
-    @property
-    def upper_bound_x(self) -> int:
-        """Number of tiles to use as an upper bound in x direction."""
-
-    @upper_bound_x.setter
-    def upper_bound_x(self, arg: int, /) -> None: ...
-    @property
-    def upper_bound_y(self) -> int:
-        """Number of tiles to use as an upper bound in y direction."""
-
-    @upper_bound_y.setter
-    def upper_bound_y(self, arg: int, /) -> None: ...
-    @property
-    def fixed_size(self) -> bool:
-        """
-        Exclusively investigate aspect ratios that conform with the
-        restrictions imposed by the upper bound options. E.g., if `fixed_size
-        == true` *and* `upper_bound_area == 20`, only aspect ratios with
-        exactly 20 tiles will be examined. Restricted imposed by the
-        `upper_bound_x` and `upper_bound_y` flags additionally apply.
-        """
-
-    @fixed_size.setter
-    def fixed_size(self, arg: bool, /) -> None: ...
-    @property
-    def num_threads(self) -> int:
-        """
-        Number of threads to use for exploring the possible aspect ratios.
-
-        Note:
-            This is an unstable beta feature.
-        """
-
-    @num_threads.setter
-    def num_threads(self, arg: int, /) -> None: ...
-    @property
-    def synchronization_elements(self) -> bool: ...
-    @synchronization_elements.setter
-    def synchronization_elements(self, arg: bool, /) -> None: ...
-    @property
-    def crossings(self) -> bool:
-        """Flag to indicate that crossings may be used."""
-
-    @crossings.setter
-    def crossings(self, arg: bool, /) -> None: ...
-    @property
-    def border_io(self) -> bool:
-        """Flag to indicate that I/Os should be placed at the layout's border."""
-
-    @border_io.setter
-    def border_io(self, arg: bool, /) -> None: ...
-    @property
-    def straight_inverters(self) -> bool:
-        """
-        Flag to indicate that straight inverters should be used over bend
-        ones.
-        """
-
-    @straight_inverters.setter
-    def straight_inverters(self, arg: bool, /) -> None: ...
-    @property
-    def desynchronize(self) -> bool:
-        """
-        Flag to indicate that a discrepancy in fan-in path lengths is allowed
-        (reduces runtime!).
-        """
-
-    @desynchronize.setter
-    def desynchronize(self, arg: bool, /) -> None: ...
-    @property
-    def minimize_wires(self) -> bool:
-        """Minimize the number of wire tiles."""
-
-    @minimize_wires.setter
-    def minimize_wires(self, arg: bool, /) -> None: ...
-    @property
-    def minimize_crossings(self) -> bool:
-        """
-        Flag to indicate that the number of used crossing tiles should be
-        minimized.
-        """
-
-    @minimize_crossings.setter
-    def minimize_crossings(self, arg: bool, /) -> None: ...
-    @property
-    def timeout(self) -> int:
-        """Timeout budget for the solving process, in milliseconds."""
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def technology_specifics(self) -> technology_constraints:
-        """
-        Technology-specific constraints that are only to be added for a
-        certain target technology.
-        """
-
-    @technology_specifics.setter
-    def technology_specifics(self, arg: technology_constraints, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Callback that receives the number of examined aspect ratios."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
-        """
-        Reports logical worker activity with a fixed worker count for each
-        invocation.
-        """
-
-    @on_worker_progress.setter
-    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
-
 class exact_stats:
     """Statistics."""
 
@@ -212,10 +60,27 @@ class exact_stats:
 @overload
 def exact(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
     *,
     layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout] = ...,
+    statistics: exact_stats | None = None,
+    scheme: str = ...,
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ...,
+    upper_bound_area: int = ...,
+    upper_bound_x: int = ...,
+    upper_bound_y: int = ...,
+    fixed_size: bool = ...,
+    num_threads: int = ...,
+    synchronization_elements: bool = ...,
+    crossings: bool = ...,
+    border_io: bool = ...,
+    straight_inverters: bool = ...,
+    desynchronize: bool = ...,
+    minimize_wires: bool = ...,
+    minimize_crossings: bool = ...,
+    timeout: int = ...,
+    technology_specifics: technology_constraints = ...,
+    on_progress: Callable[[str, int, int], None] | None = ...,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = ...,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout | None:
     """
     An exact placement & routing approach using SMT solving as originally
@@ -278,12 +143,7 @@ def exact(
 
     Args:
         ntk: The network that is to place and route.
-        ps: Parameters.
         pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
 
     Returns:
         A gate-level layout of type `Lyt` that implements `ntk` as an FCN
@@ -293,42 +153,86 @@ def exact(
     Raises:
         std::invalid_argument: If `Lyt` is a shifted Cartesian or
                                hexagonal layout and
-                               `ps.layout_arrangement` is empty.
+                               `layout_arrangement` is empty.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def exact(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
     *,
     layout_type: type[mnt.pyfiction.layouts.shifted_cartesian_gate_layout],
+    statistics: exact_stats | None = None,
+    scheme: str = ...,
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ...,
+    upper_bound_area: int = ...,
+    upper_bound_x: int = ...,
+    upper_bound_y: int = ...,
+    fixed_size: bool = ...,
+    num_threads: int = ...,
+    synchronization_elements: bool = ...,
+    crossings: bool = ...,
+    border_io: bool = ...,
+    straight_inverters: bool = ...,
+    desynchronize: bool = ...,
+    minimize_wires: bool = ...,
+    minimize_crossings: bool = ...,
+    timeout: int = ...,
+    technology_specifics: technology_constraints = ...,
+    on_progress: Callable[[str, int, int], None] | None = ...,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = ...,
 ) -> mnt.pyfiction.layouts.shifted_cartesian_gate_layout | None: ...
 @overload
 def exact(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
     *,
     layout_type: type[mnt.pyfiction.layouts.hexagonal_gate_layout],
+    statistics: exact_stats | None = None,
+    scheme: str = ...,
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ...,
+    upper_bound_area: int = ...,
+    upper_bound_x: int = ...,
+    upper_bound_y: int = ...,
+    fixed_size: bool = ...,
+    num_threads: int = ...,
+    synchronization_elements: bool = ...,
+    crossings: bool = ...,
+    border_io: bool = ...,
+    straight_inverters: bool = ...,
+    desynchronize: bool = ...,
+    minimize_wires: bool = ...,
+    minimize_crossings: bool = ...,
+    timeout: int = ...,
+    technology_specifics: technology_constraints = ...,
+    on_progress: Callable[[str, int, int], None] | None = ...,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = ...,
 ) -> mnt.pyfiction.layouts.hexagonal_gate_layout | None: ...
 @overload
 def exact(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: exact_params = ...,
-    statistics: exact_stats | None = None,
     *,
-    layout_type: type[
-        mnt.pyfiction.layouts.cartesian_gate_layout
-        | mnt.pyfiction.layouts.shifted_cartesian_gate_layout
-        | mnt.pyfiction.layouts.hexagonal_gate_layout
-    ],
-) -> (
-    mnt.pyfiction.layouts.cartesian_gate_layout
-    | mnt.pyfiction.layouts.shifted_cartesian_gate_layout
-    | mnt.pyfiction.layouts.hexagonal_gate_layout
-    | None
-): ...
+    layout_type: object,
+    statistics: exact_stats | None = None,
+    scheme: str = "2DDWave",
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = None,
+    upper_bound_area: int = 65535,
+    upper_bound_x: int = 65535,
+    upper_bound_y: int = 65535,
+    fixed_size: bool = False,
+    num_threads: int = 1,
+    synchronization_elements: bool = False,
+    crossings: bool = False,
+    border_io: bool = False,
+    straight_inverters: bool = False,
+    desynchronize: bool = False,
+    minimize_wires: bool = False,
+    minimize_crossings: bool = False,
+    timeout: int = 4294967,
+    technology_specifics: technology_constraints = ...,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
+) -> object: ...
 
 class num_clks(enum.Enum):
     """Number of clock phases of a clocking scheme."""
@@ -338,35 +242,6 @@ class num_clks(enum.Enum):
 
     FOUR = 1
     """Four clocks."""
-
-class orthogonal_params:
-    """Parameters for the orthogonal physical design algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def number_of_clock_phases(self) -> num_clks:
-        """Number of clock phases to use. 3 and 4 are supported."""
-
-    @number_of_clock_phases.setter
-    def number_of_clock_phases(self, arg: num_clks, /) -> None: ...
-    @property
-    def layout_arrangement(self) -> mnt.pyfiction.layouts.arrangement | None:
-        """
-        Arrangement of the shifted rows or columns of the created layout.
-        Shifted Cartesian and hexagonal layouts require it, Cartesian layouts
-        ignore it.
-        """
-
-    @layout_arrangement.setter
-    def layout_arrangement(self, arg: mnt.pyfiction.layouts.arrangement | None, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Callback that receives the progress of the gate placement."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class orthogonal_stats:
     def __init__(self) -> None:
@@ -393,10 +268,12 @@ class orthogonal_stats:
 @overload
 def orthogonal(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
     *,
     layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout] = ...,
+    statistics: orthogonal_stats | None = None,
+    number_of_clock_phases: num_clks = ...,
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ...,
+    on_progress: Callable[[str, int, int], None] | None = ...,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout:
     """
     A scalable placement & routing approach based on orthogonal graph
@@ -438,12 +315,7 @@ def orthogonal(
 
     Args:
         ntk: The network that is to place and route.
-        ps: Parameters.
         pst: Statistics.
-
-    Template Args:
-        Lyt: Desired gate-level layout type.
-        Ntk: Network type that acts as specification.
 
     Returns:
         A gate-level layout of type `Lyt` that implements `ntk` as an FCN
@@ -452,25 +324,31 @@ def orthogonal(
     Raises:
         std::invalid_argument: If `Lyt` is a shifted Cartesian or
                                hexagonal layout and
-                               `ps.layout_arrangement` is empty.
+                               `layout_arrangement` is empty.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def orthogonal(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
     *,
     layout_type: type[mnt.pyfiction.layouts.hexagonal_gate_layout],
+    statistics: orthogonal_stats | None = None,
+    number_of_clock_phases: num_clks = ...,
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ...,
+    on_progress: Callable[[str, int, int], None] | None = ...,
 ) -> mnt.pyfiction.layouts.hexagonal_gate_layout: ...
 @overload
 def orthogonal(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: orthogonal_params = ...,
-    statistics: orthogonal_stats | None = None,
     *,
-    layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout],
-) -> mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout: ...
+    layout_type: object,
+    statistics: orthogonal_stats | None = None,
+    number_of_clock_phases: num_clks = ...,
+    layout_arrangement: mnt.pyfiction.layouts.arrangement | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+) -> object: ...
 
 class gold_effort_mode(enum.Enum):
     """
@@ -556,164 +434,6 @@ class gold_cost_objective(enum.Enum):
     the predefined options.
     """
 
-class graph_oriented_layout_design_params:
-    """Parameters for the graph-oriented layout design algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def timeout(self) -> int:
-        """Timeout limit (in ms)."""
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def num_vertex_expansions(self) -> int:
-        """
-        Number of expansions for each vertex that should be explored. For each
-        partial layout, `num_vertex_expansions` positions will be checked for
-        the next node/gate to be placed. A lower value requires less runtime,
-        but the layout might have a larger area or it could also lead to no
-        solution being found. A higher value might lead to better solutions,
-        but also requires more runtime. Defaults to 4 expansions for each
-        vertex.
-        """
-
-    @num_vertex_expansions.setter
-    def num_vertex_expansions(self, arg: int, /) -> None: ...
-    @property
-    def verbose(self) -> bool:
-        """Verbosity."""
-
-    @verbose.setter
-    def verbose(self, arg: bool, /) -> None: ...
-    @property
-    def mode(self) -> gold_effort_mode:
-        """The effort mode used. Defaults to HIGH_EFFORT."""
-
-    @mode.setter
-    def mode(self, arg: gold_effort_mode, /) -> None: ...
-    @property
-    def cost(self) -> gold_cost_objective:
-        """The cost objective used. Defaults to AREA"""
-
-    @cost.setter
-    def cost(self, arg: gold_cost_objective, /) -> None: ...
-    @property
-    def return_first(self) -> bool:
-        """
-        Return the first found layout, which might still have a high cost but
-        can be found fast.
-        """
-
-    @return_first.setter
-    def return_first(self, arg: bool, /) -> None: ...
-    @property
-    def planar(self) -> bool:
-        """
-        Disable the creation of crossings during layout generation. If set to
-        true, gates will only be placed if a crossing-free wiring is found.
-        Defaults to false.
-        """
-
-    @planar.setter
-    def planar(self, arg: bool, /) -> None: ...
-    @property
-    def enable_multithreading(self) -> bool:
-        """
-        BETA feature: Flag to enable or disable multithreading during the
-        execution of the layout design algorithm.
-
-        When set to `true`, the algorithm will utilize multiple threads to
-        process different search space graphs in parallel, improving
-        performance by distributing the workload across available CPU cores.
-        If set to `false`, the algorithm will run sequentially on a single
-        thread.
-
-        Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and
-        complex networks (> 100 nodes).
-
-        Enabling multithreading can significantly speed up the algorithm,
-        especially when using multiple search space graphs and dealing with
-        complex networks, by concurrently expanding them. However, it may
-        introduce additional overhead for thread synchronization and can
-        increase memory usage. It is therefore not recommended for small input
-        networks.
-
-        Default value: `false`
-        """
-
-    @enable_multithreading.setter
-    def enable_multithreading(self, arg: bool, /) -> None: ...
-    @property
-    def seed(self) -> int | None:
-        """
-        Random seed for PI spacing, fanout substitution, and topological
-        ordering. Generated randomly if not specified.
-        """
-
-    @seed.setter
-    def seed(self, arg: int | None, /) -> None: ...
-    @property
-    def straight_inverters(self) -> bool:
-        """Enforce NOT gates to be routed non-bending only."""
-
-    @straight_inverters.setter
-    def straight_inverters(self, arg: bool, /) -> None: ...
-    @property
-    def tiles_to_skip_between_pis(self) -> int:
-        """
-        For each primary input (PI) considered during placement, reserve this
-        many empty tiles *after* the current frontier:
-         - Top edge (row 0): leave `tiles_to_skip_between_pis` empty tiles to
-           the right of the rightmost occupied tile before proposing a new PI
-           position.
-         - Left edge (column 0): leave `tiles_to_skip_between_pis` empty tiles
-           below the bottommost occupied tile before proposing a new PI
-           position.
-
-        This soft margin can reduce local congestion and increase the
-        probability of finding a routable layout at the expense of a
-        temporarily larger footprint, which post-layout optimization may later
-        shrink. Must lie in :math:`[0, 2^{20}]`. Defaults to `0`.
-        """
-
-    @tiles_to_skip_between_pis.setter
-    def tiles_to_skip_between_pis(self, arg: int, /) -> None: ...
-    @property
-    def randomize_tiles_to_skip_between_pis(self) -> bool:
-        """
-        When enabled, randomizes the tiles_to_skip_between_pis value for each
-        PI placement. The random value is chosen from
-        `tiles_to_skip_between_pis - 1` to `tiles_to_skip_between_pis`
-        (inclusive). A zero limit always selects zero. This can help explore
-        different placement strategies and potentially find better layouts.
-        Uses the same random seed as other randomization features for
-        reproducibility. Defaults to `false`.
-        """
-
-    @randomize_tiles_to_skip_between_pis.setter
-    def randomize_tiles_to_skip_between_pis(self, arg: bool, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the number of search space graph expansions
-        performed so far.
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
-        """
-        Reports logical worker activity with a fixed worker count for each
-        invocation.
-        """
-
-    @on_worker_progress.setter
-    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
-
 class graph_oriented_layout_design_stats:
     """
     This struct stores statistics about the graph-oriented layout design
@@ -749,7 +469,21 @@ class graph_oriented_layout_design_stats:
 
 def graph_oriented_layout_design(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: graph_oriented_layout_design_params = ...,
+    *,
+    timeout: int = ...,
+    num_vertex_expansions: int = 4,
+    verbose: bool = False,
+    mode: gold_effort_mode = ...,
+    cost: gold_cost_objective = ...,
+    return_first: bool = False,
+    planar: bool = False,
+    enable_multithreading: bool = False,
+    seed: int | None = None,
+    straight_inverters: bool = False,
+    tiles_to_skip_between_pis: int = 0,
+    randomize_tiles_to_skip_between_pis: bool = False,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     statistics: graph_oriented_layout_design_stats | None = None,
     custom_cost_objective: Callable[[mnt.pyfiction.layouts.cartesian_gate_layout], int] | None = None,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout | None:
@@ -781,8 +515,6 @@ def graph_oriented_layout_design(
 
     Args:
         ntk: The network to be placed and routed.
-        ps: The parameters for the A* priority routing algorithm. Defaults
-            to an empty parameter set.
         pst: A pointer to a statistics object to record execution details.
              Defaults to nullptr.
         custom_cost_objective: A custom cost objective that is evaluated
@@ -791,10 +523,6 @@ def graph_oriented_layout_design(
                                calculated based on the current partial
                                layout and returns an uint64_t that should
                                be minimized.
-
-    Template Args:
-        Lyt: Cartesian gate-level layout type.
-        Ntk: Network type.
 
     Returns:
         The smallest layout yielded by the graph-oriented layout design
@@ -805,8 +533,10 @@ def graph_oriented_layout_design(
                                                more than two fanins.
         std::invalid_argument: If the cost objective is `CUSTOM` and no
                                custom cost objective is provided, or if
-                               `ps.tiles_to_skip_between_pis` does not lie
+                               `tiles_to_skip_between_pis` does not lie
                                in :math:`[0, 2^{20}]`.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def apply_qca_one_library(
@@ -1001,50 +731,6 @@ class graph_coloring_engine(enum.Enum):
     SAT = 4
     """Custom iterative SAT-based encoding that finds optimal colorings."""
 
-class color_routing_params:
-    """Parameters for the color routing algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def conduct_partial_routing(self) -> bool:
-        """
-        Do not abort if some objectives cannot be fulfilled, but partially
-        route the layout as much as possible.
-        """
-
-    @conduct_partial_routing.setter
-    def conduct_partial_routing(self, arg: bool, /) -> None: ...
-    @property
-    def crossings(self) -> bool:
-        """Enable crossings."""
-
-    @crossings.setter
-    def crossings(self, arg: bool, /) -> None: ...
-    @property
-    def path_limit(self) -> int | None:
-        """
-        If a value is given, for each objective, only up to the `path_limit`
-        shortest paths will be enumerated (using Yen's algorithm) instead of
-        all paths.
-        """
-
-    @path_limit.setter
-    def path_limit(self, arg: int | None, /) -> None: ...
-    @property
-    def engine(self) -> graph_coloring_engine:
-        """The engine to use."""
-
-    @engine.setter
-    def engine(self, arg: graph_coloring_engine, /) -> None: ...
-    @property
-    def partial_sat(self) -> bool:
-        """Allow partial solutions when the SAT engine is used."""
-
-    @partial_sat.setter
-    def partial_sat(self, arg: bool, /) -> None: ...
-
 @overload
 def color_routing(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
@@ -1055,7 +741,12 @@ def color_routing(
             int,
         ]
     ],
-    params: color_routing_params = ...,
+    *,
+    conduct_partial_routing: bool = False,
+    crossings: bool = False,
+    path_limit: int | None = None,
+    engine: graph_coloring_engine = ...,
+    partial_sat: bool = False,
 ) -> bool: ...
 @overload
 def color_routing(
@@ -1067,7 +758,12 @@ def color_routing(
             int,
         ]
     ],
-    params: color_routing_params = ...,
+    *,
+    conduct_partial_routing: bool = False,
+    crossings: bool = False,
+    path_limit: int | None = None,
+    engine: graph_coloring_engine = ...,
+    partial_sat: bool = False,
 ) -> bool: ...
 @overload
 def color_routing(
@@ -1079,7 +775,12 @@ def color_routing(
             int,
         ]
     ],
-    params: color_routing_params = ...,
+    *,
+    conduct_partial_routing: bool = False,
+    crossings: bool = False,
+    path_limit: int | None = None,
+    engine: graph_coloring_engine = ...,
+    partial_sat: bool = False,
 ) -> bool:
     """
     A multi-path signal routing approach based on coloring of edge
@@ -1126,15 +827,13 @@ def color_routing(
         lyt: A gate-level layout to route.
         objectives: The routing objectives as source coordinates and
                     indexed destination inputs to fulfill.
-        ps: Parameters.
         pst: Statistics.
-
-    Template Args:
-        Lyt: The gate-level layout type to route.
 
     Returns:
         `true` iff routing was successful, i.e., iff all objectives could
         be satisfied.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 class hexagonalization_io_pin_routing_error(RuntimeError): ...
@@ -1156,38 +855,6 @@ class hexagonalization_io_pin_extension_mode(enum.Enum):
     Extend primary inputs/outputs to the top/bottom row with planar
     rerouting (i.e., without crossings).
     """
-
-class hexagonalization_params:
-    """
-    This structure encapsulates settings that determine how primary inputs
-    (PIs) and primary outputs (POs) are handled during the conversion from
-    a Cartesian to a hexagonal layout.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def input_pin_extension(self) -> hexagonalization_io_pin_extension_mode:
-        """Input extension mode. Defaults to none"""
-
-    @input_pin_extension.setter
-    def input_pin_extension(self, arg: hexagonalization_io_pin_extension_mode, /) -> None: ...
-    @property
-    def output_pin_extension(self) -> hexagonalization_io_pin_extension_mode:
-        """Output extension mode. Defaults to none"""
-
-    @output_pin_extension.setter
-    def output_pin_extension(self, arg: hexagonalization_io_pin_extension_mode, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the progress of the gate mapping and the pin
-        extension.
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class hexagonalization_stats:
     """This struct stores statistics about the hexagonalization process."""
@@ -1221,7 +888,10 @@ class hexagonalization_stats:
 
 def hexagonalization(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    parameters: hexagonalization_params = ...,
+    *,
+    input_pin_extension: hexagonalization_io_pin_extension_mode = ...,
+    output_pin_extension: hexagonalization_io_pin_extension_mode = ...,
+    on_progress: Callable[[str, int, int], None] | None = None,
     statistics: hexagonalization_stats | None = None,
 ) -> mnt.pyfiction.layouts.hexagonal_gate_layout:
     """
@@ -1234,12 +904,7 @@ def hexagonalization(
 
     Args:
         lyt: 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
-        params: Parameters.
         stats: Statistics.
-
-    Template Args:
-        HexLyt: Even-row hexagonal gate-level layout return type.
-        CartLyt: Input Cartesian gate-level layout type.
 
     Returns:
         Hexagonal representation of the Cartesian layout.
@@ -1249,61 +914,9 @@ def hexagonalization(
                                satisfy the input contract.
         std::overflow_error: If the transformed coordinates exceed the
                              signed coordinate range.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
-
-class post_layout_optimization_params:
-    """Parameters for the post-layout optimization algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def max_gate_relocations(self) -> int | None:
-        """
-        Maximum number of relocations to try for each gate. Defaults to the
-        number of tiles in the given layout if not specified.
-        """
-
-    @max_gate_relocations.setter
-    def max_gate_relocations(self, arg: int | None, /) -> None: ...
-    @property
-    def optimize_pos_only(self) -> bool:
-        """Only optimize PO positions."""
-
-    @optimize_pos_only.setter
-    def optimize_pos_only(self, arg: bool, /) -> None: ...
-    @property
-    def planar_optimization(self) -> bool:
-        """
-        Disable the creation of crossings during optimization. If set to true,
-        gates will only be relocated if a crossing-free wiring is found.
-        Defaults to false.
-        """
-
-    @planar_optimization.setter
-    def planar_optimization(self, arg: bool, /) -> None: ...
-    @property
-    def timeout(self) -> int:
-        """
-        Timeout limit (in ms). Specifies the maximum allowed time in
-        milliseconds for the optimization process. For large layouts, the
-        actual execution time may slightly exceed this limit because it's
-        impractical to check the timeout at every algorithm step and the
-        functional correctness has to be ensured by completing essential
-        algorithm steps.
-        """
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the progress of the gate relocations and of the
-        nested wiring reduction.
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class post_layout_optimization_stats:
     """
@@ -1356,7 +969,12 @@ class post_layout_optimization_stats:
 
 def post_layout_optimization(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    parameters: post_layout_optimization_params = ...,
+    *,
+    max_gate_relocations: int | None = None,
+    optimize_pos_only: bool = False,
+    planar_optimization: bool = False,
+    timeout: int = ...,
+    on_progress: Callable[[str, int, int], None] | None = None,
     statistics: post_layout_optimization_stats | None = None,
 ) -> None:
     """
@@ -1388,7 +1006,6 @@ def post_layout_optimization(
 
     Args:
         lyt: 2DDWave-clocked Cartesian gate-level layout to optimize.
-        ps: Parameters.
         pst: Statistics.
 
     Raises:
@@ -1406,33 +1023,9 @@ def post_layout_optimization(
         occupancy, and connection storage remain structurally valid;
         logical equivalence and physical validity are not guaranteed after
         failure.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
-
-class wiring_reduction_params:
-    """Parameters for the wiring reduction algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def timeout(self) -> int:
-        """
-        Timeout limit (in ms). Specifies the maximum allowed time in
-        milliseconds for the optimization process. For large layouts, the
-        actual execution time may slightly exceed this limit because it's
-        impractical to check the timeout at every algorithm step and the
-        functional correctness has to be ensured by completing essential
-        algorithm steps.
-        """
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Callback that receives the number of wire paths processed so far."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class wiring_reduction_stats:
     """This struct stores statistics about the wiring reduction process."""
@@ -1478,7 +1071,9 @@ class wiring_reduction_stats:
 
 def wiring_reduction(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    parameters: wiring_reduction_params = ...,
+    *,
+    timeout: int = ...,
+    on_progress: Callable[[str, int, int], None] | None = None,
     statistics: wiring_reduction_stats | None = None,
 ) -> None:
     """
@@ -1505,7 +1100,6 @@ def wiring_reduction(
 
     Args:
         lyt: The 2DDWave-clocked layout whose wiring is to be reduced.
-        ps: Parameters.
         pst: Statistics.
 
     Raises:
@@ -1513,6 +1107,8 @@ def wiring_reduction(
                                invalid.
         std::overflow_error: If the extent leaves no room for signed
                              routing coordinates.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload

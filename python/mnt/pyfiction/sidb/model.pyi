@@ -295,26 +295,12 @@ class sidb_simulation_parameters:
 
     def __init__(
         self,
+        *,
         base_number: int = 3,
         mu_minus: float = -0.32,
         relative_permittivity: float = 5.6,
         screening_distance: float = 5.0,
-    ) -> None:
-        """
-        Default constructor.
-
-        Args:
-            base_number: simulation can be conducted with 2 and 3 charge
-                         states. 2 = (Negative, Neutral), 3 = (Negative,
-                         Neutral, Positive).
-            mu: (µ-) is the energy transition level (0/-) in eV.
-            relative_permittivity: it describes the electric field reduction
-                                   due to polarization.
-            screening_distance: also known as "Thomas-Fermi screening" and it
-                                describes the electric field screening due to
-                                free charges in nm.
-        """
-
+    ) -> None: ...
     @property
     def epsilon_r(self) -> float:
         """
@@ -355,7 +341,15 @@ class sidb_simulation_parameters:
     def mu_plus(self) -> float:
         """`mu_plus` (µ+) is the energy transition level (+/0) (unit: eV)."""
 
-def potential_to_distance_conversion(potential: float, params: sidb_simulation_parameters, precision: int) -> float:
+def potential_to_distance_conversion(
+    potential: float,
+    precision: float,
+    *,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+) -> float:
     """
     The electrostatic potential on hydrogen-passivated silicon is
     typically modeled using a screened Coulomb potential. This
@@ -366,8 +360,6 @@ def potential_to_distance_conversion(potential: float, params: sidb_simulation_p
     distance for a given potential and given physical parameters.
 
     Args:
-        params: The physical parameters for a given hydrogen-passivated
-                silicon surface.
         potential: The electrostatic potential (unit: V) to be converted
                    to a distance.
         precision: The precision level for the conversion, specifying the
@@ -379,4 +371,6 @@ def potential_to_distance_conversion(potential: float, params: sidb_simulation_p
 
     Note:
         Runtime depends exponentially on the provided precision.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """

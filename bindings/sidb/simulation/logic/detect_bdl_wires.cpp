@@ -22,6 +22,7 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 
+#include <optional>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -42,6 +43,9 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using detect_bdl_wires_options = fiction::sidb::simulation::logic::detect_bdl_wires_params;
+
 /**
  * @brief Binds detect bdl wires helpers.
  * @param m Python module.
@@ -60,15 +64,6 @@ void register_detect_bdl_wires(nb::module_& m)
         .value("OUTPUT", fiction::sidb::simulation::logic::bdl_wire_selection::OUTPUT,
                DOC(fiction_sidb_simulation_logic_bdl_wire_selection_OUTPUT))
         .export_values();
-
-    nb::class_<fiction::sidb::simulation::logic::detect_bdl_wires_params>(
-        m, "detect_bdl_wires_params", DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params))
-        .def(nb::init<>(), DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params))
-        .def_rw("threshold_bdl_interdistance",
-                &fiction::sidb::simulation::logic::detect_bdl_wires_params::threshold_bdl_interdistance,
-                DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params_threshold_bdl_interdistance))
-        .def_rw("bdl_pairs_params", &fiction::sidb::simulation::logic::detect_bdl_wires_params::bdl_pairs_params,
-                DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params_bdl_pairs_params));
 
     auto wire = nb::class_<bdl_wire>(m, "bdl_wire", DOC(fiction_sidb_simulation_logic_bdl_wire));
     // The port belongs to the wire's Python API; importing fcn here would cycle through sidb.
@@ -110,12 +105,37 @@ void register_detect_bdl_wires(nb::module_& m)
 
     m.def(
         "detect_bdl_wires",
-        [](const layout& lyt, const fiction::sidb::simulation::logic::detect_bdl_wires_params& params,
-           const fiction::sidb::simulation::logic::bdl_wire_selection wire_selection)
-        { return fiction::sidb::simulation::logic::detect_bdl_wires(lyt, params, wire_selection); },
-        nb::arg("lyt"), nb::arg("params") = fiction::sidb::simulation::logic::detect_bdl_wires_params{},
-        nb::arg("wire_selection") = fiction::sidb::simulation::logic::bdl_wire_selection::ALL,
-        DOC(fiction_sidb_simulation_logic_detect_bdl_wires));
+        [](const layout&                                                                lyt,
+           const decltype(detect_bdl_wires_options{}.threshold_bdl_interdistance)       threshold_bdl_interdistance,
+           const decltype(detect_bdl_wires_options{}.bdl_pairs_params.minimum_distance) minimum_distance,
+           const decltype(detect_bdl_wires_options{}.bdl_pairs_params.maximum_distance) maximum_distance,
+           const fiction::sidb::simulation::logic::bdl_wire_selection                   wire_selection)
+        {
+            detect_bdl_wires_options params{};
+            params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
+            params.bdl_pairs_params.minimum_distance = minimum_distance;
+            params.bdl_pairs_params.maximum_distance = maximum_distance;
+            return fiction::sidb::simulation::logic::detect_bdl_wires(lyt, params, wire_selection);
+        },
+        nb::arg("lyt"), nb::kw_only(),
+        nb::arg("threshold_bdl_interdistance") = detect_bdl_wires_options{}.threshold_bdl_interdistance,
+        nb::arg("minimum_distance")            = detect_bdl_wires_options{}.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance")            = detect_bdl_wires_options{}.bdl_pairs_params.maximum_distance,
+        nb::arg("wire_selection")              = fiction::sidb::simulation::logic::bdl_wire_selection::ALL,
+        R"doc(Detects the BDL wires of an SiDB layout: the BDL pairs of all types
+are chained into wires along the layout's lattice whenever two pairs
+lie within `threshold_bdl_interdistance` of each other.
+
+Args:
+    lyt: The layout.
+    wire_selection: Which wires to return: all, input, or output
+                    wires.
+
+Returns:
+    The detected wires.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
 }
 
 }  // namespace pyfiction

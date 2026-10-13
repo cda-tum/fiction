@@ -21,6 +21,7 @@
 #include <fmt/format.h>
 
 #include <cstdint>
+#include <memory>
 
 #include <nanobind/nanobind.h>
 
@@ -40,9 +41,19 @@ void register_simulation_parameters(nb::module_& m)
 {
     nb::class_<fiction::sidb::model::simulation_parameters>(m, "sidb_simulation_parameters",
                                                             DOC(fiction_sidb_model_simulation_parameters))
-        .def(nb::init<const uint8_t, const double, const double, const double>(), nb::arg("base_number") = 3,
-             nb::arg("mu_minus") = -0.32, nb::arg("relative_permittivity") = 5.6, nb::arg("screening_distance") = 5.0,
-             DOC(fiction_sidb_model_simulation_parameters_simulation_parameters))
+        .def(
+            "__init__",
+            [](fiction::sidb::model::simulation_parameters* self, const uint8_t base_number, const double mu_minus,
+               const double relative_permittivity, const double screening_distance)
+            {
+                if (base_number != 2 && base_number != 3)
+                {
+                    throw nb::value_error("base must be 2 or 3");
+                }
+                std::construct_at(self, base_number, mu_minus, relative_permittivity, screening_distance);
+            },
+            nb::kw_only(), nb::arg("base_number") = 3, nb::arg("mu_minus") = -0.32,
+            nb::arg("relative_permittivity") = 5.6, nb::arg("screening_distance") = 5.0)
         .def_rw("epsilon_r", &fiction::sidb::model::simulation_parameters::epsilon_r,
                 DOC(fiction_sidb_model_simulation_parameters_epsilon_r))
         .def_rw("lambda_tf", &fiction::sidb::model::simulation_parameters::lambda_tf,

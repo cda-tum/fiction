@@ -143,29 +143,14 @@ class potential_landscape:
     def __init__(
         self,
         layout: mnt.pyfiction.sidb.sidb_layout,
-        params: mnt.pyfiction.sidb.model.sidb_simulation_parameters = ...,
-        local_external_potential: Mapping[mnt.pyfiction.sidb.lattice_site, float] = {},
+        *,
+        base: int = 3,
+        mu_minus: float = -0.32,
+        epsilon_r: float = 5.6,
+        lambda_tf: float = 5.0,
+        local_external_potential: Mapping[mnt.pyfiction.sidb.lattice_site, float] | None = None,
         global_external_potential: float = 0.0,
-    ) -> None:
-        """
-        Builds the landscape of a layout.
-
-        Args:
-            lyt: Layout; its charged surface defects enter the landscape.
-            params: Physical parameters.
-            local_external_potential: External potential per site (unit: V). A
-                                      site holding a defect shifts the
-                                      potential at that defect; a site holding
-                                      an SiDB shifts the potential at that
-                                      SiDB.
-            global_external_potential: External potential applied to every
-                                       SiDB (unit: V).
-
-        Raises:
-            std::out_of_range: if a SiDB or defect site has an invalid lattice
-                               basis index.
-        """
-
+    ) -> None: ...
     def get_layout(self) -> mnt.pyfiction.sidb.sidb_layout:
         """
         The layout the landscape describes.

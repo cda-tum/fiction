@@ -16,7 +16,6 @@ from typing import overload
 from typing_extensions import Self
 
 import mnt.pyfiction.sidb
-import mnt.pyfiction.sidb.model
 import mnt.pyfiction.sidb.simulation
 import mnt.pyfiction.synthesis
 
@@ -35,28 +34,6 @@ class input_bdl_configuration(enum.Enum):
     away (as described in https://dl.acm.org/doi/10.1145/3489517.3530525).
     """
 
-class bdl_input_iterator_params:
-    """Parameters for the BDL input iterator."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def bdl_wire_params(self) -> detect_bdl_wires_params:
-        """Parameters to detect BDL wires."""
-
-    @bdl_wire_params.setter
-    def bdl_wire_params(self, arg: detect_bdl_wires_params, /) -> None: ...
-    @property
-    def input_bdl_config(self) -> input_bdl_configuration:
-        """
-        The `input_bdl_config` member allows selection between different modes
-        for handling input BDLs.
-        """
-
-    @input_bdl_config.setter
-    def input_bdl_config(self, arg: input_bdl_configuration, /) -> None: ...
-
 class bdl_input_iterator:
     """
     Iterator that assigns the input patterns to the input BDL pairs of an
@@ -70,39 +47,26 @@ class bdl_input_iterator:
     """
 
     @overload
-    def __init__(self, lyt: mnt.pyfiction.sidb.sidb_layout, params: bdl_input_iterator_params = ...) -> None:
-        """
-        Detects the input BDL pairs and wires of `source_layout` and applies
-        input pattern `0`.
-
-        Args:
-            source_layout: The layout to iterate over.
-            ps: Parameters for the BDL pair and wire detection and the input
-                encoding.
-
-        Raises:
-            std::invalid_argument: if the layout has more than 63 input BDL
-                                   pairs.
-        """
-
+    def __init__(
+        self,
+        lyt: mnt.pyfiction.sidb.sidb_layout,
+        *,
+        threshold_bdl_interdistance: float = 2.0,
+        minimum_distance: float = 0.75,
+        maximum_distance: float = 1.5,
+        input_bdl_config: input_bdl_configuration = ...,
+    ) -> None: ...
     @overload
     def __init__(
-        self, lyt: mnt.pyfiction.sidb.sidb_layout, params: bdl_input_iterator_params, input_wires: Sequence[bdl_wire]
-    ) -> None:
-        """
-        Like the constructor above but with input wires that are already
-        known.
-
-        Args:
-            source_layout: The layout to iterate over.
-            ps: Parameters for the BDL pair detection and the input encoding.
-            source_input_wires: The input wires of `source_layout`.
-
-        Raises:
-            std::invalid_argument: if the layout has more than 63 input BDL
-                                   pairs.
-        """
-
+        self,
+        lyt: mnt.pyfiction.sidb.sidb_layout,
+        input_wires: Sequence[bdl_wire],
+        *,
+        threshold_bdl_interdistance: float = 2.0,
+        minimum_distance: float = 0.75,
+        maximum_distance: float = 1.5,
+        input_bdl_config: input_bdl_configuration = ...,
+    ) -> None: ...
     def __iter__(self) -> bdl_input_iterator: ...
     def __next__(self) -> mnt.pyfiction.sidb.sidb_layout:
         """
@@ -206,7 +170,12 @@ class bdl_input_iterator:
 
 @overload
 def generate_bdl_input_pattern_layouts(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: bdl_input_iterator_params = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
 ) -> list[mnt.pyfiction.sidb.sidb_layout]:
     """
     Applies every input pattern to the input BDL pairs of a layout and
@@ -215,7 +184,6 @@ def generate_bdl_input_pattern_layouts(
 
     Args:
         lyt: The layout.
-        ps: Parameters for the BDL detection and the input encoding.
 
     Returns:
         One layout per input pattern.
@@ -223,11 +191,19 @@ def generate_bdl_input_pattern_layouts(
     Raises:
         std::invalid_argument: if the layout has more than 63 input BDL
                                pairs.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def generate_bdl_input_pattern_layouts(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: bdl_input_iterator_params, input_wires: Sequence[bdl_wire]
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    input_wires: Sequence[bdl_wire],
+    *,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
 ) -> list[mnt.pyfiction.sidb.sidb_layout]:
     """
     Applies every input pattern to the input BDL pairs of a layout and
@@ -236,7 +212,6 @@ def generate_bdl_input_pattern_layouts(
 
     Args:
         lyt: The layout.
-        ps: Parameters for the BDL pair detection and the input encoding.
         input_wires: The input wires of `lyt`.
 
     Returns:
@@ -245,6 +220,8 @@ def generate_bdl_input_pattern_layouts(
     Raises:
         std::invalid_argument: if the layout has more than 63 input BDL
                                pairs.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 class bdl_pair:
@@ -316,43 +293,17 @@ class bdl_pair:
 
     def __hash__(self) -> int: ...
 
-class detect_bdl_pairs_params:
-    """Parameters for the BDL pair detection algorithms."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def minimum_distance(self) -> float:
-        """
-        The minimum distance between two SiDBs to be considered a BDL pair.
-        This is useful to prevent, e.g., SiDBs of atomic wires to be
-        considered BDL pairs. (unit: nm).
-        """
-
-    @minimum_distance.setter
-    def minimum_distance(self, arg: float, /) -> None: ...
-    @property
-    def maximum_distance(self) -> float:
-        """
-        The maximum distance between two dots to be considered a BDL pair.
-        This is useful to prevent unlikely pairings of SiDBs that are far
-        apart and to improve performance of the matching algorithm. (unit:
-        nm).
-        """
-
-    @maximum_distance.setter
-    def maximum_distance(self, arg: float, /) -> None: ...
-
 def detect_bdl_pairs(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     type: mnt.pyfiction.sidb.sidb_dot_tag | None = None,
-    params: detect_bdl_pairs_params = ...,
+    *,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
 ) -> list[bdl_pair]:
     """
     Detects the BDL pairs of an SiDB layout. Dots with the given tag are
     uniquely paired in increasing distance. The closest unpaired dots
-    within `[params.minimum_distance, params.maximum_distance]` (defaults
+    within `[minimum_distance, maximum_distance]` (defaults
     of 0.75 nm and 1.5 nm) form a pair. The lower bound keeps, e.g., the
     SiDBs of an atomic wire from being paired; the upper bound prevents
     unlikely pairings and bounds the work. Distances follow the layout's
@@ -364,10 +315,11 @@ def detect_bdl_pairs(
               `OUTPUT`, `NORMAL`, ...). If omitted, the BDL pairs of the
               input, output, and normal SiDBs are detected and returned in
               that order.
-        params: Parameters for the BDL pair detection.
 
     Returns:
         The detected BDL pairs.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 class bdl_wire_selection(enum.Enum):
@@ -387,28 +339,6 @@ ALL: bdl_wire_selection = ...
 INPUT: bdl_wire_selection = ...
 
 OUTPUT: bdl_wire_selection = ...
-
-class detect_bdl_wires_params:
-    """This struct encapsulates parameters used for detecting BDL wires."""
-
-    def __init__(self) -> None:
-        """This struct encapsulates parameters used for detecting BDL wires."""
-
-    @property
-    def threshold_bdl_interdistance(self) -> float:
-        """
-        A distance threshold, which is used to determine if two pairs of BDLs
-        are part of the same wire. (unit: nm).
-        """
-
-    @threshold_bdl_interdistance.setter
-    def threshold_bdl_interdistance(self, arg: float, /) -> None: ...
-    @property
-    def bdl_pairs_params(self) -> detect_bdl_pairs_params:
-        """Parameters for the `detect_bdl_pairs` algorithm."""
-
-    @bdl_pairs_params.setter
-    def bdl_pairs_params(self, arg: detect_bdl_pairs_params, /) -> None: ...
 
 class bdl_wire:
     """
@@ -552,21 +482,27 @@ class bdl_wire:
     def __ne__(self, arg: bdl_wire, /) -> bool: ...
 
 def detect_bdl_wires(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: detect_bdl_wires_params = ..., wire_selection: bdl_wire_selection = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    wire_selection: bdl_wire_selection = ...,
 ) -> list[bdl_wire]:
     """
     Detects the BDL wires of an SiDB layout: the BDL pairs of all types
     are chained into wires along the layout's lattice whenever two pairs
-    lie within `params.threshold_bdl_interdistance` of each other.
+    lie within `threshold_bdl_interdistance` of each other.
 
     Args:
         lyt: The layout.
-        params: Parameters for the BDL pair and wire detection.
         wire_selection: Which wires to return: all, input, or output
                         wires.
 
     Returns:
         The detected wires.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 class operational_status(enum.Enum):
@@ -649,72 +585,23 @@ class operational_analysis_strategy(enum.Enum):
     This only provides any runtime benefits if kinks are rejected.
     """
 
-class is_operational_params:
-    """Parameters for the `is_operational` algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def timeout(self) -> int:
-        """
-        Millisecond budget for the complete operation. Gate design, domains,
-        and critical-temperature calculations share this budget across all
-        nested checks. The maximum value means unlimited; zero expires
-        immediately. Expiration throws `utils::timeout_error` without
-        returning a partial result.
-        """
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """
-        The simulation parameters for the physical simulation of the ground
-        state.
-        """
-
-    @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
-    @property
-    def sim_engine(self) -> mnt.pyfiction.sidb.simulation.sidb_simulation_engine:
-        """
-        The simulation engine to be used for the operational domain
-        computation.
-        """
-
-    @sim_engine.setter
-    def sim_engine(self, arg: mnt.pyfiction.sidb.simulation.sidb_simulation_engine, /) -> None: ...
-    @property
-    def input_bdl_iterator_params(self) -> bdl_input_iterator_params:
-        """Parameters for the BDL input iterator."""
-
-    @input_bdl_iterator_params.setter
-    def input_bdl_iterator_params(self, arg: bdl_input_iterator_params, /) -> None: ...
-    @property
-    def op_condition(self) -> operational_condition:
-        """
-        Condition to decide whether a layout is operational or non-
-        operational.
-        """
-
-    @op_condition.setter
-    def op_condition(self, arg: operational_condition, /) -> None: ...
-    @property
-    def strategy_to_analyze_operational_status(self) -> operational_analysis_strategy:
-        """
-        Strategy to determine whether a layout is operational or non-
-        operational.
-        """
-
-    @strategy_to_analyze_operational_status.setter
-    def strategy_to_analyze_operational_status(self, arg: operational_analysis_strategy, /) -> None: ...
-
 @overload
 def is_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
 ) -> tuple[operational_status, int]:
     """
     Determines whether an SiDB layout implements the given Boolean
@@ -728,19 +615,32 @@ def is_operational(
     Args:
         lyt: The layout to check.
         spec: The Boolean function(s) it has to implement.
-        params: Parameters.
 
     Returns:
         The operational status and the number of simulator invocations.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def is_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> tuple[operational_status, int]:
     """
@@ -750,22 +650,35 @@ def is_operational(
     Args:
         lyt: The layout to check.
         spec: The Boolean function(s) it has to implement.
-        params: Parameters.
         input_bdl_wire: The input BDL wires of `lyt`.
         output_bdl_wire: The output BDL wires of `lyt`.
         canvas_lyt: The canvas; defaults to the logic dots of `lyt`.
 
     Returns:
         The operational status and the number of simulator invocations.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def is_operational(
     input_pattern_layouts: Sequence[mnt.pyfiction.sidb.sidb_layout],
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> tuple[operational_status, int]:
     """
@@ -776,7 +689,6 @@ def is_operational(
         input_pattern_layouts: One layout per input pattern, pattern `0`
                                first.
         spec: The Boolean function(s) to implement.
-        params: Parameters.
         input_bdl_wire: The input BDL wires.
         output_bdl_wire: The output BDL wires.
         canvas_lyt: The canvas; defaults to the logic dots of the first
@@ -788,13 +700,27 @@ def is_operational(
     Raises:
         std::invalid_argument: if `spec` is empty or the number of layouts
                                does not match the number of patterns.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
 ) -> set[int]:
     """
     Determines the input patterns for which the layout is operational.
@@ -802,19 +728,32 @@ def operational_input_patterns(
     Args:
         lyt: The layout to check.
         spec: The Boolean function(s) it has to implement.
-        params: Parameters.
 
     Returns:
         The operational input patterns.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> set[int]:
     """
@@ -824,20 +763,33 @@ def operational_input_patterns(
     Args:
         lyt: The layout to check.
         spec: The Boolean function(s) it has to implement.
-        params: Parameters.
         input_bdl_wire: The input BDL wires of `lyt`.
         output_bdl_wire: The output BDL wires of `lyt`.
         canvas_lyt: The canvas; defaults to none.
 
     Returns:
         The operational input patterns.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
 ) -> set[int]:
     """
     Determines the input patterns for which kinks render the layout non-
@@ -846,20 +798,32 @@ def kink_induced_non_operational_input_patterns(
     Args:
         lyt: The layout to check.
         spec: The Boolean function(s) it has to implement.
-        params: Parameters; kinks are rejected regardless of
-                `params.op_condition`.
 
     Returns:
         The kink-induced non-operational input patterns.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> set[int]:
     """
@@ -869,21 +833,33 @@ def kink_induced_non_operational_input_patterns(
     Args:
         lyt: The layout to check.
         spec: The Boolean function(s) it has to implement.
-        params: Parameters; kinks are rejected regardless of
-                `params.op_condition`.
         input_bdl_wire: The input BDL wires of `lyt`.
         output_bdl_wire: The output BDL wires of `lyt`.
         canvas_lyt: The canvas; defaults to none.
 
     Returns:
         The kink-induced non-operational input patterns.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
 ) -> bool:
     """
     Determines whether kinks are the reason the layout is non-operational.
@@ -891,20 +867,32 @@ def is_kink_induced_non_operational(
     Args:
         lyt: The layout to check.
         spec: The Boolean function(s) it has to implement.
-        params: Parameters; kinks are rejected regardless of
-                `params.op_condition`.
 
     Returns:
         `true` if the layout is non-operational because of kinks.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> bool:
     """
@@ -914,14 +902,14 @@ def is_kink_induced_non_operational(
     Args:
         lyt: The layout to check.
         spec: The Boolean function(s) it has to implement.
-        params: Parameters; kinks are rejected regardless of
-                `params.op_condition`.
         input_bdl_wire: The input BDL wires of `lyt`.
         output_bdl_wire: The output BDL wires of `lyt`.
         canvas_lyt: The canvas; defaults to none.
 
     Returns:
         `true` if the layout is non-operational because of kinks.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 class parameter_point:
@@ -1196,72 +1184,6 @@ class operational_domain_value_range:
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
-class operational_domain_params:
-    """
-    Parameters for the operational domain computation. The parameters are
-    used across the different operational domain computation algorithms.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def operational_params(self) -> is_operational_params:
-        """
-        Operational parameters. Their timeout bounds the entire domain
-        calculation across all parameter points and workers. Finite budgets
-        reject ClusterComplete and throw `utils::timeout_error` on expiration.
-        """
-
-    @operational_params.setter
-    def operational_params(self, arg: is_operational_params, /) -> None: ...
-    @property
-    def sweep_dimensions(self) -> list[operational_domain_value_range]:
-        """
-        Dimensions to sweep over together with their value ranges, ordered by
-        priority.
-
-        The first dimension is the x dimension, the second dimension is the y
-        dimension, etc. The default sweeps relative permittivity and screening
-        distance from 1.0 to 10.0 in steps of 0.1.
-        """
-
-    @sweep_dimensions.setter
-    def sweep_dimensions(self, arg: Sequence[operational_domain_value_range], /) -> None: ...
-    @property
-    def number_of_threads(self) -> int:
-        """
-        Number of worker threads to distribute the parameter points over.
-
-        Defaults to the number of hardware threads, or `1` when that count is
-        unavailable. Values below `1` are treated as `1`.
-
-        Pinning it makes wall-clock comparisons reproducible across runs and
-        machines, and allows an operational domain computation to leave cores
-        free for other work.
-        """
-
-    @number_of_threads.setter
-    def number_of_threads(self, arg: int, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the number of evaluated parameter points. The
-        total is known for grid search and random sampling only.
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
-        """
-        Reports logical worker activity with a fixed worker count for each
-        invocation.
-        """
-
-    @on_worker_progress.setter
-    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
-
 class operational_domain_stats:
     """
     Statistics for the operational domain computation. The statistics are
@@ -1301,7 +1223,23 @@ class operational_domain_stats:
 def operational_domain_grid_search(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
@@ -1328,7 +1266,6 @@ def operational_domain_grid_search(
         lyt: Layout to compute the operational domain for.
         spec: Expected Boolean functions, one dynamic truth table per
               output.
-        params: Parameters for the operational domain computation.
         stats: Statistics of the process.
 
     Returns:
@@ -1340,13 +1277,31 @@ def operational_domain_grid_search(
                                requested without rejecting kinks or on a
                                layout without `LOGIC` dots. Any number of
                                sweep dimensions is accepted.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def operational_domain_random_sampling(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
@@ -1372,7 +1327,6 @@ def operational_domain_random_sampling(
         spec: Expected Boolean function of the layout given as a multi-
               output truth table.
         samples: Number of samples to perform.
-        params: Operational domain computation parameters.
         stats: Operational domain computation statistics.
 
     Returns:
@@ -1384,13 +1338,31 @@ def operational_domain_random_sampling(
                                requested without rejecting kinks or on a
                                layout without `LOGIC` dots. Any number of
                                sweep dimensions is accepted.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def operational_domain_flood_fill(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
@@ -1430,7 +1402,6 @@ def operational_domain_flood_fill(
         spec: Expected Boolean function of the layout given as a multi-
               output truth table.
         samples: Number of samples to perform.
-        params: Operational domain computation parameters.
         stats: Operational domain computation statistics.
 
     Returns:
@@ -1444,13 +1415,31 @@ def operational_domain_flood_fill(
                                contour tracing additionally require at
                                least two sweep dimensions; grid search and
                                random sampling accept any number.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def operational_domain_contour_tracing(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
@@ -1488,7 +1477,6 @@ def operational_domain_contour_tracing(
         spec: Expected Boolean function of the layout given as a multi-
               output truth table.
         samples: Number of samples to perform.
-        params: Operational domain computation parameters.
         stats: Operational domain computation statistics.
 
     Returns:
@@ -1502,12 +1490,30 @@ def operational_domain_contour_tracing(
                                contour tracing additionally require at
                                least two sweep dimensions; grid search and
                                random sampling accept any number.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def critical_temperature_domain_grid_search(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
@@ -1532,7 +1538,6 @@ def critical_temperature_domain_grid_search(
         lyt: Layout to compute the operational domain for.
         spec: Expected vector of truth tables of the layout. Each truth
               table represents an output of the Boolean function.
-        params: Operational domain computation parameters.
         stats: Operational domain computation statistics.
 
     Returns:
@@ -1544,13 +1549,31 @@ def critical_temperature_domain_grid_search(
                                requested without rejecting kinks or on a
                                layout without `LOGIC` dots. Any number of
                                sweep dimensions is accepted.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def critical_temperature_domain_random_sampling(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
@@ -1574,7 +1597,6 @@ def critical_temperature_domain_random_sampling(
         spec: Expected Boolean function of the layout given as a multi-
               output truth table.
         samples: Number of samples to perform.
-        params: Operational domain computation parameters.
         stats: Operational domain computation statistics.
 
     Returns:
@@ -1586,13 +1608,31 @@ def critical_temperature_domain_random_sampling(
                                requested without rejecting kinks or on a
                                layout without `LOGIC` dots. Any number of
                                sweep dimensions is accepted.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def critical_temperature_domain_flood_fill(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
@@ -1625,7 +1665,6 @@ def critical_temperature_domain_flood_fill(
         spec: Expected Boolean function of the layout given as a multi-
               output truth table.
         samples: Number of samples to perform.
-        params: Operational domain computation parameters.
         stats: Operational domain computation statistics.
 
     Returns:
@@ -1639,13 +1678,31 @@ def critical_temperature_domain_flood_fill(
                                contour tracing additionally require at
                                least two sweep dimensions; grid search and
                                random sampling accept any number.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def critical_temperature_domain_contour_tracing(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
@@ -1682,7 +1739,6 @@ def critical_temperature_domain_contour_tracing(
         spec: Expected Boolean function of the layout given as a multi-
               output truth table.
         samples: Number of samples to perform.
-        params: Operational domain computation parameters.
         stats: Operational domain computation statistics.
 
     Returns:
@@ -1696,30 +1752,31 @@ def critical_temperature_domain_contour_tracing(
                                contour tracing additionally require at
                                least two sweep dimensions; grid search and
                                random sampling accept any number.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
-
-class operational_domain_ratio_params:
-    """
-    Parameters for computing the ratio of operational parameter points
-    around a specified parameter point to the total number of parameter
-    points in the given parameter space.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def op_domain_params(self) -> operational_domain_params:
-        """Parameters for the operational domain computation."""
-
-    @op_domain_params.setter
-    def op_domain_params(self, arg: operational_domain_params, /) -> None: ...
 
 def operational_domain_ratio(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     pp: parameter_point,
-    params: operational_domain_ratio_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
 ) -> float:
     """
     Calculates the ratio of operational parameter points surrounding a
@@ -1738,7 +1795,6 @@ def operational_domain_ratio(
              the total number of parameter points.
         spec: The expected Boolean function of the layout, provided as a
               multi-output truth table.
-        params: Parameters.
         pp: The specific parameter point around which the operational
             ratio is computed.
 
@@ -1751,4 +1807,6 @@ def operational_domain_ratio(
                                a range is invalid, or the seed is non-
                                finite, outside the grid, or has the wrong
                                dimension count.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """

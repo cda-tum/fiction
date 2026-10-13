@@ -88,7 +88,7 @@ def test_simulate_all_inputs_of_and_gate(resources_dir: Path) -> None:
     """
 
     and_gate = read_sqd_layout(str(resources_dir / "Bestagon_AND_mu_025_v0.sqd"))
-    physical_parameters = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    physical_parameters: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     physical_parameters["base"] = 2
     physical_parameters["epsilon_r"] = 5.6
     physical_parameters["lambda_tf"] = 5.0  # (nm)

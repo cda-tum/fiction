@@ -90,52 +90,17 @@ class sidb_lattice_mode(enum.Enum):
     HIDE_LATTICE = 0
     """Lattice is hidden. Only SiDBs are shown."""
 
-class write_sidb_layout_svg_params:
-    """Parameters for writing SiDB layouts to SVG format."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives serialization progress."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def lattice_point_size(self) -> float:
-        """Size of the H-Si lattice points in SVG units."""
-
-    @lattice_point_size.setter
-    def lattice_point_size(self, arg: float, /) -> None: ...
-    @property
-    def sidb_size(self) -> float:
-        """Size of the SiDB in SVG units."""
-
-    @sidb_size.setter
-    def sidb_size(self, arg: float, /) -> None: ...
-    @property
-    def sidb_border_width(self) -> float:
-        """Border width of the SiDB."""
-
-    @sidb_border_width.setter
-    def sidb_border_width(self, arg: float, /) -> None: ...
-    @property
-    def color_background(self) -> color_mode:
-        """The color mode of the background for the SVG output."""
-
-    @color_background.setter
-    def color_background(self, arg: color_mode, /) -> None: ...
-    @property
-    def lattice_mode(self) -> sidb_lattice_mode:
-        """The lattice mode of the SiDB layout."""
-
-    @lattice_mode.setter
-    def lattice_mode(self, arg: sidb_lattice_mode, /) -> None: ...
-
 @overload
 def write_sidb_layout_svg(
-    layout: mnt.pyfiction.sidb.sidb_layout, filename: str, ps: write_sidb_layout_svg_params = ...
+    layout: mnt.pyfiction.sidb.sidb_layout,
+    filename: str,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    lattice_point_size: float = 0.3,
+    sidb_size: float = 0.9,
+    sidb_border_width: float = 0.3,
+    color_background: color_mode = ...,
+    lattice_mode: sidb_lattice_mode = ...,
 ) -> None:
     """
     Writes an `sidb::layout` as an SVG image. See the stream overload for
@@ -144,12 +109,13 @@ def write_sidb_layout_svg(
     Args:
         lyt: Layout to draw.
         filename: File to write into.
-        ps: Drawing parameters.
 
     Raises:
         std::ofstream::failure: if the file cannot be opened.
         std::out_of_range: if padding exceeds the lattice-site coordinate
                            range.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
@@ -157,7 +123,13 @@ def write_sidb_layout_svg(
     layout: mnt.pyfiction.sidb.sidb_layout,
     charge_distribution: mnt.pyfiction.sidb.charge_distribution,
     filename: str,
-    ps: write_sidb_layout_svg_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    lattice_point_size: float = 0.3,
+    sidb_size: float = 0.9,
+    sidb_border_width: float = 0.3,
+    color_background: color_mode = ...,
+    lattice_mode: sidb_lattice_mode = ...,
 ) -> None:
     """
     Writes an `sidb::layout` with a charge distribution as an SVG image.
@@ -167,17 +139,25 @@ def write_sidb_layout_svg(
         lyt: Layout to draw.
         cd: Charge distribution over the layout's SiDBs.
         filename: File to write into.
-        ps: Drawing parameters.
 
     Raises:
         std::invalid_argument: if the charge distribution sites differ
                                from the layout.
         std::ofstream::failure: if the file cannot be opened.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def write_sidb_layout_svg_to_string(
-    layout: mnt.pyfiction.sidb.sidb_layout, ps: write_sidb_layout_svg_params = ...
+    layout: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    lattice_point_size: float = 0.3,
+    sidb_size: float = 0.9,
+    sidb_border_width: float = 0.3,
+    color_background: color_mode = ...,
+    lattice_mode: sidb_lattice_mode = ...,
 ) -> str:
     """
     Writes an `sidb::layout` as an SVG image to a stream: the lattice
@@ -188,18 +168,25 @@ def write_sidb_layout_svg_to_string(
     Args:
         lyt: Layout to draw.
         os: Output stream to write into.
-        ps: Drawing parameters.
 
     Raises:
         std::out_of_range: if padding exceeds the lattice-site coordinate
                            range.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
 def write_sidb_layout_svg_to_string(
     layout: mnt.pyfiction.sidb.sidb_layout,
     charge_distribution: mnt.pyfiction.sidb.charge_distribution,
-    ps: write_sidb_layout_svg_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    lattice_point_size: float = 0.3,
+    sidb_size: float = 0.9,
+    sidb_border_width: float = 0.3,
+    color_background: color_mode = ...,
+    lattice_mode: sidb_lattice_mode = ...,
 ) -> str:
     """
     Writes an `sidb::layout` with a charge distribution as an SVG image to
@@ -210,11 +197,12 @@ def write_sidb_layout_svg_to_string(
         lyt: Layout to draw.
         cd: Charge distribution over the layout's SiDBs.
         os: Output stream to write into.
-        ps: Drawing parameters.
 
     Raises:
         std::invalid_argument: if the charge distribution sites differ
                                from the layout.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def print_sidb_layout(
