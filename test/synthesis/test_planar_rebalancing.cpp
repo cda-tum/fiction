@@ -318,3 +318,51 @@ TEST_CASE("An output driven directly by a node that also drives a gate", "[plana
     CHECK(count_crossings(rebalanced) == 0);
     check_equivalent(tec, rebalanced);
 }
+
+TEST_CASE("Gates with a repeated fanin and nodes with two outputs", "[planar-rebalancing]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto x3 = tec.create_pi();
+    const auto m  = tec.create_maj(x1, x2, x3);
+    // the fanout node this gate needs has both outputs on the gate: one edge per fanin slot, not per consumer
+    const auto a = tec.create_and(m, m);
+    const auto o = tec.create_or(m, x3);
+    tec.create_po(a);
+    tec.create_po(o);
+    tec.create_po(o);
+
+    const auto ranked      = rank(tec);
+    const auto substituted = planar_fanout_substitution(ranked);
+    REQUIRE(count_crossings(substituted) == 0);
+
+    const auto rebalanced = planar_rebalancing(substituted);
+
+    check_contract(tec, rebalanced);
+    CHECK(rebalanced.num_pos() == 3);
+    CHECK(count_chain_buffers(rebalanced) <= count_chain_buffers(substituted));
+}
+
+TEST_CASE("Primary inputs without fanout are kept", "[planar-rebalancing]")
+{
+    technology_network tec{};
+
+    const auto unused = tec.create_pi();
+    const auto x1     = tec.create_pi();
+    const auto x2     = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x2));
+    tec.create_po(tec.create_not(x2));
+
+    const auto ranked = rank(tec);
+    REQUIRE(count_crossings(ranked) == 0);
+
+    const auto rebalanced = planar_rebalancing(planar_fanout_substitution(ranked));
+
+    check_contract(tec, rebalanced);
+    CHECK(rebalanced.num_pis() == 3);
+    CHECK(rebalanced.rank_width(0) == 3);
+    CHECK(rebalanced.fanout_size(rebalanced.pi_at(0)) == 0);
+    CHECK(tec.fanout_size(tec.get_node(unused)) == 0);
+}

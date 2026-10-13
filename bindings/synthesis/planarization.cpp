@@ -244,8 +244,14 @@ Returns:
     those inputs together when simulating or checking equivalence.
 
 Raises:
-    ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, or if a gate
-        drives no output (remove such gates first, e.g., with `cleanup_dangling`).)doc",
+    ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if a gate
+        drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `params.fanout_degree` is
+        below 2, or if the duplication parameters are invalid (a lookahead budget of zero, a negative or
+        non-finite cost weight).
+    RuntimeError: If more than `params.duplication.max_duplications` nodes were duplicated, if a rank has more
+        than `params.duplication.max_crossings_per_rank` crossings, or if a stage cannot keep its contract. Note
+        that `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth
+        of the network.)doc",
         py::call_guard<py::gil_scoped_release>());
 }
 

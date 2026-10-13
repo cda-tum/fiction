@@ -171,7 +171,8 @@ their own.
 
 `planarization` runs the whole pipeline: node duplication with the chosen strategy, crossing gates for the levels the
 hybrid strategy left crossed, planar fanout substitution, and planar rebalancing. The pipeline defaults to the hybrid
-strategy with the lookahead criterion, which produced the fewest nodes on the benchmark sets.
+strategy with the lookahead criterion and XOR crossing gates; the planarization experiment in `experiments/` runs
+this default configuration on the benchmark sets and checks every result for equivalence.
 
 ::::{tab-set}
 :sync-group: language
@@ -209,6 +210,9 @@ virtual inputs; see its docstring below.
    :members:
 
 .. autoclass:: mnt.pyfiction.synthesis.planarization_strategy
+   :members:
+
+.. autoclass:: mnt.pyfiction.synthesis.output_order
    :members:
 
 .. autoclass:: mnt.pyfiction.synthesis.decision_criterion

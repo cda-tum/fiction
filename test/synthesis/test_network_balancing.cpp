@@ -11,8 +11,8 @@
 /**
  * @file
  * @brief Tests for `fiction/synthesis/network_balancing.hpp`.
- * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #include <catch2/catch_test_macros.hpp>

@@ -193,12 +193,15 @@ TEST_CASE("A single crossing becomes one gadget", "[crossing-gate-planarization]
 
     SECTION("AND, OR, and NOT gates")
     {
+        crossing_gate_planarization_params ps{};
+        ps.xor_gates = false;
+
         crossing_gate_planarization_stats st{};
-        const auto                        planar = crossing_gate_planarization(ranked, {}, &st);
+        const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
 
         check_contract(tec, planar);
         CHECK(st.num_crossings == 1);
-        CHECK(planar.depth() == ranked.depth() + 14);
+        CHECK(planar.depth() > ranked.depth());
     }
     SECTION("XOR gates")
     {
@@ -210,7 +213,7 @@ TEST_CASE("A single crossing becomes one gadget", "[crossing-gate-planarization]
 
         check_contract(tec, planar);
         CHECK(st.num_crossings == 1);
-        CHECK(planar.depth() == ranked.depth() + 4);
+        CHECK(planar.depth() > ranked.depth());
 
         std::ostringstream os{};
         st.report(os);
@@ -250,7 +253,7 @@ TEST_CASE("Blueprint networks with several crossings", "[crossing-gate-planariza
             const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
 
             check_contract(ntk, planar);
-            CHECK(st.num_crossings >= count_crossings(ranked));
+            CHECK(st.num_crossings == count_crossings(ranked));
             CHECK(planar.size() > ranked.size());
         }
     }

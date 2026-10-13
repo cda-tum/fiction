@@ -18,9 +18,11 @@
 
 #include "fiction/networks/virtual_pi_network.hpp"
 #include "fiction/synthesis/crossing_gate_planarization.hpp"
+#include "fiction/synthesis/network_balancing.hpp"
 #include "fiction/synthesis/node_duplication_planarization.hpp"
 #include "fiction/synthesis/planar_fanout_substitution.hpp"
 #include "fiction/synthesis/planar_rebalancing.hpp"
+#include "fiction/utils/graph/mincross.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
@@ -30,6 +32,7 @@
 #include <cstdint>
 #include <iostream>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 
 namespace fiction::synthesis
@@ -45,24 +48,14 @@ struct planarization_params
      */
     utils::progress_callback on_progress{};
     /**
-     * Default parameters of the node duplication stage: the hybrid strategy, which yields the fewest nodes.
-     *
-     * @return Node duplication parameters with the hybrid strategy selected.
-     */
-    [[nodiscard]] static node_duplication_planarization_params hybrid_duplication() noexcept
-    {
-        node_duplication_planarization_params ps{};
-        ps.strategy = node_duplication_planarization_params::planarization_strategy::HYBRID;
-
-        return ps;
-    }
-    /**
      * Parameters of the node duplication stage, including the strategy and the gadget type of the crossing gates.
-     * The pipeline defaults to the hybrid strategy, which yields the fewest nodes.
+     * The pipeline defaults to the hybrid strategy, which decides per level between duplicating nodes and keeping the
+     * crossings for the crossing gates.
      */
-    node_duplication_planarization_params duplication = hybrid_duplication();
+    node_duplication_planarization_params duplication{
+        .strategy = node_duplication_planarization_params::planarization_strategy::HYBRID};
     /**
-     * Maximum output degree of the fanout nodes in the result.
+     * Maximum output degree of the fanout nodes in the result. Must be at least 2.
      */
     uint32_t fanout_degree = 2u;
 };
@@ -116,8 +109,10 @@ struct planarization_stats
  * @param ps Parameters.
  * @param pst Statistics.
  * @return Planar `virtual_pi_network` with unified outputs and fanout nodes of at most `fanout_degree` outputs.
- * @throws std::invalid_argument If `ntk` is not balanced or contains virtual primary inputs.
- * @throws std::runtime_error If a stage cannot keep its contract, see the stages' documentation.
+ * @throws std::invalid_argument If `ps.fanout_degree` is below 2, or if `ntk` is not balanced with unified outputs,
+ * contains virtual primary inputs, or violates another precondition of `node_duplication_planarization`.
+ * @throws std::runtime_error If a stage cannot keep its contract (see the stages' documentation), or if the result is
+ * not planar or not balanced with unified outputs after all.
  */
 template <typename Ntk>
 [[nodiscard]] networks::virtual_pi_network<Ntk> planarization(const Ntk& ntk, const planarization_params& ps = {},
@@ -125,6 +120,12 @@ template <typename Ntk>
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
+
+    // checked up front, so that the stages before the fanout substitution do not run for nothing
+    if (ps.fanout_degree < 2)
+    {
+        throw std::invalid_argument("The fanout degree must be at least 2");
+    }
 
     planarization_stats st{};
 
@@ -160,6 +161,25 @@ template <typename Ntk>
         rb_ps.on_progress = progress;
 
         result.emplace(planar_rebalancing(planar_fanout_substitution(planar, fs_ps), rb_ps));
+
+        // the stages keep their contracts by construction; a cheap check turns any slip into an error rather than
+        // a silently wrong result
+        utils::graph::mincross_params mc_ps{};
+        mc_ps.optimize = false;
+        utils::graph::mincross_stats mc_st{};
+
+        utils::graph::mincross(*result, mc_ps, &mc_st);
+
+        if (mc_st.num_crossings != 0)
+        {
+            throw std::runtime_error(
+                fmt::format("Planarization failed: the result contains {} crossings", mc_st.num_crossings));
+        }
+
+        if (!is_balanced(*result, {.unify_outputs = true, .buffer_constant_outputs = false}))
+        {
+            throw std::runtime_error("Planarization failed: the result is not balanced with unified outputs");
+        }
 
         st.num_nodes = result->size();
     }

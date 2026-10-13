@@ -883,11 +883,11 @@ class decision_criterion(enum.Enum):
 
     LOOKAHEAD = 1
     """
-    The number of nodes that duplicating the rest of the network actually
-    creates, measured by running the duplication strategy on the levels
-    below for both options and stopping once one exceeds the other. On the
-    benchmark sets this is never worse and up to 16 % better than the
-    weighted cone at the same runtime.
+    The number of nodes that duplicating actually creates: the copies on
+    the level plus those that running the duplication strategy on the
+    levels below creates. Both options are run, and the second run stops
+    once it exceeds the first. Levels whose runs exceed `lookahead_budget`
+    fall back to `WEIGHTED_CONE`.
     """
 
 class output_order(enum.Enum):
@@ -916,6 +916,8 @@ class duplication_cost_model:
     because duplicates on deep levels are duplicated again by the
     decisions below. The weights are in units of one crossing gadget node.
     The defaults were determined empirically on the benchmark sets.
+    Weights must be finite and non-negative, the growth finite and
+    positive.
     """
 
     def __init__(self) -> None:
@@ -965,7 +967,8 @@ class node_duplication_planarization_params:
     def xor_gates(self) -> bool:
         """
         Whether the subsequent `crossing_gate_planarization` builds its
-        gadgets from XOR gates. Sets the gadget cost of the hybrid strategy.
+        gadgets from XOR gates, which are smaller and shallower than the AND-
+        OR-NOT gadgets. Sets the gadget cost of the hybrid strategy.
         """
 
     @xor_gates.setter
@@ -999,7 +1002,8 @@ class node_duplication_planarization_params:
     def lookahead_budget(self) -> int:
         """
         Nodes a lookahead may create before it is cut off; levels whose both
-        options exceed it fall back to the weighted cone model.
+        options exceed it fall back to the weighted cone model. Must be
+        positive.
         """
 
     @lookahead_budget.setter
@@ -1007,9 +1011,11 @@ class node_duplication_planarization_params:
     @property
     def max_duplications(self) -> int:
         """
-        Abort with `std::runtime_error` once more nodes than this have been
-        duplicated. Node duplication can grow exponentially with the depth of
-        the network; 0 disables the limit.
+        Abort with `std::runtime_error` as soon as more nodes than this have
+        been duplicated. Node duplication can grow exponentially with the
+        depth of the network, so the limit is checked at every duplicate. `0`
+        disables the limit, which may exhaust the memory on an adverse
+        network.
         """
 
     @max_duplications.setter
@@ -1047,14 +1053,18 @@ class planarization_params:
         """
         Parameters of the node duplication stage, including the strategy and
         the gadget type of the crossing gates. The pipeline defaults to the
-        hybrid strategy, which yields the fewest nodes.
+        hybrid strategy, which decides per level between duplicating nodes and
+        keeping the crossings for the crossing gates.
         """
 
     @duplication.setter
     def duplication(self, arg: node_duplication_planarization_params, /) -> None: ...
     @property
     def fanout_degree(self) -> int:
-        """Maximum output degree of the fanout nodes in the result."""
+        """
+        Maximum output degree of the fanout nodes in the result. Must be at
+        least 2.
+        """
 
     @fanout_degree.setter
     def fanout_degree(self, arg: int, /) -> None: ...
@@ -1109,6 +1119,12 @@ def planarization(
         those inputs together when simulating or checking equivalence.
 
     Raises:
-        ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, or if a gate
-            drives no output (remove such gates first, e.g., with `cleanup_dangling`).
+        ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if a gate
+            drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `params.fanout_degree` is
+            below 2, or if the duplication parameters are invalid (a lookahead budget of zero, a negative or
+            non-finite cost weight).
+        RuntimeError: If more than `params.duplication.max_duplications` nodes were duplicated, if a rank has more
+            than `params.duplication.max_crossings_per_rank` crossings, or if a stage cannot keep its contract. Note
+            that `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth
+            of the network.
     """

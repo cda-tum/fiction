@@ -11,8 +11,8 @@
 /**
  * @file
  * @brief Tests for `fiction/networks/network_utils.hpp`.
- * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -186,44 +186,4 @@ TEST_CASE("Initialize a copy network with virtual primary inputs", "[network-uti
         CHECK(copies == dest_pis);
         CHECK(copies.size() == 3);
     }
-}
-
-TEST_CASE("Barycenters of ranked nodes", "[network-utils]")
-{
-    technology_network tec{};
-
-    const auto x1 = tec.create_pi();
-    const auto x2 = tec.create_pi();
-    const auto x3 = tec.create_pi();
-    const auto a1 = tec.create_and(x1, x3);  // fanins at rank positions 0 and 2
-    const auto b1 = tec.create_buf(x2);      // fanin at rank position 1
-    const auto c1 = tec.create_and(tec.get_constant(true), x3);
-    tec.create_po(a1);
-    tec.create_po(b1);
-    tec.create_po(c1);
-
-    const views::mutable_rank_view ranked{tec};
-
-    REQUIRE(ranked.rank_position(tec.get_node(x1)) == 0);
-    REQUIRE(ranked.rank_position(tec.get_node(x2)) == 1);
-    REQUIRE(ranked.rank_position(tec.get_node(x3)) == 2);
-
-    const auto centers = barycenters(ranked, {tec.get_node(a1), tec.get_node(b1), tec.get_node(c1)});
-
-    REQUIRE(centers.size() == 3);
-    CHECK(centers[0] == 1.0);
-    CHECK(centers[1] == 1.0);
-    CHECK(centers[2] == 2.0);  // the constant fanin is ignored
-
-    CHECK(barycenters(ranked, {}).empty());
-
-    // a node whose only fanin is constant has barycenter 0
-    technology_network constant_only{};
-    const auto         y  = constant_only.create_pi();
-    const auto         nc = constant_only.create_not(constant_only.get_constant(false));
-    constant_only.create_po(constant_only.create_and(y, nc));
-
-    const views::mutable_rank_view ranked_constant{constant_only};
-
-    CHECK(barycenters(ranked_constant, {constant_only.get_node(nc)}) == std::vector<double>{0.0});
 }

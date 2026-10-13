@@ -83,10 +83,6 @@ views/views
 
 ```
 
-```{doxygenfunction} fiction::networks::barycenters
-
-```
-
 :::
 
 :::{tab-item} Python

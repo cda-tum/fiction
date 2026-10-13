@@ -55,9 +55,10 @@ struct crossing_gate_planarization_params
      * Build crossing gadgets from XOR gates (three XORs, four levels) instead of AND, OR, and NOT gates (fourteen
      * levels).
      */
-    bool xor_gates = false;
+    bool xor_gates = true;
     /**
-     * Ranks with more crossings than this are rejected, since the number of gadgets grows with the crossings.
+     * Ranks with more crossings than this are rejected, since the number of gadgets grows with the crossings. The
+     * limit bounds the gadgets of a rank, not the buffers that every pass adds along the other edges of the rank.
      */
     uint32_t max_crossings_per_rank = 1000u;
 };
@@ -279,11 +280,6 @@ class crossing_gate_planarization_impl
         std::vector<edge> edges{};
     };
     /**
-     * Depth of one crossing gadget, including the buffers that align the edges it is placed on.
-     *
-     * @return Number of levels a gadget occupies.
-     */
-    /**
      * Levels an input of the XOR gadget is delayed by so that it meets the buffered XOR of both inputs: the XOR and its
      * buffer.
      */
@@ -298,7 +294,12 @@ class crossing_gate_planarization_impl
      * inputs: the XOR of depth six and its buffer.
      */
     static constexpr uint32_t AND_OR_CORE_DELAY = 7u;
-    [[nodiscard]] uint32_t    gadget_depth() const noexcept
+    /**
+     * Depth of one crossing gadget, including the buffers that align the edges it is placed on.
+     *
+     * @return Number of levels a gadget occupies.
+     */
+    [[nodiscard]] uint32_t gadget_depth() const noexcept
     {
         return static_cast<uint32_t>(ps.xor_gates ? XOR_GADGET_DEPTH : AND_OR_GADGET_DEPTH);
     }
@@ -326,7 +327,7 @@ class crossing_gate_planarization_impl
 
             ntk.foreach_node_in_rank(
                 r,
-                [this, &rank_stage, &swept, &max_pos, &rank_crossings](const auto& n)
+                [this, &rank_stage, &swept, &max_pos, &rank_crossings, r](const auto& n)
                 {
                     std::vector<edge> targets{};
                     targets.reserve(fanout_ntk.fanout_size(n));
@@ -350,6 +351,15 @@ class crossing_gate_planarization_impl
                                 rank_stage.crossings.push_back({prev_edge, e, level});
                                 ++rank_crossings;
 
+                                // checked per crossing, so that a rank far above the limit does not fill the memory
+                                // the limit is meant to protect
+                                if (rank_crossings > ps.max_crossings_per_rank)
+                                {
+                                    throw std::runtime_error(
+                                        fmt::format("Rank {} has more than the {} crossings allowed", r,
+                                                    ps.max_crossings_per_rank));
+                                }
+
                                 local_lvl = std::max(local_lvl, prev_lvl) + 1;
                                 ++prev_lvl;
                             }
@@ -365,12 +375,6 @@ class crossing_gate_planarization_impl
                         swept[pos].push_front({e, 0});
                     }
                 });
-
-            if (rank_crossings > ps.max_crossings_per_rank)
-            {
-                throw std::runtime_error(fmt::format("Rank {} has {} crossings, more than the {} allowed", r,
-                                                     rank_crossings, ps.max_crossings_per_rank));
-            }
 
             pst.num_crossings += rank_crossings;
 

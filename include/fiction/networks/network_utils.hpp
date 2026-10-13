@@ -537,43 +537,4 @@ initialize_copy_network_with_virtual_pis(const Ntk& src)
     return {dest, old2new};
 }
 
-/**
- * Computes the barycenter of every node in `nodes`: the mean rank position of its non-constant fanins, or 0 for a
- * node without such fanins.
- *
- * @tparam Ntk Ranked network type.
- * @param ntk Ranked network.
- * @param nodes Nodes of one rank.
- * @return Barycenters, aligned with `nodes`.
- */
-template <typename Ntk>
-[[nodiscard]] std::vector<double> barycenters(const Ntk& ntk, const std::vector<mockturtle::node<Ntk>>& nodes)
-{
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-    static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
-
-    std::vector<double> result{};
-    result.reserve(nodes.size());
-
-    for (const auto& n : nodes)
-    {
-        double   sum   = 0.0;
-        uint32_t count = 0;
-
-        ntk.foreach_fanin(n,
-                          [&ntk, &sum, &count](const auto& f)
-                          {
-                              if (const auto fn = ntk.get_node(f); !ntk.is_constant(fn))
-                              {
-                                  sum += static_cast<double>(ntk.rank_position(fn));
-                                  ++count;
-                              }
-                          });
-
-        result.push_back(count == 0 ? 0.0 : sum / static_cast<double>(count));
-    }
-
-    return result;
-}
-
 }  // namespace fiction::networks

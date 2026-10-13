@@ -93,9 +93,9 @@ struct node_duplication_planarization_params
          */
         WEIGHTED_CONE,
         /**
-         * The number of nodes that duplicating the rest of the network actually creates, measured by running the
-         * duplication strategy on the levels below for both options and stopping once one exceeds the other. On the
-         * benchmark sets this is never worse and up to 16 % better than the weighted cone at the same runtime.
+         * The number of nodes that duplicating actually creates: the copies on the level plus those that running
+         * the duplication strategy on the levels below creates. Both options are run, and the second run stops once
+         * it exceeds the first. Levels whose runs exceed `lookahead_budget` fall back to `WEIGHTED_CONE`.
          */
         LOOKAHEAD
     };
@@ -105,7 +105,8 @@ struct node_duplication_planarization_params
      * along. A gate weighs `node_weight` and a chain buffer or inverter weighs `buffer_weight`. The sum is scaled by
      * \f$\text{depth\_growth}^{d}\f$ for a duplication on level \f$d\f$, because duplicates on deep levels are
      * duplicated again by the decisions below. The weights are in units of one crossing gadget node. The defaults
-     * were determined empirically on the benchmark sets.
+     * were determined empirically on the benchmark sets. Weights must be finite and non-negative, the growth finite
+     * and positive.
      */
     struct duplication_cost_model
     {
@@ -144,10 +145,10 @@ struct node_duplication_planarization_params
      */
     uint32_t max_swaps = 32u;
     /**
-     * Whether the subsequent `crossing_gate_planarization` builds its gadgets from XOR gates. Sets the gadget cost
-     * of the hybrid strategy.
+     * Whether the subsequent `crossing_gate_planarization` builds its gadgets from XOR gates, which are smaller and
+     * shallower than the AND-OR-NOT gadgets. Sets the gadget cost of the hybrid strategy.
      */
-    bool xor_gates = false;
+    bool xor_gates = true;
     /**
      * Levels with more crossings are always duplicated in the hybrid strategy, matching the limit of
      * `crossing_gate_planarization`.
@@ -163,14 +164,15 @@ struct node_duplication_planarization_params
     duplication_cost_model duplication_cost{};
     /**
      * Nodes a lookahead may create before it is cut off; levels whose both options exceed it fall back to the
-     * weighted cone model.
+     * weighted cone model. Must be positive.
      */
     uint64_t lookahead_budget = 1000000u;
     /**
-     * Abort with `std::runtime_error` once more nodes than this have been duplicated. Node duplication can grow
-     * exponentially with the depth of the network; 0 disables the limit.
+     * Abort with `std::runtime_error` as soon as more nodes than this have been duplicated. Node duplication can
+     * grow exponentially with the depth of the network, so the limit is checked at every duplicate. `0` disables the
+     * limit, which may exhaust the memory on an adverse network.
      */
-    uint64_t max_duplications = 0u;
+    uint64_t max_duplications = 2000000u;
 };
 
 /**
@@ -260,6 +262,12 @@ struct hgraph_node
      * consumers; the tie-break among equally short paths prefers the heaviest sum.
      */
     double shared_weight{0.0};
+    /**
+     * Whether `first_fanin` and the last fanin of the predecessor on the shortest path are different nodes that share
+     * a fanin in the level below; the last tie-break prefers such paths, since placing the two side by side avoids a
+     * duplication there.
+     */
+    bool shares_below{false};
     /**
      * Creates an H-graph node.
      *
@@ -404,9 +412,10 @@ class node_duplication_planarization_impl
      * If so, the level is replaced by its original rank order and the statistics count the kept crossings.
      *
      * @param next_level Level below the current one as the duplication computed it; replaced if crossings are kept.
+     * @param copies_on_level Number of duplicates in `next_level`.
      * @return `true` iff the level keeps its crossings.
      */
-    [[nodiscard]] bool keep_crossings(std::vector<mockturtle::node<Ntk>>& next_level)
+    [[nodiscard]] bool keep_crossings(std::vector<mockturtle::node<Ntk>>& next_level, const uint64_t copies_on_level)
     {
         if (ps.strategy != node_duplication_planarization_params::planarization_strategy::HYBRID)
         {
@@ -419,7 +428,7 @@ class node_duplication_planarization_impl
         auto       original_rank = ntk.get_ranks(lvl);
         const auto cross_cost    = crossing_cost(levels.back(), original_rank);
 
-        if (!crossings_are_cheaper(cross_cost.cost, next_level, original_rank, lvl))
+        if (!crossings_are_cheaper(cross_cost.cost, next_level, original_rank, lvl, copies_on_level))
         {
             return false;
         }
@@ -449,36 +458,35 @@ class node_duplication_planarization_impl
         crossing_level.push_back(false);
         progress.advance();
 
-        std::size_t copies_before = copy_origin.size();
-
-        auto next_level = next_level_of(pos);
-        bool at_inputs  = is_final_level(next_level);
-
-        while (!next_level.empty() && !at_inputs)
+        // outputs that inputs drive directly form the only level; there is nothing below them to order
+        if (!is_final_level(pos))
         {
-            // the hybrid strategy considers keeping the crossings of a level instead of its duplicates
-            const bool crossings = copy_origin.size() > copies_before && keep_crossings(next_level);
+            std::size_t copies_before = copy_origin.size();
 
-            levels.push_back(next_level);
-            crossing_level.push_back(crossings);
+            auto next_level = next_level_of(pos);
+            bool at_inputs  = is_final_level(next_level);
 
-            copies_before = copy_origin.size();
-            next_level    = next_level_of(next_level);
-            at_inputs     = is_final_level(next_level);
-            progress.advance();
-
-            if (ps.max_duplications > 0 && copy_origin.size() > ps.max_duplications)
+            while (!next_level.empty() && !at_inputs)
             {
-                throw std::runtime_error(
-                    fmt::format("Planarization aborted: more than {} duplications", ps.max_duplications));
-            }
-        }
+                // the hybrid strategy considers keeping the crossings of a level instead of its duplicates
+                const auto copies_on_level = copy_origin.size() - copies_before;
+                const bool crossings       = copies_on_level > 0 && keep_crossings(next_level, copies_on_level);
 
-        // the final level holds the primary inputs
-        if (at_inputs)
-        {
-            levels.push_back(next_level);
-            crossing_level.push_back(false);
+                levels.push_back(next_level);
+                crossing_level.push_back(crossings);
+
+                copies_before = copy_origin.size();
+                next_level    = next_level_of(next_level);
+                at_inputs     = is_final_level(next_level);
+                progress.advance();
+            }
+
+            // the final level holds the primary inputs
+            if (at_inputs)
+            {
+                levels.push_back(next_level);
+                crossing_level.push_back(false);
+            }
         }
 
         auto planar_ntk = build_network();
@@ -512,6 +520,12 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] mockturtle::node<Ntk> make_copy(const mockturtle::node<Ntk> n)
     {
+        if (ps.max_duplications > 0 && copy_origin.size() >= ps.max_duplications)
+        {
+            throw std::runtime_error(
+                fmt::format("Planarization aborted: more than {} duplications", ps.max_duplications));
+        }
+
         copy_origin.push_back(n);
         fanins_of.emplace_back();
 
@@ -545,8 +559,8 @@ class node_duplication_planarization_impl
      * shortest path duplicates the same number of nodes but not the same nodes: where consecutive consumers share
      * several fanins, only one is placed once between them and the others are copied. Ties between equal delays are
      * therefore broken in favour of the path whose shared fanins have the heaviest cones, so that the copies drag the
-     * lightest cones along, and then in favour of orderings that share a fanin in the level below, which avoids a
-     * duplication there. The slice is appended to `hgraph`.
+     * lightest cones along, and then in favour of paths that place two different fanins with a common fanin in the
+     * level below side by side, which avoids a duplication there. The slice is appended to `hgraph`.
      *
      * @param n Node (source id or copy id) whose fanins form the slice.
      */
@@ -595,7 +609,9 @@ class node_duplication_planarization_impl
                 // the cone weight of the fanin this ordering can share with the previous one
                 const double share = cone_weight(cur.first_fanin);
 
-                // relax every edge from the previous slice: a shared fanin costs one placement, otherwise two
+                // relax every edge from the previous slice: a shared fanin costs one placement, otherwise two. Three
+                // keys decide: the shorter path, among equally short ones the heavier shared cone, and among those
+                // a path whose adjacent fanins share a fanin in the level below
                 for (std::size_t last_idx = 0; last_idx < previous.size(); ++last_idx)
                 {
                     const auto& last = previous[last_idx];
@@ -604,19 +620,29 @@ class node_duplication_planarization_impl
                     const auto   delay  = last.delay + (shares ? 1 : 2);
                     const double weight = last.shared_weight + (shares ? share : 0.0);
 
-                    // shorter path, or equally short with a heavier shared cone
-                    if (delay < cur.delay || (delay == cur.delay && weight > cur.shared_weight + WEIGHT_TOLERANCE))
+                    bool better = false;
+                    bool below  = false;
+
+                    if (delay != cur.delay)
+                    {
+                        better = delay < cur.delay;
+                    }
+                    else if (std::abs(weight - cur.shared_weight) > WEIGHT_TOLERANCE)
+                    {
+                        better = weight > cur.shared_weight;
+                    }
+                    else
+                    {
+                        below  = !shares && share_fanin(cur.first_fanin, last.last_fanin);
+                        better = below && !cur.shares_below;
+                    }
+
+                    if (better)
                     {
                         cur.predecessor   = last_idx;
                         cur.delay         = delay;
                         cur.shared_weight = weight;
-                    }
-                    else if (!shares && delay == cur.delay &&
-                             std::abs(weight - cur.shared_weight) <= WEIGHT_TOLERANCE &&
-                             last.predecessor < previous.size() && share_fanin(cur.first_fanin, last.last_fanin))
-                    {
-                        cur.predecessor = last_idx;
-                        break;
+                        cur.shares_below  = below || (!shares && share_fanin(cur.first_fanin, last.last_fanin));
                     }
                 }
             }
@@ -832,6 +858,26 @@ class node_duplication_planarization_impl
                 dest.create_po(ntk.is_complemented(po) ? dest.create_not(sig) : sig);
             });
 
+        // an input that drives nothing is reached from no output, so no level holds it; it belongs to rank 0 of the
+        // result all the same, after the inputs the duplication placed
+        if (!levels.empty() && is_final_level(levels.back()))
+        {
+            std::vector<bool> placed(ntk.size(), false);
+            for (const auto& n : levels.back())
+            {
+                placed[origin(n)] = true;
+            }
+
+            ntk.foreach_pi_unranked(
+                [&placed, &old2new, &dest, &inputs = lvls_new.back()](const auto& n)
+                {
+                    if (!placed[n])
+                    {
+                        inputs.push_back(dest.get_node(old2new[n]));
+                    }
+                });
+        }
+
         // `levels` starts at the primary outputs; ranks start at the primary inputs
         std::reverse(lvls_new.begin(), lvls_new.end());
 
@@ -897,12 +943,13 @@ class node_duplication_planarization_impl
      * @param duplicated The level as the duplication strategy would build it, duplicates as copy ids.
      * @param crossed The level in its crossing-minimized source order.
      * @param lvl Level in the source network.
+     * @param copies_on_level Number of duplicates in `duplicated`.
      * @return `true` iff the crossings are cheaper.
      */
     [[nodiscard]] bool crossings_are_cheaper(const uint64_t                            gadget_cost,
                                              const std::vector<mockturtle::node<Ntk>>& duplicated,
-                                             const std::vector<mockturtle::node<Ntk>>& crossed,
-                                             const uint32_t                            lvl) const
+                                             const std::vector<mockturtle::node<Ntk>>& crossed, const uint32_t lvl,
+                                             const uint64_t copies_on_level) const
     {
         if (gadget_cost == std::numeric_limits<uint64_t>::max())
         {
@@ -911,14 +958,22 @@ class node_duplication_planarization_impl
 
         if (ps.criterion == node_duplication_planarization_params::decision_criterion::LOOKAHEAD)
         {
-            // what the rest of the network costs after each option; the second run stops once it loses
+            // what each option costs in nodes: the gadgets or the copies on this level, plus what the duplication
+            // strategy creates below it; the second run stops once it loses
             const auto below_crossed = copies_below(crossed, ps.lookahead_budget);
 
             if (below_crossed <= ps.lookahead_budget)
             {
                 const auto crossing_total = gadget_cost + below_crossed;
 
-                return copies_below(duplicated, crossing_total) > crossing_total;
+                if (copies_on_level > crossing_total)
+                {
+                    return true;
+                }
+
+                const auto remaining = crossing_total - copies_on_level;
+
+                return copies_below(duplicated, remaining) > remaining;
             }
 
             if (copies_below(duplicated, ps.lookahead_budget) <= ps.lookahead_budget)
@@ -940,7 +995,8 @@ class node_duplication_planarization_impl
     [[nodiscard]] uint64_t copies_below(const std::vector<mockturtle::node<Ntk>>& level, const uint64_t budget) const
     {
         node_duplication_planarization_params sub_ps{};
-        sub_ps.strategy = node_duplication_planarization_params::planarization_strategy::DUPLICATION;
+        sub_ps.strategy         = node_duplication_planarization_params::planarization_strategy::DUPLICATION;
+        sub_ps.max_duplications = 0;  // the budget cuts the run off
 
         node_duplication_planarization_stats sub_st{};
 
@@ -1211,7 +1267,8 @@ class node_duplication_planarization_impl
     }
     /**
      * Orders a level by the barycenters of the positions its nodes are used from in the upper level, then applies up
-     * to `max_swaps` adjacent swaps that reduce the crossing count.
+     * to `max_swaps` adjacent swaps that reduce the crossing count. A swap of two neighbours only changes the
+     * crossings between their own edges, so each candidate is evaluated on those edges alone.
      *
      * @param upper Nodes of the upper level, duplicates as copy ids.
      * @param lower Nodes of the lower level, source ids; reordered.
@@ -1226,30 +1283,64 @@ class node_duplication_planarization_impl
 
         const auto pos = positions(lower);
 
-        std::vector<double>   sum(lower.size(), 0.0);
-        std::vector<uint32_t> count(lower.size(), 0);
+        // positions in the upper level that use each node of the lower level, one entry per edge
+        std::vector<std::vector<std::size_t>> users(lower.size());
 
         for (std::size_t t = 0; t < upper.size(); ++t)
         {
-            ntk.foreach_fanin(origin(upper[t]),
-                              [this, &pos, &sum, &count, t](const auto& f)
-                              {
-                                  if (const auto p = pos[ntk.get_node(f)]; p != std::numeric_limits<std::size_t>::max())
-                                  {
-                                      sum[p] += static_cast<double>(t);
-                                      ++count[p];
-                                  }
-                              });
+            for (const auto p : fanin_positions(upper[t], pos))
+            {
+                users[p].push_back(t);
+            }
         }
 
         std::vector<std::size_t> order(lower.size());
         std::iota(order.begin(), order.end(), 0u);
 
-        const auto key = [&sum, &count](const std::size_t i)
-        { return count[i] > 0 ? sum[i] / static_cast<double>(count[i]) : static_cast<double>(i); };
+        const auto key = [&users](const std::size_t i)
+        {
+            if (users[i].empty())
+            {
+                return static_cast<double>(i);
+            }
+
+            return static_cast<double>(std::accumulate(users[i].cbegin(), users[i].cend(), std::size_t{0})) /
+                   static_cast<double>(users[i].size());
+        };
 
         std::stable_sort(order.begin(), order.end(),
                          [&key](const std::size_t a, const std::size_t b) { return key(a) < key(b); });
+
+        // crossings between the edges of two nodes of the lower level, the first standing left of the second: an
+        // edge of the left node crosses every edge of the right node that ends further left in the upper level
+        const auto crossings_between = [&users](const std::size_t left, const std::size_t right)
+        {
+            uint64_t count = 0;
+
+            for (const auto a : users[left])
+            {
+                for (const auto b : users[right])
+                {
+                    if (a > b)
+                    {
+                        ++count;
+                    }
+                }
+            }
+
+            return count;
+        };
+
+        uint32_t swaps = 0;
+
+        for (std::size_t i = 0; i + 1 < order.size() && swaps < ps.max_swaps; ++i)
+        {
+            if (crossings_between(order[i + 1], order[i]) < crossings_between(order[i], order[i + 1]))
+            {
+                std::swap(order[i], order[i + 1]);
+                ++swaps;
+            }
+        }
 
         std::vector<mockturtle::node<Ntk>> sorted{};
         sorted.reserve(lower.size());
@@ -1258,24 +1349,6 @@ class node_duplication_planarization_impl
             sorted.push_back(lower[i]);
         }
         lower = std::move(sorted);
-
-        auto     current = count_crossings(upper, lower);
-        uint32_t swaps   = 0;
-
-        for (std::size_t i = 0; i + 1 < lower.size() && swaps < ps.max_swaps; ++i)
-        {
-            std::swap(lower[i], lower[i + 1]);
-
-            if (const auto candidate = count_crossings(upper, lower); candidate < current)
-            {
-                current = candidate;
-                ++swaps;
-            }
-            else
-            {
-                std::swap(lower[i], lower[i + 1]);
-            }
-        }
     }
     /**
      * Costs keeping the crossings between the upper level and a level in its original order: the level is reordered
@@ -1284,7 +1357,7 @@ class node_duplication_planarization_impl
      *
      * @param upper Nodes of the upper level, duplicates as copy ids.
      * @param lower Nodes of the lower level in source order; reordered.
-     * @return Cost and crossing count; the cost is infinite above `max_crossings_per_rank`.
+     * @return Cost and crossing count; the cost is infinite above `max_crossings_per_rank`, where counting stops.
      */
     [[nodiscard]] crossing_cost_result crossing_cost(const std::vector<mockturtle::node<Ntk>>& upper,
                                                      std::vector<mockturtle::node<Ntk>>&       lower) const
@@ -1321,6 +1394,13 @@ class node_duplication_planarization_impl
                     for (auto& [prev_key, prev_count] : swept[k])
                     {
                         ++num_crossings;
+
+                        // a level this crossed is always duplicated; no need to cost it
+                        if (num_crossings > ps.max_crossings_per_rank)
+                        {
+                            return {std::numeric_limits<uint64_t>::max(), num_crossings};
+                        }
+
                         ++prev_count;
                         ++per_edge[prev_key];
                         ++per_edge[key];
@@ -1334,11 +1414,6 @@ class node_duplication_planarization_impl
                 max_pos = std::max(max_pos, p);
                 swept[p].emplace_back(edge_key(n, p), 0);
             }
-        }
-
-        if (num_crossings > ps.max_crossings_per_rank)
-        {
-            return {std::numeric_limits<uint64_t>::max(), num_crossings};
         }
 
         uint64_t cost = num_crossings * gadget_nodes();
@@ -1425,7 +1500,8 @@ class node_duplication_planarization_impl
  * @param pst Statistics.
  * @return `virtual_pi_network` that computes the same functions as `ntk`; planar with the duplication strategy.
  * @throws std::invalid_argument If `ntk` is not balanced with unified outputs, contains virtual primary inputs, or
- * has a gate whose fanins are all constants.
+ * has a gate whose fanins are all constants; or if `ps.lookahead_budget` is zero or the duplication cost model has a
+ * weight that is negative or not finite or a depth growth that is not positive.
  * @throws std::runtime_error If more than `max_duplications` nodes were duplicated, or if the result of the
  * duplication strategy still contains crossings.
  */
@@ -1450,6 +1526,19 @@ node_duplication_planarization(const Ntk& ntk, const node_duplication_planarizat
         {
             throw std::invalid_argument("The network must not contain virtual primary inputs; delete them first");
         }
+    }
+
+    if (ps.lookahead_budget == 0)
+    {
+        throw std::invalid_argument("The lookahead budget must be positive");
+    }
+
+    if (const auto& m = ps.duplication_cost;
+        !(std::isfinite(m.node_weight) && m.node_weight >= 0.0 && std::isfinite(m.buffer_weight) &&
+          m.buffer_weight >= 0.0 && std::isfinite(m.depth_growth) && m.depth_growth > 0.0))
+    {
+        throw std::invalid_argument(
+            "The duplication cost model needs finite, non-negative weights and a finite, positive depth growth");
     }
 
     node_duplication_planarization_stats st{};

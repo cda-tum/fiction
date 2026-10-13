@@ -11,8 +11,8 @@
 /**
  * @file
  * @brief Entry point of the `mnt.pyfiction.synthesis` extension module.
- * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #include <nanobind/nanobind.h>

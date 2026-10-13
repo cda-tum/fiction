@@ -32,12 +32,17 @@
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/networks/aig.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
+#include <limits>
+#include <random>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -477,6 +482,248 @@ TEST_CASE("The duplication limit aborts the planarization", "[node-duplication-p
 
     ps.max_duplications = 0;
     CHECK_NOTHROW(node_duplication_planarization(ranked, ps));
+
+    // the limit is checked at every duplicate, so a level cannot overshoot it: one below the actual count aborts
+    node_duplication_planarization_stats st{};
+    const auto                           planar = node_duplication_planarization(ranked, ps, &st);
+    REQUIRE(st.num_duplications > 1);
+
+    ps.max_duplications = st.num_duplications - 1;
+    CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::runtime_error);
+
+    ps.max_duplications = st.num_duplications;
+    CHECK_NOTHROW(node_duplication_planarization(ranked, ps));
+    CHECK(planar.size() == ranked.size() + st.num_duplications);
+}
+
+TEST_CASE("Invalid parameters are rejected", "[node-duplication-planarization]")
+{
+    const auto ranked = prepare(blueprints::full_adder_network<technology_network>());
+
+    SECTION("lookahead budget of zero")
+    {
+        node_duplication_planarization_params ps{};
+        ps.lookahead_budget = 0;
+
+        CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
+    }
+    SECTION("negative, infinite, or undefined cost weights")
+    {
+        for (const double weight :
+             {-1.0, std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()})
+        {
+            node_duplication_planarization_params ps{};
+            ps.duplication_cost.node_weight = weight;
+            CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
+
+            ps                                = {};
+            ps.duplication_cost.buffer_weight = weight;
+            CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
+        }
+    }
+    SECTION("depth growth that is not positive")
+    {
+        node_duplication_planarization_params ps{};
+        ps.duplication_cost.depth_growth = 0.0;
+
+        CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
+    }
+}
+
+TEST_CASE("Outputs driven by inputs pass through unchanged", "[node-duplication-planarization]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    tec.create_po(x1);
+    tec.create_po(tec.create_not(x2));
+    tec.create_po(x1);
+
+    const auto ranked = rank_without_substitution(tec);
+    REQUIRE(ranked.depth() == 1);
+
+    for (const auto strategy : {node_duplication_planarization_params::planarization_strategy::DUPLICATION,
+                                node_duplication_planarization_params::planarization_strategy::HYBRID})
+    {
+        node_duplication_planarization_params ps{};
+        ps.strategy = strategy;
+
+        node_duplication_planarization_stats st{};
+        const auto                           planar = node_duplication_planarization(ranked, ps, &st);
+
+        check_planar_and_equivalent(tec, planar);
+        CHECK(st.num_duplications == 0);
+        CHECK(planar.num_pos() == 3);
+        CHECK(planar.num_virtual_pis() == 0);
+    }
+
+    // an AIG puts its complemented outputs on the inputs themselves
+    mockturtle::aig_network aig{};
+
+    const auto a = aig.create_pi();
+    const auto b = aig.create_pi();
+    aig.create_po(a);
+    aig.create_po(!b);
+    aig.create_po(!a);
+
+    const auto planar = node_duplication_planarization(rank_without_substitution(aig));
+
+    check_planar_and_equivalent(aig, planar);
+    CHECK(planar.num_pos() == 3);
+}
+
+TEST_CASE("Primary inputs without fanout are kept in rank 0", "[node-duplication-planarization]")
+{
+    technology_network tec{};
+
+    const auto unused_1 = tec.create_pi();
+    const auto x1       = tec.create_pi();
+    const auto x2       = tec.create_pi();
+    const auto unused_2 = tec.create_pi();
+    const auto x3       = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x2));
+    tec.create_po(tec.create_or(x2, x3));
+    tec.create_po(tec.create_and(x1, x3));
+
+    const auto ranked = rank_without_substitution(tec);
+
+    node_duplication_planarization_stats st{};
+    const auto                           planar = node_duplication_planarization(ranked, {}, &st);
+
+    check_planar_and_equivalent(tec, planar);
+    CHECK(planar.check_validity());
+    CHECK(planar.num_real_pis() == 5);
+    CHECK(planar.rank_width(0) == planar.num_pis());
+    planar.foreach_pi([&planar](const auto& n) { CHECK(planar.has_level(n)); });
+
+    // the unused inputs stay real inputs that drive nothing
+    uint32_t unused = 0;
+    planar.foreach_pi(
+        [&planar, &unused](const auto& n)
+        {
+            if (planar.fanout_size(n) == 0)
+            {
+                ++unused;
+            }
+        });
+    CHECK(unused == 2);
+    CHECK(tec.fanout_size(tec.get_node(unused_1)) == 0);
+    CHECK(tec.fanout_size(tec.get_node(unused_2)) == 0);
+}
+
+TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[node-duplication-planarization]")
+{
+    // for a network of one gate level, the width of rank 0 after the duplication is the number of placements on the
+    // shortest path; a brute force over every fanin ordering of every output gives the minimum to compare with
+    std::mt19937 generator{42};
+    const auto   draw = [&generator](const uint32_t lo, const uint32_t hi)
+    { return std::uniform_int_distribution<uint32_t>{lo, hi}(generator); };
+
+    for (uint32_t trial = 0; trial < 60; ++trial)
+    {
+        technology_network tec{};
+
+        const auto                                          num_pis = draw(2, 5);
+        std::vector<mockturtle::signal<technology_network>> pis{};
+        for (uint32_t i = 0; i < num_pis; ++i)
+        {
+            pis.push_back(tec.create_pi());
+        }
+
+        // outputs with one to three distinct inputs each
+        const auto                         num_pos = draw(1, 5);
+        std::vector<std::vector<uint32_t>> fanins_of_po{};
+        for (uint32_t i = 0; i < num_pos; ++i)
+        {
+            std::vector<uint32_t> indices{};
+            const auto            count = std::min(draw(1, 3), num_pis);
+            while (indices.size() < count)
+            {
+                const auto idx = draw(0, num_pis - 1);
+                if (std::find(indices.cbegin(), indices.cend(), idx) == indices.cend())
+                {
+                    indices.push_back(idx);
+                }
+            }
+
+            if (indices.size() == 1)
+            {
+                tec.create_po(tec.create_not(pis[indices[0]]));
+            }
+            else if (indices.size() == 2)
+            {
+                tec.create_po(tec.create_xor(pis[indices[0]], pis[indices[1]]));
+            }
+            else
+            {
+                tec.create_po(tec.create_maj(pis[indices[0]], pis[indices[1]], pis[indices[2]]));
+            }
+
+            fanins_of_po.push_back(std::move(indices));
+        }
+
+        const mutable_rank_view ranked{tec};
+        REQUIRE(ranked.depth() == 1);
+
+        // the outputs are ordered in rank order, which is their creation order here
+        std::vector<std::vector<uint32_t>> orders{};
+        ranked.foreach_node_in_rank(
+            1,
+            [&ranked, &tec, &pis, &orders](const auto& n)
+            {
+                std::vector<uint32_t> indices{};
+                ranked.foreach_fanin(n,
+                                     [&tec, &pis, &indices](const auto& f)
+                                     {
+                                         const auto it =
+                                             std::find_if(pis.cbegin(), pis.cend(), [&tec, &f](const auto& pi)
+                                                          { return tec.get_node(pi) == tec.get_node(f); });
+                                         indices.push_back(static_cast<uint32_t>(std::distance(pis.cbegin(), it)));
+                                     });
+                std::sort(indices.begin(), indices.end());
+                orders.push_back(std::move(indices));
+            });
+        REQUIRE(orders.size() == num_pos);
+
+        // brute force: every permutation of every output's fanins; consecutive outputs share one placement when
+        // the last fanin of one equals the first of the next
+        uint32_t best = std::numeric_limits<uint32_t>::max();
+
+        const auto search = [&orders, &best](auto& self, const std::size_t po, const uint32_t placed,
+                                             const uint32_t last) -> void
+        {
+            if (po == orders.size())
+            {
+                best = std::min(best, placed);
+                return;
+            }
+
+            auto perm = orders[po];
+            do
+            {
+                const uint32_t shared = (po > 0 && perm.front() == last) ? 1 : 0;
+                self(self, po + 1, placed + static_cast<uint32_t>(perm.size()) - shared, perm.back());
+            } while (std::next_permutation(perm.begin(), perm.end()));
+        };
+        search(search, 0, 0, std::numeric_limits<uint32_t>::max());
+
+        // inputs that no output reads are placed once as well
+        std::vector<bool> used(num_pis, false);
+        for (const auto& fanins : fanins_of_po)
+        {
+            for (const auto idx : fanins)
+            {
+                used[idx] = true;
+            }
+        }
+        const auto unused = static_cast<uint32_t>(std::count(used.cbegin(), used.cend(), false));
+
+        const auto planar = node_duplication_planarization(ranked);
+
+        check_planar_and_equivalent(tec, planar);
+        CHECK(planar.rank_width(0) == best + unused);
+    }
 }
 
 TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")

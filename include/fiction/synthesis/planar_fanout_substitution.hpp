@@ -145,7 +145,7 @@ class planar_fanout_substitution_impl
      * @param fanouts Number of outputs.
      * @return Number of fanout nodes in its tree.
      */
-    [[nodiscard]] uint32_t num_fanout_nodes(const uint32_t fanouts) const noexcept
+    [[nodiscard]] uint64_t num_fanout_nodes(const uint64_t fanouts) const noexcept
     {
         if (fanouts <= 1)
         {
@@ -153,7 +153,7 @@ class planar_fanout_substitution_impl
         }
 
         // every fanout node adds `degree - 1` outputs beyond the one it consumes
-        const auto per_node = ps.degree - 1;
+        const auto per_node = static_cast<uint64_t>(ps.degree) - 1;
 
         return (fanouts - 1 + per_node - 1) / per_node;
     }
@@ -163,7 +163,7 @@ class planar_fanout_substitution_impl
      * @param index Creation index of the fanout node.
      * @return Its level in the tree.
      */
-    [[nodiscard]] uint32_t fanout_node_level(const uint32_t index) const noexcept
+    [[nodiscard]] uint32_t fanout_node_level(const uint64_t index) const noexcept
     {
         uint32_t level         = 0;
         uint64_t first_of_next = 1;
@@ -182,7 +182,7 @@ class planar_fanout_substitution_impl
      * @param fanouts Number of outputs.
      * @return Number of levels the tree adds below the node.
      */
-    [[nodiscard]] uint32_t tree_depth(const uint32_t fanouts) const noexcept
+    [[nodiscard]] uint32_t tree_depth(const uint64_t fanouts) const noexcept
     {
         const auto num_nodes = num_fanout_nodes(fanouts);
 
@@ -272,6 +272,12 @@ class planar_fanout_substitution_impl
     {
         const auto fanouts = fanout_ntk.fanout_size(n);
 
+        // a node that drives nothing, such as an unused primary input, gets no chain that nothing would consume
+        if (fanouts == 0 && !ntk.is_po(n))
+        {
+            return;
+        }
+
         if (fanouts > 1 && !is_proper_fanout(n))
         {
             old2new[n] = buffer_chain(dest, old2new[n], pad - tree_depth(fanouts));
@@ -320,14 +326,17 @@ class planar_fanout_substitution_impl
         std::queue<std::pair<mockturtle::signal<Ntk>, uint32_t>> slots{};
         slots.emplace(root, 0);
 
-        for (uint32_t i = 0; i < num_nodes; ++i)
+        // a tree of one node needs no more outputs than the node has consumers, whatever the degree allows
+        const auto outputs_per_node = std::min(static_cast<uint64_t>(ps.degree), static_cast<uint64_t>(fanouts));
+
+        for (uint64_t i = 0; i < num_nodes; ++i)
         {
             const auto [sig, level] = slots.front();
             slots.pop();
 
             const auto buf = dest.create_buf(sig);
 
-            for (uint32_t d = 0; d < ps.degree; ++d)
+            for (uint64_t d = 0; d < outputs_per_node; ++d)
             {
                 slots.emplace(buf, level + 1);
             }

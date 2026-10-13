@@ -33,12 +33,21 @@ def test_balancing(mux21: technology_network) -> None:
     assert is_balanced(balanced_unify, unify_params)
 
 
-def test_balancing_keeps_constant_outputs_unbuffered_on_request(mux21: technology_network) -> None:
+def test_balancing_keeps_constant_outputs_unbuffered_on_request(interface_network: technology_network) -> None:
+    """A network with two constant outputs gets buffer chains for them only when asked to."""
     params = network_balancing_params()
     assert params.buffer_constant_outputs is True
 
     params.unify_outputs = True
+    buffered = network_balancing(interface_network, params)
+    assert is_balanced(buffered, params)
+
     params.buffer_constant_outputs = False
-    balanced = network_balancing(mux21, params)
-    assert balanced.num_gates() == 6
-    assert is_balanced(balanced, params)
+    unbuffered = network_balancing(interface_network, params)
+    assert is_balanced(unbuffered, params)
+
+    # the two constant outputs receive no buffers, so the unbuffered network is smaller and does not count as
+    # balanced once the constant outputs take part in the comparison again
+    assert unbuffered.num_gates() < buffered.num_gates()
+    params.buffer_constant_outputs = True
+    assert not is_balanced(unbuffered, params)

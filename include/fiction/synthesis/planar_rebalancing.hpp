@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <numeric>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
@@ -65,7 +64,14 @@ class planar_rebalancing_impl
      * @param src Source network.
      * @param p Parameters.
      */
-    planar_rebalancing_impl(const Ntk& src, const planar_rebalancing_params& p) : ntk{src}, fanout_ntk{src}, ps{p} {}
+    planar_rebalancing_impl(const Ntk& src, const planar_rebalancing_params& p) :
+            ntk{src},
+            fanout_ntk{src},
+            ps{p},
+            output_count(src.size(), 0u)
+    {
+        ntk.foreach_po([this](const auto& po) { ++output_count[ntk.get_node(po)]; });
+    }
 
     /**
      * Runs the algorithm.
@@ -83,7 +89,7 @@ class planar_rebalancing_impl
         remove_buffer_chains(stripped, old2new);
         progress.advance();
 
-        reorder_ranks(stripped, old2new);
+        keep_input_order(stripped, old2new);
         progress.advance();
 
         auto balanced = insert_buffers(stripped, old2new);
@@ -157,31 +163,17 @@ class planar_rebalancing_impl
         networks::restore_names(ntk, stripped, old2new);
     }
     /**
-     * Recomputes the ranks of the stripped network and orders every rank by the barycenter of its fanins, with the
-     * source rank position as the tie-breaker. Removing buffer chains merges nodes of different source levels into one
-     * rank; the position of a deeper node is taken from the node above its former buffer chain, so that nodes of a
-     * rank keep their relative order from the source network.
+     * Recomputes the ranks of the stripped network and puts its primary inputs in the order of the source network.
+     * Only the input order matters for the sweep that re-inserts the buffers; the order within the other ranks is
+     * derived from the consumer order of the source network as the sweep goes.
      *
-     * @param stripped Stripped network; its ranks are rewritten.
+     * @param stripped Stripped network; its ranks are recomputed.
      * @param old2new Map from source nodes to destination signals.
      */
-    void reorder_ranks(Ntk& stripped, const mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new) const
+    void keep_input_order(Ntk& stripped, const mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new) const
     {
         stripped.update_ranks();
 
-        // source node of every stripped node
-        std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Ntk>> new2old{};
-        new2old.reserve(ntk.size());
-        ntk.foreach_node(
-            [this, &stripped, &old2new, &new2old](const auto& n)
-            {
-                if (!is_chain_buffer(n))
-                {
-                    new2old.emplace(stripped.get_node(old2new[n]), n);
-                }
-            });
-
-        // rank 0 keeps the primary input order of the source
         std::vector<mockturtle::node<Ntk>> rank0{};
         rank0.reserve(ntk.rank_width(0));
         for (const auto& pi : ntk.get_ranks(0))
@@ -189,79 +181,11 @@ class planar_rebalancing_impl
             rank0.push_back(stripped.get_node(old2new[pi]));
         }
         stripped.set_ranks(0, rank0);
-
-        for (uint32_t level = 1; level <= stripped.depth(); ++level)
-        {
-            auto       nodes   = stripped.get_ranks(level);
-            const auto centers = networks::barycenters(stripped, nodes);
-
-            std::vector<std::size_t> order(nodes.size());
-            std::iota(order.begin(), order.end(), 0u);
-
-            std::stable_sort(order.begin(), order.end(),
-                             [this, &centers, &nodes, &new2old](const std::size_t a, const std::size_t b)
-                             {
-                                 if (centers[a] != centers[b])
-                                 {
-                                     return centers[a] < centers[b];
-                                 }
-
-                                 return source_position(new2old.at(nodes[a]), new2old.at(nodes[b]));
-                             });
-
-            std::vector<mockturtle::node<Ntk>> sorted{};
-            sorted.reserve(nodes.size());
-            for (const auto i : order)
-            {
-                sorted.push_back(nodes[i]);
-            }
-
-            stripped.set_ranks(level, sorted);
-        }
-    }
-    /**
-     * Compares two source nodes by their rank position after lifting the deeper one to the level of the shallower one
-     * along its chain of buffers.
-     *
-     * @param a First source node.
-     * @param b Second source node.
-     * @return `true` iff `a` comes before `b`.
-     */
-    [[nodiscard]] bool source_position(mockturtle::node<Ntk> a, mockturtle::node<Ntk> b) const
-    {
-        const auto lift = [this](mockturtle::node<Ntk> n, const uint32_t target_level)
-        {
-            while (ntk.level(n) > target_level)
-            {
-                const auto fanin_nodes = networks::fanins(ntk, n).fanin_nodes;
-
-                if (fanin_nodes.empty())
-                {
-                    break;
-                }
-
-                n = fanin_nodes.front();
-            }
-
-            return n;
-        };
-
-        const auto target_level = std::min(ntk.level(a), ntk.level(b));
-
-        a = lift(a, target_level);
-        b = lift(b, target_level);
-
-        if (ntk.rank_position(a) != ntk.rank_position(b))
-        {
-            return ntk.rank_position(a) < ntk.rank_position(b);
-        }
-
-        return a < b;
     }
     /**
      * Consumers of a node in the source network, ordered by the rank position of the node's direct fanouts, with
-     * chain buffers skipped. A consumer equal to the node itself stands for a primary output; one that the node drives
-     * directly comes first.
+     * chain buffers skipped. There is one entry per edge: a gate that reads the node twice appears twice, and a
+     * consumer equal to the node itself stands for one primary output the node drives; direct outputs come first.
      *
      * @param n Node of the source network.
      * @return Consumers of `n` in rank order of the source network.
@@ -281,13 +205,29 @@ class planar_rebalancing_impl
                                           c = networks::fanouts(fanout_ntk, c).front();
                                       }
 
+                                      // one edge per fanin of the direct fanout that reads `n`; the fanout view
+                                      // lists a consumer once however often it reads the node
+                                      std::size_t edges = 0;
+                                      ntk.foreach_fanin(fo,
+                                                        [this, n, &edges](const auto& f)
+                                                        {
+                                                            if (ntk.get_node(f) == n)
+                                                            {
+                                                                ++edges;
+                                                            }
+                                                        });
+
                                       // ordered by the direct fanout, which sits in the rank above `n`; a buffer
                                       // chain that ends in a primary output stands for that output
-                                      consumers.emplace_back(static_cast<int64_t>(ntk.rank_position(fo)),
-                                                             is_chain_buffer(c) ? n : c);
+                                      for (std::size_t i = 0; i < edges; ++i)
+                                      {
+                                          consumers.emplace_back(static_cast<int64_t>(ntk.rank_position(fo)),
+                                                                 is_chain_buffer(c) ? n : c);
+                                      }
                                   });
 
-        if (ntk.is_po(n))
+        // one edge per primary output the node drives
+        for (uint32_t i = 0; i < output_count[n]; ++i)
         {
             consumers.emplace_back(-1, n);
         }
@@ -460,9 +400,10 @@ class planar_rebalancing_impl
     }
     /**
      * Re-inserts buffers into the stripped network so that every edge spans exactly one level and all primary outputs
-     * sit on the top level. Edges are swept level by level in rank order; consecutive edges from the same source share
-     * one buffer per level, so a fanout splits right above its targets. The sweep follows the rank order of the
-     * stripped network, which keeps the result planar.
+     * sit on the top level. Edges are swept level by level; consecutive edges from the same source share one buffer
+     * per level, so a fanout splits right above its targets. The sweep starts from the primary inputs in their source
+     * order and appends the edges of every placed node in the consumer order of the source network, which reproduces
+     * the planar embedding of the source and keeps the result planar.
      *
      * @param stripped Stripped network with final ranks.
      * @param old2new Map from source nodes to signals of the stripped network.
@@ -585,6 +526,10 @@ class planar_rebalancing_impl
      * Parameters.
      */
     const planar_rebalancing_params& ps;
+    /**
+     * Number of primary outputs every source node drives directly.
+     */
+    std::vector<uint32_t> output_count;
 };
 
 }  // namespace detail

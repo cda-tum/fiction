@@ -157,3 +157,45 @@ def test_random_output_order_is_equivalent(full_adder: technology_network) -> No
     assert planar.size() == again.size()
     assert original_input == original_input_again
     assert _equivalent_with_tied_inputs(balanced, planar, original_input)
+
+
+def test_statistics_and_progress(full_adder: technology_network) -> None:
+    """The hybrid strategy reports its crossing decisions, and the progress callback is called."""
+    balanced = _balanced(full_adder)
+
+    reports: list[tuple[str, int, int]] = []
+
+    params = planarization_params()
+    params.duplication.strategy = planarization_strategy.HYBRID
+    params.on_progress = lambda task, done, total: reports.append((task, done, total))
+
+    stats = planarization_stats()
+    planar, original_input = planarization(balanced, params, stats)
+
+    assert reports
+    assert all(done <= total for _, done, total in reports if total > 0)
+    assert stats.num_crossing_levels >= 0
+    assert (stats.num_crossings > 0) == (stats.num_crossing_levels > 0)
+    assert "crossing levels" in repr(stats)
+    assert _equivalent_with_tied_inputs(balanced, planar, original_input)
+
+
+def test_invalid_parameters_and_limits(full_adder: technology_network) -> None:
+    """Invalid parameters raise ``ValueError`` before any stage runs; an exceeded limit raises ``RuntimeError``."""
+    balanced = _balanced(full_adder)
+
+    params = planarization_params()
+    params.fanout_degree = 1
+    with pytest.raises(ValueError, match="degree"):
+        planarization(balanced, params)
+
+    params = planarization_params()
+    params.duplication.lookahead_budget = 0
+    with pytest.raises(ValueError, match="budget"):
+        planarization(balanced, params)
+
+    # the full adder needs duplicates, so a limit of one is exceeded
+    params = planarization_params()
+    params.duplication.max_duplications = 1
+    with pytest.raises(RuntimeError, match="duplications"):
+        planarization(balanced, params)

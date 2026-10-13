@@ -10,7 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - `synthesis::planarization` turns a balanced, ranked network into a planar, balanced, fanout-substituted one
+  - `synthesis::planarization` turns a balanced, ranked network into a planar, balanced, fanout-substituted one and
+    verifies that contract on its result
   - `synthesis::node_duplication_planarization` planarizes a balanced, ranked network by duplicating nodes, breaking
     ties among equally short H-graph paths by cone weight, with a hybrid strategy that keeps the crossings of a
     level where crossing gates are cheaper, decided by a budgeted lookahead or by weighted cone sizes
@@ -73,7 +74,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
-  - `planarization` runs every benchmark set through the planarization pipeline and verifies each result
+  - `planarization` runs the trindade16, fontes18, ISCAS85, and IWLS93 benchmarks whose balanced network has at most
+    8000 nodes through node duplication and through the planarization pipeline with its defaults, and checks every
+    result by SAT or, above 50000 nodes, by random simulation
 
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and

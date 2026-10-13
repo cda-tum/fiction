@@ -10,7 +10,8 @@
 
 /**
  * @file
- * @brief Planarizes benchmark networks by node duplication and verifies every result.
+ * @brief Planarizes benchmark networks by node duplication alone and by the planarization pipeline with its default
+ * hybrid strategy, and verifies every result by SAT or, above a size limit, by random simulation.
  * @author Benjamin Hien (hibenj)
  */
 
@@ -25,6 +26,7 @@
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planar_fanout_substitution.hpp>
 #include <fiction/synthesis/planar_rebalancing.hpp>
+#include <fiction/synthesis/planarization.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/graph/mincross.hpp>
 #include <fiction/verification/virtual_miter.hpp>
@@ -71,7 +73,8 @@ constexpr uint32_t MAX_NODES_FOR_SAT = 50000;
 constexpr uint32_t SIMULATION_PATTERNS = 4096;
 /**
  * Planarizations that duplicate more nodes than this are aborted and reported as failures, since pure node
- * duplication can grow exponentially with the depth of the network.
+ * duplication can grow exponentially with the depth of the network. This is also the default limit of the
+ * planarization parameters.
  */
 constexpr uint64_t MAX_DUPLICATIONS = 2000000;
 
@@ -210,7 +213,7 @@ int main(const int argc, const char** argv)  // NOLINT
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint32_t,
                             uint32_t, uint64_t, double, bool, std::string, double, bool, uint64_t, uint32_t, uint32_t,
-                            double, bool, bool, uint32_t, uint64_t, uint64_t, uint32_t, uint32_t, double, bool, bool,
+                            double, bool, bool, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool, bool,
                             double>
         planarization_exp{"planarization",
                           "benchmark",
@@ -235,11 +238,11 @@ int main(const int argc, const char** argv)  // NOLINT
                           "pipeline time (s)",
                           "pipeline ok",
                           "pipeline equivalent",
-                          "hybrid nodes",
+                          "hybrid duplications",
                           "crossing levels",
                           "kept crossings",
-                          "hybrid gadget nodes",
-                          "hybrid rebalanced nodes",
+                          "gadget crossings",
+                          "pipeline nodes",
                           "hybrid time (s)",
                           "hybrid ok",
                           "hybrid equivalent",
@@ -318,33 +321,18 @@ int main(const int argc, const char** argv)  // NOLINT
                 pipeline_eq = is_equivalent(ntk, rebalanced);
             }
 
-            // the paper's hybrid: per-level choice, crossing gates with XOR gadgets, then the same post-processing
-            fmt::print("[i]   hybrid planarization\n");
-            mockturtle::stopwatch<>::duration    hybrid_time{};
-            node_duplication_planarization_stats hybrid_st{};
-            uint32_t                             hybrid_nodes        = 0;
-            uint32_t                             hybrid_gadget_nodes = 0;
-            uint32_t                             hybrid_rebalanced   = 0;
-            bool                                 hybrid_ok           = false;
-            equivalence_result                   hybrid_eq{};
+            // the paper's hybrid is the pipeline's default: per-level choice, crossing gates with XOR gadgets, then
+            // the same post-processing; run through the entry point so that the numbers belong to its defaults
+            fmt::print("[i]   planarization pipeline\n");
+            mockturtle::stopwatch<>::duration hybrid_time{};
+            planarization_stats               hybrid_st{};
+            uint64_t                          hybrid_rebalanced = 0;
+            bool                              hybrid_ok         = false;
+            equivalence_result                hybrid_eq{};
             {
                 const mockturtle::stopwatch stop{hybrid_time};
 
-                node_duplication_planarization_params h_ps{};
-                h_ps.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID;
-                h_ps.xor_gates        = true;
-                h_ps.max_duplications = MAX_DUPLICATIONS;
-
-                const auto hybrid = node_duplication_planarization(ranked, h_ps, &hybrid_st);
-                hybrid_nodes      = hybrid.size();
-
-                crossing_gate_planarization_params cg_ps{};
-                cg_ps.xor_gates = true;
-
-                const auto gadgets  = crossing_gate_planarization(hybrid, cg_ps);
-                hybrid_gadget_nodes = gadgets.size();
-
-                const auto rebalanced = planar_rebalancing(planar_fanout_substitution(gadgets));
+                const auto rebalanced = planarization(ranked, {}, &hybrid_st);
                 hybrid_rebalanced     = rebalanced.size();
                 hybrid_ok             = is_balanced(rebalanced, b_ps) && is_fanout_substituted(rebalanced) &&
                                         count_crossings(rebalanced) == 0;
@@ -371,8 +359,9 @@ int main(const int argc, const char** argv)  // NOLINT
                               st.num_duplications, mockturtle::to_seconds(st.time_total), eq.equivalent, eq.method,
                               mockturtle::to_seconds(eq_time), bal, crossings_after, substituted_nodes,
                               rebalanced_nodes, mockturtle::to_seconds(pipeline_time), pipeline_ok,
-                              pipeline_eq.equivalent, hybrid_nodes, hybrid_st.num_crossing_levels,
-                              hybrid_st.num_crossings, hybrid_gadget_nodes, hybrid_rebalanced,
+                              pipeline_eq.equivalent, hybrid_st.duplication.num_duplications,
+                              hybrid_st.duplication.num_crossing_levels, hybrid_st.duplication.num_crossings,
+                              hybrid_st.crossing_gates.num_crossings, hybrid_rebalanced,
                               mockturtle::to_seconds(hybrid_time), hybrid_ok, hybrid_eq.equivalent, decrease);
             planarization_exp.save();
             planarization_exp.table();

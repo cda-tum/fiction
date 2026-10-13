@@ -32,6 +32,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
@@ -293,4 +294,57 @@ TEST_CASE("No buffer is left without a consumer", "[planar-fanout-substitution]"
             CHECK(mockturtle::cleanup_dangling(substituted).size() == substituted.size());
         }
     }
+}
+
+TEST_CASE("A huge fanout degree needs one fanout node with as many outputs as consumers",
+          "[planar-fanout-substitution]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto a  = tec.create_and(x1, x2);
+    tec.create_po(tec.create_not(a));
+    tec.create_po(tec.create_buf(a));
+    tec.create_po(tec.create_not(a));
+
+    const auto ranked = rank(tec);
+    REQUIRE(count_crossings(ranked) == 0);
+
+    for (const uint32_t degree : {3u, 1u << 31u, std::numeric_limits<uint32_t>::max()})
+    {
+        planar_fanout_substitution_params ps{};
+        ps.degree = degree;
+
+        const auto substituted = planar_fanout_substitution(ranked, ps);
+
+        fanout_substitution_params fs_ps{};
+        fs_ps.degree = degree;
+        check_contract(tec, substituted, fs_ps);
+
+        // the one fanout node of `a` has exactly three outputs
+        CHECK(substituted.size() == ranked.size() + 1);
+    }
+}
+
+TEST_CASE("Primary inputs without fanout get no buffer chain", "[planar-fanout-substitution]")
+{
+    technology_network tec{};
+
+    const auto unused = tec.create_pi();
+    const auto x1     = tec.create_pi();
+    const auto x2     = tec.create_pi();
+    tec.create_po(tec.create_buf(x1));
+    tec.create_po(tec.create_and(x1, x2));
+    tec.create_po(tec.create_not(x2));
+
+    const auto ranked = rank(tec);
+    REQUIRE(ranked.rank_position(ranked.get_node(unused)) == 0);
+    REQUIRE(count_crossings(ranked) == 0);
+
+    const auto substituted = planar_fanout_substitution(ranked);
+
+    check_contract(tec, substituted);
+    CHECK(substituted.num_pis() == 3);
+    CHECK(mockturtle::cleanup_dangling(substituted).size() == substituted.size());
 }
