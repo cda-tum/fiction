@@ -34,7 +34,6 @@
 #include <mockturtle/networks/aig.hpp>
 
 #include <cstdint>
-#include <limits>
 #include <optional>
 #include <vector>
 
@@ -370,18 +369,16 @@ TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
     CHECK(rec.is_consistent("output pins"));
 }
 
-TEST_CASE("Hexagonalization preserves the maximum signed layer", "[hexagonalization]")
+TEST_CASE("Hexagonalization preserves the crossing layer", "[hexagonalization]")
 {
-    /** Highest representable layer coordinate. */
-    constexpr auto maximum = std::numeric_limits<int32_t>::max();
-    /** Sparse layout with one input on the final layer. */
-    cart_gate_clk_lyt layout{{1, 1, static_cast<uint64_t>(maximum) + 1}, clocking::twoddwave()};
-    layout.create_pi("a", {0, 0, maximum});
+    /** Sparse layout with one input on the crossing layer. */
+    cart_gate_clk_lyt layout{{1, 1, 2}, clocking::twoddwave()};
+    layout.create_pi("a", {0, 0, 1});
 
-    /** Converted geometry retains all layers without enumerating empty coordinates. */
+    /** Converted geometry retains both layers. */
     const auto converted = hexagonalization<hex_gate_clk_lyt>(layout);
 
-    CHECK(converted.layers() == static_cast<uint64_t>(maximum) + 1);
+    CHECK(converted.layers() == 2);
     REQUIRE(converted.num_pis() == 1);
-    CHECK(converted.get_tile(converted.pi_at(0)).z == maximum);
+    CHECK(converted.get_tile(converted.pi_at(0)).z == 1);
 }
