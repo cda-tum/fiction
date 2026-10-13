@@ -15,6 +15,7 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include "pyfiction/bdl_parameters.hpp"
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
@@ -79,6 +80,7 @@ void register_detect_bdl_pairs(nb::module_& m)
            const decltype(detect_bdl_pairs_options{}.minimum_distance) minimum_distance,
            const decltype(detect_bdl_pairs_options{}.maximum_distance) maximum_distance)
         {
+            validate_bdl_pair_distances(minimum_distance, maximum_distance);
             detect_bdl_pairs_options params{};
             params.minimum_distance = minimum_distance;
             params.maximum_distance = maximum_distance;

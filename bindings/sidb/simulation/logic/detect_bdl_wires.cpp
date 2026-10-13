@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "pyfiction/bdl_parameters.hpp"
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -110,6 +111,7 @@ void register_detect_bdl_wires(nb::module_& m)
            const decltype(detect_bdl_wires_options{}.bdl_pairs_params.maximum_distance) maximum_distance,
            const fiction::sidb::simulation::logic::bdl_wire_selection                   wire_selection)
         {
+            validate_bdl_pair_distances(minimum_distance, maximum_distance);
             detect_bdl_wires_options params{};
             params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
             params.bdl_pairs_params.minimum_distance = minimum_distance;
