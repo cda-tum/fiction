@@ -425,9 +425,13 @@ void operational_domain(nanobind::module_& m)
                 buffers->operational.reserve(points);
 
                 self.for_each(
-                    [&buffers](const auto& key, const auto& value)
+                    [&buffers, dimensions](const auto& key, const auto& value)
                     {
                         const auto& parameters = key.get_parameters();
+                        if (parameters.size() != dimensions)
+                        {
+                            throw py::value_error("point dimensions must match the operational domain");
+                        }
                         buffers->coordinates.insert(buffers->coordinates.end(), parameters.begin(), parameters.end());
                         buffers->operational.push_back(std::get<0>(value) == operational_status::OPERATIONAL);
                     });
@@ -451,7 +455,8 @@ void operational_domain(nanobind::module_& m)
             "parameter values in dimension order, and a boolean array of length points that is True where the "
             "point is operational. Requires NumPy; install it with uv pip install 'mnt.pyfiction[plot]'.\n\n"
             "Raises:\n"
-            "    ImportError: NumPy is not installed or cannot be imported.")
+            "    ImportError: NumPy is not installed or cannot be imported.\n"
+            "    ValueError: A point does not match the domain dimension count.")
 
         ;
 

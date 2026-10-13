@@ -512,6 +512,17 @@ def test_operational_domain_to_numpy() -> None:
     assert empty_operational.shape == (0,)
 
 
+@pytest.mark.parametrize("values", [[5.0], [5.0, 5.6, -0.3]])
+def test_operational_domain_to_numpy_rejects_mismatched_point(values: list[float]) -> None:
+    """NumPy export rejects points that do not match the domain's dimension count."""
+    pytest.importorskip("numpy")
+    domain = operational_domain([sweep_parameter.LAMBDA_TF, sweep_parameter.EPSILON_R])
+    domain[parameter_point(values)] = operational_status.OPERATIONAL
+
+    with pytest.raises(ValueError, match="point dimensions must match the operational domain"):
+        domain.to_numpy()
+
+
 @pytest.mark.parametrize("failure", ["numpy", "numpy._core", "broken"])
 def test_operational_domain_to_numpy_import_error(failure: str) -> None:
     """Missing NumPy reports installation help; broken installations retain their error."""
