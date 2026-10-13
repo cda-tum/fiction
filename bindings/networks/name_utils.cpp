@@ -42,7 +42,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `get_name`.
+ * @brief Binds get name helpers.
  * @param m Python module.
  * @tparam NtkOrLyt Network or layout type.
  */
@@ -53,7 +53,7 @@ void bind_get_name(nb::module_& m)
 }
 
 /**
- * @brief Binds `set_name`.
+ * @brief Binds set name helpers.
  * @param m Python module.
  * @tparam NtkOrLyt Network or layout type.
  */
@@ -67,7 +67,7 @@ void bind_set_name(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `name_utils`.
+ * @brief Binds name utils helpers.
  * @param m Python module.
  */
 void bind_name_utils(nb::module_& m)

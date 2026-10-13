@@ -43,7 +43,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `bdl_input_iterator`.
+ * @brief Binds bdl input iterator helpers.
  * @param m Python module.
  */
 void bind_bdl_input_iterator(nb::module_& m)

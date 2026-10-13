@@ -39,7 +39,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `quickexact`.
+ * @brief Binds quickexact helpers.
  * @param m Python module.
  */
 void bind_quickexact(nb::module_& m)

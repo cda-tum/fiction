@@ -25,22 +25,22 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `count_gate_types`.
+ * @brief Binds count gate types helpers.
  * @param m Python module.
  */
 void bind_count_gate_types(nb::module_& m);
 /**
- * @brief Binds `critical_path_length_and_throughput`.
+ * @brief Binds critical path length and throughput helpers.
  * @param m Python module.
  */
 void bind_critical_path_length_and_throughput(nb::module_& m);
 /**
- * @brief Binds `design_rule_violations`.
+ * @brief Binds design rule violations helpers.
  * @param m Python module.
  */
 void bind_design_rule_violations(nb::module_& m);
 /**
- * @brief Binds `equivalence_checking`.
+ * @brief Binds equivalence checking helpers.
  * @param m Python module.
  */
 void bind_equivalence_checking(nb::module_& m);

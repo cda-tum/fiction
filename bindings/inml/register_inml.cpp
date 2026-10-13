@@ -27,7 +27,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `inml_layout`.
+ * @brief Binds inml layout helpers.
  * @param m Python module.
  */
 void bind_inml_layout(nb::module_& m);

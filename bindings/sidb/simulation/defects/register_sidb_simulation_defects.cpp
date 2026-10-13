@@ -25,7 +25,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `displacement_robustness_domain`.
+ * @brief Binds displacement robustness domain helpers.
  * @param m Python module.
  */
 void bind_displacement_robustness_domain(nb::module_& m);

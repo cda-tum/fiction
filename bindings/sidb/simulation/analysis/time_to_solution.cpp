@@ -44,7 +44,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `time_to_solution`.
+ * @brief Binds time to solution helpers.
  * @param m Python module.
  */
 void bind_time_to_solution(nb::module_& m)

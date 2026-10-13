@@ -27,7 +27,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `mol_qca_layout`.
+ * @brief Binds mol qca layout helpers.
  * @param m Python module.
  */
 void bind_mol_qca_layout(nb::module_& m);

@@ -25,22 +25,22 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `defect`.
+ * @brief Binds defect helpers.
  * @param m Python module.
  */
 void bind_defect(nb::module_& m);
 /**
- * @brief Binds `charge_state`.
+ * @brief Binds charge state helpers.
  * @param m Python module.
  */
 void bind_charge_state(nb::module_& m);
 /**
- * @brief Binds `simulation_parameters`.
+ * @brief Binds simulation parameters helpers.
  * @param m Python module.
  */
 void bind_simulation_parameters(nb::module_& m);
 /**
- * @brief Binds `potential_to_distance_conversion`.
+ * @brief Binds potential to distance conversion helpers.
  * @param m Python module.
  */
 void bind_potential_to_distance_conversion(nb::module_& m);

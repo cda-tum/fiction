@@ -72,7 +72,7 @@ inline void bind_physical_population_stability_functions(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `physical_population_stability`.
+ * @brief Binds physical population stability helpers.
  * @param m Python module.
  */
 void bind_physical_population_stability(nb::module_& m)

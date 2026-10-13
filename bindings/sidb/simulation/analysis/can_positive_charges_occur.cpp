@@ -32,7 +32,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `can_positive_charges_occur`.
+ * @brief Binds can positive charges occur helpers.
  * @param m Python module.
  */
 void bind_can_positive_charges_occur(nb::module_& m)

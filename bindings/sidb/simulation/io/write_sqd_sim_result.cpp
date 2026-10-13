@@ -33,7 +33,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `write_sqd_sim_result`.
+ * @brief Binds write sqd sim result helpers.
  * @param m Python module.
  */
 void bind_write_sqd_sim_result(nb::module_& m)

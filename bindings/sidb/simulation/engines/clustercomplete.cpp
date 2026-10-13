@@ -40,7 +40,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `clustercomplete`.
+ * @brief Binds clustercomplete helpers.
  * @param m Python module.
  */
 void bind_clustercomplete(nb::module_& m)

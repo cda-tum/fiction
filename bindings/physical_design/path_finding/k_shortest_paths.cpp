@@ -46,7 +46,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `yen_k_shortest_paths_impl`.
+ * @brief Binds yen k shortest paths helpers.
  * @param m Python module.
  * @tparam Lyt Layout type.
  */
@@ -82,7 +82,7 @@ void bind_yen_k_shortest_paths_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `k_shortest_paths`.
+ * @brief Binds k shortest paths helpers.
  * @param m Python module.
  */
 void bind_k_shortest_paths(nb::module_& m)

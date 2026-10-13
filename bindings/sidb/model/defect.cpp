@@ -35,7 +35,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `defect`.
+ * @brief Binds defect helpers.
  * @param m Python module.
  */
 void bind_defect(nb::module_& m)

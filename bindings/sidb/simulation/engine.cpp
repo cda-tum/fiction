@@ -38,9 +38,9 @@ namespace detail
 {
 
 /**
- * @brief Binds `sidb_simulation_engine_name_impl`.
+ * @brief Binds sidb simulation engine name helpers.
  * @param m Python module.
- * @tparam EngineType Layout type.
+ * @tparam EngineType Engine enumeration type.
  */
 template <typename EngineType>
 void bind_sidb_simulation_engine_name_impl(nb::module_& m)
@@ -54,7 +54,7 @@ void bind_sidb_simulation_engine_name_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `engine`.
+ * @brief Binds engine helpers.
  * @param m Python module.
  */
 void bind_engine(nb::module_& m)

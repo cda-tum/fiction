@@ -44,7 +44,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `hexagonalization`.
+ * @brief Binds hexagonalization helpers.
  * @param m Python module.
  */
 void bind_hexagonalization(nb::module_& m)

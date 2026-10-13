@@ -25,17 +25,17 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `layout_drawers`.
+ * @brief Binds layout drawers helpers.
  * @param m Python module.
  */
 void bind_layout_drawers(nb::module_& m);
 /**
- * @brief Binds `write_fgl_layout`.
+ * @brief Binds write fgl layout helpers.
  * @param m Python module.
  */
 void bind_write_fgl_layout(nb::module_& m);
 /**
- * @brief Binds `read_fgl_layout`.
+ * @brief Binds read fgl layout helpers.
  * @param m Python module.
  */
 void bind_read_fgl_layout(nb::module_& m);

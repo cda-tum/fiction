@@ -45,7 +45,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `enumerate_all_paths_impl`.
+ * @brief Binds enumerate all paths helpers.
  * @param m Python module.
  * @tparam Lyt Layout type.
  */
@@ -81,7 +81,7 @@ void bind_enumerate_all_paths_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `enumerate_all_paths`.
+ * @brief Binds enumerate all paths helpers.
  * @param m Python module.
  */
 void bind_enumerate_all_paths(nb::module_& m)

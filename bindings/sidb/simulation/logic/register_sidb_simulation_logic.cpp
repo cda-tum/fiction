@@ -25,32 +25,32 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `bdl_input_iterator`.
+ * @brief Binds bdl input iterator helpers.
  * @param m Python module.
  */
 void bind_bdl_input_iterator(nb::module_& m);
 /**
- * @brief Binds `detect_bdl_pairs`.
+ * @brief Binds detect bdl pairs helpers.
  * @param m Python module.
  */
 void bind_detect_bdl_pairs(nb::module_& m);
 /**
- * @brief Binds `detect_bdl_wires`.
+ * @brief Binds detect bdl wires helpers.
  * @param m Python module.
  */
 void bind_detect_bdl_wires(nb::module_& m);
 /**
- * @brief Binds `is_operational`.
+ * @brief Binds is operational helpers.
  * @param m Python module.
  */
 void bind_is_operational(nb::module_& m);
 /**
- * @brief Binds `operational_domain`.
+ * @brief Binds operational domain helpers.
  * @param m Python module.
  */
 void bind_operational_domain(nb::module_& m);
 /**
- * @brief Binds `operational_domain_ratio`.
+ * @brief Binds operational domain ratio helpers.
  * @param m Python module.
  */
 void bind_operational_domain_ratio(nb::module_& m);

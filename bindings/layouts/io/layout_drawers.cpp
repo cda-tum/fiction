@@ -83,7 +83,7 @@ void draw(const Lyt& lyt, const std::string_view& filename, const fiction::utils
 }
 
 /**
- * @brief Binds `write_dot_layout`.
+ * @brief Binds write dot layout helpers.
  * @param m Python module.
  * @tparam Lyt Layout type.
  */
@@ -120,7 +120,7 @@ void bind_write_dot_layout(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `layout_drawers`.
+ * @brief Binds layout drawers helpers.
  * @param m Python module.
  */
 void bind_layout_drawers(nb::module_& m)

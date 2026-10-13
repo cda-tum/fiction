@@ -42,7 +42,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `energy_distribution`.
+ * @brief Binds energy distribution helpers.
  * @param m Python module.
  */
 void bind_energy_distribution(nb::module_& m)

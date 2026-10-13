@@ -36,7 +36,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `write_dot_network`.
+ * @brief Binds write dot network helpers.
  * @param m Python module.
  * @tparam Ntk Network type.
  */
@@ -65,7 +65,7 @@ void bind_write_dot_network(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `dot_drawers`.
+ * @brief Binds dot drawers helpers.
  * @param m Python module.
  */
 void bind_dot_drawers(nb::module_& m)

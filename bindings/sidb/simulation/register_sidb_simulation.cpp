@@ -25,27 +25,27 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `engine`.
+ * @brief Binds engine helpers.
  * @param m Python module.
  */
 void bind_engine(nb::module_& m);
 /**
- * @brief Binds `potential_landscape`.
+ * @brief Binds potential landscape helpers.
  * @param m Python module.
  */
 void bind_potential_landscape(nb::module_& m);
 /**
- * @brief Binds `result`.
+ * @brief Binds result helpers.
  * @param m Python module.
  */
 void bind_result(nb::module_& m);
 /**
- * @brief Binds `is_ground_state`.
+ * @brief Binds is ground state helpers.
  * @param m Python module.
  */
 void bind_is_ground_state(nb::module_& m);
 /**
- * @brief Binds `check_simulation_results_for_equivalence`.
+ * @brief Binds check simulation results for equivalence helpers.
  * @param m Python module.
  */
 void bind_check_simulation_results_for_equivalence(nb::module_& m);

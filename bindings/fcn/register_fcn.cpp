@@ -27,7 +27,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `area`.
+ * @brief Binds area helpers.
  * @param m Python module.
  */
 void bind_area(nb::module_& m);

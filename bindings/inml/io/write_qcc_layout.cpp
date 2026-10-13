@@ -41,7 +41,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `write_qcc_layout`.
+ * @brief Binds write qcc layout helpers.
  * @param m Python module.
  */
 void bind_write_qcc_layout(nb::module_& m)

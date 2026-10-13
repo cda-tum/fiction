@@ -36,7 +36,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `write_sqd_layout`.
+ * @brief Binds write sqd layout helpers.
  * @param m Python module.
  */
 void bind_write_sqd_layout(nb::module_& m)

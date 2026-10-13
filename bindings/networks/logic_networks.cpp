@@ -44,7 +44,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `one_network_type`. Node-type queries are bound only where the network implements them, so an AIG
+ * @brief Binds one network type. Node-type queries are bound only where the network implements them, so an AIG
  * exposes `is_and` but not `is_maj`. Output lookups by index (`po_index`, `po_at`) exist on the technology network
  * alone, whose signals are nodes; the mockturtle networks answer them with signals, which have no Python type.
  * @param m Python module.
@@ -213,7 +213,7 @@ void bind_network(nb::module_& m, const char* network_name, const char* doc)
 }  // namespace detail
 
 /**
- * @brief Binds `logic_networks`.
+ * @brief Binds logic networks helpers.
  * @param m Python module.
  */
 void bind_logic_networks(nb::module_& m)

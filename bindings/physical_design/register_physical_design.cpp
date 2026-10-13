@@ -32,52 +32,52 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `exact`.
+ * @brief Binds exact helpers.
  * @param m Python module.
  */
 void bind_exact(nb::module_& m);
 /**
- * @brief Binds `orthogonal`.
+ * @brief Binds orthogonal helpers.
  * @param m Python module.
  */
 void bind_orthogonal(nb::module_& m);
 /**
- * @brief Binds `graph_oriented_layout_design`.
+ * @brief Binds graph oriented layout design helpers.
  * @param m Python module.
  */
 void bind_graph_oriented_layout_design(nb::module_& m);
 /**
- * @brief Binds `apply_gate_library`.
+ * @brief Binds apply gate library helpers.
  * @param m Python module.
  */
 void bind_apply_gate_library(nb::module_& m);
 /**
- * @brief Binds `color_routing`.
+ * @brief Binds color routing helpers.
  * @param m Python module.
  */
 void bind_color_routing(nb::module_& m);
 /**
- * @brief Binds `hexagonalization`.
+ * @brief Binds hexagonalization helpers.
  * @param m Python module.
  */
 void bind_hexagonalization(nb::module_& m);
 /**
- * @brief Binds `post_layout_optimization`.
+ * @brief Binds post layout optimization helpers.
  * @param m Python module.
  */
 void bind_post_layout_optimization(nb::module_& m);
 /**
- * @brief Binds `wiring_reduction`.
+ * @brief Binds wiring reduction helpers.
  * @param m Python module.
  */
 void bind_wiring_reduction(nb::module_& m);
 /**
- * @brief Binds `routing_utils`.
+ * @brief Binds routing utils helpers.
  * @param m Python module.
  */
 void bind_routing_utils(nb::module_& m);
 /**
- * @brief Binds `placement_utils`.
+ * @brief Binds placement utils helpers.
  * @param m Python module.
  */
 void bind_placement_utils(nb::module_& m);

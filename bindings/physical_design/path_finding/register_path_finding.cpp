@@ -25,22 +25,22 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `distance`.
+ * @brief Binds distance helpers.
  * @param m Python module.
  */
 void bind_distance(nb::module_& m);
 /**
- * @brief Binds `a_star`.
+ * @brief Binds a star helpers.
  * @param m Python module.
  */
 void bind_a_star(nb::module_& m);
 /**
- * @brief Binds `k_shortest_paths`.
+ * @brief Binds k shortest paths helpers.
  * @param m Python module.
  */
 void bind_k_shortest_paths(nb::module_& m);
 /**
- * @brief Binds `enumerate_all_paths`.
+ * @brief Binds enumerate all paths helpers.
  * @param m Python module.
  */
 void bind_enumerate_all_paths(nb::module_& m);

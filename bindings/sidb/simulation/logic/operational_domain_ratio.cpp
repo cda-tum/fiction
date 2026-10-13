@@ -44,7 +44,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `operational_domain_ratio`.
+ * @brief Binds operational domain ratio helpers.
  * @param m Python module.
  */
 void bind_operational_domain_ratio(nb::module_& m)

@@ -47,7 +47,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `a_star_impl`.
+ * @brief Binds a star helpers.
  * @param m Python module.
  * @tparam Lyt Layout type.
  */
@@ -78,7 +78,7 @@ void bind_a_star_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `a_star`.
+ * @brief Binds a star helpers.
  * @param m Python module.
  */
 void bind_a_star(nb::module_& m)

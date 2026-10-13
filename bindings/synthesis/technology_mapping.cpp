@@ -41,7 +41,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `technology_mapping_impl`.
+ * @brief Binds technology mapping helpers.
  * @param m Python module.
  * @tparam Ntk Network type.
  */
@@ -56,7 +56,7 @@ void bind_technology_mapping_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `technology_mapping`.
+ * @brief Binds technology mapping helpers.
  * @param m Python module.
  */
 void bind_technology_mapping(nb::module_& m)

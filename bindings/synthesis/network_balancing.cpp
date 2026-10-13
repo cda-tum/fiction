@@ -38,7 +38,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `network_balancing_impl`.
+ * @brief Binds network balancing helpers.
  * @param m Python module.
  * @tparam Ntk Network type.
  */
@@ -57,7 +57,7 @@ void bind_network_balancing_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `network_balancing`.
+ * @brief Binds network balancing helpers.
  * @param m Python module.
  */
 void bind_network_balancing(nb::module_& m)

@@ -33,7 +33,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `simulation_parameters`.
+ * @brief Binds simulation parameters helpers.
  * @param m Python module.
  */
 void bind_simulation_parameters(nb::module_& m)

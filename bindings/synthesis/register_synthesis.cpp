@@ -31,27 +31,27 @@ namespace pyfiction
 void bind_dynamic_truth_table(nb::module_& m);
 
 /**
- * @brief Binds `truth_tables`.
+ * @brief Binds truth tables helpers.
  * @param m Python module.
  */
 void bind_truth_tables(nb::module_& m);
 /**
- * @brief Binds `fanout_substitution`.
+ * @brief Binds fanout substitution helpers.
  * @param m Python module.
  */
 void bind_fanout_substitution(nb::module_& m);
 /**
- * @brief Binds `network_balancing`.
+ * @brief Binds network balancing helpers.
  * @param m Python module.
  */
 void bind_network_balancing(nb::module_& m);
 /**
- * @brief Binds `technology_mapping`.
+ * @brief Binds technology mapping helpers.
  * @param m Python module.
  */
 void bind_technology_mapping(nb::module_& m);
 /**
- * @brief Binds `network_conversion`.
+ * @brief Binds network conversion helpers.
  * @param m Python module.
  */
 void bind_network_conversion(nb::module_& m);

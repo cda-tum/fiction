@@ -153,7 +153,7 @@ inline void bind_operational_domain_functions(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `operational_domain`.
+ * @brief Binds operational domain helpers.
  * @param m Python module.
  */
 void bind_operational_domain(nb::module_& m)

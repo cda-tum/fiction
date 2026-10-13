@@ -43,7 +43,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `detect_bdl_wires`.
+ * @brief Binds detect bdl wires helpers.
  * @param m Python module.
  */
 void bind_detect_bdl_wires(nb::module_& m)

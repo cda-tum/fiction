@@ -32,7 +32,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `charge_state`.
+ * @brief Binds charge state helpers.
  * @param m Python module.
  */
 void bind_charge_state(nb::module_& m)

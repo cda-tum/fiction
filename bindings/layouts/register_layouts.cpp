@@ -27,47 +27,47 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `coordinate`.
+ * @brief Binds coordinate helpers.
  * @param m Python module.
  */
 void bind_coordinate(nb::module_& m);
 /**
- * @brief Binds `coordinate_utility`.
+ * @brief Binds coordinate utility helpers.
  * @param m Python module.
  */
 void bind_coordinate_utility(nb::module_& m);
 /**
- * @brief Binds `arrangement`.
+ * @brief Binds arrangement helpers.
  * @param m Python module.
  */
 void bind_arrangement(nb::module_& m);
 /**
- * @brief Binds `cartesian_layout`.
+ * @brief Binds cartesian layout helpers.
  * @param m Python module.
  */
 void bind_cartesian_layout(nb::module_& m);
 /**
- * @brief Binds `shifted_cartesian_layout`.
+ * @brief Binds shifted cartesian layout helpers.
  * @param m Python module.
  */
 void bind_shifted_cartesian_layout(nb::module_& m);
 /**
- * @brief Binds `hexagonal_layout`.
+ * @brief Binds hexagonal layout helpers.
  * @param m Python module.
  */
 void bind_hexagonal_layout(nb::module_& m);
 /**
- * @brief Binds `gate_level_layout`.
+ * @brief Binds gate level layout helpers.
  * @param m Python module.
  */
 void bind_gate_level_layout(nb::module_& m);
 /**
- * @brief Binds `obstructions`.
+ * @brief Binds obstructions helpers.
  * @param m Python module.
  */
 void bind_obstructions(nb::module_& m);
 /**
- * @brief Binds `layout_utils`.
+ * @brief Binds layout utils helpers.
  * @param m Python module.
  */
 void bind_layout_utils(nb::module_& m);

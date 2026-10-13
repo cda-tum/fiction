@@ -25,12 +25,12 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `write_qca_layout`.
+ * @brief Binds write qca layout helpers.
  * @param m Python module.
  */
 void bind_write_qca_layout(nb::module_& m);
 /**
- * @brief Binds `write_qca_layout_svg`.
+ * @brief Binds write qca layout svg helpers.
  * @param m Python module.
  */
 void bind_write_qca_layout_svg(nb::module_& m);

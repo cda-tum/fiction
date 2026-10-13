@@ -46,7 +46,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `has_high_degree_fanin_nodes`.
+ * @brief Binds has high degree fanin nodes helpers.
  * @param m Python module.
  * @tparam Ntk Network type.
  */
@@ -60,7 +60,7 @@ void bind_has_high_degree_fanin_nodes(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `network_utils`.
+ * @brief Binds network utils helpers.
  * @param m Python module.
  */
 void bind_network_utils(nb::module_& m)

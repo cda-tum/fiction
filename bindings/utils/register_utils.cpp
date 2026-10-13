@@ -25,7 +25,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `version_info`.
+ * @brief Binds version info helpers.
  * @param m Python module.
  */
 void bind_version_info(nb::module_& m);

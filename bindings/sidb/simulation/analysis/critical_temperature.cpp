@@ -98,7 +98,7 @@ inline void bind_critical_temperature_functions(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `critical_temperature`.
+ * @brief Binds critical temperature helpers.
  * @param m Python module.
  */
 void bind_critical_temperature(nb::module_& m)

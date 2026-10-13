@@ -27,22 +27,22 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `logic_networks`.
+ * @brief Binds logic networks helpers.
  * @param m Python module.
  */
 void bind_logic_networks(nb::module_& m);
 /**
- * @brief Binds `name_utils`.
+ * @brief Binds name utils helpers.
  * @param m Python module.
  */
 void bind_name_utils(nb::module_& m);
 /**
- * @brief Binds `network_utils`.
+ * @brief Binds network utils helpers.
  * @param m Python module.
  */
 void bind_network_utils(nb::module_& m);
 /**
- * @brief Binds `logic_simulation`.
+ * @brief Binds logic simulation helpers.
  * @param m Python module.
  */
 void bind_logic_simulation(nb::module_& m);

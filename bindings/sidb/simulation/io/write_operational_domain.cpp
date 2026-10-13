@@ -48,7 +48,7 @@ namespace pyfiction
 namespace detail
 {
 /**
- * @brief Binds `write_operational_domain`.
+ * @brief Binds write operational domain helpers.
  * @param m Python module.
  */
 void bind_write_operational_domain(nb::module_& m)
@@ -77,7 +77,7 @@ void bind_write_operational_domain(nb::module_& m)
 }
 
 /**
- * @brief Binds `write_critical_temperature_domain`.
+ * @brief Binds write critical temperature domain helpers.
  * @param m Python module.
  */
 void bind_write_critical_temperature_domain(nb::module_& m)
@@ -108,7 +108,7 @@ void bind_write_critical_temperature_domain(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `write_operational_domain`.
+ * @brief Binds write operational domain helpers.
  * @param m Python module.
  */
 void bind_write_operational_domain(nb::module_& m)

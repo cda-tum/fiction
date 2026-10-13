@@ -30,7 +30,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `is_ground_state`.
+ * @brief Binds is ground state helpers.
  * @param m Python module.
  */
 void bind_is_ground_state(nb::module_& m)

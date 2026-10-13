@@ -43,7 +43,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `detect_bdl_pairs`.
+ * @brief Binds detect bdl pairs helpers.
  * @param m Python module.
  */
 void bind_detect_bdl_pairs(nb::module_& m)

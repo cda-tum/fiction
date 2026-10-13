@@ -38,7 +38,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `occupation_probability_of_excited_states_impl`.
+ * @brief Binds occupation probability of excited states helpers.
  * @param m Python module.
  */
 void bind_occupation_probability_of_excited_states_impl(nb::module_& m)
@@ -56,7 +56,7 @@ void bind_occupation_probability_of_excited_states_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `occupation_probability_of_excited_states`.
+ * @brief Binds occupation probability of excited states helpers.
  * @param m Python module.
  */
 void bind_occupation_probability_of_excited_states(nb::module_& m)

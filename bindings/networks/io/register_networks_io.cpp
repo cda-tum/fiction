@@ -25,17 +25,17 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `network_reader`.
+ * @brief Binds network reader helpers.
  * @param m Python module.
  */
 void bind_network_reader(nb::module_& m);
 /**
- * @brief Binds `network_writers`.
+ * @brief Binds network writers helpers.
  * @param m Python module.
  */
 void bind_network_writers(nb::module_& m);
 /**
- * @brief Binds `dot_drawers`.
+ * @brief Binds dot drawers helpers.
  * @param m Python module.
  */
 void bind_dot_drawers(nb::module_& m);

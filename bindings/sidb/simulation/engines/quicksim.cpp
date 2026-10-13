@@ -40,7 +40,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `quicksim`.
+ * @brief Binds quicksim helpers.
  * @param m Python module.
  */
 void bind_quicksim(nb::module_& m)

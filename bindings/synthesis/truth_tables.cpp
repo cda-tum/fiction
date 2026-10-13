@@ -30,7 +30,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `truth_tables`.
+ * @brief Binds truth tables helpers.
  * @param m Python module.
  */
 void bind_truth_tables(nb::module_& m)

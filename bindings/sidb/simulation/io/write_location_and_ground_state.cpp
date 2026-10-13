@@ -33,7 +33,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `write_location_and_ground_state`.
+ * @brief Binds write location and ground state helpers.
  * @param m Python module.
  */
 void bind_write_location_and_ground_state(nb::module_& m)

@@ -45,7 +45,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `orthogonal`.
+ * @brief Binds orthogonal helpers.
  * @param m Python module.
  */
 void bind_orthogonal(nb::module_& m)

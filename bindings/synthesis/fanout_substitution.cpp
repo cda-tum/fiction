@@ -41,7 +41,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `fanout_substitution_impl`.
+ * @brief Binds fanout substitution helpers.
  * @param m Python module.
  * @tparam Ntk Network type.
  */
@@ -60,7 +60,7 @@ void bind_fanout_substitution_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `fanout_substitution`.
+ * @brief Binds fanout substitution helpers.
  * @param m Python module.
  */
 void bind_fanout_substitution(nb::module_& m)

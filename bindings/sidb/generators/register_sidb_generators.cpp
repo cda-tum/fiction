@@ -25,17 +25,17 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `random_layout_generator`.
+ * @brief Binds random layout generator helpers.
  * @param m Python module.
  */
 void bind_random_layout_generator(nb::module_& m);
 /**
- * @brief Binds `design_gates`.
+ * @brief Binds design gates helpers.
  * @param m Python module.
  */
 void bind_design_gates(nb::module_& m);
 /**
- * @brief Binds `on_the_fly_circuit_design`.
+ * @brief Binds on the fly circuit design helpers.
  * @param m Python module.
  */
 void bind_on_the_fly_circuit_design(nb::module_& m);

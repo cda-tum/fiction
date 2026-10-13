@@ -25,22 +25,22 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `quickexact`.
+ * @brief Binds quickexact helpers.
  * @param m Python module.
  */
 void bind_quickexact(nb::module_& m);
 /**
- * @brief Binds `quicksim`.
+ * @brief Binds quicksim helpers.
  * @param m Python module.
  */
 void bind_quicksim(nb::module_& m);
 /**
- * @brief Binds `exhaustive_ground_state_simulation`.
+ * @brief Binds exhaustive ground state simulation helpers.
  * @param m Python module.
  */
 void bind_exhaustive_ground_state_simulation(nb::module_& m);
 /**
- * @brief Binds `clustercomplete`.
+ * @brief Binds clustercomplete helpers.
  * @param m Python module.
  */
 void bind_clustercomplete(nb::module_& m);

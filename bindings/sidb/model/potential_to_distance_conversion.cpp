@@ -30,7 +30,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `potential_to_distance_conversion`.
+ * @brief Binds potential to distance conversion helpers.
  * @param m Python module.
  */
 void bind_potential_to_distance_conversion(nb::module_& m)

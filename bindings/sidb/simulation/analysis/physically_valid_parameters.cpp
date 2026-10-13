@@ -44,7 +44,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `physically_valid_parameters`.
+ * @brief Binds physically valid parameters helpers.
  * @param m Python module.
  */
 void bind_physically_valid_parameters(nb::module_& m)

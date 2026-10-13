@@ -49,7 +49,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `exact`.
+ * @brief Binds exact helpers.
  * @param m Python module.
  */
 void bind_exact(nb::module_& m)

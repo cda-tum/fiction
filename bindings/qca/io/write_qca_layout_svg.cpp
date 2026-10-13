@@ -44,7 +44,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `write_qca_layout_svg_impl`.
+ * @brief Binds write qca layout svg helpers.
  * @param m Python module.
  */
 void bind_write_qca_layout_svg_impl(nb::module_& m)
@@ -63,7 +63,7 @@ void bind_write_qca_layout_svg_impl(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `write_qca_layout_svg`.
+ * @brief Binds write qca layout svg helpers.
  * @param m Python module.
  */
 void bind_write_qca_layout_svg(nb::module_& m)

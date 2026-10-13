@@ -46,7 +46,7 @@ namespace detail
 {
 
 /**
- * @brief Binds `write_qll_layout`.
+ * @brief Binds write qll layout helpers.
  * @param m Python module.
  * @tparam Lyt Layout type.
  */
@@ -66,7 +66,7 @@ void bind_write_qll_layout(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `write_qll_layout`.
+ * @brief Binds write qll layout helpers.
  * @param m Python module.
  */
 void bind_write_qll_layout(nb::module_& m)

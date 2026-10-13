@@ -34,7 +34,7 @@ namespace pyfiction
 {
 
 /**
- * @brief Binds `minimum_energy`.
+ * @brief Binds minimum energy helpers.
  * @param m Python module.
  */
 void bind_minimum_energy(nb::module_& m)

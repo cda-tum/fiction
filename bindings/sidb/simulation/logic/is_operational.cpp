@@ -136,7 +136,7 @@ inline void bind_is_operational_functions(nb::module_& m)
 }  // namespace detail
 
 /**
- * @brief Binds `is_operational`.
+ * @brief Binds is operational helpers.
  * @param m Python module.
  */
 void bind_is_operational(nb::module_& m)
