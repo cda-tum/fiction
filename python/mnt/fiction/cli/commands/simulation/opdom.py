@@ -19,7 +19,8 @@ from rich.table import Table
 from mnt.fiction.cli import drawing
 from mnt.fiction.cli.commands.io.tt import _table_from_string
 from mnt.fiction.cli.errors import CommandError
-from mnt.fiction.cli.opdom_plotting import atomic_output, plot_arguments, validate_outputs, write_plot
+from mnt.fiction.cli.opdom_plotting import plot_arguments, validate_outputs, write_plot
+from mnt.fiction.cli.output import atomic_output
 from mnt.fiction.cli.parsing import finite_float, integer, positive_float, positive_int
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict

@@ -19,8 +19,6 @@ import shutil
 # the viewer is the platform's own opener or a command the user typed, both started without a shell
 import subprocess  # ruff: ignore[suspicious-subprocess-import]
 import sys
-import tempfile
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction.layouts.io import write_dot_layout
@@ -33,12 +31,14 @@ from mnt.pyfiction.sidb import sidb_layout
 from mnt.pyfiction.sidb.io import write_sidb_layout_svg, write_sidb_layout_svg_params
 
 from .errors import CommandError
+from .output import atomic_output
 from .parsing import tokenize
 from .session import ProgressCallback, ignore_progress
 from .stores import Network, ground_state
 
 if TYPE_CHECKING:
     import argparse
+    from pathlib import Path
 
     from .parsing import Parser
     from .stores import CellEntry, GateLayout
@@ -208,19 +208,13 @@ def render_dot(source: Path, destination: Path) -> None:
     if executable is None:
         msg = f"Graphviz 'dot' is required for SVG rendering; DOT retained at '{source}'"
         raise CommandError(msg)
-    if destination.is_symlink():
-        destination = destination.resolve(strict=True)
     if destination.exists() and not destination.is_file():
         msg = f"output path is not a regular file: '{destination}'"
         raise CommandError(msg)
-    with tempfile.TemporaryDirectory(prefix=".fiction-", dir=destination.parent) as directory:
-        temporary = Path(directory) / destination.name
+    with atomic_output(destination) as temporary:
         result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- pass paths as arguments, never shell code
             [executable, "-Tsvg", str(source), "-o", str(temporary)], capture_output=True, text=True, check=False
         )
         if result.returncode or not temporary.is_file():
             msg = f"Graphviz failed: {result.stderr.strip()}; DOT retained at '{source}'"
             raise CommandError(msg)
-        if destination.exists():
-            shutil.copymode(destination, temporary)
-        temporary.replace(destination)

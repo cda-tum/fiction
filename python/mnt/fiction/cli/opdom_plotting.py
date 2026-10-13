@@ -10,19 +10,17 @@
 
 from __future__ import annotations
 
-import tempfile
-from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction.sidb.simulation.logic import sweep_parameter
 
 from .errors import CommandError
+from .output import atomic_output
 from .parsing import positive_float, positive_int
 
 if TYPE_CHECKING:
     import argparse
-    from collections.abc import Generator
 
     import numpy as np
     from matplotlib.figure import Figure
@@ -316,28 +314,6 @@ def plotly_figure(domain: operational_domain, args: argparse.Namespace) -> Plotl
         **({"scene": axes} if dimensions == DIMENSIONS_3D else axes),
     )
     return figure
-
-
-@contextmanager
-def atomic_output(path: Path) -> Generator[Path, None, None]:
-    """Stage an output in a sibling temporary file, then replace the destination.
-
-    The destination changes only when the body completes. Existing symbolic links retain their link
-    and receive the output through their target.
-
-    Args:
-        path: The destination.
-
-    Yields:
-        The temporary path to write.
-    """
-    destination = path.resolve(strict=True) if path.is_symlink() else path
-    with tempfile.TemporaryDirectory(prefix=".fiction-", dir=destination.parent) as directory:
-        temporary = Path(directory) / destination.name
-        yield temporary  # ruff: ignore[fallible-context-manager] -- a failed body skips the replacement
-        if destination.exists():
-            temporary.chmod(destination.stat().st_mode)
-        temporary.replace(destination)
 
 
 def write_plot(domain: operational_domain, path: Path, args: argparse.Namespace) -> None:
