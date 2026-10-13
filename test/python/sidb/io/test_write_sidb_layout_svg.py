@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.io import color_mode, write_sidb_layout_svg_params, write_sidb_layout_svg_to_string
+from mnt.pyfiction.sidb.io import color_mode, write_sidb_layout_svg_to_string
 from mnt.pyfiction.sidb.model import sidb_charge_state
 from mnt.pyfiction.utils import __repo__, __version__
 
@@ -220,14 +220,14 @@ cds_light_mode = (
 
 def test_write_sidb_layout_to_svg(four_sidb_layout: sidb_layout) -> None:
     """SiDB layouts render the expected SVG in both color modes."""
-    params = write_sidb_layout_svg_params()
+    options = {}
 
-    params.color_background = color_mode.DARK
-    generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(four_sidb_layout, params)
+    options["color_background"] = color_mode.DARK
+    generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(four_sidb_layout, **options)
     assert normalize_svg(generated_svg_cell_level_dark_mode) == normalize_svg(cell_level_dark_mode)
 
-    params.color_background = color_mode.LIGHT
-    generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(four_sidb_layout, params)
+    options["color_background"] = color_mode.LIGHT
+    generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(four_sidb_layout, **options)
     assert normalize_svg(generated_svg_cell_level_light_mode) == normalize_svg(cell_level_light_mode)
 
 
@@ -239,14 +239,14 @@ def test_write_sidb_charge_distribution_to_svg(four_sidb_layout: sidb_layout) ->
     cd.assign_charge_state(lattice_site(1, 0, 0), sidb_charge_state.NEUTRAL)
     cd.assign_charge_state(lattice_site(3, 1, 1), sidb_charge_state.POSITIVE)
 
-    params = write_sidb_layout_svg_params()
+    options = {}
 
-    params.color_background = color_mode.DARK
-    generated_svg_cds_dark_mode = write_sidb_layout_svg_to_string(four_sidb_layout, cd, params)
+    options["color_background"] = color_mode.DARK
+    generated_svg_cds_dark_mode = write_sidb_layout_svg_to_string(four_sidb_layout, cd, **options)
     assert normalize_svg(generated_svg_cds_dark_mode) == normalize_svg(cds_dark_mode)
 
-    params.color_background = color_mode.LIGHT
-    generated_svg_cds_light_mode = write_sidb_layout_svg_to_string(four_sidb_layout, cd, params)
+    options["color_background"] = color_mode.LIGHT
+    generated_svg_cds_light_mode = write_sidb_layout_svg_to_string(four_sidb_layout, cd, **options)
     assert normalize_svg(generated_svg_cds_light_mode) == normalize_svg(cds_light_mode)
 
 
@@ -258,10 +258,7 @@ def test_sidb_layout_svg() -> None:
     lyt.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
     lyt.assign_sidb(lattice_site(3, 1, 1), sidb_dot_tag.NORMAL)
 
-    params = write_sidb_layout_svg_params()
-    params.color_background = color_mode.LIGHT
-
-    svg = write_sidb_layout_svg_to_string(lyt, params)
+    svg = write_sidb_layout_svg_to_string(lyt, color_background=color_mode.LIGHT)
 
     assert svg.count('xlink:href="#sidb_color"') == 4
     assert svg.count('xlink:href="#lattice_point"') == 16

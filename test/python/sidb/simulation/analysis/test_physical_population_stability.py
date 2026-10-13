@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability, physical_population_stability_params
+from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability
 
 
 def test_three_sidbs_100_lattice() -> None:
@@ -18,16 +18,17 @@ def test_three_sidbs_100_lattice() -> None:
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
-    params = physical_population_stability_params()
-    params.simulation_parameters.mu_minus = -0.25
-    result = physical_population_stability(layout, params)
+    options = {
+        "mu_minus": -0.25,
+    }
+    result = physical_population_stability(layout, **options)
     assert len(result) == 5
     assert result[0].critical_dot in layout.sidbs()
     assert result[0].system_energy <= result[1].system_energy
     assert result[1].system_energy <= result[2].system_energy
 
-    params.simulation_parameters.mu_minus = -0.32
-    result = physical_population_stability(layout, params)
+    options["mu_minus"] = -0.32
+    result = physical_population_stability(layout, **options)
     assert len(result) == 1
 
 
@@ -37,14 +38,15 @@ def test_three_sidbs_111_lattice() -> None:
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(1, 0, 1), sidb_dot_tag.NORMAL)
-    params = physical_population_stability_params()
-    params.simulation_parameters.mu_minus = -0.25
-    result = physical_population_stability(layout, params)
+    options = {
+        "mu_minus": -0.25,
+    }
+    result = physical_population_stability(layout, **options)
     assert len(result) == 5
     assert result[0].critical_dot in layout.sidbs()
     assert result[0].system_energy <= result[1].system_energy
     assert result[1].system_energy <= result[2].system_energy
 
-    params.simulation_parameters.mu_minus = -0.32
-    result = physical_population_stability(layout, params)
+    options["mu_minus"] = -0.32
+    result = physical_population_stability(layout, **options)
     assert len(result) == 2

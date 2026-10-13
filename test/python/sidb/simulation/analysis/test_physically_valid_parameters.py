@@ -58,20 +58,17 @@ def test_progress_callback_completes() -> None:
             sys.executable,
             "-c",
             textwrap.dedent("""
+
                 import time
                 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
                 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
-                from mnt.pyfiction.sidb.simulation.logic import (
-                    operational_domain_params,
-                    operational_domain_value_range,
-                    sweep_parameter,
-                )
+                from mnt.pyfiction.sidb.simulation.logic import operational_domain_value_range, sweep_parameter
 
                 layout = sidb_layout()
                 layout.assign_sidb(lattice_site(0, 0), sidb_dot_tag.NORMAL)
-                params = operational_domain_params()
-                params.number_of_threads = 2
-                params.sweep_dimensions = [
+                options = {}
+                options['number_of_threads'] = 2
+                options['sweep_dimensions'] = [
                     operational_domain_value_range(sweep_parameter.EPSILON_R, 5, 6, 0.5)
                 ]
                 reports = []
@@ -82,8 +79,8 @@ def test_progress_callback_completes() -> None:
                     if done == 0:
                         time.sleep(0.2)
 
-                params.on_progress = report
-                physically_valid_parameters(layout, charge_distribution(layout), params)
+                options['on_progress'] = report
+                physically_valid_parameters(layout, charge_distribution(layout), **options)
                 assert reports[-1] == ("parameter points", 3, 3), reports
             """),
         ],

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.physical_design import orthogonal, wiring_reduction, wiring_reduction_params, wiring_reduction_stats
+from mnt.pyfiction.physical_design import orthogonal, wiring_reduction, wiring_reduction_stats
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
@@ -34,8 +34,7 @@ def test_wiring_reduction_with_parameters(mux21: technology_network) -> None:
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
-    params = wiring_reduction_params()
-    wiring_reduction(layout, params)
+    wiring_reduction(layout, timeout=2**64 - 1)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
@@ -72,12 +71,9 @@ def test_wiring_reduction_with_stats_and_parameters(mux21: technology_network) -
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
-    params = wiring_reduction_params()
-    params.timeout = 1000000
-
     before = layout.clone()
     stats = wiring_reduction_stats()
-    wiring_reduction(layout, params, stats)
+    wiring_reduction(layout, statistics=stats, timeout=1000000)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0

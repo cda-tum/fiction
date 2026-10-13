@@ -15,7 +15,7 @@ import pytest
 from mnt.pyfiction.layouts import cartesian_gate_layout, layout_input_port
 from mnt.pyfiction.networks import simulate, simulate_outputs
 from mnt.pyfiction.networks.io import read_network
-from mnt.pyfiction.physical_design import exact, exact_params
+from mnt.pyfiction.physical_design import exact
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -31,9 +31,7 @@ def test_logic_simulation(resources_dir):
     xnor_sim = simulate(xnor2_net)
     assert xnor_sim["out"] == [True, False, False, True]
 
-    params = exact_params()
-    params.crossings = True
-    xor_lyt = exact(xor2_net, params)
+    xor_lyt = exact(xor2_net, crossings=True)
     assert xor_lyt is not None
     xor_lyt_sim = simulate(xor_lyt)
     assert xor_lyt_sim["out"] == [False, True, True, False]

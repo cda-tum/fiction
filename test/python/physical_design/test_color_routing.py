@@ -17,7 +17,7 @@ from mnt.pyfiction.layouts import (
     hexagonal_gate_layout,
     layout_input_port,
 )
-from mnt.pyfiction.physical_design import color_routing, color_routing_params
+from mnt.pyfiction.physical_design import color_routing
 
 
 @pytest.mark.parametrize(
@@ -57,10 +57,6 @@ def test_crossings():
     lyt.disconnect(layout_input_port(gate, 0))
     lyt.disconnect(layout_input_port(gate, 1))
 
-    params = color_routing_params()
-    params.crossings = True
-    params.path_limit = 1
-
-    success = color_routing(lyt, [((0, 1), (4, 2), 0), ((3, 2), (4, 2), 1)], params=params)
+    success = color_routing(lyt, [((0, 1), (4, 2), 0), ((3, 2), (4, 2), 1)], crossings=True, path_limit=1)
 
     assert success

@@ -12,12 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.physical_design import (
-    orthogonal,
-    post_layout_optimization,
-    post_layout_optimization_params,
-    post_layout_optimization_stats,
-)
+from mnt.pyfiction.physical_design import orthogonal, post_layout_optimization, post_layout_optimization_stats
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
@@ -39,8 +34,7 @@ def test_post_layout_optimization_with_parameters(mux21: technology_network) -> 
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
-    params = post_layout_optimization_params()
-    post_layout_optimization(layout, params)
+    post_layout_optimization(layout, timeout=2**64 - 1)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
@@ -71,13 +65,9 @@ def test_post_layout_optimization_with_stats_and_parameters(mux21: technology_ne
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
-    params = post_layout_optimization_params()
-    params.max_gate_relocations = 1
-    params.timeout = 1000000
-
     before = layout.clone()
     stats = post_layout_optimization_stats()
-    post_layout_optimization(layout, params, statistics=stats)
+    post_layout_optimization(layout, statistics=stats, max_gate_relocations=1, timeout=1000000)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert stats.time_total.total_seconds() > 0

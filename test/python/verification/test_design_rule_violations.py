@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from mnt.pyfiction.layouts import cartesian_gate_layout
 from mnt.pyfiction.physical_design import color_routing
-from mnt.pyfiction.verification import gate_level_drv_params, gate_level_drvs
+from mnt.pyfiction.verification import gate_level_drvs
 
 
 def test_drvs() -> None:
@@ -40,13 +40,14 @@ def test_drvs_check_placements_outside_extent() -> None:
     layout = cartesian_gate_layout((1, 1, 1), "2DDWave")
     source = layout.create_pi("a", (-2, 0))
     layout.create_po(source, "result", (-1, 0))
-    params = gate_level_drv_params()
-    params.non_adjacent_connections = False
-    params.missing_connections = False
-    params.crossing_gates = False
-    params.clocked_data_flow = False
-    params.has_io = False
-    params.border_io = False
-    assert gate_level_drvs(layout, params) == (0, 2)
-    params.outside_extent = False
-    assert gate_level_drvs(layout, params) == (0, 0)
+    options = {
+        "non_adjacent_connections": False,
+        "missing_connections": False,
+        "crossing_gates": False,
+        "clocked_data_flow": False,
+        "has_io": False,
+        "border_io": False,
+    }
+    assert gate_level_drvs(layout, **options) == (0, 2)
+    options["outside_extent"] = False
+    assert gate_level_drvs(layout, **options) == (0, 0)

@@ -22,7 +22,9 @@ def test_initialization():
 
 
 def test_custom_initialization():
-    params = sidb_simulation_parameters(2, -0.4, 7.1, 10.0)
+    params = sidb_simulation_parameters(
+        base_number=2, mu_minus=-0.4, relative_permittivity=7.1, screening_distance=10.0
+    )
 
     # Check if it is initialized correctly.
     assert params.epsilon_r == 7.1
