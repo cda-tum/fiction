@@ -682,7 +682,7 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
                                          const auto it =
                                              std::ranges::find_if(pis, [&tec, &f](const auto& pi)
                                                                   { return tec.get_node(pi) == tec.get_node(f); });
-                                         indices.push_back(static_cast<uint32_t>(std::distance(pis.cbegin(), it)));
+                                         indices.push_back(static_cast<uint32_t>(std::distance(pis.begin(), it)));
                                      });
                 std::ranges::sort(indices);
                 orders.push_back(std::move(indices));
