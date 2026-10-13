@@ -19,7 +19,6 @@
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
 
-#include <optional>
 #include <string_view>
 
 #include <nanobind/nanobind.h>

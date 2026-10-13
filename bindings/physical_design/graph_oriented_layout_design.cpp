@@ -20,7 +20,6 @@
 
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 
-#include <optional>
 #include <sstream>
 
 #include <nanobind/nanobind.h>
@@ -156,6 +155,7 @@ void register_graph_oriented_layout_design(nb::module_& m)
         nb::arg("statistics") = nullptr, nb::arg("custom_cost_objective") = nullptr,
         R"doc(Place and route a technology network by searching partial gate layouts.
 The keyword options control search effort, clocking, and progress reporting.
+tiles_to_skip_between_pis must lie in [0, 2**20]; values outside this range raise ValueError.
 )doc");
 }
 

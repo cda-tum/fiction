@@ -25,7 +25,6 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 
-#include <optional>
 #include <sstream>
 #include <vector>
 
@@ -51,9 +50,6 @@ namespace pyfiction
 
 /** @brief Native options constructed for each Python call. */
 using critical_temperature_options = fiction::sidb::simulation::analysis::critical_temperature_params;
-
-/** @brief Native options constructed for each Python call. */
-using simulation_model = fiction::sidb::model::simulation_parameters;
 
 namespace detail
 {
@@ -140,7 +136,7 @@ inline void register_critical_temperature_functions(nb::module_& m)
         nb::arg("stats") = nullptr,
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
-Supplied input and output wires bypass automatic wire detection.
+The overload with input and output wires bypasses automatic wire detection.
 )doc");
     m.def(
         "critical_temperature_gate_based",
@@ -216,7 +212,7 @@ Supplied input and output wires bypass automatic wire detection.
         nb::arg("stats") = nullptr,
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
-Supplied input and output wires bypass automatic wire detection.
+The overload with input and output wires bypasses automatic wire detection.
 )doc");
     m.def(
         "critical_temperature_non_gate_based",
@@ -322,10 +318,6 @@ void register_critical_temperature(nb::module_& m)
             DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
 
         ;
-
-    /**
-     * Critical temperature parameters.
-     */
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

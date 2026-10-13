@@ -20,7 +20,6 @@
 
 #include <fiction/physical_design/wiring_reduction.hpp>
 
-#include <optional>
 #include <sstream>
 
 #include <nanobind/nanobind.h>
@@ -99,6 +98,8 @@ void register_wiring_reduction(nb::module_& m)
         nb::arg("on_progress").none() = nb::none(), nb::arg("statistics") = nullptr,
         R"doc(Reduce wires in a 2DDWave-clocked gate layout in place with A* routing.
 The keyword options bound runtime and report progress.
+Raises ValueError for unsupported clocking or invalid occupied geometry.
+Raises OverflowError when the extent exceeds signed routing coordinates.
 )doc");
 }
 

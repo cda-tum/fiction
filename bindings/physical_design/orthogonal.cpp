@@ -87,6 +87,8 @@ void register_orthogonal(nb::module_& m, const char* signature)
               R"doc(Place and route a technology network with orthogonal graph drawing.
 The layout_type keyword selects Cartesian or hexagonal gate layouts.
 The keyword options select clock phases, arrangement, and progress reporting.
+Raises ValueError when a shifted Cartesian or hexagonal layout requires layout_arrangement and none is supplied.
+Raises high_degree_fanin_exception for network nodes with more than two inputs.
 )doc");
     }
     else

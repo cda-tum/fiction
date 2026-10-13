@@ -78,6 +78,7 @@ void register_a_star_impl(nb::module_& m)
         nb::arg("crossings") = a_star_options{}.crossings, nb::arg("obstructions") = nb::none(),
         R"doc(Find a shortest loop-free path from source to target in the layout.
 The keyword options select obstructions and crossing constraints.
+Raises ValueError when source or target lies outside the layout extent.
 )doc");
 
     m.def("a_star_distance", &fiction::physical_design::path_finding::a_star_distance<Lyt>, nb::arg("layout"),

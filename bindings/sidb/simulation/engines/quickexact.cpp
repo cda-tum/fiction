@@ -89,6 +89,7 @@ void register_quickexact(nb::module_& m)
         nb::arg("global_potential") = quickexact_options{}.global_potential, nb::arg("on_progress").none() = nb::none(),
         R"doc(Simulate the SiDB layout with QuickExact.
 The keyword options select physical values, base detection, external potentials, and progress reporting.
+Raises ValueError when base is neither 2 nor 3.
 )doc");
 }
 

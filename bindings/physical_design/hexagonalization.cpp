@@ -20,7 +20,6 @@
 
 #include <fiction/physical_design/hexagonalization.hpp>
 
-#include <optional>
 #include <sstream>
 
 #include <nanobind/nanobind.h>

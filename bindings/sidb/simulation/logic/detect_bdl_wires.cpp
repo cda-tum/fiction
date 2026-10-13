@@ -22,7 +22,6 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 
-#include <optional>
 #include <vector>
 
 #include <nanobind/nanobind.h>

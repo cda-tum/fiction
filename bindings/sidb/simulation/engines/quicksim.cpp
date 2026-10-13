@@ -85,6 +85,7 @@ void register_quicksim(nb::module_& m)
         R"doc(Search for low-energy charge distributions with QuickSim.
 The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
 Returns None when the heuristic search finds no physically valid charge distribution.
+Raises ValueError when base is neither 2 nor 3.
 )doc");
 }
 

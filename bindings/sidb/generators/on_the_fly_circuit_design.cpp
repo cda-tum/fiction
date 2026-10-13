@@ -25,7 +25,6 @@
 
 #include <fmt/format.h>
 
-#include <optional>
 #include <stdexcept>
 
 #include <nanobind/nanobind.h>
@@ -60,11 +59,6 @@ void register_on_the_fly_circuit_design(nb::module_& m)
      * Choice between predefined and synthesized complex gates.
      */
     using complex_policy = library_params::complex_gate_design_policy;
-    /**
-     * Parameters for circuit design on a placed and routed layout.
-     */
-    using circuit_params = on_the_fly_circuit_design_options;
-
     nb::enum_<complex_policy>(m, "sidb_complex_gate_design_policy",
                               DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy))
         .value("USING_PREDEFINED", complex_policy::USING_PREDEFINED,

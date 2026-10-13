@@ -23,7 +23,6 @@
 #include <fiction/utils/graph/graph_coloring.hpp>
 
 #include <cstdint>
-#include <optional>
 #include <tuple>
 #include <vector>
 

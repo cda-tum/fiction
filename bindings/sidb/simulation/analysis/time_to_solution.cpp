@@ -158,6 +158,7 @@ Args:
                    ground state.
     results_heuristic: The results of the heuristic runs.
     confidence_level: Confidence level for the TTS computation.
+    ps: Receives the completed statistics when supplied.
 
 )doc");
 }
