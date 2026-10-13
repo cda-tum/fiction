@@ -99,6 +99,8 @@ namespace fiction::layouts
  *
  * Objects have stable identities independent of their coordinates. Connections describe declared topology;
  * physical validation checks adjacency, clocking, and geometry separately. Copies own independent state.
+ * A sink is a destination input port driven by a source object's output. One destination object may
+ * receive the same source at several input indices; each connected input port is a distinct sink.
  * Visitors may edit coordinates, names, and capabilities. Object and terminal visitors must not create
  * or remove objects, change terminal order, or replace the layout during traversal. Connection visitors
  * must also preserve the traversed input or sink connections, as specified on each visitor.
@@ -548,7 +550,10 @@ class gate_level_layout : public CoordinateLayout
         const auto ins = input_edges(id.index);
         return static_cast<uint32_t>(std::ranges::count_if(ins, [](const auto edge) { return edge != NO_INDEX; }));
     }
-    /** @brief Counts sink input ports, including multiple ports on one object. */
+    /**
+     * @brief Counts destination input ports driven by this object's output.
+     * Each connected input port is a sink, including multiple ports on the same destination object.
+     */
     [[nodiscard]] uint32_t fanout_size(const object_id id) const
     {
         return checked_object(id).sink_count;
@@ -779,8 +784,13 @@ class gate_level_layout : public CoordinateLayout
         }
     }
     /**
-     * @brief Visits sink input ports of an output, irrespective of physical legality.
-     * Sink order is unspecified. Callbacks must not remove the source object or change its sink connections.
+     * @brief Visits destination input ports driven by the source object's output.
+     * Each sink is an `input_port` naming a destination object and its truth-table argument index.
+     * Connecting one source to several inputs of the same destination yields a sink for each input.
+     * Connections need not be physically legal, and sink order is unspecified.
+     * Callbacks must not remove the source object or change its sink connections.
+     * @param src Source object whose output drives the visited input ports.
+     * @param fn Callable accepting an input port and optionally its traversal index.
      */
     template <typename Fn>
     // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): repeated calls require an lvalue callback.
@@ -824,7 +834,7 @@ class gate_level_layout : public CoordinateLayout
         }
         return result;
     }
-    /** @brief Returns coordinates of declared sinks; optionally filters physical clocking and adjacency. */
+    /** @brief Returns destination-object coordinates of output connections, filtered by adjacency and optionally clocking. */
     template <bool RespectClocking = true>
     [[nodiscard]] std::vector<tile> outgoing_data_flow(const tile& t) const
     {

@@ -13,6 +13,12 @@ Coordinates describe positions; IDs describe objects and their single output; an
 names the object and the truth-table argument where a connection enters. Wires and fanouts
 are explicit objects. An empty layout contains no objects or implicit constants.
 
+A sink is a destination input port driven by a source object's output. `foreach_sink(source, fn)`
+in C++ and `sinks(source)` in Python report each port as the destination object and its input index.
+If a source drives inputs 0 and 2 of one gate, both ports are sinks. `fanout_size(source)` counts
+these ports, and `foreach_fanout` visits the destination once per connected port. Sink order is
+unspecified, and declared connections need not satisfy physical adjacency or clocking.
+
 `is_wire`, `foreach_wire`, and `num_wires` identify physical wire objects and exclude PIs and POs.
 Python's `wires()` returns the same objects. `is_buf` identifies the identity function, including terminals;
 `is_fanout` identifies identity objects that drive more than one input port. `num_gates` excludes wires and terminals.

@@ -377,8 +377,9 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
                 return sinks;
             },
             py::arg("object"),
-            "Returns the connected sink input ports, including repeated inputs of one object. Sink order is "
-            "unspecified.")
+            "Returns the destination input ports driven by this object's output. Each sink identifies the destination "
+            "object and its input index. If the source drives several inputs of one destination, each input is a "
+            "separate sink. Connections need not be physically legal; order is unspecified.")
         .def("clear_tile", &GateLyt::clear_tile, py::arg("t"), DOC(fiction_layouts_gate_level_layout_clear_tile))
 
         .def("is_gate_tile", &GateLyt::is_gate_tile, py::arg("t"), DOC(fiction_layouts_gate_level_layout_is_gate_tile))
@@ -591,7 +592,8 @@ void gate_level_layout(nanobind::module_& m)
         .def(
             "__eq__", [](const object_id a, const object_id b) { return a == b; }, py::is_operator())
         .def("__hash__", [](const object_id id) { return std::hash<object_id>{}(id); });
-    py::class_<input_port>(m, "LayoutInputPort", "An object's ordered input port.")
+    py::class_<input_port>(m, "LayoutInputPort", "A destination input port, identified by its object and truth-table argument index. "
+                                          "A connected input port is a sink of its source object's output.")
         .def(py::init<object_id, uint32_t>(), py::arg("object"), py::arg("index"))
         .def_ro("object", &input_port::object)
         .def_ro("index", &input_port::index)
