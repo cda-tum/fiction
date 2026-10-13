@@ -15,6 +15,13 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <nanobind/nanobind.h>
+
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "pyfiction/documentation.hpp"
@@ -24,7 +31,6 @@
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 
-#include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
@@ -93,13 +99,6 @@ void bind_clustercomplete(nb::module_& m)
 }  // namespace pyfiction
 
 #else  // FICTION_ALGLIB_ENABLED
-
-#include <nanobind/nanobind.h>
-
-/**
- * @brief Namespace alias for nanobind.
- */
-namespace nb = nanobind;
 
 namespace pyfiction
 {

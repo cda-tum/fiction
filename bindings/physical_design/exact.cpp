@@ -15,6 +15,13 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <nanobind/nanobind.h>
+
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 #if (FICTION_Z3_SOLVER)
 
 #include "pyfiction/documentation.hpp"
@@ -25,7 +32,6 @@
 
 #include <sstream>
 
-#include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
@@ -144,13 +150,6 @@ void bind_exact(nb::module_& m)
 }  // namespace pyfiction
 
 #else  // FICTION_Z3_SOLVER
-
-#include <nanobind/nanobind.h>
-
-/**
- * @brief Namespace alias for nanobind.
- */
-namespace nb = nanobind;
 
 namespace pyfiction
 {
