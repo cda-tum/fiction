@@ -31,6 +31,7 @@
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/traits.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -616,6 +617,7 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
 {
     // for a network of one gate level, the width of rank 0 after the duplication is the number of placements on the
     // shortest path; a brute force over every fanin ordering of every output gives the minimum to compare with
+    // NOLINTNEXTLINE(cert-msc32-c, cert-msc51-cpp): a fixed seed keeps the brute-force comparison reproducible.
     std::mt19937 generator{42};
     const auto   draw = [&generator](const uint32_t lo, const uint32_t hi)
     { return std::uniform_int_distribution<uint32_t>{lo, hi}(generator); };
@@ -626,6 +628,7 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
 
         const auto                                          num_pis = draw(2, 5);
         std::vector<mockturtle::signal<technology_network>> pis{};
+        pis.reserve(num_pis);
         for (uint32_t i = 0; i < num_pis; ++i)
         {
             pis.push_back(tec.create_pi());
@@ -641,7 +644,7 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
             while (indices.size() < count)
             {
                 const auto idx = draw(0, num_pis - 1);
-                if (std::find(indices.cbegin(), indices.cend(), idx) == indices.cend())
+                if (std::ranges::find(indices, idx) == indices.cend())
                 {
                     indices.push_back(idx);
                 }
@@ -677,11 +680,11 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
                                      [&tec, &pis, &indices](const auto& f)
                                      {
                                          const auto it =
-                                             std::find_if(pis.cbegin(), pis.cend(), [&tec, &f](const auto& pi)
-                                                          { return tec.get_node(pi) == tec.get_node(f); });
+                                             std::ranges::find_if(pis, [&tec, &f](const auto& pi)
+                                                                  { return tec.get_node(pi) == tec.get_node(f); });
                                          indices.push_back(static_cast<uint32_t>(std::distance(pis.cbegin(), it)));
                                      });
-                std::sort(indices.begin(), indices.end());
+                std::ranges::sort(indices);
                 orders.push_back(std::move(indices));
             });
         REQUIRE(orders.size() == num_pos);
@@ -700,11 +703,13 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
             }
 
             auto perm = orders[po];
-            do
+            bool more = true;
+            while (more)
             {
                 const uint32_t shared = (po > 0 && perm.front() == last) ? 1 : 0;
                 self(self, po + 1, placed + static_cast<uint32_t>(perm.size()) - shared, perm.back());
-            } while (std::next_permutation(perm.begin(), perm.end()));
+                more = std::ranges::next_permutation(perm).found;
+            }
         };
         search(search, 0, 0, std::numeric_limits<uint32_t>::max());
 
@@ -717,7 +722,7 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
                 used[idx] = true;
             }
         }
-        const auto unused = static_cast<uint32_t>(std::count(used.cbegin(), used.cend(), false));
+        const auto unused = static_cast<uint32_t>(std::ranges::count(used, false));
 
         const auto planar = node_duplication_planarization(ranked);
 

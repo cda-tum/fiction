@@ -30,6 +30,7 @@
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/traits.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -456,8 +457,8 @@ technology_network random_network(const uint32_t seed, const bool long_edges, co
 
                 if (!repeated_fanins)
                 {
-                    for (uint32_t tries = 0;
-                         tries < 8 && std::find(fanins.cbegin(), fanins.cend(), below[idx]) != fanins.cend(); ++tries)
+                    for (uint32_t tries = 0; tries < 8 && std::ranges::find(fanins, below[idx]) != fanins.cend();
+                         ++tries)
                     {
                         idx = draw(0, static_cast<uint32_t>(below.size()) - 1);
                     }

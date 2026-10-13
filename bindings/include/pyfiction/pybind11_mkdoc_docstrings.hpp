@@ -25494,6 +25494,12 @@ R"doc(Sum of the cone weights of the fanins that the shortest path ending
 here places once for two consecutive consumers; the tie-break among
 equally short paths prefers the heaviest sum.)doc";
 
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_shares_below =
+R"doc(Whether `first_fanin` and the last fanin of the predecessor on the
+shortest path are different nodes that share a fanin in the level
+below; the last tie-break prefers such paths, since placing the two
+side by side avoids a duplication there.)doc";
+
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_balanced = R"doc()doc";

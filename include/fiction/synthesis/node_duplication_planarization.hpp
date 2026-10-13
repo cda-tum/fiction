@@ -1533,9 +1533,9 @@ node_duplication_planarization(const Ntk& ntk, const node_duplication_planarizat
         throw std::invalid_argument("The lookahead budget must be positive");
     }
 
-    if (const auto& m = ps.duplication_cost;
-        !(std::isfinite(m.node_weight) && m.node_weight >= 0.0 && std::isfinite(m.buffer_weight) &&
-          m.buffer_weight >= 0.0 && std::isfinite(m.depth_growth) && m.depth_growth > 0.0))
+    if (const auto& m = ps.duplication_cost; !std::isfinite(m.node_weight) || m.node_weight < 0.0 ||
+                                             !std::isfinite(m.buffer_weight) || m.buffer_weight < 0.0 ||
+                                             !std::isfinite(m.depth_growth) || m.depth_growth <= 0.0)
     {
         throw std::invalid_argument(
             "The duplication cost model needs finite, non-negative weights and a finite, positive depth growth");
