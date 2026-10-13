@@ -445,7 +445,7 @@ void operational_domain(nanobind::module_& m)
                                             delete static_cast<detail::numpy_buffers*>(p);
                                         }};
 
-                static_cast<void>(buffers.release());
+                std::ignore = buffers.release();
 
                 return std::make_tuple(
                     py::ndarray<py::numpy, double, py::ndim<2>>{data->coordinates.data(), {points, dimensions}, owner},
