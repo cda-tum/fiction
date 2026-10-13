@@ -55,12 +55,12 @@ def tt(session: Session, args: argparse.Namespace) -> Result:
         table = dynamic_truth_table(max(variables, default=0))
         table.create_from_expression(args.expression)
     else:
-        table = _table_from_string(args.table)
+        table = table_from_string(args.table)
     session.truth_tables.add(table)
     return {"truth_table": describe(table)}
 
 
-def _table_from_string(text: str) -> dynamic_truth_table:
+def table_from_string(text: str) -> dynamic_truth_table:
     """Create a truth table from binary bits or hexadecimal digits."""
     if text.lower().startswith("0x"):
         digits = text[2:]
