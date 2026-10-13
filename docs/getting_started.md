@@ -271,7 +271,7 @@ Each nested namespace is a submodule of it. For example, import the coordinate t
 follow the same tree, so a binding sits in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
 
 Binding files declare `namespace nb = nanobind;` after their includes.
-Each leaf `.cpp` file defines one public binding helper with a `bind_` prefix (e.g.
+Each leaf `.cpp` file defines public binding helpers with a `bind_` prefix (e.g.
 `void bind_a_star(nb::module_& m)`) that binds a class, function, or related group. Internal template helpers use the same prefix. Each
 directory that holds binding sources has exactly one `register_<path>.cpp`, named after the directory, that
 forward-declares and calls the binding helpers beside it. The `register_*` aggregators keep their names. In a top-level directory, that file holds the

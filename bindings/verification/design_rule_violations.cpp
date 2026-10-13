@@ -42,7 +42,7 @@ namespace pyfiction
 namespace detail
 {
 
-/** @brief Binds `object_layout_design_rule_checks`. @tparam Lyt Layout type. @param m Python module. */
+/** @brief Binds object-layout design rule checks. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
 void bind_gate_level_drvs_impl(nb::module_& m)
 {

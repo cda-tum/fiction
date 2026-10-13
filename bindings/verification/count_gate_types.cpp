@@ -35,7 +35,7 @@ namespace pyfiction
 namespace detail
 {
 
-/** @brief Binds `gate_classification_for_an_operand`. @tparam NtkOrLyt Network or layout type. @param m Python module.
+/** @brief Binds gate classification for an operand. @tparam NtkOrLyt Network or layout type. @param m Python module.
  */
 template <typename NtkOrLyt>
 void bind_count_gate_types(nb::module_& m)

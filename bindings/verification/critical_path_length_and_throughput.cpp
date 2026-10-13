@@ -36,7 +36,7 @@ namespace pyfiction
 namespace detail
 {
 
-/** @brief Binds `iterative_physical_timing_analysis`. @tparam Lyt Layout type. @param m Python module. */
+/** @brief Binds iterative physical timing analysis. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
 void bind_critical_path_length_and_throughput_impl(nb::module_& m)
 {
