@@ -88,8 +88,7 @@ inline void register_is_operational_functions(nb::module_& m)
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
@@ -140,8 +139,7 @@ Overloads accept supplied wires or one layout per input pattern.
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
@@ -194,8 +192,7 @@ Overloads accept supplied wires or one layout per input pattern.
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
@@ -247,8 +244,7 @@ Overloads accept supplied wires or one layout per input pattern.
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
@@ -298,8 +294,7 @@ The keyword options select physical values, simulation, BDL encoding, and operat
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
@@ -349,8 +344,7 @@ The keyword options select physical values, simulation, BDL encoding, and operat
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
@@ -400,8 +394,7 @@ The keyword options select physical values, simulation, BDL encoding, and operat
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
@@ -452,8 +445,7 @@ The keyword options select physical values, simulation, BDL encoding, and operat
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
@@ -503,8 +495,7 @@ The keyword options select physical values, simulation, BDL encoding, and operat
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            is_operational_options params{};
-            params =
+            const auto params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);

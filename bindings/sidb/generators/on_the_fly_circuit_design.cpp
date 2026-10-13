@@ -15,7 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/simulation_parameters.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -73,8 +73,7 @@ void register_on_the_fly_circuit_design(nb::module_& m)
                DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_DESIGN_ON_THE_FLY));
 
     m.def(
-        "on_the_fly_sidb_circuit_design",  // NOLINTNEXTLINE(performance-unnecessary-value-param): Own parameters while
-                                           // Python can mutate the original.
+        "on_the_fly_sidb_circuit_design",
         [](const py_hexagonal_gate_layout& layout, const decltype(on_the_fly_circuit_design_options{}.timeout) timeout,
            const decltype(on_the_fly_circuit_design_options{}
                               .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
@@ -129,7 +128,7 @@ void register_on_the_fly_circuit_design(nb::module_& m)
                               .sidb_on_the_fly_gate_library_parameters.design_gate_params
                               .termination_cond)               termination_cond,
            const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress) on_progress,
+                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress)& on_progress,
            const decltype(on_the_fly_circuit_design_options{}
                               .sidb_on_the_fly_gate_library_parameters
                               .canvas_sidb_complex_gates) canvas_sidb_complex_gates,
@@ -142,25 +141,11 @@ void register_on_the_fly_circuit_design(nb::module_& m)
                               .influence_radius_charged_defects) influence_radius_charged_defects)
         {
             on_the_fly_circuit_design_options params{};
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params =
-                make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout = timeout;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.timeout =
-                design_gate_timeout;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_engine =
-                sim_engine;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                .input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                .input_bdl_iterator_params.input_bdl_config = input_bdl_config;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.op_condition =
-                op_condition;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                .strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params =
+                make_operational_parameters(design_gate_timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            params.timeout                                                                = timeout;
             params.sidb_on_the_fly_gate_library_parameters.design_gate_params.design_mode = design_mode;
             params.sidb_on_the_fly_gate_library_parameters.design_gate_params.canvas      = canvas;
             params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs =

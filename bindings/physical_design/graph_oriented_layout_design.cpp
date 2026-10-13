@@ -118,7 +118,7 @@ void register_graph_oriented_layout_design(nb::module_& m)
            const decltype(graph_oriented_layout_design_options{}.on_progress)& on_progress,
            const decltype(graph_oriented_layout_design_options{}.on_worker_progress)& on_worker_progress,
            fiction::physical_design::graph_oriented_layout_design_stats*              statistics,
-           std::function<uint64_t(const py_cartesian_gate_layout&)>                   custom_cost_objective)
+           const std::function<uint64_t(const py_cartesian_gate_layout&)>&            custom_cost_objective)
         {
             graph_oriented_layout_design_options params{};
             params.timeout                             = timeout;
@@ -136,10 +136,8 @@ void register_graph_oriented_layout_design(nb::module_& m)
             params.on_progress                         = on_progress;
             params.on_worker_progress                  = on_worker_progress;
             const nb::gil_scoped_release release{};
-            return (&fiction::physical_design::graph_oriented_layout_design<py_cartesian_gate_layout,
-                                                                            py_tec_network>)(network, params,
-                                                                                             statistics,
-                                                                                             custom_cost_objective);
+            return fiction::physical_design::graph_oriented_layout_design<py_cartesian_gate_layout, py_tec_network>(
+                network, params, statistics, custom_cost_objective);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("timeout") = graph_oriented_layout_design_options{}.timeout,
         nb::arg("num_vertex_expansions")     = graph_oriented_layout_design_options{}.num_vertex_expansions,
