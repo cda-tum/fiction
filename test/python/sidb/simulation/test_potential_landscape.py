@@ -13,7 +13,7 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_defect, sidb_defect_type, sidb_simulation_parameters
+from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_defect, sidb_defect_type
 from mnt.pyfiction.sidb.simulation import charge_transition_threshold_bounds, potential_landscape
 
 
@@ -27,7 +27,7 @@ def three_sidbs() -> sidb_layout:
 
 def test_geometry_and_potentials():
     layout = three_sidbs()
-    landscape = potential_landscape(layout, sidb_simulation_parameters(2, -0.32))
+    landscape = potential_landscape(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
     assert landscape.num_sidbs() == 3
     assert landscape.get_layout() == layout
@@ -51,7 +51,7 @@ def test_geometry_and_potentials():
 
 def test_energies_and_validity():
     layout = three_sidbs()
-    landscape = potential_landscape(layout, sidb_simulation_parameters(2, -0.32))
+    landscape = potential_landscape(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
     all_negative = landscape.evaluate(charge_distribution(layout))
     all_neutral = landscape.evaluate(charge_distribution(layout, sidb_charge_state.NEUTRAL))
@@ -80,9 +80,11 @@ def test_energies_and_validity():
 
 def test_external_potentials():
     layout = three_sidbs()
-    params = sidb_simulation_parameters(2, -0.32)
-    plain = potential_landscape(layout, params)
-    shifted = potential_landscape(layout, params, {lattice_site(0, 0, 0): 0.1}, 0.2)
+    options = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    plain = potential_landscape(layout, **options)
+    shifted = potential_landscape(
+        layout, local_external_potential={lattice_site(0, 0, 0): 0.1}, global_external_potential=0.2, **options
+    )
 
     assert shifted.local_external_potential(0) == pytest.approx(0.3)
     assert shifted.local_external_potential(1) == pytest.approx(0.2)
@@ -98,7 +100,7 @@ def test_charged_defect():
     layout.assign_defect(lattice_site(1, 1, 0), sidb_defect(sidb_defect_type.SI_VACANCY, -1, 5.6, 5.0))
     layout.assign_defect(lattice_site(6, 1, 0), sidb_defect(sidb_defect_type.SILOXANE, 0))  # neutral, does not enter
 
-    landscape = potential_landscape(layout, sidb_simulation_parameters(2, -0.32))
+    landscape = potential_landscape(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
     assert len(landscape.defects()) == 1
     assert landscape.local_potential_caused_by_defects(0) < 0.0

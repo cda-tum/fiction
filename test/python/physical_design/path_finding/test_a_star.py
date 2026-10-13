@@ -26,7 +26,6 @@ from mnt.pyfiction.layouts import (
 from mnt.pyfiction.physical_design.path_finding import (
     a_star,
     a_star_distance,
-    a_star_params,
     enumerate_all_paths,
     yen_k_shortest_paths,
 )
@@ -138,50 +137,51 @@ def test_path_finding_with_obstructions_and_crossings(make_lyt: Callable[[], Gat
     lyt.obstruct_coordinate((1, 1, 0))
     lyt.obstruct_coordinate((1, 1, 1))
 
-    params = a_star_params()
-    params.crossings = True
+    options = {
+        "crossings": True,
+    }
 
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 0), params)) == 1
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 1), params)) == 2
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 1), params)) == 0
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 0), **options)) == 1
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 1), **options)) == 2
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 1), **options)) == 0
 
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 0), params)) == 1
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 0), params)) == 2
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 1), params)) == 3
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 0), **options)) == 1
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 0), **options)) == 2
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 1), **options)) == 3
 
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 1), params)) == 1
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 1), params)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 1), **options)) == 1
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 1), **options)) == 0
 
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 1), params)) == 1
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 1), params)) == 2
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 1), **options)) == 1
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 1), **options)) == 2
 
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 0), params)) == 1
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 1), params)) == 2
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 0), **options)) == 1
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 1), **options)) == 2
 
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 1), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 0), params)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 1), params)) == 1
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 0), **options)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 1), **options)) == 1
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)

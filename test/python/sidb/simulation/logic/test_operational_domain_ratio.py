@@ -18,9 +18,7 @@ import pytest
 from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.logic import (
-    operational_domain_params,
     operational_domain_ratio,
-    operational_domain_ratio_params,
     operational_domain_value_range,
     parameter_point,
     sweep_parameter,
@@ -34,25 +32,20 @@ if TYPE_CHECKING:
 def test_and_gate_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
-    params = operational_domain_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-    params.operational_params.simulation_parameters.base = 2
+    options = {
+        "sim_engine": sidb_simulation_engine.QUICKEXACT,
+        "base": 2,
+    }
 
-    params.sweep_dimensions = [
+    options["sweep_dimensions"] = [
         operational_domain_value_range(sweep_parameter.EPSILON_R, 5.00, 6.00, 0.1),
         operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 6.00, 0.1),
     ]
 
-    ratio_params = operational_domain_ratio_params()
-    ratio_params.op_domain_params = params
-
-    assert ratio_params.op_domain_params.operational_params.simulation_parameters.base == 2
+    ratio_options = options.copy()
 
     operational_domain_ratio_result = operational_domain_ratio(
-        lyt,
-        [create_and_tt()],
-        parameter_point([5.6, 5.0]),
-        ratio_params,
+        lyt, [create_and_tt()], parameter_point([5.6, 5.0]), **ratio_options
     )
 
     assert operational_domain_ratio_result == pytest.approx(23 / 121, abs=1e-5)
@@ -65,15 +58,14 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
             sys.executable,
             "-c",
             textwrap.dedent("""
+
                 import sys
                 import threading
                 import time
                 from mnt.pyfiction.sidb.io import read_sqd_layout
                 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
                 from mnt.pyfiction.sidb.simulation.logic import (
-                    operational_domain_params,
                     operational_domain_ratio,
-                    operational_domain_ratio_params,
                     operational_domain_value_range,
                     parameter_point,
                     sweep_parameter,
@@ -81,11 +73,11 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                 from mnt.pyfiction.synthesis import create_and_tt
 
                 layout = read_sqd_layout(sys.argv[1])
-                params = operational_domain_params()
-                params.number_of_threads = 2
-                params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-                params.operational_params.simulation_parameters.base = 2
-                params.sweep_dimensions = [
+                options = {}
+                options['number_of_threads'] = 2
+                options['sim_engine'] = sidb_simulation_engine.QUICKEXACT
+                options['base'] = 2
+                options['sweep_dimensions'] = [
                     operational_domain_value_range(sweep_parameter.EPSILON_R, 5.5, 5.7, 0.02),
                     operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5, 5.2, 0.02),
                 ]
@@ -99,12 +91,9 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
                     if done == 0:
                         time.sleep(0.2)
 
-                params.on_progress = report
-                ratio_params = operational_domain_ratio_params()
-                ratio_params.op_domain_params = params
-                ratio = operational_domain_ratio(
-                    layout, [create_and_tt()], parameter_point([5.6, 5]), ratio_params
-                )
+                options['on_progress'] = report
+                ratio_options = options.copy()
+                ratio = operational_domain_ratio(layout, [create_and_tt()], parameter_point([5.6, 5]), **ratio_options)
                 assert 0 <= ratio <= 1, ratio
                 assert reports[-1][1] > 0, reports
                 assert threads - {threading.get_ident()}, threads

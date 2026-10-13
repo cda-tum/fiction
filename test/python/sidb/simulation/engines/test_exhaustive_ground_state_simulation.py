@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_simulation_parameters
+from mnt.pyfiction.sidb.model import sidb_charge_state
 from mnt.pyfiction.sidb.simulation.engines import exhaustive_ground_state_simulation
 
 
@@ -23,7 +23,7 @@ def test_perturber_and_sidb_pair() -> None:
     layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
-    result = exhaustive_ground_state_simulation(layout, sidb_simulation_parameters())
+    result = exhaustive_ground_state_simulation(layout, base=3, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
     assert result.algorithm_name == "ExGS"
     assert result.layout == layout
@@ -45,11 +45,11 @@ def test_perturber_and_sidb_pair_111() -> None:
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
-    params = sidb_simulation_parameters()
-    params.mu_minus = -0.32
-    params.base = 2
+    options = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options["mu_minus"] = -0.32
+    options["base"] = 2
 
-    result = exhaustive_ground_state_simulation(layout, params)
+    result = exhaustive_ground_state_simulation(layout, **options)
 
     assert result.algorithm_name == "ExGS"
 
@@ -71,13 +71,13 @@ def test_exgs_reports_progress() -> None:
     layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
-    params = sidb_simulation_parameters()
-    params.base = 2
+    options = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options["base"] = 2
 
     reports: list[tuple[str, int, int]] = []
 
     result = exhaustive_ground_state_simulation(
-        layout, params, lambda task, done, total: reports.append((task, done, total))
+        layout, on_progress=lambda task, done, total: reports.append((task, done, total)), **options
     )
 
     assert len(result.charge_distributions) == 1
@@ -85,5 +85,5 @@ def test_exgs_reports_progress() -> None:
     assert reports[0] == ("charge configurations", 0, 8)
     assert reports[-1] == ("charge configurations", 8, 8)
 
-    silent = exhaustive_ground_state_simulation(layout, params, None)
+    silent = exhaustive_ground_state_simulation(layout, on_progress=None, **options)
     assert len(silent.charge_distributions) == 1

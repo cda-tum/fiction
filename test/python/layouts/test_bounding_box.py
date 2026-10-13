@@ -21,7 +21,7 @@ from mnt.pyfiction.layouts import (
     shifted_cartesian_gate_layout,
 )
 from mnt.pyfiction.networks.io import read_network
-from mnt.pyfiction.physical_design import orthogonal, orthogonal_params
+from mnt.pyfiction.physical_design import orthogonal
 from mnt.pyfiction.qca import qca_layout
 
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
 def test_initialize_gate_level_with_ortho_bounding_box(resources_dir: Path, verilog: str) -> None:
     """Orthogonal placement fills the layout's declared extent."""
     network = read_network(str(resources_dir / verilog))
-    layout = orthogonal(network, orthogonal_params())
+    layout = orthogonal(network)
     min_coord, max_coord = layout.bounding_box()
 
     assert min_coord == layout.coord(0, 0)

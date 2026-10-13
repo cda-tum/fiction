@@ -9,12 +9,10 @@
 from __future__ import annotations
 
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 from mnt.pyfiction.sidb.simulation.defects import (
     determine_displacement_robustness_domain,
     dimer_displacement_policy,
     displacement_analysis_mode,
-    displacement_robustness_domain_params,
     displacement_robustness_domain_stats,
 )
 from mnt.pyfiction.synthesis import create_and_tt
@@ -40,16 +38,16 @@ def test_siqad_and_gate_100_lattice():
 
     layout.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
-    params = displacement_robustness_domain_params()
+    options = {}
 
-    params.displacement_variations = (1, 1)
-    params.operational_params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
+    options["displacement_variations"] = (1, 1)
+    options.update({"base": 2, "mu_minus": -0.28, "epsilon_r": 5.6, "lambda_tf": 5.0})
 
-    params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0
-    params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2
+    options["maximum_distance"] = 2.0
+    options["minimum_distance"] = 0.2
 
     # only the SiDBs at (4, 5) and (10, 12) are affected by displacement
-    params.fixed_sidbs = {
+    options["fixed_sidbs"] = {
         lattice_site(0, 0, 1),
         lattice_site(2, 1, 1),
         lattice_site(20, 0, 1),
@@ -61,12 +59,12 @@ def test_siqad_and_gate_100_lattice():
         lattice_site(10, 9, 1),
     }
 
-    params.percentage_of_analyzed_displaced_layouts = 0.1
-    params.dimer_policy = dimer_displacement_policy.ALLOW_OTHER_DIMER
-    params.analysis_mode = displacement_analysis_mode.RANDOM
+    options.update(0.1)
+    options["dimer_policy"] = dimer_displacement_policy.ALLOW_OTHER_DIMER
+    options["analysis_mode"] = displacement_analysis_mode.RANDOM
 
     stats = displacement_robustness_domain_stats()
 
-    _ = determine_displacement_robustness_domain(layout, [create_and_tt()], params, stats)
+    _ = determine_displacement_robustness_domain(layout, [create_and_tt()], stats=stats, **options)
 
     assert stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements == 8
