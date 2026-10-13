@@ -102,7 +102,8 @@ void register_gate_level_drvs_impl(nb::module_& m)
         nb::arg("has_io") = gate_level_drv_options{}.has_io, nb::arg("border_io") = gate_level_drv_options{}.border_io,
         nb::arg("print_report") = false, nb::arg("statistics") = nullptr,
         R"doc(Count design-rule violations in the gate-level layout.
-The keyword options select which checks run and statistics receives their counts.
+Returns (warnings, drvs); statistics receives their counts.
+The keyword options select which checks run.
 )doc");
 }
 

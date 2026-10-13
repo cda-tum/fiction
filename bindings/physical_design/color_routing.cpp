@@ -83,8 +83,8 @@ void register_color_routing_impl(nb::module_& m)
         nb::arg("crossings")               = color_routing_options{}.crossings,
         nb::arg("path_limit") = color_routing_options{}.path_limit, nb::arg("engine") = color_routing_options{}.engine,
         nb::arg("partial_sat") = color_routing_options{}.partial_sat,
-        R"doc(Route the supplied connections by coloring their path intersections.
-Returns the paths found with the keyword routing options.
+        R"doc(Route the supplied connections in place by coloring their path intersections.
+Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
 )doc");
 }
 

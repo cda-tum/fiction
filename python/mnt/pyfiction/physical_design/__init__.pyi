@@ -628,8 +628,8 @@ def color_routing(
     partial_sat: bool = False,
 ) -> bool:
     """
-    Route the supplied connections by coloring their path intersections.
-    Returns the paths found with the keyword routing options.
+    Route the supplied connections in place by coloring their path intersections.
+    Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
     """
 
 class hexagonalization_io_pin_routing_error(RuntimeError): ...
@@ -693,6 +693,8 @@ def hexagonalization(
     """
     Convert a 2DDWave-clocked Cartesian gate layout to an even-row hexagonal layout.
     The keyword options select input and output pin extension and progress reporting.
+    Raises ValueError for unsupported clocking or invalid occupied geometry.
+    Raises OverflowError when transformed coordinates exceed the signed coordinate range.
     """
 
 class post_layout_optimization_stats:

@@ -148,6 +148,7 @@ inline void register_operational_domain_functions(nb::module_& m)
         nb::arg("stats") = nullptr,
         R"doc(Compute the operational domain by exhaustively sweeping every parameter combination.
 The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
 )doc");
     m.def(
         "operational_domain_random_sampling",
@@ -224,6 +225,7 @@ The keyword options define the sweep, physical values, BDL encoding, analysis, a
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("stats") = nullptr, R"doc(Compute the operational domain by randomly sampling parameter combinations.
 The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
 )doc");
     m.def(
         "operational_domain_flood_fill",
@@ -298,6 +300,7 @@ The keyword options define the sweep, physical values, BDL encoding, analysis, a
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("stats") = nullptr, R"doc(Compute the operational domain by expanding from sampled operational points.
 The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
 )doc");
     m.def(
         "operational_domain_contour_tracing",
@@ -374,6 +377,7 @@ The keyword options define the sweep, physical values, BDL encoding, analysis, a
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("stats") = nullptr, R"doc(Compute the operational domain by tracing operational boundaries.
 The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
 )doc");
     m.def(
         "critical_temperature_domain_grid_search",
@@ -449,6 +453,7 @@ The keyword options define the sweep, physical values, BDL encoding, analysis, a
         nb::arg("stats") = nullptr,
         R"doc(Compute the critical-temperature domain by exhaustively sweeping every parameter combination.
 The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
 )doc");
     m.def(
         "critical_temperature_domain_random_sampling",
@@ -526,6 +531,7 @@ The keyword options define the sweep, physical values, BDL encoding, analysis, c
         nb::arg("stats") = nullptr,
         R"doc(Compute the critical-temperature domain by randomly sampling parameter combinations.
 The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
 )doc");
     m.def(
         "critical_temperature_domain_flood_fill",
@@ -603,6 +609,7 @@ The keyword options define the sweep, physical values, BDL encoding, analysis, c
         nb::arg("stats") = nullptr,
         R"doc(Compute the critical-temperature domain by expanding from sampled operational points.
 The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
 )doc");
     m.def(
         "critical_temperature_domain_contour_tracing",
@@ -679,6 +686,7 @@ The keyword options define the sweep, physical values, BDL encoding, analysis, c
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("stats") = nullptr, R"doc(Compute the critical-temperature domain by tracing operational boundaries.
 The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
 )doc");
 }
 
