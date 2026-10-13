@@ -543,6 +543,7 @@ def time_to_solution(
     quicksim_timeout bounds each heuristic run; timeout bounds the complete evaluation.
     Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
     ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
+    Raises ValueError when ClusterComplete is selected with a finite timeout.
     """
 
 def time_to_solution_for_given_simulation_results(

@@ -1057,6 +1057,7 @@ def operational_domain_grid_search(
     """
     Compute the operational domain by exhaustively sweeping every parameter combination.
     The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
     """
 
 def operational_domain_random_sampling(
@@ -1085,6 +1086,7 @@ def operational_domain_random_sampling(
     """
     Compute the operational domain by randomly sampling parameter combinations.
     The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
     """
 
 def operational_domain_flood_fill(
@@ -1113,6 +1115,7 @@ def operational_domain_flood_fill(
     """
     Compute the operational domain by expanding from sampled operational points.
     The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
     """
 
 def operational_domain_contour_tracing(
@@ -1141,6 +1144,7 @@ def operational_domain_contour_tracing(
     """
     Compute the operational domain by tracing operational boundaries.
     The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
     """
 
 def critical_temperature_domain_grid_search(
@@ -1168,6 +1172,7 @@ def critical_temperature_domain_grid_search(
     """
     Compute the critical-temperature domain by exhaustively sweeping every parameter combination.
     The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
     """
 
 def critical_temperature_domain_random_sampling(
@@ -1196,6 +1201,7 @@ def critical_temperature_domain_random_sampling(
     """
     Compute the critical-temperature domain by randomly sampling parameter combinations.
     The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
     """
 
 def critical_temperature_domain_flood_fill(
@@ -1224,6 +1230,7 @@ def critical_temperature_domain_flood_fill(
     """
     Compute the critical-temperature domain by expanding from sampled operational points.
     The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
     """
 
 def critical_temperature_domain_contour_tracing(
@@ -1252,6 +1259,7 @@ def critical_temperature_domain_contour_tracing(
     """
     Compute the critical-temperature domain by tracing operational boundaries.
     The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
     """
 
 def operational_domain_ratio(

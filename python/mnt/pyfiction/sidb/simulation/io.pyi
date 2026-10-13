@@ -52,7 +52,9 @@ def write_operational_domain(
 ) -> None:
     """
     Write the operational domain to the supplied filename as CSV.
-    The keyword options select the parameter and operational-status labels.
+    CSV columns hold the sweep-parameter values followed by the operational-status tag.
+    The keyword options select status tags and which samples to write.
+    Raises ValueError unless the domain has one to three sweep dimensions.
     """
 
 def write_operational_domain_to_string(
@@ -61,7 +63,14 @@ def write_operational_domain_to_string(
     operational_tag: str = "1",
     non_operational_tag: str = "0",
     writing_mode: sample_writing_mode = ...,
-) -> str: ...
+) -> str:
+    """
+    Return the domain CSV with a header and one row per selected sample.
+    Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
+    The keyword options select status tags and which samples to write.
+    Raises ValueError unless the domain has one to three sweep dimensions.
+    """
+
 def write_critical_temperature_domain(
     opdom: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain,
     filename: str,
@@ -70,7 +79,12 @@ def write_critical_temperature_domain(
     non_operational_tag: str = "0",
     writing_mode: sample_writing_mode = ...,
 ) -> None:
-    """Write critical-temperature samples to a CSV file."""
+    """
+    Write critical-temperature samples to a CSV file.
+    CSV columns hold sweep-parameter values, the operational-status tag, and critical temperature.
+    The keyword options select status tags and which samples to write.
+    Raises ValueError unless the domain has one to three sweep dimensions.
+    """
 
 def write_critical_temperature_domain_to_string(
     opdom: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain,
@@ -78,7 +92,14 @@ def write_critical_temperature_domain_to_string(
     operational_tag: str = "1",
     non_operational_tag: str = "0",
     writing_mode: sample_writing_mode = ...,
-) -> str: ...
+) -> str:
+    """
+    Return the domain CSV with a header and one row per selected sample.
+    Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
+    The keyword options select status tags and which samples to write.
+    Raises ValueError unless the domain has one to three sweep dimensions.
+    """
+
 def write_location_and_ground_state(
     sim_result: mnt.pyfiction.sidb.simulation.sidb_simulation_result, filename: str
 ) -> None:

@@ -150,7 +150,7 @@ Returns None when the attempt limit does not produce a layout.
         nb::arg("on_progress").none() = nb::none(),
         R"doc(Generate distinct random SiDB layouts, optionally extending lyt_skeleton.
 The keyword options select the area, physical values, requested count, and attempt limits.
-Returns None when the attempt limit does not produce the requested layouts.
+Returns None if no layout is generated; the attempt limit can yield fewer layouts than requested.
 )doc");
 }
 

@@ -74,7 +74,7 @@ def generate_multiple_random_sidb_layouts(
     """
     Generate distinct random SiDB layouts, optionally extending lyt_skeleton.
     The keyword options select the area, physical values, requested count, and attempt limits.
-    Returns None when the attempt limit does not produce the requested layouts.
+    Returns None if no layout is generated; the attempt limit can yield fewer layouts than requested.
     """
 
 class design_sidb_gates_stats:

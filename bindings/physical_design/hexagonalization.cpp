@@ -115,6 +115,8 @@ void register_hexagonalization(nb::module_& m)
         nb::arg("on_progress").none() = nb::none(), nb::arg("statistics") = nullptr,
         R"doc(Convert a 2DDWave-clocked Cartesian gate layout to an even-row hexagonal layout.
 The keyword options select input and output pin extension and progress reporting.
+Raises ValueError for unsupported clocking or invalid occupied geometry.
+Raises OverflowError when transformed coordinates exceed the signed coordinate range.
 )doc");
 }
 

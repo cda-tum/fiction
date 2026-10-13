@@ -76,7 +76,9 @@ void register_write_operational_domain(nb::module_& m)
         nb::arg("non_operational_tag") = write_operational_domain_options{}.non_operational_tag,
         nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode,
         R"doc(Write the operational domain to the supplied filename as CSV.
-The keyword options select the parameter and operational-status labels.
+CSV columns hold the sweep-parameter values followed by the operational-status tag.
+The keyword options select status tags and which samples to write.
+Raises ValueError unless the domain has one to three sweep dimensions.
 )doc");
 
     m.def(
@@ -98,7 +100,12 @@ The keyword options select the parameter and operational-status labels.
         nb::arg("opdom"), nb::kw_only(),
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,
         nb::arg("non_operational_tag") = write_operational_domain_options{}.non_operational_tag,
-        nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode);
+        nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode,
+        R"doc(Return the domain CSV with a header and one row per selected sample.
+Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
+The keyword options select status tags and which samples to write.
+Raises ValueError unless the domain has one to three sweep dimensions.
+)doc");
 }
 
 /**
@@ -126,7 +133,11 @@ void register_write_critical_temperature_domain(nb::module_& m)
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,
         nb::arg("non_operational_tag") = write_operational_domain_options{}.non_operational_tag,
         nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode,
-        "Write critical-temperature samples to a CSV file.");
+        R"doc(Write critical-temperature samples to a CSV file.
+CSV columns hold sweep-parameter values, the operational-status tag, and critical temperature.
+The keyword options select status tags and which samples to write.
+Raises ValueError unless the domain has one to three sweep dimensions.
+)doc");
 
     m.def(
         "write_critical_temperature_domain_to_string",
@@ -147,7 +158,12 @@ void register_write_critical_temperature_domain(nb::module_& m)
         nb::arg("opdom"), nb::kw_only(),
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,
         nb::arg("non_operational_tag") = write_operational_domain_options{}.non_operational_tag,
-        nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode);
+        nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode,
+        R"doc(Return the domain CSV with a header and one row per selected sample.
+Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
+The keyword options select status tags and which samples to write.
+Raises ValueError unless the domain has one to three sweep dimensions.
+)doc");
 }
 
 }  // namespace detail

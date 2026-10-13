@@ -230,7 +230,8 @@ def gate_level_drvs(
 ) -> tuple[int, int]:
     """
     Count design-rule violations in the gate-level layout.
-    The keyword options select which checks run and statistics receives their counts.
+    Returns (warnings, drvs); statistics receives their counts.
+    The keyword options select which checks run.
     """
 
 class eq_type(enum.Enum):

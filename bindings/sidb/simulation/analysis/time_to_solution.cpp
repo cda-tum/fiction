@@ -142,6 +142,7 @@ void register_time_to_solution(nb::module_& m)
 quicksim_timeout bounds each heuristic run; timeout bounds the complete evaluation.
 Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
 ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
+Raises ValueError when ClusterComplete is selected with a finite timeout.
 )doc");
     m.def("time_to_solution_for_given_simulation_results",
           &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, nb::arg("results_exact"),
