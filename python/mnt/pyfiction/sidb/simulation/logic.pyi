@@ -189,7 +189,8 @@ def generate_bdl_input_pattern_layouts(
 ) -> list[mnt.pyfiction.sidb.sidb_layout]:
     """
     Return one SiDB layout per input pattern, starting with pattern zero.
-    The keyword options select BDL detection and input encoding; supplied wires bypass detection.
+    The keyword options select BDL detection and input encoding.
+    The overload with input_wires bypasses automatic wire detection.
     """
 
 class bdl_pair:

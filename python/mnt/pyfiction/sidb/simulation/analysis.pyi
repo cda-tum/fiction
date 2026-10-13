@@ -182,7 +182,7 @@ def critical_temperature_gate_based(
     """
     Determine the critical temperature of an SiDB gate implementing the truth tables.
     The keyword options select physical values, operational analysis, confidence, and temperature bounds.
-    Supplied input and output wires bypass automatic wire detection.
+    The overload with input and output wires bypasses automatic wire detection.
     """
 
 def critical_temperature_non_gate_based(
@@ -440,6 +440,8 @@ def physical_population_stability(
     """
     Determine the stability of the SiDB population under the physical model.
     The keyword options select simulation, potential precision, and the execution budget.
+    Raises ValueError for an invalid base or a precision yielding a zero or non-finite distance step.
+    Large precisions can make the native distance scan impractical or stall floating-point increments.
     """
 
 class physically_valid_parameters_domain:
@@ -562,4 +564,5 @@ def time_to_solution_for_given_simulation_results(
                        ground state.
         results_heuristic: The results of the heuristic runs.
         confidence_level: Confidence level for the TTS computation.
+        ps: Receives the completed statistics when supplied.
     """
