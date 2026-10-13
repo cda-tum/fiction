@@ -17,6 +17,7 @@
 
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 
+#include <cmath>
 #include <cstdint>
 
 #include <nanobind/nanobind.h>
@@ -44,6 +45,21 @@ make_simulation_parameters(const uint8_t base, const double mu_minus, const doub
         throw nb::value_error("base must be 2 or 3");
     }
     return fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+}
+
+/**
+ * @brief Validate that the native distance scan has a positive finite increment.
+ * @param precision Number of decimal places.
+ * @throws nb::value_error If the distance increment is zero or non-finite.
+ */
+inline void validate_distance_conversion_precision(const uint64_t precision)
+{
+    /** @brief Distance increment used by the native scan. */
+    const auto step = std::pow(10, -static_cast<double>(precision));
+    if (step == 0 || !std::isfinite(step))
+    {
+        throw nb::value_error("precision must yield a positive finite step");
+    }
 }
 
 }  // namespace pyfiction

@@ -11,6 +11,8 @@
 from __future__ import annotations
 
 import gc
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native guard regressions
+import sys
 import weakref
 from importlib import import_module
 from typing import TYPE_CHECKING, Any, cast
@@ -243,23 +245,52 @@ def test_mapping_default_gate_set(mux21: technology_network) -> None:
     assert technology_mapping(mux21, **cast("dict[str, Any]", and_or_not())).num_gates() > 0
 
 
+def _assert_distance_rejection(call: str, exception_type: str, message: str = "") -> None:
+    """Check native input rejection in a child that cannot hang the test suite."""
+    script = f"""from mnt.pyfiction.sidb import sidb_layout
+from mnt.pyfiction.sidb.model import potential_to_distance_conversion
+from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability
+try:
+    {call}
+except {exception_type} as error:
+    assert {message!r} in str(error)
+else:
+    raise AssertionError("input was accepted")
+"""
+    subprocess.run([sys.executable, "-c", script], check=True, timeout=10, shell=False)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and constant regression calls
+
+
 @pytest.mark.parametrize("precision", [-1, 2.7])
 def test_distance_conversion_rejects_non_unsigned_precision(precision: float) -> None:
     """Precision preserves the native unsigned integer contract."""
-    with pytest.raises(TypeError):
-        cast("Callable[..., Any]", potential_to_distance_conversion)(0.5, precision)
+    _assert_distance_rejection(f"potential_to_distance_conversion(0.5, {precision!r})", "TypeError")
 
 
 @pytest.mark.parametrize("potential", [0.0, -0.1, float("nan"), -float("inf")])
 def test_distance_conversion_rejects_invalid_potential(potential: float) -> None:
     """Invalid potentials fail before entering the native distance scan."""
-    with pytest.raises(ValueError, match="potential must be positive"):
-        potential_to_distance_conversion(potential, 2)
+    _assert_distance_rejection(
+        f"potential_to_distance_conversion(float({str(potential)!r}), 2)",
+        "ValueError",
+        "potential must be positive",
+    )
 
 
 def test_distance_conversion_precision_and_infinite_potential() -> None:
     """Integer precision controls the scan step, including positive infinity."""
     assert potential_to_distance_conversion(0.01, 2, epsilon_r=2.0, lambda_tf=1.0) == pytest.approx(314 / 100)
     assert potential_to_distance_conversion(float("inf"), 3) == pytest.approx(0.001)
-    with pytest.raises(ValueError, match="precision must yield a positive finite step"):
-        potential_to_distance_conversion(0.5, 1000)
+    _assert_distance_rejection(
+        "potential_to_distance_conversion(0.5, 1000)",
+        "ValueError",
+        "precision must yield a positive finite step",
+    )
+
+
+def test_population_stability_rejects_zero_distance_step() -> None:
+    """Both native distance-conversion callers reject unusable precision."""
+    _assert_distance_rejection(
+        "physical_population_stability(sidb_layout(), precision_for_distance_corresponding_to_potential=1000)",
+        "ValueError",
+        "precision must yield a positive finite step",
+    )
