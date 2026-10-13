@@ -20,7 +20,6 @@
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <optional>
 

@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/simulation_parameters.hpp"
 
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 
 #include <nanobind/nanobind.h>

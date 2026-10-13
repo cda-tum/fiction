@@ -99,7 +99,7 @@ void register_post_layout_optimization(nb::module_& m)
             params.timeout              = timeout;
             params.on_progress          = on_progress;
             const nb::gil_scoped_release release{};
-            return fiction::physical_design::post_layout_optimization(layout, params, statistics);
+            fiction::physical_design::post_layout_optimization(layout, params, statistics);
         },
         nb::arg("layout"), nb::kw_only(),
         nb::arg("max_gate_relocations") = post_layout_optimization_options{}.max_gate_relocations,

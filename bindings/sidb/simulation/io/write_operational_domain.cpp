@@ -69,7 +69,7 @@ void register_write_operational_domain(nb::module_& m)
             params.operational_tag     = operational_tag;
             params.non_operational_tag = non_operational_tag;
             params.writing_mode        = writing_mode;
-            return fiction::sidb::simulation::io::write_operational_domain(opdom, filename, params);
+            fiction::sidb::simulation::io::write_operational_domain(opdom, filename, params);
         },
         nb::arg("opdom"), nb::arg("filename"), nb::kw_only(),
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,
@@ -127,7 +127,7 @@ void register_write_critical_temperature_domain(nb::module_& m)
             params.operational_tag     = operational_tag;
             params.non_operational_tag = non_operational_tag;
             params.writing_mode        = writing_mode;
-            return fiction::sidb::simulation::io::write_operational_domain(opdom, filename, params);
+            fiction::sidb::simulation::io::write_operational_domain(opdom, filename, params);
         },
         nb::arg("opdom"), nb::arg("filename"), nb::kw_only(),
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,

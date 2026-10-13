@@ -20,6 +20,8 @@
 
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 
+#include <cstdint>
+#include <functional>
 #include <sstream>
 
 #include <nanobind/nanobind.h>

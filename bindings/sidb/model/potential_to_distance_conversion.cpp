@@ -18,6 +18,7 @@
 #include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/model/potential_to_distance_conversion.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 
 #include <cmath>
 #include <cstdint>

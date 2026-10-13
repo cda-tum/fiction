@@ -14,8 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
 #include <fiction/technology/qca/layout.hpp>
 
@@ -62,7 +60,7 @@ void register_write_qca_layout_svg_impl(nb::module_& m)
             params.on_progress = on_progress;
             params.simple      = simple;
             const nb::gil_scoped_release release{};
-            return fiction::qca::io::write_qca_layout_svg(layout, filename, params);
+            fiction::qca::io::write_qca_layout_svg(layout, filename, params);
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("simple") = write_qca_layout_svg_options{}.simple,
