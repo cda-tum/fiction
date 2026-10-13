@@ -20,8 +20,6 @@
 
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 
-#include <optional>
-
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
@@ -79,6 +77,7 @@ inline void register_physical_population_stability_functions(nb::module_& m)
            const decltype(physical_population_stability_options{}.precision_for_distance_corresponding_to_potential)
                precision_for_distance_corresponding_to_potential)
         {
+            validate_distance_conversion_precision(precision_for_distance_corresponding_to_potential);
             physical_population_stability_options params{};
             params.precision_for_distance_corresponding_to_potential =
                 precision_for_distance_corresponding_to_potential;
@@ -95,6 +94,8 @@ inline void register_physical_population_stability_functions(nb::module_& m)
             physical_population_stability_options{}.precision_for_distance_corresponding_to_potential,
         R"doc(Determine the stability of the SiDB population under the physical model.
 The keyword options select simulation, potential precision, and the execution budget.
+Raises ValueError for an invalid base or a precision yielding a zero or non-finite distance step.
+Large precisions can make the native distance scan impractical or stall floating-point increments.
 )doc");
 }
 

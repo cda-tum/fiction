@@ -51,13 +51,10 @@ void register_potential_to_distance_conversion(nb::module_& m)
             {
                 throw nb::value_error("potential must be positive");
             }
-            /** @brief Distance increment used by the native scan. */
-            const auto step = std::pow(10, -static_cast<double>(precision));
-            if (step == 0 || !std::isfinite(step))
-            {
-                throw nb::value_error("precision must yield a positive finite step");
-            }
+            validate_distance_conversion_precision(precision);
             const auto params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+            /** @brief Releases the GIL during native distance conversion. */
+            const nb::gil_scoped_release release{};
             return fiction::sidb::model::potential_to_distance_conversion(potential, params, precision);
         },
         nb::arg("potential"), nb::arg("precision"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
@@ -66,7 +63,8 @@ void register_potential_to_distance_conversion(nb::module_& m)
         R"doc(Compute the distance corresponding to the potential with the requested precision.
 The physical model is supplied by the scalar keyword values.
 Potential must be positive. Precision must be a non-negative integer yielding a
-positive finite step. Runtime grows exponentially with precision.
+positive finite step. Runtime grows exponentially with precision. Large precisions
+can stall the native scan when floating-point increments lose resolution.
 )doc");
 }
 

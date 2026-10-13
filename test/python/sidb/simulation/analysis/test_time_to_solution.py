@@ -108,13 +108,55 @@ def test_time_to_solution_with_simulation_results() -> None:
 
 
 def test_independent_quicksim_and_tts_timeouts() -> None:
-    """Failed heuristic attempts publish statistics; the whole-search deadline raises."""
+    """Each heuristic timeout fails its attempt; the whole-search timeout raises."""
     layout = sidb_layout()
-    layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
-    layout.assign_sidb(lattice_site(4, 0, 0), sidb_dot_tag.NORMAL)
+    for x, y in [(0, 0), (1, 3), (3, 3), (5, 3), (10, 3), (15, 3), (18, 3)]:
+        layout.assign_sidb(lattice_site(x, y, 0), sidb_dot_tag.NORMAL)
     stats = time_to_solution_stats()
-    time_to_solution(layout, quicksim_timeout=0, timeout=10000, iteration_steps=0, repetitions=2, ps=stats)
+    time_to_solution(
+        layout,
+        base=2,
+        quicksim_timeout=0,
+        timeout=10000,
+        number_threads=1,
+        iteration_steps=10,
+        repetitions=2,
+        ps=stats,
+    )
     assert stats.acc == 0
     assert math.isinf(stats.time_to_solution)
     with pytest.raises(TimeoutError):
         time_to_solution(layout, quicksim_timeout=10000, timeout=0, repetitions=2)
+
+
+def test_tts_callback_routing() -> None:
+    """TTS, heuristic, and worker callbacks report their respective tasks."""
+    layout = sidb_layout()
+    for x, y in [(0, 0), (1, 3), (3, 3), (5, 3), (10, 3), (15, 3), (18, 3)]:
+        layout.assign_sidb(lattice_site(x, y, 0), sidb_dot_tag.NORMAL)
+    repetitions: list[tuple[str, int, int]] = []
+    iterations: list[tuple[str, int, int]] = []
+    workers: list[tuple[int, int, str, int, int, bool]] = []
+    time_to_solution(
+        layout,
+        base=2,
+        number_threads=1,
+        iteration_steps=2,
+        repetitions=2,
+        on_progress=lambda task, done, total: repetitions.append((task, done, total)),
+        quicksim_on_progress=lambda task, done, total: iterations.append((task, done, total)),
+        on_worker_progress=lambda worker, count, task, done, total, active: workers.append((
+            worker,
+            count,
+            task,
+            done,
+            total,
+            active,
+        )),
+    )
+    assert repetitions
+    assert all(task == "repetitions" for task, _, _ in repetitions)
+    assert iterations
+    assert all(task == "iterations" for task, _, _ in iterations)
+    assert workers
+    assert any(not active for _, _, _, _, _, active in workers)
