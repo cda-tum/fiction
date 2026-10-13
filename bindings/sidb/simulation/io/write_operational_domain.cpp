@@ -56,8 +56,6 @@ namespace detail
  */
 void register_write_operational_domain(nb::module_& m)
 {
-    // Function pointer for writing to a file
-    // Define function using function pointer
     m.def(
         "write_operational_domain",
         [](const fiction::sidb::simulation::logic::operational_domain& opdom, const std::string_view& filename,
@@ -115,7 +113,6 @@ Raises ValueError unless the domain has one to three sweep dimensions.
 void register_write_critical_temperature_domain(nb::module_& m)
 {
 
-    // Define function using function pointer
     m.def(
         "write_critical_temperature_domain",
         [](const fiction::sidb::simulation::logic::critical_temperature_domain& opdom, const std::string_view& filename,
