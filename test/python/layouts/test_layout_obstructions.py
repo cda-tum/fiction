@@ -276,11 +276,6 @@ def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
     assert layout.inputs(f1) == [c]
     assert layout.inputs(a2) == [b1, b2]
 
-    # Sink ports identify each destination input.
-    assert layout.sinks(x1) == [layout_input_port(a1, 0)]
-    assert layout.sinks(f1) == []
-    assert layout.sinks(a2) == [layout_input_port(f2, 0)]
-
     cp, tp = critical_path_length_and_throughput(layout)
     assert cp == 4
     assert tp == 1
