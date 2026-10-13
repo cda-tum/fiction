@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.topologies import SPECS, canonical
-from mnt.pyfiction import physical_design
+from mnt.pyfiction import layouts
 from mnt.pyfiction.physical_design import num_clks, orthogonal, orthogonal_params, orthogonal_stats
 
 if TYPE_CHECKING:
@@ -70,7 +70,7 @@ def ortho(session: Session, args: argparse.Namespace) -> Result:
     params.number_of_clock_phases = num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR
     stats = orthogonal_stats()
     family, params.layout_arrangement = SPECS[canonical(args.topology)]
-    design = orthogonal if family == "cartesian" else physical_design.orthogonal_hexagonal
-    layout = design(network, params, stats)
+    cls = getattr(layouts, f"{family}_gate_layout")
+    layout = orthogonal(network, params, stats, layout_type=cls)
     session.gate_layouts.add(layout)
     return _added(session, layout, stats, verbose=args.verbose)

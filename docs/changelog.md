@@ -426,6 +426,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** Use `read_network`, `read_fgl_layout`, `random_network`, `exact`, and `orthogonal`
+    with keyword `network_type` or `layout_type`. Specialized function names were removed.
+
   - **Breaking:** Layout value classes now use `extent`, `layout_object_id`, and `layout_input_port` names.
 
   - **Breaking:** Python keyword calls to `random_coordinate` now use `corner1` and `corner2` for the region bounds.

@@ -10,15 +10,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.pyfiction.layouts import arrangement
+from mnt.pyfiction.layouts import arrangement, hexagonal_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.physical_design import (
     apply_bestagon_library,
     apply_qca_one_library,
     apply_sim7_mol_library,
     apply_topolinano_library,
-    exact_hexagonal,
+    exact,
     exact_params,
-    exact_shifted_cartesian,
     orthogonal,
     technology_constraints,
 )
@@ -55,7 +54,7 @@ def test_apply_bestagon_library(mux21: technology_network) -> None:
     params.border_io = True
     params.layout_arrangement = arrangement.EVEN_ROW
 
-    layout = exact_hexagonal(mux21, params)
+    layout = exact(mux21, params, layout_type=hexagonal_gate_layout)
     assert layout is not None
 
     reports: list[tuple[str, int, int]] = []
@@ -72,7 +71,7 @@ def test_apply_topolinano_library(mux21: technology_network) -> None:
     params.technology_specifics = technology_constraints.TOPOLINANO
     params.layout_arrangement = arrangement.ODD_COLUMN
 
-    layout = exact_shifted_cartesian(mux21, params)
+    layout = exact(mux21, params, layout_type=shifted_cartesian_gate_layout)
     assert layout is not None
 
     reports: list[tuple[str, int, int]] = []

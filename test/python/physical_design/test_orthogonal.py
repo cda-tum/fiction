@@ -8,12 +8,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 import pytest
 
-from mnt.pyfiction.layouts import arrangement
+from mnt.pyfiction.layouts import arrangement, hexagonal_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.networks import high_degree_fanin_exception
-from mnt.pyfiction.networks.io import read_technology_network
-from mnt.pyfiction.physical_design import orthogonal, orthogonal_hexagonal, orthogonal_params, orthogonal_stats
+from mnt.pyfiction.networks.io import read_network
+from mnt.pyfiction.physical_design import orthogonal, orthogonal_params, orthogonal_stats
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 
@@ -67,7 +69,7 @@ def test_orthogonal_rejects_high_degree_fanin(tmp_path):
     )
 
     with pytest.raises(high_degree_fanin_exception):
-        orthogonal(read_technology_network(str(path)))
+        orthogonal(read_network(str(path)))
 
 
 @pytest.mark.parametrize("a", list(arrangement))
@@ -75,7 +77,7 @@ def test_orthogonal_hexagonal_takes_the_arrangement_from_the_parameters(mux21, a
     params = orthogonal_params()
     params.layout_arrangement = a
 
-    layout = orthogonal_hexagonal(mux21, params)
+    layout = orthogonal(mux21, params, layout_type=hexagonal_gate_layout)
 
     assert layout.get_arrangement() == a
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
@@ -83,4 +85,15 @@ def test_orthogonal_hexagonal_takes_the_arrangement_from_the_parameters(mux21, a
 
 def test_orthogonal_hexagonal_requires_an_arrangement(mux21):
     with pytest.raises(ValueError, match="arrangement"):
-        orthogonal_hexagonal(mux21)
+        orthogonal(mux21, layout_type=hexagonal_gate_layout)
+
+
+@pytest.mark.parametrize("selector", [None, "hexagonal", int, shifted_cartesian_gate_layout])
+def test_orthogonal_rejects_invalid_selectors(mux21: technology_network, selector: Any) -> None:
+    """Orthogonal supports only Cartesian and hexagonal output classes."""
+    with pytest.raises(TypeError):
+        orthogonal(mux21, layout_type=selector)
+
+
+if TYPE_CHECKING:
+    from mnt.pyfiction.networks import technology_network

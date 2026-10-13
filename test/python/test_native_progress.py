@@ -29,9 +29,8 @@ from mnt.pyfiction.physical_design import (
     apply_qca_one_library,
     apply_sim7_mol_library,
     apply_topolinano_library,
-    exact_cartesian,
+    exact,
     exact_params,
-    exact_shifted_cartesian,
     graph_oriented_layout_design,
     graph_oriented_layout_design_params,
     orthogonal,
@@ -73,7 +72,7 @@ def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> N
     params.num_threads = threads
     reports: list[tuple[int, int, str, int, int, bool]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
-    layout = exact_cartesian(mux21, params)
+    layout = exact(mux21, params)
     assert layout is not None
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert reports
@@ -231,7 +230,7 @@ def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) ->
     params.upper_bound_area = 1
     reports: list[tuple[int, int, str, int, int, bool]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
-    assert exact_cartesian(mux21, params) is None
+    assert exact(mux21, params) is None
     assert not reports
 
 
@@ -242,7 +241,7 @@ def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
     params.timeout = 1
     reports: list[tuple[int, int, str, int, int, bool]] = []
     params.on_worker_progress = lambda *report: reports.append(report)
-    exact_cartesian(mux21, params)
+    exact(mux21, params)
     active = {worker: running for worker, count, description, done, total, running in reports}
     assert not any(active.values())
 
@@ -310,7 +309,7 @@ def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path)
     placement.border_io = True
     placement.technology_specifics = technology_constraints.TOPOLINANO
     placement.layout_arrangement = arrangement.ODD_COLUMN
-    gate_layout = exact_shifted_cartesian(mux21, placement)
+    gate_layout = exact(mux21, placement, layout_type=shifted_cartesian_gate_layout)
     assert gate_layout is not None
     layout = apply_topolinano_library(gate_layout)
     before = tmp_path / "before.qcc"

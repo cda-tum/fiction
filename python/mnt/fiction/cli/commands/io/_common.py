@@ -19,27 +19,25 @@ from mnt.fiction.cli.aigverse_bridge import from_aigverse
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import FGL_READERS
-from mnt.pyfiction.networks import set_name
-from mnt.pyfiction.networks.io import read_aig_network, read_mig_network, read_technology_network, read_xag_network
+from mnt.pyfiction.networks import aig_network, mig_network, set_name, technology_network, xag_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.synthesis import convert_network, network_target
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
     from mnt.fiction.cli.stores import Network
 
 
-NETWORK_READERS: dict[str, Callable[..., Network]] = {
-    "aig": read_aig_network,
-    "xag": read_xag_network,
-    "mig": read_mig_network,
-    "tec": read_technology_network,
+NETWORK_TYPES: dict[str, type[Network]] = {
+    "aig": aig_network,
+    "xag": xag_network,
+    "mig": mig_network,
+    "tec": technology_network,
 }
-"""The ``--type`` names and the readers that produce them."""
+"""The ``--type`` names and their registered output classes."""
 
 
 READ_SUFFIXES = (".v", ".aig", ".blif", ".aag", ".pla", ".fgl", ".sqd")
@@ -62,7 +60,7 @@ def _type_argument(parser: Parser) -> None:
     """
     parser.add_argument(
         "--type",
-        choices=list(NETWORK_READERS),
+        choices=list(NETWORK_TYPES),
         default="tec",
         help="the network type to build",
     )
@@ -132,7 +130,7 @@ def _read_network(session: Session, path: Path, network_type: str, file_format: 
     if suffix == ".blif" and network_type != "tec":
         msg = "BLIF files are read as technology networks only; drop --type"
         raise CommandError(msg)
-    return NETWORK_READERS[network_type](str(path), format=suffix[1:])
+    return read_network(str(path), format=suffix[1:], network_type=NETWORK_TYPES[network_type])
 
 
 def _read_pla(session: Session, path: Path) -> Network:

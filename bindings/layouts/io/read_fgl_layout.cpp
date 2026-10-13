@@ -21,6 +21,7 @@
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 
 #include <string_view>
+#include <type_traits>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts filename and layout name arguments.
@@ -33,6 +34,40 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+namespace detail
+{
+/**
+ * @brief Bind the FGL overload that selects a registered layout class.
+ * @tparam Lyt Layout representation.
+ * @param m Layout I/O module.
+ * @param signature Python signature including the selected return type.
+ */
+template <typename Lyt>
+void register_read_fgl_layout(nb::module_& m, const char* signature)
+{
+    const auto read =
+        [](const std::string_view& filename, const std::string_view& layout_name, const nb::handle layout_type)
+    {
+        if (!layout_type.is(nb::type<Lyt>()))
+        {
+            throw nb::next_overload();
+        }
+        const nb::gil_scoped_release release{};
+        return fiction::layouts::io::read_fgl_layout<Lyt>(filename, layout_name);
+    };
+    if constexpr (std::is_same_v<Lyt, py_cartesian_gate_layout>)
+    {
+        m.def("read_fgl_layout", read, nb::arg("filename"), nb::arg("layout_name") = "", nb::kw_only(),
+              nb::arg("layout_type") = nb::type<Lyt>(), nb::sig(signature), DOC(fiction_layouts_io_read_fgl_layout_3));
+    }
+    else
+    {
+        m.def("read_fgl_layout", read, nb::arg("filename"), nb::arg("layout_name") = "", nb::kw_only(),
+              nb::arg("layout_type"), nb::sig(signature));
+    }
+}
+}  // namespace detail
+
 /** @brief Register FGL readers and their parsing exception. @param m Layout I/O module. */
 void register_read_fgl_layout(nb::module_& m)
 {
@@ -43,21 +78,26 @@ void register_read_fgl_layout(nb::module_& m)
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    m.def("read_cartesian_fgl_layout",
-          nb::overload_cast<const std::string_view&, const std::string_view&>(
-              &fiction::layouts::io::read_fgl_layout<py_cartesian_gate_layout>),
-          nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
-          nb::call_guard<nb::gil_scoped_release>());
-    m.def("read_shifted_cartesian_fgl_layout",
-          nb::overload_cast<const std::string_view&, const std::string_view&>(
-              &fiction::layouts::io::read_fgl_layout<py_shifted_cartesian_gate_layout>),
-          nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
-          nb::call_guard<nb::gil_scoped_release>());
-    m.def("read_hexagonal_fgl_layout",
-          nb::overload_cast<const std::string_view&, const std::string_view&>(
-              &fiction::layouts::io::read_fgl_layout<py_hexagonal_gate_layout>),
-          nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3),
-          nb::call_guard<nb::gil_scoped_release>());
+    detail::register_read_fgl_layout<py_cartesian_gate_layout>(
+        m, "def read_fgl_layout(filename: str, layout_name: str = \"\", *, layout_type: "
+           "type[mnt.pyfiction.layouts.cartesian_gate_layout] = mnt.pyfiction.layouts.cartesian_gate_layout) -> "
+           "mnt.pyfiction.layouts.cartesian_gate_layout");
+    detail::register_read_fgl_layout<py_shifted_cartesian_gate_layout>(
+        m, "def read_fgl_layout(filename: str, layout_name: str = \"\", *, layout_type: "
+           "type[mnt.pyfiction.layouts.shifted_cartesian_gate_layout]) -> "
+           "mnt.pyfiction.layouts.shifted_cartesian_gate_layout");
+    detail::register_read_fgl_layout<py_hexagonal_gate_layout>(
+        m, "def read_fgl_layout(filename: str, layout_name: str = \"\", *, layout_type: "
+           "type[mnt.pyfiction.layouts.hexagonal_gate_layout]) -> mnt.pyfiction.layouts.hexagonal_gate_layout");
+    m.def(
+        "read_fgl_layout", [](const std::string_view&, const std::string_view&, const nb::handle) -> nb::object
+        { throw nb::type_error("layout_type must be a registered gate layout class"); }, nb::arg("filename"),
+        nb::arg("layout_name") = "", nb::kw_only(), nb::arg("layout_type"),
+        nb::sig(
+            "def read_fgl_layout(filename: str, layout_name: str = \"\", *, layout_type: "
+            "type[mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.shifted_cartesian_gate_layout | "
+            "mnt.pyfiction.layouts.hexagonal_gate_layout]) -> mnt.pyfiction.layouts.cartesian_gate_layout | "
+            "mnt.pyfiction.layouts.shifted_cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout"));
 }
 
 }  // namespace pyfiction

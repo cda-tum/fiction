@@ -30,7 +30,7 @@ from mnt.fiction.cli.session import Session, ignore_progress, ignore_worker_prog
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
 from mnt.pyfiction.networks import set_name
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import orthogonal, orthogonal_stats
 
 if TYPE_CHECKING:
@@ -529,7 +529,7 @@ def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytes
         sys.setswitchinterval(10)
         with session.progress("read"):
             reading = True
-            read_technology_network(str(path))
+            read_network(str(path))
             reading = False
     finally:
         sys.setswitchinterval(interval)

@@ -20,7 +20,7 @@
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.networks.io.read_technology_network
+.. autofunction:: mnt.pyfiction.networks.io.read_network
 ```
 
 :::
@@ -69,3 +69,14 @@
 :::
 
 ::::
+
+Python network readers and random generation accept a keyword-only `network_type` class.
+Both default to `technology_network`; AIG, XAG, and MIG retain their native readers and generators.
+
+```python
+from mnt.pyfiction.networks import aig_network, random_network
+from mnt.pyfiction.networks.io import read_network
+
+network = read_network("network.v", network_type=aig_network)
+random = random_network(3, 4, 42, network_type=aig_network)
+```

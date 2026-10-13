@@ -13,6 +13,7 @@ from __future__ import annotations
 import secrets
 from typing import TYPE_CHECKING
 
+from mnt.fiction.cli.commands.io._common import NETWORK_TYPES
 from mnt.fiction.cli.parsing import integer, positive_int, seed
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
@@ -26,10 +27,6 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.session import Session
 
 
-NETWORK_TARGETS = ("aig", "xag", "mig", "tec")
-"""The network types available to the native random generators."""
-
-
 def _random_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
     parser.add_argument("-n", "--inputs", type=positive_int, required=True, help="number of primary inputs")
@@ -37,7 +34,7 @@ def _random_arguments(parser: Parser) -> None:
     parser.add_argument(
         "--type",
         type=str.lower,
-        choices=list(NETWORK_TARGETS),
+        choices=list(NETWORK_TYPES),
         default="aig",
         help="the network type to produce",
     )
@@ -51,6 +48,6 @@ def random_command(session: Session, args: argparse.Namespace) -> Result:
     Each type uses its native gate distribution; technology networks use the mixed generator.
     """
     seed = args.seed if args.seed is not None else secrets.randbelow(2**32)
-    network = getattr(networks, f"random_{args.type}_network")(args.inputs, args.gates, seed)
+    network = networks.random_network(args.inputs, args.gates, seed, network_type=NETWORK_TYPES[args.type])
     session.networks.add(network)
     return {"network": describe(network), "seed": seed}
