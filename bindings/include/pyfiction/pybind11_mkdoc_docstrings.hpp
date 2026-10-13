@@ -3891,8 +3891,22 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_outgoing_data_flow =
-R"doc(Returns destination-object coordinates of output connections, filtered
-by adjacency and optionally clocking.
+R"doc(Returns adjacent destination coordinates once per connected input
+port.
+
+Multiple connected inputs on one destination yield repeated
+coordinates.
+
+Args:
+    t: Source-object coordinate.
+
+Template Args:
+    RespectClocking: Require outgoing clocking in addition to
+                     adjacency; enabled by default.
+
+Returns:
+    Destination coordinates of the selected connections, in
+    unspecified order.
 
 )doc";
 
