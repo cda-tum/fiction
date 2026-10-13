@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import finite_float, integer, positive_float
@@ -61,9 +61,9 @@ def _physical_arguments(parser: Parser, *, base: bool, base_default: int = 2, po
         )
 
 
-def _physical_options(args: argparse.Namespace) -> dict[str, float | int]:
+def _physical_options(args: argparse.Namespace) -> dict[str, Any]:
     """Return physical simulation keywords and their CLI report values."""
-    options: dict[str, float | int] = {
+    options: dict[str, Any] = {
         "epsilon_r": args.epsilon_r,
         "lambda_tf": args.lambda_tf,
         "mu_minus": args.mu_minus,

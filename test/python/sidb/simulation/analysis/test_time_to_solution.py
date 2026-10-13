@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import pytest
 
@@ -27,7 +28,7 @@ def test_one_sidb_100_lattice() -> None:
     layout = sidb_layout()
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
 
-    quicksim_parameter = {"base": 3, "mu_minus": -0.3, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    quicksim_parameter: dict[str, Any] = {"base": 3, "mu_minus": -0.3, "epsilon_r": 5.6, "lambda_tf": 5.0}
 
     stats = time_to_solution_stats()
 
@@ -43,7 +44,7 @@ def test_one_sidb_111_lattice() -> None:
     layout = sidb_layout(lattice.si_111_1x1())
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
 
-    quicksim_parameter = {"base": 3, "mu_minus": -0.3, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    quicksim_parameter: dict[str, Any] = {"base": 3, "mu_minus": -0.3, "epsilon_r": 5.6, "lambda_tf": 5.0}
 
     stats = time_to_solution_stats()
 

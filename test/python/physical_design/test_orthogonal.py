@@ -42,7 +42,7 @@ def test_orthogonal_with_stats(mux21):
 
 
 def test_orthogonal_reports_progress(mux21):
-    options = {}
+    options: dict[str, Any] = {}
     reports = []
     options["on_progress"] = lambda task, done, total: reports.append((task, done, total))
 

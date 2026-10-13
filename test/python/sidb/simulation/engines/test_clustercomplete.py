@@ -10,6 +10,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state
 from mnt.pyfiction.sidb.simulation.engines import clustercomplete, ground_state_space_reporting
@@ -23,7 +25,7 @@ def test_three_sidbs() -> None:
     layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
-    options = {
+    options: dict[str, Any] = {
         "base": 2,
         "mu_minus": -0.25,
     }

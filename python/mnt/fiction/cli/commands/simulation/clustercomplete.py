@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
@@ -51,7 +51,7 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     The witness limits tune the first pruning stage; -r prints its statistics.
     """
     layout = _active_sidb_layout(session)
-    options = {
+    options: dict[str, Any] = {
         "on_progress": session.report_progress,
         "on_worker_progress": session.report_worker_progress,
     }

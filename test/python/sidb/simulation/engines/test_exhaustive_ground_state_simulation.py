@@ -10,6 +10,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state
 from mnt.pyfiction.sidb.simulation.engines import exhaustive_ground_state_simulation
@@ -45,7 +47,7 @@ def test_perturber_and_sidb_pair_111() -> None:
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
-    options = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     options["mu_minus"] = -0.32
     options["base"] = 2
 
@@ -71,7 +73,7 @@ def test_exgs_reports_progress() -> None:
     layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
-    options = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     options["base"] = 2
 
     reports: list[tuple[str, int, int]] = []

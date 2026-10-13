@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import positive_float, probability
@@ -60,7 +60,7 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     the erroneous states are those with a wrong output.
     """
     layout = _active_sidb_layout(session)
-    options = {
+    options: dict[str, Any] = {
         "on_progress": session.report_progress,
         "on_worker_progress": session.report_worker_progress,
         "confidence_level": args.confidence,

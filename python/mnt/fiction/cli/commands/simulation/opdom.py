@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import finite_float, positive_int
@@ -112,7 +112,7 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     spec = [session.truth_tables.current()]
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
 
-    options = {
+    options: dict[str, Any] = {
         "on_progress": session.report_progress,
         "on_worker_progress": session.report_worker_progress,
         "sim_engine": ENGINES[args.engine],

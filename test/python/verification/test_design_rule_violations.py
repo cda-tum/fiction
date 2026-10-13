@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from mnt.pyfiction.layouts import cartesian_gate_layout
 from mnt.pyfiction.physical_design import color_routing
 from mnt.pyfiction.verification import gate_level_drvs
@@ -40,7 +42,7 @@ def test_drvs_check_placements_outside_extent() -> None:
     layout = cartesian_gate_layout((1, 1, 1), "2DDWave")
     source = layout.create_pi("a", (-2, 0))
     layout.create_po(source, "result", (-1, 0))
-    options = {
+    options: dict[str, Any] = {
         "non_adjacent_connections": False,
         "missing_connections": False,
         "crossing_gates": False,

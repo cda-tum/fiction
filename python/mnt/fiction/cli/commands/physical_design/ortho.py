@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
@@ -65,7 +65,7 @@ def ortho(session: Session, args: argparse.Namespace) -> Result:
     must not have gates with more than two inputs.
     """
     network = session.as_technology_network(session.networks.current())
-    options = {
+    options: dict[str, Any] = {
         "on_progress": session.report_progress,
         "number_of_clock_phases": num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR,
     }

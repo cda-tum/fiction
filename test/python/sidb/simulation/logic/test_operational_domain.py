@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -75,7 +75,7 @@ def wire_with_canvas() -> sidb_layout:
 def test_operational_domain_siqad_or_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
     }
@@ -99,7 +99,7 @@ def test_number_of_threads(resources_dir):
     """The thread count is configurable and does not change the resulting operational domain."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
         "mu_minus": -0.28,
@@ -130,7 +130,7 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
     """The sketch and the boundary-following strategies work over three sweep dimensions."""
     lyt = wire_with_canvas
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
         "op_condition": operational_condition.REJECT_KINKS,
@@ -167,7 +167,7 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
     """The sketch is rejected when it cannot filter anything."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "strategy_to_analyze_operational_status": operational_analysis_strategy.FILTER_ONLY,
         "op_condition": operational_condition.REJECT_KINKS,
@@ -197,7 +197,7 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
 def test_operational_domain_xor_gate_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
     }
@@ -228,7 +228,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     """Critical-temperature searches agree on every evaluated XOR parameter point."""
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
     }
@@ -282,7 +282,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
 def test_operational_domain_and_gate_111_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
     }
@@ -449,7 +449,7 @@ def test_operational_domain_two_bdl_pair_wire():
 
     bdl_wire.assign_sidb(lattice_site(18, 0, 0), sidb_dot_tag.NORMAL)
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
         "input_bdl_config": input_bdl_configuration.PERTURBER_DISTANCE_ENCODED,
@@ -476,7 +476,7 @@ def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
     """The parameter points are reported as they are evaluated, ending at the grid size."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
         "mu_minus": -0.28,

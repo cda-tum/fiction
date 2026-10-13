@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -137,7 +137,7 @@ def test_path_finding_with_obstructions_and_crossings(make_lyt: Callable[[], Gat
     lyt.obstruct_coordinate((1, 1, 0))
     lyt.obstruct_coordinate((1, 1, 1))
 
-    options = {
+    options: dict[str, Any] = {
         "crossings": True,
     }
 

@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
@@ -29,7 +29,7 @@ def test_three_sidbs() -> None:
     layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
-    options = {
+    options: dict[str, Any] = {
         "base": 2,
         "mu_minus": -0.25,
         "base_number_detection": automatic_base_number_detection.OFF,

@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -63,17 +63,17 @@ def test_zero_budgets(resources_dir: Path) -> None:
     """All existing simulation-application entry points expose the built-in TimeoutError."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
     spec = [create_and_tt()]
-    operational = {
+    operational: dict[str, Any] = {
         "timeout": 0,
     }
     domain = operational.copy()
     temperature = operational.copy()
     displacement = operational.copy()
     ratio = domain.copy()
-    population = {
+    population: dict[str, Any] = {
         "timeout": 0,
     }
-    tts = {
+    tts: dict[str, Any] = {
         "timeout": 0,
     }
 
@@ -104,7 +104,7 @@ def test_zero_budgets(resources_dir: Path) -> None:
 def test_domain_timeout_preserves_statistics(resources_dir: Path) -> None:
     """An expired outer budget survives nested simulator calls and does not publish partial statistics."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
-    options = {
+    options: dict[str, Any] = {
         "timeout": 10,
         "number_of_threads": 2,
     }

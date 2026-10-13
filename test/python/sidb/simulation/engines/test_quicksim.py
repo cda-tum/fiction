@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
@@ -30,7 +30,7 @@ def test_perturber_and_sidb_pair() -> None:
     layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
-    options = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     options["iteration_steps"] = 80
     options["alpha"] = 0.7
 
@@ -57,7 +57,7 @@ def test_perturber_and_sidb_pair_111() -> None:
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
-    options = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     options["mu_minus"] = -0.32
     options["iteration_steps"] = 80
     options["alpha"] = 0.7
@@ -100,7 +100,7 @@ def test_quicksim_reports_progress_from_worker_threads(resources_dir: Path) -> N
     """The iterations are reported by the worker threads, which needs the GIL released during the call."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "iteration_steps": 50000,  # long enough for the throttled reporter to forward worker reports
         "number_threads": 2,
     }

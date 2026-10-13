@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import integer, positive_float, positive_int, seed
@@ -82,7 +82,7 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     The result is a 2DDWave-clocked Cartesian layout. The network must not have gates with more
     than two inputs.
     """
-    options = {
+    options: dict[str, Any] = {
         "on_progress": session.report_progress,
         "on_worker_progress": session.report_worker_progress,
         "num_vertex_expansions": args.expansions,
