@@ -621,6 +621,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Build system:
 
   - Rebuild Python bindings when uncommitted C++ binding sources change.
+  - Keep tinyxml2 static when reconfiguring Windows builds so Python imports find all libraries.
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
   - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
