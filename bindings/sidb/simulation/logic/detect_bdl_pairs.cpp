@@ -42,7 +42,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void detect_bdl_pairs(nb::module_& m)
+/**
+ * @brief Binds `detect_bdl_pairs`.
+ * @param m Python module.
+ */
+void bind_detect_bdl_pairs(nb::module_& m)
 {
     using fiction::sidb::lattice_site;
     using fiction::sidb::layout;

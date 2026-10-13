@@ -24,11 +24,15 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_qcc_layout(nb::module_& m);
+/**
+ * @brief Binds `write_qcc_layout`.
+ * @param m Python module.
+ */
+void bind_write_qcc_layout(nb::module_& m);
 
 void register_inml_io(nb::module_& m)
 {
-    write_qcc_layout(m);
+    bind_write_qcc_layout(m);
 }
 
 }  // namespace pyfiction

@@ -119,7 +119,7 @@ inline nb::dict convert_map_to_py(const std::unordered_map<std::string, std::any
  *
  * @param m Python module.
  */
-void result(nb::module_& m)
+void bind_result(nb::module_& m)
 {
     using fiction::sidb::simulation::result;
 

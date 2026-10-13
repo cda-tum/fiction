@@ -49,7 +49,7 @@ namespace detail
  * @param doc Docstring of the bound `area` overload.
  */
 template <typename Lyt>
-void area(nb::module_& m, const char* doc)
+void bind_area(nb::module_& m, const char* doc)
 {
     m.def(
         "area",
@@ -73,12 +73,12 @@ void area(nb::module_& m, const char* doc)
  *
  * @param m Python module.
  */
-void area(nb::module_& m)
+void bind_area(nb::module_& m)
 {
-    detail::area<fiction::qca::layout>(m, DOC(fiction_fcn_area));
-    detail::area<fiction::mol_qca::layout>(m, DOC(fiction_fcn_area));
-    detail::area<fiction::inml::layout>(m, DOC(fiction_fcn_area));
-    detail::area<fiction::sidb::layout>(m, DOC(fiction_fcn_area_3));
+    detail::bind_area<fiction::qca::layout>(m, DOC(fiction_fcn_area));
+    detail::bind_area<fiction::mol_qca::layout>(m, DOC(fiction_fcn_area));
+    detail::bind_area<fiction::inml::layout>(m, DOC(fiction_fcn_area));
+    detail::bind_area<fiction::sidb::layout>(m, DOC(fiction_fcn_area_3));
 }
 
 }  // namespace pyfiction

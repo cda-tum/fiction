@@ -44,8 +44,13 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Binds `enumerate_all_paths_impl`.
+ * @param m Python module.
+ * @tparam Lyt Layout type.
+ */
 template <typename Lyt>
-void enumerate_all_paths_impl(nb::module_& m)
+void bind_enumerate_all_paths_impl(nb::module_& m)
 {
     m.def(
         "enumerate_all_paths",
@@ -75,7 +80,11 @@ void enumerate_all_paths_impl(nb::module_& m)
 
 }  // namespace detail
 
-void enumerate_all_paths(nb::module_& m)
+/**
+ * @brief Binds `enumerate_all_paths`.
+ * @param m Python module.
+ */
+void bind_enumerate_all_paths(nb::module_& m)
 {
     nb::class_<fiction::physical_design::path_finding::enumerate_all_paths_params>(
         m, "enumerate_all_paths_params", DOC(fiction_physical_design_path_finding_enumerate_all_paths_params))
@@ -87,12 +96,12 @@ void enumerate_all_paths(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::enumerate_all_paths_impl<py_cartesian_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_cartesian_layout>(m);
-    detail::enumerate_all_paths_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_shifted_cartesian_layout>(m);
-    detail::enumerate_all_paths_impl<py_hexagonal_gate_layout>(m);
-    detail::enumerate_all_paths_impl<py_hexagonal_layout>(m);
+    detail::bind_enumerate_all_paths_impl<py_cartesian_gate_layout>(m);
+    detail::bind_enumerate_all_paths_impl<py_cartesian_layout>(m);
+    detail::bind_enumerate_all_paths_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::bind_enumerate_all_paths_impl<py_shifted_cartesian_layout>(m);
+    detail::bind_enumerate_all_paths_impl<py_hexagonal_gate_layout>(m);
+    detail::bind_enumerate_all_paths_impl<py_hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

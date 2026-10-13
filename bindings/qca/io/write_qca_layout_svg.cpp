@@ -43,7 +43,11 @@ namespace pyfiction
 namespace detail
 {
 
-void write_qca_layout_svg_impl(nb::module_& m)
+/**
+ * @brief Binds `write_qca_layout_svg_impl`.
+ * @param m Python module.
+ */
+void bind_write_qca_layout_svg_impl(nb::module_& m)
 {
     // QCA plot
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -58,7 +62,11 @@ void write_qca_layout_svg_impl(nb::module_& m)
 
 }  // namespace detail
 
-void write_qca_layout_svg(nb::module_& m)
+/**
+ * @brief Binds `write_qca_layout_svg`.
+ * @param m Python module.
+ */
+void bind_write_qca_layout_svg(nb::module_& m)
 {
     nb::class_<fiction::qca::io::write_qca_layout_svg_params>(
         m, "write_qca_layout_svg_params",
@@ -70,7 +78,7 @@ void write_qca_layout_svg(nb::module_& m)
         .def_rw("simple", &fiction::qca::io::write_qca_layout_svg_params::simple,
                 DOC(fiction_qca_io_write_qca_layout_svg_params_simple));
 
-    detail::write_qca_layout_svg_impl(m);
+    detail::bind_write_qca_layout_svg_impl(m);
 }
 
 }  // namespace pyfiction

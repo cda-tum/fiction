@@ -41,7 +41,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void energy_distribution(nb::module_& m)
+/**
+ * @brief Binds `energy_distribution`.
+ * @param m Python module.
+ */
+void bind_energy_distribution(nb::module_& m)
 {
     nb::class_<fiction::sidb::simulation::analysis::energy_state>(m, "energy_state")
         .def(nb::init<double, uint64_t>(), nb::arg("electrostatic_potential_energy"), nb::arg("degeneracy"),

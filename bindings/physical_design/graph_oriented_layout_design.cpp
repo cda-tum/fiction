@@ -46,7 +46,7 @@ namespace pyfiction
 {
 
 /** @brief Registers graph-oriented layout design. @param m Python module. */
-void graph_oriented_layout_design(nb::module_& m)
+void bind_graph_oriented_layout_design(nb::module_& m)
 {
     nb::enum_<fiction::physical_design::graph_oriented_layout_design_params::effort_mode>(
         m, "gold_effort_mode", DOC(fiction_physical_design_graph_oriented_layout_design_params_effort_mode))

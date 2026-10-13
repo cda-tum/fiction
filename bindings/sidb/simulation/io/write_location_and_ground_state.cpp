@@ -32,7 +32,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_location_and_ground_state(nb::module_& m)
+/**
+ * @brief Binds `write_location_and_ground_state`.
+ * @param m Python module.
+ */
+void bind_write_location_and_ground_state(nb::module_& m)
 {
     // NOLINTNEXTLINE(misc-const-correctness)
     void (*const write_pointer)(const fiction::sidb::simulation::result&, const std::string_view&) =

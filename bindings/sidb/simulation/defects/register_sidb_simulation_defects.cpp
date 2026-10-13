@@ -24,11 +24,15 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void displacement_robustness_domain(nb::module_& m);
+/**
+ * @brief Binds `displacement_robustness_domain`.
+ * @param m Python module.
+ */
+void bind_displacement_robustness_domain(nb::module_& m);
 
 void register_sidb_simulation_defects(nb::module_& m)
 {
-    displacement_robustness_domain(m);
+    bind_displacement_robustness_domain(m);
 }
 
 }  // namespace pyfiction

@@ -38,7 +38,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void random_layout_generator(nb::module_& m)
+/**
+ * @brief Binds `random_layout_generator`.
+ * @param m Python module.
+ */
+void bind_random_layout_generator(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::generators::generate_random_layout_params;

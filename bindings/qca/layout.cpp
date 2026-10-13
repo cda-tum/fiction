@@ -35,7 +35,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void qca_layout(nb::module_& m)
+void bind_qca_layout(nb::module_& m)
 {
     using fiction::qca::cell_mode;
     using fiction::qca::cell_type;

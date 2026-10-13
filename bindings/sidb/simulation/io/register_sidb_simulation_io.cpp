@@ -24,15 +24,27 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_sqd_sim_result(nb::module_& m);
-void write_operational_domain(nb::module_& m);
-void write_location_and_ground_state(nb::module_& m);
+/**
+ * @brief Binds `write_sqd_sim_result`.
+ * @param m Python module.
+ */
+void bind_write_sqd_sim_result(nb::module_& m);
+/**
+ * @brief Binds `write_operational_domain`.
+ * @param m Python module.
+ */
+void bind_write_operational_domain(nb::module_& m);
+/**
+ * @brief Binds `write_location_and_ground_state`.
+ * @param m Python module.
+ */
+void bind_write_location_and_ground_state(nb::module_& m);
 
 void register_sidb_simulation_io(nb::module_& m)
 {
-    write_sqd_sim_result(m);
-    write_operational_domain(m);
-    write_location_and_ground_state(m);
+    bind_write_sqd_sim_result(m);
+    bind_write_operational_domain(m);
+    bind_write_location_and_ground_state(m);
 }
 
 }  // namespace pyfiction

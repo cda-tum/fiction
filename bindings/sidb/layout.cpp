@@ -46,7 +46,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void layout(nb::module_& m)
+void bind_layout(nb::module_& m)
 {
     using fiction::sidb::layout;
 

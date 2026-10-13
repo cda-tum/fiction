@@ -43,7 +43,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void physically_valid_parameters(nb::module_& m)
+/**
+ * @brief Binds `physically_valid_parameters`.
+ * @param m Python module.
+ */
+void bind_physically_valid_parameters(nb::module_& m)
 {
     nb::class_<fiction::sidb::simulation::domain<fiction::sidb::simulation::logic::parameter_point, uint64_t>>(
         m, "physically_valid_parameters_domain")

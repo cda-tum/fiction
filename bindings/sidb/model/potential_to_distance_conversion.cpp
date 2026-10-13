@@ -29,7 +29,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void potential_to_distance_conversion(nb::module_& m)
+/**
+ * @brief Binds `potential_to_distance_conversion`.
+ * @param m Python module.
+ */
+void bind_potential_to_distance_conversion(nb::module_& m)
 {
     m.def("potential_to_distance_conversion", &fiction::sidb::model::potential_to_distance_conversion,
           nb::arg("potential"), nb::arg("params"), nb::arg("precision"),

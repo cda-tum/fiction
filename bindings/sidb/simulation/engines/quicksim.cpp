@@ -39,7 +39,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void quicksim(nb::module_& m)
+/**
+ * @brief Binds `quicksim`.
+ * @param m Python module.
+ */
+void bind_quicksim(nb::module_& m)
 {
     using fiction::sidb::simulation::engines::quicksim_params;
 

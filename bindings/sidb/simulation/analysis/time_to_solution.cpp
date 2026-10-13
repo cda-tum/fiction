@@ -43,7 +43,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void time_to_solution(nb::module_& m)
+/**
+ * @brief Binds `time_to_solution`.
+ * @param m Python module.
+ */
+void bind_time_to_solution(nb::module_& m)
 {
     /**
      * Parameters.

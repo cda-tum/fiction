@@ -35,7 +35,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void inml_layout(nb::module_& m)
+void bind_inml_layout(nb::module_& m)
 {
     using fiction::inml::layout;
     using fiction::inml::magnet_type;

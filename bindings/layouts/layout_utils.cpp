@@ -51,7 +51,7 @@ namespace detail
  * @param m Python module.
  */
 template <typename Lyt>
-void num_adjacent_coordinates(nb::module_& m)
+void bind_num_adjacent_coordinates(nb::module_& m)
 {
     m.def("num_adjacent_coordinates", &fiction::layouts::num_adjacent_coordinates<Lyt>, nb::arg("lyt"), nb::arg("c"),
           DOC(fiction_layouts_num_adjacent_coordinates));
@@ -63,7 +63,7 @@ void num_adjacent_coordinates(nb::module_& m)
  * @param m Python module.
  */
 template <typename Lyt>
-void normalize_layout_coordinates(nb::module_& m)
+void bind_normalize_layout_coordinates(nb::module_& m)
 {
     m.def("normalize_layout_coordinates", &fiction::layouts::normalize_layout_coordinates<Lyt>, nb::arg("lyt"),
           DOC(fiction_layouts_normalize_layout_coordinates));
@@ -73,7 +73,7 @@ void normalize_layout_coordinates(nb::module_& m)
  * @brief Registers signed random coordinate generation.
  * @param m Python module.
  */
-void random_coordinate(nb::module_& m)
+void bind_random_coordinate(nb::module_& m)
 {
     m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
           nb::arg("corner1"), nb::arg("corner2"), DOC(fiction_layouts_random_coordinate));
@@ -85,19 +85,19 @@ void random_coordinate(nb::module_& m)
  * @brief Registers layout coordinate utilities.
  * @param m Python module.
  */
-void layout_utils(nb::module_& m)
+void bind_layout_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::num_adjacent_coordinates<py_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
+    detail::bind_num_adjacent_coordinates<py_cartesian_gate_layout>(m);
+    detail::bind_num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
+    detail::bind_num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
 
-    detail::normalize_layout_coordinates<fiction::qca::layout>(m);
-    detail::normalize_layout_coordinates<fiction::mol_qca::layout>(m);
-    detail::normalize_layout_coordinates<fiction::inml::layout>(m);
+    detail::bind_normalize_layout_coordinates<fiction::qca::layout>(m);
+    detail::bind_normalize_layout_coordinates<fiction::mol_qca::layout>(m);
+    detail::bind_normalize_layout_coordinates<fiction::inml::layout>(m);
 
-    detail::random_coordinate(m);
+    detail::bind_random_coordinate(m);
 }
 
 }  // namespace pyfiction

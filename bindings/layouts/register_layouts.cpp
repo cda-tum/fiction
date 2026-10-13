@@ -26,15 +26,51 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void coordinate(nb::module_& m);
-void coordinate_utility(nb::module_& m);
-void arrangement(nb::module_& m);
-void cartesian_layout(nb::module_& m);
-void shifted_cartesian_layout(nb::module_& m);
-void hexagonal_layout(nb::module_& m);
-void gate_level_layout(nb::module_& m);
-void obstructions(nb::module_& m);
-void layout_utils(nb::module_& m);
+/**
+ * @brief Binds `coordinate`.
+ * @param m Python module.
+ */
+void bind_coordinate(nb::module_& m);
+/**
+ * @brief Binds `coordinate_utility`.
+ * @param m Python module.
+ */
+void bind_coordinate_utility(nb::module_& m);
+/**
+ * @brief Binds `arrangement`.
+ * @param m Python module.
+ */
+void bind_arrangement(nb::module_& m);
+/**
+ * @brief Binds `cartesian_layout`.
+ * @param m Python module.
+ */
+void bind_cartesian_layout(nb::module_& m);
+/**
+ * @brief Binds `shifted_cartesian_layout`.
+ * @param m Python module.
+ */
+void bind_shifted_cartesian_layout(nb::module_& m);
+/**
+ * @brief Binds `hexagonal_layout`.
+ * @param m Python module.
+ */
+void bind_hexagonal_layout(nb::module_& m);
+/**
+ * @brief Binds `gate_level_layout`.
+ * @param m Python module.
+ */
+void bind_gate_level_layout(nb::module_& m);
+/**
+ * @brief Binds `obstructions`.
+ * @param m Python module.
+ */
+void bind_obstructions(nb::module_& m);
+/**
+ * @brief Binds `layout_utils`.
+ * @param m Python module.
+ */
+void bind_layout_utils(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.layouts.io` submodule.
@@ -55,15 +91,15 @@ NB_MODULE(layouts, m)
     // Overloads on the cell-level layouts of `qca`, `mol_qca`, `inml`, and `sidb` import nothing: those
     // modules come later in the import chain, and an argument of their type implies that they are loaded.
 
-    pyfiction::coordinate(m);
-    pyfiction::coordinate_utility(m);
-    pyfiction::arrangement(m);
-    pyfiction::cartesian_layout(m);
-    pyfiction::shifted_cartesian_layout(m);
-    pyfiction::hexagonal_layout(m);
-    pyfiction::gate_level_layout(m);
-    pyfiction::obstructions(m);
-    pyfiction::layout_utils(m);
+    pyfiction::bind_coordinate(m);
+    pyfiction::bind_coordinate_utility(m);
+    pyfiction::bind_arrangement(m);
+    pyfiction::bind_cartesian_layout(m);
+    pyfiction::bind_shifted_cartesian_layout(m);
+    pyfiction::bind_hexagonal_layout(m);
+    pyfiction::bind_gate_level_layout(m);
+    pyfiction::bind_obstructions(m);
+    pyfiction::bind_layout_utils(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers, writers, and drawers of gate-level layouts.");
     pyfiction::register_layouts_io(io);
 }

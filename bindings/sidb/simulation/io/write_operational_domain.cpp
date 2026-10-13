@@ -47,7 +47,11 @@ namespace pyfiction
 
 namespace detail
 {
-void write_operational_domain(nb::module_& m)
+/**
+ * @brief Binds `write_operational_domain`.
+ * @param m Python module.
+ */
+void bind_write_operational_domain(nb::module_& m)
 {
     // Function pointer for writing to a file
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -72,7 +76,11 @@ void write_operational_domain(nb::module_& m)
         nb::arg("opdom"), nb::arg("params") = fiction::sidb::simulation::io::write_operational_domain_params{});
 }
 
-void write_critical_temperature_domain(nb::module_& m)
+/**
+ * @brief Binds `write_critical_temperature_domain`.
+ * @param m Python module.
+ */
+void bind_write_critical_temperature_domain(nb::module_& m)
 {
     // Function pointer for writing to a file
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -99,7 +107,11 @@ void write_critical_temperature_domain(nb::module_& m)
 
 }  // namespace detail
 
-void write_operational_domain(nb::module_& m)
+/**
+ * @brief Binds `write_operational_domain`.
+ * @param m Python module.
+ */
+void bind_write_operational_domain(nb::module_& m)
 {
     nb::enum_<fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode>(
         m, "sample_writing_mode", DOC(fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode))
@@ -123,8 +135,8 @@ void write_operational_domain(nb::module_& m)
         .def_rw("writing_mode", &fiction::sidb::simulation::io::write_operational_domain_params::writing_mode,
                 DOC(fiction_sidb_simulation_io_write_operational_domain_params_writing_mode));
 
-    detail::write_operational_domain(m);
-    detail::write_critical_temperature_domain(m);
+    detail::bind_write_operational_domain(m);
+    detail::bind_write_critical_temperature_domain(m);
 }
 
 }  // namespace pyfiction

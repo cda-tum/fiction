@@ -142,6 +142,8 @@ C++ docstrings.
 
 A few things must be noted when adding new bindings:
 
+- Name C++ binding helpers `bind_<name>`, including internal template helpers. Keep the `register_*` aggregator names.
+
 - Do not use `""_a` literals in the bindings. Instead, use `nb::arg` to specify the argument names.
 - Regenerate the type stubs with `nox -s stubs` and commit them.
 - Do not use `from mnt.pyfiction.<submodule> import *` in the Python code. Instead, use explicit imports like

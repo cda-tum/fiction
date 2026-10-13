@@ -32,7 +32,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_sqd_sim_result(nb::module_& m)
+/**
+ * @brief Binds `write_sqd_sim_result`.
+ * @param m Python module.
+ */
+void bind_write_sqd_sim_result(nb::module_& m)
 {
     m.def("write_sqd_sim_result",
           static_cast<void (*)(const fiction::sidb::simulation::result&, const std::string_view&)>(

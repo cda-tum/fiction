@@ -40,7 +40,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void exhaustive_ground_state_simulation(nb::module_& m)
+void bind_exhaustive_ground_state_simulation(nb::module_& m)
 {
     m.def(
         "exhaustive_ground_state_simulation",

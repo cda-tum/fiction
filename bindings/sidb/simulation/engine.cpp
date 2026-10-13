@@ -37,8 +37,13 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Binds `sidb_simulation_engine_name_impl`.
+ * @param m Python module.
+ * @tparam EngineType Layout type.
+ */
 template <typename EngineType>
-void sidb_simulation_engine_name_impl(nb::module_& m)
+void bind_sidb_simulation_engine_name_impl(nb::module_& m)
 {
     m.def(
         "sidb_simulation_engine_name",
@@ -48,7 +53,11 @@ void sidb_simulation_engine_name_impl(nb::module_& m)
 
 }  // namespace detail
 
-void engine(nb::module_& m)
+/**
+ * @brief Binds `engine`.
+ * @param m Python module.
+ */
+void bind_engine(nb::module_& m)
 {
     nb::enum_<fiction::sidb::simulation::engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
         .value("EXGS", fiction::sidb::simulation::engine::EXGS, DOC(fiction_sidb_simulation_engine_EXGS))
@@ -81,9 +90,9 @@ void engine(nb::module_& m)
 
         ;
 
-    detail::sidb_simulation_engine_name_impl<fiction::sidb::simulation::engine>(m);
-    detail::sidb_simulation_engine_name_impl<fiction::sidb::simulation::exact_engine>(m);
-    detail::sidb_simulation_engine_name_impl<fiction::sidb::simulation::heuristic_engine>(m);
+    detail::bind_sidb_simulation_engine_name_impl<fiction::sidb::simulation::engine>(m);
+    detail::bind_sidb_simulation_engine_name_impl<fiction::sidb::simulation::exact_engine>(m);
+    detail::bind_sidb_simulation_engine_name_impl<fiction::sidb::simulation::heuristic_engine>(m);
 }
 
 }  // namespace pyfiction

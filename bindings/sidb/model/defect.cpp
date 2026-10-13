@@ -34,7 +34,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void defect(nb::module_& m)
+/**
+ * @brief Binds `defect`.
+ * @param m Python module.
+ */
+void bind_defect(nb::module_& m)
 {
     nb::enum_<fiction::sidb::model::defect_type>(m, "sidb_defect_type", DOC(fiction_sidb_model_defect_type))
         .value("NONE", fiction::sidb::model::defect_type::NONE, DOC(fiction_sidb_model_defect_type_NONE))

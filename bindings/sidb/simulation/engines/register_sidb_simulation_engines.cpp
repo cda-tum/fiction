@@ -24,17 +24,33 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void quickexact(nb::module_& m);
-void quicksim(nb::module_& m);
-void exhaustive_ground_state_simulation(nb::module_& m);
-void clustercomplete(nb::module_& m);
+/**
+ * @brief Binds `quickexact`.
+ * @param m Python module.
+ */
+void bind_quickexact(nb::module_& m);
+/**
+ * @brief Binds `quicksim`.
+ * @param m Python module.
+ */
+void bind_quicksim(nb::module_& m);
+/**
+ * @brief Binds `exhaustive_ground_state_simulation`.
+ * @param m Python module.
+ */
+void bind_exhaustive_ground_state_simulation(nb::module_& m);
+/**
+ * @brief Binds `clustercomplete`.
+ * @param m Python module.
+ */
+void bind_clustercomplete(nb::module_& m);
 
 void register_sidb_simulation_engines(nb::module_& m)
 {
-    quickexact(m);
-    quicksim(m);
-    exhaustive_ground_state_simulation(m);
-    clustercomplete(m);
+    bind_quickexact(m);
+    bind_quicksim(m);
+    bind_exhaustive_ground_state_simulation(m);
+    bind_clustercomplete(m);
 }
 
 }  // namespace pyfiction

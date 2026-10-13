@@ -24,21 +24,45 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void bdl_input_iterator(nb::module_& m);
-void detect_bdl_pairs(nb::module_& m);
-void detect_bdl_wires(nb::module_& m);
-void is_operational(nb::module_& m);
-void operational_domain(nb::module_& m);
-void operational_domain_ratio(nb::module_& m);
+/**
+ * @brief Binds `bdl_input_iterator`.
+ * @param m Python module.
+ */
+void bind_bdl_input_iterator(nb::module_& m);
+/**
+ * @brief Binds `detect_bdl_pairs`.
+ * @param m Python module.
+ */
+void bind_detect_bdl_pairs(nb::module_& m);
+/**
+ * @brief Binds `detect_bdl_wires`.
+ * @param m Python module.
+ */
+void bind_detect_bdl_wires(nb::module_& m);
+/**
+ * @brief Binds `is_operational`.
+ * @param m Python module.
+ */
+void bind_is_operational(nb::module_& m);
+/**
+ * @brief Binds `operational_domain`.
+ * @param m Python module.
+ */
+void bind_operational_domain(nb::module_& m);
+/**
+ * @brief Binds `operational_domain_ratio`.
+ * @param m Python module.
+ */
+void bind_operational_domain_ratio(nb::module_& m);
 
 void register_sidb_simulation_logic(nb::module_& m)
 {
-    bdl_input_iterator(m);
-    detect_bdl_pairs(m);
-    detect_bdl_wires(m);
-    is_operational(m);
-    operational_domain(m);
-    operational_domain_ratio(m);
+    bind_bdl_input_iterator(m);
+    bind_detect_bdl_pairs(m);
+    bind_detect_bdl_wires(m);
+    bind_is_operational(m);
+    bind_operational_domain(m);
+    bind_operational_domain_ratio(m);
 }
 
 }  // namespace pyfiction

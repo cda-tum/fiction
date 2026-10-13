@@ -66,7 +66,7 @@ namespace detail
  * @param topology Name identifying the coordinate geometry.
  */
 template <typename LytBase, typename GateLyt>
-void gate_level_layout(nb::module_& m, const std::string& topology)
+void bind_gate_level_layout(nb::module_& m, const std::string& topology)
 {
     nb::class_<GateLyt, LytBase> cls(m, fmt::format("{}_gate_layout", topology).c_str(),
                                      DOC(fiction_layouts_gate_level_layout));
@@ -584,7 +584,7 @@ void gate_level_layout(nb::module_& m, const std::string& topology)
 }  // namespace detail
 
 /** @brief Register object IDs, ports, and gate layouts. @param m Python module. */
-void gate_level_layout(nb::module_& m)
+void bind_gate_level_layout(nb::module_& m)
 {
     /** @brief Layout-local object identity. */
     using object_id = fiction::layouts::layout_object_id;
@@ -610,15 +610,16 @@ void gate_level_layout(nb::module_& m)
     /**
      * Gate-level clocked Cartesian layout.
      */
-    detail::gate_level_layout<py_cartesian_layout, py_cartesian_gate_layout>(m, "cartesian");
+    detail::bind_gate_level_layout<py_cartesian_layout, py_cartesian_gate_layout>(m, "cartesian");
     /**
      * Gate-level clocked shifted Cartesian layout.
      */
-    detail::gate_level_layout<py_shifted_cartesian_layout, py_shifted_cartesian_gate_layout>(m, "shifted_cartesian");
+    detail::bind_gate_level_layout<py_shifted_cartesian_layout, py_shifted_cartesian_gate_layout>(m,
+                                                                                                  "shifted_cartesian");
     /**
      * Gate-level clocked hexagonal layout.
      */
-    detail::gate_level_layout<py_hexagonal_layout, py_hexagonal_gate_layout>(m, "hexagonal");
+    detail::bind_gate_level_layout<py_hexagonal_layout, py_hexagonal_gate_layout>(m, "hexagonal");
 }
 
 }  // namespace pyfiction

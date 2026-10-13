@@ -44,7 +44,7 @@ namespace pyfiction
 {
 
 /** @brief Registers mutable post_layout_optimization operations. @param m Python module. */
-void post_layout_optimization(nb::module_& m)
+void bind_post_layout_optimization(nb::module_& m)
 {
     nb::class_<fiction::physical_design::post_layout_optimization_params>(
         m, "post_layout_optimization_params",

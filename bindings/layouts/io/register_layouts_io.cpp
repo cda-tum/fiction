@@ -24,15 +24,27 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void layout_drawers(nb::module_& m);
-void write_fgl_layout(nb::module_& m);
-void read_fgl_layout(nb::module_& m);
+/**
+ * @brief Binds `layout_drawers`.
+ * @param m Python module.
+ */
+void bind_layout_drawers(nb::module_& m);
+/**
+ * @brief Binds `write_fgl_layout`.
+ * @param m Python module.
+ */
+void bind_write_fgl_layout(nb::module_& m);
+/**
+ * @brief Binds `read_fgl_layout`.
+ * @param m Python module.
+ */
+void bind_read_fgl_layout(nb::module_& m);
 
 void register_layouts_io(nb::module_& m)
 {
-    layout_drawers(m);
-    write_fgl_layout(m);
-    read_fgl_layout(m);
+    bind_layout_drawers(m);
+    bind_write_fgl_layout(m);
+    bind_read_fgl_layout(m);
 }
 
 }  // namespace pyfiction

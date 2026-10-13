@@ -40,7 +40,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_qcc_layout(nb::module_& m)
+/**
+ * @brief Binds `write_qcc_layout`.
+ * @param m Python module.
+ */
+void bind_write_qcc_layout(nb::module_& m)
 {
     nb::class_<fiction::inml::io::write_qcc_layout_params>(
         m, "write_qcc_layout_params", pyfiction::progress_type_slots<fiction::inml::io::write_qcc_layout_params>(),

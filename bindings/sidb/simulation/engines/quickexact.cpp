@@ -38,7 +38,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void quickexact(nb::module_& m)
+/**
+ * @brief Binds `quickexact`.
+ * @param m Python module.
+ */
+void bind_quickexact(nb::module_& m)
 {
     using fiction::sidb::simulation::engines::quickexact_params;
 

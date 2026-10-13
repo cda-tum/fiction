@@ -31,8 +31,8 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-/** @brief Binds distances between shared layout coordinates. @param m Physical-design module. */
-void distance(nb::module_& m)
+/** @brief Binds `distances_between_shared_layout_coordinates`. @param m Physical-design module. */
+void bind_distance(nb::module_& m)
 {
     m.def("manhattan_distance", &fiction::physical_design::path_finding::manhattan_distance, nb::arg("source"),
           nb::arg("target"), DOC(fiction_physical_design_path_finding_manhattan_distance));

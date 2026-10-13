@@ -45,8 +45,13 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Binds `yen_k_shortest_paths_impl`.
+ * @param m Python module.
+ * @tparam Lyt Layout type.
+ */
 template <typename Lyt>
-void yen_k_shortest_paths_impl(nb::module_& m)
+void bind_yen_k_shortest_paths_impl(nb::module_& m)
 {
     m.def(
         "yen_k_shortest_paths",
@@ -76,7 +81,11 @@ void yen_k_shortest_paths_impl(nb::module_& m)
 
 }  // namespace detail
 
-void k_shortest_paths(nb::module_& m)
+/**
+ * @brief Binds `k_shortest_paths`.
+ * @param m Python module.
+ */
+void bind_k_shortest_paths(nb::module_& m)
 {
     nb::class_<fiction::physical_design::path_finding::yen_k_shortest_paths_params>(
         m, "yen_k_shortest_paths_params", DOC(fiction_physical_design_path_finding_yen_k_shortest_paths_params))
@@ -88,12 +97,12 @@ void k_shortest_paths(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::yen_k_shortest_paths_impl<py_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_cartesian_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_hexagonal_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_hexagonal_layout>(m);
+    detail::bind_yen_k_shortest_paths_impl<py_cartesian_gate_layout>(m);
+    detail::bind_yen_k_shortest_paths_impl<py_cartesian_layout>(m);
+    detail::bind_yen_k_shortest_paths_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::bind_yen_k_shortest_paths_impl<py_shifted_cartesian_layout>(m);
+    detail::bind_yen_k_shortest_paths_impl<py_hexagonal_gate_layout>(m);
+    detail::bind_yen_k_shortest_paths_impl<py_hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

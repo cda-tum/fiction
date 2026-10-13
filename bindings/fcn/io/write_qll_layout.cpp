@@ -45,8 +45,13 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Binds `write_qll_layout`.
+ * @param m Python module.
+ * @tparam Lyt Layout type.
+ */
 template <typename Lyt>
-void write_qll_layout(nb::module_& m)
+void bind_write_qll_layout(nb::module_& m)
 {
     // NOLINTNEXTLINE(misc-const-correctness)
     void (*const write_qll_layout_function_pointer)(const Lyt&, const std::string_view&,
@@ -60,11 +65,15 @@ void write_qll_layout(nb::module_& m)
 
 }  // namespace detail
 
-void write_qll_layout(nb::module_& m)
+/**
+ * @brief Binds `write_qll_layout`.
+ * @param m Python module.
+ */
+void bind_write_qll_layout(nb::module_& m)
 {
-    detail::write_qll_layout<fiction::qca::layout>(m);
-    detail::write_qll_layout<fiction::inml::layout>(m);
-    detail::write_qll_layout<fiction::mol_qca::layout>(m);
+    detail::bind_write_qll_layout<fiction::qca::layout>(m);
+    detail::bind_write_qll_layout<fiction::inml::layout>(m);
+    detail::bind_write_qll_layout<fiction::mol_qca::layout>(m);
 }
 
 }  // namespace pyfiction

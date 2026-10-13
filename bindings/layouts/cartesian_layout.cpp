@@ -47,13 +47,13 @@ namespace pyfiction
 namespace detail
 {
 /**
- * Register one concrete topology.
+ * @brief Register one concrete topology.
  * @tparam Lyt Concrete layout.
  * @param m Python module.
  * @param name Python class name.
  */
 template <typename Lyt>
-void cartesian_layout(nb::module_& m, const char* name)
+void bind_cartesian_layout(nb::module_& m, const char* name)
 {
     /**
      * Cartesian layout.
@@ -195,12 +195,12 @@ void cartesian_layout(nb::module_& m, const char* name)
 }  // namespace detail
 
 /**
- * Register supported cartesian topologies.
+ * @brief Register supported cartesian topologies.
  * @param m Python module.
  */
-void cartesian_layout(nb::module_& m)
+void bind_cartesian_layout(nb::module_& m)
 {
-    detail::cartesian_layout<py_cartesian_layout>(m, "cartesian_layout");
+    detail::bind_cartesian_layout<py_cartesian_layout>(m, "cartesian_layout");
 }
 
 }  // namespace pyfiction

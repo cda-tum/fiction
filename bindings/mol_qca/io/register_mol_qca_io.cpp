@@ -24,7 +24,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_mol_qca_layout_svg(nb::module_& m);
+/**
+ * @brief Binds `write_mol_qca_layout_svg`.
+ * @param m Python module.
+ */
+void bind_write_mol_qca_layout_svg(nb::module_& m);
 
 /**
  * @brief Registers the molQCA writers.
@@ -33,7 +37,7 @@ void write_mol_qca_layout_svg(nb::module_& m);
  */
 void register_mol_qca_io(nb::module_& m)
 {
-    write_mol_qca_layout_svg(m);
+    bind_write_mol_qca_layout_svg(m);
 }
 
 }  // namespace pyfiction

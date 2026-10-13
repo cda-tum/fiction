@@ -32,7 +32,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void simulation_parameters(nb::module_& m)
+/**
+ * @brief Binds `simulation_parameters`.
+ * @param m Python module.
+ */
+void bind_simulation_parameters(nb::module_& m)
 {
     nb::class_<fiction::sidb::model::simulation_parameters>(m, "sidb_simulation_parameters",
                                                             DOC(fiction_sidb_model_simulation_parameters))

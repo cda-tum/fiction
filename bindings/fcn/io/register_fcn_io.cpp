@@ -24,11 +24,15 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_qll_layout(nb::module_& m);
+/**
+ * @brief Binds `write_qll_layout`.
+ * @param m Python module.
+ */
+void bind_write_qll_layout(nb::module_& m);
 
 void register_fcn_io(nb::module_& m)
 {
-    write_qll_layout(m);
+    bind_write_qll_layout(m);
 }
 
 }  // namespace pyfiction

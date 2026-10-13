@@ -24,13 +24,21 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_qca_layout(nb::module_& m);
-void write_qca_layout_svg(nb::module_& m);
+/**
+ * @brief Binds `write_qca_layout`.
+ * @param m Python module.
+ */
+void bind_write_qca_layout(nb::module_& m);
+/**
+ * @brief Binds `write_qca_layout_svg`.
+ * @param m Python module.
+ */
+void bind_write_qca_layout_svg(nb::module_& m);
 
 void register_qca_io(nb::module_& m)
 {
-    write_qca_layout(m);
-    write_qca_layout_svg(m);
+    bind_write_qca_layout(m);
+    bind_write_qca_layout_svg(m);
 }
 
 }  // namespace pyfiction

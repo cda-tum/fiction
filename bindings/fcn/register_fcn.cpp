@@ -26,7 +26,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void area(nb::module_& m);
+/**
+ * @brief Binds `area`.
+ * @param m Python module.
+ */
+void bind_area(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.fcn.io` submodule.
@@ -50,7 +54,7 @@ NB_MODULE(fcn, m)
     nb::module_::import_("mnt.pyfiction.inml");
     nb::module_::import_("mnt.pyfiction.sidb");
 
-    pyfiction::area(m);
+    pyfiction::bind_area(m);
     auto io = pyfiction::def_submodule(m, "io", "Technology-independent readers and writers of cell-level layouts.");
     pyfiction::register_fcn_io(io);
 }

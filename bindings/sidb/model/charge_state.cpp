@@ -31,7 +31,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void charge_state(nb::module_& m)
+/**
+ * @brief Binds `charge_state`.
+ * @param m Python module.
+ */
+void bind_charge_state(nb::module_& m)
 {
     nb::enum_<fiction::sidb::model::charge_state>(m, "sidb_charge_state", DOC(fiction_sidb_model_charge_state))
         .value("NEGATIVE", fiction::sidb::model::charge_state::NEGATIVE, DOC(fiction_sidb_model_charge_state_NEGATIVE))

@@ -45,7 +45,7 @@ namespace detail
 /** @brief Bind routing objectives with explicit destination input indices. @tparam Lyt Gate layout. @param m Python
  * module. */
 template <typename Lyt>
-void color_routing_impl(nb::module_& m)
+void bind_color_routing_impl(nb::module_& m)
 {
     m.def(
         "color_routing",
@@ -71,7 +71,7 @@ void color_routing_impl(nb::module_& m)
 }  // namespace detail
 
 /** @brief Register color routing. @param m Python module. */
-void color_routing(nb::module_& m)
+void bind_color_routing(nb::module_& m)
 {
     /**
      * Graph coloring engine selector type.
@@ -105,9 +105,9 @@ void color_routing(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::color_routing_impl<py_cartesian_gate_layout>(m);
-    detail::color_routing_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::color_routing_impl<py_hexagonal_gate_layout>(m);
+    detail::bind_color_routing_impl<py_cartesian_gate_layout>(m);
+    detail::bind_color_routing_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::bind_color_routing_impl<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

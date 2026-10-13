@@ -40,7 +40,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void charge_distribution(nb::module_& m)
+void bind_charge_distribution(nb::module_& m)
 {
     using fiction::sidb::charge_distribution;
 

@@ -24,15 +24,27 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void network_reader(nb::module_& m);
-void network_writers(nb::module_& m);
-void dot_drawers(nb::module_& m);
+/**
+ * @brief Binds `network_reader`.
+ * @param m Python module.
+ */
+void bind_network_reader(nb::module_& m);
+/**
+ * @brief Binds `network_writers`.
+ * @param m Python module.
+ */
+void bind_network_writers(nb::module_& m);
+/**
+ * @brief Binds `dot_drawers`.
+ * @param m Python module.
+ */
+void bind_dot_drawers(nb::module_& m);
 
 void register_networks_io(nb::module_& m)
 {
-    network_reader(m);
-    network_writers(m);
-    dot_drawers(m);
+    bind_network_reader(m);
+    bind_network_writers(m);
+    bind_dot_drawers(m);
 }
 
 }  // namespace pyfiction
