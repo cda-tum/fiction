@@ -17,7 +17,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -27,6 +26,7 @@
 #include <fmt/format.h>
 
 #include <cstddef>
+#include <optional>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -56,6 +56,12 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using operational_domain_options = fiction::sidb::simulation::logic::operational_domain_params;
+
+/** @brief Native options constructed for each Python call. */
+using simulation_model = fiction::sidb::model::simulation_parameters;
+
 namespace detail
 {
 
@@ -67,87 +73,1013 @@ namespace detail
 inline void register_operational_domain_functions(nb::module_& m)
 {
     using fiction::sidb::layout;
-    using fiction::sidb::simulation::logic::operational_domain_params;
+
     using fiction::sidb::simulation::logic::operational_domain_stats;
 
     m.def(
         "operational_domain_grid_search",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const operational_domain_params& params,
-           operational_domain_stats* stats)
-        { return fiction::sidb::simulation::logic::operational_domain_grid_search(lyt, spec, params, stats); },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("params") = operational_domain_params{}, nb::arg("stats") = nullptr,
-        nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_logic_operational_domain_grid_search));
+        [](const layout& lyt, const std::vector<py_tt>& spec,
+           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
+           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
+           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params
+                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)            minimum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)            maximum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
+           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
+               strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)                      on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress,
+           operational_domain_stats*                                                     stats)
+        {
+            operational_domain_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.timeout    = timeout;
+            params.operational_params.sim_engine = sim_engine;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
+                threshold_bdl_interdistance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
+                minimum_distance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
+                maximum_distance;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
+            params.operational_params.op_condition                               = op_condition;
+            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::logic::operational_domain_grid_search(lyt, spec, params, stats);
+        },
+        nb::arg("lyt"), nb::arg("spec"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Computes the operational domain of the given SiDB layout. The
+operational domain is the set of all parameter combinations for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table. The input BDL pairs of
+the layout are assumed to be in the same order as the inputs of the
+truth table.
+
+This algorithm uses a grid search to find the operational domain. The
+grid search is performed by exhaustively sweeping all sweep
+dimensions. Since grid search is exhaustive, the algorithm is
+guaranteed to find the operational domain, if it exists within the
+parameter range. However, the algorithm performs one operational check
+per parameter combination, i.e., the product of the step counts of all
+sweep dimensions, where each operational check consists of up to
+:math:`2^n` exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
+
+Args:
+    lyt: Layout to compute the operational domain for.
+    spec: Expected Boolean functions, one dynamic truth table per
+          output.
+    stats: Statistics of the process.
+
+Returns:
+    The operational domain of the layout.
+
+Raises:
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` dots. Any number of
+                           sweep dimensions is accepted.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
     m.def(
         "operational_domain_random_sampling",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
+           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
+           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params
+                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)            minimum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)            maximum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
+           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
+               strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)                      on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.timeout    = timeout;
+            params.operational_params.sim_engine = sim_engine;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
+                threshold_bdl_interdistance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
+                minimum_distance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
+                maximum_distance;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
+            params.operational_params.op_condition                               = op_condition;
+            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::operational_domain_random_sampling(lyt, spec, samples, params,
                                                                                         stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_operational_domain_random_sampling));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Computes the operational domain of the given SiDB layout. The
+operational domain is the set of all parameter combinations for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table. The input BDL pairs of
+the layout are assumed to be in the same order as the inputs of the
+truth table.
+
+This algorithm uses random sampling to find a part of the operational
+domain that might not be complete. It performs a total of `samples`
+uniformly-distributed random samples within the parameter range. For
+each sample, the algorithm performs one operational check on the
+layout, where each operational check consists of up to :math:`2^n`
+exact ground state simulations, where :math:`n` is the number of
+inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
+
+Args:
+    lyt: Layout to compute the operational domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    samples: Number of samples to perform.
+    stats: Operational domain computation statistics.
+
+Returns:
+    The operational domain of the layout.
+
+Raises:
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` dots. Any number of
+                           sweep dimensions is accepted.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
     m.def(
         "operational_domain_flood_fill",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
-        { return fiction::sidb::simulation::logic::operational_domain_flood_fill(lyt, spec, samples, params, stats); },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_operational_domain_flood_fill));
+           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
+           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
+           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params
+                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)            minimum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)            maximum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
+           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
+               strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)                      on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress,
+           operational_domain_stats*                                                     stats)
+        {
+            operational_domain_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.timeout    = timeout;
+            params.operational_params.sim_engine = sim_engine;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
+                threshold_bdl_interdistance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
+                minimum_distance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
+                maximum_distance;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
+            params.operational_params.op_condition                               = op_condition;
+            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::logic::operational_domain_flood_fill(lyt, spec, samples, params, stats);
+        },
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Computes the operational domain of the given SiDB layout. The
+operational domain is the set of all parameter combinations for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table. The input BDL pairs of
+the layout are assumed to be in the same order as the inputs of the
+truth table.
+
+This algorithm first uses random sampling to find several operational
+points within the parameter range. From there, it employs the "flood
+fill" algorithm to explore the operational domain. The algorithm is
+guaranteed to determine all operational "islands" in their entirety if
+the initial random sampling found at least one operational point
+within them. Thereby, this algorithm works for disconnected
+operational domains.
+
+It performs `samples` uniformly-distributed random samples within the
+parameter range. From there, it performs another number of samples
+equal to the number of points within the operational domain plus the
+first non-operational point in each direction. For each sample, the
+algorithm performs one operational check on the layout, where each
+operational check consists of up to :math:`2^n` exact ground state
+simulations, where :math:`n` is the number of inputs of the layout.
+Each exact ground state simulation has exponential complexity in of
+itself. Therefore, the algorithm is only feasible for small layouts
+with few inputs.
+
+This flavor of operational domain computation was proposed in
+\"Reducing the Complexity of Operational Domain Computation in Silicon
+Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
+Walus, and R. Wille in NANOARCH 2023.
+
+Args:
+    lyt: Layout to compute the operational domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    samples: Number of samples to perform.
+    stats: Operational domain computation statistics.
+
+Returns:
+    The operational domain of the layout.
+
+Raises:
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
+                           least two sweep dimensions; grid search and
+                           random sampling accept any number.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
     m.def(
         "operational_domain_contour_tracing",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
+           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
+           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params
+                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)            minimum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)            maximum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
+           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
+               strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)                      on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.timeout    = timeout;
+            params.operational_params.sim_engine = sim_engine;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
+                threshold_bdl_interdistance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
+                minimum_distance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
+                maximum_distance;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
+            params.operational_params.op_condition                               = op_condition;
+            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::operational_domain_contour_tracing(lyt, spec, samples, params,
                                                                                         stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_operational_domain_contour_tracing));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Computes the operational domain of the given SiDB layout. The
+operational domain is the set of all parameter combinations for which
+the layout is logically operational. Logical operation is defined as
+the layout implementing the given truth table. The input BDL pairs of
+the layout are assumed to be in the same order as the inputs of the
+truth table.
+
+This algorithm first uses random sampling to find a set of operational
+point within the parameter range. From there, it traverses outwards to
+find the edge of the operational area and performs Moore neighborhood
+contour tracing to explore the contour of the operational domain. This
+is repeated for all initially sampled points that do not lie within a
+contour. The algorithm is guaranteed to determine the contours of all
+operational "islands" if the initial random sampling found at least
+one operational point within them. Thereby, this algorithm works for
+disconnected operational domains.
+
+It performs `samples` uniformly-distributed random samples within the
+parameter range. For each thusly discovered operational island, it
+performs another number of samples equal to the distance to an edge of
+each operational area. Finally, it performs up to 8 samples for each
+contour point (however, the actual number is usually lower). For each
+sample, the algorithm performs one operational check on the layout,
+where each operational check consists of up to :math:`2^n` exact
+ground state simulations, where :math:`n` is the number of inputs of
+the layout. Each exact ground state simulation has exponential
+complexity in of itself. Therefore, the algorithm is only feasible for
+small layouts with few inputs.
+
+Args:
+    lyt: Layout to compute the operational domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    samples: Number of samples to perform.
+    stats: Operational domain computation statistics.
+
+Returns:
+    The operational domain of the layout.
+
+Raises:
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
+                           least two sweep dimensions; grid search and
+                           random sampling accept any number.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
     m.def(
         "critical_temperature_domain_grid_search",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const operational_domain_params& params,
-           operational_domain_stats* stats)
-        { return fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(lyt, spec, params, stats); },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("params") = operational_domain_params{}, nb::arg("stats") = nullptr,
-        nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_grid_search));
+        [](const layout& lyt, const std::vector<py_tt>& spec,
+           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
+           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
+           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params
+                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)            minimum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)            maximum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
+           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
+               strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)                      on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress,
+           operational_domain_stats*                                                     stats)
+        {
+            operational_domain_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.timeout    = timeout;
+            params.operational_params.sim_engine = sim_engine;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
+                threshold_bdl_interdistance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
+                minimum_distance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
+                maximum_distance;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
+            params.operational_params.op_condition                               = op_condition;
+            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(lyt, spec, params, stats);
+        },
+        nb::arg("lyt"), nb::arg("spec"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Computes the critical temperature domain of the given SiDB layout. The
+critical temperature domain consists of all parameter combinations for
+which the layout is logically operational, along with the critical
+temperature for each specific parameter point.
+
+This algorithm uses a grid search to find the operational domain. The
+grid search is performed by exhaustively sweeping all sweep
+dimensions. Since grid search is exhaustive, the algorithm is
+guaranteed to find the operational domain, if it exists within the
+parameter range. However, the algorithm performs one operational check
+per parameter combination, i.e., the product of the step counts of all
+sweep dimensions, where each operational check consists of up to
+:math:`2^n` exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
+
+Args:
+    lyt: Layout to compute the operational domain for.
+    spec: Expected vector of truth tables of the layout. Each truth
+          table represents an output of the Boolean function.
+    stats: Operational domain computation statistics.
+
+Returns:
+    The critical temperature domain of the layout.
+
+Raises:
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` dots. Any number of
+                           sweep dimensions is accepted.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
     m.def(
         "critical_temperature_domain_random_sampling",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
+           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
+           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params
+                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)            minimum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)            maximum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
+           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
+               strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)                      on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.timeout    = timeout;
+            params.operational_params.sim_engine = sim_engine;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
+                threshold_bdl_interdistance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
+                minimum_distance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
+                maximum_distance;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
+            params.operational_params.op_condition                               = op_condition;
+            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling(lyt, spec, samples,
                                                                                                  params, stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_random_sampling));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Computes the critical temperature domain of the given SiDB layout. The
+critical temperature domain consists of all parameter combinations for
+which the layout is logically operational, along with the critical
+temperature for each specific parameter point.
+
+This algorithm uses random sampling to find a part of the operational
+domain that might not be complete. It performs a total of `samples`
+uniformly-distributed random samples within the parameter range. For
+each sample, the algorithm performs one operational check on the
+layout, where each operational check consists of up to :math:`2^n`
+exact ground state simulations, where :math:`n` is the number of
+inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
+
+Args:
+    lyt: Layout to compute the operational domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    samples: Number of samples to perform.
+    stats: Operational domain computation statistics.
+
+Returns:
+    The critical temperature domain of the layout.
+
+Raises:
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` dots. Any number of
+                           sweep dimensions is accepted.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
     m.def(
         "critical_temperature_domain_flood_fill",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
+           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
+           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params
+                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)            minimum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)            maximum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
+           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
+               strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)                      on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.timeout    = timeout;
+            params.operational_params.sim_engine = sim_engine;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
+                threshold_bdl_interdistance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
+                minimum_distance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
+                maximum_distance;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
+            params.operational_params.op_condition                               = op_condition;
+            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill(lyt, spec, samples, params,
                                                                                             stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_flood_fill));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Computes the critical temperature domain of the given SiDB layout. The
+critical temperature domain consists of all parameter combinations for
+which the layout is logically operational, along with the critical
+temperature for each specific parameter point.
+
+This algorithm first uses random sampling to find several operational
+points within the parameter range. From there, it employs the "flood
+fill" algorithm to explore the operational domain. The algorithm is
+guaranteed to determine all operational "islands" in their entirety if
+the initial random sampling found at least one operational point
+within them. Thereby, this algorithm works for disconnected
+operational domains.
+
+It performs `samples` uniformly-distributed random samples within the
+parameter range. From there, it performs another number of samples
+equal to the number of points within the operational domain plus the
+first non-operational point in each direction. For each sample, the
+algorithm performs one operational check on the layout, where each
+operational check consists of up to :math:`2^n` exact ground state
+simulations, where :math:`n` is the number of inputs of the layout.
+Each exact ground state simulation has exponential complexity in of
+itself. Therefore, the algorithm is only feasible for small layouts
+with few inputs.
+
+Args:
+    lyt: Layout to compute the operational domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    samples: Number of samples to perform.
+    stats: Operational domain computation statistics.
+
+Returns:
+    The critical temperature domain of the layout.
+
+Raises:
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
+                           least two sweep dimensions; grid search and
+                           random sampling accept any number.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
     m.def(
         "critical_temperature_domain_contour_tracing",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
+           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
+           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params
+                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)            minimum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)            maximum_distance,
+           const decltype(operational_domain_options{}
+                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
+           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
+               strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)                      on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.operational_params.sim_params = simulation_model{base, mu_minus, epsilon_r, lambda_tf};
+            params.operational_params.timeout    = timeout;
+            params.operational_params.sim_engine = sim_engine;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
+                threshold_bdl_interdistance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
+                minimum_distance;
+            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
+                maximum_distance;
+            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
+            params.operational_params.op_condition                               = op_condition;
+            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing(lyt, spec, samples,
                                                                                                  params, stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_contour_tracing));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Computes the critical temperature domain of the given SiDB layout. The
+critical temperature domain consists of all parameter combinations for
+which the layout is logically operational, along with the critical
+temperature for each specific parameter point.
+
+This algorithm first uses random sampling to find a set of operational
+point within the parameter range. From there, it traverses outwards to
+find the edge of the operational area and performs Moore neighborhood
+contour tracing to explore the contour of the operational domain. This
+is repeated for all initially sampled points that do not lie within a
+contour. The algorithm is guaranteed to determine the contours of all
+operational "islands" if the initial random sampling found at least
+one operational point within them. Thereby, this algorithm works for
+disconnected operational domains. The critical temperature is computed
+for each operational point.
+
+It performs `samples` uniformly-distributed random samples within the
+parameter range. For each thusly discovered operational island, it
+performs another number of samples equal to the distance to an edge of
+each operational area. Finally, it performs up to 8 samples for each
+contour point (however, the actual number is usually lower). For each
+sample, the algorithm performs one operational check on the layout,
+where each operational check consists of up to :math:`2^n` exact
+ground state simulations, where :math:`n` is the number of inputs of
+the layout. Each exact ground state simulation has exponential
+complexity in of itself. Therefore, the algorithm is only feasible for
+small layouts with few inputs.
+
+Args:
+    lyt: Layout to compute the operational domain for.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    samples: Number of samples to perform.
+    stats: Operational domain computation statistics.
+
+Returns:
+    The critical temperature domain of the layout.
+
+Raises:
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` dots. Flood fill and
+                           contour tracing additionally require at
+                           least two sweep dimensions; grid search and
+                           random sampling accept any number.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
 }
 
 }  // namespace detail
@@ -400,24 +1332,6 @@ void register_operational_domain(nb::module_& m)
                 DOC(fiction_sidb_simulation_logic_operational_domain_value_range_step))
 
         ;
-
-    nb::class_<fiction::sidb::simulation::logic::operational_domain_params>(
-        m, "operational_domain_params",
-        pyfiction::progress_type_slots<fiction::sidb::simulation::logic::operational_domain_params>(),
-        DOC(fiction_sidb_simulation_logic_operational_domain_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("operational_params", &fiction::sidb::simulation::logic::operational_domain_params::operational_params,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_operational_params))
-        .def_rw("sweep_dimensions", &fiction::sidb::simulation::logic::operational_domain_params::sweep_dimensions,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_sweep_dimensions))
-        .def_rw("number_of_threads", &fiction::sidb::simulation::logic::operational_domain_params::number_of_threads,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_number_of_threads))
-        .def_rw("on_progress", &fiction::sidb::simulation::logic::operational_domain_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_on_progress))
-        .def_rw("on_worker_progress", &fiction::sidb::simulation::logic::operational_domain_params::on_worker_progress,
-                pyfiction::ON_WORKER_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_on_worker_progress));
 
     nb::class_<fiction::sidb::simulation::logic::operational_domain_stats>(
         m, "operational_domain_stats", DOC(fiction_sidb_simulation_logic_operational_domain_stats))

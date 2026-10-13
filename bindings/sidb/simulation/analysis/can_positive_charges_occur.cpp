@@ -21,7 +21,10 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
 
+#include <optional>
+
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner): enables keyword options
 
 /**
  * @brief Namespace alias for nanobind.
@@ -31,6 +34,9 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using simulation_model = fiction::sidb::model::simulation_parameters;
+
 /**
  * @brief Binds can positive charges occur helpers.
  * @param m Python module.
@@ -39,9 +45,36 @@ void register_can_positive_charges_occur(nb::module_& m)
 {
     m.def(
         "can_positive_charges_occur",
-        [](const fiction::sidb::layout& lyt, const fiction::sidb::model::simulation_parameters& sim_params)
-        { return fiction::sidb::simulation::analysis::can_positive_charges_occur(lyt, sim_params); }, nb::arg("lyt"),
-        nb::arg("sim_params"), DOC(fiction_sidb_simulation_analysis_can_positive_charges_occur_2));
+        [](const fiction::sidb::layout& lyt, const decltype(simulation_model{}.base) base,
+           const decltype(simulation_model{}.mu_minus) mu_minus, const decltype(simulation_model{}.epsilon_r) epsilon_r,
+           const decltype(simulation_model{}.lambda_tf) lambda_tf)
+        {
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            simulation_model sim_params{base, mu_minus, epsilon_r, lambda_tf};
+            return fiction::sidb::simulation::analysis::can_positive_charges_occur(lyt, sim_params);
+        },
+        nb::arg("lyt"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
+        nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
+        nb::arg("lambda_tf") = simulation_model{}.lambda_tf,
+        R"doc(Checks whether positively charged SiDBs can occur in a layout under
+the given physical parameters. See the `potential_landscape` overload.
+
+Args:
+    lyt: The layout to check.
+
+Returns:
+    `true` if at least one SiDB can be positively charged, `false`
+    otherwise.
+
+Raises:
+    std::out_of_range: if a SiDB or defect site has an invalid lattice
+                       basis index.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
 }
 
 }  // namespace pyfiction

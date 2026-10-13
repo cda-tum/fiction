@@ -61,7 +61,7 @@ def test_siqad_and_gate_100_lattice():
         lattice_site(10, 9, 1),
     }
 
-    options.update(0.1)
+    options["percentage_of_analyzed_displaced_layouts"] = 0.1
     options["dimer_policy"] = dimer_displacement_policy.ALLOW_OTHER_DIMER
     options["analysis_mode"] = displacement_analysis_mode.RANDOM
 

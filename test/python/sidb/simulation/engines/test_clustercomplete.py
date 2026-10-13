@@ -29,7 +29,7 @@ def test_three_sidbs() -> None:
         "base": 2,
         "mu_minus": -0.25,
     }
-    options.update(15)
+    options["validity_witness_partitioning_max_cluster_size_gss"] = 15
     options["num_overlapping_witnesses_limit_gss"] = 8
     options["available_threads"] = 4
     options["report_gss_stats"] = ground_state_space_reporting.ON

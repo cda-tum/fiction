@@ -15,15 +15,16 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
 
+#include <optional>
 #include <string_view>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner): enables keyword options
 #include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
@@ -36,29 +37,41 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using write_qca_layout_options = fiction::qca::io::write_qca_layout_params;
+
 /**
  * @brief Binds write qca layout helpers.
  * @param m Python module.
  */
 void register_write_qca_layout(nb::module_& m)
 {
-    nb::class_<fiction::qca::io::write_qca_layout_params>(
-        m, "write_qca_layout_params", pyfiction::progress_type_slots<fiction::qca::io::write_qca_layout_params>(),
-        DOC(fiction_qca_io_write_qca_layout_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::qca::io::write_qca_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
-        .def_rw("create_inter_layer_via_cells",
-                &fiction::qca::io::write_qca_layout_params::create_inter_layer_via_cells,
-                DOC(fiction_qca_io_write_qca_layout_params_create_inter_layer_via_cells))
+    m.def(
+        "write_qca_layout",
+        [](const fiction::qca::layout& layout, const std::string_view& filename,
+           const decltype(write_qca_layout_options{}.on_progress)                  on_progress,
+           const decltype(write_qca_layout_options{}.create_inter_layer_via_cells) create_inter_layer_via_cells)
+        {
+            write_qca_layout_options params{};
+            params.on_progress                  = on_progress;
+            params.create_inter_layer_via_cells = create_inter_layer_via_cells;
+            const nb::gil_scoped_release release{};
+            return fiction::qca::io::write_qca_layout(layout, filename, params);
+        },
+        nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("create_inter_layer_via_cells") = write_qca_layout_options{}.create_inter_layer_via_cells,
+        R"doc(Writes a QCA layout to a qca file that is used by QCADesigner
+(https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
+the QCA technology platform.
 
-        ;
+This overload uses an output stream to write into.
 
-    m.def("write_qca_layout",
-          nb::overload_cast<const fiction::qca::layout&, const std::string_view&,
-                            fiction::qca::io::write_qca_layout_params>(&fiction::qca::io::write_qca_layout),
-          nb::arg("layout"), nb::arg("filename"), nb::arg("params") = fiction::qca::io::write_qca_layout_params{},
-          DOC(fiction_qca_io_write_qca_layout), nb::call_guard<nb::gil_scoped_release>());
+Args:
+    lyt: The layout to be written.
+    os: The output stream to write into.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
 }
 
 }  // namespace pyfiction

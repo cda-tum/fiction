@@ -69,7 +69,7 @@ def test_time_to_solution_with_simulation_results() -> None:
     layout.assign_sidb(lattice_site(18, 3, 0), sidb_dot_tag.NORMAL)
 
     # Define simulation parameters
-    options = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options: dict[str, Any] = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     quicksim_options = options.copy()
 
     number_of_repetitions = 100

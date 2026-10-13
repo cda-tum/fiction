@@ -16,9 +16,12 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
+
+#include <optional>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
@@ -35,33 +38,80 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using quicksim_options = fiction::sidb::simulation::engines::quicksim_params;
+
 /**
  * @brief Binds quicksim helpers.
  * @param m Python module.
  */
 void register_quicksim(nb::module_& m)
 {
-    using fiction::sidb::simulation::engines::quicksim_params;
+    m.def(
+        "quicksim",
+        [](const fiction::sidb::layout& lyt, const decltype(quicksim_options{}.sim_params.base) base,
+           const decltype(quicksim_options{}.sim_params.mu_minus)           mu_minus,
+           const decltype(quicksim_options{}.sim_params.epsilon_r)          epsilon_r,
+           const decltype(quicksim_options{}.sim_params.lambda_tf)          lambda_tf,
+           const decltype(quicksim_options{}.iteration_steps)               iteration_steps,
+           const decltype(quicksim_options{}.alpha)                         alpha,
+           const std::optional<decltype(quicksim_options{}.number_threads)> number_threads,
+           const decltype(quicksim_options{}.timeout)                       timeout,
+           const decltype(quicksim_options{}.on_progress)                   on_progress,
+           const decltype(quicksim_options{}.on_worker_progress)            on_worker_progress)
+        {
+            quicksim_options params{};
+            if (base != 2 && base != 3)
+            {
+                throw nb::value_error("base must be 2 or 3");
+            }
+            params.sim_params      = fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+            params.iteration_steps = iteration_steps;
+            params.alpha           = alpha;
+            if (number_threads)
+            {
+                params.number_threads = *number_threads;
+            }
+            params.timeout            = timeout;
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::engines::quicksim(lyt, params);
+        },
+        nb::arg("lyt"), nb::kw_only(), nb::arg("base") = quicksim_options{}.sim_params.base,
+        nb::arg("mu_minus")        = quicksim_options{}.sim_params.mu_minus,
+        nb::arg("epsilon_r")       = quicksim_options{}.sim_params.epsilon_r,
+        nb::arg("lambda_tf")       = quicksim_options{}.sim_params.lambda_tf,
+        nb::arg("iteration_steps") = quicksim_options{}.iteration_steps, nb::arg("alpha") = quicksim_options{}.alpha,
+        nb::arg("number_threads") = nb::none(), nb::arg("timeout") = quicksim_options{}.timeout,
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        R"doc(*QuickSim* is a heuristic ground-state simulation of SiDB layouts
+proposed in \"QuickSim: Efficient and Accurate Physical Simulation of
+Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng,
+K. Walus, and R. Wille in IEEE NANO 2023
+(https://ieeexplore.ieee.org/document/10231266). It grows candidate
+charge distributions from the SiDBs that have to be negative by
+repeatedly charging the neutral SiDB farthest from every negative one,
+keeping the physically valid intermediate states. Every worker thread
+owns one simulation state and shares the layout's potential landscape.
+Charged surface defects are not supported: a layout that holds any
+yields `std::nullopt`.
 
-    nb::class_<quicksim_params>(m, "quicksim_params", pyfiction::progress_type_slots<quicksim_params>(),
-                                DOC(fiction_sidb_simulation_engines_quicksim_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &quicksim_params::sim_params,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_sim_params))
-        .def_rw("iteration_steps", &quicksim_params::iteration_steps,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_iteration_steps))
-        .def_rw("alpha", &quicksim_params::alpha, DOC(fiction_sidb_simulation_engines_quicksim_params_alpha))
-        .def_rw("number_threads", &quicksim_params::number_threads,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_number_threads))
-        .def_rw("timeout", &quicksim_params::timeout, DOC(fiction_sidb_simulation_engines_quicksim_params_timeout))
-        .def_rw("on_progress", &quicksim_params::on_progress, pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_on_progress))
-        .def_rw("on_worker_progress", &quicksim_params::on_worker_progress, pyfiction::ON_WORKER_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_quicksim_params_on_worker_progress));
+Args:
+    lyt: Layout to simulate.
 
-    m.def("quicksim", &fiction::sidb::simulation::engines::quicksim, nb::arg("lyt"),
-          nb::arg("params") = quicksim_params{}, nb::call_guard<nb::gil_scoped_release>(),
-          DOC(fiction_sidb_simulation_engines_quicksim));
+Returns:
+    The physically valid charge distributions found, or `std::nullopt`
+    if the layout is empty, holds charged defects, the iteration count
+    is zero, the timeout was hit, or no valid distribution was found.
+
+Raises:
+    std::out_of_range: if a site has an invalid lattice basis index.
+    utils::timeout_error: if the shared caller deadline expires. No
+                          partial result is returned.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
 }
 
 }  // namespace pyfiction

@@ -22,11 +22,14 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 
+#include <memory>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner): enables optional potentials
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
@@ -38,6 +41,9 @@ namespace nb = nanobind;
 
 namespace pyfiction
 {
+
+/** @brief Native options constructed for each Python call. */
+using simulation_model = fiction::sidb::model::simulation_parameters;
 
 /**
  * @brief Registers SiDB potential landscapes and charge-transition bounds.
@@ -64,12 +70,29 @@ void register_potential_landscape(nb::module_& m)
                DOC(fiction_sidb_simulation_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND));
 
     nb::class_<potential_landscape>(m, "potential_landscape", DOC(fiction_sidb_simulation_potential_landscape))
-        .def(nb::init<const fiction::sidb::layout&, const fiction::sidb::model::simulation_parameters&,
-                      const std::unordered_map<fiction::sidb::lattice_site, double>&, double>(),
-             nb::arg("layout"), nb::arg("params") = fiction::sidb::model::simulation_parameters{},
-             nb::arg("local_external_potential")  = std::unordered_map<fiction::sidb::lattice_site, double>{},
-             nb::arg("global_external_potential") = 0.0,
-             DOC(fiction_sidb_simulation_potential_landscape_potential_landscape))
+        .def(
+            "__init__",
+            [](potential_landscape* self, const fiction::sidb::layout& layout,
+               const decltype(simulation_model{}.base) base, const decltype(simulation_model{}.mu_minus) mu_minus,
+               const decltype(simulation_model{}.epsilon_r)                                  epsilon_r,
+               const decltype(simulation_model{}.lambda_tf)                                  lambda_tf,
+               const std::optional<std::unordered_map<fiction::sidb::lattice_site, double>>& local_external_potential,
+               double                                                                        global_external_potential)
+            {
+                if (base != 2 && base != 3)
+                {
+                    throw nb::value_error("base must be 2 or 3");
+                }
+                simulation_model params{base, mu_minus, epsilon_r, lambda_tf};
+                std::construct_at(
+                    self, layout, params,
+                    local_external_potential.value_or(std::unordered_map<fiction::sidb::lattice_site, double>{}),
+                    global_external_potential);
+            },
+            nb::arg("layout"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
+            nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
+            nb::arg("lambda_tf") = simulation_model{}.lambda_tf, nb::arg("local_external_potential") = nb::none(),
+            nb::arg("global_external_potential") = 0.0)
         .def("get_layout", &potential_landscape::get_layout,
              DOC(fiction_sidb_simulation_potential_landscape_get_layout))
         .def("params", &potential_landscape::params, DOC(fiction_sidb_simulation_potential_landscape_params))

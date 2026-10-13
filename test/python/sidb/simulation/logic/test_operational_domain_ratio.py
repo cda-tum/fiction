@@ -11,7 +11,7 @@ from __future__ import annotations
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native deadlock regression
 import sys
 import textwrap
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 def test_and_gate_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
-    options = {
+    options: dict[str, Any] = {
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
         "base": 2,
     }

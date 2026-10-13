@@ -55,7 +55,7 @@ def test_coordinate_input_and_output_types() -> None:
 @pytest.mark.parametrize("limit", [None, 7])
 def test_optional_relocation_limit(limit: int | None) -> None:
     """Optimization accepts an integer relocation limit or no limit."""
-    layout = cartesian_gate_layout((1, 1))
+    layout = cartesian_gate_layout((1, 1), "2DDWave")
     post_layout_optimization(layout, max_gate_relocations=limit)
     assert layout.is_empty()
     with pytest.raises(TypeError):

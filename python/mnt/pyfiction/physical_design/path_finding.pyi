@@ -124,69 +124,59 @@ def chebyshev_distance(
         Chebyshev distance between `source` and `target`.
     """
 
-class a_star_params:
-    """Parameters for the A* algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def crossings(self) -> bool:
-        """
-        Allow paths to cross over obstructed tiles if they are occupied by
-        wire segments.
-        """
-
-    @crossings.setter
-    def crossings(self, arg: bool, /) -> None: ...
-
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[mnt.pyfiction.layouts.coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.cartesian_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[mnt.pyfiction.layouts.coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[mnt.pyfiction.layouts.coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[mnt.pyfiction.layouts.coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[mnt.pyfiction.layouts.coordinate]: ...
 @overload
 def a_star(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: a_star_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[mnt.pyfiction.layouts.coordinate]:
     """
     The A* path finding algorithm for shortest loop-less paths between a
@@ -248,21 +238,14 @@ def a_star(
         dist_fn: A distance functor that implements the desired heuristic
                  estimation function.
         cost_fn: A cost functor that implements the desired cost function.
-        params: Parameters.
         obstructions: Additional coordinate and connection constraints;
                       the search does not modify them.
-
-    Template Args:
-        Path: Type of the returned path.
-        Lyt: Type of the layout to perform path finding on.
-        Dist: Distance value type to be used in the heuristic estimation
-              function.
-        Cost: Cost value type to be used when determining moving cost
-              between coordinates.
 
     Returns:
         The shortest loop-less path in `layout` from `objective.source` to
         `objective.target`.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 @overload
@@ -331,27 +314,15 @@ def a_star_distance(
         Minimum path length between `source` and `target` in `layout`.
     """
 
-class yen_k_shortest_paths_params:
-    """Parameters for Yen's :math:`k`-shortest paths algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def a_star_params(self) -> mnt.pyfiction.physical_design.path_finding.a_star_params:
-        """Parameters for the internal A* algorithm."""
-
-    @a_star_params.setter
-    def a_star_params(self, arg: mnt.pyfiction.physical_design.path_finding.a_star_params, /) -> None: ...
-
 @overload
 def yen_k_shortest_paths(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def yen_k_shortest_paths(
@@ -359,8 +330,9 @@ def yen_k_shortest_paths(
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def yen_k_shortest_paths(
@@ -368,8 +340,9 @@ def yen_k_shortest_paths(
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def yen_k_shortest_paths(
@@ -377,8 +350,9 @@ def yen_k_shortest_paths(
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def yen_k_shortest_paths(
@@ -386,8 +360,9 @@ def yen_k_shortest_paths(
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def yen_k_shortest_paths(
@@ -395,8 +370,9 @@ def yen_k_shortest_paths(
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     k: int,
-    params: yen_k_shortest_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]:
     """
     Yen's algorithm for finding up to :math:`k` shortest paths without
@@ -454,82 +430,69 @@ def yen_k_shortest_paths(
                 found.
         objective: Source-target coordinate pair.
         k: Maximum number of shortest paths to find.
-        params: Parameters.
         obstructions: Additional constraints; caller and layout
                       obstructions remain unchanged.
-
-    Template Args:
-        Path: Type of the returned individual paths.
-        Lyt: Type of the layout to perform path finding on.
 
     Returns:
         A collection of up to :math:`k` shortest loop-less paths in
         `layout` from `objective.source` to `objective.target`.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
-
-class enumerate_all_paths_params:
-    """Parameters for the algorithm that enumerates all paths in a layout."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def crossings(self) -> bool:
-        """
-        Allow paths to cross over obstructed tiles if they are occupied by
-        wire segments.
-        """
-
-    @crossings.setter
-    def crossings(self, arg: bool, /) -> None: ...
 
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.cartesian_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.shifted_cartesian_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]: ...
 @overload
 def enumerate_all_paths(
     layout: mnt.pyfiction.layouts.hexagonal_layout,
     source: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
     target: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int],
-    params: enumerate_all_paths_params = ...,
-    obstructions: mnt.pyfiction.layouts.obstructions = ...,
+    *,
+    crossings: bool = False,
+    obstructions: mnt.pyfiction.layouts.obstructions | None = None,
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]:
     """
     Enumerates all possible paths in a layout that start at a given source
@@ -573,15 +536,12 @@ def enumerate_all_paths(
     Args:
         layout: The layout whose paths are to be enumerated.
         objective: Source-target coordinate pair.
-        params: Parameters.
         obstructions: Additional coordinate and connection constraints;
                       the search does not modify them.
-
-    Template Args:
-        Path: Type of the returned individual paths.
-        Lyt: Type of the layout to perform path finding on.
 
     Returns:
         A collection of all unique paths in `layout` from
         `objective.source` to `objective.target`.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """

@@ -15,7 +15,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/network_balancing.hpp>
@@ -34,31 +33,73 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+namespace detail
+{
+
+/**
+ * @brief Binds network balancing helpers.
+ * @param m Python module.
+ * @tparam Ntk Network type.
+ */
+template <typename Ntk>
+void register_network_balancing_impl(nb::module_& m)
+{
+    m.def(
+        "network_balancing",
+        [](const Ntk& network, const decltype(fiction::synthesis::network_balancing_params{}.on_progress) on_progress,
+           const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs)
+        {
+            fiction::synthesis::network_balancing_params params{};
+            params.on_progress   = on_progress;
+            params.unify_outputs = unify_outputs;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::network_balancing<py_tec_network, Ntk>(network, params);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress") = nb::none(),
+        nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
+        R"doc(Balance the network paths by inserting buffer nodes.
+
+The returned technology network is logically equivalent to the input.
+Set unify_outputs to place all outputs at the same logic depth.
+Options are keyword-only; on_progress reports completed work.
+)doc");
+
+    m.def(
+        "is_balanced",
+        [](const Ntk& network, const decltype(fiction::synthesis::network_balancing_params{}.on_progress) on_progress,
+           const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs)
+        {
+            fiction::synthesis::network_balancing_params params{};
+            params.on_progress   = on_progress;
+            params.unify_outputs = unify_outputs;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::is_balanced<Ntk>(network, params);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress") = nb::none(),
+        nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
+        R"doc(Checks if a logic network is properly path-balanced with regard to the
+keyword options.
+
+Args:
+    ntk: The logic network to check.
+
+Returns:
+    `true` iff `ntk` is properly path-balanced with regard to the keyword options.
+
+Algorithm options are keyword-only; the signature lists their defaults.
+)doc");
+}
+
+}  // namespace detail
+
 /**
  * @brief Binds network balancing helpers.
  * @param m Python module.
  */
 void register_network_balancing(nb::module_& m)
 {
-    nb::class_<fiction::synthesis::network_balancing_params>(
-        m, "network_balancing_params", pyfiction::progress_type_slots<fiction::synthesis::network_balancing_params>(),
-        DOC(fiction_synthesis_network_balancing_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::synthesis::network_balancing_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                "Receives completed work and the phase total.")
-        .def_rw("unify_outputs", &fiction::synthesis::network_balancing_params::unify_outputs,
-                DOC(fiction_synthesis_network_balancing_params_unify_outputs))
 
-        ;
-
-    m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, py_tec_network>,
-          nb::arg("network"), nb::arg("params") = fiction::synthesis::network_balancing_params{},
-          DOC(fiction_synthesis_network_balancing), nb::call_guard<nb::gil_scoped_release>());
-
-    m.def("is_balanced", &fiction::synthesis::is_balanced<py_tec_network>, nb::arg("network"),
-          nb::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_is_balanced),
-          nb::call_guard<nb::gil_scoped_release>());
+    detail::register_network_balancing_impl<py_tec_network>(m);
 }
 
 }  // namespace pyfiction

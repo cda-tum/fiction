@@ -12,27 +12,12 @@ from collections.abc import Callable
 
 import mnt.pyfiction.qca
 
-class write_qca_layout_params:
-    """Parameters for writing QCADesigner layouts."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives serialization progress."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def create_inter_layer_via_cells(self) -> bool:
-        """Create via cells in between each layer."""
-
-    @create_inter_layer_via_cells.setter
-    def create_inter_layer_via_cells(self, arg: bool, /) -> None: ...
-
 def write_qca_layout(
-    layout: mnt.pyfiction.qca.qca_layout, filename: str, params: write_qca_layout_params = ...
+    layout: mnt.pyfiction.qca.qca_layout,
+    filename: str,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    create_inter_layer_via_cells: bool = True,
 ) -> None:
     """
     Writes a QCA layout to a qca file that is used by QCADesigner
@@ -44,30 +29,16 @@ def write_qca_layout(
     Args:
         lyt: The layout to be written.
         os: The output stream to write into.
-        ps: Parameters.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
-class write_qca_layout_svg_params:
-    """Parameters for writing SVG QCA layouts."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives serialization progress."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def simple(self) -> bool:
-        """Limit details to create smaller file sizes."""
-
-    @simple.setter
-    def simple(self, arg: bool, /) -> None: ...
-
 def write_qca_layout_svg(
-    layout: mnt.pyfiction.qca.qca_layout, filename: str, params: write_qca_layout_svg_params = ...
+    layout: mnt.pyfiction.qca.qca_layout,
+    filename: str,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    simple: bool = False,
 ) -> None:
     """
     Writes an SVG representation of a QCA layout into an output stream.
@@ -84,5 +55,6 @@ def write_qca_layout_svg(
     Args:
         lyt: The layout to be written.
         os: The output stream to write into.
-        ps: Parameters.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """

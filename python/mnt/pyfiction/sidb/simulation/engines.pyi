@@ -12,7 +12,6 @@ import enum
 from collections.abc import Callable, Mapping
 
 import mnt.pyfiction.sidb
-import mnt.pyfiction.sidb.model
 import mnt.pyfiction.sidb.simulation
 
 class automatic_base_number_detection(enum.Enum):
@@ -31,55 +30,17 @@ class automatic_base_number_detection(enum.Enum):
     simulation.
     """
 
-class quickexact_params:
-    """This struct stores the parameters for the *QuickExact* algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """All parameters for physical SiDB simulations."""
-
-    @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
-    @property
-    def base_number_detection(self) -> automatic_base_number_detection:
-        """
-        If `ON`, *QuickExact* checks which base number is required for the
-        simulation, i.e., whether positively charged SiDBs can occur. If
-        `OFF`, the base number from the physical parameters is used.
-        """
-
-    @base_number_detection.setter
-    def base_number_detection(self, arg: automatic_base_number_detection, /) -> None: ...
-    @property
-    def local_external_potential(self) -> dict[mnt.pyfiction.sidb.lattice_site, float]:
-        """
-        Local external electrostatic potentials (e.g., locally applied
-        electrodes), per site (unit: V).
-        """
-
-    @local_external_potential.setter
-    def local_external_potential(self, arg: Mapping[mnt.pyfiction.sidb.lattice_site, float], /) -> None: ...
-    @property
-    def global_potential(self) -> float:
-        """
-        Global external electrostatic potential (unit: V). Value is applied on
-        each SiDB.
-        """
-
-    @global_potential.setter
-    def global_potential(self, arg: float, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Callback that receives the number of enumerated charge configurations."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-
 def quickexact(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: quickexact_params = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    base_number_detection: automatic_base_number_detection = ...,
+    local_external_potential: Mapping[mnt.pyfiction.sidb.lattice_site, float] | None = None,
+    global_potential: float = 0.0,
+    on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result:
     """
     *QuickExact* is a quick and exact physical simulation algorithm
@@ -101,7 +62,6 @@ def quickexact(
 
     Args:
         lyt: Layout to simulate.
-        params: Parameter required for the simulation.
 
     Returns:
         Simulation result: every physically valid charge distribution of
@@ -111,68 +71,23 @@ def quickexact(
         std::out_of_range: if a site has an invalid lattice basis index.
         utils::timeout_error: if the shared caller deadline expires. No
                               partial result is returned.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
-class quicksim_params:
-    """This struct stores the parameters for the *QuickSim* algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """Simulation parameters for the simulation of the physical SiDB system."""
-
-    @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
-    @property
-    def iteration_steps(self) -> int:
-        """Number of iterations to run the simulation for."""
-
-    @iteration_steps.setter
-    def iteration_steps(self, arg: int, /) -> None: ...
-    @property
-    def alpha(self) -> float:
-        """`alpha` parameter for the *QuickSim* algorithm."""
-
-    @alpha.setter
-    def alpha(self, arg: float, /) -> None: ...
-    @property
-    def number_threads(self) -> int:
-        """
-        Number of threads to spawn. By default the number of threads is set to
-        the number of available hardware threads.
-        """
-
-    @number_threads.setter
-    def number_threads(self, arg: int, /) -> None: ...
-    @property
-    def timeout(self) -> int:
-        """Timeout limit (in ms)."""
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the number of completed iterations across all
-        threads.
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
-        """
-        Reports logical worker activity with a fixed worker count for each
-        invocation.
-        """
-
-    @on_worker_progress.setter
-    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
-
 def quicksim(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: quicksim_params = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    iteration_steps: int = 80,
+    alpha: float = 0.7,
+    number_threads: int | None = None,
+    timeout: int = ...,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result | None:
     """
     *QuickSim* is a heuristic ground-state simulation of SiDB layouts
@@ -189,7 +104,6 @@ def quicksim(
 
     Args:
         lyt: Layout to simulate.
-        ps: *QuickSim* parameters.
 
     Returns:
         The physically valid charge distributions found, or `std::nullopt`
@@ -200,11 +114,17 @@ def quicksim(
         std::out_of_range: if a site has an invalid lattice basis index.
         utils::timeout_error: if the shared caller deadline expires. No
                               partial result is returned.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 def exhaustive_ground_state_simulation(
     lyt: mnt.pyfiction.sidb.sidb_layout,
-    params: mnt.pyfiction.sidb.model.sidb_simulation_parameters = ...,
+    *,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result:
     """
@@ -218,7 +138,6 @@ def exhaustive_ground_state_simulation(
 
     Args:
         lyt: Layout to simulate.
-        params: Physical parameters.
         on_progress: Callback that receives the number of enumerated
                      charge configurations.
         deadline: Shared caller deadline. `time_point::max()` leaves the
@@ -231,6 +150,8 @@ def exhaustive_ground_state_simulation(
         std::out_of_range: if a site has an invalid lattice basis index.
         utils::timeout_error: if the shared caller deadline expires. No
                               partial result is returned.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
 
 class ground_state_space_reporting(enum.Enum):
@@ -256,105 +177,21 @@ class ground_state_space_reporting(enum.Enum):
     statistics.
     """
 
-class clustercomplete_params:
-    """
-    The struct containing the parameters both passed on to pre-simulator
-    Ground State Space, and used during simulation.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """Physical simulation parameters."""
-
-    @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
-    @property
-    def local_external_potential(self) -> dict[mnt.pyfiction.sidb.lattice_site, float]:
-        """
-        Local external electrostatic potentials (e.g., locally applied
-        electrodes).
-        """
-
-    @local_external_potential.setter
-    def local_external_potential(self, arg: Mapping[mnt.pyfiction.sidb.lattice_site, float], /) -> None: ...
-    @property
-    def global_potential(self) -> float:
-        """
-        Global external electrostatic potential. Value is applied to each dot
-        in the layout.
-        """
-
-    @global_potential.setter
-    def global_potential(self, arg: float, /) -> None: ...
-    @property
-    def validity_witness_partitioning_max_cluster_size_gss(self) -> int:
-        """
-        This specifies the maximum cluster size for which *Ground State Space*
-        will solve an NP-complete sub-problem exhaustively. The sets of SiDBs
-        that witness local population stability for each respective charge
-        state may be partitioned into disjoint sets such that the number of
-        required witnesses for each respective charge state is satisfied. If
-        no such partition exists, the multiset charge configuration associated
-        with the requirements may be rejected.
-        """
-
-    @validity_witness_partitioning_max_cluster_size_gss.setter
-    def validity_witness_partitioning_max_cluster_size_gss(self, arg: int, /) -> None: ...
-    @property
-    def num_overlapping_witnesses_limit_gss(self) -> int:
-        """
-        The complexity is of validity witness partitioning bounded by a
-        factorial in the number of overlapping witnesses. This parameter thus
-        allows the validity witness partitioning procedure to perform the
-        reduction to overlapping witnesses for larger cluster sizes that could
-        be runtime-impairing, then limiting specifically the length of the
-        input to the factorial call.
-        """
-
-    @num_overlapping_witnesses_limit_gss.setter
-    def num_overlapping_witnesses_limit_gss(self, arg: int, /) -> None: ...
-    @property
-    def available_threads(self) -> int:
-        """
-        Number of threads to make available to *ClusterComplete* for the
-        unfolding stage.
-        """
-
-    @available_threads.setter
-    def available_threads(self, arg: int, /) -> None: ...
-    @property
-    def report_gss_stats(self) -> ground_state_space_reporting:
-        """
-        Option to decide if the *Ground State Space* statistics are reported
-        to the standard output. By default, this option is disabled.
-        """
-
-    @report_gss_stats.setter
-    def report_gss_stats(self, arg: ground_state_space_reporting, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the number of unfolded charge space
-        compositions.
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
-        """
-        Reports logical worker activity with a fixed worker count for each
-        invocation.
-        """
-
-    @on_worker_progress.setter
-    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
-
 def clustercomplete(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: clustercomplete_params = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    local_external_potential: Mapping[mnt.pyfiction.sidb.lattice_site, float] | None = None,
+    global_potential: float = 0.0,
+    num_overlapping_witnesses_limit_gss: int = 6,
+    available_threads: int | None = None,
+    report_gss_stats: ground_state_space_reporting = ...,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
+    validity_witness_partitioning_max_cluster_size_gss: int = 6,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result:
     """
     *ClusterComplete* is an instantiation of a general solution to
@@ -390,12 +227,12 @@ def clustercomplete(
 
     Args:
         lyt: Layout to simulate.
-        params: Parameter required for both the invocation of *Ground
-                State Space*, and the simulation following.
 
     Returns:
         Simulation results.
 
     Raises:
         std::out_of_range: if a site has an invalid lattice basis index.
+
+    Algorithm options are keyword-only; the signature lists their defaults.
     """
