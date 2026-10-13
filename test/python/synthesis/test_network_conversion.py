@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 
@@ -45,7 +45,7 @@ def test_technology_mapping_accepts_every_network_type(
     network = read_network(str(resources_dir / "mux21.v"), network_type=cls)
     options = all_supported_standard_functions()
     options["lt2"] = True
-    mapped = technology_mapping(network, **options)
+    mapped = technology_mapping(network, **cast("dict[str, Any]", options))
     assert isinstance(mapped, technology_network)
     assert equivalence_checking(convert_network(network), mapped) == eq_type.STRONG
 

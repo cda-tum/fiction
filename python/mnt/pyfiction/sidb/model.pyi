@@ -300,7 +300,11 @@ class sidb_simulation_parameters:
         mu_minus: float = -0.32,
         relative_permittivity: float = 5.6,
         screening_distance: float = 5.0,
-    ) -> None: ...
+    ) -> None:
+        """
+        Store physical model values. All arguments are keyword-only; base_number must be 2 or 3.
+        """
+
     @property
     def epsilon_r(self) -> float:
         """
@@ -351,26 +355,6 @@ def potential_to_distance_conversion(
     lambda_tf: float = 5.0,
 ) -> float:
     """
-    The electrostatic potential on hydrogen-passivated silicon is
-    typically modeled using a screened Coulomb potential. This
-    electrostatic potential is commonly employed to determine the
-    electrostatic potential for a given distance (between SiDB and point
-    under consideration) and given physical parameters. However, the
-    function provided here serves the inverse purpose by calculating the
-    distance for a given potential and given physical parameters.
-
-    Args:
-        potential: The electrostatic potential (unit: V) to be converted
-                   to a distance.
-        precision: The precision level for the conversion, specifying the
-                   number of decimal places.
-
-    Returns:
-        The distance (unit: nm) corresponding to the given electrostatic
-        potential.
-
-    Note:
-        Runtime depends exponentially on the provided precision.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Compute the distance corresponding to the potential with the requested precision.
+    The physical model is supplied by the scalar keyword values.
     """

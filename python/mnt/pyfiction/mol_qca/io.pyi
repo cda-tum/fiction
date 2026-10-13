@@ -20,15 +20,6 @@ def write_mol_qca_layout_svg(
     simple: bool = False,
 ) -> None:
     """
-    Writes an SVG representation of a molQCA layout to an output stream.
-    Each regular cell is colored by its clock phase.
-
-    May throw an `unsupported_cell_type_exception` if it encounters
-    unsupported cell types in the layout.
-
-    Args:
-        lyt: The layout to be written.
-        os: The output stream to write into.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Write an SVG representation of the molQCA layout to the supplied filename.
+    simple selects a compact drawing; on_progress reports writing progress.
     """

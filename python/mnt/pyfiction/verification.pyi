@@ -229,30 +229,8 @@ def gate_level_drvs(
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]:
     """
-    Performs design rule violation (DRV) checking on the given gate-level
-    layout. The implementation of gate_level_layout allows for layouts
-    with structural defects like the connection of non-adjacent tiles or
-    connections that defy the clocking scheme. This function checks for
-    such violations and documents them in the statistics. A brief report
-    can be printed and more in-depth information including with error
-    sites can be obtained from a generated json object.
-
-    Furthermore, this function does not only find and log DRVs but can
-    also warn for instances that are not per se errors but defy best
-    practices of layout generation, e.g., I/Os not being placed at the
-    layout borders.
-
-    The checker inspects every live object through public ordered ports,
-    including placements outside the extent. Unplaced objects, placed dead
-    objects, empty terminals, and gate terminals cannot occur in the
-    placed-object API and have no corresponding checks.
-
-    Args:
-        lyt: The gate-level layout that is to be examined for DRVs and
-             warnings.
-        pst: Statistics.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Count design-rule violations in the gate-level layout.
+    The keyword options select which checks run and stats receives their counts.
     """
 
 class eq_type(enum.Enum):

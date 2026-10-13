@@ -51,21 +51,9 @@ def generate_random_sidb_layout(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.sidb.sidb_layout | None:
     """
-    Generates a random SiDB layout by placing SiDBs at random sites of an
-    area, optionally on top of a skeleton. The skeleton's lattice, dots,
-    and defects carry over; sites that hold a defect or that a neutral
-    defect affects are left empty. Depending on the positive charge
-    policy, SiDBs that would allow positive charges are removed again, or
-    the generation is repeated until positive charges are possible.
-
-    Args:
-        skeleton: The skeleton to place SiDBs on, if any.
-
-    Returns:
-        The generated layout, or `std::nullopt` if not all SiDBs could be
-        placed within the attempt limit.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Generate a random SiDB layout within coordinate_pair, optionally extending lyt_skeleton.
+    The keyword options select physical values, charge restrictions, and attempt limits.
+    Returns None when the attempt limit does not produce a layout.
     """
 
 def generate_multiple_random_sidb_layouts(
@@ -84,17 +72,9 @@ def generate_multiple_random_sidb_layouts(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> list[mnt.pyfiction.sidb.sidb_layout] | None:
     """
-    Generates several unique random SiDB layouts with
-    `generate_random_layout`.
-
-    Args:
-        skeleton: The skeleton to place SiDBs on, if any.
-
-    Returns:
-        The layouts, or `std::nullopt` if none could be generated within
-        the attempt limit.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Generate distinct random SiDB layouts, optionally extending lyt_skeleton.
+    The keyword options select the area, physical values, requested count, and attempt limits.
+    Returns None when the attempt limit does not produce the requested layouts.
     """
 
 class design_sidb_gates_stats:
@@ -157,48 +137,9 @@ def design_sidb_gates(
     stats: design_sidb_gates_stats | None = None,
 ) -> list[mnt.pyfiction.sidb.sidb_layout]:
     """
-    Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
-    canvas area so that the skeleton's input and output wires implement
-    the given Boolean function(s). The design mode chooses between
-    simulating every combination of canvas SiDBs, *QuickCell*'s pruning
-    followed by simulation, random placement, and pruning only.
-
-    Worker exceptions propagate to the caller after all started workers
-    finish.
-
-    Random placement samples at most `maximal_random_design_attempts`
-    candidates without enumerating canvas layouts.
-
-    The timeout covers setup and all search phases. Expiration discards
-    partial results and stops all workers before throwing. Allocation and
-    non-interruptible setup may exceed the cooperative deadline.
-
-    *QuickCell* is described in "Towards Fast Automatic Design of Silicon
-    Dangling Bond Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus,
-    and R. Wille in DATE 2025
-    (https://ieeexplore.ieee.org/abstract/document/10992885) and
-    "QuickCell: Fast Automatic Design of Standard Cells for Silicon
-    Dangling Bond Logic" by the same authors in TCAD 2025
-    (https://ieeexplore.ieee.org/document/11146893). The exhaustive
-    designer is described in "Minimal Design of SiDB Gates: An Optimal
-    Basis for Circuits Based on Silicon Dangling Bonds" by J. Drewniok, M.
-    Walter, and R. Wille in NANOARCH 2023
-    (https://dl.acm.org/doi/10.1145/3611315.3633241).
-
-    Args:
-        skeleton: The skeleton with its input and output wires.
-        spec: The Boolean function(s) to implement; must not be empty.
-        stats: Statistics.
-
-    Returns:
-        The designed gates.
-
-    Raises:
-        std::invalid_argument: if `spec` is empty or the input wire count
-                               differs from the specification.
-        utils::timeout_error: if the gate-design deadline is reached.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Design SiDB gates implementing the supplied truth tables within the canvas.
+    The keyword options select physical values, BDL detection, the design mode, and termination.
+    Expiration raises TimeoutError; on_progress reports completed search work.
     """
 
 class sidb_complex_gate_design_policy(enum.Enum):

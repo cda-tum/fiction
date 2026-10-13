@@ -20,11 +20,19 @@ import pytest
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 from mnt.pyfiction.sidb.simulation import potential_landscape
-from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact
-from mnt.pyfiction.synthesis import and_or_not, is_balanced, network_balancing, technology_mapping
+from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact, quicksim
+from mnt.pyfiction.synthesis import (
+    and_or_not,
+    is_balanced,
+    missing_required_gates_exception,
+    network_balancing,
+    technology_mapping,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from typing_extensions import assert_type
 
     from mnt.pyfiction.networks import technology_network
 
@@ -40,8 +48,10 @@ def test_balancing_keyword_options(mux21: technology_network) -> None:
 def test_gate_factory_keyword_options(mux21: technology_network) -> None:
     """Gate factories produce mapping keywords."""
     options = and_or_not()
+    if TYPE_CHECKING:
+        assert_type(options, dict[str, bool])
     assert isinstance(options, dict)
-    assert technology_mapping(mux21, **options).num_gates() > 0
+    assert technology_mapping(mux21, **cast("dict[str, Any]", options)).num_gates() > 0
 
 
 @pytest.mark.parametrize(
@@ -161,3 +171,73 @@ def test_per_call_callback_lifetime(mux21: technology_network, *, raises: bool) 
     del callback
     gc.collect()
     assert reference() is None
+
+
+@pytest.mark.parametrize(
+    ("factory_name", "enabled"),
+    [
+        ("and_or_not", {"inv", "and2", "or2"}),
+        ("and_or_not_maj", {"inv", "and2", "or2", "maj3"}),
+        ("all_standard_2_input_functions", {"inv", "and2", "nand2", "or2", "nor2", "xor2", "xnor2"}),
+        (
+            "all_standard_3_input_functions",
+            {"inv", "and3", "xor_and", "or_and", "onehot", "maj3", "gamble", "dot", "mux", "and_xor"},
+        ),
+        (
+            "all_supported_standard_functions",
+            {
+                "inv",
+                "and2",
+                "nand2",
+                "or2",
+                "nor2",
+                "xor2",
+                "xnor2",
+                "and3",
+                "xor_and",
+                "or_and",
+                "onehot",
+                "maj3",
+                "gamble",
+                "dot",
+                "mux",
+                "and_xor",
+            },
+        ),
+    ],
+)
+def test_factory_gate_sets(factory_name: str, enabled: set[str], mux21: technology_network) -> None:
+    """Each factory enables its documented gates and returns usable mapping keywords."""
+    factory = getattr(import_module("mnt.pyfiction.synthesis"), factory_name)
+    options = factory()
+    assert {name for name, selected in options.items() if selected} == enabled
+    assert all(isinstance(selected, bool) for selected in options.values())
+    assert technology_mapping(mux21, **cast("dict[str, Any]", options)).num_gates() > 0
+
+
+@pytest.mark.parametrize("base", [-1, 256])
+def test_physics_rejects_out_of_range_base(base: int) -> None:
+    """Values outside the native unsigned-byte range fail conversion."""
+    with pytest.raises(TypeError):
+        quickexact(sidb_layout(), base=base)
+
+
+def test_explicit_none_progress(mux21: technology_network) -> None:
+    """Omitted and explicit None callbacks have the same behavior."""
+    assert network_balancing(mux21, on_progress=None).num_gates() == network_balancing(mux21).num_gates()
+
+
+@pytest.mark.parametrize("engine", [quickexact, quicksim])
+def test_engine_keyword_boundary(engine: Callable[..., Any]) -> None:
+    """Every engine validates the physical model and rejects positional options."""
+    with pytest.raises(ValueError, match="base must be 2 or 3"):
+        engine(sidb_layout(), base=1)
+    with pytest.raises(TypeError):
+        engine(sidb_layout(), 2)
+
+
+def test_mapping_default_gate_set(mux21: technology_network) -> None:
+    """No gates are enabled by default, so mapping requires an explicit gate set."""
+    with pytest.raises(missing_required_gates_exception, match="missing required gates"):
+        technology_mapping(mux21)
+    assert technology_mapping(mux21, **cast("dict[str, Any]", and_or_not())).num_gates() > 0

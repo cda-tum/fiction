@@ -513,3 +513,25 @@ def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
     assert all(total in (done, 0) for done, total in finished)
     if strategy == "flood":
         assert any("exploring" in description and total == 0 for _, _, description, _, total, _ in workers)
+
+
+def test_single_point_keyword_domain(resources_dir: Path) -> None:
+    """Nested physical and BDL options reach the one-point sweep and its statistics."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+    stats = operational_domain_stats()
+    domain = operational_domain_grid_search(
+        layout,
+        [create_or_tt()],
+        base=2,
+        mu_minus=-0.28,
+        threshold_bdl_interdistance=1.5,
+        sweep_dimensions=[
+            operational_domain_value_range(sweep_parameter.EPSILON_R, 5.7, 5.7, 0.01),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 3.0, 3.0, 0.01),
+        ],
+        number_of_threads=1,
+        stats=stats,
+    )
+    assert domain[parameter_point([5.7, 3.0])] == operational_status.OPERATIONAL
+    assert stats.num_evaluated_parameter_combinations == 1
+    assert stats.num_operational_parameter_combinations == 1

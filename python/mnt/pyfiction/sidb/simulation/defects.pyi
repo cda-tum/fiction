@@ -112,36 +112,6 @@ def determine_displacement_robustness_domain(
     percentage_of_analyzed_displaced_layouts: float = 1.0,
 ) -> displacement_robustness_domain:
     """
-    During fabrication, SiDBs may not align precisely with their intended
-    atomic positions, resulting in displacement. This means that an SiDB
-    is fabricated close to the desired one, typically one or a few H-Si
-    positions away. Consequently, depending on the fabrication speed, a
-    certain number of SiDBs may experience displacement.
-
-    This function determines the operational status of all possible
-    displacements of the SiDBs of the given SiDB layout, based on the
-    provided truth table specification and displacement robustness
-    computation parameters. The number of displacements grows
-    exponentially with the number of SiDBs. For small layouts, all
-    displacements can be analyzed. For larger layouts, random sampling can
-    be applied, controllable by the `analysis_mode` and
-    `percentage_of_analyzed_displaced_layouts` in the keyword options.
-
-    Displaced layouts retain the layout name and the defects at their
-    original positions.
-
-    Args:
-        lyt: The SiDB layout which is analyzed.
-        spec: Vector of truth table specifications.
-        stats: Statistics related to the displacement robustness
-               computation.
-
-    Returns:
-        The displacement robustness domain of the SiDB layout.
-
-    Raises:
-        std::out_of_range: if a displacement exceeds the lattice-site
-                           range.
-
-    Algorithm options are keyword-only; the signature lists their defaults.
+    Determine robustness against displacement of SiDBs in a gate implementing the truth tables.
+    The keyword options select displacement, sampling, fixed SiDBs, and operational analysis.
     """

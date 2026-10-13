@@ -8,10 +8,12 @@
 
 from __future__ import annotations
 
+import gc
+
 import pytest
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator
+from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator, bdl_wire_selection, detect_bdl_wires
 
 
 @pytest.fixture
@@ -198,3 +200,15 @@ def test_automatic_siqad_and_gate_iteration() -> None:
 
             assert lyt.get_dot_tag(lattice_site(20, 0, 1)) == sidb_dot_tag.EMPTY
             assert lyt.get_dot_tag(lattice_site(18, 1, 1)) == sidb_dot_tag.INPUT
+
+
+def test_keyword_iterator_owns_options_and_supplied_wires(bdl_wire: sidb_layout) -> None:
+    """The iterator keeps supplied wires after the caller releases temporary inputs."""
+    wires = detect_bdl_wires(bdl_wire, wire_selection=bdl_wire_selection.INPUT)
+    iterator = bdl_input_iterator(bdl_wire, wires, threshold_bdl_interdistance=1.8)
+    expected = list(bdl_input_iterator(bdl_wire, threshold_bdl_interdistance=1.8))
+    del wires
+    gc.collect()
+    actual = list(iterator)
+    assert len(actual) == len(expected) == 2
+    assert [layout.sidbs() for layout in actual] == [layout.sidbs() for layout in expected]
