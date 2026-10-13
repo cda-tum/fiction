@@ -227,7 +227,6 @@ def test_and_gate_111_lattice_operational_input_pattern(resources_dir):
         lyt, [create_and_tt()], base=2, mu_minus=-0.30, epsilon_r=5.6, lambda_tf=5.0
     )
 
-    print(operational_patterns)
     assert len(operational_patterns) == 2
 
     assert operational_patterns == {0, 3}
