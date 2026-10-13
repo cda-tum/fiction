@@ -16,7 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/simulation_parameters.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -96,20 +96,10 @@ void register_operational_domain_ratio(nb::module_& m)
            const decltype(operational_domain_ratio_options{}.op_domain_params.on_worker_progress)& on_worker_progress)
         {
             operational_domain_ratio_options params{};
-            params.op_domain_params.operational_params.sim_params =
-                make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.op_domain_params.operational_params.timeout    = timeout;
-            params.op_domain_params.operational_params.sim_engine = sim_engine;
-            params.op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params
-                .threshold_bdl_interdistance = threshold_bdl_interdistance;
-            params.op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                .minimum_distance = minimum_distance;
-            params.op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                .maximum_distance                                                                 = maximum_distance;
-            params.op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
-            params.op_domain_params.operational_params.op_condition                               = op_condition;
-            params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
-                strategy_to_analyze_operational_status;
+            params.op_domain_params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
             if (sweep_dimensions)
             {
                 params.op_domain_params.sweep_dimensions = *sweep_dimensions;

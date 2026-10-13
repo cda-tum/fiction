@@ -90,8 +90,7 @@ void register_design_gates(nb::module_& m)
         .value("AFTER_FIRST_SOLUTION", design_gates_options::termination_condition::AFTER_FIRST_SOLUTION)
         .value("ALL_COMBINATIONS_ENUMERATED", design_gates_options::termination_condition::ALL_COMBINATIONS_ENUMERATED);
     m.def(
-        "design_sidb_gates",  // NOLINTNEXTLINE(performance-unnecessary-value-param): Own inputs while Python can mutate
-                              // the originals.
+        "design_sidb_gates",
         [](const layout skeleton, const std::vector<py_tt> spec,
            const decltype(design_gates_options{}.operational_params.timeout)              timeout,
            const decltype(design_gates_options{}.operational_params.sim_params.base)      base,
