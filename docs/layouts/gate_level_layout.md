@@ -147,6 +147,6 @@ routing edits without shifting neighboring adjacency lists. Analyses that need r
 can extract a network; the editable layout does not maintain a second adjacency representation.
 
 Coordinates use a sparse flat hash map rather than an array proportional to the layout's frame. Names and
-large truth tables are cold data: they do not enlarge the records read by ordinary topology traversal.
+truth-table payloads live outside the records read by ordinary topology traversal, which needs neither payload.
 The three inline input indices cover the built-in gate set without an allocation per gate. Object IDs keep
 their slot and generation across moves; compacting slots would require a separate identity mapping.

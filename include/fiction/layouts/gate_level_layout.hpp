@@ -1719,7 +1719,7 @@ class gate_level_layout : public CoordinateLayout
         /** @brief Logic gate. */
         GATE
     };
-    /** @brief Hot object data. Names and truth-table payloads are stored separately. */
+    /** @brief Object data used for placement and topology traversal; names and truth-table payloads are separate. */
     struct object_record
     {
         /** @brief Assigned coordinate. */
@@ -1763,9 +1763,9 @@ class gate_level_layout : public CoordinateLayout
     std::vector<edge_record> edges{};
     /** @brief Coordinate lookup independent of identities and connections. */
     phmap::flat_hash_map<tile, uint32_t> occupancy{};
-    /** @brief Deduplicated cold truth-table payloads. */
+    /** @brief Deduplicated truth tables stored outside object records and referenced by function literals. */
     mockturtle::truth_table_cache<kitty::dynamic_truth_table> functions{0};
-    /** @brief Sparse cold names. */
+    /** @brief Names stored outside object records, with entries only for named objects. */
     phmap::flat_hash_map<object_id, std::string> names{};
     /** @brief Declared primary input order. */
     std::vector<uint32_t> inputs{};
