@@ -16,7 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/simulation_parameters.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -125,30 +125,23 @@ void register_displacement_robustness_domain(nb::module_& m)
            const decltype(displacement_robustness_domain_options{}
                               .operational_params
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
-           const std::optional<decltype(displacement_robustness_domain_options{}.fixed_sidbs)>       fixed_sidbs,
+           const std::optional<decltype(displacement_robustness_domain_options{}.fixed_sidbs)>&      fixed_sidbs,
            const decltype(displacement_robustness_domain_options{}.dimer_policy)                     dimer_policy,
            const std::optional<decltype(displacement_robustness_domain_options{}.number_of_threads)> number_of_threads,
-           const decltype(displacement_robustness_domain_options{}.on_progress)                      on_progress,
+           const decltype(displacement_robustness_domain_options{}.on_progress)&                     on_progress,
            displacement_robustness_domain_stats*                                                     stats,
            const decltype(displacement_robustness_domain_options{}
                               .percentage_of_analyzed_displaced_layouts) percentage_of_analyzed_displaced_layouts)
         {
             displacement_robustness_domain_options params{};
             params.percentage_of_analyzed_displaced_layouts = percentage_of_analyzed_displaced_layouts;
-            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.analysis_mode                 = analysis_mode;
-            params.displacement_variations       = displacement_variations;
-            params.operational_params.timeout    = timeout;
-            params.operational_params.sim_engine = sim_engine;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
-                threshold_bdl_interdistance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
-                minimum_distance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
-                maximum_distance;
-            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
-            params.operational_params.op_condition                               = op_condition;
-            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            params.analysis_mode           = analysis_mode;
+            params.displacement_variations = displacement_variations;
+
             if (fixed_sidbs)
             {
                 params.fixed_sidbs = *fixed_sidbs;
@@ -190,41 +183,12 @@ void register_displacement_robustness_domain(nb::module_& m)
         nb::arg("fixed_sidbs")       = nb::none(),
         nb::arg("dimer_policy")      = displacement_robustness_domain_options{}.dimer_policy,
         nb::arg("number_of_threads") = nb::none(), nb::arg("on_progress").none() = nb::none(),
-        nb::arg("stats") = nullptr, R"doc(During fabrication, SiDBs may not align precisely with their intended
-atomic positions, resulting in displacement. This means that an SiDB
-is fabricated close to the desired one, typically one or a few H-Si
-positions away. Consequently, depending on the fabrication speed, a
-certain number of SiDBs may experience displacement.
-
-This function determines the operational status of all possible
-displacements of the SiDBs of the given SiDB layout, based on the
-provided truth table specification and displacement robustness
-computation parameters. The number of displacements grows
-exponentially with the number of SiDBs. For small layouts, all
-displacements can be analyzed. For larger layouts, random sampling can
-be applied, controllable by the `analysis_mode` and
-`percentage_of_analyzed_displaced_layouts` in the keyword options.
-
-Displaced layouts retain the layout name and the defects at their
-original positions.
-
-Args:
-    lyt: The SiDB layout which is analyzed.
-    spec: Vector of truth table specifications.
-    stats: Statistics related to the displacement robustness
-           computation.
-
-Returns:
-    The displacement robustness domain of the SiDB layout.
-
-Raises:
-    std::out_of_range: if a displacement exceeds the lattice-site
-                       range.
-
-Algorithm options are keyword-only; the signature lists their defaults.
-)doc",
+        nb::arg("stats") = nullptr,
         nb::arg("percentage_of_analyzed_displaced_layouts") =
-            displacement_robustness_domain_options{}.percentage_of_analyzed_displaced_layouts);
+            displacement_robustness_domain_options{}.percentage_of_analyzed_displaced_layouts,
+        R"doc(Determine robustness against displacement of SiDBs in a gate implementing the truth tables.
+The keyword options select displacement, sampling, fixed SiDBs, and operational analysis.
+)doc");
 }
 
 }  // namespace pyfiction

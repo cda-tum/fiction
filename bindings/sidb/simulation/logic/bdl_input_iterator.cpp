@@ -208,21 +208,8 @@ void register_bdl_input_iterator(nb::module_& m)
         nb::arg("minimum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
         nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
-        R"doc(Applies every input pattern to the input BDL pairs of a layout and
-returns the resulting layouts, pattern `0` first; the input wires are
-detected first.
-
-Args:
-    lyt: The layout.
-
-Returns:
-    One layout per input pattern.
-
-Raises:
-    std::invalid_argument: if the layout has more than 63 input BDL
-                           pairs.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Return one SiDB layout per input pattern, starting with pattern zero.
+The keyword options select BDL detection and input encoding; supplied wires bypass detection.
 )doc");
     m.def(
         "generate_bdl_input_pattern_layouts",
@@ -248,22 +235,8 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("minimum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
         nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
-        R"doc(Applies every input pattern to the input BDL pairs of a layout and
-returns the resulting layouts, pattern `0` first, with the input wires
-given by the caller.
-
-Args:
-    lyt: The layout.
-    input_wires: The input wires of `lyt`.
-
-Returns:
-    One layout per input pattern.
-
-Raises:
-    std::invalid_argument: if the layout has more than 63 input BDL
-                           pairs.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Return one SiDB layout per input pattern, starting with pattern zero.
+The keyword options select BDL detection and input encoding; supplied wires bypass detection.
 )doc");
 }
 

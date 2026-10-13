@@ -52,7 +52,8 @@ void register_simulation_parameters(nb::module_& m)
                     self, make_simulation_parameters(base_number, mu_minus, relative_permittivity, screening_distance));
             },
             nb::kw_only(), nb::arg("base_number") = 3, nb::arg("mu_minus") = -0.32,
-            nb::arg("relative_permittivity") = 5.6, nb::arg("screening_distance") = 5.0)
+            nb::arg("relative_permittivity") = 5.6, nb::arg("screening_distance") = 5.0,
+            "Store physical model values. All arguments are keyword-only; base_number must be 2 or 3.")
         .def_rw("epsilon_r", &fiction::sidb::model::simulation_parameters::epsilon_r,
                 DOC(fiction_sidb_model_simulation_parameters_epsilon_r))
         .def_rw("lambda_tf", &fiction::sidb::model::simulation_parameters::lambda_tf,

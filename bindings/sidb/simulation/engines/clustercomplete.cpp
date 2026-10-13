@@ -69,17 +69,17 @@ void register_clustercomplete(nb::module_& m)
     m.def(
         "clustercomplete",
         [](const fiction::sidb::layout& lyt, const decltype(clustercomplete_options{}.sim_params.base) base,
-           const decltype(clustercomplete_options{}.sim_params.mu_minus)                     mu_minus,
-           const decltype(clustercomplete_options{}.sim_params.epsilon_r)                    epsilon_r,
-           const decltype(clustercomplete_options{}.sim_params.lambda_tf)                    lambda_tf,
-           const std::optional<decltype(clustercomplete_options{}.local_external_potential)> local_external_potential,
-           const decltype(clustercomplete_options{}.global_potential)                        global_potential,
+           const decltype(clustercomplete_options{}.sim_params.mu_minus)                      mu_minus,
+           const decltype(clustercomplete_options{}.sim_params.epsilon_r)                     epsilon_r,
+           const decltype(clustercomplete_options{}.sim_params.lambda_tf)                     lambda_tf,
+           const std::optional<decltype(clustercomplete_options{}.local_external_potential)>& local_external_potential,
+           const decltype(clustercomplete_options{}.global_potential)                         global_potential,
            const decltype(clustercomplete_options{}
                               .num_overlapping_witnesses_limit_gss) num_overlapping_witnesses_limit_gss,
            const std::optional<decltype(clustercomplete_options{}.available_threads)> available_threads,
            const decltype(clustercomplete_options{}.report_gss_stats)                 report_gss_stats,
-           const decltype(clustercomplete_options{}.on_progress)                      on_progress,
-           const decltype(clustercomplete_options{}.on_worker_progress)               on_worker_progress,
+           const decltype(clustercomplete_options{}.on_progress)&                     on_progress,
+           const decltype(clustercomplete_options{}.on_worker_progress)&              on_worker_progress,
            const decltype(clustercomplete_options{}.validity_witness_partitioning_max_cluster_size_gss)
                validity_witness_partitioning_max_cluster_size_gss)
         {
@@ -113,50 +113,11 @@ void register_clustercomplete(nb::module_& m)
         nb::arg("available_threads")                   = nb::none(),
         nb::arg("report_gss_stats")                    = clustercomplete_options{}.report_gss_stats,
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        R"doc(*ClusterComplete* is an instantiation of a general solution to
-exhaustive state assignment searching for which all local predicates
-hold, given respective local evaluations that may be aggregated from
-individual inter-variable interactions. Applied to the problem of
-exact physical simulation of SiDBs, it is able to efficiently consider
-positive charges that are rare to occur, but drastically blow up exact
-simulation runtimes when hierarchical pruning methods are not applied.
-In fact, the exponential growth in problem complexity for added SiDBs
-is tamed by *ClusterComplete*, as SiDB layouts to simulate in practise
-amount to a high pruning efficacy, resulting in a layout-dependent
-reduction of the simulation base. This amounts to an effective
-simulation base in the real number range :math:`[1,b]`, where
-:math:`b\in\{2,3\}` is the given simulation base.
-
-The part of the *ClusterComplete* algorithm that is implemented in
-this file is the destructive phase of the procedure that employs the
-duality of construction and destruction, folding and unfolding. The
-phase preceding it is the key ingredient to the achieved efficiency:
-the *Ground State Space* algorithm, which constructs a minimized
-hierarchical search space of charge configurations that adhere to the
-critical population stability criterion. In particular, it generalizes
-physically informed space pruning that contributes to the capabilities
-of the *QuickExact* simulator, now applying to all charge states
-equally, and, most importantly, it lifts the associated potential
-equations to higher order, allowing us to reason over potential bounds
-in a cluster hierarchy.
-
-*ClusterComplete* was proposed in \"Mastering the Exponential
-Complexity of Exact Physical Simulation of Silicon Dangling Bonds\" by
-W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
-
-Args:
-    lyt: Layout to simulate.
-
-Returns:
-    Simulation results.
-
-Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
-
-Algorithm options are keyword-only; the signature lists their defaults.
-)doc",
         nb::arg("validity_witness_partitioning_max_cluster_size_gss") =
-            clustercomplete_options{}.validity_witness_partitioning_max_cluster_size_gss);
+            clustercomplete_options{}.validity_witness_partitioning_max_cluster_size_gss,
+        R"doc(Simulate the SiDB layout with ClusterComplete.
+The keyword options select physical values, clustering, witness searches, and available threads.
+)doc");
 }
 
 }  // namespace pyfiction

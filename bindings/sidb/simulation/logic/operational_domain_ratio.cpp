@@ -88,12 +88,12 @@ void register_operational_domain_ratio(nb::module_& m)
            const decltype(operational_domain_ratio_options{}
                               .op_domain_params.operational_params
                               .strategy_to_analyze_operational_status)           strategy_to_analyze_operational_status,
-           const std::optional<decltype(operational_domain_ratio_options{}.op_domain_params.sweep_dimensions)>
+           const std::optional<decltype(operational_domain_ratio_options{}.op_domain_params.sweep_dimensions)>&
                sweep_dimensions,
            const std::optional<decltype(operational_domain_ratio_options{}.op_domain_params.number_of_threads)>
-                                                                                                  number_of_threads,
-           const decltype(operational_domain_ratio_options{}.op_domain_params.on_progress)        on_progress,
-           const decltype(operational_domain_ratio_options{}.op_domain_params.on_worker_progress) on_worker_progress)
+                                                                                                   number_of_threads,
+           const decltype(operational_domain_ratio_options{}.op_domain_params.on_progress)&        on_progress,
+           const decltype(operational_domain_ratio_options{}.op_domain_params.on_worker_progress)& on_worker_progress)
         {
             operational_domain_ratio_options params{};
             params.op_domain_params.operational_params.sim_params =
@@ -151,36 +151,8 @@ void register_operational_domain_ratio(nb::module_& m)
                 .op_domain_params.operational_params.strategy_to_analyze_operational_status,
         nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        R"doc(Calculates the ratio of operational parameter points surrounding a
-specified parameter point to the total number of parameter points in
-the given parameter space. This function is useful for assessing how
-robust a gate design is to variations in its parameters.
-
-A ratio close to 1 indicates that the gate is robust, meaning it
-functions correctly across a broad range of parameter values. A ratio
-close to 0 indicates that the gate is highly sensitive to parameter
-variations and may fail to operate correctly.
-
-Args:
-    lyt: The SiDB layout for which to compute the ratio of operational
-         parameter points surrounding a specified parameter point to
-         the total number of parameter points.
-    spec: The expected Boolean function of the layout, provided as a
-          multi-output truth table.
-    pp: The specific parameter point around which the operational
-        ratio is computed.
-
-Returns:
-    The ratio of operational parameter points to the total number of
-    parameter points in the parameter space.
-
-Raises:
-    std::invalid_argument: if the sweep has fewer than two dimensions,
-                           a range is invalid, or the seed is non-
-                           finite, outside the grid, or has the wrong
-                           dimension count.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Compute the fraction of operational parameter points surrounding the given point.
+The keyword options select the sweep, sampling, physical values, operational analysis, and progress.
 )doc");
 }
 

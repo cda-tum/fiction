@@ -16,7 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/simulation_parameters.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/generators/design_gates.hpp>
@@ -118,27 +118,20 @@ void register_design_gates(nb::module_& m)
            const decltype(design_gates_options{}.number_of_canvas_sidbs)         number_of_canvas_sidbs,
            const decltype(design_gates_options{}.maximal_random_design_attempts) maximal_random_design_attempts,
            const decltype(design_gates_options{}.termination_cond)               termination_cond,
-           const decltype(design_gates_options{}.on_progress) on_progress, design_gates_stats* stats)
+           const decltype(design_gates_options{}.on_progress)& on_progress, design_gates_stats* stats)
         {
             design_gates_options params{};
-            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.operational_params.timeout    = timeout;
-            params.operational_params.sim_engine = sim_engine;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
-                threshold_bdl_interdistance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
-                minimum_distance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
-                maximum_distance;
-            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
-            params.operational_params.op_condition                               = op_condition;
-            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
-            params.design_mode                                               = design_mode;
-            params.canvas                                                    = canvas;
-            params.number_of_canvas_sidbs                                    = number_of_canvas_sidbs;
-            params.maximal_random_design_attempts                            = maximal_random_design_attempts;
-            params.termination_cond                                          = termination_cond;
-            params.on_progress                                               = on_progress;
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            params.design_mode                    = design_mode;
+            params.canvas                         = canvas;
+            params.number_of_canvas_sidbs         = number_of_canvas_sidbs;
+            params.maximal_random_design_attempts = maximal_random_design_attempts;
+            params.termination_cond               = termination_cond;
+            params.on_progress                    = on_progress;
 
             // Copy Python-owned inputs before releasing the GIL; publish statistics after reacquiring it.
             design_gates_stats  local_stats{};
@@ -179,48 +172,9 @@ void register_design_gates(nb::module_& m)
         nb::arg("maximal_random_design_attempts") = design_gates_options{}.maximal_random_design_attempts,
         nb::arg("termination_cond")               = design_gates_options{}.termination_cond,
         nb::arg("on_progress").none() = nb::none(), nb::arg("stats") = nullptr,
-        R"doc(Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
-canvas area so that the skeleton's input and output wires implement
-the given Boolean function(s). The design mode chooses between
-simulating every combination of canvas SiDBs, *QuickCell*'s pruning
-followed by simulation, random placement, and pruning only.
-
-Worker exceptions propagate to the caller after all started workers
-finish.
-
-Random placement samples at most `maximal_random_design_attempts`
-candidates without enumerating canvas layouts.
-
-The timeout covers setup and all search phases. Expiration discards
-partial results and stops all workers before throwing. Allocation and
-non-interruptible setup may exceed the cooperative deadline.
-
-*QuickCell* is described in "Towards Fast Automatic Design of Silicon
-Dangling Bond Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus,
-and R. Wille in DATE 2025
-(https://ieeexplore.ieee.org/abstract/document/10992885) and
-"QuickCell: Fast Automatic Design of Standard Cells for Silicon
-Dangling Bond Logic" by the same authors in TCAD 2025
-(https://ieeexplore.ieee.org/document/11146893). The exhaustive
-designer is described in "Minimal Design of SiDB Gates: An Optimal
-Basis for Circuits Based on Silicon Dangling Bonds" by J. Drewniok, M.
-Walter, and R. Wille in NANOARCH 2023
-(https://dl.acm.org/doi/10.1145/3611315.3633241).
-
-Args:
-    skeleton: The skeleton with its input and output wires.
-    spec: The Boolean function(s) to implement; must not be empty.
-    stats: Statistics.
-
-Returns:
-    The designed gates.
-
-Raises:
-    std::invalid_argument: if `spec` is empty or the input wire count
-                           differs from the specification.
-    utils::timeout_error: if the gate-design deadline is reached.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Design SiDB gates implementing the supplied truth tables within the canvas.
+The keyword options select physical values, BDL detection, the design mode, and termination.
+Expiration raises TimeoutError; on_progress reports completed search work.
 )doc");
 }
 

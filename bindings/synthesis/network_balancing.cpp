@@ -46,7 +46,7 @@ void register_network_balancing_impl(nb::module_& m)
 {
     m.def(
         "network_balancing",
-        [](const Ntk& network, const decltype(fiction::synthesis::network_balancing_params{}.on_progress) on_progress,
+        [](const Ntk& network, const decltype(fiction::synthesis::network_balancing_params{}.on_progress)& on_progress,
            const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs)
         {
             fiction::synthesis::network_balancing_params params{};
@@ -55,18 +55,16 @@ void register_network_balancing_impl(nb::module_& m)
             const nb::gil_scoped_release release{};
             return fiction::synthesis::network_balancing<py_tec_network, Ntk>(network, params);
         },
-        nb::arg("network"), nb::kw_only(), nb::arg("on_progress") = nb::none(),
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
-        R"doc(Balance the network paths by inserting buffer nodes.
-
-The returned technology network is logically equivalent to the input.
-Set unify_outputs to place all outputs at the same logic depth.
-Options are keyword-only; on_progress reports completed work.
+        R"doc(Insert identity nodes to balance network paths.
+Returns a fresh technology network that is logically equivalent to the input.
+Set unify_outputs to place every output at the same logic depth.
 )doc");
 
     m.def(
         "is_balanced",
-        [](const Ntk& network, const decltype(fiction::synthesis::network_balancing_params{}.on_progress) on_progress,
+        [](const Ntk& network, const decltype(fiction::synthesis::network_balancing_params{}.on_progress)& on_progress,
            const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs)
         {
             fiction::synthesis::network_balancing_params params{};
@@ -75,18 +73,10 @@ Options are keyword-only; on_progress reports completed work.
             const nb::gil_scoped_release release{};
             return fiction::synthesis::is_balanced<Ntk>(network, params);
         },
-        nb::arg("network"), nb::kw_only(), nb::arg("on_progress") = nb::none(),
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
-        R"doc(Checks if a logic network is properly path-balanced with regard to the
-keyword options.
-
-Args:
-    ntk: The logic network to check.
-
-Returns:
-    `true` iff `ntk` is properly path-balanced with regard to the keyword options.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Check whether network paths are balanced.
+Set unify_outputs to require every output at the same logic depth.
 )doc");
 }
 

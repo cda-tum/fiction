@@ -62,30 +62,8 @@ void register_exhaustive_ground_state_simulation(nb::module_& m)
         nb::arg("lyt"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
         nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
         nb::arg("lambda_tf") = simulation_model{}.lambda_tf, nb::arg("on_progress").none() = nb::none(),
-        R"doc(*Exhaustive Ground State Simulation* (*ExGS*) which was proposed in
-\"Computer-Aided Design of Atomic Silicon Quantum Dots and
-Computational Applications\" by S. S. H. Ng
-(https://dx.doi.org/10.14288/1.0392909) enumerates every charge
-distribution of the layout in base 2 or 3 and keeps the physically
-valid ones. Charged surface defects of the layout enter the potential
-landscape.
-
-Args:
-    lyt: Layout to simulate.
-    on_progress: Callback that receives the number of enumerated
-                 charge configurations.
-    deadline: Shared caller deadline. `time_point::max()` leaves the
-              simulation unlimited.
-
-Returns:
-    The physically valid charge distributions.
-
-Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
-    utils::timeout_error: if the shared caller deadline expires. No
-                          partial result is returned.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Find all minimum-energy charge distributions by exhaustive simulation.
+The physical model is supplied by the scalar keyword values.
 )doc");
 }
 

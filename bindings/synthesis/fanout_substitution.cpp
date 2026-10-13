@@ -49,11 +49,12 @@ void register_fanout_substitution_impl(nb::module_& m)
 {
     m.def(
         "fanout_substitution",
-        [](const Ntk& network, const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress) on_progress,
-           const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)  strategy,
-           const decltype(fiction::synthesis::fanout_substitution_params{}.degree)    degree,
-           const decltype(fiction::synthesis::fanout_substitution_params{}.threshold) threshold,
-           const decltype(fiction::synthesis::fanout_substitution_params{}.seed)      seed)
+        [](const Ntk&                                                                    network,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress)& on_progress,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)     strategy,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.degree)       degree,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.threshold)    threshold,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.seed)         seed)
         {
             fiction::synthesis::fanout_substitution_params params{};
             params.on_progress = on_progress;
@@ -64,54 +65,23 @@ void register_fanout_substitution_impl(nb::module_& m)
             const nb::gil_scoped_release release{};
             return fiction::synthesis::fanout_substitution<py_tec_network, Ntk>(network, params);
         },
-        nb::arg("network"), nb::kw_only(), nb::arg("on_progress") = nb::none(),
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy")  = fiction::synthesis::fanout_substitution_params{}.strategy,
         nb::arg("degree")    = fiction::synthesis::fanout_substitution_params{}.degree,
         nb::arg("threshold") = fiction::synthesis::fanout_substitution_params{}.threshold,
         nb::arg("seed")      = fiction::synthesis::fanout_substitution_params{}.seed,
-        R"doc(Substitutes high-output degrees in a logic network with fanout nodes
-that compute the identity function. For this purpose, `create_buf` is
-utilized. Therefore, `NtkDest` should support identity nodes. If it
-does not, no new nodes will in fact be created. A destination that
-elides buffer nodes may exceed the requested fanout degrees. The
-returned network is logically equivalent to the input network.
-
-The algorithm builds breadth-first, depth-first, or random fanout
-trees. Parameters set the maximum output degrees of ordinary nodes and
-fanout nodes.
-
-The returned network is newly created from scratch because its type
-`NtkDest` may differ from `NtkSrc`. Repeated nonconstant inputs use
-distinct routing branches when `NtkDest` preserves buffer nodes.
-
-Args:
-    ntk_src: The input logic network.
-
-Returns:
-    A fanout-substituted logic network of type `NtkDest` that is
-    logically equivalent to `ntk_src`.
-
-Raises:
-    std::invalid_argument: If `degree` is less than two or
-                           `threshold` is zero.
-
-Note:
-    The physical design algorithms natively provided in fiction do not
-    require their input networks to be fanout-substituted. If that is
-    necessary, they will do it themselves. Providing already
-    substituted networks does however allow for the control over
-    maximum output degrees.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Insert identity nodes so the network respects the keyword fanout limits.
+Returns a fresh technology network that is logically equivalent to the input.
 )doc");
 
     m.def(
         "is_fanout_substituted",
-        [](const Ntk& network, const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress) on_progress,
-           const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)  strategy,
-           const decltype(fiction::synthesis::fanout_substitution_params{}.degree)    degree,
-           const decltype(fiction::synthesis::fanout_substitution_params{}.threshold) threshold,
-           const decltype(fiction::synthesis::fanout_substitution_params{}.seed)      seed)
+        [](const Ntk&                                                                    network,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress)& on_progress,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)     strategy,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.degree)       degree,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.threshold)    threshold,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.seed)         seed)
         {
             fiction::synthesis::fanout_substitution_params params{};
             params.on_progress = on_progress;
@@ -122,23 +92,12 @@ Algorithm options are keyword-only; the signature lists their defaults.
             const nb::gil_scoped_release release{};
             return fiction::synthesis::is_fanout_substituted<Ntk>(network, params);
         },
-        nb::arg("network"), nb::kw_only(), nb::arg("on_progress") = nb::none(),
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy")  = fiction::synthesis::fanout_substitution_params{}.strategy,
         nb::arg("degree")    = fiction::synthesis::fanout_substitution_params{}.degree,
         nb::arg("threshold") = fiction::synthesis::fanout_substitution_params{}.threshold,
         nb::arg("seed")      = fiction::synthesis::fanout_substitution_params{}.seed,
-        R"doc(Checks if a logic network is properly fanout-substituted with regard
-to the keyword options, i.e., if no node exceeds the specified
-fanout limits.
-
-Args:
-    ntk: The logic network to check.
-
-Returns:
-    `true` iff `ntk` is properly fanout-substituted with regard to
-    the keyword options.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Check whether every network node respects the keyword fanout limits.
 )doc");
 }
 

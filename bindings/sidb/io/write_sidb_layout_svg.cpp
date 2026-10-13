@@ -70,7 +70,7 @@ void register_write_sidb_layout_svg(nb::module_& m)
     m.def(
         "write_sidb_layout_svg",
         [](const fiction::sidb::layout& layout, const std::string_view& filename,
-           const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.on_progress)        on_progress,
+           const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.on_progress)&       on_progress,
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.lattice_point_size) lattice_point_size,
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.sidb_size)          sidb_size,
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.sidb_border_width)  sidb_border_width,
@@ -95,24 +95,14 @@ void register_write_sidb_layout_svg(nb::module_& m)
         nb::arg("sidb_border_width")  = fiction::sidb::io::write_sidb_layout_svg_params{}.sidb_border_width,
         nb::arg("color_background")   = fiction::sidb::io::write_sidb_layout_svg_params{}.color_background,
         nb::arg("lattice_mode")       = fiction::sidb::io::write_sidb_layout_svg_params{}.lattice_mode,
-        R"doc(Writes an `sidb::layout` as an SVG image. See the stream overload for
-the image's content.
-
-Args:
-    lyt: Layout to draw.
-    filename: File to write into.
-
-Raises:
-    std::ofstream::failure: if the file cannot be opened.
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Write an SVG representation of the SiDB layout to the supplied filename.
+The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 )doc");
 
     m.def(
         "write_sidb_layout_svg_to_string",
-        [](const fiction::sidb::layout& layout, const decltype(write_sidb_layout_svg_options{}.on_progress) on_progress,
+        [](const fiction::sidb::layout&                                       layout,
+           const decltype(write_sidb_layout_svg_options{}.on_progress)&       on_progress,
            const decltype(write_sidb_layout_svg_options{}.lattice_point_size) lattice_point_size,
            const decltype(write_sidb_layout_svg_options{}.sidb_size)          sidb_size,
            const decltype(write_sidb_layout_svg_options{}.sidb_border_width)  sidb_border_width,
@@ -138,27 +128,15 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("sidb_border_width")  = write_sidb_layout_svg_options{}.sidb_border_width,
         nb::arg("color_background")   = write_sidb_layout_svg_options{}.color_background,
         nb::arg("lattice_mode")       = write_sidb_layout_svg_options{}.lattice_mode,
-        R"doc(Writes an `sidb::layout` as an SVG image to a stream: the lattice
-points of the layout's bounding box, if the parameters ask for them,
-and every SiDB at its position on the layout's lattice. Surface
-defects are not drawn.
-
-Args:
-    lyt: Layout to draw.
-    os: Output stream to write into.
-
-Raises:
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Return an SVG representation of the SiDB layout.
+The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 )doc");
 
     m.def(
         "write_sidb_layout_svg",
         [](const fiction::sidb::layout& layout, const fiction::sidb::charge_distribution& charge_distribution,
            const std::string_view&                                                              filename,
-           const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.on_progress)        on_progress,
+           const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.on_progress)&       on_progress,
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.lattice_point_size) lattice_point_size,
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.sidb_size)          sidb_size,
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.sidb_border_width)  sidb_border_width,
@@ -184,26 +162,14 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("sidb_border_width")  = fiction::sidb::io::write_sidb_layout_svg_params{}.sidb_border_width,
         nb::arg("color_background")   = fiction::sidb::io::write_sidb_layout_svg_params{}.color_background,
         nb::arg("lattice_mode")       = fiction::sidb::io::write_sidb_layout_svg_params{}.lattice_mode,
-        R"doc(Writes an `sidb::layout` with a charge distribution as an SVG image.
-See the stream overload for the image's content.
-
-Args:
-    lyt: Layout to draw.
-    cd: Charge distribution over the layout's SiDBs.
-    filename: File to write into.
-
-Raises:
-    std::invalid_argument: if the charge distribution sites differ
-                           from the layout.
-    std::ofstream::failure: if the file cannot be opened.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Write an SVG representation of the SiDB layout to the supplied filename.
+The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 )doc");
 
     m.def(
         "write_sidb_layout_svg_to_string",
         [](const fiction::sidb::layout& layout, const fiction::sidb::charge_distribution& cd,
-           const decltype(write_sidb_layout_svg_options{}.on_progress)        on_progress,
+           const decltype(write_sidb_layout_svg_options{}.on_progress)&       on_progress,
            const decltype(write_sidb_layout_svg_options{}.lattice_point_size) lattice_point_size,
            const decltype(write_sidb_layout_svg_options{}.sidb_size)          sidb_size,
            const decltype(write_sidb_layout_svg_options{}.sidb_border_width)  sidb_border_width,
@@ -229,20 +195,8 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("sidb_border_width")  = write_sidb_layout_svg_options{}.sidb_border_width,
         nb::arg("color_background")   = write_sidb_layout_svg_options{}.color_background,
         nb::arg("lattice_mode")       = write_sidb_layout_svg_options{}.lattice_mode,
-        R"doc(Writes an `sidb::layout` with a charge distribution as an SVG image to
-a stream: as the layout overload, with every SiDB colored by its
-charge state.
-
-Args:
-    lyt: Layout to draw.
-    cd: Charge distribution over the layout's SiDBs.
-    os: Output stream to write into.
-
-Raises:
-    std::invalid_argument: if the charge distribution sites differ
-                           from the layout.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Return an SVG representation of the SiDB layout.
+The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 )doc");
 }
 

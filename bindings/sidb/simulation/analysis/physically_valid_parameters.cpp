@@ -16,7 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/simulation_parameters.hpp"
+#include "pyfiction/operational_parameters.hpp"
 
 #include <fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp>
 #include <fiction/technology/sidb/simulation/domain.hpp>
@@ -99,24 +99,17 @@ void register_physically_valid_parameters(nb::module_& m)
            const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
            const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
                strategy_to_analyze_operational_status,
-           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>  sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
            const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
-           const decltype(operational_domain_options{}.on_progress)                      on_progress,
-           const decltype(operational_domain_options{}.on_worker_progress)               on_worker_progress)
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress)
         {
             operational_domain_options params{};
-            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.operational_params.timeout    = timeout;
-            params.operational_params.sim_engine = sim_engine;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
-                threshold_bdl_interdistance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
-                minimum_distance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
-                maximum_distance;
-            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
-            params.operational_params.op_condition                               = op_condition;
-            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -153,29 +146,8 @@ void register_physically_valid_parameters(nb::module_& m)
             operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
         nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        R"doc(Determines the physical parameters under which a given charge
-distribution of a layout is physically valid: every parameter point of
-the sweep dimensions in the keyword options is checked, and for each one where
-the charge distribution is valid, its excited-state number (the number
-of valid configurations with lower energy under those parameters) is
-recorded.
-
-Args:
-    lyt: The layout.
-    cd: The charge distribution whose validity is checked.
-
-Returns:
-    The parameter points where `cd` is physically valid, each with its
-    excited-state number; empty if `cd` does not cover the layout's
-    SiDBs in raster order.
-
-Raises:
-    std::invalid_argument: if a sweep range has non-finite or reversed
-                           bounds, a non-positive or non-finite step,
-                           or more points than the storage range
-                           permits.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Sweep physical parameter values for which the supplied charge distribution is physically valid.
+The keyword options define the sweep, physical model, worker count, and progress callbacks.
 )doc");
 }
 

@@ -90,7 +90,7 @@ void register_post_layout_optimization(nb::module_& m)
            const decltype(post_layout_optimization_options{}.optimize_pos_only)    optimize_pos_only,
            const decltype(post_layout_optimization_options{}.planar_optimization)  planar_optimization,
            const decltype(post_layout_optimization_options{}.timeout)              timeout,
-           const decltype(post_layout_optimization_options{}.on_progress)          on_progress,
+           const decltype(post_layout_optimization_options{}.on_progress)&         on_progress,
            fiction::physical_design::post_layout_optimization_stats*               statistics)
         {
             post_layout_optimization_options params{};
@@ -108,53 +108,8 @@ void register_post_layout_optimization(nb::module_& m)
         nb::arg("planar_optimization")  = post_layout_optimization_options{}.planar_optimization,
         nb::arg("timeout") = post_layout_optimization_options{}.timeout, nb::arg("on_progress").none() = nb::none(),
         nb::arg("statistics") = nullptr,
-        R"doc(A post-layout optimization algorithm as originally proposed in \"Post-
-Layout Optimization for Field-coupled Nanotechnologies\" by S.
-Hofmann, M. Walter, and R. Wille in NANOARCH 2023
-(https://dl.acm.org/doi/10.1145/3611315.3633247) and extended in
-\"Efficient and Scalable Post-Layout Optimization for Field-coupled
-Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in TCAD 2025
-(https://ieeexplore.ieee.org/document/10916761). It can be used to
-reduce the area of a given sub-optimal Cartesian gate-level layout
-created by heuristics or machine learning. This optimization utilizes
-the distinct characteristics of the 2DDWave clocking scheme, which
-only allows information flow from top to bottom and left to right,
-therefore only aforementioned clocking scheme is supported.
-
-To reduce the layout area, first, gates are moved up and to the left
-as far as possible, including rerouting. This creates more compact
-layouts by freeing up space to the right and bottom, as all gates were
-moved to the top left corner.
-
-After moving all gates, this algorithm also checks if excess wiring
-exists on the layout using the `wiring_reduction` algorithm (cf.
-`wiring_reduction.hpp`)
-
-As outputs have to lay on the border of a layout for better
-accessibility, they are also moved to new borders determined based on
-the location of all other gates.
-
-Args:
-    lyt: 2DDWave-clocked Cartesian gate-level layout to optimize.
-    pst: Statistics.
-
-Raises:
-    std::invalid_argument: If clocking or occupied geometry is
-                           invalid.
-    std::overflow_error: If the extent leaves no room for signed
-                         routing coordinates.
-
-Note:
-    This function requires the gate-level layout to be 2DDWave-
-    clocked!
-
-Note:
-    Exceptions may leave a partially edited layout. Object identities,
-    occupancy, and connection storage remain structurally valid;
-    logical equivalence and physical validity are not guaranteed after
-    failure.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Optimize a 2DDWave-clocked Cartesian gate layout in place.
+The keyword options bound relocations and runtime; statistics receives the completed result.
 )doc");
 }
 

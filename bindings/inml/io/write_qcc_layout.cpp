@@ -54,7 +54,7 @@ void register_write_qcc_layout(nb::module_& m)
     m.def(
         "write_qcc_layout",
         [](const fiction::inml::layout& lyt, const std::string_view& filename,
-           const decltype(write_qcc_layout_options{}.on_progress)                    on_progress,
+           const decltype(write_qcc_layout_options{}.on_progress)&                   on_progress,
            const decltype(write_qcc_layout_options{}.use_filename_as_component_name) use_filename_as_component_name)
         {
             write_qcc_layout_options params{};
@@ -65,17 +65,8 @@ void register_write_qcc_layout(nb::module_& m)
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("use_filename_as_component_name") = write_qcc_layout_options{}.use_filename_as_component_name,
-        R"doc(Writes a cell-level iNML layout to a qcc file that is used by
-ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
-physical simulator for the iNML technology platform.
-
-This overload uses an output stream to write into.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Write the iNML layout to the supplied ToPoliNano and MagCAD filename.
+use_filename_as_component_name selects the component name; on_progress reports writing progress.
 )doc");
 }
 

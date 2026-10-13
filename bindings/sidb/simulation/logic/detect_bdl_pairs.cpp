@@ -87,25 +87,8 @@ void register_detect_bdl_pairs(nb::module_& m)
         nb::arg("lyt"), nb::arg("type") = std::nullopt, nb::kw_only(),
         nb::arg("minimum_distance") = detect_bdl_pairs_options{}.minimum_distance,
         nb::arg("maximum_distance") = detect_bdl_pairs_options{}.maximum_distance,
-        R"doc(Detects the BDL pairs of an SiDB layout. Dots with the given tag are
-uniquely paired in increasing distance. The closest unpaired dots
-within `[minimum_distance, maximum_distance]` (defaults
-of 0.75 nm and 1.5 nm) form a pair. The lower bound keeps, e.g., the
-SiDBs of an atomic wire from being paired; the upper bound prevents
-unlikely pairings and bounds the work. Distances follow the layout's
-lattice. The pairs are returned sorted.
-
-Args:
-    lyt: The layout to detect BDL pairs in.
-    type: Optional dot tag to restrict the detection to (`INPUT`,
-          `OUTPUT`, `NORMAL`, ...). If omitted, the BDL pairs of the
-          input, output, and normal SiDBs are detected and returned in
-          that order.
-
-Returns:
-    The detected BDL pairs.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Detect uniquely paired SiDBs with the selected tag in increasing distance.
+The keyword minimum_distance and maximum_distance bound the pair separation in nm.
 )doc");
 }
 

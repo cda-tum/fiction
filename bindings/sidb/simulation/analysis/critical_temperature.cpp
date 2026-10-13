@@ -17,7 +17,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/simulation_parameters.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -93,30 +93,23 @@ inline void register_critical_temperature_functions(nb::module_& m)
                               .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
            const decltype(critical_temperature_options{}.operational_params.op_condition)     op_condition,
            const decltype(critical_temperature_options{}.operational_params.strategy_to_analyze_operational_status)
-                                                                             strategy_to_analyze_operational_status,
-           const decltype(critical_temperature_options{}.confidence_level)   confidence_level,
-           const decltype(critical_temperature_options{}.max_temperature)    max_temperature,
-           const decltype(critical_temperature_options{}.on_progress)        on_progress,
-           const decltype(critical_temperature_options{}.on_worker_progress) on_worker_progress,
-           critical_temperature_stats*                                       stats)
+                                                                              strategy_to_analyze_operational_status,
+           const decltype(critical_temperature_options{}.confidence_level)    confidence_level,
+           const decltype(critical_temperature_options{}.max_temperature)     max_temperature,
+           const decltype(critical_temperature_options{}.on_progress)&        on_progress,
+           const decltype(critical_temperature_options{}.on_worker_progress)& on_worker_progress,
+           critical_temperature_stats*                                        stats)
         {
             critical_temperature_options params{};
-            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.operational_params.timeout    = timeout;
-            params.operational_params.sim_engine = sim_engine;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
-                threshold_bdl_interdistance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
-                minimum_distance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
-                maximum_distance;
-            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
-            params.operational_params.op_condition                               = op_condition;
-            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
-            params.confidence_level                                          = confidence_level;
-            params.max_temperature                                           = max_temperature;
-            params.on_progress                                               = on_progress;
-            params.on_worker_progress                                        = on_worker_progress;
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            params.confidence_level   = confidence_level;
+            params.max_temperature    = max_temperature;
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::analysis::critical_temperature_gate_based(lyt, spec, params, stats);
         },
@@ -144,27 +137,10 @@ inline void register_critical_temperature_functions(nb::module_& m)
         nb::arg("confidence_level")   = critical_temperature_options{}.confidence_level,
         nb::arg("max_temperature")    = critical_temperature_options{}.max_temperature,
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        nb::arg("stats") = nullptr, R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
-in \"Temperature Behavior of Silicon Dangling Bond Logic\" by J.
-Drewniok, M. Walter, and R. Wille in IEEE NANO 2023
-(https://ieeexplore.ieee.org/document/10231259). It comes in two
-flavors: gate-based and non-gate based.
-
-For *Gate-based Critical Temperature* Simulation, the Critical
-Temperature is defined as follows: The temperature at which the
-erroneous charge distributions are populated by more than :math:`1 -
-\eta`, where :math:`\eta \in [0,1]`.
-
-Args:
-    lyt: The layout to simulate.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    pst: Statistics.
-
-Returns:
-    The critical temperature (unit: K).
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        nb::arg("stats") = nullptr,
+        R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
+The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+Supplied input and output wires bypass automatic wire detection.
 )doc");
     m.def(
         "critical_temperature_gate_based",
@@ -190,30 +166,23 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
            const decltype(critical_temperature_options{}.operational_params.op_condition)     op_condition,
            const decltype(critical_temperature_options{}.operational_params.strategy_to_analyze_operational_status)
-                                                                             strategy_to_analyze_operational_status,
-           const decltype(critical_temperature_options{}.confidence_level)   confidence_level,
-           const decltype(critical_temperature_options{}.max_temperature)    max_temperature,
-           const decltype(critical_temperature_options{}.on_progress)        on_progress,
-           const decltype(critical_temperature_options{}.on_worker_progress) on_worker_progress,
-           critical_temperature_stats*                                       stats)
+                                                                              strategy_to_analyze_operational_status,
+           const decltype(critical_temperature_options{}.confidence_level)    confidence_level,
+           const decltype(critical_temperature_options{}.max_temperature)     max_temperature,
+           const decltype(critical_temperature_options{}.on_progress)&        on_progress,
+           const decltype(critical_temperature_options{}.on_worker_progress)& on_worker_progress,
+           critical_temperature_stats*                                        stats)
         {
             critical_temperature_options params{};
-            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.operational_params.timeout    = timeout;
-            params.operational_params.sim_engine = sim_engine;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
-                threshold_bdl_interdistance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
-                minimum_distance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
-                maximum_distance;
-            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
-            params.operational_params.op_condition                               = op_condition;
-            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
-            params.confidence_level                                          = confidence_level;
-            params.max_temperature                                           = max_temperature;
-            params.on_progress                                               = on_progress;
-            params.on_worker_progress                                        = on_worker_progress;
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            params.confidence_level   = confidence_level;
+            params.max_temperature    = max_temperature;
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::analysis::critical_temperature_gate_based(
@@ -244,43 +213,10 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("confidence_level")   = critical_temperature_options{}.confidence_level,
         nb::arg("max_temperature")    = critical_temperature_options{}.max_temperature,
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        nb::arg("stats") = nullptr, R"doc(*Gate-based Critical Temperature* simulation of an SiDB layout from
-its pre-generated input pattern layouts.
-
-This overload takes one layout per input pattern together with the BDL
-detection results, instead of deriving all of them from the layout.
-Since neither the input configuration nor the BDL pairs and wires
-depend on the simulation parameters, a caller that simulates the same
-layout under many parameter settings can determine them once with
-`generate_bdl_input_pattern_layouts`, `detect_bdl_pairs` and
-`detect_bdl_wires` and pass them to every call, instead of re-deriving
-them each time.
-
-The layouts and the detection results are only read and may be shared
-by concurrent calls.
-
-Args:
-    input_pattern_layouts: One layout per input pattern, indexed by
-                           input pattern, as generated by
-                           `generate_bdl_input_pattern_layouts`.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    output_bdl_pairs: Output BDL pairs of the layout.
-    input_bdl_wires: BDL input wires of the layout.
-    output_bdl_wires: BDL output wires of the layout.
-    pst: Statistics.
-
-Returns:
-    The critical temperature (unit: K).
-
-Raises:
-    std::invalid_argument: if `spec` is empty, if the number of input
-                           pattern layouts does not match the number
-                           of input combinations of `spec`, or if the
-                           number of output BDL pairs does not match
-                           the number of truth tables.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        nb::arg("stats") = nullptr,
+        R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
+The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+Supplied input and output wires bypass automatic wire detection.
 )doc");
     m.def(
         "critical_temperature_non_gate_based",
@@ -303,30 +239,23 @@ Algorithm options are keyword-only; the signature lists their defaults.
                               .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
            const decltype(critical_temperature_options{}.operational_params.op_condition)     op_condition,
            const decltype(critical_temperature_options{}.operational_params.strategy_to_analyze_operational_status)
-                                                                             strategy_to_analyze_operational_status,
-           const decltype(critical_temperature_options{}.confidence_level)   confidence_level,
-           const decltype(critical_temperature_options{}.max_temperature)    max_temperature,
-           const decltype(critical_temperature_options{}.on_progress)        on_progress,
-           const decltype(critical_temperature_options{}.on_worker_progress) on_worker_progress,
-           critical_temperature_stats*                                       stats)
+                                                                              strategy_to_analyze_operational_status,
+           const decltype(critical_temperature_options{}.confidence_level)    confidence_level,
+           const decltype(critical_temperature_options{}.max_temperature)     max_temperature,
+           const decltype(critical_temperature_options{}.on_progress)&        on_progress,
+           const decltype(critical_temperature_options{}.on_worker_progress)& on_worker_progress,
+           critical_temperature_stats*                                        stats)
         {
             critical_temperature_options params{};
-            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.operational_params.timeout    = timeout;
-            params.operational_params.sim_engine = sim_engine;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance =
-                threshold_bdl_interdistance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance =
-                minimum_distance;
-            params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance =
-                maximum_distance;
-            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_bdl_config;
-            params.operational_params.op_condition                               = op_condition;
-            params.operational_params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
-            params.confidence_level                                          = confidence_level;
-            params.max_temperature                                           = max_temperature;
-            params.on_progress                                               = on_progress;
-            params.on_worker_progress                                        = on_worker_progress;
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            params.confidence_level   = confidence_level;
+            params.max_temperature    = max_temperature;
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(lyt, params, stats);
         },
@@ -353,20 +282,9 @@ Algorithm options are keyword-only; the signature lists their defaults.
         nb::arg("confidence_level")   = critical_temperature_options{}.confidence_level,
         nb::arg("max_temperature")    = critical_temperature_options{}.max_temperature,
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        nb::arg("stats") = nullptr, R"doc(For *Non-gate-based Critical Temperature* simulation, the Critical
-Temperature is defined as follows: The temperature at which the
-excited charge distributions are populated by more than :math:`1 -
-\eta`, where :math:`\eta \in [0,1]` is the confidence level for the
-presence of a working gate.
-
-Args:
-    lyt: The layout to simulate.
-    pst: Statistics.
-
-Returns:
-    The critical temperature (unit: K)
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        nb::arg("stats") = nullptr,
+        R"doc(Determine the critical temperature from the population of excited charge distributions.
+The keyword options select physical values, confidence, and temperature bounds.
 )doc");
 }
 

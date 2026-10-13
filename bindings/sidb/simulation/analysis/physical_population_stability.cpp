@@ -91,24 +91,11 @@ inline void register_physical_population_stability_functions(nb::module_& m)
         nb::arg("mu_minus")  = physical_population_stability_options{}.sim_params.mu_minus,
         nb::arg("epsilon_r") = physical_population_stability_options{}.sim_params.epsilon_r,
         nb::arg("lambda_tf") = physical_population_stability_options{}.sim_params.lambda_tf,
-        R"doc(Assesses the population stability of an SiDB layout: for every
-physically valid charge distribution (found with *QuickExact*), it
-determines the SiDB closest to each charge transition and the
-potential change required for it, in ascending order of the
-distributions' energies. The distance an SiDB would have to be placed
-at to cause that potential change is reported as well.
-
-Args:
-    lyt: The layout to analyze.
-
-Returns:
-    The population stability information, one entry per distinct
-    charge distribution.
-
-Algorithm options are keyword-only; the signature lists their defaults.
-)doc",
         nb::arg("precision_for_distance_corresponding_to_potential") =
-            physical_population_stability_options{}.precision_for_distance_corresponding_to_potential);
+            physical_population_stability_options{}.precision_for_distance_corresponding_to_potential,
+        R"doc(Determine the stability of the SiDB population under the physical model.
+The keyword options select simulation, potential precision, and the execution budget.
+)doc");
 }
 
 }  // namespace detail

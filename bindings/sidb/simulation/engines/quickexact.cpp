@@ -60,13 +60,13 @@ void register_quickexact(nb::module_& m)
     m.def(
         "quickexact",
         [](const fiction::sidb::layout& lyt, const decltype(quickexact_options{}.sim_params.base) base,
-           const decltype(quickexact_options{}.sim_params.mu_minus)                     mu_minus,
-           const decltype(quickexact_options{}.sim_params.epsilon_r)                    epsilon_r,
-           const decltype(quickexact_options{}.sim_params.lambda_tf)                    lambda_tf,
-           const decltype(quickexact_options{}.base_number_detection)                   base_number_detection,
-           const std::optional<decltype(quickexact_options{}.local_external_potential)> local_external_potential,
-           const decltype(quickexact_options{}.global_potential)                        global_potential,
-           const decltype(quickexact_options{}.on_progress)                             on_progress)
+           const decltype(quickexact_options{}.sim_params.mu_minus)                      mu_minus,
+           const decltype(quickexact_options{}.sim_params.epsilon_r)                     epsilon_r,
+           const decltype(quickexact_options{}.sim_params.lambda_tf)                     lambda_tf,
+           const decltype(quickexact_options{}.base_number_detection)                    base_number_detection,
+           const std::optional<decltype(quickexact_options{}.local_external_potential)>& local_external_potential,
+           const decltype(quickexact_options{}.global_potential)                         global_potential,
+           const decltype(quickexact_options{}.on_progress)&                             on_progress)
         {
             quickexact_options params{};
             params.sim_params            = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
@@ -87,36 +87,8 @@ void register_quickexact(nb::module_& m)
         nb::arg("base_number_detection")    = quickexact_options{}.base_number_detection,
         nb::arg("local_external_potential") = nb::none(),
         nb::arg("global_potential") = quickexact_options{}.global_potential, nb::arg("on_progress").none() = nb::none(),
-        R"doc(*QuickExact* is a quick and exact physical simulation algorithm
-designed specifically for SiDB layouts. It was proposed in \"The Need
-for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic\"
-by J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2024
-(https://ieeexplore.ieee.org/document/10473946). It determines all
-physically valid charge configurations of a given SiDB layout,
-providing a significant performance advantage of more than three
-orders of magnitude over *ExGS*.
-
-The performance improvement stems from the use of physically informed
-search space pruning: SiDBs whose local potential forces them negative
-are removed from the enumeration and modeled as fixed negative
-charges, one SiDB's charge state follows from the others, and
-positively charged SiDBs are enumerated only where they can occur.
-Charged surface defects of the layout and external potentials enter
-the potential landscape.
-
-Args:
-    lyt: Layout to simulate.
-
-Returns:
-    Simulation result: every physically valid charge distribution of
-    `lyt`.
-
-Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
-    utils::timeout_error: if the shared caller deadline expires. No
-                          partial result is returned.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Simulate the SiDB layout with QuickExact.
+The keyword options select physical values, base detection, external potentials, and progress reporting.
 )doc");
 }
 

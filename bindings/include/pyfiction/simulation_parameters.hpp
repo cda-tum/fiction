@@ -21,6 +21,9 @@
 
 #include <nanobind/nanobind.h>
 
+/** @brief Namespace alias for nanobind. */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -31,14 +34,14 @@ namespace pyfiction
  * @param epsilon_r Relative permittivity.
  * @param lambda_tf Screening distance in nm.
  * @return Validated native physical simulation values.
- * @throws nanobind::value_error If base is neither 2 nor 3.
+ * @throws nb::value_error If base is neither 2 nor 3.
  */
 inline fiction::sidb::model::simulation_parameters
 make_simulation_parameters(const uint8_t base, const double mu_minus, const double epsilon_r, const double lambda_tf)
 {
     if (base != 2 && base != 3)
     {
-        throw nanobind::value_error("base must be 2 or 3");
+        throw nb::value_error("base must be 2 or 3");
     }
     return fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
 }

@@ -122,19 +122,8 @@ void register_detect_bdl_wires(nb::module_& m)
         nb::arg("minimum_distance")            = detect_bdl_wires_options{}.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance")            = detect_bdl_wires_options{}.bdl_pairs_params.maximum_distance,
         nb::arg("wire_selection")              = fiction::sidb::simulation::logic::bdl_wire_selection::ALL,
-        R"doc(Detects the BDL wires of an SiDB layout: the BDL pairs of all types
-are chained into wires along the layout's lattice whenever two pairs
-lie within `threshold_bdl_interdistance` of each other.
-
-Args:
-    lyt: The layout.
-    wire_selection: Which wires to return: all, input, or output
-                    wires.
-
-Returns:
-    The detected wires.
-
-Algorithm options are keyword-only; the signature lists their defaults.
+        R"doc(Chain BDL pairs into wires along the SiDB lattice.
+The keyword options select pair-distance bounds, inter-pair distance, and wire types.
 )doc");
 }
 
