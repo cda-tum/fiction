@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import contextlib
-import datetime
+import datetime as dt
 import json
 import os
 import shutil
@@ -295,7 +295,7 @@ class Session:
             ``True`` when the command succeeded or only printed its help.
         """
         name, *arguments = argv
-        started = datetime.datetime.now(tz=datetime.timezone.utc)
+        started = dt.datetime.now(tz=dt.timezone.utc)
         clock = time.perf_counter()
         entry: dict[str, object] = {
             "command": name,
