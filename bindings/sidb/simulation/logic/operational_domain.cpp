@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI Codex
  */
 
 #include "pyfiction/documentation.hpp"
@@ -437,7 +438,7 @@ void operational_domain(nanobind::module_& m)
                     });
 
                 /** @brief Buffer address retained by both returned arrays. */
-                auto*             data = buffers.get();
+                auto* const       data = buffers.get();
                 const py::capsule owner{data, [](void* p) noexcept
                                         {
                                             // the capsule is the owner and runs this when the last array dies
@@ -445,7 +446,7 @@ void operational_domain(nanobind::module_& m)
                                             delete static_cast<detail::numpy_buffers*>(p);
                                         }};
 
-                data = buffers.release();
+                static_cast<void>(buffers.release());
 
                 return std::make_tuple(
                     py::ndarray<py::numpy, double, py::ndim<2>>{data->coordinates.data(), {points, dimensions}, owner},
