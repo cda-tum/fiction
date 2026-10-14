@@ -52,6 +52,30 @@
 
 ## Operational Domain Computation
 
+The plots below show the {download}`SiQAD OR gate <../../../../../test/python/resources/siqad_or_gate.sqd>`
+with each reconstruction method. QuickExact evaluates the OR truth table with two charge states,
+distance-encoded inputs, tolerated kinks, and $\mu^{-} = -0.32\,\mathrm{eV}$. Both $\epsilon_r$ and
+$\lambda_{\mathrm{TF}}$ range from 1 to 10 in steps of 0.1; the latter is measured in nm.
+Purple marks operational samples, gray marks non-operational samples, and blank areas contain no samples.
+Random sampling uses 500 draws; flood fill and contour tracing start from 500 random draws.
+These three methods can produce different samples on each run.
+
+Install `mnt-pyfiction[plot]`, download the gate, and run these commands in the download directory:
+
+```bash
+fiction-opdom siqad_or_gate.sqd --gate or --algorithm grid_search \
+    --bdl-wire-distance 1.5 --threads 4 --width 7 --height 5 --dpi 180 \
+    --title "SiQAD OR gate: grid search" --plot opdom_siqad_or_grid_search.png
+for algorithm in random_sampling flood_fill contour_tracing; do
+    fiction-opdom siqad_or_gate.sqd --gate or --algorithm "$algorithm" --samples 500 \
+        --bdl-wire-distance 1.5 --threads 4 --width 7 --height 5 --dpi 180 \
+        --title "SiQAD OR gate: ${algorithm//_/ }" --plot "opdom_siqad_or_${algorithm}.png"
+done
+```
+
+The 1.5 nm BDL wire threshold keeps the gate's two inputs separate. The other simulation,
+sweep, color, and legend options use the CLI defaults.
+
 ::::{tab-set}
 :sync-group: language
 
@@ -162,16 +186,44 @@ flood fill or contour tracing in three dimensions.
 
 ```
 
+```{figure} /_static/opdom_siqad_or_grid_search.png
+:alt: SiQAD OR gate operational domain from grid search, with purple operational and gray non-operational samples.
+:width: 100%
+
+Grid search evaluates every point in the parameter grid.
+```
+
 ```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
+```
+
+```{figure} /_static/opdom_siqad_or_random_sampling.png
+:alt: SiQAD OR gate operational domain from random sampling, with purple operational and gray non-operational samples.
+:width: 100%
+
+Random sampling evaluates isolated points across the parameter grid.
 ```
 
 ```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
+```{figure} /_static/opdom_siqad_or_flood_fill.png
+:alt: SiQAD OR gate operational domain from flood fill, with purple operational and gray non-operational samples.
+:width: 100%
+
+Flood fill expands from operational seeds and evaluates their neighbors.
+```
+
 ```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
+```
+
+```{figure} /_static/opdom_siqad_or_contour_tracing.png
+:alt: SiQAD OR gate operational domain from contour tracing, with purple operational and gray non-operational samples.
+:width: 100%
+
+Contour tracing samples the operational boundary and retains its initial random samples.
 ```
 
 ```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
@@ -268,11 +320,35 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 ```{eval-rst}
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_grid_search
 
+.. figure:: /_static/opdom_siqad_or_grid_search.png
+   :alt: SiQAD OR gate operational domain from grid search, with purple operational and gray non-operational samples.
+   :width: 100%
+
+   Grid search evaluates every point in the parameter grid.
+
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_random_sampling
+
+.. figure:: /_static/opdom_siqad_or_random_sampling.png
+   :alt: SiQAD OR gate operational domain from random sampling, with purple operational and gray non-operational samples.
+   :width: 100%
+
+   Random sampling evaluates isolated points across the parameter grid.
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_flood_fill
 
+.. figure:: /_static/opdom_siqad_or_flood_fill.png
+   :alt: SiQAD OR gate operational domain from flood fill, with purple operational and gray non-operational samples.
+   :width: 100%
+
+   Flood fill expands from operational seeds and evaluates their neighbors.
+
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_contour_tracing
+
+.. figure:: /_static/opdom_siqad_or_contour_tracing.png
+   :alt: SiQAD OR gate operational domain from contour tracing, with purple operational and gray non-operational samples.
+   :width: 100%
+
+   Contour tracing samples the operational boundary and retains its initial random samples.
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_grid_search
 
