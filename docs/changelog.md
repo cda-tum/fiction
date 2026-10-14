@@ -572,6 +572,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
+    in physical-parameter analysis.
   - `random_coordinate` uses a separate random generator for each thread.
   - Dense distance maps now index every layer and reject coordinates outside the layout frame.
   - Physical-design border calculations and hexagonalization now preserve the maximum signed coordinate.

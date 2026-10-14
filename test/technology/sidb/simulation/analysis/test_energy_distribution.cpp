@@ -35,6 +35,18 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 
+TEST_CASE("Energy degeneracy returns the stored state count", "[energy-distribution]")
+{
+    energy_distribution distribution{};
+    distribution.add_energy_state({-1.0, 7});
+    distribution.add_energy_state({0.0, 3});
+
+    CHECK(distribution.degeneracy(-1.0) == 7);
+    CHECK(distribution.degeneracy(-1.0 + 1e-7) == 7);
+    CHECK(distribution.degeneracy(0.0) == 3);
+    CHECK_FALSE(distribution.degeneracy(1.0).has_value());
+}
+
 TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]")
 {
     SECTION("one empty layout")

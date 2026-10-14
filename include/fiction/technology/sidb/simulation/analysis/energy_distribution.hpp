@@ -101,15 +101,12 @@ class energy_distribution
      */
     [[nodiscard]] std::optional<uint64_t> degeneracy(const double energy) const noexcept
     {
-        uint64_t degeneracy = 0;
-
         for (const auto& [key, value] : distribution)
         {
             if (std::abs(key - energy) < fiction::utils::math::ERROR_MARGIN)
             {
-                return degeneracy;
+                return value;
             }
-            ++degeneracy;
         }
 
         return std::nullopt;

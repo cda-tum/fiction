@@ -17,7 +17,17 @@ import pytest
 from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state
 from mnt.pyfiction.sidb.simulation import potential_landscape
-from mnt.pyfiction.sidb.simulation.analysis import calculate_energy_distribution
+from mnt.pyfiction.sidb.simulation.analysis import calculate_energy_distribution, energy_distribution, energy_state
+
+
+def test_degeneracy_returns_state_count() -> None:
+    """Energy lookup returns the stored state count rather than the energy-level index."""
+    distribution = energy_distribution()
+    distribution.add_energy_state(energy_state(-1.0, 7))
+    distribution.add_energy_state(energy_state(0.0, 3))
+    assert distribution.degeneracy(-1.0) == 7
+    assert distribution.degeneracy(0.0) == 3
+    assert distribution.degeneracy(1.0) is None
 
 
 @pytest.mark.parametrize(
