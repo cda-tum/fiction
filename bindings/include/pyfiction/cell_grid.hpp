@@ -118,6 +118,7 @@ void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
         .def(
             "__deepcopy__", [](const Lyt& lyt, const nb::dict&) { return Lyt{lyt}; }, nb::arg("memo"),
             "Returns an independent copy of the layout.", nb::call_guard<nb::gil_scoped_release>())
+        // nanobind compares placeholders to register same-type operators.
         .def(nb::self == nb::self, nb::call_guard<nb::gil_scoped_release>())  // NOLINT(misc-redundant-expression)
         .def(nb::self != nb::self, nb::call_guard<nb::gil_scoped_release>())  // NOLINT(misc-redundant-expression)
         .def(
