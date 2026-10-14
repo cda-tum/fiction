@@ -14,6 +14,7 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded nativ
 import sys
 import textwrap
 import threading
+from time import monotonic
 from typing import TYPE_CHECKING
 
 import pytest
@@ -40,15 +41,15 @@ def test_native_work_releases_the_gil(kind: str, tmp_path: Path) -> None:
         tmp_path: Directory for the defect matrix.
     """
     if kind == "coordinates":
-        layout = cartesian_layout((1000, 1000))
-        assert len(run_with_python_progress(layout.coordinates)) == 1_000_000
+        layout = cartesian_layout((2000, 1000))
+        assert len(run_with_python_progress(layout.coordinates)) == 2_000_000
     elif kind == "depth":
-        network = random_network(100, 50_000, 7)
+        network = random_network(100, 100_000, 7)
         assert run_with_python_progress(network.depth) > 0
     elif kind == "routing":
-        gate_layout = cartesian_gate_layout((251, 50), "2DDWave")
+        gate_layout = cartesian_gate_layout((251, 250), "2DDWave")
         objectives = []
-        for y in range(50):
+        for y in range(250):
             source = gate_layout.create_pi(f"in{y}", (0, y))
             gate_layout.create_po(source, f"out{y}", (250, y))
             objectives.append(((0, y), (250, y), 0))
@@ -61,7 +62,8 @@ def test_native_work_releases_the_gil(kind: str, tmp_path: Path) -> None:
             """
             return color_routing(gate_layout, objectives, path_limit=1)
 
-        assert run_with_python_progress(route) is True
+        # Routing mutates the layout, so use one substantial workload instead of repeating it.
+        assert run_with_python_progress(route, repeat=False) is True
 
     elif kind == "defects":
         path = tmp_path / "defects.txt"
@@ -92,37 +94,29 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
     count = 1_000_000
     layout = sidb_layout()
     for column in range(count):
-        layout.assign_sidb(lattice_site(column, 0, 0), sidb_dot_tag.INPUT)
+        layout.assign_sidb(lattice_site(column, 0, 0), sidb_dot_tag.NORMAL)
 
     if kind == "sites":
-
-        def sites() -> list[lattice_site]:
-            """Repeat bulk traversal so a waiting Python thread can observe the release.
-
-            Returns:
-                The input sites from the final traversal.
-            """
-            result = layout.pis()
-            for _ in range(7):
-                result = layout.pis()
-            return result
-
-        assert len(run_with_python_progress(sites)) == count
+        # Scan every dot while keeping Python result conversion small.
+        layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
+        assert run_with_python_progress(layout.pis) == [lattice_site(0, 0, 0)]
     else:
 
         def construct() -> charge_distribution:
-            """Construct distributions over the layout's complete dot collection.
+            """Construct a distribution over the layout's complete dot collection.
 
             Returns:
-                The final distribution containing one charge per dot.
+                The distribution containing one charge per dot.
             """
-            # Sustained native work lets a waiting thread run even when one allocation finishes quickly.
-            distribution = charge_distribution(layout)
-            for _ in range(127):
-                distribution = charge_distribution(layout)
-            return distribution
+            return charge_distribution(layout)
 
         assert run_with_python_progress(construct).size() == count
+
+
+def test_progress_check_requires_a_native_gil_release() -> None:
+    """Repeated Python calls cannot satisfy the native progress check."""
+    with pytest.raises(AssertionError):
+        run_with_python_progress(lambda: None)
 
 
 def test_bdl_iterator_serializes_cursor_updates() -> None:
@@ -170,11 +164,12 @@ def test_bdl_iterator_serializes_cursor_updates() -> None:
     assert result.returncode == 0, result.stderr
 
 
-def run_with_python_progress(operation: Callable[[], Any]) -> Any:
-    """Check that another Python thread runs before the native operation returns.
+def run_with_python_progress(operation: Callable[[], Any], *, repeat: bool = True) -> Any:
+    """Check that another Python thread runs during native work.
 
     Args:
-        operation: Native call with its arguments prepared.
+        operation: Native call with its arguments prepared. Must support repeated calls when repeat is True.
+        repeat: Repeat fast operations for up to five seconds to allow OS scheduling; False for mutating operations.
 
     Returns:
         The native operation's result.
@@ -198,7 +193,10 @@ def run_with_python_progress(operation: Callable[[], Any]) -> Any:
         # Suppress interpreter handoffs so progress requires a native GIL release.
         sys.setswitchinterval(60)
         start.set()
+        deadline = monotonic() + 5
         result = operation()
+        while repeat and not refreshed.is_set() and monotonic() < deadline:
+            result = operation()
         refreshed_during_operation = refreshed.is_set()
     finally:
         sys.setswitchinterval(interval)
