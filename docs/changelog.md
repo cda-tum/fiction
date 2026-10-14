@@ -435,6 +435,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate-set factories return keyword dictionaries for `technology_mapping`; nested timeout
     options use `design_gate_timeout` and `quicksim_timeout`.
 
+  - Single-layout generation omits multiple-layout options; non-gate temperature analysis omits gate options.
+    Supplied-wire overloads omit `threshold_bdl_interdistance`.
+
   - Python bindings reject NaN or reversed BDL distance bounds, nonpositive or NaN conversion potentials,
     and conversion precisions that yield a zero or non-finite distance step.
 
