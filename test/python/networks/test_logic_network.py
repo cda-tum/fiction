@@ -137,8 +137,7 @@ def test_random_specialization_names_are_removed(name: str) -> None:
 def test_random_network_contract(generator_name: str, network_name: str) -> None:
     """Generators preserve type, size, seed behavior, and input validation."""
     network_type = getattr(networks, network_name)
-    generate = lambda **kwargs: networks.random_network(**kwargs, network_type=network_type)
-    network = generate(inputs=3, gates=5, seed=42)
+    network = networks.random_network(inputs=3, gates=5, seed=42, network_type=network_type)
     assert isinstance(network, getattr(networks, network_name))
     assert network.num_pis() == 3
     if generator_name == "tec":
@@ -147,7 +146,9 @@ def test_random_network_contract(generator_name: str, network_name: str) -> None
     else:
         assert network.num_gates() == 5
     assert networks.get_name(network) == "42"
-    assert networks.simulate_outputs(network) == networks.simulate_outputs(generate(inputs=3, gates=5, seed=42))
+    assert networks.simulate_outputs(network) == networks.simulate_outputs(
+        networks.random_network(inputs=3, gates=5, seed=42, network_type=network_type)
+    )
     for inputs, gates in [(0, 5), (1, 5), (3, 0)]:
         with pytest.raises(ValueError, match="random generation requires at least two inputs and one gate"):
-            generate(inputs=inputs, gates=gates, seed=42)
+            networks.random_network(inputs=inputs, gates=gates, seed=42, network_type=network_type)
