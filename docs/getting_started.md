@@ -336,9 +336,9 @@ require the GIL; wrappers release it only around their native work.
 Python callbacks passed through nanobind's `std::function` conversion acquire the GIL for each invocation.
 Native calls that wait for callback workers release the GIL so those workers can enter Python.
 
-GIL release does not synchronize native objects. Do not access an object from another thread while a native call
-mutates it, and do not mutate an object while a native call reads it. This restriction includes copies that share
-native storage, callback access, and statistics objects supplied to a running algorithm. Use a Python lock around
+GIL release does not synchronize native objects. Do not access an object from another thread or callback while a
+released call uses it. Even read-only operations can update native traversal state. This restriction includes
+copies that share native storage and statistics objects supplied to a running algorithm. Use a Python lock around
 all such access or pass independent objects. A callback may consume its reported values; it must not inspect or
 modify native objects still in use by the algorithm.
 
