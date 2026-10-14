@@ -23,23 +23,27 @@
 #include <nanobind/stl/function.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 /** @brief Binds distances between shared layout coordinates. @param m Physical-design module. */
-void distance(nanobind::module_& m)
+void register_distance(nb::module_& m)
 {
-    namespace py = nanobind;
-    m.def("manhattan_distance", &fiction::physical_design::path_finding::manhattan_distance, py::arg("source"),
-          py::arg("target"), DOC(fiction_physical_design_path_finding_manhattan_distance));
-    m.def("euclidean_distance", &fiction::physical_design::path_finding::euclidean_distance, py::arg("source"),
-          py::arg("target"), DOC(fiction_physical_design_path_finding_euclidean_distance));
+    m.def("manhattan_distance", &fiction::physical_design::path_finding::manhattan_distance, nb::arg("source"),
+          nb::arg("target"), DOC(fiction_physical_design_path_finding_manhattan_distance));
+    m.def("euclidean_distance", &fiction::physical_design::path_finding::euclidean_distance, nb::arg("source"),
+          nb::arg("target"), DOC(fiction_physical_design_path_finding_euclidean_distance));
     m.def("squared_euclidean_distance", &fiction::physical_design::path_finding::squared_euclidean_distance,
-          py::arg("source"), py::arg("target"), DOC(fiction_physical_design_path_finding_squared_euclidean_distance));
-    m.def("twoddwave_distance", &fiction::physical_design::path_finding::twoddwave_distance, py::arg("source"),
-          py::arg("target"), DOC(fiction_physical_design_path_finding_twoddwave_distance));
-    m.def("chebyshev_distance", &fiction::physical_design::path_finding::chebyshev_distance, py::arg("source"),
-          py::arg("target"), DOC(fiction_physical_design_path_finding_chebyshev_distance));
+          nb::arg("source"), nb::arg("target"), DOC(fiction_physical_design_path_finding_squared_euclidean_distance));
+    m.def("twoddwave_distance", &fiction::physical_design::path_finding::twoddwave_distance, nb::arg("source"),
+          nb::arg("target"), DOC(fiction_physical_design_path_finding_twoddwave_distance));
+    m.def("chebyshev_distance", &fiction::physical_design::path_finding::chebyshev_distance, nb::arg("source"),
+          nb::arg("target"), DOC(fiction_physical_design_path_finding_chebyshev_distance));
 }
 
 }  // namespace pyfiction

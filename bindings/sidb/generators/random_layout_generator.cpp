@@ -30,17 +30,24 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void random_layout_generator(nanobind::module_& m)
+/**
+ * @brief Binds random layout generator helpers.
+ * @param m Python module.
+ */
+void register_random_layout_generator(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::layout;
     using fiction::sidb::generators::generate_random_layout_params;
 
-    py::enum_<generate_random_layout_params::positive_charges>(
+    nb::enum_<generate_random_layout_params::positive_charges>(
         m, "positive_charges", DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges))
         .value("ALLOWED", generate_random_layout_params::positive_charges::ALLOWED,
                DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED))
@@ -52,10 +59,10 @@ void random_layout_generator(nanobind::module_& m)
     /**
      * Parameters.
      */
-    py::class_<generate_random_layout_params>(m, "generate_random_sidb_layout_params",
+    nb::class_<generate_random_layout_params>(m, "generate_random_sidb_layout_params",
                                               pyfiction::progress_type_slots<generate_random_layout_params>(),
                                               DOC(fiction_sidb_generators_generate_random_layout_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("coordinate_pair", &generate_random_layout_params::coordinate_pair,
                 DOC(fiction_sidb_generators_generate_random_layout_params_coordinate_pair))
         .def_rw("number_of_sidbs", &generate_random_layout_params::number_of_sidbs,
@@ -78,15 +85,15 @@ void random_layout_generator(nanobind::module_& m)
     m.def(
         "generate_random_sidb_layout",
         [](const generate_random_layout_params& params, const std::optional<layout>& skeleton)
-        { return fiction::sidb::generators::generate_random_layout(params, skeleton); }, py::arg("params"),
-        py::arg("lyt_skeleton") = std::nullopt, py::call_guard<py::gil_scoped_release>(),
+        { return fiction::sidb::generators::generate_random_layout(params, skeleton); }, nb::arg("params"),
+        nb::arg("lyt_skeleton") = std::nullopt, nb::call_guard<nb::gil_scoped_release>(),
         DOC(fiction_sidb_generators_generate_random_layout));
 
     m.def(
         "generate_multiple_random_sidb_layouts",
         [](const generate_random_layout_params& params, const std::optional<layout>& skeleton)
-        { return fiction::sidb::generators::generate_multiple_random_layouts(params, skeleton); }, py::arg("params"),
-        py::arg("lyt_skeleton") = std::nullopt, py::call_guard<py::gil_scoped_release>(),
+        { return fiction::sidb::generators::generate_multiple_random_layouts(params, skeleton); }, nb::arg("params"),
+        nb::arg("lyt_skeleton") = std::nullopt, nb::call_guard<nb::gil_scoped_release>(),
         DOC(fiction_sidb_generators_generate_multiple_random_layouts));
 }
 

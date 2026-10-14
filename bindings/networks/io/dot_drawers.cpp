@@ -24,17 +24,25 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 namespace detail
 {
 
+/**
+ * @brief Binds write dot network helpers.
+ * @param m Python module.
+ * @tparam Ntk Network type.
+ */
 template <typename Ntk>
-void write_dot_network(nanobind::module_& m)
+void register_write_dot_network(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "write_dot_network",
         [](const Ntk& ntk, const std::string& filename, const bool indexes)
@@ -50,18 +58,22 @@ void write_dot_network(nanobind::module_& m)
                     ntk, filename);
             }
         },
-        py::arg("network"), py::arg("filename"), py::arg("indexes") = true, DOC(fiction_networks_io_write_dot_network),
-        py::call_guard<py::gil_scoped_release>());
+        nb::arg("network"), nb::arg("filename"), nb::arg("indexes") = true, DOC(fiction_networks_io_write_dot_network),
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
-void dot_drawers(nanobind::module_& m)
+/**
+ * @brief Binds dot drawers helpers.
+ * @param m Python module.
+ */
+void register_dot_drawers(nb::module_& m)
 {
-    detail::write_dot_network<py_tec_network>(m);
-    detail::write_dot_network<py_aig_network>(m);
-    detail::write_dot_network<py_xag_network>(m);
-    detail::write_dot_network<py_mig_network>(m);
+    detail::register_write_dot_network<py_tec_network>(m);
+    detail::register_write_dot_network<py_aig_network>(m);
+    detail::register_write_dot_network<py_xag_network>(m);
+    detail::register_write_dot_network<py_mig_network>(m);
 }
 
 }  // namespace pyfiction

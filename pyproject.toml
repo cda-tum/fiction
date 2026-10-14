@@ -189,6 +189,7 @@ cache-keys = [
     { file = "pyproject.toml" },
     { git = { commit = true, tags = true } },
     { file = "bindings/**/*.hpp" },
+    { file = "bindings/**/*.cpp" },
 ]
 
 [tool.uv.dependency-groups]

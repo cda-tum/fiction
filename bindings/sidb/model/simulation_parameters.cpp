@@ -24,17 +24,24 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void simulation_parameters(nanobind::module_& m)
+/**
+ * @brief Binds simulation parameters helpers.
+ * @param m Python module.
+ */
+void register_simulation_parameters(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    py::class_<fiction::sidb::model::simulation_parameters>(m, "sidb_simulation_parameters",
+    nb::class_<fiction::sidb::model::simulation_parameters>(m, "sidb_simulation_parameters",
                                                             DOC(fiction_sidb_model_simulation_parameters))
-        .def(py::init<const uint8_t, const double, const double, const double>(), py::arg("base_number") = 3,
-             py::arg("mu_minus") = -0.32, py::arg("relative_permittivity") = 5.6, py::arg("screening_distance") = 5.0,
+        .def(nb::init<const uint8_t, const double, const double, const double>(), nb::arg("base_number") = 3,
+             nb::arg("mu_minus") = -0.32, nb::arg("relative_permittivity") = 5.6, nb::arg("screening_distance") = 5.0,
              DOC(fiction_sidb_model_simulation_parameters_simulation_parameters))
         .def_rw("epsilon_r", &fiction::sidb::model::simulation_parameters::epsilon_r,
                 DOC(fiction_sidb_model_simulation_parameters_epsilon_r))

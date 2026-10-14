@@ -15,6 +15,8 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <nanobind/nanobind.h>
+
 #if (FICTION_Z3_SOLVER)
 
 #include "pyfiction/documentation.hpp"
@@ -24,8 +26,8 @@
 #include <fiction/physical_design/exact.hpp>
 
 #include <sstream>
+#include <type_traits>
 
-#include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
@@ -39,24 +41,70 @@
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void exact(nanobind::module_& m)
+namespace detail
 {
-    namespace py = nanobind;
+/**
+ * @brief Bind exact physical design for a registered output layout class.
+ * @tparam Lyt Layout representation.
+ * @param m Physical design module.
+ * @param signature Python signature including the selected return type.
+ */
+template <typename Lyt>
+void register_exact(nb::module_& m, const char* signature)
+{
+    /** @brief Compute exact physical design for the selected layout representation. */
+    const auto design =
+        [](const py_tec_network& network, const fiction::physical_design::exact_physical_design_params& parameters,
+           fiction::physical_design::exact_physical_design_stats* statistics, const nb::handle layout_type)
+    {
+        if (!layout_type.is(nb::type<Lyt>()))
+        {
+            throw nb::next_overload();
+        }
+        const nb::gil_scoped_release release{};
+        return fiction::physical_design::exact<Lyt, py_tec_network>(network, parameters, statistics);
+    };
+    if constexpr (std::is_same_v<Lyt, py_cartesian_gate_layout>)
+    {
+        m.def("exact", design, nb::arg("network"),
+              nb::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+              nb::arg("statistics") = nullptr, nb::kw_only(), nb::arg("layout_type") = nb::type<Lyt>(),
+              nb::sig(signature), DOC(fiction_physical_design_exact));
+    }
+    else
+    {
+        m.def("exact", design, nb::arg("network"),
+              nb::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+              nb::arg("statistics") = nullptr, nb::kw_only(), nb::arg("layout_type"), nb::sig(signature));
+    }
+}
+}  // namespace detail
 
-    py::enum_<fiction::physical_design::technology_constraints>(m, "technology_constraints",
+/**
+ * @brief Binds exact helpers.
+ * @param m Python module.
+ */
+void register_exact(nb::module_& m)
+{
+    nb::enum_<fiction::physical_design::technology_constraints>(m, "technology_constraints",
                                                                 DOC(fiction_physical_design_technology_constraints))
         .value("NONE", fiction::physical_design::technology_constraints::NONE,
                DOC(fiction_physical_design_technology_constraints_NONE))
         .value("TOPOLINANO", fiction::physical_design::technology_constraints::TOPOLINANO,
                DOC(fiction_physical_design_technology_constraints_TOPOLINANO));
 
-    py::class_<fiction::physical_design::exact_physical_design_params>(
+    nb::class_<fiction::physical_design::exact_physical_design_params>(
         m, "exact_params", pyfiction::progress_type_slots<fiction::physical_design::exact_physical_design_params>(),
         DOC(fiction_physical_design_exact_physical_design_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("scheme", &fiction::physical_design::exact_physical_design_params::scheme,
                 DOC(fiction_physical_design_exact_physical_design_params_scheme))
         .def_rw("layout_arrangement", &fiction::physical_design::exact_physical_design_params::layout_arrangement,
@@ -96,9 +144,9 @@ void exact(nanobind::module_& m)
                 pyfiction::ON_WORKER_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_exact_physical_design_params_on_worker_progress));
 
-    py::class_<fiction::physical_design::exact_physical_design_stats>(
+    nb::class_<fiction::physical_design::exact_physical_design_stats>(
         m, "exact_stats", DOC(fiction_physical_design_exact_physical_design_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::physical_design::exact_physical_design_stats& stats)
@@ -123,35 +171,50 @@ void exact(nanobind::module_& m)
         .def_ro("num_aspect_ratios", &fiction::physical_design::exact_physical_design_stats::num_aspect_ratios,
                 DOC(fiction_physical_design_exact_physical_design_stats_num_aspect_ratios));
 
-    m.def("exact_cartesian", &fiction::physical_design::exact<py_cartesian_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
-          DOC(fiction_physical_design_exact));
-
-    m.def("exact_shifted_cartesian", &fiction::physical_design::exact<py_shifted_cartesian_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
-          DOC(fiction_physical_design_exact));
-
-    m.def("exact_hexagonal", &fiction::physical_design::exact<py_hexagonal_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
-          DOC(fiction_physical_design_exact));
+    detail::register_exact<py_cartesian_gate_layout>(
+        m, "def exact(network: mnt.pyfiction.networks.technology_network, parameters: exact_params = ..., statistics: "
+           "exact_stats | None = None, *, layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout] = "
+           "mnt.pyfiction.layouts.cartesian_gate_layout) -> mnt.pyfiction.layouts.cartesian_gate_layout | None");
+    detail::register_exact<py_shifted_cartesian_gate_layout>(
+        m, "def exact(network: mnt.pyfiction.networks.technology_network, parameters: exact_params = ..., statistics: "
+           "exact_stats | None = None, *, layout_type: type[mnt.pyfiction.layouts.shifted_cartesian_gate_layout]) -> "
+           "mnt.pyfiction.layouts.shifted_cartesian_gate_layout | None");
+    detail::register_exact<py_hexagonal_gate_layout>(
+        m, "def exact(network: mnt.pyfiction.networks.technology_network, parameters: exact_params = ..., statistics: "
+           "exact_stats | None = None, *, layout_type: type[mnt.pyfiction.layouts.hexagonal_gate_layout]) -> "
+           "mnt.pyfiction.layouts.hexagonal_gate_layout | None");
+    m.def(
+        "exact",
+        [](const py_tec_network&, const fiction::physical_design::exact_physical_design_params&,
+           fiction::physical_design::exact_physical_design_stats*, const nb::handle) -> nb::object
+        { throw nb::type_error("layout_type must be a supported registered gate layout class"); },
+        nb::arg("network"), nb::arg("parameters") = fiction::physical_design::exact_physical_design_params{},
+        nb::arg("statistics") = nullptr, nb::kw_only(), nb::arg("layout_type"),
+        nb::sig(
+            "def exact(network: mnt.pyfiction.networks.technology_network, parameters: exact_params = ..., statistics: "
+            "exact_stats | None = None, *, layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout | "
+            "mnt.pyfiction.layouts.shifted_cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout]) -> "
+            "mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.shifted_cartesian_gate_layout | "
+            "mnt.pyfiction.layouts.hexagonal_gate_layout | None"));
 }
 
 }  // namespace pyfiction
 
 #else  // FICTION_Z3_SOLVER
 
-#include <nanobind/nanobind.h>
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
 
 /**
- * Disable SMT-based exact physical design.
+ * @brief Disable SMT-based exact physical design.
+ * @param m Python module.
  */
-void exact([[maybe_unused]] nanobind::module_& m) {}
+void register_exact([[maybe_unused]] nb::module_& m) {}
 
 }  // namespace pyfiction
 

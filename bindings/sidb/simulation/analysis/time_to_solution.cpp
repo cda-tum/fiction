@@ -35,21 +35,28 @@
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void time_to_solution(nanobind::module_& m)
+/**
+ * @brief Binds time to solution helpers.
+ * @param m Python module.
+ */
+void register_time_to_solution(nb::module_& m)
 {
-    namespace py = nanobind;
-
     /**
      * Parameters.
      */
-    py::class_<fiction::sidb::simulation::analysis::time_to_solution_params>(
+    nb::class_<fiction::sidb::simulation::analysis::time_to_solution_params>(
         m, "time_to_solution_params",
         pyfiction::progress_type_slots<fiction::sidb::simulation::analysis::time_to_solution_params>(),
         DOC(fiction_sidb_simulation_analysis_time_to_solution_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::sidb::simulation::analysis::time_to_solution_params::timeout,
                 DOC(fiction_sidb_simulation_analysis_time_to_solution_params_timeout))
         .def_rw("engine", &fiction::sidb::simulation::analysis::time_to_solution_params::engine,
@@ -64,9 +71,9 @@ void time_to_solution(nanobind::module_& m)
     /**
      * Statistics.
      */
-    py::class_<fiction::sidb::simulation::analysis::time_to_solution_stats>(
+    nb::class_<fiction::sidb::simulation::analysis::time_to_solution_stats>(
         m, "time_to_solution_stats", DOC(fiction_sidb_simulation_analysis_time_to_solution_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::sidb::simulation::analysis::time_to_solution_stats& stats)
@@ -99,12 +106,12 @@ void time_to_solution(nanobind::module_& m)
            const fiction::sidb::simulation::analysis::time_to_solution_params& tts_params,
            fiction::sidb::simulation::analysis::time_to_solution_stats*        ps)
         { fiction::sidb::simulation::analysis::time_to_solution(lyt, qs_params, tts_params, ps); },
-        py::arg("lyt"), py::arg("quicksim_params"),
-        py::arg("tts_params") = fiction::sidb::simulation::analysis::time_to_solution_params{}, py::arg("ps") = nullptr,
-        py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_analysis_time_to_solution));
+        nb::arg("lyt"), nb::arg("quicksim_params"),
+        nb::arg("tts_params") = fiction::sidb::simulation::analysis::time_to_solution_params{}, nb::arg("ps") = nullptr,
+        nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_analysis_time_to_solution));
     m.def("time_to_solution_for_given_simulation_results",
-          &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, py::arg("results_exact"),
-          py::arg("results_heuristic"), py::arg("confidence_level") = 0.997, py::arg("ps") = nullptr,
+          &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, nb::arg("results_exact"),
+          nb::arg("results_heuristic"), nb::arg("confidence_level") = 0.997, nb::arg("ps") = nullptr,
           DOC(fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results));
 }
 

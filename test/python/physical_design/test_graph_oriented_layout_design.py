@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import (
     gold_cost_objective,
     gold_effort_mode,
@@ -141,7 +141,7 @@ def test_gold_preserves_declared_interface_order(tmp_path: Path) -> None:
     """GOLD retains unused inputs and terminal names in a serial result."""
     source = tmp_path / "ordered.blif"
     source.write_text(".model ordered\n.inputs unused a b\n.outputs less\n.names b a less\n01 1\n.end\n")
-    ntk = read_technology_network(str(source))
+    ntk = read_network(str(source))
     params = graph_oriented_layout_design_params()
     params.enable_multithreading = False
     params.return_first = True

@@ -16,16 +16,29 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void write_qca_layout(nanobind::module_& m);
-void write_qca_layout_svg(nanobind::module_& m);
+/**
+ * @brief Binds write qca layout helpers.
+ * @param m Python module.
+ */
+void register_write_qca_layout(nb::module_& m);
+/**
+ * @brief Binds write qca layout svg helpers.
+ * @param m Python module.
+ */
+void register_write_qca_layout_svg(nb::module_& m);
 
-void register_qca_io(nanobind::module_& m)
+void register_qca_io(nb::module_& m)
 {
-    write_qca_layout(m);
-    write_qca_layout_svg(m);
+    register_write_qca_layout(m);
+    register_write_qca_layout_svg(m);
 }
 
 }  // namespace pyfiction

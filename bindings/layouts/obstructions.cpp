@@ -27,24 +27,28 @@
 #include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner): Converts directed connection pairs to Python tuples.
 #include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner): Converts obstruction collections to Python lists.
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 /** @brief Registers explicit routing constraints on offset coordinates. @param m Python module. */
-void obstructions(nanobind::module_& m)
+void register_obstructions(nb::module_& m)
 {
-    namespace py = nanobind;
-    using data   = fiction::layouts::obstructions;
+    using data = fiction::layouts::obstructions;
 
-    py::class_<data>(m, "obstructions", DOC(fiction_layouts_obstructions))
-        .def(py::init<>(), "Creates empty layout-independent routing-search constraints.")
-        .def("obstruct_coordinate", &data::obstruct_coordinate, py::arg("c"),
+    nb::class_<data>(m, "obstructions", DOC(fiction_layouts_obstructions))
+        .def(nb::init<>(), "Creates empty layout-independent routing-search constraints.")
+        .def("obstruct_coordinate", &data::obstruct_coordinate, nb::arg("c"),
              DOC(fiction_layouts_obstructions_obstruct_coordinate))
-        .def("obstruct_connection", &data::obstruct_connection, py::arg("src"), py::arg("tgt"),
+        .def("obstruct_connection", &data::obstruct_connection, nb::arg("src"), nb::arg("tgt"),
              DOC(fiction_layouts_obstructions_obstruct_connection))
-        .def("clear_obstructed_coordinate", &data::clear_obstructed_coordinate, py::arg("c"),
+        .def("clear_obstructed_coordinate", &data::clear_obstructed_coordinate, nb::arg("c"),
              DOC(fiction_layouts_obstructions_clear_obstructed_coordinate))
-        .def("clear_obstructed_connection", &data::clear_obstructed_connection, py::arg("src"), py::arg("tgt"),
+        .def("clear_obstructed_connection", &data::clear_obstructed_connection, nb::arg("src"), nb::arg("tgt"),
              DOC(fiction_layouts_obstructions_clear_obstructed_connection))
         .def("clear_obstructed_coordinates", &data::clear_obstructed_coordinates,
              DOC(fiction_layouts_obstructions_clear_obstructed_coordinates))
@@ -71,9 +75,9 @@ void obstructions(nanobind::module_& m)
                 return connections;
             },
             "Returns explicit directed-connection obstructions in unspecified order.")
-        .def("is_obstructed_coordinate", &data::is_obstructed_coordinate, py::arg("c"),
+        .def("is_obstructed_coordinate", &data::is_obstructed_coordinate, nb::arg("c"),
              DOC(fiction_layouts_obstructions_is_obstructed_coordinate))
-        .def("is_obstructed_connection", &data::is_obstructed_connection, py::arg("src"), py::arg("tgt"),
+        .def("is_obstructed_connection", &data::is_obstructed_connection, nb::arg("src"), nb::arg("tgt"),
              DOC(fiction_layouts_obstructions_is_obstructed_connection));
 }
 

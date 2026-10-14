@@ -38,11 +38,25 @@ network specifications under constraints. This approach finds exact results but 
 .. autoclass:: mnt.pyfiction.physical_design.exact_params
    :members:
 
-.. autofunction:: mnt.pyfiction.physical_design.exact_cartesian
-
-.. autofunction:: mnt.pyfiction.physical_design.exact_hexagonal
+.. autofunction:: mnt.pyfiction.physical_design.exact
 ```
 
 :::
 
 ::::
+
+Python `exact` and `orthogonal` select their output with the keyword-only `layout_type` class,
+which defaults to `cartesian_gate_layout`. `exact` also supports shifted Cartesian and hexagonal
+layouts; `orthogonal` also supports hexagonal layouts. Non-Cartesian layouts require an explicit
+`parameters.layout_arrangement`. Pass the exact registered class; subclasses are not supported.
+
+```python
+from mnt.pyfiction.layouts import arrangement, hexagonal_gate_layout
+from mnt.pyfiction.networks.io import read_network
+from mnt.pyfiction.physical_design import exact, exact_params
+
+network = read_network("network.v")
+params = exact_params()
+params.layout_arrangement = arrangement.EVEN_ROW
+layout = exact(network, params, layout_type=hexagonal_gate_layout)
+```

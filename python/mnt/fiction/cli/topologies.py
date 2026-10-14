@@ -110,10 +110,10 @@ def _fgl_reader(topology: str) -> Callable[[str, str], GateLayout]:
         A function of file name and layout name.
     """
     name = canonical(topology)
-    read = getattr(layouts.io, f"read_{SPECS[name][0]}_fgl_layout")
+    cls = getattr(layouts, f"{SPECS[name][0]}_gate_layout")
 
     def reader(filename: str, layout_name: str) -> GateLayout:
-        layout = read(filename, layout_name)
+        layout = layouts.io.read_fgl_layout(filename, layout_name, layout_type=cls)
         if topology_name(layout) != name:
             msg = f"Error parsing FGL file: the layout is not an {name} layout"
             raise layouts.io.fgl_parsing_error(msg)

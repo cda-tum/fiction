@@ -16,18 +16,35 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void layout_drawers(nanobind::module_& m);
-void write_fgl_layout(nanobind::module_& m);
-void read_fgl_layout(nanobind::module_& m);
+/**
+ * @brief Binds layout drawers helpers.
+ * @param m Python module.
+ */
+void register_layout_drawers(nb::module_& m);
+/**
+ * @brief Binds write fgl layout helpers.
+ * @param m Python module.
+ */
+void register_write_fgl_layout(nb::module_& m);
+/**
+ * @brief Binds read fgl layout helpers.
+ * @param m Python module.
+ */
+void register_read_fgl_layout(nb::module_& m);
 
-void register_layouts_io(nanobind::module_& m)
+void register_layouts_io(nb::module_& m)
 {
-    layout_drawers(m);
-    write_fgl_layout(m);
-    read_fgl_layout(m);
+    register_layout_drawers(m);
+    register_write_fgl_layout(m);
+    register_read_fgl_layout(m);
 }
 
 }  // namespace pyfiction

@@ -21,7 +21,6 @@
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <sstream>
-#include <string>
 #include <string_view>
 
 #include <nanobind/nanobind.h>
@@ -37,72 +36,54 @@
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 namespace detail
 {
-void write_operational_domain(nanobind::module_& m)
+/**
+ * @brief Registers file and string writers for an operational domain type.
+ * @tparam Domain Operational domain type.
+ * @param m Python module.
+ * @param file_name Exported file writer name.
+ * @param string_name Exported string writer name.
+ * @param doc File writer documentation.
+ */
+template <typename Domain>
+void register_domain_writer(nb::module_& m, const char* file_name, const char* string_name, const char* doc)
 {
-    namespace py = nanobind;
+    using fiction::sidb::simulation::io::write_operational_domain_params;
 
-    // Function pointer for writing to a file
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_operational_domain_pointer)(
-        const fiction::sidb::simulation::logic::operational_domain&, const std::string_view&,
-        const fiction::sidb::simulation::io::write_operational_domain_params&) =
-        &fiction::sidb::simulation::io::write_operational_domain;
-
-    // Define function using function pointer
-    m.def("write_operational_domain", write_operational_domain_pointer, py::arg("opdom"), py::arg("filename"),
-          py::arg("params"), DOC(fiction_sidb_simulation_io_write_operational_domain));
+    m.def(file_name,
+          nb::overload_cast<const Domain&, const std::string_view&, const write_operational_domain_params&>(
+              &fiction::sidb::simulation::io::write_operational_domain<Domain>),
+          nb::arg("opdom"), nb::arg("filename"), nb::arg("params"), doc);
 
     m.def(
-        "write_operational_domain_to_string",
-        [](const fiction::sidb::simulation::logic::operational_domain&           opdom,
-           const fiction::sidb::simulation::io::write_operational_domain_params& params = {}) -> std::string
+        string_name,
+        [](const Domain& opdom, const write_operational_domain_params& params)
         {
             std::ostringstream oss;
             fiction::sidb::simulation::io::write_operational_domain(opdom, oss, params);
             return oss.str();
         },
-        py::arg("opdom"), py::arg("params") = fiction::sidb::simulation::io::write_operational_domain_params{});
-}
-
-void write_critical_temperature_domain(nanobind::module_& m)
-{
-    namespace py = nanobind;
-
-    // Function pointer for writing to a file
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_critical_temperature_domain_pointer)(
-        const fiction::sidb::simulation::logic::critical_temperature_domain&, const std::string_view&,
-        const fiction::sidb::simulation::io::write_operational_domain_params&) =
-        &fiction::sidb::simulation::io::write_operational_domain;
-
-    // Define function using function pointer
-    m.def("write_critical_temperature_domain", write_critical_temperature_domain_pointer, py::arg("opdom"),
-          py::arg("filename"), py::arg("params"), DOC(fiction_sidb_simulation_logic_critical_temperature_domain));
-
-    m.def(
-        "write_critical_temperature_domain_to_string",
-        [](const fiction::sidb::simulation::logic::critical_temperature_domain&  opdom,
-           const fiction::sidb::simulation::io::write_operational_domain_params& params = {}) -> std::string
-        {
-            std::ostringstream oss;
-            fiction::sidb::simulation::io::write_operational_domain(opdom, oss, params);
-            return oss.str();
-        },
-        py::arg("opdom"), py::arg("params") = fiction::sidb::simulation::io::write_operational_domain_params{});
+        nb::arg("opdom"), nb::arg("params") = write_operational_domain_params{});
 }
 
 }  // namespace detail
 
-void write_operational_domain(nanobind::module_& m)
+/**
+ * @brief Binds write operational domain helpers.
+ * @param m Python module.
+ */
+void register_write_operational_domain(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::enum_<fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode>(
+    nb::enum_<fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode>(
         m, "sample_writing_mode", DOC(fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode))
         .value("ALL_SAMPLES",
                fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES,
@@ -113,9 +94,9 @@ void write_operational_domain(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::sidb::simulation::io::write_operational_domain_params>(
+    nb::class_<fiction::sidb::simulation::io::write_operational_domain_params>(
         m, "write_operational_domain_params", DOC(fiction_sidb_simulation_io_write_operational_domain_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("operational_tag", &fiction::sidb::simulation::io::write_operational_domain_params::operational_tag,
                 DOC(fiction_sidb_simulation_io_write_operational_domain_params_operational_tag))
         .def_rw("non_operational_tag",
@@ -124,8 +105,12 @@ void write_operational_domain(nanobind::module_& m)
         .def_rw("writing_mode", &fiction::sidb::simulation::io::write_operational_domain_params::writing_mode,
                 DOC(fiction_sidb_simulation_io_write_operational_domain_params_writing_mode));
 
-    detail::write_operational_domain(m);
-    detail::write_critical_temperature_domain(m);
+    detail::register_domain_writer<fiction::sidb::simulation::logic::operational_domain>(
+        m, "write_operational_domain", "write_operational_domain_to_string",
+        DOC(fiction_sidb_simulation_io_write_operational_domain));
+    detail::register_domain_writer<fiction::sidb::simulation::logic::critical_temperature_domain>(
+        m, "write_critical_temperature_domain", "write_critical_temperature_domain_to_string",
+        DOC(fiction_sidb_simulation_logic_critical_temperature_domain));
 }
 
 }  // namespace pyfiction

@@ -31,6 +31,11 @@
 #include <nanobind/stl/tuple.h>     // NOLINT(misc-include-cleaner): Converts objective triples from Python tuples.
 #include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner): Converts objective collections from Python lists.
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -40,7 +45,7 @@ namespace detail
 /** @brief Bind routing objectives with explicit destination input indices. @tparam Lyt Gate layout. @param m Python
  * module. */
 template <typename Lyt>
-void color_routing_impl(nanobind::module_& m)
+void register_color_routing_impl(nb::module_& m)
 {
     m.def(
         "color_routing",
@@ -59,23 +64,20 @@ void color_routing_impl(nanobind::module_& m)
 
             return fiction::physical_design::color_routing(lyt, objs, params);
         },
-        nanobind::arg("layout"), nanobind::arg("objectives"),
-        nanobind::arg("params") = fiction::physical_design::color_routing_params{},
+        nb::arg("layout"), nb::arg("objectives"), nb::arg("params") = fiction::physical_design::color_routing_params{},
         DOC(fiction_physical_design_color_routing));
 }
 
 }  // namespace detail
 
 /** @brief Register color routing. @param m Python module. */
-void color_routing(nanobind::module_& m)
+void register_color_routing(nb::module_& m)
 {
-    namespace py = nanobind;
-
     /**
      * Graph coloring engine selector type.
      */
-    nanobind::enum_<fiction::utils::graph::graph_coloring_engine>(m, "graph_coloring_engine",
-                                                                  DOC(fiction_utils_graph_graph_coloring_engine))
+    nb::enum_<fiction::utils::graph::graph_coloring_engine>(m, "graph_coloring_engine",
+                                                            DOC(fiction_utils_graph_graph_coloring_engine))
         .value("MCS", fiction::utils::graph::graph_coloring_engine::MCS,
                DOC(fiction_utils_graph_graph_coloring_engine_MCS))
         .value("DSATUR", fiction::utils::graph::graph_coloring_engine::DSATUR,
@@ -87,9 +89,9 @@ void color_routing(nanobind::module_& m)
         .value("SAT", fiction::utils::graph::graph_coloring_engine::SAT,
                DOC(fiction_utils_graph_graph_coloring_engine_SAT));
 
-    py::class_<fiction::physical_design::color_routing_params>(m, "color_routing_params",
+    nb::class_<fiction::physical_design::color_routing_params>(m, "color_routing_params",
                                                                DOC(fiction_physical_design_color_routing_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("conduct_partial_routing", &fiction::physical_design::color_routing_params::conduct_partial_routing,
                 DOC(fiction_physical_design_color_routing_params_conduct_partial_routing))
         .def_rw("crossings", &fiction::physical_design::color_routing_params::crossings,
@@ -103,9 +105,9 @@ void color_routing(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::color_routing_impl<py_cartesian_gate_layout>(m);
-    detail::color_routing_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::color_routing_impl<py_hexagonal_gate_layout>(m);
+    detail::register_color_routing_impl<py_cartesian_gate_layout>(m);
+    detail::register_color_routing_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::register_color_routing_impl<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

@@ -25,6 +25,11 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/pair.h>  // NOLINT(misc-include-cleaner): enables return-value conversion
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -33,7 +38,7 @@ namespace detail
 
 /** @brief Binds iterative physical timing analysis. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
-void critical_path_length_and_throughput_impl(nanobind::module_& m)
+void register_critical_path_length_and_throughput_impl(nb::module_& m)
 {
     m.def(
         "critical_path_length_and_throughput",
@@ -43,18 +48,18 @@ void critical_path_length_and_throughput_impl(nanobind::module_& m)
 
             return {result.critical_path_length, result.throughput};
         },
-        nanobind::arg("layout"), nanobind::call_guard<nanobind::gil_scoped_release>(),
+        nb::arg("layout"), nb::call_guard<nb::gil_scoped_release>(),
         DOC(fiction_verification_critical_path_length_and_throughput));
 }
 
 }  // namespace detail
 
 /** @brief Registers layout timing analysis. @param m Python module. */
-void critical_path_length_and_throughput(nanobind::module_& m)
+void register_critical_path_length_and_throughput(nb::module_& m)
 {
-    detail::critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
-    detail::critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::critical_path_length_and_throughput_impl<py_hexagonal_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

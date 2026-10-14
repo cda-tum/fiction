@@ -290,18 +290,28 @@ def has_high_degree_fanin_nodes(ntk: technology_network, threshold: int = 2) -> 
         `true` iff any node in `ntk` exceeds `threshold` fanins.
     """
 
-def random_aig_network(inputs: int, gates: int, seed: int) -> aig_network:
-    """Generate a native random AIG network."""
+@overload
+def random_network(
+    inputs: int, gates: int, seed: int, *, network_type: type[technology_network] = ...
+) -> technology_network:
+    """
+    Generate directly in the selected network representation. network_type defaults to technology_network. Require at least two inputs and one gate; use the seed as the network name.
+    """
 
-def random_xag_network(inputs: int, gates: int, seed: int) -> xag_network:
-    """Generate a native random XAG network."""
-
-def random_mig_network(inputs: int, gates: int, seed: int) -> mig_network:
-    """Generate a native random MIG network."""
-
-def random_tec_network(inputs: int, gates: int, seed: int) -> technology_network:
-    """Generate a native random TEC network."""
-
+@overload
+def random_network(inputs: int, gates: int, seed: int, *, network_type: type[aig_network]) -> aig_network: ...
+@overload
+def random_network(inputs: int, gates: int, seed: int, *, network_type: type[xag_network]) -> xag_network: ...
+@overload
+def random_network(inputs: int, gates: int, seed: int, *, network_type: type[mig_network]) -> mig_network: ...
+@overload
+def random_network(
+    inputs: int,
+    gates: int,
+    seed: int,
+    *,
+    network_type: type[technology_network | aig_network | xag_network | mig_network],
+) -> technology_network | aig_network | xag_network | mig_network: ...
 @overload
 def simulate_outputs(network: technology_network) -> list[tuple[str, list[bool]]]: ...
 @overload

@@ -37,15 +37,18 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 /** @brief Registers graph-oriented layout design. @param m Python module. */
-void graph_oriented_layout_design(nanobind::module_& m)
+void register_graph_oriented_layout_design(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::enum_<fiction::physical_design::graph_oriented_layout_design_params::effort_mode>(
+    nb::enum_<fiction::physical_design::graph_oriented_layout_design_params::effort_mode>(
         m, "gold_effort_mode", DOC(fiction_physical_design_graph_oriented_layout_design_params_effort_mode))
         .value("HIGH_EFFICIENCY",
                fiction::physical_design::graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
@@ -59,7 +62,7 @@ void graph_oriented_layout_design(nanobind::module_& m)
                fiction::physical_design::graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT,
                DOC(fiction_physical_design_graph_oriented_layout_design_params_effort_mode_MAXIMUM_EFFORT));
 
-    py::enum_<fiction::physical_design::graph_oriented_layout_design_params::cost_objective>(
+    nb::enum_<fiction::physical_design::graph_oriented_layout_design_params::cost_objective>(
         m, "gold_cost_objective", DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective))
         .value("AREA", fiction::physical_design::graph_oriented_layout_design_params::cost_objective::AREA,
                DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective_AREA))
@@ -72,11 +75,11 @@ void graph_oriented_layout_design(nanobind::module_& m)
         .value("CUSTOM", fiction::physical_design::graph_oriented_layout_design_params::cost_objective::CUSTOM,
                DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective_CUSTOM));
 
-    py::class_<fiction::physical_design::graph_oriented_layout_design_params>(
+    nb::class_<fiction::physical_design::graph_oriented_layout_design_params>(
         m, "graph_oriented_layout_design_params",
         pyfiction::progress_type_slots<fiction::physical_design::graph_oriented_layout_design_params>(),
         DOC(fiction_physical_design_graph_oriented_layout_design_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::physical_design::graph_oriented_layout_design_params::timeout,
                 DOC(fiction_physical_design_graph_oriented_layout_design_params_timeout))
         .def_rw("num_vertex_expansions",
@@ -114,9 +117,9 @@ void graph_oriented_layout_design(nanobind::module_& m)
                 pyfiction::ON_WORKER_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_graph_oriented_layout_design_params_on_worker_progress));
 
-    py::class_<fiction::physical_design::graph_oriented_layout_design_stats>(
+    nb::class_<fiction::physical_design::graph_oriented_layout_design_stats>(
         m, "graph_oriented_layout_design_stats", DOC(fiction_physical_design_graph_oriented_layout_design_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::physical_design::graph_oriented_layout_design_stats& stats)
@@ -141,9 +144,9 @@ void graph_oriented_layout_design(nanobind::module_& m)
 
     m.def("graph_oriented_layout_design",
           &fiction::physical_design::graph_oriented_layout_design<py_cartesian_gate_layout, py_tec_network>,
-          py::arg("network"), py::arg("parameters") = fiction::physical_design::graph_oriented_layout_design_params{},
-          py::arg("statistics") = nullptr, py::arg("custom_cost_objective") = nullptr,
-          py::call_guard<py::gil_scoped_release>(), DOC(fiction_physical_design_graph_oriented_layout_design));
+          nb::arg("network"), nb::arg("parameters") = fiction::physical_design::graph_oriented_layout_design_params{},
+          nb::arg("statistics") = nullptr, nb::arg("custom_cost_objective") = nullptr,
+          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_physical_design_graph_oriented_layout_design));
 }
 
 }  // namespace pyfiction

@@ -35,19 +35,22 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 /** @brief Registers mutable post_layout_optimization operations. @param m Python module. */
-void post_layout_optimization(nanobind::module_& m)
+void register_post_layout_optimization(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::class_<fiction::physical_design::post_layout_optimization_params>(
+    nb::class_<fiction::physical_design::post_layout_optimization_params>(
         m, "post_layout_optimization_params",
         pyfiction::progress_type_slots<fiction::physical_design::post_layout_optimization_params>(),
         DOC(fiction_physical_design_post_layout_optimization_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("max_gate_relocations",
                 &fiction::physical_design::post_layout_optimization_params::max_gate_relocations,
                 DOC(fiction_physical_design_post_layout_optimization_params_max_gate_relocations))
@@ -61,9 +64,9 @@ void post_layout_optimization(nanobind::module_& m)
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_post_layout_optimization_params_on_progress));
 
-    py::class_<fiction::physical_design::post_layout_optimization_stats>(
+    nb::class_<fiction::physical_design::post_layout_optimization_stats>(
         m, "post_layout_optimization_stats", DOC(fiction_physical_design_post_layout_optimization_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::physical_design::post_layout_optimization_stats& stats)
@@ -94,9 +97,9 @@ void post_layout_optimization(nanobind::module_& m)
         .def_ro("num_crossings_after", &fiction::physical_design::post_layout_optimization_stats::num_crossings_after,
                 DOC(fiction_physical_design_post_layout_optimization_stats_num_crossings_after));
 
-    m.def("post_layout_optimization", &fiction::physical_design::post_layout_optimization, py::arg("layout"),
-          py::arg("parameters") = fiction::physical_design::post_layout_optimization_params{},
-          py::arg("statistics") = nullptr, py::call_guard<py::gil_scoped_release>(),
+    m.def("post_layout_optimization", &fiction::physical_design::post_layout_optimization, nb::arg("layout"),
+          nb::arg("parameters") = fiction::physical_design::post_layout_optimization_params{},
+          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
           DOC(fiction_physical_design_post_layout_optimization));
 }
 

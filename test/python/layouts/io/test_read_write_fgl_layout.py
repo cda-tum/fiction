@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -16,14 +16,14 @@ from mnt.pyfiction.layouts import (
     arrangement,
     cartesian_gate_layout,
     coordinate,
+    hexagonal_gate_layout,
+    io,
     layout_input_port,
     shifted_cartesian_gate_layout,
 )
 from mnt.pyfiction.layouts.io import (
     fgl_parsing_error,
-    read_cartesian_fgl_layout,
-    read_hexagonal_fgl_layout,
-    read_shifted_cartesian_fgl_layout,
+    read_fgl_layout,
     write_fgl_layout,
 )
 from mnt.pyfiction.physical_design import hexagonalization, orthogonal
@@ -40,17 +40,22 @@ def test_read_write(mux21: technology_network, tmp_path: Path) -> None:
     cart_layout = orthogonal(mux21)
     cart_file = str(tmp_path / "mux21_cartesian.fgl")
     write_fgl_layout(cart_layout, cart_file)
-    assert equivalence_checking(read_cartesian_fgl_layout(cart_file), cart_layout) == eq_type.STRONG
+    assert equivalence_checking(read_fgl_layout(cart_file), cart_layout) == eq_type.STRONG
 
     hex_layout = hexagonalization(cart_layout)
     hex_file = str(tmp_path / "mux21_hexagonal.fgl")
     write_fgl_layout(hex_layout, hex_file)
-    assert equivalence_checking(read_hexagonal_fgl_layout(hex_file), hex_layout) == eq_type.STRONG
+    assert (
+        equivalence_checking(read_fgl_layout(hex_file, layout_type=hexagonal_gate_layout), hex_layout) == eq_type.STRONG
+    )
 
     shifted_layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "2DDWave", "Layout")
     shifted_file = str(tmp_path / "empty_shifted_cartesian.fgl")
     write_fgl_layout(shifted_layout, shifted_file)
-    assert equivalence_checking(read_shifted_cartesian_fgl_layout(shifted_file), shifted_layout) == eq_type.STRONG
+    assert (
+        equivalence_checking(read_fgl_layout(shifted_file, layout_type=shifted_cartesian_gate_layout), shifted_layout)
+        == eq_type.STRONG
+    )
 
 
 @pytest.mark.parametrize("value", ["3", "2147483648", "2147483649", "-1", "18446744073709551616", "1garbage"])
@@ -63,7 +68,7 @@ def test_fgl_rejects_unrepresentable_layers(tmp_path: Path, value: str) -> None:
     write_fgl_layout(layout, str(path))
     path.write_text(path.read_text(encoding="utf-8").replace("<z>1</z>", f"<z>{value}</z>", 1), encoding="utf-8")
     with pytest.raises(fgl_parsing_error, match=r"range|integer|two layers"):
-        read_cartesian_fgl_layout(str(path))
+        read_fgl_layout(str(path))
 
 
 def test_fgl_preserves_labels_and_synchronization(tmp_path: Path) -> None:
@@ -75,7 +80,7 @@ def test_fgl_preserves_labels_and_synchronization(tmp_path: Path) -> None:
     layout.assign_synchronization_element((1, 0), 2)
     path = tmp_path / "sync.fgl"
     write_fgl_layout(layout, str(path))
-    restored = read_cartesian_fgl_layout(str(path))
+    restored = read_fgl_layout(str(path))
     assert restored.get_layout_name() == "A & B < C"
     assert restored.num_se() == 1
     assert restored.get_synchronization_element((1, 0)) == 2
@@ -93,7 +98,7 @@ def test_fgl_preserves_interface_order(tmp_path: Path) -> None:
     path = tmp_path / "ordered.fgl"
     write_fgl_layout(layout, str(path))
     assert '<fgl version="2">' in path.read_text(encoding="utf-8")
-    restored = read_cartesian_fgl_layout(str(path))
+    restored = read_fgl_layout(str(path))
     assert restored.get_input_name(0) == "a"
     assert restored.get_input_name(1) == "b"
     assert equivalence_checking(restored, layout) == eq_type.STRONG
@@ -126,7 +131,7 @@ def test_fgl_preserves_manual_obstructions(tmp_path: Path) -> None:
     layout.obstruct_connection(positions[1], positions[2])
     path = tmp_path / "manual.fgl"
     write_fgl_layout(layout, str(path))
-    restored = read_cartesian_fgl_layout(str(path))
+    restored = read_fgl_layout(str(path))
     assert len(restored.obstructed_coordinates()) == len(positions)
     for position in positions:
         assert position in restored.obstructed_coordinates()
@@ -138,3 +143,38 @@ def test_fgl_preserves_manual_obstructions(tmp_path: Path) -> None:
     restored.clear_obstructed_coordinates()
     assert not restored.is_obstructed_coordinate((1, 0))
     assert restored.is_obstructed_coordinate((2, 0))
+
+
+@pytest.mark.parametrize("selector", [None, "hexagonal", int, cartesian_gate_layout((1, 1))])
+def test_fgl_rejects_invalid_selectors_before_io(selector: Any) -> None:
+    """Reject invalid selectors before opening the filename."""
+    with pytest.raises(TypeError):
+        read_fgl_layout("missing.fgl", layout_type=selector)
+
+
+@pytest.mark.parametrize("cls", [cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout])
+def test_fgl_selector_retains_class_name_and_arrangement(
+    tmp_path: Path, cls: type[cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout]
+) -> None:
+    """The selector chooses the class; the file supplies the arrangement."""
+    layout = (
+        cls((2, 2), "2DDWave", "source")
+        if issubclass(cls, cartesian_gate_layout)
+        else cls(arrangement.ODD_COLUMN, (2, 2), "2DDWave", "source")
+    )
+    path = tmp_path / "layout.fgl"
+    write_fgl_layout(layout, str(path))
+    restored = read_fgl_layout(str(path), "restored", layout_type=cls)
+    assert type(restored) is cls
+    assert restored.get_layout_name() == "source"
+    if cls is not cartesian_gate_layout:
+        assert isinstance(restored, (shifted_cartesian_gate_layout, hexagonal_gate_layout))
+        assert restored.get_arrangement() == arrangement.ODD_COLUMN
+
+
+@pytest.mark.parametrize(
+    "name", ["read_cartesian_fgl_layout", "read_shifted_cartesian_fgl_layout", "read_hexagonal_fgl_layout"]
+)
+def test_fgl_specialization_names_are_removed(name: str) -> None:
+    """Expose one reader name for every gate layout representation."""
+    assert not hasattr(io, name)

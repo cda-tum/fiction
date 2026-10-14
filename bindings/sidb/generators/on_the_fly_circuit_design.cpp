@@ -29,6 +29,11 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -37,10 +42,8 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void on_the_fly_circuit_design(nanobind::module_& m)
+void register_on_the_fly_circuit_design(nb::module_& m)
 {
-    namespace py = nanobind;
-
     /**
      * Parameters for the individual SiDB gate designs.
      */
@@ -54,17 +57,17 @@ void on_the_fly_circuit_design(nanobind::module_& m)
      */
     using circuit_params = fiction::sidb::generators::on_the_fly_circuit_design_params;
 
-    py::enum_<complex_policy>(m, "sidb_complex_gate_design_policy",
+    nb::enum_<complex_policy>(m, "sidb_complex_gate_design_policy",
                               DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy))
         .value("USING_PREDEFINED", complex_policy::USING_PREDEFINED,
                DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_USING_PREDEFINED))
         .value("DESIGN_ON_THE_FLY", complex_policy::DESIGN_ON_THE_FLY,
                DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_DESIGN_ON_THE_FLY));
 
-    py::class_<library_params>(m, "sidb_on_the_fly_gate_library_params",
+    nb::class_<library_params>(m, "sidb_on_the_fly_gate_library_params",
                                pyfiction::progress_type_slots<library_params>(),
                                DOC(fiction_sidb_on_the_fly_gate_library_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("design_gate_params", &library_params::design_gate_params,
                 DOC(fiction_sidb_on_the_fly_gate_library_params_design_gate_params))
         .def_rw("canvas_sidb_complex_gates", &library_params::canvas_sidb_complex_gates,
@@ -75,10 +78,10 @@ void on_the_fly_circuit_design(nanobind::module_& m)
         .def_rw("influence_radius_charged_defects", &library_params::influence_radius_charged_defects,
                 DOC(fiction_sidb_on_the_fly_gate_library_params_influence_radius_charged_defects));
 
-    py::class_<circuit_params>(m, "on_the_fly_sidb_circuit_design_params",
+    nb::class_<circuit_params>(m, "on_the_fly_sidb_circuit_design_params",
                                pyfiction::progress_type_slots<circuit_params>(),
                                DOC(fiction_sidb_generators_on_the_fly_circuit_design_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("timeout", &circuit_params::timeout,
                 DOC(fiction_sidb_generators_on_the_fly_circuit_design_params_timeout))
         .def_rw("sidb_on_the_fly_gate_library_parameters", &circuit_params::sidb_on_the_fly_gate_library_parameters,
@@ -91,7 +94,7 @@ void on_the_fly_circuit_design(nanobind::module_& m)
         {
             // Own the layout before releasing the GIL so Python edits cannot race the design.
             const auto                   snapshot = layout.clone();
-            const py::gil_scoped_release release{};
+            const nb::gil_scoped_release release{};
 
             try
             {
@@ -107,7 +110,7 @@ void on_the_fly_circuit_design(nanobind::module_& m)
                 throw std::invalid_argument{fmt::format("Unsupported gate orientation at tile {}", error.where())};
             }
         },
-        py::arg("layout"), py::arg("params") = circuit_params{},
+        nb::arg("layout"), nb::arg("params") = circuit_params{},
         R"doc(Design an SiDB circuit from a placed and routed pointy-top hexagonal gate-level layout.
 
 The layout and parameters are copied before releasing the GIL. The input layout is not modified.

@@ -34,17 +34,25 @@
 #include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 namespace detail
 {
 
+/**
+ * @brief Binds yen k shortest paths helpers.
+ * @param m Python module.
+ * @tparam Lyt Layout type.
+ */
 template <typename Lyt>
-void yen_k_shortest_paths_impl(nanobind::module_& m)
+void register_yen_k_shortest_paths_impl(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "yen_k_shortest_paths",
         [](const Lyt& lyt, const fiction::layouts::layout_base::coordinate& source,
@@ -65,21 +73,23 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
 
             return paths;
         },
-        py::arg("layout"), py::arg("source"), py::arg("target"), py::arg("k"),
-        py::arg("params")       = fiction::physical_design::path_finding::yen_k_shortest_paths_params{},
-        py::arg("obstructions") = fiction::layouts::obstructions{},
+        nb::arg("layout"), nb::arg("source"), nb::arg("target"), nb::arg("k"),
+        nb::arg("params")       = fiction::physical_design::path_finding::yen_k_shortest_paths_params{},
+        nb::arg("obstructions") = fiction::layouts::obstructions{},
         DOC(fiction_physical_design_path_finding_yen_k_shortest_paths));
 }
 
 }  // namespace detail
 
-void k_shortest_paths(nanobind::module_& m)
+/**
+ * @brief Binds k shortest paths helpers.
+ * @param m Python module.
+ */
+void register_k_shortest_paths(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::class_<fiction::physical_design::path_finding::yen_k_shortest_paths_params>(
+    nb::class_<fiction::physical_design::path_finding::yen_k_shortest_paths_params>(
         m, "yen_k_shortest_paths_params", DOC(fiction_physical_design_path_finding_yen_k_shortest_paths_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("a_star_params", &fiction::physical_design::path_finding::yen_k_shortest_paths_params::astar_params,
                 DOC(fiction_physical_design_path_finding_yen_k_shortest_paths_params_astar_params))
 
@@ -87,12 +97,12 @@ void k_shortest_paths(nanobind::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::yen_k_shortest_paths_impl<py_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_cartesian_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_shifted_cartesian_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_hexagonal_gate_layout>(m);
-    detail::yen_k_shortest_paths_impl<py_hexagonal_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<py_cartesian_gate_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<py_cartesian_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<py_shifted_cartesian_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<py_hexagonal_gate_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<py_hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

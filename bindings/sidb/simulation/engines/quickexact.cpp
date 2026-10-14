@@ -18,9 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/progress.hpp"
 
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
@@ -30,16 +28,23 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void quickexact(nanobind::module_& m)
+/**
+ * @brief Binds quickexact helpers.
+ * @param m Python module.
+ */
+void register_quickexact(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::simulation::engines::quickexact_params;
 
-    py::enum_<quickexact_params::automatic_base_number_detection>(
+    nb::enum_<quickexact_params::automatic_base_number_detection>(
         m, "automatic_base_number_detection",
         DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection))
         .value("ON", quickexact_params::automatic_base_number_detection::ON,
@@ -47,9 +52,9 @@ void quickexact(nanobind::module_& m)
         .value("OFF", quickexact_params::automatic_base_number_detection::OFF,
                DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection_OFF));
 
-    py::class_<quickexact_params>(m, "quickexact_params", pyfiction::progress_type_slots<quickexact_params>(),
+    nb::class_<quickexact_params>(m, "quickexact_params", pyfiction::progress_type_slots<quickexact_params>(),
                                   DOC(fiction_sidb_simulation_engines_quickexact_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("simulation_parameters", &quickexact_params::sim_params,
                 DOC(fiction_sidb_simulation_engines_quickexact_params_sim_params))
         .def_rw("base_number_detection", &quickexact_params::base_number_detection,
@@ -61,12 +66,9 @@ void quickexact(nanobind::module_& m)
         .def_rw("on_progress", &quickexact_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
                 pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_quickexact_params_on_progress));
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    fiction::sidb::simulation::result (*const quickexact_pointer)(
-        const fiction::sidb::layout&, const quickexact_params&) = &fiction::sidb::simulation::engines::quickexact;
-
-    m.def("quickexact", quickexact_pointer, py::arg("lyt"), py::arg("params") = quickexact_params{},
-          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quickexact));
+    m.def("quickexact", &fiction::sidb::simulation::engines::quickexact, nb::arg("lyt"),
+          nb::arg("params") = quickexact_params{}, nb::call_guard<nb::gil_scoped_release>(),
+          DOC(fiction_sidb_simulation_engines_quickexact));
 }
 
 }  // namespace pyfiction

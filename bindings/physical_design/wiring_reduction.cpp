@@ -35,28 +35,31 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 /** @brief Registers mutable wiring_reduction operations. @param m Python module. */
-void wiring_reduction(nanobind::module_& m)
+void register_wiring_reduction(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::class_<fiction::physical_design::wiring_reduction_params>(
+    nb::class_<fiction::physical_design::wiring_reduction_params>(
         m, "wiring_reduction_params",
         pyfiction::progress_type_slots<fiction::physical_design::wiring_reduction_params>(),
         DOC(fiction_physical_design_wiring_reduction_params))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("timeout", &fiction::physical_design::wiring_reduction_params::timeout,
                 DOC(fiction_physical_design_wiring_reduction_params_timeout))
         .def_rw("on_progress", &fiction::physical_design::wiring_reduction_params::on_progress,
                 pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
                 DOC(fiction_physical_design_wiring_reduction_params_on_progress));
 
-    py::class_<fiction::physical_design::wiring_reduction_stats>(m, "wiring_reduction_stats",
+    nb::class_<fiction::physical_design::wiring_reduction_stats>(m, "wiring_reduction_stats",
                                                                  DOC(fiction_physical_design_wiring_reduction_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const fiction::physical_design::wiring_reduction_stats& stats)
@@ -87,9 +90,9 @@ void wiring_reduction(nanobind::module_& m)
 
         ;
 
-    m.def("wiring_reduction", &fiction::physical_design::wiring_reduction, py::arg("layout"),
-          py::arg("parameters") = fiction::physical_design::wiring_reduction_params{}, py::arg("statistics") = nullptr,
-          py::call_guard<py::gil_scoped_release>(), DOC(fiction_physical_design_wiring_reduction));
+    m.def("wiring_reduction", &fiction::physical_design::wiring_reduction, nb::arg("layout"),
+          nb::arg("parameters") = fiction::physical_design::wiring_reduction_params{}, nb::arg("statistics") = nullptr,
+          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_physical_design_wiring_reduction));
 }
 
 }  // namespace pyfiction

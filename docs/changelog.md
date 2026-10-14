@@ -408,6 +408,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - C++ Python binding helpers now use a `register_` prefix.
+  - Python bindings use the `nb` namespace alias for nanobind.
   - The C++ test suite and the experiments now open the namespaces they use, one
     `using namespace` directive per namespace, rather than qualifying every symbol below
     `fiction`. That removes about 14,000 qualifier tokens. `fiction::layouts::clocking`
@@ -432,6 +434,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     it that carries the toctree
 
 - Python bindings:
+
+  - **Breaking:** Use `read_network`, `read_fgl_layout`, `random_network`, `exact`, and `orthogonal`
+    with keyword `network_type` or `layout_type`. Specialized function names were removed.
 
   - **Breaking:** Layout value classes now use `extent`, `layout_object_id`, and `layout_input_port` names.
 
@@ -626,6 +631,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
 
 - Build system:
+
+  - Rebuild Python bindings when uncommitted C++ binding sources change.
+  - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
   - Direct Python binding builds now request the stable-ABI component on CMake 3.26 and newer.
   - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.

@@ -24,17 +24,24 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void write_sqd_sim_result(nanobind::module_& m)
+/**
+ * @brief Binds write sqd sim result helpers.
+ * @param m Python module.
+ */
+void register_write_sqd_sim_result(nb::module_& m)
 {
-    namespace py = nanobind;
-
     m.def("write_sqd_sim_result",
-          static_cast<void (*)(const fiction::sidb::simulation::result&, const std::string_view&)>(
+          nb::overload_cast<const fiction::sidb::simulation::result&, const std::string_view&>(
               &fiction::sidb::simulation::io::write_sqd_sim_result),
-          py::arg("sim_result"), py::arg("filename"), DOC(fiction_sidb_simulation_io_write_sqd_sim_result_2));
+          nb::arg("sim_result"), nb::arg("filename"), DOC(fiction_sidb_simulation_io_write_sqd_sim_result_2));
 }
 
 }  // namespace pyfiction
