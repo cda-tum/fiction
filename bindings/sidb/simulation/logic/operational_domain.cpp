@@ -528,7 +528,8 @@ Args:
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("stats") = nullptr,
         R"doc(Compute the critical-temperature domain by exhaustively sweeping every parameter combination.
-The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Confidence uses the native critical-temperature default of 0.99.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
 Args:
@@ -625,7 +626,8 @@ Args:
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("stats") = nullptr,
         R"doc(Compute the critical-temperature domain by randomly sampling parameter combinations.
-The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Confidence uses the native critical-temperature default of 0.99.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
 Args:
@@ -722,7 +724,8 @@ Args:
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("stats") = nullptr,
         R"doc(Compute the critical-temperature domain by expanding from sampled operational points.
-The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Confidence uses the native critical-temperature default of 0.99.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
 Args:
@@ -818,7 +821,8 @@ Args:
         nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         nb::arg("stats") = nullptr, R"doc(Compute the critical-temperature domain by tracing operational boundaries.
-The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Confidence uses the native critical-temperature default of 0.99.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
 Args:

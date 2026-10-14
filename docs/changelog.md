@@ -711,6 +711,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
+  - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
   - Gate-level layout editing examples now pass the object ID returned by `create_buf`.
   - API documentation now resolves current declarations without duplicate enum entries.
