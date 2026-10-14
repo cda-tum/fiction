@@ -87,7 +87,7 @@ namespace fiction::sidb::model
         {
             return screened_potential > potential;
         }
-        return log_coefficient - std::log(distance) - distance / params.lambda_tf > log_potential;
+        return log_coefficient - std::log(distance) - (distance / params.lambda_tf) > log_potential;
     };
 
     if (!below_inverse(step_size))
@@ -110,7 +110,7 @@ namespace fiction::sidb::model
     while (true)
     {
         const auto middle = std::midpoint(lower, upper);
-        if (middle == lower || middle == upper)
+        if (middle <= lower || middle >= upper)
         {
             break;
         }
