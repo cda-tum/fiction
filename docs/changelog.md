@@ -267,7 +267,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Standardized paper links in the docs and README to DOI URLs and corrected the `ortho`, `equiv`, and Yen references.
-  - Corrected README links to the C++ library, CLI installation, and synchronization elements.
+  - Corrected README links to the C++ library, CLI installation, and synchronization elements, and updated its QCA layout include.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
   - QCA, molQCA, and iNML each document their layout on a page of its own, like SiDB, and the Python tabs list every
