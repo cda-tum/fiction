@@ -99,12 +99,16 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
     else:
 
         def construct() -> charge_distribution:
-            """Construct a charge distribution over the layout's complete dot collection.
+            """Construct distributions over the layout's complete dot collection.
 
             Returns:
-                The distribution containing one charge per dot.
+                The final distribution containing one charge per dot.
             """
-            return charge_distribution(layout)
+            # Sustained native work lets a waiting thread run even when one allocation finishes quickly.
+            distribution = charge_distribution(layout)
+            for _ in range(127):
+                distribution = charge_distribution(layout)
+            return distribution
 
         assert run_with_python_progress(construct).size() == count
 
