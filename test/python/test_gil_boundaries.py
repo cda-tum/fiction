@@ -10,7 +10,9 @@
 
 from __future__ import annotations
 
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native concurrency regression
 import sys
+import textwrap
 import threading
 from typing import TYPE_CHECKING
 
@@ -38,8 +40,8 @@ def test_native_work_releases_the_gil(kind: str, tmp_path: Path) -> None:
         tmp_path: Directory for the defect matrix.
     """
     if kind == "coordinates":
-        layout = cartesian_layout((1000, 200))
-        assert len(run_with_python_progress(layout.coordinates)) == 200_000
+        layout = cartesian_layout((1000, 1000))
+        assert len(run_with_python_progress(layout.coordinates)) == 1_000_000
     elif kind == "depth":
         network = random_network(100, 50_000, 7)
         assert run_with_python_progress(network.depth) > 0
@@ -87,12 +89,13 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
     Args:
         kind: Native SiDB operation to exercise.
     """
+    count = 1_000_000 if kind == "sites" else 200_000
     layout = sidb_layout()
-    for column in range(200_000):
+    for column in range(count):
         layout.assign_sidb(lattice_site(column, 0, 0), sidb_dot_tag.INPUT)
 
     if kind == "sites":
-        assert len(run_with_python_progress(layout.pis)) == 200_000
+        assert len(run_with_python_progress(layout.pis)) == count
     else:
 
         def construct() -> charge_distribution:
@@ -104,6 +107,51 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
             return charge_distribution(layout)
 
         assert run_with_python_progress(construct).size() == 200_000
+
+
+def test_bdl_iterator_serializes_cursor_updates() -> None:
+    """Concurrent consumers receive each BDL input pattern once without racing the native cursor."""
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and test input
+        [
+            sys.executable,
+            "-c",
+            textwrap.dedent("""
+                import threading
+                from concurrent.futures import ThreadPoolExecutor
+                from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+                from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
+                from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator
+
+                layout = sidb_layout()
+                for column, tag in [(0, sidb_dot_tag.INPUT), (2, sidb_dot_tag.INPUT),
+                                    (6, sidb_dot_tag.NORMAL), (8, sidb_dot_tag.NORMAL),
+                                    (12, sidb_dot_tag.NORMAL), (14, sidb_dot_tag.NORMAL),
+                                    (18, sidb_dot_tag.OUTPUT), (20, sidb_dot_tag.OUTPUT)]:
+                    layout.assign_sidb(lattice_site(column, 0, 0), tag)
+                for column in range(100_000):
+                    layout.assign_defect(lattice_site(column + 1000, 0, 0), sidb_defect(sidb_defect_type.DB))
+
+                iterator = bdl_input_iterator(layout)
+                start = threading.Barrier(2)
+
+                def consume(_: int) -> list[tuple[lattice_site, ...]]:
+                    'Consume complete snapshots from the shared iterator.'
+                    start.wait()
+                    return [tuple(snapshot.pis()) for snapshot in iterator]
+
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    groups = list(pool.map(consume, range(2)))
+                patterns = [pattern for group in groups for pattern in group]
+                assert len(patterns) == 2, patterns
+                assert set(patterns) == {(lattice_site(0, 0, 0),), (lattice_site(2, 0, 0),)}, patterns
+            """),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def run_with_python_progress(operation: Callable[[], Any]) -> Any:

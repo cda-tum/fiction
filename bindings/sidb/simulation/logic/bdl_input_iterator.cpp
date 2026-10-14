@@ -53,7 +53,7 @@ using bdl_input_iterator_options = fiction::sidb::simulation::logic::bdl_input_i
  */
 void register_bdl_input_iterator(nb::module_& m)
 {
-    // Keep the GIL for cursor queries and iterator references; native layout copies and updates release it.
+    // Keep the GIL for cursor queries, mutations, and iterator references; cursor advances must remain atomic.
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_input_iterator;
 
@@ -140,13 +140,13 @@ Args:
             "__next__",
             [](bdl_input_iterator& self) -> layout
             {
+                // Keep the snapshot and cursor advance under the GIL so concurrent next() calls cannot overlap.
                 if (self >= (uint64_t{1} << self.num_input_pairs()))
                 {
                     throw nb::stop_iteration();
                 }
 
-                const nb::gil_scoped_release release{};
-                auto                         result = *self;
+                auto result = *self;
                 ++self;
 
                 return result;
@@ -173,7 +173,6 @@ Args:
             "__iadd__",
             [](bdl_input_iterator& self, const int n) -> bdl_input_iterator&
             {
-                const nb::gil_scoped_release release{};
                 self += n;
                 return self;
             },
@@ -186,7 +185,6 @@ Args:
             "__isub__",
             [](bdl_input_iterator& self, const int n) -> bdl_input_iterator&
             {
-                const nb::gil_scoped_release release{};
                 self -= n;
                 return self;
             },

@@ -342,6 +342,9 @@ copies that share native storage and statistics objects supplied to a running al
 all such access or pass independent objects. A callback may read its supplied arguments; it must not access other
 native objects still in use by the algorithm.
 
+BDL iterator cursor updates retain the GIL so concurrent `next()` calls consume distinct patterns. Other operations
+on an iterator still follow the synchronization rule above.
+
 Binding contributors should use `nanobind::call_guard<nanobind::gil_scoped_release>()` for entirely native call
 bodies. Mixed wrappers need an inner release scope after Python validation and before Python result construction.
 Keep Python-owned objects and callback wrappers alive until the GIL is reacquired. Explain retained-GIL decisions

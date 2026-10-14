@@ -95,7 +95,7 @@ class energy_distribution
     /**
      * Returns the degeneracy value (number of states) with the given energy value.
      *
-     * @param energy The energy value for which the excited state number is to be determined.
+     * @param energy The energy value whose degeneracy is requested.
      * @return The degeneracy of the given energy. If the energy value is not found, `std::nullopt` is
      * returned instead.
      */
