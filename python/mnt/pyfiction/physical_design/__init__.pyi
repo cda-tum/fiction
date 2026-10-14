@@ -241,14 +241,14 @@ def orthogonal(
     Place and route a technology network with orthogonal graph drawing.
     The layout_type keyword selects Cartesian or hexagonal gate layouts.
     The keyword options select clock phases, arrangement, and progress reporting.
-    Raises ValueError when a shifted Cartesian or hexagonal layout requires layout_arrangement and none is supplied.
+    Raises ValueError when a hexagonal layout requires layout_arrangement and none is supplied.
     Raises high_degree_fanin_exception for network nodes with more than two inputs.
 
     Args:
         layout_type: Registered gate-layout class for the returned layout.
         statistics: Statistics object filled by the algorithm; None discards statistics.
         number_of_clock_phases: Number of clock phases to use. 3 and 4 are supported.
-        layout_arrangement: Row or column arrangement; required for shifted Cartesian and hexagonal layouts, ignored for Cartesian layouts.
+        layout_arrangement: Row or column arrangement; required for hexagonal layouts, ignored for Cartesian layouts.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     """
 

@@ -45,7 +45,7 @@ network specifications under constraints. This approach finds exact results but 
 Python `exact` and `orthogonal` select their output with the keyword-only `layout_type` class,
 which defaults to `cartesian_gate_layout`. `exact` also supports shifted Cartesian and hexagonal
 layouts; `orthogonal` also supports hexagonal layouts. Non-Cartesian layouts require an explicit
-`parameters.layout_arrangement`. Pass the exact registered class; subclasses are not supported.
+`layout_arrangement`. Pass the exact registered class; subclasses are not supported.
 
 ```python
 from mnt.pyfiction.layouts import arrangement, hexagonal_gate_layout
