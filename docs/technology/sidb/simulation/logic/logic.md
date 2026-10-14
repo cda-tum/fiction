@@ -60,7 +60,7 @@ Purple marks operational samples, gray marks non-operational samples, and blank 
 Random sampling uses 500 draws; flood fill and contour tracing start from 500 random draws.
 These three methods can produce different samples on each run.
 
-Install `mnt-pyfiction[plot]`, download the gate, and run these commands in the download directory:
+Install `mnt-pyfiction[plot]`, download the gate, and run these commands in Bash in the download directory:
 
 ```bash
 fiction-opdom siqad_or_gate.sqd --gate or --algorithm grid_search \
@@ -213,7 +213,7 @@ Random sampling evaluates isolated points across the parameter grid.
 :width: 100%
 ```
 
-Flood fill expands from operational seeds and evaluates their neighbors.
+Flood fill expands from operational seeds, evaluates their neighbors, and retains its initial random samples.
 
 ```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
@@ -340,7 +340,7 @@ Random sampling evaluates isolated points across the parameter grid.
    :alt: SiQAD OR gate operational domain from flood fill, with purple operational and gray non-operational samples.
    :width: 100%
 
-Flood fill expands from operational seeds and evaluates their neighbors.
+Flood fill expands from operational seeds, evaluates their neighbors, and retains its initial random samples.
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_contour_tracing
 
