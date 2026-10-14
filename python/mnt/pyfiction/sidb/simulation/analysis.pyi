@@ -492,7 +492,7 @@ class physical_population_stability_params:
     def precision_for_distance_corresponding_to_potential(self) -> int:
         """
         Number of decimal places of the distance corresponding to a potential
-        difference.
+        difference, at most `std::numeric_limits<double>::digits10`.
         """
 
     @precision_for_distance_corresponding_to_potential.setter
@@ -564,6 +564,11 @@ def physical_population_stability(
     Returns:
         The population stability information, one entry per distinct
         charge distribution.
+
+    Raises:
+        std::invalid_argument: If a potential-to-distance conversion
+                               receives invalid physical parameters or
+                               precision.
     """
 
 class physically_valid_parameters_domain:

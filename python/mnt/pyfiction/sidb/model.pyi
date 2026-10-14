@@ -365,18 +365,25 @@ def potential_to_distance_conversion(potential: float, params: sidb_simulation_p
     function provided here serves the inverse purpose by calculating the
     distance for a given potential and given physical parameters.
 
+    The distance rounds upward to the requested decimal precision, with a
+    minimum of `10^-precision` nm. Zero potential returns positive
+    infinity. Positive infinite potential returns the minimum distance.
+
     Args:
         params: The physical parameters for a given hydrogen-passivated
                 silicon surface.
         potential: The electrostatic potential (unit: V) to be converted
                    to a distance.
-        precision: The precision level for the conversion, specifying the
-                   number of decimal places.
+        precision: Number of decimal places, at most
+                   `std::numeric_limits<double>::digits10`.
 
     Returns:
-        The distance (unit: nm) corresponding to the given electrostatic
-        potential.
+        The distance (unit: nm), or positive infinity if no finite
+        `double` distance can represent the inverse.
 
-    Note:
-        Runtime depends exponentially on the provided precision.
+    Raises:
+        std::invalid_argument: If potential is negative or NaN, the
+                               relative permittivity or screening distance
+                               is non-positive or non-finite, or precision
+                               exceeds the decimal precision of `double`.
     """
