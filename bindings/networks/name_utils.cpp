@@ -49,6 +49,7 @@ namespace detail
 template <typename NtkOrLyt>
 void register_name_utils(nb::module_& m)
 {
+    // Keep the GIL for these short name lookups and updates; a release adds overhead.
     m.def("get_name", &fiction::networks::get_name<NtkOrLyt>, nb::arg("ntk_or_lyt"), DOC(fiction_networks_get_name));
     m.def("set_name", &fiction::networks::set_name<NtkOrLyt>, nb::arg("ntk_or_lyt"), nb::arg("name"),
           DOC(fiction_networks_set_name));

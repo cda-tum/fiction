@@ -40,6 +40,7 @@ void register_obstructions(nb::module_& m)
 {
     using data = fiction::layouts::obstructions;
 
+    // Keep the GIL for individual obstruction lookups and mutations; a release adds overhead.
     nb::class_<data>(m, "obstructions", DOC(fiction_layouts_obstructions))
         .def(nb::init<>(), "Creates empty layout-independent routing-search constraints.")
         .def("obstruct_coordinate", &data::obstruct_coordinate, nb::arg("c"),
@@ -62,7 +63,7 @@ void register_obstructions(nb::module_& m)
                 constraints.foreach_obstructed_coordinate([&coordinates](const auto& c) { coordinates.push_back(c); });
                 return coordinates;
             },
-            "Returns explicit coordinate obstructions in unspecified order.")
+            "Returns explicit coordinate obstructions in unspecified order.", nb::call_guard<nb::gil_scoped_release>())
         .def(
             "obstructed_connections",
             [](const data& constraints)
@@ -74,7 +75,8 @@ void register_obstructions(nb::module_& m)
                                                           { connections.emplace_back(source, target); });
                 return connections;
             },
-            "Returns explicit directed-connection obstructions in unspecified order.")
+            "Returns explicit directed-connection obstructions in unspecified order.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def("is_obstructed_coordinate", &data::is_obstructed_coordinate, nb::arg("c"),
              DOC(fiction_layouts_obstructions_is_obstructed_coordinate))
         .def("is_obstructed_connection", &data::is_obstructed_connection, nb::arg("src"), nb::arg("tgt"),
