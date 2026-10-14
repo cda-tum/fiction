@@ -854,7 +854,7 @@ Args:
  */
 void register_operational_domain(nb::module_& m)
 {
-    // Keep the GIL for domain access and mutation; iterators create Python objects after collecting keys.
+    // Keep the GIL for domain lookups and Python conversion; native domain scans release it.
     nb::class_<fiction::sidb::simulation::logic::parameter_point>(m, "parameter_point",
                                                                   DOC(fiction_sidb_simulation_logic_parameter_point))
         .def(nb::init<>(), DOC(fiction_sidb_simulation_logic_parameter_point_parameter_point))
@@ -919,8 +919,10 @@ void register_operational_domain(nb::module_& m)
              &fiction::sidb::simulation::logic::critical_temperature_domain::get_number_of_dimensions,
              DOC(fiction_sidb_simulation_logic_critical_temperature_domain_get_number_of_dimensions))
         .def("minimum_ct", &fiction::sidb::simulation::logic::critical_temperature_domain::minimum_ct,
+             nb::call_guard<nb::gil_scoped_release>(),
              DOC(fiction_sidb_simulation_logic_critical_temperature_domain_minimum_ct))
         .def("maximum_ct", &fiction::sidb::simulation::logic::critical_temperature_domain::maximum_ct,
+             nb::call_guard<nb::gil_scoped_release>(),
              DOC(fiction_sidb_simulation_logic_critical_temperature_domain_maximum_ct))
 
         // Pythonic interface functions
@@ -957,8 +959,11 @@ void register_operational_domain(nb::module_& m)
             [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
             {
                 std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
-                keys.reserve(self.size());
-                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                {
+                    const nb::gil_scoped_release release{};
+                    keys.reserve(self.size());
+                    self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                }
 
                 // Keep the GIL: casting keys and creating the iterator call the Python API.
                 const nb::object py_keys = nb::cast(keys);
@@ -967,32 +972,38 @@ void register_operational_domain(nb::module_& m)
             nb::sig(
                 "def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction.sidb.simulation.logic.parameter_point]"),
             "Returns an iterator over the parameter points stored in the domain.")
-        .def("keys",
-             [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
-             {
-                 std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
-                 keys.reserve(self.size());
-                 self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
-                 return keys;
-             })
-        .def("values",
-             [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
-             {
-                 std::vector<std::tuple<fiction::sidb::simulation::logic::operational_status, double>> values{};
-                 values.reserve(self.size());
-                 self.for_each([&values](const auto&, const auto& value) { values.push_back(value); });
-                 return values;
-             })
-        .def("items",
-             [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
-             {
-                 std::vector<std::pair<fiction::sidb::simulation::logic::parameter_point,
-                                       std::tuple<fiction::sidb::simulation::logic::operational_status, double>>>
-                     items{};
-                 items.reserve(self.size());
-                 self.for_each([&items](const auto& key, const auto& value) { items.emplace_back(key, value); });
-                 return items;
-             })
+        .def(
+            "keys",
+            [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
+            {
+                std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
+                keys.reserve(self.size());
+                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                return keys;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "values",
+            [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
+            {
+                std::vector<std::tuple<fiction::sidb::simulation::logic::operational_status, double>> values{};
+                values.reserve(self.size());
+                self.for_each([&values](const auto&, const auto& value) { values.push_back(value); });
+                return values;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "items",
+            [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
+            {
+                std::vector<std::pair<fiction::sidb::simulation::logic::parameter_point,
+                                      std::tuple<fiction::sidb::simulation::logic::operational_status, double>>>
+                    items{};
+                items.reserve(self.size());
+                self.for_each([&items](const auto& key, const auto& value) { items.emplace_back(key, value); });
+                return items;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
 
         ;
 
@@ -1044,8 +1055,11 @@ void register_operational_domain(nb::module_& m)
             [](const fiction::sidb::simulation::logic::operational_domain& self)
             {
                 std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
-                keys.reserve(self.size());
-                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                {
+                    const nb::gil_scoped_release release{};
+                    keys.reserve(self.size());
+                    self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                }
 
                 // Keep the GIL: casting keys and creating the iterator call the Python API.
                 const nb::object py_keys = nb::cast(keys);
@@ -1054,33 +1068,39 @@ void register_operational_domain(nb::module_& m)
             nb::sig(
                 "def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction.sidb.simulation.logic.parameter_point]"),
             "Returns an iterator over the parameter points stored in the domain.")
-        .def("keys",
-             [](const fiction::sidb::simulation::logic::operational_domain& self)
-             {
-                 std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
-                 keys.reserve(self.size());
-                 self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
-                 return keys;
-             })
-        .def("values",
-             [](const fiction::sidb::simulation::logic::operational_domain& self)
-             {
-                 std::vector<fiction::sidb::simulation::logic::operational_status> values{};
-                 values.reserve(self.size());
-                 self.for_each([&values](const auto&, const auto& value) { values.push_back(std::get<0>(value)); });
-                 return values;
-             })
-        .def("items",
-             [](const fiction::sidb::simulation::logic::operational_domain& self)
-             {
-                 std::vector<std::pair<fiction::sidb::simulation::logic::parameter_point,
-                                       fiction::sidb::simulation::logic::operational_status>>
-                     items{};
-                 items.reserve(self.size());
-                 self.for_each([&items](const auto& key, const auto& value)
-                               { items.emplace_back(key, std::get<0>(value)); });
-                 return items;
-             })
+        .def(
+            "keys",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
+                keys.reserve(self.size());
+                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                return keys;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "values",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                std::vector<fiction::sidb::simulation::logic::operational_status> values{};
+                values.reserve(self.size());
+                self.for_each([&values](const auto&, const auto& value) { values.push_back(std::get<0>(value)); });
+                return values;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "items",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                std::vector<std::pair<fiction::sidb::simulation::logic::parameter_point,
+                                      fiction::sidb::simulation::logic::operational_status>>
+                    items{};
+                items.reserve(self.size());
+                self.for_each([&items](const auto& key, const auto& value)
+                              { items.emplace_back(key, std::get<0>(value)); });
+                return items;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
 
         ;
 

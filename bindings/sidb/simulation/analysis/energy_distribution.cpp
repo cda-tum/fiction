@@ -45,7 +45,7 @@ namespace pyfiction
  */
 void register_energy_distribution(nb::module_& m)
 {
-    // Keep the GIL for energy-state access and mutation so calls on one distribution remain serialized.
+    // Keep the GIL for scalar energy-state access and map insertion; distribution scans release it.
     nb::class_<fiction::sidb::simulation::analysis::energy_state>(m, "energy_state")
         .def(nb::init<double, uint64_t>(), nb::arg("electrostatic_potential_energy"), nb::arg("degeneracy"),
              DOC(fiction_sidb_simulation_analysis_energy_state))
@@ -58,8 +58,10 @@ void register_energy_distribution(nb::module_& m)
     nb::class_<fiction::sidb::simulation::analysis::energy_distribution>(m, "energy_distribution")
         .def(nb::init<>(), "Default constructor.")
         .def("get_nth_state", &fiction::sidb::simulation::analysis::energy_distribution::get_nth_state,
-             nb::arg("state_index"), DOC(fiction_sidb_simulation_analysis_energy_distribution_get_nth_state))
-        .def("degeneracy", &fiction::sidb::simulation::analysis::energy_distribution::degeneracy, nb::arg("energy"),
+             nb::call_guard<nb::gil_scoped_release>(), nb::arg("state_index"),
+             DOC(fiction_sidb_simulation_analysis_energy_distribution_get_nth_state))
+        .def("degeneracy", &fiction::sidb::simulation::analysis::energy_distribution::degeneracy,
+             nb::call_guard<nb::gil_scoped_release>(), nb::arg("energy"),
              DOC(fiction_sidb_simulation_analysis_energy_distribution_degeneracy))
         .def("add_energy_state", &fiction::sidb::simulation::analysis::energy_distribution::add_energy_state,
              nb::arg("state"), DOC(fiction_sidb_simulation_analysis_energy_distribution_add_energy_state))

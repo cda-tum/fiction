@@ -53,7 +53,7 @@ using bdl_input_iterator_options = fiction::sidb::simulation::logic::bdl_input_i
  */
 void register_bdl_input_iterator(nb::module_& m)
 {
-    // Keep the GIL for iterator operations to serialize access to the mutable cursor.
+    // Keep the GIL for cursor queries and iterator references; native layout copies and updates release it.
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_input_iterator;
 
@@ -151,7 +151,8 @@ Args:
                     throw nb::stop_iteration();
                 }
 
-                auto result = *self;
+                const nb::gil_scoped_release release{};
+                auto                         result = *self;
                 ++self;
 
                 return result;
@@ -171,29 +172,34 @@ Args:
         .def(
             "__ge__", [](const bdl_input_iterator& self, const uint64_t n) { return self >= n; }, nb::arg("m"))
         .def(
-            "__add__", [](const bdl_input_iterator& self, const int n) { return self + n; }, nb::arg("m"),
+            "__add__", [](const bdl_input_iterator& self, const int n) { return self + n; },
+            nb::call_guard<nb::gil_scoped_release>(), nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_add))
         .def(
             "__iadd__",
             [](bdl_input_iterator& self, const int n) -> bdl_input_iterator&
             {
+                const nb::gil_scoped_release release{};
                 self += n;
                 return self;
             },
             nb::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_iadd))
         .def(
-            "__sub__", [](const bdl_input_iterator& self, const int n) { return self - n; }, nb::arg("m"),
+            "__sub__", [](const bdl_input_iterator& self, const int n) { return self - n; },
+            nb::call_guard<nb::gil_scoped_release>(), nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_sub))
         .def(
             "__isub__",
             [](bdl_input_iterator& self, const int n) -> bdl_input_iterator&
             {
+                const nb::gil_scoped_release release{};
                 self -= n;
                 return self;
             },
             nb::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_isub))
         .def(
-            "__getitem__", [](const bdl_input_iterator& self, const int n) { return self[n]; }, nb::arg("m"),
+            "__getitem__", [](const bdl_input_iterator& self, const int n) { return self[n]; },
+            nb::call_guard<nb::gil_scoped_release>(), nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_array))
         .def("num_input_pairs", &bdl_input_iterator::num_input_pairs,
              DOC(fiction_sidb_simulation_logic_bdl_input_iterator_num_input_pairs))

@@ -108,7 +108,7 @@ Args:
         .def("num_sidbs", &potential_landscape::num_sidbs, DOC(fiction_sidb_simulation_potential_landscape_num_sidbs))
         .def(
             "sites", [](const potential_landscape& land) { return *land.sites(); },
-            DOC(fiction_sidb_simulation_potential_landscape_sites))
+            nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_potential_landscape_sites))
         .def("defects", &potential_landscape::defects, DOC(fiction_sidb_simulation_potential_landscape_defects))
         .def("nm_distance", &potential_landscape::nm_distance, nb::arg("i"), nb::arg("j"),
              DOC(fiction_sidb_simulation_potential_landscape_nm_distance))

@@ -48,7 +48,7 @@ namespace pyfiction
  */
 void register_layout(nb::module_& m)
 {
-    // Keep the GIL for layout access and mutation so calls on one layout remain serialized.
+    // Keep the GIL for scalar queries, binary searches, and views converted through the Python API.
     using fiction::sidb::layout;
 
     nb::enum_<fiction::sidb::dot_tag>(m, "sidb_dot_tag", DOC(fiction_sidb_dot_tag))
@@ -67,40 +67,43 @@ void register_layout(nb::module_& m)
         .def("get_layout_name", &layout::get_layout_name, DOC(fiction_sidb_layout_get_layout_name))
         .def("set_layout_name", &layout::set_layout_name, nb::arg("name"), DOC(fiction_sidb_layout_set_layout_name))
 
-        .def("assign_sidb", &layout::assign_sidb, nb::arg("site"), nb::arg("dot_tag") = fiction::sidb::dot_tag::NORMAL,
-             DOC(fiction_sidb_layout_assign_sidb))
+        .def("assign_sidb", &layout::assign_sidb, nb::call_guard<nb::gil_scoped_release>(), nb::arg("site"),
+             nb::arg("dot_tag") = fiction::sidb::dot_tag::NORMAL, DOC(fiction_sidb_layout_assign_sidb))
         .def("get_dot_tag", &layout::get_dot_tag, nb::arg("site"), DOC(fiction_sidb_layout_get_dot_tag))
         .def("is_empty_site", &layout::is_empty_site, nb::arg("site"), DOC(fiction_sidb_layout_is_empty_site))
         .def("is_empty", &layout::is_empty, DOC(fiction_sidb_layout_is_empty))
         .def("num_dots", &layout::num_dots, DOC(fiction_sidb_layout_num_dots))
-        .def("num_dots_with_tag", &layout::num_dots_with_tag, nb::arg("dot_tag"),
-             DOC(fiction_sidb_layout_num_dots_with_tag))
-        .def("dots_with_tag", &layout::dots_with_tag, nb::arg("dot_tag"), DOC(fiction_sidb_layout_dots_with_tag))
+        .def("num_dots_with_tag", &layout::num_dots_with_tag, nb::call_guard<nb::gil_scoped_release>(),
+             nb::arg("dot_tag"), DOC(fiction_sidb_layout_num_dots_with_tag))
+        .def("dots_with_tag", &layout::dots_with_tag, nb::call_guard<nb::gil_scoped_release>(), nb::arg("dot_tag"),
+             DOC(fiction_sidb_layout_dots_with_tag))
         .def("sidbs", &layout::sidbs, DOC(fiction_sidb_layout_sidbs))
         .def("index_of", &layout::index_of, nb::arg("site"), DOC(fiction_sidb_layout_index_of))
-        .def("num_pis", &layout::num_pis, DOC(fiction_sidb_layout_num_pis))
-        .def("num_pos", &layout::num_pos, DOC(fiction_sidb_layout_num_pos))
+        .def("num_pis", &layout::num_pis, nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_num_pis))
+        .def("num_pos", &layout::num_pos, nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_num_pos))
         .def("is_pi", &layout::is_pi, nb::arg("site"), DOC(fiction_sidb_layout_is_pi))
         .def("is_po", &layout::is_po, nb::arg("site"), DOC(fiction_sidb_layout_is_po))
         .def(
             "pis", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::INPUT); },
-            "Returns the sites of all input SiDBs.")
+            nb::call_guard<nb::gil_scoped_release>(), "Returns the sites of all input SiDBs.")
         .def(
             "pos", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::OUTPUT); },
-            "Returns the sites of all output SiDBs.")
+            nb::call_guard<nb::gil_scoped_release>(), "Returns the sites of all output SiDBs.")
 
-        .def("assign_defect", &layout::assign_defect, nb::arg("site"), nb::arg("defect"),
-             DOC(fiction_sidb_layout_assign_defect))
-        .def("move_defect", &layout::move_defect, nb::arg("source"), nb::arg("target"),
-             DOC(fiction_sidb_layout_move_defect))
+        .def("assign_defect", &layout::assign_defect, nb::call_guard<nb::gil_scoped_release>(), nb::arg("site"),
+             nb::arg("defect"), DOC(fiction_sidb_layout_assign_defect))
+        .def("move_defect", &layout::move_defect, nb::call_guard<nb::gil_scoped_release>(), nb::arg("source"),
+             nb::arg("target"), DOC(fiction_sidb_layout_move_defect))
         .def("get_defect", &layout::get_defect, nb::arg("site"), DOC(fiction_sidb_layout_get_defect))
         .def("num_defects", &layout::num_defects, DOC(fiction_sidb_layout_num_defects))
         .def("num_positively_charged_defects", &layout::num_positively_charged_defects,
-             DOC(fiction_sidb_layout_num_positively_charged_defects))
+             nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_num_positively_charged_defects))
         .def("num_negatively_charged_defects", &layout::num_negatively_charged_defects,
-             DOC(fiction_sidb_layout_num_negatively_charged_defects))
-        .def("num_charged_defects", &layout::num_charged_defects, DOC(fiction_sidb_layout_num_charged_defects))
-        .def("num_neutral_defects", &layout::num_neutral_defects, DOC(fiction_sidb_layout_num_neutral_defects))
+             nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_num_negatively_charged_defects))
+        .def("num_charged_defects", &layout::num_charged_defects, nb::call_guard<nb::gil_scoped_release>(),
+             DOC(fiction_sidb_layout_num_charged_defects))
+        .def("num_neutral_defects", &layout::num_neutral_defects, nb::call_guard<nb::gil_scoped_release>(),
+             DOC(fiction_sidb_layout_num_neutral_defects))
         .def("defects", &layout::defects, DOC(fiction_sidb_layout_defects))
         .def("affected_sidbs", &layout::affected_sidbs, nb::call_guard<nb::gil_scoped_release>(), nb::arg("site"),
              nb::arg("charged_defect_spacing_overwrite") = std::nullopt,
@@ -109,12 +112,15 @@ void register_layout(nb::module_& m)
              nb::arg("charged_defect_spacing_overwrite") = std::nullopt,
              nb::arg("neutral_defect_spacing_overwrite") = std::nullopt, DOC(fiction_sidb_layout_all_affected_sidbs))
 
-        .def("bounding_box", &layout::bounding_box, DOC(fiction_sidb_layout_bounding_box))
+        .def("bounding_box", &layout::bounding_box, nb::call_guard<nb::gil_scoped_release>(),
+             DOC(fiction_sidb_layout_bounding_box))
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
-        .def(nb::self == nb::self, DOC(fiction_sidb_layout_operator_eq))
-        .def(nb::self != nb::self)
+        .def(nb::self == nb::self, nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_operator_eq))
+        .def(nb::self != nb::self, nb::call_guard<nb::gil_scoped_release>())
         // NOLINTEND(misc-redundant-expression)
-        .def("__hash__", [](const layout& lyt) { return std::hash<layout>{}(lyt); })
+        .def(
+            "__hash__", [](const layout& lyt) { return std::hash<layout>{}(lyt); },
+            nb::call_guard<nb::gil_scoped_release>())
         .def(
             "__repr__",
             [](const layout& lyt)
