@@ -20,6 +20,7 @@
 #include "fiction/technology/sidb/model/physical_constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <limits>
@@ -130,7 +131,7 @@ namespace fiction::sidb::model
         return upper;
     }
     const auto rounded_down = std::floor(scaled_distance) / scale;
-    return !below_inverse(rounded_down) ? rounded_down : std::ceil(scaled_distance) / scale;
+    return !below_inverse(rounded_down) ? rounded_down : std::max(upper, std::ceil(scaled_distance) / scale);
 }
 
 }  // namespace fiction::sidb::model

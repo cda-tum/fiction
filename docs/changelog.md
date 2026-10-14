@@ -121,8 +121,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - `potential_to_distance_conversion` now uses a bounded inverse search, returns infinity for zero potential,
-    and rejects invalid physical parameters and precision beyond `double`'s decimal precision.
+  - `potential_to_distance_conversion` now uses a bounded inverse search and returns infinity for zero potential.
+    It throws `std::invalid_argument` for invalid physical parameters, negative or NaN potential,
+    and precision beyond `double`'s decimal precision.
   - Geometric distances accept coordinate pairs directly and use fixed `uint64_t` or `double` results.
     Squared Euclidean distance is `noexcept` and requires a result within the `uint64_t` range.
     Euclidean distance is a runtime `noexcept` function.

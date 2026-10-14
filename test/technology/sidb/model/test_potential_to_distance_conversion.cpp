@@ -151,3 +151,13 @@ TEST_CASE("Potential-to-distance conversion rounds decimal boundaries", "[potent
                      Catch::Matchers::WithinAbs(distance + 0.01, 1e-14));
     }
 }
+
+TEST_CASE("Potential-to-distance conversion rounds high precision upward", "[potential_to_distance_conversion]")
+{
+    const auto       params    = simulation_parameters{};
+    constexpr double potential = 1.3772094688939445e-08;
+    const auto       distance  = potential_to_distance_conversion(potential, params, 13);
+    const auto       recovered_potential =
+        params.k() * ELEMENTARY_CHARGE / (distance * 1e-9) * std::exp(-distance / params.lambda_tf);
+    REQUIRE(recovered_potential <= potential);
+}

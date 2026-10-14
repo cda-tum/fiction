@@ -104,7 +104,8 @@ struct physical_population_stability_params
      */
     model::simulation_parameters sim_params{};
     /**
-     * Number of decimal places of the distance corresponding to a potential difference.
+     * Number of decimal places of the distance corresponding to a potential difference, at most
+     * `std::numeric_limits<double>::digits10`.
      */
     uint64_t precision_for_distance_corresponding_to_potential = 2;
     /**
@@ -314,6 +315,8 @@ class physical_population_stability_impl
  * @param lyt The layout to analyze.
  * @param params Parameters.
  * @return The population stability information, one entry per distinct charge distribution.
+ * @throws std::invalid_argument If a potential-to-distance conversion receives invalid physical parameters or
+ * precision.
  */
 [[nodiscard]] inline std::vector<population_stability_information>
 physical_population_stability(const layout& lyt, const physical_population_stability_params& params)
