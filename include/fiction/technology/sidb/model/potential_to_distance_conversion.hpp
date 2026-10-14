@@ -71,6 +71,7 @@ namespace fiction::sidb::model
     }
 
     // Logarithms keep finite positive inputs usable when the screened potential would underflow or overflow.
+    const auto coefficient = params.k() * model::ELEMENTARY_CHARGE;
     const auto log_coefficient =
         std::log(model::K_E) + std::log(model::ELEMENTARY_CHARGE) + std::log(1e9) - std::log(params.epsilon_r);
     const auto log_potential = std::log(potential);
@@ -81,9 +82,8 @@ namespace fiction::sidb::model
      */
     const auto below_inverse = [&](const double distance) noexcept
     {
-        const auto screened_potential =
-            params.k() * model::ELEMENTARY_CHARGE / (distance * 1e-9) * std::exp(-distance / params.lambda_tf);
-        if (std::isfinite(screened_potential) && screened_potential >= std::numeric_limits<double>::min())
+        const auto screened_potential = coefficient / (distance * 1e-9) * std::exp(-distance / params.lambda_tf);
+        if (std::isnormal(coefficient) && std::isnormal(screened_potential))
         {
             return screened_potential > potential;
         }

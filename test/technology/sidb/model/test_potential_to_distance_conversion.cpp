@@ -136,6 +136,13 @@ TEST_CASE("Potential-to-distance conversion bounds precision and extremes", "[po
     extreme_params.lambda_tf = 1e300;
     REQUIRE_THAT(potential_to_distance_conversion(1e-300, extreme_params), Catch::Matchers::WithinAbs(1.44, 1e-14));
 
+    extreme_params.epsilon_r             = std::numeric_limits<double>::max();
+    extreme_params.lambda_tf             = std::numeric_limits<double>::max();
+    constexpr double tiny_potential      = 1e-307;
+    const auto       unscreened_distance = K_E * ELEMENTARY_CHARGE * 1e9 / (extreme_params.epsilon_r * tiny_potential);
+    REQUIRE_THAT(potential_to_distance_conversion(tiny_potential, extreme_params, 12),
+                 Catch::Matchers::WithinAbs(unscreened_distance, 1e-12));
+
     extreme_params.epsilon_r = std::numeric_limits<double>::denorm_min();
     extreme_params.lambda_tf = std::numeric_limits<double>::max();
     REQUIRE(std::isinf(potential_to_distance_conversion(std::numeric_limits<double>::denorm_min(), extreme_params)));
