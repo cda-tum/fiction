@@ -67,8 +67,9 @@ void register_layout(nb::module_& m)
         .def("get_layout_name", &layout::get_layout_name, DOC(fiction_sidb_layout_get_layout_name))
         .def("set_layout_name", &layout::set_layout_name, nb::arg("name"), DOC(fiction_sidb_layout_set_layout_name))
 
-        .def("assign_sidb", &layout::assign_sidb, nb::call_guard<nb::gil_scoped_release>(), nb::arg("site"),
-             nb::arg("dot_tag") = fiction::sidb::dot_tag::NORMAL, DOC(fiction_sidb_layout_assign_sidb))
+        // Keep the GIL for individual site updates; a release adds overhead to these common mutations.
+        .def("assign_sidb", &layout::assign_sidb, nb::arg("site"), nb::arg("dot_tag") = fiction::sidb::dot_tag::NORMAL,
+             DOC(fiction_sidb_layout_assign_sidb))
         .def("get_dot_tag", &layout::get_dot_tag, nb::arg("site"), DOC(fiction_sidb_layout_get_dot_tag))
         .def("is_empty_site", &layout::is_empty_site, nb::arg("site"), DOC(fiction_sidb_layout_is_empty_site))
         .def("is_empty", &layout::is_empty, DOC(fiction_sidb_layout_is_empty))
@@ -90,10 +91,11 @@ void register_layout(nb::module_& m)
             "pos", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::OUTPUT); },
             nb::call_guard<nb::gil_scoped_release>(), "Returns the sites of all output SiDBs.")
 
-        .def("assign_defect", &layout::assign_defect, nb::call_guard<nb::gil_scoped_release>(), nb::arg("site"),
-             nb::arg("defect"), DOC(fiction_sidb_layout_assign_defect))
-        .def("move_defect", &layout::move_defect, nb::call_guard<nb::gil_scoped_release>(), nb::arg("source"),
-             nb::arg("target"), DOC(fiction_sidb_layout_move_defect))
+        // Keep individual defect updates under the GIL, as with individual dot updates.
+        .def("assign_defect", &layout::assign_defect, nb::arg("site"), nb::arg("defect"),
+             DOC(fiction_sidb_layout_assign_defect))
+        .def("move_defect", &layout::move_defect, nb::arg("source"), nb::arg("target"),
+             DOC(fiction_sidb_layout_move_defect))
         .def("get_defect", &layout::get_defect, nb::arg("site"), DOC(fiction_sidb_layout_get_defect))
         .def("num_defects", &layout::num_defects, DOC(fiction_sidb_layout_num_defects))
         .def("num_positively_charged_defects", &layout::num_positively_charged_defects,

@@ -89,7 +89,7 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
     Args:
         kind: Native SiDB operation to exercise.
     """
-    count = 1_000_000 if kind == "sites" else 200_000
+    count = 1_000_000
     layout = sidb_layout()
     for column in range(count):
         layout.assign_sidb(lattice_site(column, 0, 0), sidb_dot_tag.INPUT)
@@ -106,7 +106,7 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
             """
             return charge_distribution(layout)
 
-        assert run_with_python_progress(construct).size() == 200_000
+        assert run_with_python_progress(construct).size() == count
 
 
 def test_bdl_iterator_serializes_cursor_updates() -> None:
