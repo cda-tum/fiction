@@ -16802,6 +16802,11 @@ Returns:
     The population stability information, one entry per distinct
     charge distribution.
 
+Raises:
+    std::invalid_argument: If a potential-to-distance conversion
+                           receives invalid physical parameters or
+                           precision.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params = R"doc(Parameters of the population stability analysis.)doc";
@@ -16812,7 +16817,7 @@ budget unlimited.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_precision_for_distance_corresponding_to_potential =
 R"doc(Number of decimal places of the distance corresponding to a potential
-difference.)doc";
+difference, at most `std::numeric_limits<double>::digits10`.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_sim_params = R"doc(Physical parameters of the simulation.)doc";
 
