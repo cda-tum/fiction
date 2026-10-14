@@ -8,6 +8,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+import pytest
+
+from mnt.pyfiction.sidb.simulation import io, logic
 from mnt.pyfiction.sidb.simulation.io import (
     sample_writing_mode,
     write_critical_temperature_domain_to_string,
@@ -21,6 +26,9 @@ from mnt.pyfiction.sidb.simulation.logic import (
     parameter_point,
     sweep_parameter,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_write_simple_operational_domain():
@@ -121,3 +129,27 @@ def test_skip_non_operational_samples():
     operational_domain_as_string = write_operational_domain_to_string(opdom, params)
 
     assert sorted(operational_domain_as_string.strip().split("\n")) == sorted(expected.strip().split("\n"))
+
+
+@pytest.mark.parametrize("domain_name", ["operational_domain", "critical_temperature_domain"])
+def test_domain_writer_parameters(tmp_path: Path, domain_name: str) -> None:
+    """File writers require params; string writers provide the same defaults."""
+    domain = getattr(logic, domain_name)([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+    point = parameter_point([0.1, 0.2])
+    domain[point] = (
+        operational_status.OPERATIONAL
+        if domain_name == "operational_domain"
+        else (operational_status.OPERATIONAL, 50.3)
+    )
+    write_file = getattr(io, f"write_{domain_name}")
+    write_string = getattr(io, f"write_{domain_name}_to_string")
+    filename = tmp_path / "domain.csv"
+    with pytest.raises(TypeError):
+        write_file(opdom=domain, filename=str(filename))
+    params = write_operational_domain_params()
+    write_file(opdom=domain, filename=str(filename), params=params)
+    assert filename.read_text(encoding="utf-8") == write_string(opdom=domain)
+    params.operational_tag = "working"
+    write_file(opdom=domain, filename=str(filename), params=params)
+    assert filename.read_text(encoding="utf-8") == write_string(opdom=domain, params=params)
+    assert "working" in filename.read_text(encoding="utf-8")
