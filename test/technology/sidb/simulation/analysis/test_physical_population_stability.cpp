@@ -26,6 +26,8 @@
 #include <fiction/utils/execution_timeout.hpp>
 
 #include <cmath>
+#include <limits>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -45,6 +47,33 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 {
     layout lyt{};
     lyt.assign_sidb({1, 1, 0}, dot_tag::NORMAL);
+
+    SECTION("Distance conversion rejects unsupported precision")
+    {
+        const physical_population_stability_params params{.precision_for_distance_corresponding_to_potential =
+                                                              std::numeric_limits<double>::digits10 + 1};
+        CHECK_THROWS_AS(physical_population_stability(lyt, params), std::invalid_argument);
+    }
+
+    SECTION("Zero potential difference corresponds to infinite distance")
+    {
+        const physical_population_stability_params params{.sim_params = simulation_parameters{2, 0.0}};
+        const auto                                 result = physical_population_stability(lyt, params);
+        REQUIRE_FALSE(result.empty());
+        bool found_zero_potential = false;
+        for (const auto& stability : result)
+        {
+            for (const auto& [transition, dot_and_potential] : stability.transition_potentials)
+            {
+                if (dot_and_potential.second == 0.0)
+                {
+                    found_zero_potential = true;
+                    CHECK(std::isinf(stability.distance_corresponding_to_potential.at(transition)));
+                }
+            }
+        }
+        CHECK(found_zero_potential);
+    }
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {

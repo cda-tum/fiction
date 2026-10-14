@@ -37,7 +37,8 @@ namespace fiction::sidb::model
  * serves the inverse purpose by calculating the distance for a given potential and given physical parameters.
  *
  * The distance rounds upward to the requested decimal precision, with a minimum of `10^-precision` nm.
- * Zero potential returns positive infinity. Positive infinite potential returns the minimum distance.
+ * Floating-point evaluation error can exceed the requested decimal precision, especially for extreme physical
+ * parameters. Zero potential returns positive infinity. Positive infinite potential returns the minimum distance.
  *
  * @param params The physical parameters for a given hydrogen-passivated silicon surface.
  * @param potential The electrostatic potential (unit: V) to be converted to a distance.

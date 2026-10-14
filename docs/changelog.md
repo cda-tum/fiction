@@ -124,6 +124,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `potential_to_distance_conversion` now uses a bounded inverse search and returns infinity for zero potential.
     It throws `std::invalid_argument` for invalid physical parameters, negative or NaN potential,
     and precision beyond `double`'s decimal precision.
+    Population stability distances now return infinity for a zero potential difference.
   - Geometric distances accept coordinate pairs directly and use fixed `uint64_t` or `double` results.
     Squared Euclidean distance is `noexcept` and requires a result within the `uint64_t` range.
     Euclidean distance is a runtime `noexcept` function.

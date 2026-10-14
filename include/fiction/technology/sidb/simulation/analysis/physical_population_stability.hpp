@@ -86,6 +86,7 @@ struct population_stability_information
     /**
      * For each transition type, the distance (unit: nm) an additional SiDB would have to be placed at to induce
      * the required potential difference.
+     * A zero potential difference corresponds to positive infinity.
      */
     std::unordered_map<transition_type, double> distance_corresponding_to_potential{};
     /**
