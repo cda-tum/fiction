@@ -326,6 +326,27 @@ message naming that version.
 
 ## Advanced Configuration
 
+### GIL handling
+
+`pyfiction` releases Python's global interpreter lock (GIL) during substantial native computation, collection
+traversal, and file I/O. Other Python threads can run while these calls execute. Small accessors and mutations
+retain the GIL because a release would add overhead. Python object construction, imports, and printing also
+require the GIL; wrappers release it only around their native work.
+
+Python callbacks passed through nanobind's `std::function` conversion acquire the GIL for each invocation.
+Native calls that wait for callback workers release the GIL so those workers can enter Python.
+
+GIL release does not synchronize native objects. Do not access an object from another thread while a native call
+mutates it, and do not mutate an object while a native call reads it. This restriction includes copies that share
+native storage, callback access, and statistics objects supplied to a running algorithm. Use a Python lock around
+all such access or pass independent objects. A callback may consume its reported values; it must not inspect or
+modify native objects still in use by the algorithm.
+
+Binding contributors should use `nanobind::call_guard<nanobind::gil_scoped_release>()` for entirely native call
+bodies. Mixed wrappers need an inner release scope after Python validation and before Python result construction.
+Keep Python-owned objects and callback wrappers alive until the GIL is reacquired. Explain retained-GIL decisions
+once per binding group and locally at Python-sensitive boundaries.
+
 ### Enabling dependent functions
 
 Some functionalities require the presence of third-party dependencies. In the following, it is discussed how to enable
