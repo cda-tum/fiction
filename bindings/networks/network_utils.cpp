@@ -47,18 +47,6 @@ namespace detail
 {
 
 /**
- * @brief Binds `has_high_degree_fanin_nodes`.
- * @param m Python module.
- * @tparam Ntk Network type.
- */
-template <typename Ntk>
-void register_has_high_degree_fanin_nodes(nb::module_& m)
-{
-    m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<Ntk>, nb::arg("ntk"),
-          nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
-}
-
-/**
  * @brief Bind random generation for the selected registered network class.
  * @tparam Ntk Network representation.
  * @param m Networks module.
@@ -135,7 +123,8 @@ void register_network_utils(nb::module_& m)
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    detail::register_has_high_degree_fanin_nodes<py_tec_network>(m);
+    m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<py_tec_network>,
+          nb::arg("ntk"), nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
     detail::register_random_network<py_tec_network>(
         m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
            "type[mnt.pyfiction.networks.technology_network] = mnt.pyfiction.networks.technology_network) -> "
