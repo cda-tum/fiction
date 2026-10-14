@@ -127,7 +127,7 @@ def test_skip_non_operational_samples():
 
 @pytest.mark.parametrize("domain_name", ["operational_domain", "critical_temperature_domain"])
 def test_domain_writer_parameters(tmp_path: Path, domain_name: str) -> None:
-    """File writers require params; string writers provide the same defaults."""
+    """File and string writers share defaults and keyword options."""
     domain = getattr(logic, domain_name)([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
     point = parameter_point([0.1, 0.2])
     domain[point] = (
@@ -138,12 +138,8 @@ def test_domain_writer_parameters(tmp_path: Path, domain_name: str) -> None:
     write_file = getattr(io, f"write_{domain_name}")
     write_string = getattr(io, f"write_{domain_name}_to_string")
     filename = tmp_path / "domain.csv"
-    with pytest.raises(TypeError):
-        write_file(opdom=domain, filename=str(filename))
-    params = write_operational_domain_params()
-    write_file(opdom=domain, filename=str(filename), params=params)
+    write_file(opdom=domain, filename=str(filename))
     assert filename.read_text(encoding="utf-8") == write_string(opdom=domain)
-    params.operational_tag = "working"
-    write_file(opdom=domain, filename=str(filename), params=params)
-    assert filename.read_text(encoding="utf-8") == write_string(opdom=domain, params=params)
+    write_file(opdom=domain, filename=str(filename), operational_tag="working")
+    assert filename.read_text(encoding="utf-8") == write_string(opdom=domain, operational_tag="working")
     assert "working" in filename.read_text(encoding="utf-8")
