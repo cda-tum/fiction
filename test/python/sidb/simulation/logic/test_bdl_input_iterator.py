@@ -206,7 +206,7 @@ def test_keyword_iterator_owns_options_and_supplied_wires(bdl_wire: sidb_layout)
     """The iterator keeps supplied wires after the caller releases temporary inputs."""
     wires = detect_bdl_wires(bdl_wire, wire_selection=bdl_wire_selection.INPUT)
     iterator = bdl_input_iterator(bdl_wire, wires, minimum_distance=0.7)
-    expected = list(bdl_input_iterator(bdl_wire, threshold_bdl_interdistance=1.8))
+    expected = list(bdl_input_iterator(bdl_wire, minimum_distance=0.7))
     del wires
     gc.collect()
     actual = list(iterator)
