@@ -17,7 +17,6 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 
 #include <string_view>
 

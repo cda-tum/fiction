@@ -17,7 +17,6 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/simulation/is_ground_state.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
 

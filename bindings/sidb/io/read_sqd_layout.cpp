@@ -18,7 +18,6 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 
 #include <string_view>
 

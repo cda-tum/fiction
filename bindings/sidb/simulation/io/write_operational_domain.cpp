@@ -21,7 +21,6 @@
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <sstream>
-#include <string>
 #include <string_view>
 
 #include <nanobind/nanobind.h>
