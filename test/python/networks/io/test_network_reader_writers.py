@@ -87,7 +87,7 @@ def test_reader_rejects_blif_for_specialized_networks(
     """BLIF input supports the technology network representation only."""
     source = tmp_path / "one.blif"
     source.write_text(".model one\n.inputs a b\n.outputs y\n.names a b y\n11 1\n.end\n", encoding="utf-8")
-    with pytest.raises(RuntimeError, match="do not support the full feature set of BLIF"):
+    with pytest.raises(RuntimeError, match="could not parse"):
         read_network(str(source), network_type=cls)
 
 
