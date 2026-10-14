@@ -310,8 +310,7 @@ class energy_distribution:
         value.
 
         Args:
-            energy: The energy value for which the excited state number is to
-                    be determined.
+            energy: The energy value whose degeneracy is requested.
 
         Returns:
             The degeneracy of the given energy. If the energy value is not
