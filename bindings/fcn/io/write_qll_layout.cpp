@@ -53,14 +53,11 @@ namespace detail
 template <typename Lyt>
 void register_write_qll_layout(nb::module_& m)
 {
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_qll_layout_function_pointer)(const Lyt&, const std::string_view&,
-                                                    fiction::utils::progress_callback) =
-        &fiction::fcn::io::write_qll_layout<Lyt>;
-
-    m.def("write_qll_layout", write_qll_layout_function_pointer, nb::arg("layout"), nb::arg("filename"),
-          nb::arg("on_progress").none() = nb::none(), DOC(fiction_fcn_io_write_qll_layout),
-          nb::call_guard<nb::gil_scoped_release>());
+    m.def("write_qll_layout",
+          nb::overload_cast<const Lyt&, const std::string_view&, fiction::utils::progress_callback>(
+              &fiction::fcn::io::write_qll_layout<Lyt>),
+          nb::arg("layout"), nb::arg("filename"), nb::arg("on_progress").none() = nb::none(),
+          DOC(fiction_fcn_io_write_qll_layout), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail

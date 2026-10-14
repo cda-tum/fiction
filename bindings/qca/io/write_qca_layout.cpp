@@ -54,14 +54,11 @@ void register_write_qca_layout(nb::module_& m)
 
         ;
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_qca_layout_function_pointer)(const fiction::qca::layout&, const std::string_view&,
-                                                    fiction::qca::io::write_qca_layout_params) =
-        &fiction::qca::io::write_qca_layout;
-
-    m.def("write_qca_layout", write_qca_layout_function_pointer, nb::arg("layout"), nb::arg("filename"),
-          nb::arg("params") = fiction::qca::io::write_qca_layout_params{}, DOC(fiction_qca_io_write_qca_layout),
-          nb::call_guard<nb::gil_scoped_release>());
+    m.def("write_qca_layout",
+          nb::overload_cast<const fiction::qca::layout&, const std::string_view&,
+                            fiction::qca::io::write_qca_layout_params>(&fiction::qca::io::write_qca_layout),
+          nb::arg("layout"), nb::arg("filename"), nb::arg("params") = fiction::qca::io::write_qca_layout_params{},
+          DOC(fiction_qca_io_write_qca_layout), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

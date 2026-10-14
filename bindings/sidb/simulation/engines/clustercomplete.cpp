@@ -22,9 +22,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/progress.hpp"
 
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
@@ -87,13 +85,9 @@ void register_clustercomplete(nb::module_& m)
                 pyfiction::CALLBACK_SETTER,
                 DOC(fiction_sidb_simulation_engines_clustercomplete_params_on_worker_progress));
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    fiction::sidb::simulation::result (*const clustercomplete_pointer)(const fiction::sidb::layout&,
-                                                                       const clustercomplete_params&) =
-        &fiction::sidb::simulation::engines::clustercomplete;
-
-    m.def("clustercomplete", clustercomplete_pointer, nb::arg("lyt"), nb::arg("params") = clustercomplete_params{},
-          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_clustercomplete));
+    m.def("clustercomplete", &fiction::sidb::simulation::engines::clustercomplete, nb::arg("lyt"),
+          nb::arg("params") = clustercomplete_params{}, nb::call_guard<nb::gil_scoped_release>(),
+          DOC(fiction_sidb_simulation_engines_clustercomplete));
 }
 
 }  // namespace pyfiction

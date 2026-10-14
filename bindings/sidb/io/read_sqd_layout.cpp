@@ -47,8 +47,7 @@ void register_read_sqd_layout(nb::module_& m)
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     m.def("read_sqd_layout",
-          static_cast<fiction::sidb::layout (*)(const std::string_view&, const std::string_view&)>(
-              &fiction::sidb::io::read_sqd_layout),
+          nb::overload_cast<const std::string_view&, const std::string_view&>(&fiction::sidb::io::read_sqd_layout),
           nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_sidb_io_read_sqd_layout_2),
           nb::call_guard<nb::gil_scoped_release>());
 }

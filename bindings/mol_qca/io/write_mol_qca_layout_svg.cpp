@@ -53,14 +53,11 @@ void register_write_mol_qca_layout_svg(nb::module_& m)
         .def_rw("simple", &write_mol_qca_layout_svg_params::simple,
                 DOC(fiction_mol_qca_io_write_mol_qca_layout_svg_params_simple));
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_pointer)(const fiction::mol_qca::layout&, const std::string_view&,
-                                const write_mol_qca_layout_svg_params&) =
-        &fiction::mol_qca::io::write_mol_qca_layout_svg;
-
-    m.def("write_mol_qca_layout_svg", write_pointer, nb::arg("layout"), nb::arg("filename"),
-          nb::arg("params") = write_mol_qca_layout_svg_params{}, DOC(fiction_mol_qca_io_write_mol_qca_layout_svg),
-          nb::call_guard<nb::gil_scoped_release>());
+    m.def("write_mol_qca_layout_svg",
+          nb::overload_cast<const fiction::mol_qca::layout&, const std::string_view&,
+                            const write_mol_qca_layout_svg_params&>(&fiction::mol_qca::io::write_mol_qca_layout_svg),
+          nb::arg("layout"), nb::arg("filename"), nb::arg("params") = write_mol_qca_layout_svg_params{},
+          DOC(fiction_mol_qca_io_write_mol_qca_layout_svg), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

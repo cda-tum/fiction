@@ -56,15 +56,12 @@ void register_write_qca_layout_svg(nb::module_& m)
         .def_rw("simple", &fiction::qca::io::write_qca_layout_svg_params::simple,
                 DOC(fiction_qca_io_write_qca_layout_svg_params_simple));
 
-    // QCA plot
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_qca_layout_svg_pointer)(const fiction::qca::layout&, const std::string_view&,
-                                               const fiction::qca::io::write_qca_layout_svg_params&) =
-        &fiction::qca::io::write_qca_layout_svg;
-
-    m.def("write_qca_layout_svg", write_qca_layout_svg_pointer, nb::arg("layout"), nb::arg("filename"),
-          nb::arg("params") = fiction::qca::io::write_qca_layout_svg_params{}, DOC(fiction_qca_io_write_qca_layout_svg),
-          nb::call_guard<nb::gil_scoped_release>());
+    m.def("write_qca_layout_svg",
+          nb::overload_cast<const fiction::qca::layout&, const std::string_view&,
+                            const fiction::qca::io::write_qca_layout_svg_params&>(
+              &fiction::qca::io::write_qca_layout_svg),
+          nb::arg("layout"), nb::arg("filename"), nb::arg("params") = fiction::qca::io::write_qca_layout_svg_params{},
+          DOC(fiction_qca_io_write_qca_layout_svg), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

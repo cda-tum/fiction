@@ -18,9 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/progress.hpp"
 
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
@@ -68,12 +66,9 @@ void register_quickexact(nb::module_& m)
         .def_rw("on_progress", &quickexact_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
                 pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_quickexact_params_on_progress));
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    fiction::sidb::simulation::result (*const quickexact_pointer)(
-        const fiction::sidb::layout&, const quickexact_params&) = &fiction::sidb::simulation::engines::quickexact;
-
-    m.def("quickexact", quickexact_pointer, nb::arg("lyt"), nb::arg("params") = quickexact_params{},
-          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quickexact));
+    m.def("quickexact", &fiction::sidb::simulation::engines::quickexact, nb::arg("lyt"),
+          nb::arg("params") = quickexact_params{}, nb::call_guard<nb::gil_scoped_release>(),
+          DOC(fiction_sidb_simulation_engines_quickexact));
 }
 
 }  // namespace pyfiction
