@@ -42,7 +42,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void bdl_input_iterator(nb::module_& m)
+/**
+ * @brief Binds bdl input iterator helpers.
+ * @param m Python module.
+ */
+void register_bdl_input_iterator(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_input_iterator;

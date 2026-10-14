@@ -60,11 +60,11 @@ namespace detail
 {
 
 /**
- * Registers the operational domain and critical temperature domain algorithms on `sidb_layout`.
+ * @brief Registers the operational domain and critical temperature domain algorithms on `sidb_layout`.
  *
  * @param m The module.
  */
-inline void operational_domain_functions(nb::module_& m)
+inline void register_operational_domain_functions(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::operational_domain_params;
@@ -152,7 +152,11 @@ inline void operational_domain_functions(nb::module_& m)
 
 }  // namespace detail
 
-void operational_domain(nb::module_& m)
+/**
+ * @brief Binds operational domain helpers.
+ * @param m Python module.
+ */
+void register_operational_domain(nb::module_& m)
 {
     nb::class_<fiction::sidb::simulation::logic::parameter_point>(m, "parameter_point",
                                                                   DOC(fiction_sidb_simulation_logic_parameter_point))
@@ -440,7 +444,7 @@ void operational_domain(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::operational_domain_functions(m);
+    detail::register_operational_domain_functions(m);
 }
 
 }  // namespace pyfiction

@@ -82,8 +82,13 @@ void draw(const Lyt& lyt, const std::string_view& filename, const fiction::utils
     }
 }
 
+/**
+ * @brief Binds write dot layout helpers.
+ * @param m Python module.
+ * @tparam Lyt Layout type.
+ */
 template <typename Lyt>
-void write_dot_layout(nb::module_& m)
+void register_write_dot_layout(nb::module_& m)
 {
     m.def(
         "write_dot_layout",
@@ -114,11 +119,15 @@ void write_dot_layout(nb::module_& m)
 
 }  // namespace detail
 
-void layout_drawers(nb::module_& m)
+/**
+ * @brief Binds layout drawers helpers.
+ * @param m Python module.
+ */
+void register_layout_drawers(nb::module_& m)
 {
-    detail::write_dot_layout<py_cartesian_gate_layout>(m);
-    detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);
-    detail::write_dot_layout<py_hexagonal_gate_layout>(m);
+    detail::register_write_dot_layout<py_cartesian_gate_layout>(m);
+    detail::register_write_dot_layout<py_shifted_cartesian_gate_layout>(m);
+    detail::register_write_dot_layout<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

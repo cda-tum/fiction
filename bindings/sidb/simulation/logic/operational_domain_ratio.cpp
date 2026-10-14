@@ -43,7 +43,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void operational_domain_ratio(nb::module_& m)
+/**
+ * @brief Binds operational domain ratio helpers.
+ * @param m Python module.
+ */
+void register_operational_domain_ratio(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::operational_domain_ratio_params;

@@ -44,7 +44,7 @@ namespace detail
 
 /** @brief Binds object layout design rule checks. @tparam Lyt Layout type. @param m Python module. */
 template <typename Lyt>
-void gate_level_drvs_impl(nb::module_& m)
+void register_gate_level_drvs_impl(nb::module_& m)
 {
     m.def(
         "gate_level_drvs",
@@ -80,7 +80,7 @@ void gate_level_drvs_impl(nb::module_& m)
 }  // namespace detail
 
 /** @brief Registers design rule checks and reports. @param m Python module. */
-void design_rule_violations(nb::module_& m)
+void register_design_rule_violations(nb::module_& m)
 {
     nb::class_<fiction::verification::gate_level_drv_params>(
         m, "gate_level_drv_params", pyfiction::progress_type_slots<fiction::verification::gate_level_drv_params>(),
@@ -121,9 +121,9 @@ void design_rule_violations(nb::module_& m)
 
         ;
 
-    detail::gate_level_drvs_impl<py_cartesian_gate_layout>(m);
-    detail::gate_level_drvs_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::gate_level_drvs_impl<py_hexagonal_gate_layout>(m);
+    detail::register_gate_level_drvs_impl<py_cartesian_gate_layout>(m);
+    detail::register_gate_level_drvs_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::register_gate_level_drvs_impl<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

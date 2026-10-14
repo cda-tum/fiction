@@ -35,7 +35,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void qca_layout(nb::module_& m)
+void register_qca_layout(nb::module_& m)
 {
     using fiction::qca::cell_mode;
     using fiction::qca::cell_type;
@@ -57,9 +57,9 @@ void qca_layout(nb::module_& m)
 
     nb::class_<layout, py_cartesian_layout> cls(m, "qca_layout", DOC(fiction_qca_layout));
 
-    detail::bind_clocked_constructors(cls);
-    detail::bind_cell_grid(cls);
-    detail::bind_tile_clocking(cls);
+    detail::register_clocked_constructors(cls);
+    detail::register_cell_grid(cls);
+    detail::register_tile_clocking(cls);
 
     cls.def("assign_cell_type", &layout::assign_cell_type, nb::arg("c"), nb::arg("ct"),
             DOC(fiction_qca_layout_assign_cell_type))

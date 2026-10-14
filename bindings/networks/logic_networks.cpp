@@ -44,12 +44,16 @@ namespace detail
 {
 
 /**
- * Binds one network type. Node-type queries are bound only where the network implements them, so an AIG exposes
- * `is_and` but not `is_maj`. Output lookups by index (`po_index`, `po_at`) exist on the technology network alone,
- * whose signals are nodes; the mockturtle networks answer them with signals, which have no Python type.
+ * @brief Binds one network type. Node-type queries are bound only where the network implements them, so an AIG
+ * exposes `is_and` but not `is_maj`. Output lookups by index (`po_index`, `po_at`) exist on the technology network
+ * alone, whose signals are nodes; the mockturtle networks answer them with signals, which have no Python type.
+ * @param m Python module.
+ * @param network_name Python network type name.
+ * @param doc Python type documentation.
+ * @tparam Ntk Network type.
  */
 template <typename Ntk>
-void network(nb::module_& m, const char* network_name, const char* doc)
+void register_network(nb::module_& m, const char* network_name, const char* doc)
 {
     // Network node: mockturtle::node<Ntk> is a plain uint64_t, which nanobind already represents
     // as a Python int via its built-in integer type caster -- no separate class binding needed
@@ -208,12 +212,19 @@ void network(nb::module_& m, const char* network_name, const char* doc)
 
 }  // namespace detail
 
-void logic_networks(nb::module_& m)
+/**
+ * @brief Binds logic networks helpers.
+ * @param m Python module.
+ */
+void register_logic_networks(nb::module_& m)
 {
-    detail::network<py_tec_network>(m, "technology_network", DOC(fiction_networks_technology_network));
-    detail::network<py_aig_network>(m, "aig_network", "An AND-inverter graph (AIG) with node and output names.");
-    detail::network<py_xag_network>(m, "xag_network", "An XOR-AND-inverter graph (XAG) with node and output names.");
-    detail::network<py_mig_network>(m, "mig_network", "A majority-inverter graph (MIG) with node and output names.");
+    detail::register_network<py_tec_network>(m, "technology_network", DOC(fiction_networks_technology_network));
+    detail::register_network<py_aig_network>(m, "aig_network",
+                                             "An AND-inverter graph (AIG) with node and output names.");
+    detail::register_network<py_xag_network>(m, "xag_network",
+                                             "An XOR-AND-inverter graph (XAG) with node and output names.");
+    detail::register_network<py_mig_network>(m, "mig_network",
+                                             "A majority-inverter graph (MIG) with node and output names.");
 }
 
 }  // namespace pyfiction

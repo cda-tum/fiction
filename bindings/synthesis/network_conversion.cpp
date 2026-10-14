@@ -119,7 +119,7 @@ inline nb::object convert_to_target(const any_network& network, const network_ta
  * @param signature Python signature of the overload.
  */
 template <network_target Target>
-void convert_network_to(nb::module_& m, const char* signature)
+void register_convert_network_to(nb::module_& m, const char* signature)
 {
     m.def(
         "convert_network",
@@ -141,7 +141,7 @@ void convert_network_to(nb::module_& m, const char* signature)
  * @brief Register conversion targets and network overloads.
  * @param m Python module.
  */
-void network_conversion(nb::module_& m)
+void register_network_conversion(nb::module_& m)
 {
     nb::enum_<detail::network_target>(m, "network_target", "The network types `convert_network` produces.")
         .value("TEC", detail::network_target::TEC, "A technology network.")
@@ -168,17 +168,17 @@ void network_conversion(nb::module_& m)
             "mnt.pyfiction.synthesis.network_target.TEC) "
             "-> mnt.pyfiction.networks.technology_network"),
         DOC(fiction_synthesis_convert_network));
-    detail::convert_network_to<detail::network_target::AIG>(
+    detail::register_convert_network_to<detail::network_target::AIG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
            "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.AIG]) "
            "-> mnt.pyfiction.networks.aig_network");
-    detail::convert_network_to<detail::network_target::XAG>(
+    detail::register_convert_network_to<detail::network_target::XAG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
            "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.XAG]) "
            "-> mnt.pyfiction.networks.xag_network");
-    detail::convert_network_to<detail::network_target::MIG>(
+    detail::register_convert_network_to<detail::network_target::MIG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
            "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.MIG]) "

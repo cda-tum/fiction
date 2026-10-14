@@ -31,7 +31,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void can_positive_charges_occur(nb::module_& m)
+/**
+ * @brief Binds can positive charges occur helpers.
+ * @param m Python module.
+ */
+void register_can_positive_charges_occur(nb::module_& m)
 {
     m.def(
         "can_positive_charges_occur",

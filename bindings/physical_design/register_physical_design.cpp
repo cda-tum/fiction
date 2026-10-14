@@ -31,16 +31,56 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void exact(nb::module_& m);
-void orthogonal(nb::module_& m);
-void graph_oriented_layout_design(nb::module_& m);
-void apply_gate_library(nb::module_& m);
-void color_routing(nb::module_& m);
-void hexagonalization(nb::module_& m);
-void post_layout_optimization(nb::module_& m);
-void wiring_reduction(nb::module_& m);
-void routing_utils(nb::module_& m);
-void placement_utils(nb::module_& m);
+/**
+ * @brief Binds exact helpers.
+ * @param m Python module.
+ */
+void register_exact(nb::module_& m);
+/**
+ * @brief Binds orthogonal helpers.
+ * @param m Python module.
+ */
+void register_orthogonal(nb::module_& m);
+/**
+ * @brief Binds graph oriented layout design helpers.
+ * @param m Python module.
+ */
+void register_graph_oriented_layout_design(nb::module_& m);
+/**
+ * @brief Binds apply gate library helpers.
+ * @param m Python module.
+ */
+void register_apply_gate_library(nb::module_& m);
+/**
+ * @brief Binds color routing helpers.
+ * @param m Python module.
+ */
+void register_color_routing(nb::module_& m);
+/**
+ * @brief Binds hexagonalization helpers.
+ * @param m Python module.
+ */
+void register_hexagonalization(nb::module_& m);
+/**
+ * @brief Binds post layout optimization helpers.
+ * @param m Python module.
+ */
+void register_post_layout_optimization(nb::module_& m);
+/**
+ * @brief Binds wiring reduction helpers.
+ * @param m Python module.
+ */
+void register_wiring_reduction(nb::module_& m);
+/**
+ * @brief Binds routing utils helpers.
+ * @param m Python module.
+ */
+void register_routing_utils(nb::module_& m);
+/**
+ * @brief Binds placement utils helpers.
+ * @param m Python module.
+ */
+void register_placement_utils(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.physical_design.path_finding` submodule.
@@ -84,16 +124,16 @@ NB_MODULE(physical_design, m)
             }
         });
 
-    pyfiction::exact(m);
-    pyfiction::orthogonal(m);
-    pyfiction::graph_oriented_layout_design(m);
-    pyfiction::apply_gate_library(m);
-    pyfiction::color_routing(m);
-    pyfiction::hexagonalization(m);
-    pyfiction::post_layout_optimization(m);
-    pyfiction::wiring_reduction(m);
-    pyfiction::routing_utils(m);
-    pyfiction::placement_utils(m);
+    pyfiction::register_exact(m);
+    pyfiction::register_orthogonal(m);
+    pyfiction::register_graph_oriented_layout_design(m);
+    pyfiction::register_apply_gate_library(m);
+    pyfiction::register_color_routing(m);
+    pyfiction::register_hexagonalization(m);
+    pyfiction::register_post_layout_optimization(m);
+    pyfiction::register_wiring_reduction(m);
+    pyfiction::register_routing_utils(m);
+    pyfiction::register_placement_utils(m);
     auto path_finding = pyfiction::def_submodule(m, "path_finding", "Path finding and distance functions on layouts.");
     pyfiction::register_path_finding(path_finding);
 }

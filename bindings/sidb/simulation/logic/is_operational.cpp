@@ -48,11 +48,11 @@ namespace detail
 {
 
 /**
- * Registers the operational checks on `sidb_layout`.
+ * @brief Registers the operational checks on `sidb_layout`.
  *
  * @param m The module.
  */
-inline void is_operational_functions(nb::module_& m)
+inline void register_is_operational_functions(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_wire;
@@ -135,7 +135,11 @@ inline void is_operational_functions(nb::module_& m)
 
 }  // namespace detail
 
-void is_operational(nb::module_& m)
+/**
+ * @brief Binds is operational helpers.
+ * @param m Python module.
+ */
+void register_is_operational(nb::module_& m)
 {
     nb::enum_<fiction::sidb::simulation::logic::operational_status>(
         m, "operational_status", DOC(fiction_sidb_simulation_logic_operational_status))
@@ -186,7 +190,7 @@ void is_operational(nb::module_& m)
                 &fiction::sidb::simulation::logic::is_operational_params::strategy_to_analyze_operational_status,
                 DOC(fiction_sidb_simulation_logic_is_operational_params_strategy_to_analyze_operational_status));
 
-    detail::is_operational_functions(m);
+    detail::register_is_operational_functions(m);
 }
 
 }  // namespace pyfiction

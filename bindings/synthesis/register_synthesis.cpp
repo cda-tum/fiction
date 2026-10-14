@@ -28,13 +28,33 @@ namespace pyfiction
  * @brief Register the dynamic truth-table type.
  * @param m Python module.
  */
-void dynamic_truth_table(nb::module_& m);
+void register_dynamic_truth_table(nb::module_& m);
 
-void truth_tables(nb::module_& m);
-void fanout_substitution(nb::module_& m);
-void network_balancing(nb::module_& m);
-void technology_mapping(nb::module_& m);
-void network_conversion(nb::module_& m);
+/**
+ * @brief Binds truth tables helpers.
+ * @param m Python module.
+ */
+void register_truth_tables(nb::module_& m);
+/**
+ * @brief Binds fanout substitution helpers.
+ * @param m Python module.
+ */
+void register_fanout_substitution(nb::module_& m);
+/**
+ * @brief Binds network balancing helpers.
+ * @param m Python module.
+ */
+void register_network_balancing(nb::module_& m);
+/**
+ * @brief Binds technology mapping helpers.
+ * @param m Python module.
+ */
+void register_technology_mapping(nb::module_& m);
+/**
+ * @brief Binds network conversion helpers.
+ * @param m Python module.
+ */
+void register_network_conversion(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -48,12 +68,12 @@ NB_MODULE(synthesis, m)
     // Registers the types this module names in signatures and default arguments.
     nb::module_::import_("mnt.pyfiction.networks");
 
-    pyfiction::dynamic_truth_table(m);
-    pyfiction::truth_tables(m);
-    pyfiction::fanout_substitution(m);
-    pyfiction::network_balancing(m);
-    pyfiction::technology_mapping(m);
-    pyfiction::network_conversion(m);
+    pyfiction::register_dynamic_truth_table(m);
+    pyfiction::register_truth_tables(m);
+    pyfiction::register_fanout_substitution(m);
+    pyfiction::register_network_balancing(m);
+    pyfiction::register_technology_mapping(m);
+    pyfiction::register_network_conversion(m);
 }
 
 #pragma GCC diagnostic pop

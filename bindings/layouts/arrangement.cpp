@@ -33,7 +33,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void arrangement(nb::module_& m)
+void register_arrangement(nb::module_& m)
 {
     using fiction::layouts::arrangement;
 

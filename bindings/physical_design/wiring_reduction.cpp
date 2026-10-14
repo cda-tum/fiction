@@ -44,7 +44,7 @@ namespace pyfiction
 {
 
 /** @brief Registers mutable wiring_reduction operations. @param m Python module. */
-void wiring_reduction(nb::module_& m)
+void register_wiring_reduction(nb::module_& m)
 {
     nb::class_<fiction::physical_design::wiring_reduction_params>(
         m, "wiring_reduction_params",

@@ -91,14 +91,14 @@ typename GateLibrary::layout checked_apply_gate_library(const GateLyt&          
 }
 
 /**
- * Bind a gate library for its supported topology.
+ * @brief Bind a gate library for its supported topology.
  * @tparam GateLibrary Gate library.
  * @tparam GateLyt Source layout.
  * @param m Python module.
  * @param lib_name Library name.
  */
 template <typename GateLibrary, typename GateLyt>
-void apply_gate_library(nb::module_& m, const std::string& lib_name)
+void register_apply_gate_library(nb::module_& m, const std::string& lib_name)
 {
     m.def(fmt::format("apply_{}_library", lib_name).c_str(), &checked_apply_gate_library<GateLibrary, GateLyt>,
           nb::arg("layout"), nb::arg("on_progress").none() = nb::none(), nb::call_guard<nb::gil_scoped_release>(),
@@ -107,15 +107,17 @@ void apply_gate_library(nb::module_& m, const std::string& lib_name)
 
 }  // namespace detail
 
-/** Register the four supported gate libraries.
+/**
+ * @brief Register the four supported gate libraries.
  * @param m Python module.
  */
-void apply_gate_library(nb::module_& m)
+void register_apply_gate_library(nb::module_& m)
 {
-    detail::apply_gate_library<fiction::qca::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
-    detail::apply_gate_library<fiction::mol_qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");
-    detail::apply_gate_library<fiction::inml::topolinano_library, py_shifted_cartesian_gate_layout>(m, "topolinano");
-    detail::apply_gate_library<fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
+    detail::register_apply_gate_library<fiction::qca::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
+    detail::register_apply_gate_library<fiction::mol_qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");
+    detail::register_apply_gate_library<fiction::inml::topolinano_library, py_shifted_cartesian_gate_layout>(
+        m, "topolinano");
+    detail::register_apply_gate_library<fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
 }
 
 }  // namespace pyfiction

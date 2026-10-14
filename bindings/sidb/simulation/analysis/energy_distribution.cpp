@@ -17,11 +17,9 @@
 
 #include "pyfiction/documentation.hpp"
 
-#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 
 #include <cstdint>
-#include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -41,7 +39,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void energy_distribution(nb::module_& m)
+/**
+ * @brief Binds energy distribution helpers.
+ * @param m Python module.
+ */
+void register_energy_distribution(nb::module_& m)
 {
     nb::class_<fiction::sidb::simulation::analysis::energy_state>(m, "energy_state")
         .def(nb::init<double, uint64_t>(), nb::arg("electrostatic_potential_energy"), nb::arg("degeneracy"),
@@ -71,13 +73,8 @@ void energy_distribution(nb::module_& m)
 
         ;
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    fiction::sidb::simulation::analysis::energy_distribution (*const energy_distribution_pointer)(
-        const std::vector<fiction::sidb::charge_distribution>&) =
-        &fiction::sidb::simulation::analysis::calculate_energy_distribution;
-
-    m.def("calculate_energy_distribution", energy_distribution_pointer, nb::arg("charge_distributions"),
-          DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
+    m.def("calculate_energy_distribution", &fiction::sidb::simulation::analysis::calculate_energy_distribution,
+          nb::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
 }
 
 }  // namespace pyfiction

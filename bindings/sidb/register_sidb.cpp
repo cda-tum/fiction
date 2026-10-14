@@ -32,19 +32,19 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void lattice(nb::module_& m);
+void register_lattice(nb::module_& m);
 /**
  * @brief Registers SiDB layouts and their cell and defect operations.
  *
  * @param m Python module.
  */
-void layout(nb::module_& m);
+void register_layout(nb::module_& m);
 /**
  * @brief Registers SiDB charge distributions.
  *
  * @param m Python module.
  */
-void charge_distribution(nb::module_& m);
+void register_charge_distribution(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.sidb.model` submodule.
@@ -118,9 +118,9 @@ NB_MODULE(sidb, m)
 
     auto model = pyfiction::def_submodule(m, "model", "Physical models and parameters of SiDB systems.");
     pyfiction::register_sidb_model(model);
-    pyfiction::lattice(m);
-    pyfiction::layout(m);
-    pyfiction::charge_distribution(m);
+    pyfiction::register_lattice(m);
+    pyfiction::register_layout(m);
+    pyfiction::register_charge_distribution(m);
     auto simulation =
         pyfiction::def_submodule(m, "simulation", "SiDB simulation engines, results, and their analysis.");
     pyfiction::register_sidb_simulation(simulation);

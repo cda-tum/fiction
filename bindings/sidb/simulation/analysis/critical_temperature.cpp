@@ -52,11 +52,11 @@ namespace detail
 {
 
 /**
- * Registers the critical temperature algorithms on `sidb_layout`.
+ * @brief Registers the critical temperature algorithms on `sidb_layout`.
  *
  * @param m The module.
  */
-inline void critical_temperature_functions(nb::module_& m)
+inline void register_critical_temperature_functions(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::analysis::critical_temperature_params;
@@ -97,7 +97,11 @@ inline void critical_temperature_functions(nb::module_& m)
 
 }  // namespace detail
 
-void critical_temperature(nb::module_& m)
+/**
+ * @brief Binds critical temperature helpers.
+ * @param m Python module.
+ */
+void register_critical_temperature(nb::module_& m)
 {
     /**
      * Critical temperature statistics.
@@ -151,7 +155,7 @@ void critical_temperature(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::critical_temperature_functions(m);
+    detail::register_critical_temperature_functions(m);
 }
 
 }  // namespace pyfiction

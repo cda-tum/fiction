@@ -24,10 +24,26 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void count_gate_types(nb::module_& m);
-void critical_path_length_and_throughput(nb::module_& m);
-void design_rule_violations(nb::module_& m);
-void equivalence_checking(nb::module_& m);
+/**
+ * @brief Binds count gate types helpers.
+ * @param m Python module.
+ */
+void register_count_gate_types(nb::module_& m);
+/**
+ * @brief Binds critical path length and throughput helpers.
+ * @param m Python module.
+ */
+void register_critical_path_length_and_throughput(nb::module_& m);
+/**
+ * @brief Binds design rule violations helpers.
+ * @param m Python module.
+ */
+void register_design_rule_violations(nb::module_& m);
+/**
+ * @brief Binds equivalence checking helpers.
+ * @param m Python module.
+ */
+void register_equivalence_checking(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -42,10 +58,10 @@ NB_MODULE(verification, m)
     nb::module_::import_("mnt.pyfiction.layouts");
     nb::module_::import_("mnt.pyfiction.networks");
 
-    pyfiction::count_gate_types(m);
-    pyfiction::critical_path_length_and_throughput(m);
-    pyfiction::design_rule_violations(m);
-    pyfiction::equivalence_checking(m);
+    pyfiction::register_count_gate_types(m);
+    pyfiction::register_critical_path_length_and_throughput(m);
+    pyfiction::register_design_rule_violations(m);
+    pyfiction::register_equivalence_checking(m);
 }
 
 #pragma GCC diagnostic pop

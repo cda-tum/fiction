@@ -44,7 +44,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void lattice(nb::module_& m)
+void register_lattice(nb::module_& m)
 {
     nb::class_<fiction::sidb::lattice_site>(m, "lattice_site", DOC(fiction_sidb_lattice_site))
         .def(nb::init<>(), DOC(fiction_sidb_lattice_site_lattice_site))

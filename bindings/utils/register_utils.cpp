@@ -24,7 +24,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void version_info(nb::module_& m);
+/**
+ * @brief Binds version info helpers.
+ * @param m Python module.
+ */
+void register_version_info(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -35,7 +39,7 @@ NB_MODULE(utils, m)
 {
     m.doc() = "Version information and shared utilities.";
 
-    pyfiction::version_info(m);
+    pyfiction::register_version_info(m);
 }
 
 #pragma GCC diagnostic pop

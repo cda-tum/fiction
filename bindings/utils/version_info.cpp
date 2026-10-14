@@ -27,7 +27,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void version_info(nb::module_& m)
+/**
+ * @brief Binds version info helpers.
+ * @param m Python module.
+ */
+void register_version_info(nb::module_& m)
 {
     m.attr("__version__")       = fiction::FICTION_VERSION;
     m.attr("__repo__")          = fiction::FICTION_REPO;

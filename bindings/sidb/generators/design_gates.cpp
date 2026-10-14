@@ -45,7 +45,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void design_gates(nb::module_& m)
+void register_design_gates(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::generators::design_gates_params;

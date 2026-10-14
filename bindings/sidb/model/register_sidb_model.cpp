@@ -24,17 +24,33 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void defect(nb::module_& m);
-void charge_state(nb::module_& m);
-void simulation_parameters(nb::module_& m);
-void potential_to_distance_conversion(nb::module_& m);
+/**
+ * @brief Binds defect helpers.
+ * @param m Python module.
+ */
+void register_defect(nb::module_& m);
+/**
+ * @brief Binds charge state helpers.
+ * @param m Python module.
+ */
+void register_charge_state(nb::module_& m);
+/**
+ * @brief Binds simulation parameters helpers.
+ * @param m Python module.
+ */
+void register_simulation_parameters(nb::module_& m);
+/**
+ * @brief Binds potential to distance conversion helpers.
+ * @param m Python module.
+ */
+void register_potential_to_distance_conversion(nb::module_& m);
 
 void register_sidb_model(nb::module_& m)
 {
-    defect(m);
-    charge_state(m);
-    simulation_parameters(m);
-    potential_to_distance_conversion(m);
+    register_defect(m);
+    register_charge_state(m);
+    register_simulation_parameters(m);
+    register_potential_to_distance_conversion(m);
 }
 
 }  // namespace pyfiction

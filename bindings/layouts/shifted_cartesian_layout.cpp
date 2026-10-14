@@ -47,13 +47,13 @@ namespace pyfiction
 namespace detail
 {
 /**
- * Register the layout class.
+ * @brief Register the layout class.
  * @tparam Lyt Concrete layout.
  * @param m Python module.
  * @param name Python class name.
  */
 template <typename Lyt>
-void shifted_cartesian_layout(nb::module_& m, const char* name)
+void register_shifted_cartesian_layout(nb::module_& m, const char* name)
 {
     /**
      * Shifted Cartesian layout.
@@ -275,12 +275,12 @@ void shifted_cartesian_layout(nb::module_& m, const char* name)
 }  // namespace detail
 
 /**
- * Register the shifted Cartesian layout.
+ * @brief Register the shifted Cartesian layout.
  * @param m Python module.
  */
-void shifted_cartesian_layout(nb::module_& m)
+void register_shifted_cartesian_layout(nb::module_& m)
 {
-    detail::shifted_cartesian_layout<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout");
+    detail::register_shifted_cartesian_layout<py_shifted_cartesian_layout>(m, "shifted_cartesian_layout");
 }
 
 }  // namespace pyfiction

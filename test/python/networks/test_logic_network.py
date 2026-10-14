@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pytest
 
+from mnt.pyfiction import networks
 from mnt.pyfiction.networks.io import read_technology_network
 
 DIR_PATH = Path(__file__).resolve().parent
@@ -87,3 +88,25 @@ def test_is_gate_functions(resources_dir):
         assert not network.is_xnor(i)
         assert not network.is_nand(i)
         assert not network.is_nor(i)
+
+
+@pytest.mark.parametrize(
+    ("generator_name", "network_name"),
+    [("aig", "aig_network"), ("xag", "xag_network"), ("mig", "mig_network"), ("tec", "technology_network")],
+)
+def test_random_network_contract(generator_name: str, network_name: str) -> None:
+    """Generators preserve type, size, seed behavior, and input validation."""
+    generate = getattr(networks, f"random_{generator_name}_network")
+    network = generate(inputs=3, gates=5, seed=42)
+    assert isinstance(network, getattr(networks, network_name))
+    assert network.num_pis() == 3
+    if generator_name == "tec":
+        # Technology networks materialize complemented edges as NOT gates.
+        assert network.num_gates() >= 5
+    else:
+        assert network.num_gates() == 5
+    assert networks.get_name(network) == "42"
+    assert networks.simulate_outputs(network) == networks.simulate_outputs(generate(inputs=3, gates=5, seed=42))
+    for inputs, gates in [(0, 5), (1, 5), (3, 0)]:
+        with pytest.raises(ValueError, match="random generation requires at least two inputs and one gate"):
+            generate(inputs=inputs, gates=gates, seed=42)

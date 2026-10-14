@@ -33,7 +33,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void minimum_energy(nb::module_& m)
+/**
+ * @brief Binds minimum energy helpers.
+ * @param m Python module.
+ */
+void register_minimum_energy(nb::module_& m)
 {
     m.def(
         "minimum_energy",

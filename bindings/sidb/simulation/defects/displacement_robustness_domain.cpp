@@ -40,7 +40,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void displacement_robustness_domain(nb::module_& m)
+/**
+ * @brief Binds displacement robustness domain helpers.
+ * @param m Python module.
+ */
+void register_displacement_robustness_domain(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::defects::displacement_robustness_domain;

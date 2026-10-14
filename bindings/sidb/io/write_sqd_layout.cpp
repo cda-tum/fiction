@@ -35,7 +35,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void write_sqd_layout(nb::module_& m)
+/**
+ * @brief Binds write sqd layout helpers.
+ * @param m Python module.
+ */
+void register_write_sqd_layout(nb::module_& m)
 {
     m.def(
         "write_sqd_layout",

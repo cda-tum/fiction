@@ -36,7 +36,7 @@ namespace pyfiction
  *
  * @param m The Python module.
  */
-void calculate_energy_and_state_type(nb::module_& m)
+void register_calculate_energy_and_state_type(nb::module_& m)
 {
     nb::enum_<fiction::sidb::simulation::analysis::state_type>(m, "state_type",
                                                                DOC(fiction_sidb_simulation_analysis_state_type))

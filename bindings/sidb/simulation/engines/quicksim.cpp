@@ -18,11 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/progress.hpp"
 
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
-
-#include <optional>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
@@ -39,7 +35,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void quicksim(nb::module_& m)
+/**
+ * @brief Binds quicksim helpers.
+ * @param m Python module.
+ */
+void register_quicksim(nb::module_& m)
 {
     using fiction::sidb::simulation::engines::quicksim_params;
 
@@ -59,12 +59,9 @@ void quicksim(nb::module_& m)
         .def_rw("on_worker_progress", &quicksim_params::on_worker_progress, pyfiction::ON_WORKER_PROGRESS_GETTER,
                 pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_quicksim_params_on_worker_progress));
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    std::optional<fiction::sidb::simulation::result> (*const quicksim_pointer)(
-        const fiction::sidb::layout&, const quicksim_params&) = &fiction::sidb::simulation::engines::quicksim;
-
-    m.def("quicksim", quicksim_pointer, nb::arg("lyt"), nb::arg("params") = quicksim_params{},
-          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quicksim));
+    m.def("quicksim", &fiction::sidb::simulation::engines::quicksim, nb::arg("lyt"),
+          nb::arg("params") = quicksim_params{}, nb::call_guard<nb::gil_scoped_release>(),
+          DOC(fiction_sidb_simulation_engines_quicksim));
 }
 
 }  // namespace pyfiction

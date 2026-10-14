@@ -18,7 +18,6 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 
 #include <string_view>
 
@@ -33,7 +32,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void read_sqd_layout(nb::module_& m)
+/**
+ * @brief Binds read sqd layout helpers.
+ * @param m Python module.
+ */
+void register_read_sqd_layout(nb::module_& m)
 {
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
@@ -43,8 +46,7 @@ void read_sqd_layout(nb::module_& m)
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     m.def("read_sqd_layout",
-          static_cast<fiction::sidb::layout (*)(const std::string_view&, const std::string_view&)>(
-              &fiction::sidb::io::read_sqd_layout),
+          nb::overload_cast<const std::string_view&, const std::string_view&>(&fiction::sidb::io::read_sqd_layout),
           nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_sidb_io_read_sqd_layout_2),
           nb::call_guard<nb::gil_scoped_release>());
 }

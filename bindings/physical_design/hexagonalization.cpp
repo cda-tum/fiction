@@ -43,7 +43,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void hexagonalization(nb::module_& m)
+/**
+ * @brief Binds hexagonalization helpers.
+ * @param m Python module.
+ */
+void register_hexagonalization(nb::module_& m)
 {
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here

@@ -35,7 +35,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void print_sidb_layout(nb::module_& m)
+/**
+ * @brief Binds print sidb layout helpers.
+ * @param m Python module.
+ */
+void register_print_sidb_layout(nb::module_& m)
 {
     m.def(
         "print_sidb_layout",

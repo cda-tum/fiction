@@ -42,7 +42,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void detect_bdl_wires(nb::module_& m)
+/**
+ * @brief Binds detect bdl wires helpers.
+ * @param m Python module.
+ */
+void register_detect_bdl_wires(nb::module_& m)
 {
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_wire;

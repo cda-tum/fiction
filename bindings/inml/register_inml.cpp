@@ -26,7 +26,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void inml_layout(nb::module_& m);
+/**
+ * @brief Binds inml layout helpers.
+ * @param m Python module.
+ */
+void register_inml_layout(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.inml.io` submodule.
@@ -47,7 +51,7 @@ NB_MODULE(inml, m)
     // Registers the types this module names in signatures and default arguments.
     nb::module_::import_("mnt.pyfiction.layouts");
 
-    pyfiction::inml_layout(m);
+    pyfiction::register_inml_layout(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers and writers of iNML cell-level layouts.");
     pyfiction::register_inml_io(io);
 }

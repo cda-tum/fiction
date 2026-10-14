@@ -35,8 +35,13 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Binds write dot network helpers.
+ * @param m Python module.
+ * @tparam Ntk Network type.
+ */
 template <typename Ntk>
-void write_dot_network(nb::module_& m)
+void register_write_dot_network(nb::module_& m)
 {
     m.def(
         "write_dot_network",
@@ -59,12 +64,16 @@ void write_dot_network(nb::module_& m)
 
 }  // namespace detail
 
-void dot_drawers(nb::module_& m)
+/**
+ * @brief Binds dot drawers helpers.
+ * @param m Python module.
+ */
+void register_dot_drawers(nb::module_& m)
 {
-    detail::write_dot_network<py_tec_network>(m);
-    detail::write_dot_network<py_aig_network>(m);
-    detail::write_dot_network<py_xag_network>(m);
-    detail::write_dot_network<py_mig_network>(m);
+    detail::register_write_dot_network<py_tec_network>(m);
+    detail::register_write_dot_network<py_aig_network>(m);
+    detail::register_write_dot_network<py_xag_network>(m);
+    detail::register_write_dot_network<py_mig_network>(m);
 }
 
 }  // namespace pyfiction

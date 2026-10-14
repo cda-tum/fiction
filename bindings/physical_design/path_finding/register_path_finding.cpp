@@ -24,17 +24,33 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void distance(nb::module_& m);
-void a_star(nb::module_& m);
-void k_shortest_paths(nb::module_& m);
-void enumerate_all_paths(nb::module_& m);
+/**
+ * @brief Binds distance helpers.
+ * @param m Python module.
+ */
+void register_distance(nb::module_& m);
+/**
+ * @brief Binds a star helpers.
+ * @param m Python module.
+ */
+void register_a_star(nb::module_& m);
+/**
+ * @brief Binds k shortest paths helpers.
+ * @param m Python module.
+ */
+void register_k_shortest_paths(nb::module_& m);
+/**
+ * @brief Binds enumerate all paths helpers.
+ * @param m Python module.
+ */
+void register_enumerate_all_paths(nb::module_& m);
 
 void register_path_finding(nb::module_& m)
 {
-    distance(m);
-    a_star(m);
-    k_shortest_paths(m);
-    enumerate_all_paths(m);
+    register_distance(m);
+    register_a_star(m);
+    register_k_shortest_paths(m);
+    register_enumerate_all_paths(m);
 }
 
 }  // namespace pyfiction

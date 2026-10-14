@@ -17,7 +17,6 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 
 #include <string_view>
 
@@ -37,7 +36,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void read_surface_defects(nb::module_& m)
+void register_read_surface_defects(nb::module_& m)
 {
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translators with the module; they are not meant to be thrown here
@@ -49,12 +48,9 @@ void read_surface_defects(nb::module_& m)
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    fiction::sidb::layout (*const read_surface_defects_function_pointer)(
-        const std::string_view&, const std::string_view&) = &fiction::sidb::io::read_surface_defects;
-
-    m.def("read_surface_defects", read_surface_defects_function_pointer, nb::arg("filename"),
-          nb::arg("layout_name") = "", DOC(fiction_sidb_io_read_surface_defects_2));
+    m.def("read_surface_defects",
+          nb::overload_cast<const std::string_view&, const std::string_view&>(&fiction::sidb::io::read_surface_defects),
+          nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_sidb_io_read_surface_defects_2));
 }
 
 }  // namespace pyfiction

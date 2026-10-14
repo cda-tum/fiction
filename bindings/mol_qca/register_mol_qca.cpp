@@ -26,7 +26,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-void mol_qca_layout(nb::module_& m);
+/**
+ * @brief Binds mol qca layout helpers.
+ * @param m Python module.
+ */
+void register_mol_qca_layout(nb::module_& m);
 
 /**
  * @brief Registers the bindings of the `mnt.pyfiction.mol_qca.io` submodule.
@@ -47,7 +51,7 @@ NB_MODULE(mol_qca, m)
     // Registers the types this module names in signatures and default arguments.
     nb::module_::import_("mnt.pyfiction.layouts");
 
-    pyfiction::mol_qca_layout(m);
+    pyfiction::register_mol_qca_layout(m);
     auto io = pyfiction::def_submodule(m, "io", "Writers of molecular QCA cell-level layouts.");
     pyfiction::register_mol_qca_io(io);
 }

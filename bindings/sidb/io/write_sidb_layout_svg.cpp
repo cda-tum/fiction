@@ -48,7 +48,7 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void write_sidb_layout_svg(nb::module_& m)
+void register_write_sidb_layout_svg(nb::module_& m)
 {
     nb::enum_<fiction::sidb::io::write_sidb_layout_svg_params::color_mode>(
         m, "color_mode", DOC(fiction_sidb_io_write_sidb_layout_svg_params_color_mode))
@@ -85,8 +85,8 @@ void write_sidb_layout_svg(nb::module_& m)
         ;
 
     m.def("write_sidb_layout_svg",
-          static_cast<void (*)(const fiction::sidb::layout&, const std::string_view&,
-                               const fiction::sidb::io::write_sidb_layout_svg_params&)>(
+          nb::overload_cast<const fiction::sidb::layout&, const std::string_view&,
+                            const fiction::sidb::io::write_sidb_layout_svg_params&>(
               &fiction::sidb::io::write_sidb_layout_svg),
           nb::arg("layout"), nb::arg("filename"), nb::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
           DOC(fiction_sidb_io_write_sidb_layout_svg_2), nb::call_guard<nb::gil_scoped_release>());
@@ -103,8 +103,8 @@ void write_sidb_layout_svg(nb::module_& m)
         DOC(fiction_sidb_io_write_sidb_layout_svg), nb::call_guard<nb::gil_scoped_release>());
 
     m.def("write_sidb_layout_svg",
-          static_cast<void (*)(const fiction::sidb::layout&, const fiction::sidb::charge_distribution&,
-                               const std::string_view&, const fiction::sidb::io::write_sidb_layout_svg_params&)>(
+          nb::overload_cast<const fiction::sidb::layout&, const fiction::sidb::charge_distribution&,
+                            const std::string_view&, const fiction::sidb::io::write_sidb_layout_svg_params&>(
               &fiction::sidb::io::write_sidb_layout_svg),
           nb::arg("layout"), nb::arg("charge_distribution"), nb::arg("filename"),
           nb::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
