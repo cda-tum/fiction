@@ -44,11 +44,7 @@ leaves an existing destination layout unchanged.
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.layouts.io.read_cartesian_fgl_layout
-
-.. autofunction:: mnt.pyfiction.layouts.io.read_shifted_cartesian_fgl_layout
-
-.. autofunction:: mnt.pyfiction.layouts.io.read_hexagonal_fgl_layout
+.. autofunction:: mnt.pyfiction.layouts.io.read_fgl_layout
 
 .. autoclass:: mnt.pyfiction.layouts.io.fgl_parsing_error
    :members:
@@ -159,3 +155,13 @@ illegal XML control characters are rejected before writing. Editing checkpoints 
 :::
 
 ::::
+
+Python selects the FGL output representation with a keyword-only registered class. The file
+supplies the layout arrangement. Pass the exact registered class; subclasses are not supported.
+
+```python
+from mnt.pyfiction.layouts import hexagonal_gate_layout
+from mnt.pyfiction.layouts.io import read_fgl_layout
+
+layout = read_fgl_layout("layout.fgl", layout_type=hexagonal_gate_layout)
+```

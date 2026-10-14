@@ -19,7 +19,7 @@ from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe, size_and_depth
 from mnt.pyfiction.networks import aig_network, get_name, set_name, xag_network
-from mnt.pyfiction.networks.io import read_aig_network, write_aiger
+from mnt.pyfiction.networks.io import read_network, write_aiger
 from mnt.pyfiction.synthesis import convert_network, network_target
 
 if TYPE_CHECKING:
@@ -85,7 +85,7 @@ def abc_command(session: Session, args: argparse.Namespace) -> Result:
         if not output_path.is_file() or not output_path.stat().st_size:
             msg_0 = "ABC produced no output network; the store is unchanged"
             raise CommandError(msg_0)
-        result = read_aig_network(str(output_path))
+        result = read_network(str(output_path), network_type=aig_network)
         if aig is not None:
             set_name(result, get_name(aig))
         session.networks.add(result)

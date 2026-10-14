@@ -110,6 +110,7 @@ if(NOT DEFINED TINYXML2_SHA256)
       5556deb5081fb246ee92afae73efd943c889cef0cafea92b0b82422d6a18f289)
 endif()
 set(tinyxml2_BUILD_TESTING OFF)
+set(tinyxml2_SHARED_LIBS OFF)
 FetchContent_Declare(
   tinyxml2
   URL ${TINYXML2_URL}

@@ -12,26 +12,43 @@ from typing import overload
 
 import mnt.pyfiction.networks
 
-def read_technology_network(filename: str, format: str = "") -> mnt.pyfiction.networks.technology_network:
+@overload
+def read_network(
+    filename: str, format: str = "", *, network_type: type[mnt.pyfiction.networks.technology_network] = ...
+) -> mnt.pyfiction.networks.technology_network:
     """
-    Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first network from a directory of such files. Preserves output signals without adding output buffers. Raises `RuntimeError` with the parser's diagnostics when no network can be read.
-    """
-
-def read_aig_network(filename: str, format: str = "") -> mnt.pyfiction.networks.aig_network:
-    """
-    Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first network from a directory of such files. Preserves output signals without adding output buffers. Raises `RuntimeError` with the parser's diagnostics when no network can be read.
+    Read Verilog, AIGER, or BLIF, or the first network from a directory. Select a registered network class with network_type (technology_network by default). Preserve output signals without adding output buffers. Raise RuntimeError with parser diagnostics when no network can be read. BLIF supports technology_network only.
     """
 
-def read_xag_network(filename: str, format: str = "") -> mnt.pyfiction.networks.xag_network:
-    """
-    Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first network from a directory of such files. Preserves output signals without adding output buffers. Raises `RuntimeError` with the parser's diagnostics when no network can be read.
-    """
-
-def read_mig_network(filename: str, format: str = "") -> mnt.pyfiction.networks.mig_network:
-    """
-    Reads a logic network from a Verilog (`.v`), AIGER (`.aig`), or BLIF (`.blif`) file, or the first network from a directory of such files. Preserves output signals without adding output buffers. Raises `RuntimeError` with the parser's diagnostics when no network can be read.
-    """
-
+@overload
+def read_network(
+    filename: str, format: str = "", *, network_type: type[mnt.pyfiction.networks.aig_network]
+) -> mnt.pyfiction.networks.aig_network: ...
+@overload
+def read_network(
+    filename: str, format: str = "", *, network_type: type[mnt.pyfiction.networks.xag_network]
+) -> mnt.pyfiction.networks.xag_network: ...
+@overload
+def read_network(
+    filename: str, format: str = "", *, network_type: type[mnt.pyfiction.networks.mig_network]
+) -> mnt.pyfiction.networks.mig_network: ...
+@overload
+def read_network(
+    filename: str,
+    format: str = "",
+    *,
+    network_type: type[
+        mnt.pyfiction.networks.technology_network
+        | mnt.pyfiction.networks.aig_network
+        | mnt.pyfiction.networks.xag_network
+        | mnt.pyfiction.networks.mig_network
+    ],
+) -> (
+    mnt.pyfiction.networks.technology_network
+    | mnt.pyfiction.networks.aig_network
+    | mnt.pyfiction.networks.xag_network
+    | mnt.pyfiction.networks.mig_network
+): ...
 @overload
 def write_verilog(network: mnt.pyfiction.networks.technology_network, filename: str) -> None: ...
 @overload

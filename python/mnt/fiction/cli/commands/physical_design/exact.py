@@ -18,7 +18,7 @@ from mnt.fiction.cli.parsing import positive_float, positive_int
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.topologies import FGL_READERS, SPECS, canonical, make_gate_layout
-from mnt.pyfiction import physical_design
+from mnt.pyfiction import layouts, physical_design
 from mnt.pyfiction.networks import get_name
 
 if TYPE_CHECKING:
@@ -98,7 +98,7 @@ def _exact_arguments(parser: Parser) -> None:
     inputs="Active network.",
     example="generate mux -b 1; exact --timeout 10",
     unavailable=None
-    if hasattr(physical_design, "exact_cartesian")
+    if hasattr(physical_design, "exact")
     else "this build of pyfiction has no Z3 solver, which 'exact' needs",
     progress=True,
 )
@@ -114,14 +114,14 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     params.on_progress = session.report_progress
     params.on_worker_progress = session.report_worker_progress
     family, params.layout_arrangement = SPECS[canonical(topology)]
-    design = getattr(physical_design, f"exact_{family}")
+    cls = getattr(layouts, f"{family}_gate_layout")
     if args.synchronization_elements and topology != "cartesian":
         msg_0 = "synchronization elements require Cartesian topology"
         raise CommandError(msg_0)
 
     network = session.as_technology_network(session.networks.current())
     stats = physical_design.exact_stats()
-    layout = design(network, params, stats)
+    layout = physical_design.exact(network, params, stats, layout_type=cls)
     if layout is None:
         msg = f"no layout found for '{get_name(network)}' within the search bounds or timeout"
         error = CommandError(msg)

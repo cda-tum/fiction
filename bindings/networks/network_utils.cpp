@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>     // NOLINT(misc-include-cleaner)
@@ -46,40 +47,71 @@ namespace detail
 {
 
 /**
- * @brief Registers a random network generator with size validation and seed-based naming.
- * @tparam Ntk Bound network type.
- * @tparam GeneratorFactory Generator factory type.
- * @param m Python module.
- * @param name Exported function name.
- * @param make_generator Factory for the native generator.
- * @param doc Function documentation.
+ * @brief Bind random generation for the selected registered network class.
+ * @tparam Ntk Network representation.
+ * @param m Networks module.
+ * @param signature Python signature including the selected return type.
  */
-template <typename Ntk, typename GeneratorFactory>
-void register_random_network(nb::module_& m, const char* name, const GeneratorFactory make_generator, const char* doc)
+template <typename Ntk>
+void register_random_network(nb::module_& m, const char* signature)
 {
-    m.def(
-        name,
-        [make_generator](const uint32_t inputs, const uint32_t gates, const uint64_t seed)
+    /** @brief Generate the selected registered network representation. */
+    const auto generate =
+        [](const uint32_t inputs, const uint32_t gates, const uint64_t seed, const nb::handle network_type)
+    {
+        if (!network_type.is(nb::type<Ntk>()))
         {
-            if (inputs < 2u || gates == 0u)
+            throw nb::next_overload();
+        }
+        if (inputs < 2u || gates == 0u)
+        {
+            throw std::invalid_argument("random generation requires at least two inputs and one gate");
+        }
+        const nb::gil_scoped_release                           release{};
+        const mockturtle::random_network_generator_params_size params{.seed      = seed,
+                                                                      .num_pis   = inputs,
+                                                                      .num_gates = gates};
+        auto                                                   generator = [&params]()
+        {
+            if constexpr (std::is_same_v<Ntk, py_aig_network>)
             {
-                throw std::invalid_argument("random generation requires at least two inputs and one gate");
+                return mockturtle::random_aig_generator(params);
             }
-            const mockturtle::random_network_generator_params_size params{.seed      = seed,
-                                                                          .num_pis   = inputs,
-                                                                          .num_gates = gates};
-            auto                                                   generator = make_generator(params);
-            auto network = fiction::synthesis::convert_network<Ntk>(generator.generate());
-            network.set_network_name(std::to_string(seed));
-            return network;
-        },
-        nb::arg("inputs"), nb::arg("gates"), nb::arg("seed"), doc);
+            else if constexpr (std::is_same_v<Ntk, py_xag_network>)
+            {
+                return mockturtle::random_xag_generator(params);
+            }
+            else if constexpr (std::is_same_v<Ntk, py_mig_network>)
+            {
+                return mockturtle::random_mig_generator(params);
+            }
+            else
+            {
+                return mockturtle::mixed_random_mig_generator(params);
+            }
+        }();
+        auto network = fiction::synthesis::convert_network<Ntk>(generator.generate());
+        network.set_network_name(std::to_string(seed));
+        return network;
+    };
+    if constexpr (std::is_same_v<Ntk, py_tec_network>)
+    {
+        m.def("random_network", generate, nb::arg("inputs"), nb::arg("gates"), nb::arg("seed"), nb::kw_only(),
+              nb::arg("network_type") = nb::type<Ntk>(), nb::sig(signature),
+              "Generate directly in the selected network representation. network_type defaults to technology_network. "
+              "Require at least two inputs and one gate; use the seed as the network name.");
+    }
+    else
+    {
+        m.def("random_network", generate, nb::arg("inputs"), nb::arg("gates"), nb::arg("seed"), nb::kw_only(),
+              nb::arg("network_type"), nb::sig(signature));
+    }
 }
 
 }  // namespace detail
 
 /**
- * @brief Binds network utils helpers.
+ * @brief Binds `network_utils`.
  * @param m Python module.
  */
 void register_network_utils(nb::module_& m)
@@ -93,15 +125,28 @@ void register_network_utils(nb::module_& m)
 
     m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<py_tec_network>,
           nb::arg("ntk"), nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
-
-    detail::register_random_network<py_aig_network>(m, "random_aig_network", mockturtle::random_aig_generator<>,
-                                                    "Generate a native random AIG network.");
-    detail::register_random_network<py_xag_network>(m, "random_xag_network", mockturtle::random_xag_generator<>,
-                                                    "Generate a native random XAG network.");
-    detail::register_random_network<py_mig_network>(m, "random_mig_network", mockturtle::random_mig_generator<>,
-                                                    "Generate a native random MIG network.");
-    detail::register_random_network<py_tec_network>(m, "random_tec_network", mockturtle::mixed_random_mig_generator<>,
-                                                    "Generate a native random TEC network.");
+    detail::register_random_network<py_tec_network>(
+        m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
+           "type[mnt.pyfiction.networks.technology_network] = mnt.pyfiction.networks.technology_network) -> "
+           "mnt.pyfiction.networks.technology_network");
+    detail::register_random_network<py_aig_network>(
+        m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
+           "type[mnt.pyfiction.networks.aig_network]) -> mnt.pyfiction.networks.aig_network");
+    detail::register_random_network<py_xag_network>(
+        m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
+           "type[mnt.pyfiction.networks.xag_network]) -> mnt.pyfiction.networks.xag_network");
+    detail::register_random_network<py_mig_network>(
+        m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
+           "type[mnt.pyfiction.networks.mig_network]) -> mnt.pyfiction.networks.mig_network");
+    m.def(
+        "random_network", [](const uint32_t, const uint32_t, const uint64_t, const nb::handle) -> nb::object
+        { throw nb::type_error("network_type must be a registered network class"); }, nb::arg("inputs"),
+        nb::arg("gates"), nb::arg("seed"), nb::kw_only(), nb::arg("network_type"),
+        nb::sig("def random_network(inputs: int, gates: int, seed: int, *, network_type: "
+                "type[mnt.pyfiction.networks.technology_network | mnt.pyfiction.networks.aig_network | "
+                "mnt.pyfiction.networks.xag_network | mnt.pyfiction.networks.mig_network]) -> "
+                "mnt.pyfiction.networks.technology_network | mnt.pyfiction.networks.aig_network | "
+                "mnt.pyfiction.networks.xag_network | mnt.pyfiction.networks.mig_network"));
 }
 
 }  // namespace pyfiction

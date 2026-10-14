@@ -94,7 +94,10 @@ def write_fgl_layout(
 
 class fgl_parsing_error(RuntimeError): ...
 
-def read_cartesian_fgl_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.layouts.cartesian_gate_layout:
+@overload
+def read_fgl_layout(
+    filename: str, layout_name: str = "", *, layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout] = ...
+) -> mnt.pyfiction.layouts.cartesian_gate_layout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -108,32 +111,26 @@ def read_cartesian_fgl_layout(filename: str, layout_name: str = "") -> mnt.pyfic
         Lyt: The layout type to be created from an input.
     """
 
-def read_shifted_cartesian_fgl_layout(
-    filename: str, layout_name: str = ""
-) -> mnt.pyfiction.layouts.shifted_cartesian_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
-
-def read_hexagonal_fgl_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.layouts.hexagonal_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
+@overload
+def read_fgl_layout(
+    filename: str, layout_name: str = "", *, layout_type: type[mnt.pyfiction.layouts.shifted_cartesian_gate_layout]
+) -> mnt.pyfiction.layouts.shifted_cartesian_gate_layout: ...
+@overload
+def read_fgl_layout(
+    filename: str, layout_name: str = "", *, layout_type: type[mnt.pyfiction.layouts.hexagonal_gate_layout]
+) -> mnt.pyfiction.layouts.hexagonal_gate_layout: ...
+@overload
+def read_fgl_layout(
+    filename: str,
+    layout_name: str = "",
+    *,
+    layout_type: type[
+        mnt.pyfiction.layouts.cartesian_gate_layout
+        | mnt.pyfiction.layouts.shifted_cartesian_gate_layout
+        | mnt.pyfiction.layouts.hexagonal_gate_layout
+    ],
+) -> (
+    mnt.pyfiction.layouts.cartesian_gate_layout
+    | mnt.pyfiction.layouts.shifted_cartesian_gate_layout
+    | mnt.pyfiction.layouts.hexagonal_gate_layout
+): ...
