@@ -142,6 +142,24 @@ void register_operational_domain_ratio(nb::module_& m)
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         R"doc(Compute the fraction of operational parameter points surrounding the given point.
 The keyword options select the sweep, sampling, physical values, operational analysis, and progress.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
 }
 

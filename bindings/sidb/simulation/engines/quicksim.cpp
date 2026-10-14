@@ -84,6 +84,18 @@ void register_quicksim(nb::module_& m)
 The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
 Returns None when the heuristic search finds no physically valid charge distribution.
 Raises ValueError when base is neither 2 nor 3.
+
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    iteration_steps: Number of iterations to run the simulation for.
+    alpha: `alpha` parameter for the *QuickSim* algorithm.
+    number_threads: Number of QuickSim workers; None uses the available hardware threads.
+    timeout: Execution budget in milliseconds.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
 )doc");
 }
 

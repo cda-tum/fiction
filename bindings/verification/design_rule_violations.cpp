@@ -104,6 +104,18 @@ void register_gate_level_drvs_impl(nb::module_& m)
         R"doc(Count design-rule violations in the gate-level layout.
 Returns (warnings, drvs); statistics receives their counts.
 The keyword options select which checks run.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    non_adjacent_connections: Check for nodes that are connected to non-adjacent ones.
+    missing_connections: Check for nodes without connections.
+    crossing_gates: Check for wires that are crossing gates.
+    clocked_data_flow: Check if all node connections obey the clocking scheme data flow.
+    has_io: Check if the layout has I/Os.
+    border_io: Check whether primary inputs and outputs lie on the layout border.
+    print_report: Print the design-rule report to Python stdout.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
+    outside_extent: Check that every live object lies within the layout extent.
 )doc");
 }
 

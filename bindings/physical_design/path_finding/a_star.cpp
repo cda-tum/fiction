@@ -79,6 +79,10 @@ void register_a_star_impl(nb::module_& m)
         R"doc(Find a shortest loop-free path from source to target in the layout.
 The keyword options select obstructions and crossing constraints.
 Raises ValueError when source or target lies outside the layout extent.
+
+Args:
+    obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
+    crossings: Allow wires to cross on separate layers.
 )doc");
 
     m.def("a_star_distance", &fiction::physical_design::path_finding::a_star_distance<Lyt>, nb::arg("layout"),

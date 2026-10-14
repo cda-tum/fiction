@@ -87,6 +87,28 @@ def exact(
     The layout_type keyword selects a registered gate-layout class.
     Returns a layout or None when the search finds no solution within its bounds.
     Raises ValueError when a shifted Cartesian or hexagonal layout requires layout_arrangement and none is supplied.
+
+    Args:
+        layout_type: Registered gate-layout class for the returned layout.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
+        scheme: Clocking scheme to be used.
+        layout_arrangement: Row or column arrangement; required for shifted Cartesian and hexagonal layouts, ignored for Cartesian layouts.
+        upper_bound_area: Maximum total tile count. Area and axis bounds apply together.
+        upper_bound_x: Maximum tile count in the x direction, combined with the area and y bounds.
+        upper_bound_y: Maximum tile count in the y direction, combined with the area and x bounds.
+        fixed_size: Search only aspect ratios with area min(upper_bound_area, upper_bound_x * upper_bound_y); axis bounds still apply.
+        num_threads: Number of workers exploring aspect ratios.
+        synchronization_elements: Allow synchronization elements to delay clock phases.
+        crossings: Allow wires to cross on separate layers.
+        border_io: Place primary inputs and outputs at the layout border.
+        straight_inverters: Require straight wires through inverters.
+        desynchronize: Allow unequal fan-in path lengths.
+        minimize_wires: Minimize the number of wire tiles.
+        minimize_crossings: Minimize the number of crossing tiles.
+        timeout: Execution budget in milliseconds.
+        technology_specifics: Constraints for the selected target technology.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
     """
 
 @overload
@@ -221,6 +243,13 @@ def orthogonal(
     The keyword options select clock phases, arrangement, and progress reporting.
     Raises ValueError when a shifted Cartesian or hexagonal layout requires layout_arrangement and none is supplied.
     Raises high_degree_fanin_exception for network nodes with more than two inputs.
+
+    Args:
+        layout_type: Registered gate-layout class for the returned layout.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
+        number_of_clock_phases: Number of clock phases to use. 3 and 4 are supported.
+        layout_arrangement: Row or column arrangement; required for shifted Cartesian and hexagonal layouts, ignored for Cartesian layouts.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     """
 
 @overload
@@ -385,6 +414,24 @@ def graph_oriented_layout_design(
     Place and route a technology network by searching partial gate layouts.
     The keyword options control search effort, clocking, and progress reporting.
     tiles_to_skip_between_pis must lie in [0, 2**20]; values outside this range raise ValueError.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        num_vertex_expansions: Candidate positions explored per gate; larger values increase search effort.
+        verbose: Print search details.
+        mode: Search effort mode.
+        cost: Layout cost objective.
+        return_first: Return the first valid layout instead of continuing cost optimization.
+        planar: Require crossing-free wiring during layout generation.
+        enable_multithreading: Explore search-space graphs in parallel.
+        seed: Random seed; None selects a fresh random seed.
+        straight_inverters: Require straight wires through inverters.
+        tiles_to_skip_between_pis: Empty tiles reserved between primary inputs; must lie in [0, 2**20].
+        randomize_tiles_to_skip_between_pis: Choose each PI spacing from max(0, tiles_to_skip_between_pis - 1) through tiles_to_skip_between_pis, using seed.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
+        custom_cost_objective: Layout cost callback used when cost is CUSTOM.
     """
 
 def apply_qca_one_library(
@@ -630,6 +677,13 @@ def color_routing(
     """
     Route the supplied connections in place by coloring their path intersections.
     Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
+
+    Args:
+        conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
+        crossings: Allow wires to cross on separate layers.
+        path_limit: Maximum paths considered per objective; None enumerates all paths.
+        engine: The engine to use.
+        partial_sat: Allow partial solutions when the SAT coloring engine is selected.
     """
 
 class hexagonalization_io_pin_routing_error(RuntimeError): ...
@@ -695,6 +749,12 @@ def hexagonalization(
     The keyword options select input and output pin extension and progress reporting.
     Raises ValueError for unsupported clocking or invalid occupied geometry.
     Raises OverflowError when transformed coordinates exceed the signed coordinate range.
+
+    Args:
+        input_pin_extension: Input pin extension mode: NONE, EXTEND, or EXTEND_PLANAR.
+        output_pin_extension: Output pin extension mode: NONE, EXTEND, or EXTEND_PLANAR.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
     """
 
 class post_layout_optimization_stats:
@@ -761,6 +821,14 @@ def post_layout_optimization(
     The keyword options bound relocations and runtime; statistics receives the completed result.
     Raises ValueError for unsupported clocking or invalid occupied geometry.
     Raises OverflowError when the extent exceeds signed routing coordinates.
+
+    Args:
+        max_gate_relocations: Maximum number of relocations to try for each gate. Defaults to the number of tiles in the given layout if not specified.
+        optimize_pos_only: Only optimize PO positions.
+        planar_optimization: Require crossing-free wiring during optimization.
+        timeout: Execution budget in milliseconds.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
     """
 
 class wiring_reduction_stats:
@@ -817,6 +885,11 @@ def wiring_reduction(
     The keyword options bound runtime and report progress.
     Raises ValueError for unsupported clocking or invalid occupied geometry.
     Raises OverflowError when the extent exceeds signed routing coordinates.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
     """
 
 @overload

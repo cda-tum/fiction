@@ -125,6 +125,12 @@ void register_detect_bdl_wires(nb::module_& m)
         nb::arg("wire_selection")              = fiction::sidb::simulation::logic::bdl_wire_selection::ALL,
         R"doc(Chain BDL pairs into wires along the SiDB lattice.
 The keyword options select pair-distance bounds, inter-pair distance, and wire types.
+
+Args:
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    wire_selection: Select all wires, input wires, or output wires.
 )doc");
 }
 

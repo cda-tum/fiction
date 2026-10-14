@@ -149,6 +149,25 @@ inline void register_operational_domain_functions(nb::module_& m)
         R"doc(Compute the operational domain by exhaustively sweeping every parameter combination.
 The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "operational_domain_random_sampling",
@@ -226,6 +245,25 @@ Raises ValueError for invalid sweep dimensions, bounds, or steps.
         nb::arg("stats") = nullptr, R"doc(Compute the operational domain by randomly sampling parameter combinations.
 The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "operational_domain_flood_fill",
@@ -301,6 +339,25 @@ Raises ValueError for invalid sweep dimensions, bounds, or steps.
         nb::arg("stats") = nullptr, R"doc(Compute the operational domain by expanding from sampled operational points.
 The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "operational_domain_contour_tracing",
@@ -378,6 +435,25 @@ Raises ValueError for invalid sweep dimensions, bounds, or steps.
         nb::arg("stats") = nullptr, R"doc(Compute the operational domain by tracing operational boundaries.
 The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "critical_temperature_domain_grid_search",
@@ -454,6 +530,25 @@ Raises ValueError for invalid sweep dimensions, bounds, or steps.
         R"doc(Compute the critical-temperature domain by exhaustively sweeping every parameter combination.
 The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "critical_temperature_domain_random_sampling",
@@ -532,6 +627,25 @@ Raises ValueError for invalid sweep dimensions, bounds, or steps.
         R"doc(Compute the critical-temperature domain by randomly sampling parameter combinations.
 The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "critical_temperature_domain_flood_fill",
@@ -610,6 +724,25 @@ Raises ValueError for invalid sweep dimensions, bounds, or steps.
         R"doc(Compute the critical-temperature domain by expanding from sampled operational points.
 The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "critical_temperature_domain_contour_tracing",
@@ -687,6 +820,25 @@ Raises ValueError for invalid sweep dimensions, bounds, or steps.
         nb::arg("stats") = nullptr, R"doc(Compute the critical-temperature domain by tracing operational boundaries.
 The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
 Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
 }
 

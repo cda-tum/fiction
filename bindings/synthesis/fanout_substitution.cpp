@@ -72,6 +72,13 @@ void register_fanout_substitution_impl(nb::module_& m)
         nb::arg("seed")      = fiction::synthesis::fanout_substitution_params{}.seed,
         R"doc(Insert identity nodes so the network respects the keyword fanout limits.
 Returns a fresh technology network that is logically equivalent to the input.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
+    degree: Maximum output degree of each fan-out node. Must be at least two.
+    threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
+    seed: Random seed; None selects a fresh random seed.
 )doc");
 
     m.def(
@@ -98,6 +105,13 @@ Returns a fresh technology network that is logically equivalent to the input.
         nb::arg("threshold") = fiction::synthesis::fanout_substitution_params{}.threshold,
         nb::arg("seed")      = fiction::synthesis::fanout_substitution_params{}.seed,
         R"doc(Check whether every network node respects the keyword fanout limits.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
+    degree: Maximum output degree of each fan-out node. Must be at least two.
+    threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
+    seed: Random seed; None selects a fresh random seed.
 )doc");
 }
 

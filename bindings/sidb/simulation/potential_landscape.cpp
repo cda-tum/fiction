@@ -89,7 +89,17 @@ void register_potential_landscape(nb::module_& m)
             nb::arg("layout"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
             nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
             nb::arg("lambda_tf") = simulation_model{}.lambda_tf, nb::arg("local_external_potential") = nb::none(),
-            nb::arg("global_external_potential") = 0.0)
+            nb::arg("global_external_potential") = 0.0,
+            R"doc(Construct the electrostatic potential landscape for the SiDB layout.
+
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    local_external_potential: External electrostatic potential per lattice site in V; None uses an empty map.
+    global_external_potential: External electrostatic potential applied to every SiDB in V.
+)doc")
         .def("get_layout", &potential_landscape::get_layout,
              DOC(fiction_sidb_simulation_potential_landscape_get_layout))
         .def("params", &potential_landscape::params, DOC(fiction_sidb_simulation_potential_landscape_params))

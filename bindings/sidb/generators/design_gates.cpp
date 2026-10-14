@@ -174,6 +174,27 @@ void register_design_gates(nb::module_& m)
         R"doc(Design SiDB gates implementing the supplied truth tables within the canvas.
 The keyword options select physical values, BDL detection, the design mode, and termination.
 Expiration raises TimeoutError; on_progress reports completed search work.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    design_mode: Gate-design approach: QUICKCELL, AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER, RANDOM, or PRUNING_ONLY.
+    canvas: The canvas: the area canvas SiDBs are placed in, as two opposite corners.
+    number_of_canvas_sidbs: Number of canvas SiDBs.
+    maximal_random_design_attempts: Maximum number of layouts evaluated by random gate design across all threads.
+    termination_cond: When to stop.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
 }
 

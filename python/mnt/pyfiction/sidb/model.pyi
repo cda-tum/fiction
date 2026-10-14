@@ -360,4 +360,10 @@ def potential_to_distance_conversion(
     Potential must be positive. Precision must be a non-negative integer yielding a
     positive finite step. Runtime grows exponentially with precision. Large precisions
     can stall the native scan when floating-point increments lose resolution.
+
+    Args:
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
     """

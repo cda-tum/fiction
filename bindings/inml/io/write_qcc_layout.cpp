@@ -64,6 +64,10 @@ void register_write_qcc_layout(nb::module_& m)
         nb::arg("use_filename_as_component_name") = write_qcc_layout_options{}.use_filename_as_component_name,
         R"doc(Write the iNML layout to the supplied ToPoliNano and MagCAD filename.
 use_filename_as_component_name selects the component name; on_progress reports writing progress.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    use_filename_as_component_name: Use the output filename as the component name inside the QCC file.
 )doc");
 }
 

@@ -22,4 +22,8 @@ def write_qcc_layout(
     """
     Write the iNML layout to the supplied ToPoliNano and MagCAD filename.
     use_filename_as_component_name selects the component name; on_progress reports writing progress.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        use_filename_as_component_name: Use the output filename as the component name inside the QCC file.
     """

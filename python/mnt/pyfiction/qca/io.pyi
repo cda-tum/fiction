@@ -22,6 +22,10 @@ def write_qca_layout(
     """
     Write the QCA layout to the supplied QCADesigner filename.
     create_inter_layer_via_cells controls via cells; on_progress reports writing progress.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        create_inter_layer_via_cells: Create via cells in between each layer.
     """
 
 def write_qca_layout_svg(
@@ -34,4 +38,8 @@ def write_qca_layout_svg(
     """
     Write an SVG representation of the QCA layout to the supplied filename.
     simple selects a compact drawing; on_progress reports writing progress.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        simple: Use a compact SVG drawing.
     """

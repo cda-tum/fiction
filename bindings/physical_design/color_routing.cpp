@@ -85,6 +85,13 @@ void register_color_routing_impl(nb::module_& m)
         nb::arg("partial_sat") = color_routing_options{}.partial_sat,
         R"doc(Route the supplied connections in place by coloring their path intersections.
 Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
+
+Args:
+    conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
+    crossings: Allow wires to cross on separate layers.
+    path_limit: Maximum paths considered per objective; None enumerates all paths.
+    engine: The engine to use.
+    partial_sat: Allow partial solutions when the SAT coloring engine is selected.
 )doc");
 }
 

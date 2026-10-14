@@ -114,6 +114,20 @@ void register_clustercomplete(nb::module_& m)
         R"doc(Simulate the SiDB layout with ClusterComplete.
 The keyword options select physical values, clustering, witness searches, and available threads.
 Raises ValueError when base is neither 2 nor 3.
+
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    local_external_potential: External electrostatic potential per lattice site in V; None uses an empty map.
+    global_potential: External electrostatic potential applied to every SiDB in V.
+    num_overlapping_witnesses_limit_gss: Maximum overlapping witnesses considered by validity witness partitioning.
+    available_threads: Threads available for ClusterComplete unfolding; None uses the native default.
+    report_gss_stats: Print Ground State Space statistics when ON.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    validity_witness_partitioning_max_cluster_size_gss: Maximum cluster size for validity witness partitioning.
 )doc");
 }
 

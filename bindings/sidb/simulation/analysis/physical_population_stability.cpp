@@ -97,6 +97,14 @@ inline void register_physical_population_stability_functions(nb::module_& m)
 The keyword options select simulation, potential precision, and the execution budget.
 Raises ValueError for an invalid base or a precision yielding a zero or non-finite distance step.
 Large precisions can make the native distance scan impractical or stall floating-point increments.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    precision_for_distance_corresponding_to_potential: Decimal places for the distance scan; runtime grows exponentially with precision.
 )doc");
 }
 

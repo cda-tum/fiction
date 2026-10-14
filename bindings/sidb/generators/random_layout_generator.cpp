@@ -103,6 +103,19 @@ void register_random_layout_generator(nb::module_& m)
         R"doc(Generate a random SiDB layout within coordinate_pair, optionally extending lyt_skeleton.
 The keyword options select physical values, charge restrictions, and attempt limits.
 Returns None when the attempt limit does not produce a layout.
+
+Args:
+    coordinate_pair: The area to place SiDBs in, as two opposite corners.
+    number_of_sidbs: Number of SiDBs to place.
+    positive_sidbs: Allow positive charges, forbid positive charges, or require that positive charges may occur.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    maximal_attempts: Maximum number of placement attempts.
+    number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_layouts`.
+    maximal_attempts_for_multiple_layouts: Maximum number of generation attempts for multiple layouts.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 )doc");
 
     m.def(
@@ -151,6 +164,19 @@ Returns None when the attempt limit does not produce a layout.
         R"doc(Generate distinct random SiDB layouts, optionally extending lyt_skeleton.
 The keyword options select the area, physical values, requested count, and attempt limits.
 Returns None if no layout is generated; the attempt limit can yield fewer layouts than requested.
+
+Args:
+    coordinate_pair: The area to place SiDBs in, as two opposite corners.
+    number_of_sidbs: Number of SiDBs to place.
+    positive_sidbs: Allow positive charges, forbid positive charges, or require that positive charges may occur.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    maximal_attempts: Maximum number of placement attempts.
+    number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_layouts`.
+    maximal_attempts_for_multiple_layouts: Maximum number of generation attempts for multiple layouts.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 )doc");
 }
 

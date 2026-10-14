@@ -59,6 +59,10 @@ void register_write_mol_qca_layout_svg(nb::module_& m)
         nb::arg("simple") = write_mol_qca_layout_svg_options{}.simple,
         R"doc(Write an SVG representation of the molQCA layout to the supplied filename.
 simple selects a compact drawing; on_progress reports writing progress.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    simple: Limit details to create smaller file sizes.
 )doc");
 }
 

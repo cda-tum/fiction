@@ -46,6 +46,16 @@ def quickexact(
     Simulate the SiDB layout with QuickExact.
     The keyword options select physical values, base detection, external potentials, and progress reporting.
     Raises ValueError when base is neither 2 nor 3.
+
+    Args:
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        base_number_detection: ON detects whether positive charges can occur; OFF uses base unchanged.
+        local_external_potential: External electrostatic potential per lattice site in V; None uses an empty map.
+        global_potential: External electrostatic potential applied to every SiDB in V.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     """
 
 def quicksim(
@@ -67,6 +77,18 @@ def quicksim(
     The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
     Returns None when the heuristic search finds no physically valid charge distribution.
     Raises ValueError when base is neither 2 nor 3.
+
+    Args:
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        iteration_steps: Number of iterations to run the simulation for.
+        alpha: `alpha` parameter for the *QuickSim* algorithm.
+        number_threads: Number of QuickSim workers; None uses the available hardware threads.
+        timeout: Execution budget in milliseconds.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
     """
 
 def exhaustive_ground_state_simulation(
@@ -81,6 +103,13 @@ def exhaustive_ground_state_simulation(
     """
     Find all minimum-energy charge distributions by exhaustive simulation.
     The physical model is supplied by the scalar keyword values.
+
+    Args:
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     """
 
 class ground_state_space_reporting(enum.Enum):
@@ -126,4 +155,18 @@ def clustercomplete(
     Simulate the SiDB layout with ClusterComplete.
     The keyword options select physical values, clustering, witness searches, and available threads.
     Raises ValueError when base is neither 2 nor 3.
+
+    Args:
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        local_external_potential: External electrostatic potential per lattice site in V; None uses an empty map.
+        global_potential: External electrostatic potential applied to every SiDB in V.
+        num_overlapping_witnesses_limit_gss: Maximum overlapping witnesses considered by validity witness partitioning.
+        available_threads: Threads available for ClusterComplete unfolding; None uses the native default.
+        report_gss_stats: Print Ground State Space statistics when ON.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        validity_witness_partitioning_max_cluster_size_gss: Maximum cluster size for validity witness partitioning.
     """

@@ -66,6 +66,10 @@ void register_write_qca_layout_svg_impl(nb::module_& m)
         nb::arg("simple") = write_qca_layout_svg_options{}.simple,
         R"doc(Write an SVG representation of the QCA layout to the supplied filename.
 simple selects a compact drawing; on_progress reports writing progress.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    simple: Use a compact SVG drawing.
 )doc");
 }
 

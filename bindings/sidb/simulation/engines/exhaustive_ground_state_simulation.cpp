@@ -61,6 +61,13 @@ void register_exhaustive_ground_state_simulation(nb::module_& m)
         nb::arg("lambda_tf") = simulation_model{}.lambda_tf, nb::arg("on_progress").none() = nb::none(),
         R"doc(Find all minimum-energy charge distributions by exhaustive simulation.
 The physical model is supplied by the scalar keyword values.
+
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 )doc");
 }
 
