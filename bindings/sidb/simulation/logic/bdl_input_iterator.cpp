@@ -81,7 +81,8 @@ void register_bdl_input_iterator(nb::module_& m)
             {
                 validate_bdl_pair_distances(minimum_distance, maximum_distance);
                 const bdl_input_iterator_options params{
-                    {threshold_bdl_interdistance, {minimum_distance, maximum_distance}},
+                    {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                     .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                     input_bdl_config};
                 std::construct_at(self, lyt, params);
             },
@@ -117,7 +118,8 @@ Args:
             {
                 validate_bdl_pair_distances(minimum_distance, maximum_distance);
                 const bdl_input_iterator_options params{
-                    {threshold_bdl_interdistance, {minimum_distance, maximum_distance}},
+                    {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                     .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                     input_bdl_config};
                 std::construct_at(self, lyt, params, input_wires);
             },
@@ -210,8 +212,10 @@ Args:
            const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
         {
             validate_bdl_pair_distances(minimum_distance, maximum_distance);
-            const bdl_input_iterator_options params{{threshold_bdl_interdistance, {minimum_distance, maximum_distance}},
-                                                    input_bdl_config};
+            const bdl_input_iterator_options params{
+                {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                 .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
+                input_bdl_config};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params);
         },
         nb::arg("lyt"), nb::kw_only(),
@@ -242,8 +246,10 @@ Args:
            const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
         {
             validate_bdl_pair_distances(minimum_distance, maximum_distance);
-            const bdl_input_iterator_options params{{threshold_bdl_interdistance, {minimum_distance, maximum_distance}},
-                                                    input_bdl_config};
+            const bdl_input_iterator_options params{
+                {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                 .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
+                input_bdl_config};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params, input_wires);
         },
         nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),
