@@ -42,6 +42,7 @@ namespace pyfiction
  */
 void register_charge_distribution(nb::module_& m)
 {
+    // Keep the GIL for charge-state access and mutation so calls on one distribution remain serialized.
     using fiction::sidb::charge_distribution;
 
     auto charge_distribution_class =

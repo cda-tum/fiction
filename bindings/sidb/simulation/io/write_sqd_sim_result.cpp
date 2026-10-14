@@ -41,7 +41,8 @@ void register_write_sqd_sim_result(nb::module_& m)
     m.def("write_sqd_sim_result",
           nb::overload_cast<const fiction::sidb::simulation::result&, const std::string_view&>(
               &fiction::sidb::simulation::io::write_sqd_sim_result),
-          nb::arg("sim_result"), nb::arg("filename"), DOC(fiction_sidb_simulation_io_write_sqd_sim_result_2));
+          nb::call_guard<nb::gil_scoped_release>(), nb::arg("sim_result"), nb::arg("filename"),
+          DOC(fiction_sidb_simulation_io_write_sqd_sim_result_2));
 }
 
 }  // namespace pyfiction

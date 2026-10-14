@@ -56,6 +56,7 @@ using quicksim_options = fiction::sidb::simulation::engines::quicksim_params;
  */
 void register_time_to_solution(nb::module_& m)
 {
+    // Keep the GIL for statistics properties and formatting; native time-to-solution analyses release it.
     /**
      * Statistics.
      */
@@ -163,8 +164,9 @@ Args:
     alpha: QuickSim heuristic alpha parameter.
 )doc");
     m.def("time_to_solution_for_given_simulation_results",
-          &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, nb::arg("results_exact"),
-          nb::arg("results_heuristic"), nb::arg("confidence_level") = 0.997, nb::arg("ps") = nullptr,
+          &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results,
+          nb::call_guard<nb::gil_scoped_release>(), nb::arg("results_exact"), nb::arg("results_heuristic"),
+          nb::arg("confidence_level") = 0.997, nb::arg("ps") = nullptr,
           R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
 and a series of heuristic results: the accuracy is the share of
 heuristic runs that found the ground state, and TTS is the mean

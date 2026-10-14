@@ -41,7 +41,7 @@ void register_write_location_and_ground_state(nb::module_& m)
     m.def("write_location_and_ground_state",
           nb::overload_cast<const fiction::sidb::simulation::result&, const std::string_view&>(
               &fiction::sidb::simulation::io::write_location_and_ground_state),
-          nb::arg("sim_result"), nb::arg("filename"),
+          nb::call_guard<nb::gil_scoped_release>(), nb::arg("sim_result"), nb::arg("filename"),
           DOC(fiction_sidb_simulation_io_write_location_and_ground_state_2));
 }
 

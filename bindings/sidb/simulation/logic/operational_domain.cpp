@@ -854,6 +854,7 @@ Args:
  */
 void register_operational_domain(nb::module_& m)
 {
+    // Keep the GIL for domain access and mutation; iterators create Python objects after collecting keys.
     nb::class_<fiction::sidb::simulation::logic::parameter_point>(m, "parameter_point",
                                                                   DOC(fiction_sidb_simulation_logic_parameter_point))
         .def(nb::init<>(), DOC(fiction_sidb_simulation_logic_parameter_point_parameter_point))
@@ -959,6 +960,7 @@ void register_operational_domain(nb::module_& m)
                 keys.reserve(self.size());
                 self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
 
+                // Keep the GIL: casting keys and creating the iterator call the Python API.
                 const nb::object py_keys = nb::cast(keys);
                 return nb::iter(py_keys);
             },
@@ -1045,6 +1047,7 @@ void register_operational_domain(nb::module_& m)
                 keys.reserve(self.size());
                 self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
 
+                // Keep the GIL: casting keys and creating the iterator call the Python API.
                 const nb::object py_keys = nb::cast(keys);
                 return nb::iter(py_keys);
             },

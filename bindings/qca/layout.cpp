@@ -37,6 +37,7 @@ namespace pyfiction
  */
 void register_qca_layout(nb::module_& m)
 {
+    // Keep the GIL for cell access and mutation so calls on one layout remain serialized.
     using fiction::qca::cell_mode;
     using fiction::qca::cell_type;
     using fiction::qca::layout;

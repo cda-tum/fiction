@@ -57,6 +57,7 @@ using operational_domain_options = fiction::sidb::simulation::logic::operational
  */
 void register_physically_valid_parameters(nb::module_& m)
 {
+    // Keep the GIL for domain lookups and Python exception handling; the native sweep releases it.
     nb::class_<fiction::sidb::simulation::domain<fiction::sidb::simulation::logic::parameter_point, uint64_t>>(
         m, "physically_valid_parameters_domain")
         .def(nb::init<>(), "Default constructor.")

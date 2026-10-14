@@ -349,6 +349,7 @@ Args:
  */
 void register_critical_temperature(nb::module_& m)
 {
+    // Keep the GIL for statistics properties; native temperature analyses release it.
     /**
      * Critical temperature statistics.
      */

@@ -52,6 +52,7 @@ using detect_bdl_wires_options = fiction::sidb::simulation::logic::detect_bdl_wi
  */
 void register_detect_bdl_wires(nb::module_& m)
 {
+    // Keep the GIL for wire properties and mutation so calls on one wire remain serialized.
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_wire;
 
@@ -116,6 +117,7 @@ void register_detect_bdl_wires(nb::module_& m)
             params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
             params.bdl_pairs_params.minimum_distance = minimum_distance;
             params.bdl_pairs_params.maximum_distance = maximum_distance;
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::detect_bdl_wires(lyt, params, wire_selection);
         },
         nb::arg("lyt"), nb::kw_only(),

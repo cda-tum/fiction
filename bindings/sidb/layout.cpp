@@ -48,6 +48,7 @@ namespace pyfiction
  */
 void register_layout(nb::module_& m)
 {
+    // Keep the GIL for layout access and mutation so calls on one layout remain serialized.
     using fiction::sidb::layout;
 
     nb::enum_<fiction::sidb::dot_tag>(m, "sidb_dot_tag", DOC(fiction_sidb_dot_tag))
@@ -101,10 +102,10 @@ void register_layout(nb::module_& m)
         .def("num_charged_defects", &layout::num_charged_defects, DOC(fiction_sidb_layout_num_charged_defects))
         .def("num_neutral_defects", &layout::num_neutral_defects, DOC(fiction_sidb_layout_num_neutral_defects))
         .def("defects", &layout::defects, DOC(fiction_sidb_layout_defects))
-        .def("affected_sidbs", &layout::affected_sidbs, nb::arg("site"),
+        .def("affected_sidbs", &layout::affected_sidbs, nb::call_guard<nb::gil_scoped_release>(), nb::arg("site"),
              nb::arg("charged_defect_spacing_overwrite") = std::nullopt,
              nb::arg("neutral_defect_spacing_overwrite") = std::nullopt, DOC(fiction_sidb_layout_affected_sidbs))
-        .def("all_affected_sidbs", &layout::all_affected_sidbs,
+        .def("all_affected_sidbs", &layout::all_affected_sidbs, nb::call_guard<nb::gil_scoped_release>(),
              nb::arg("charged_defect_spacing_overwrite") = std::nullopt,
              nb::arg("neutral_defect_spacing_overwrite") = std::nullopt, DOC(fiction_sidb_layout_all_affected_sidbs))
 
@@ -114,13 +115,15 @@ void register_layout(nb::module_& m)
         .def(nb::self != nb::self)
         // NOLINTEND(misc-redundant-expression)
         .def("__hash__", [](const layout& lyt) { return std::hash<layout>{}(lyt); })
-        .def("__repr__",
-             [](const layout& lyt)
-             {
-                 std::stringstream stream{};
-                 fiction::sidb::io::print_sidb_layout(stream, lyt, false);
-                 return stream.str();
-             })
+        .def(
+            "__repr__",
+            [](const layout& lyt)
+            {
+                std::stringstream stream{};
+                fiction::sidb::io::print_sidb_layout(stream, lyt, false);
+                return stream.str();
+            },
+            nb::call_guard<nb::gil_scoped_release>())
 
         ;
 }

@@ -45,6 +45,7 @@ namespace pyfiction
  */
 void register_energy_distribution(nb::module_& m)
 {
+    // Keep the GIL for energy-state access and mutation so calls on one distribution remain serialized.
     nb::class_<fiction::sidb::simulation::analysis::energy_state>(m, "energy_state")
         .def(nb::init<double, uint64_t>(), nb::arg("electrostatic_potential_energy"), nb::arg("degeneracy"),
              DOC(fiction_sidb_simulation_analysis_energy_state))
@@ -74,7 +75,8 @@ void register_energy_distribution(nb::module_& m)
         ;
 
     m.def("calculate_energy_distribution", &fiction::sidb::simulation::analysis::calculate_energy_distribution,
-          nb::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
+          nb::call_guard<nb::gil_scoped_release>(), nb::arg("charge_distributions"),
+          DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
 }
 
 }  // namespace pyfiction

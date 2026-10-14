@@ -53,6 +53,7 @@ using simulation_model = fiction::sidb::model::simulation_parameters;
  */
 void register_potential_landscape(nb::module_& m)
 {
+    // Keep the GIL for indexed potential lookups and properties; bulk electrostatic computations release it.
     using fiction::sidb::simulation::potential_landscape;
 
     nb::enum_<fiction::sidb::simulation::charge_transition_threshold_bounds>(
@@ -80,7 +81,8 @@ void register_potential_landscape(nb::module_& m)
                const std::optional<std::unordered_map<fiction::sidb::lattice_site, double>>& local_external_potential,
                double                                                                        global_external_potential)
             {
-                const auto params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+                const auto                   params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+                const nb::gil_scoped_release release{};
                 std::construct_at(
                     self, layout, params,
                     local_external_potential.value_or(std::unordered_map<fiction::sidb::lattice_site, double>{}),
@@ -120,18 +122,20 @@ Args:
              nb::arg("i"), DOC(fiction_sidb_simulation_potential_landscape_effective_charge_transition_thresholds))
         .def("chargeless_potential_at_distance", &potential_landscape::chargeless_potential_at_distance,
              nb::arg("distance"), DOC(fiction_sidb_simulation_potential_landscape_chargeless_potential_at_distance))
-        .def("local_internal_potentials", &potential_landscape::local_internal_potentials, nb::arg("cd"),
+        .def("local_internal_potentials", &potential_landscape::local_internal_potentials,
+             nb::call_guard<nb::gil_scoped_release>(), nb::arg("cd"),
              DOC(fiction_sidb_simulation_potential_landscape_local_internal_potentials))
-        .def("local_potentials", &potential_landscape::local_potentials, nb::arg("cd"),
-             DOC(fiction_sidb_simulation_potential_landscape_local_potentials))
+        .def("local_potentials", &potential_landscape::local_potentials, nb::call_guard<nb::gil_scoped_release>(),
+             nb::arg("cd"), DOC(fiction_sidb_simulation_potential_landscape_local_potentials))
         .def(
             "energy", [](const potential_landscape& land, const fiction::sidb::charge_distribution& cd)
-            { return land.energy(cd); }, nb::arg("cd"), DOC(fiction_sidb_simulation_potential_landscape_energy_2))
+            { return land.energy(cd); }, nb::call_guard<nb::gil_scoped_release>(), nb::arg("cd"),
+            DOC(fiction_sidb_simulation_potential_landscape_energy_2))
         .def(
             "is_physically_valid", [](const potential_landscape& land, const fiction::sidb::charge_distribution& cd)
-            { return land.is_physically_valid(cd); }, nb::arg("cd"),
+            { return land.is_physically_valid(cd); }, nb::call_guard<nb::gil_scoped_release>(), nb::arg("cd"),
             DOC(fiction_sidb_simulation_potential_landscape_is_physically_valid_2))
-        .def("evaluate", &potential_landscape::evaluate, nb::arg("cd"),
+        .def("evaluate", &potential_landscape::evaluate, nb::call_guard<nb::gil_scoped_release>(), nb::arg("cd"),
              DOC(fiction_sidb_simulation_potential_landscape_evaluate))
 
         ;

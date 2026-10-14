@@ -53,6 +53,7 @@ using bdl_input_iterator_options = fiction::sidb::simulation::logic::bdl_input_i
  */
 void register_bdl_input_iterator(nb::module_& m)
 {
+    // Keep the GIL for iterator operations to serialize access to the mutable cursor.
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_input_iterator;
 
@@ -84,6 +85,7 @@ void register_bdl_input_iterator(nb::module_& m)
                     {.threshold_bdl_interdistance = threshold_bdl_interdistance,
                      .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                     input_bdl_config};
+                const nb::gil_scoped_release release{};
                 std::construct_at(self, lyt, params);
             },
             nb::arg("lyt"), nb::kw_only(),
@@ -121,6 +123,7 @@ Args:
                     {.threshold_bdl_interdistance = threshold_bdl_interdistance,
                      .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                     input_bdl_config};
+                const nb::gil_scoped_release release{};
                 std::construct_at(self, lyt, params, input_wires);
             },
             nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),
@@ -216,6 +219,7 @@ Args:
                 {.threshold_bdl_interdistance = threshold_bdl_interdistance,
                  .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                 input_bdl_config};
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params);
         },
         nb::arg("lyt"), nb::kw_only(),
@@ -250,6 +254,7 @@ Args:
                 {.threshold_bdl_interdistance = threshold_bdl_interdistance,
                  .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                 input_bdl_config};
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params, input_wires);
         },
         nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),
