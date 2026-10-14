@@ -266,6 +266,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Python layout docstrings use `extent` for the extent argument.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
+  - Standardized paper links in the docs and README to DOI URLs and corrected the `ortho`, `equiv`, and Yen references.
+  - Corrected README links to the C++ library, CLI installation, and synchronization elements, and updated its QCA layout include.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
   - QCA, molQCA, and iNML each document their layout on a page of its own, like SiDB, and the Python tabs list every
@@ -522,6 +524,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Dependencies:
 
   - Removed the optional TBB dependency.
+- Documentation:
+
+  - Removed the bundled overview paper and poster PDFs and their documentation links.
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
@@ -1632,13 +1637,13 @@ Cliché or not, "stranger than fiction" expresses exactly how I feel about the t
 
   - Physical Design:
 
-    > - Graph-Oriented Layout Design (GOLD) for 2DDWave-clocked Cartesian gate-level layouts to trade-off runtime vs. result quality (based on [this paper](https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_a_star_is_born.pdf))
+    > - Graph-Oriented Layout Design (GOLD) for 2DDWave-clocked Cartesian gate-level layouts to trade-off runtime vs. result quality (based on [this paper](https://doi.org/10.1109/NANO61778.2024.10628808))
     > - Flag for planar post-layout optimization
     > - Flag for optimizing POs only in post-layout optimization
 
   - Simulation:
 
-    > - Defect-aware on-the-fly SiDB circuit design on defective H-Si surfaces (based on [this paper](https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_on_the_fly_gate_design.pdf))
+    > - Defect-aware on-the-fly SiDB circuit design on defective H-Si surfaces (based on [this paper](https://doi.org/10.1109/NANO61778.2024.10628962))
     > - Displacement robustness domain simulation for SiDB layouts
     > - Finding valid physical parameters for a given SiDB layout charge distribution
     > - Multi-dimensional operational domain computation for SiDB layouts
@@ -1716,17 +1721,17 @@ _When it comes to the past, everyone writes fiction._ --- Stephen King
 
 - Algorithms:
 
-  - Post-layout optimization and wiring reduction for 2DDWave-clocked Cartesian gate-level layouts (based on [this paper](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_post-layout_optimization_for_fcn.pdf))
+  - Post-layout optimization and wiring reduction for 2DDWave-clocked Cartesian gate-level layouts (based on [this paper](https://doi.org/10.1145/3611315.3633247))
   - SAT-based clock number assignment
   - Added an upper bound option for the total layout area to `exact`
-  - Automatic and exhaustive SiDB gate designer (based on [this paper](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_minimal_gate_design.pdf))
-  - Operational domain computation for SiDB layouts (based on [this paper](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf))
-  - Novel SiDB simulator `quickexact` for exhaustive but fast SiDB layout simulation including atomic defects (based on [this paper](https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf))
+  - Automatic and exhaustive SiDB gate designer (based on [this paper](https://doi.org/10.1145/3611315.3633241))
+  - Operational domain computation for SiDB layouts (based on [this paper](https://doi.org/10.1145/3611315.3633246))
+  - Novel SiDB simulator `quickexact` for exhaustive but fast SiDB layout simulation including atomic defects (based on [this paper](https://doi.org/10.1109/ASP-DAC58780.2024.10473946))
   - Random SiDB layout generator
   - 2DDWave distance function
-  - Hexagonalization algorithm for transforming Cartesian 2DDWave-clocked layouts into ROW-clocked hexagonal layouts (based on [this paper](https://www.cda.cit.tum.de/files/eda/2023_ieeenano_45_degree_sidb_design.pdf))
-  - Temperature-aware SiDB simulation (based on [this paper](https://www.cda.cit.tum.de/files/eda/2023_ieeenano_temperature_behavior.pdf))
-  - Atomic defect-aware physical design for SiDB layouts. Many thanks to Jeremiah Croshaw and Samuel Sze Hang Ng for the collaboration on [the paper](https://arxiv.org/abs/2311.12042)!
+  - Hexagonalization algorithm for transforming Cartesian 2DDWave-clocked layouts into ROW-clocked hexagonal layouts (based on [this paper](https://doi.org/10.1109/NANO58406.2023.10231278))
+  - Temperature-aware SiDB simulation (based on [this paper](https://doi.org/10.1109/NANO58406.2023.10231259))
+  - Atomic defect-aware physical design for SiDB layouts. Many thanks to Jeremiah Croshaw and Samuel Sze Hang Ng for the collaboration on [the paper](https://doi.org/10.48550/arXiv.2311.12042)!
 
 - Data types:
 
@@ -1844,7 +1849,7 @@ _Fiction is a way to challenge the status quo and to push the boundaries of conv
 
 - Technology:
 
-  - Support for the SiDB _Bestagon_ gate library, a standard-tile library for the SiDB technology based on hexagonal grids. Many thanks to Samuel Sze Hang Ng for the collaboration on [the paper](https://dl.acm.org/doi/abs/10.1145/3489517.3530525)!
+  - Support for the SiDB _Bestagon_ gate library, a standard-tile library for the SiDB technology based on hexagonal grids. Many thanks to Samuel Sze Hang Ng for the collaboration on [the paper](https://doi.org/10.1145/3489517.3530525)!
   - Support for charge states of SiDBs
 
 - Algorithms:
@@ -1866,7 +1871,7 @@ _Fiction is a way to challenge the status quo and to push the boundaries of conv
     : - Unit cost
     - Random cost
   - Graph coloring with a selection of SAT solvers or heuristic algorithms
-  - Efficient multi-path signal routing on gate-level layouts (based on [this paper](https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf))
+  - Efficient multi-path signal routing on gate-level layouts (based on [this paper](https://doi.org/10.1145/3565478.3572539))
   - Specify a black list of tiles and gates to avoid in exact physical design
   - Generic function optimizer based on simulated annealing
 
@@ -2045,7 +2050,7 @@ _Fiction is about stuff that's screwed up._ --- Nancy Kress
 
   - Command `read` can now also parse BLIF and FQCA files
   - Command `read` can now create various types of logic networks from parsing input files. A flag determines which one to create, e.g., `--aig`, `--mig`, or `--xag`
-  - Command `gates` supports more gate types now including the 3-input gates presented in [Marakkalage et al.](https://ieeexplore.ieee.org/document/9233431)
+  - Command `gates` supports more gate types now including the 3-input gates presented in [Marakkalage et al.](https://doi.org/10.1109/TCAD.2020.3032625)
   - `exact --clock_latches/-l` has been renamed to `exact --sync_elems/-e`
   - A technology flag `--topolinano` has been added to `exact` instructing it to respect ToPoliNano's requirements for iNML layouts
   - The `ToPoliNano` clocking scheme has been renamed to `Columnar`
@@ -2179,7 +2184,6 @@ _Sometimes, fiction was so powerful that it even had reverberations in the real 
 - Progress bars for `exact` and `ortho`
 - `show -n` to display `logic_network` objects
 - Several convenience functions in the core data structures for easier access
-- An overview [paper](https://github.com/marcelwa/fiction/blob/main/bib/paper.pdf) and a [poster](https://github.com/marcelwa/fiction/blob/main/bib/poster.pdf) about the features of _fiction_. Please find citation information in the {ref}`publication list <publications>`
 
 ### Changed
 

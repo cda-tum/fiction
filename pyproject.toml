@@ -156,7 +156,7 @@ version = ">=1.10"
 # `**/include` also matched `bindings/include/` and `**.hpp` matched the library
 # itself. `[tool.check-sdist]` below now fails on a pattern that drops a tracked source, so the
 # two rules are style rather than the only defense.
-exclude = [ "/.github", "/benchmarks", "/bib", "/docs", "/experiments", "/test", "**/cmake-build-*", "**/__pycache__" ]
+exclude = [ "/.github", "/benchmarks", "/docs", "/experiments", "/test", "**/cmake-build-*", "**/__pycache__" ]
 
 [tool.scikit-build.wheel]
 # Set the wheel install directory
@@ -363,7 +363,6 @@ build-backend = "none"
 git-only = [
     "/.github",
     "/benchmarks",
-    "/bib",
     "/docs",
     "/experiments",
     "/test",
