@@ -42,23 +42,6 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-namespace detail
-{
-
-/**
- * @brief Binds has high degree fanin nodes helpers.
- * @param m Python module.
- * @tparam Ntk Network type.
- */
-template <typename Ntk>
-void register_has_high_degree_fanin_nodes(nb::module_& m)
-{
-    m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<Ntk>, nb::arg("ntk"),
-          nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
-}
-
-}  // namespace detail
-
 /**
  * @brief Binds network utils helpers.
  * @param m Python module.
@@ -72,9 +55,8 @@ void register_network_utils(nb::module_& m)
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
-    detail::register_has_high_degree_fanin_nodes<py_tec_network>(m);
+    m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<py_tec_network>,
+          nb::arg("ntk"), nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
     m.def(
         "random_aig_network",
         [](const uint32_t inputs, const uint32_t gates, const uint64_t seed)

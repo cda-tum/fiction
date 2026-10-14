@@ -69,16 +69,6 @@ void register_normalize_layout_coordinates(nb::module_& m)
           DOC(fiction_layouts_normalize_layout_coordinates));
 }
 
-/**
- * @brief Registers signed random coordinate generation.
- * @param m Python module.
- */
-void register_random_coordinate(nb::module_& m)
-{
-    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
-          nb::arg("corner1"), nb::arg("corner2"), DOC(fiction_layouts_random_coordinate));
-}
-
 }  // namespace detail
 
 /**
@@ -97,7 +87,8 @@ void register_layout_utils(nb::module_& m)
     detail::register_normalize_layout_coordinates<fiction::mol_qca::layout>(m);
     detail::register_normalize_layout_coordinates<fiction::inml::layout>(m);
 
-    detail::register_random_coordinate(m);
+    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
+          nb::arg("corner1"), nb::arg("corner2"), DOC(fiction_layouts_random_coordinate));
 }
 
 }  // namespace pyfiction

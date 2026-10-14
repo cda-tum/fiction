@@ -34,28 +34,6 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-namespace detail
-{
-
-/**
- * @brief Binds network balancing helpers.
- * @param m Python module.
- * @tparam Ntk Network type.
- */
-template <typename Ntk>
-void register_network_balancing_impl(nb::module_& m)
-{
-    m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, Ntk>, nb::arg("network"),
-          nb::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_network_balancing),
-          nb::call_guard<nb::gil_scoped_release>());
-
-    m.def("is_balanced", &fiction::synthesis::is_balanced<Ntk>, nb::arg("network"),
-          nb::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_is_balanced),
-          nb::call_guard<nb::gil_scoped_release>());
-}
-
-}  // namespace detail
-
 /**
  * @brief Binds network balancing helpers.
  * @param m Python module.
@@ -74,7 +52,13 @@ void register_network_balancing(nb::module_& m)
 
         ;
 
-    detail::register_network_balancing_impl<py_tec_network>(m);
+    m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, py_tec_network>,
+          nb::arg("network"), nb::arg("params") = fiction::synthesis::network_balancing_params{},
+          DOC(fiction_synthesis_network_balancing), nb::call_guard<nb::gil_scoped_release>());
+
+    m.def("is_balanced", &fiction::synthesis::is_balanced<py_tec_network>, nb::arg("network"),
+          nb::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_is_balanced),
+          nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

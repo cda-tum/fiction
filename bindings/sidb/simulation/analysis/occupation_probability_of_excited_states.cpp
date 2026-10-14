@@ -34,14 +34,11 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-namespace detail
-{
-
 /**
  * @brief Binds occupation probability of excited states helpers.
  * @param m Python module.
  */
-void register_occupation_probability_of_excited_states_impl(nb::module_& m)
+void register_occupation_probability_of_excited_states(nb::module_& m)
 {
     m.def("occupation_probability_gate_based", &fiction::sidb::simulation::analysis::occupation_probability_gate_based,
           nb::arg("energy_and_state_type"), nb::arg("temperature"),
@@ -51,19 +48,6 @@ void register_occupation_probability_of_excited_states_impl(nb::module_& m)
           &fiction::sidb::simulation::analysis::occupation_probability_non_gate_based,
           nb::arg("calculate_energy_distribution"),
           nb::arg("temperature"));  // TODO DOC(fiction_sidb_simulation_analysis_occupation_probability_non_gate_based)
-}
-
-}  // namespace detail
-
-/**
- * @brief Binds occupation probability of excited states helpers.
- * @param m Python module.
- */
-void register_occupation_probability_of_excited_states(nb::module_& m)
-{
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
-    detail::register_occupation_probability_of_excited_states_impl(m);
 }
 
 }  // namespace pyfiction

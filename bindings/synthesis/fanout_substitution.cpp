@@ -37,28 +37,6 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-namespace detail
-{
-
-/**
- * @brief Binds fanout substitution helpers.
- * @param m Python module.
- * @tparam Ntk Network type.
- */
-template <typename Ntk>
-void register_fanout_substitution_impl(nb::module_& m)
-{
-    m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_tec_network, Ntk>, nb::arg("network"),
-          nb::arg("params") = fiction::synthesis::fanout_substitution_params{},
-          DOC(fiction_synthesis_fanout_substitution), nb::call_guard<nb::gil_scoped_release>());
-
-    m.def("is_fanout_substituted", &fiction::synthesis::is_fanout_substituted<Ntk>, nb::arg("network"),
-          nb::arg("params") = fiction::synthesis::fanout_substitution_params{},
-          DOC(fiction_synthesis_is_fanout_substituted), nb::call_guard<nb::gil_scoped_release>());
-}
-
-}  // namespace detail
-
 /**
  * @brief Binds fanout substitution helpers.
  * @param m Python module.
@@ -95,7 +73,13 @@ void register_fanout_substitution(nb::module_& m)
 
         ;
 
-    detail::register_fanout_substitution_impl<py_tec_network>(m);
+    m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_tec_network, py_tec_network>,
+          nb::arg("network"), nb::arg("params") = fiction::synthesis::fanout_substitution_params{},
+          DOC(fiction_synthesis_fanout_substitution), nb::call_guard<nb::gil_scoped_release>());
+
+    m.def("is_fanout_substituted", &fiction::synthesis::is_fanout_substituted<py_tec_network>, nb::arg("network"),
+          nb::arg("params") = fiction::synthesis::fanout_substitution_params{},
+          DOC(fiction_synthesis_is_fanout_substituted), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction
