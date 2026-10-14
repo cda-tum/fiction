@@ -137,6 +137,25 @@ inline void register_critical_temperature_functions(nb::module_& m)
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
 The overload with input and output wires bypasses automatic wire detection.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    confidence_level: Required probability of a correct gate output, between 0 and 1.
+    max_temperature: Maximum temperature examined in K.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "critical_temperature_gate_based",
@@ -213,6 +232,25 @@ The overload with input and output wires bypasses automatic wire detection.
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
 The overload with input and output wires bypasses automatic wire detection.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    confidence_level: Required probability of a correct gate output, between 0 and 1.
+    max_temperature: Maximum temperature examined in K.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "critical_temperature_non_gate_based",
@@ -281,6 +319,25 @@ The overload with input and output wires bypasses automatic wire detection.
         nb::arg("stats") = nullptr,
         R"doc(Determine the critical temperature from the population of excited charge distributions.
 The keyword options select physical values, confidence, and temperature bounds.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    confidence_level: Required ground-state population probability between 0 and 1.
+    max_temperature: Maximum temperature examined in K.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
 }
 

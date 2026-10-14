@@ -54,6 +54,12 @@ void register_can_positive_charges_occur(nb::module_& m)
         nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
         nb::arg("lambda_tf") = simulation_model{}.lambda_tf,
         R"doc(Check whether positively charged SiDBs can occur under the scalar physical model.
+
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
 )doc");
 }
 

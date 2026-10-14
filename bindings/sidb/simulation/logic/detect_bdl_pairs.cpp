@@ -91,6 +91,10 @@ void register_detect_bdl_pairs(nb::module_& m)
         nb::arg("maximum_distance") = detect_bdl_pairs_options{}.maximum_distance,
         R"doc(Detect uniquely paired SiDBs with the selected tag in increasing distance.
 The keyword minimum_distance and maximum_distance bound the pair separation in nm.
+
+Args:
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
 )doc");
 }
 

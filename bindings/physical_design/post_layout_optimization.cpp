@@ -111,6 +111,14 @@ void register_post_layout_optimization(nb::module_& m)
 The keyword options bound relocations and runtime; statistics receives the completed result.
 Raises ValueError for unsupported clocking or invalid occupied geometry.
 Raises OverflowError when the extent exceeds signed routing coordinates.
+
+Args:
+    max_gate_relocations: Maximum number of relocations to try for each gate. Defaults to the number of tiles in the given layout if not specified.
+    optimize_pos_only: Only optimize PO positions.
+    planar_optimization: Require crossing-free wiring during optimization.
+    timeout: Execution budget in milliseconds.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
 )doc");
 }
 

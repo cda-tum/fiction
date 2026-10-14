@@ -59,6 +59,10 @@ void register_write_qca_layout(nb::module_& m)
         nb::arg("create_inter_layer_via_cells") = write_qca_layout_options{}.create_inter_layer_via_cells,
         R"doc(Write the QCA layout to the supplied QCADesigner filename.
 create_inter_layer_via_cells controls via cells; on_progress reports writing progress.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    create_inter_layer_via_cells: Create via cells in between each layer.
 )doc");
 }
 

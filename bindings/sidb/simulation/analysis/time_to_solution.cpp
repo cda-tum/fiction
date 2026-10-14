@@ -143,6 +143,24 @@ quicksim_timeout bounds each heuristic run; timeout bounds the complete evaluati
 Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
 ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
 Raises ValueError when ClusterComplete is selected with a finite timeout.
+
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    number_threads: Number of QuickSim workers; None uses the available hardware threads.
+    quicksim_timeout: Execution budget for each heuristic run in milliseconds.
+    quicksim_on_progress: Progress callback for heuristic iterations; None disables these reports.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    timeout: Execution budget in milliseconds.
+    engine: Exhaustive simulation algorithm used to simulate the ground state as reference.
+    repetitions: Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100` means that accuracy is precise to 1 %).
+    confidence_level: Probability of finding the ground state used to compute time-to-solution, between 0 and 1.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    ps: Statistics object filled by the algorithm; None discards statistics.
+    iteration_steps: Number of QuickSim iterations.
+    alpha: QuickSim heuristic alpha parameter.
 )doc");
     m.def("time_to_solution_for_given_simulation_results",
           &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, nb::arg("results_exact"),
@@ -160,7 +178,6 @@ Args:
     results_heuristic: The results of the heuristic runs.
     confidence_level: Confidence level for the TTS computation.
     ps: Receives the completed statistics when supplied.
-
 )doc");
 }
 

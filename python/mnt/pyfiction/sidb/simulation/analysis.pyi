@@ -104,6 +104,12 @@ def can_positive_charges_occur(
 ) -> bool:
     """
     Check whether positively charged SiDBs can occur under the scalar physical model.
+
+    Args:
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
     """
 
 class critical_temperature_stats:
@@ -183,6 +189,25 @@ def critical_temperature_gate_based(
     Determine the critical temperature of an SiDB gate implementing the truth tables.
     The keyword options select physical values, operational analysis, confidence, and temperature bounds.
     The overload with input and output wires bypasses automatic wire detection.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        confidence_level: Required probability of a correct gate output, between 0 and 1.
+        max_temperature: Maximum temperature examined in K.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def critical_temperature_non_gate_based(
@@ -209,6 +234,25 @@ def critical_temperature_non_gate_based(
     """
     Determine the critical temperature from the population of excited charge distributions.
     The keyword options select physical values, confidence, and temperature bounds.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        confidence_level: Required ground-state population probability between 0 and 1.
+        max_temperature: Maximum temperature examined in K.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 class energy_state:
@@ -442,6 +486,14 @@ def physical_population_stability(
     The keyword options select simulation, potential precision, and the execution budget.
     Raises ValueError for an invalid base or a precision yielding a zero or non-finite distance step.
     Large precisions can make the native distance scan impractical or stall floating-point increments.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        precision_for_distance_corresponding_to_potential: Decimal places for the distance scan; runtime grows exponentially with precision.
     """
 
 class physically_valid_parameters_domain:
@@ -476,6 +528,24 @@ def physically_valid_parameters(
     """
     Sweep physical parameter values for which the supplied charge distribution is physically valid.
     The keyword options define the sweep, physical model, worker count, and progress callbacks.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 class time_to_solution_stats:
@@ -544,6 +614,24 @@ def time_to_solution(
     Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
     ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
     Raises ValueError when ClusterComplete is selected with a finite timeout.
+
+    Args:
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        number_threads: Number of QuickSim workers; None uses the available hardware threads.
+        quicksim_timeout: Execution budget for each heuristic run in milliseconds.
+        quicksim_on_progress: Progress callback for heuristic iterations; None disables these reports.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        timeout: Execution budget in milliseconds.
+        engine: Exhaustive simulation algorithm used to simulate the ground state as reference.
+        repetitions: Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100` means that accuracy is precise to 1 %).
+        confidence_level: Probability of finding the ground state used to compute time-to-solution, between 0 and 1.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        ps: Statistics object filled by the algorithm; None discards statistics.
+        iteration_steps: Number of QuickSim iterations.
+        alpha: QuickSim heuristic alpha parameter.
     """
 
 def time_to_solution_for_given_simulation_results(

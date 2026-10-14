@@ -135,6 +135,28 @@ void register_exact(nb::module_& m, const char* signature)
 The layout_type keyword selects a registered gate-layout class.
 Returns a layout or None when the search finds no solution within its bounds.
 Raises ValueError when a shifted Cartesian or hexagonal layout requires layout_arrangement and none is supplied.
+
+Args:
+    layout_type: Registered gate-layout class for the returned layout.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
+    scheme: Clocking scheme to be used.
+    layout_arrangement: Row or column arrangement; required for shifted Cartesian and hexagonal layouts, ignored for Cartesian layouts.
+    upper_bound_area: Maximum total tile count. Area and axis bounds apply together.
+    upper_bound_x: Maximum tile count in the x direction, combined with the area and y bounds.
+    upper_bound_y: Maximum tile count in the y direction, combined with the area and x bounds.
+    fixed_size: Search only aspect ratios with area min(upper_bound_area, upper_bound_x * upper_bound_y); axis bounds still apply.
+    num_threads: Number of workers exploring aspect ratios.
+    synchronization_elements: Allow synchronization elements to delay clock phases.
+    crossings: Allow wires to cross on separate layers.
+    border_io: Place primary inputs and outputs at the layout border.
+    straight_inverters: Require straight wires through inverters.
+    desynchronize: Allow unequal fan-in path lengths.
+    minimize_wires: Minimize the number of wire tiles.
+    minimize_crossings: Minimize the number of crossing tiles.
+    timeout: Execution budget in milliseconds.
+    technology_specifics: Constraints for the selected target technology.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
 )doc");
     }
     else

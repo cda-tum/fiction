@@ -111,6 +111,20 @@ inline void register_is_operational_functions(nb::module_& m)
         R"doc(Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 Overloads accept supplied wires or one layout per input pattern.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "is_operational",
@@ -164,6 +178,21 @@ Overloads accept supplied wires or one layout per input pattern.
         R"doc(Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 Overloads accept supplied wires or one layout per input pattern.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    canvas_lyt: Optional canvas layout for operational analysis.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "is_operational",
@@ -218,6 +247,21 @@ Overloads accept supplied wires or one layout per input pattern.
         R"doc(Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 Overloads accept supplied wires or one layout per input pattern.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    canvas_lyt: Optional canvas layout for operational analysis.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "operational_input_patterns",
@@ -266,6 +310,20 @@ Overloads accept supplied wires or one layout per input pattern.
             is_operational_options{}.strategy_to_analyze_operational_status,
         R"doc(Return the input patterns for which the SiDB layout implements the truth tables.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "operational_input_patterns",
@@ -318,6 +376,21 @@ The keyword options select physical values, simulation, BDL encoding, and operat
         nb::arg("canvas_lyt") = std::nullopt,
         R"doc(Return the input patterns for which the SiDB layout implements the truth tables.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    canvas_lyt: Optional canvas layout for operational analysis.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
@@ -366,6 +439,20 @@ The keyword options select physical values, simulation, BDL encoding, and operat
             is_operational_options{}.strategy_to_analyze_operational_status,
         R"doc(Return the input patterns for which kinks render the SiDB layout non-operational.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
@@ -419,6 +506,21 @@ The keyword options select physical values, simulation, BDL encoding, and operat
         nb::arg("canvas_lyt") = std::nullopt,
         R"doc(Return the input patterns for which kinks render the SiDB layout non-operational.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    canvas_lyt: Optional canvas layout for operational analysis.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "is_kink_induced_non_operational",
@@ -467,6 +569,20 @@ The keyword options select physical values, simulation, BDL encoding, and operat
             is_operational_options{}.strategy_to_analyze_operational_status,
         R"doc(Check whether kinks cause the SiDB layout to be non-operational.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
     m.def(
         "is_kink_induced_non_operational",
@@ -519,6 +635,21 @@ The keyword options select physical values, simulation, BDL encoding, and operat
             is_operational_options{}.strategy_to_analyze_operational_status,
         nb::arg("canvas_lyt") = std::nullopt, R"doc(Check whether kinks cause the SiDB layout to be non-operational.
 The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    op_condition: Condition used to decide whether the layout is operational.
+    canvas_lyt: Optional canvas layout for operational analysis.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
 }
 

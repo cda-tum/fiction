@@ -94,7 +94,15 @@ void register_bdl_input_iterator(nb::module_& m)
                 bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
             nb::arg("maximum_distance") =
                 bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
-            nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config)
+            nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
+            R"doc(Iterate over SiDB input patterns using the selected BDL encoding.
+
+Args:
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+)doc")
         .def(
             "__iter__", [](bdl_input_iterator& self) -> bdl_input_iterator& { return self; },
             nb::rv_policy::reference_internal)
@@ -124,7 +132,15 @@ void register_bdl_input_iterator(nb::module_& m)
                 bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
             nb::arg("maximum_distance") =
                 bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
-            nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config)
+            nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
+            R"doc(Iterate over SiDB input patterns using the selected BDL encoding.
+
+Args:
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+)doc")
         .def(
             "__next__",
             [](bdl_input_iterator& self) -> layout
@@ -214,6 +230,12 @@ void register_bdl_input_iterator(nb::module_& m)
         R"doc(Return one SiDB layout per input pattern, starting with pattern zero.
 The keyword options select BDL detection and input encoding.
 The overload with input_wires bypasses automatic wire detection.
+
+Args:
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
 )doc");
     m.def(
         "generate_bdl_input_pattern_layouts",
@@ -243,6 +265,12 @@ The overload with input_wires bypasses automatic wire detection.
         R"doc(Return one SiDB layout per input pattern, starting with pattern zero.
 The keyword options select BDL detection and input encoding.
 The overload with input_wires bypasses automatic wire detection.
+
+Args:
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
 )doc");
 }
 

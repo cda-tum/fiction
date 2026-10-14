@@ -77,6 +77,11 @@ void register_write_operational_domain(nb::module_& m)
 CSV columns hold the sweep-parameter values followed by the operational-status tag.
 The keyword options select status tags and which samples to write.
 Raises ValueError unless the domain has one to three sweep dimensions.
+
+Args:
+    operational_tag: The tag used to represent the operational value of a parameter set.
+    non_operational_tag: The tag used to represent the non-operational value of a parameter set.
+    writing_mode: Write all samples or only operational samples.
 )doc");
 
     m.def(
@@ -103,6 +108,11 @@ Raises ValueError unless the domain has one to three sweep dimensions.
 Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
 The keyword options select status tags and which samples to write.
 Raises ValueError unless the domain has one to three sweep dimensions.
+
+Args:
+    operational_tag: The tag used to represent the operational value of a parameter set.
+    non_operational_tag: The tag used to represent the non-operational value of a parameter set.
+    writing_mode: Write all samples or only operational samples.
 )doc");
 }
 
@@ -134,6 +144,11 @@ void register_write_critical_temperature_domain(nb::module_& m)
 CSV columns hold sweep-parameter values, the operational-status tag, and critical temperature.
 The keyword options select status tags and which samples to write.
 Raises ValueError unless the domain has one to three sweep dimensions.
+
+Args:
+    operational_tag: The tag used to represent the operational value of a parameter set.
+    non_operational_tag: The tag used to represent the non-operational value of a parameter set.
+    writing_mode: Write all samples or only operational samples.
 )doc");
 
     m.def(
@@ -160,6 +175,11 @@ Raises ValueError unless the domain has one to three sweep dimensions.
 Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
 The keyword options select status tags and which samples to write.
 Raises ValueError unless the domain has one to three sweep dimensions.
+
+Args:
+    operational_tag: The tag used to represent the operational value of a parameter set.
+    non_operational_tag: The tag used to represent the non-operational value of a parameter set.
+    writing_mode: Write all samples or only operational samples.
 )doc");
 }
 

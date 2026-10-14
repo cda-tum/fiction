@@ -188,6 +188,28 @@ void register_displacement_robustness_domain(nb::module_& m)
             displacement_robustness_domain_options{}.percentage_of_analyzed_displaced_layouts,
         R"doc(Determine robustness against displacement of SiDBs in a gate implementing the truth tables.
 The keyword options select displacement, sampling, fixed SiDBs, and operational analysis.
+
+Args:
+    analysis_mode: The analysis mode.
+    displacement_variations: Maximum displacement in columns and rows; the displaced sites must remain representable.
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    fixed_sidbs: SiDBs that are not displaced.
+    dimer_policy: The dimer policy.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    percentage_of_analyzed_displaced_layouts: Fraction of displaced layouts analyzed in RANDOM mode, between 0 and 1.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
 }
 

@@ -83,6 +83,10 @@ void register_enumerate_all_paths_impl(nb::module_& m)
         nb::arg("crossings") = enumerate_all_paths_options{}.crossings, nb::arg("obstructions") = nb::none(),
         R"doc(Enumerate all loop-free paths from source to target in the layout.
 The keyword options select obstructions and crossing constraints.
+
+Args:
+    crossings: Allow wires to cross on separate layers.
+    obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
 )doc");
 }
 

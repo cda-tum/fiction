@@ -59,6 +59,10 @@ void register_network_balancing_impl(nb::module_& m)
         R"doc(Insert identity nodes to balance network paths.
 Returns a fresh technology network that is logically equivalent to the input.
 Set unify_outputs to place every output at the same logic depth.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    unify_outputs: Flag to indicate that all output nodes should be in the same rank.
 )doc");
 
     m.def(
@@ -76,6 +80,10 @@ Set unify_outputs to place every output at the same logic depth.
         nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
         R"doc(Check whether network paths are balanced.
 Set unify_outputs to require every output at the same logic depth.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    unify_outputs: Flag to indicate that all output nodes should be in the same rank.
 )doc");
 }
 

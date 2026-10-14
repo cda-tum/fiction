@@ -243,8 +243,26 @@ Args:
     layout: A pointy-top hexagonal gate-level layout with a row arrangement and supported Bestagon port orientations.
     timeout: Whole-circuit deadline in milliseconds.
     design_gate_timeout: Deadline for each individual gate in milliseconds.
-    base, mu_minus, epsilon_r, lambda_tf: Physical simulation values.
     on_progress: Optional gate-design progress callback.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    canvas_sidb_complex_gates: Number of canvas SiDBs dedicated to complex gates.
+    using_predefined_crossing_and_double_wire_if_possible: Select predefined or synthesized crossing and double-wire gates.
+    influence_radius_charged_defects: Radius around each gate center in nm for incorporating charged defects.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+    design_mode: Gate-design approach: QUICKCELL, AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER, RANDOM, or PRUNING_ONLY.
+    canvas: Gate-design area as two opposite lattice-site corners.
+    number_of_canvas_sidbs: Number of SiDBs placed in the gate-design canvas.
+    maximal_random_design_attempts: Maximum candidate layouts evaluated across all random-design threads.
+    termination_cond: Stop after the first solution or collect all solutions allowed by the design mode.
 
 Returns:
     An SiDB layout that can be exported with write_sqd_layout or write_sidb_layout_svg.

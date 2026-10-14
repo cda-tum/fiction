@@ -117,6 +117,12 @@ void register_hexagonalization(nb::module_& m)
 The keyword options select input and output pin extension and progress reporting.
 Raises ValueError for unsupported clocking or invalid occupied geometry.
 Raises OverflowError when transformed coordinates exceed the signed coordinate range.
+
+Args:
+    input_pin_extension: Input pin extension mode: NONE, EXTEND, or EXTEND_PLANAR.
+    output_pin_extension: Output pin extension mode: NONE, EXTEND, or EXTEND_PLANAR.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
 )doc");
 }
 

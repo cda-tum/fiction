@@ -182,6 +182,10 @@ def a_star(
     Find a shortest loop-free path from source to target in the layout.
     The keyword options select obstructions and crossing constraints.
     Raises ValueError when source or target lies outside the layout extent.
+
+    Args:
+        obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
+        crossings: Allow wires to cross on separate layers.
     """
 
 @overload
@@ -314,6 +318,10 @@ def yen_k_shortest_paths(
     Find up to k shortest loop-free paths from source to target.
     The keyword options select obstructions and crossing constraints.
     Raises ValueError when source or target lies outside the layout extent.
+
+    Args:
+        obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
+        crossings: Allow wires to cross on separate layers.
     """
 
 @overload
@@ -373,4 +381,8 @@ def enumerate_all_paths(
     """
     Enumerate all loop-free paths from source to target in the layout.
     The keyword options select obstructions and crossing constraints.
+
+    Args:
+        crossings: Allow wires to cross on separate layers.
+        obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
     """

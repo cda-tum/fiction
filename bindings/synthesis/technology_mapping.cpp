@@ -155,6 +155,30 @@ void register_technology_mapping_impl(nb::module_& m)
 No gates are enabled by default; missing required gates raise missing_required_gates_exception.
 Returns a technology network; stats receives mapper statistics when supplied.
 Gate-set factory dictionaries can be expanded into these keywords.
+
+Args:
+    decay: Enforce the application of at least one constant input to three-input gates.
+    inv: 1-input NOT gate (inverter).
+    and2: 2-input AND gate.
+    nand2: 2-input NAND gate.
+    or2: 2-input OR gate.
+    nor2: 2-input NOR gate.
+    xor2: 2-input XOR gate.
+    xnor2: 2-input XNOR gate.
+    lt2: 2-input less-than gate.
+    gt2: 2-input greater-than gate.
+    le2: 2-input less-or-equal gate.
+    ge2: 2-input greater-or-equal gate.
+    and3: 3-input AND gate.
+    xor_and: 3-input XOR-AND gate.
+    or_and: 3-input OR-AND gate.
+    onehot: 3-input ONEHOT gate.
+    maj3: 3-input MAJ gate.
+    gamble: 3-input GAMBLE gate.
+    dot: 3-input DOT gate.
+    mux: 3-input MUX gate (ITE).
+    and_xor: 3-input AND-XOR gate.
+    stats: Statistics object filled by the algorithm; None discards statistics.
 )doc");
 }
 

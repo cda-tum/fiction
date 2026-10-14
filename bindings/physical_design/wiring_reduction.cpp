@@ -100,6 +100,11 @@ void register_wiring_reduction(nb::module_& m)
 The keyword options bound runtime and report progress.
 Raises ValueError for unsupported clocking or invalid occupied geometry.
 Raises OverflowError when the extent exceeds signed routing coordinates.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
 )doc");
 }
 

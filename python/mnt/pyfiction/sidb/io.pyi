@@ -118,6 +118,14 @@ def write_sidb_layout_svg(
     """
     Write an SVG representation of the SiDB layout to the supplied filename.
     The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        lattice_point_size: Lattice-point size in SVG units.
+        sidb_size: Size of the SiDB in SVG units.
+        sidb_border_width: SiDB border width in SVG units.
+        color_background: The color mode of the background for the SVG output.
+        lattice_mode: The lattice mode of the SiDB layout.
     """
 
 @overload
@@ -146,6 +154,14 @@ def write_sidb_layout_svg_to_string(
     """
     Return an SVG representation of the SiDB layout.
     The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        lattice_point_size: Lattice-point size in SVG units.
+        sidb_size: Size of the SiDB in SVG units.
+        sidb_border_width: SiDB border width in SVG units.
+        color_background: The color mode of the background for the SVG output.
+        lattice_mode: The lattice mode of the SiDB layout.
     """
 
 def print_sidb_layout(

@@ -89,6 +89,16 @@ void register_quickexact(nb::module_& m)
         R"doc(Simulate the SiDB layout with QuickExact.
 The keyword options select physical values, base detection, external potentials, and progress reporting.
 Raises ValueError when base is neither 2 nor 3.
+
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    base_number_detection: ON detects whether positive charges can occur; OFF uses base unchanged.
+    local_external_potential: External electrostatic potential per lattice site in V; None uses an empty map.
+    global_potential: External electrostatic potential applied to every SiDB in V.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 )doc");
 }
 

@@ -150,7 +150,19 @@ class potential_landscape:
         lambda_tf: float = 5.0,
         local_external_potential: Mapping[mnt.pyfiction.sidb.lattice_site, float] | None = None,
         global_external_potential: float = 0.0,
-    ) -> None: ...
+    ) -> None:
+        """
+        Construct the electrostatic potential landscape for the SiDB layout.
+
+        Args:
+            base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+            mu_minus: Negative-charge transition energy in eV.
+            epsilon_r: Relative permittivity (dimensionless).
+            lambda_tf: Thomas-Fermi screening distance in nm.
+            local_external_potential: External electrostatic potential per lattice site in V; None uses an empty map.
+            global_external_potential: External electrostatic potential applied to every SiDB in V.
+        """
+
     def get_layout(self) -> mnt.pyfiction.sidb.sidb_layout:
         """
         The layout the landscape describes.

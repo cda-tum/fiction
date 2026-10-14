@@ -335,6 +335,13 @@ def fanout_substitution(
     """
     Insert identity nodes so the network respects the keyword fanout limits.
     Returns a fresh technology network that is logically equivalent to the input.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
+        degree: Maximum output degree of each fan-out node. Must be at least two.
+        threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
+        seed: Random seed; None selects a fresh random seed.
     """
 
 def is_fanout_substituted(
@@ -346,7 +353,16 @@ def is_fanout_substituted(
     threshold: int = 1,
     seed: int | None = None,
 ) -> bool:
-    """Check whether every network node respects the keyword fanout limits."""
+    """
+    Check whether every network node respects the keyword fanout limits.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
+        degree: Maximum output degree of each fan-out node. Must be at least two.
+        threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
+        seed: Random seed; None selects a fresh random seed.
+    """
 
 def network_balancing(
     network: mnt.pyfiction.networks.technology_network,
@@ -358,6 +374,10 @@ def network_balancing(
     Insert identity nodes to balance network paths.
     Returns a fresh technology network that is logically equivalent to the input.
     Set unify_outputs to place every output at the same logic depth.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        unify_outputs: Flag to indicate that all output nodes should be in the same rank.
     """
 
 def is_balanced(
@@ -369,6 +389,10 @@ def is_balanced(
     """
     Check whether network paths are balanced.
     Set unify_outputs to require every output at the same logic depth.
+
+    Args:
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        unify_outputs: Flag to indicate that all output nodes should be in the same rank.
     """
 
 class missing_required_gates_exception(RuntimeError): ...
@@ -536,6 +560,30 @@ def technology_mapping(
     No gates are enabled by default; missing required gates raise missing_required_gates_exception.
     Returns a technology network; stats receives mapper statistics when supplied.
     Gate-set factory dictionaries can be expanded into these keywords.
+
+    Args:
+        decay: Enforce the application of at least one constant input to three-input gates.
+        inv: 1-input NOT gate (inverter).
+        and2: 2-input AND gate.
+        nand2: 2-input NAND gate.
+        or2: 2-input OR gate.
+        nor2: 2-input NOR gate.
+        xor2: 2-input XOR gate.
+        xnor2: 2-input XNOR gate.
+        lt2: 2-input less-than gate.
+        gt2: 2-input greater-than gate.
+        le2: 2-input less-or-equal gate.
+        ge2: 2-input greater-or-equal gate.
+        and3: 3-input AND gate.
+        xor_and: 3-input XOR-AND gate.
+        or_and: 3-input OR-AND gate.
+        onehot: 3-input ONEHOT gate.
+        maj3: 3-input MAJ gate.
+        gamble: 3-input GAMBLE gate.
+        dot: 3-input DOT gate.
+        mux: 3-input MUX gate (ITE).
+        and_xor: 3-input AND-XOR gate.
+        stats: Statistics object filled by the algorithm; None discards statistics.
     """
 
 class network_target(enum.Enum):
