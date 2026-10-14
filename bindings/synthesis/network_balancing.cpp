@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/synthesis/network_balancing.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include "pyfiction/types.hpp"
@@ -32,27 +33,23 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-namespace detail
-{
-
 /**
  * @brief Binds network balancing helpers.
  * @param m Python module.
- * @tparam Ntk Network type.
  */
-template <typename Ntk>
-void register_network_balancing_impl(nb::module_& m)
+void register_network_balancing(nb::module_& m)
 {
     m.def(
         "network_balancing",
-        [](const Ntk& network, const decltype(fiction::synthesis::network_balancing_params{}.on_progress)& on_progress,
+        [](const py_tec_network&                                                        network,
+           const decltype(fiction::synthesis::network_balancing_params{}.on_progress)&  on_progress,
            const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs)
         {
             fiction::synthesis::network_balancing_params params{};
             params.on_progress   = on_progress;
             params.unify_outputs = unify_outputs;
             const nb::gil_scoped_release release{};
-            return fiction::synthesis::network_balancing<py_tec_network, Ntk>(network, params);
+            return fiction::synthesis::network_balancing<py_tec_network, py_tec_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
@@ -67,14 +64,15 @@ Args:
 
     m.def(
         "is_balanced",
-        [](const Ntk& network, const decltype(fiction::synthesis::network_balancing_params{}.on_progress)& on_progress,
+        [](const py_tec_network&                                                        network,
+           const decltype(fiction::synthesis::network_balancing_params{}.on_progress)&  on_progress,
            const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs)
         {
             fiction::synthesis::network_balancing_params params{};
             params.on_progress   = on_progress;
             params.unify_outputs = unify_outputs;
             const nb::gil_scoped_release release{};
-            return fiction::synthesis::is_balanced<Ntk>(network, params);
+            return fiction::synthesis::is_balanced<py_tec_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
@@ -85,18 +83,6 @@ Args:
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     unify_outputs: Flag to indicate that all output nodes should be in the same rank.
 )doc");
-}
-
-}  // namespace detail
-
-/**
- * @brief Binds network balancing helpers.
- * @param m Python module.
- */
-void register_network_balancing(nb::module_& m)
-{
-
-    detail::register_network_balancing_impl<py_tec_network>(m);
 }
 
 }  // namespace pyfiction

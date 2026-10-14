@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Validated physical simulation values for Python bindings.
+ * @author OpenAI Codex
  */
 
 #pragma once

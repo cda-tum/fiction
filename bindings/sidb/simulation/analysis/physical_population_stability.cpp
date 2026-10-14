@@ -13,6 +13,7 @@
  * @brief Python bindings for `fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include "pyfiction/documentation.hpp"
@@ -42,16 +43,25 @@ namespace pyfiction
 /** @brief Native options constructed for each Python call. */
 using physical_population_stability_options = fiction::sidb::simulation::analysis::physical_population_stability_params;
 
-namespace detail
-{
-
 /**
  * @brief Registers the population stability information and the analysis on `sidb_layout`.
  *
  * @param m The module.
  */
-inline void register_physical_population_stability_functions(nb::module_& m)
+void register_physical_population_stability(nb::module_& m)
 {
+    nb::enum_<fiction::sidb::simulation::analysis::transition_type>(
+        m, "transition_type", DOC(fiction_sidb_simulation_analysis_transition_type))
+        .value("NEUTRAL_TO_NEGATIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_NEGATIVE,
+               DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_NEGATIVE))
+        .value("NEGATIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::NEGATIVE_TO_NEUTRAL,
+               DOC(fiction_sidb_simulation_analysis_transition_type_NEGATIVE_TO_NEUTRAL))
+        .value("NEUTRAL_TO_POSITIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_POSITIVE,
+               DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_POSITIVE))
+        .value("POSITIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::POSITIVE_TO_NEUTRAL,
+               DOC(fiction_sidb_simulation_analysis_transition_type_POSITIVE_TO_NEUTRAL));
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+
     using fiction::sidb::simulation::analysis::population_stability_information;
 
     nb::class_<population_stability_information>(m, "population_stability_information",
@@ -106,28 +116,6 @@ Args:
     lambda_tf: Thomas-Fermi screening distance in nm.
     precision_for_distance_corresponding_to_potential: Decimal places for the distance scan; runtime grows exponentially with precision.
 )doc");
-}
-
-}  // namespace detail
-
-/**
- * @brief Binds physical population stability helpers.
- * @param m Python module.
- */
-void register_physical_population_stability(nb::module_& m)
-{
-    nb::enum_<fiction::sidb::simulation::analysis::transition_type>(
-        m, "transition_type", DOC(fiction_sidb_simulation_analysis_transition_type))
-        .value("NEUTRAL_TO_NEGATIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_NEGATIVE,
-               DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_NEGATIVE))
-        .value("NEGATIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::NEGATIVE_TO_NEUTRAL,
-               DOC(fiction_sidb_simulation_analysis_transition_type_NEGATIVE_TO_NEUTRAL))
-        .value("NEUTRAL_TO_POSITIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_POSITIVE,
-               DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_POSITIVE))
-        .value("POSITIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::POSITIVE_TO_NEUTRAL,
-               DOC(fiction_sidb_simulation_analysis_transition_type_POSITIVE_TO_NEUTRAL));
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::register_physical_population_stability_functions(m);
 }
 
 }  // namespace pyfiction

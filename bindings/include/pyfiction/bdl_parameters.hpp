@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Validated BDL pair distance bounds for Python bindings.
+ * @author OpenAI Codex
  */
 
 #pragma once

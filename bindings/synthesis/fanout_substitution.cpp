@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI Codex
  */
 
 #include "pyfiction/documentation.hpp"
@@ -36,20 +37,26 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-namespace detail
-{
-
 /**
  * @brief Binds fanout substitution helpers.
  * @param m Python module.
- * @tparam Ntk Network type.
  */
-template <typename Ntk>
-void register_fanout_substitution_impl(nb::module_& m)
+void register_fanout_substitution(nb::module_& m)
 {
+    nb::enum_<fiction::synthesis::fanout_substitution_params::substitution_strategy>(
+        m, "substitution_strategy", DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy))
+        .value("BREADTH", fiction::synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
+               DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_BREADTH))
+        .value("DEPTH", fiction::synthesis::fanout_substitution_params::substitution_strategy::DEPTH,
+               DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_DEPTH))
+        .value("RANDOM", fiction::synthesis::fanout_substitution_params::substitution_strategy::RANDOM,
+               DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_RANDOM))
+
+        ;
+
     m.def(
         "fanout_substitution",
-        [](const Ntk&                                                                    network,
+        [](const py_tec_network&                                                         network,
            const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress)& on_progress,
            const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)     strategy,
            const decltype(fiction::synthesis::fanout_substitution_params{}.degree)       degree,
@@ -63,7 +70,7 @@ void register_fanout_substitution_impl(nb::module_& m)
             params.threshold   = threshold;
             params.seed        = seed;
             const nb::gil_scoped_release release{};
-            return fiction::synthesis::fanout_substitution<py_tec_network, Ntk>(network, params);
+            return fiction::synthesis::fanout_substitution<py_tec_network, py_tec_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy")  = fiction::synthesis::fanout_substitution_params{}.strategy,
@@ -83,7 +90,7 @@ Args:
 
     m.def(
         "is_fanout_substituted",
-        [](const Ntk&                                                                    network,
+        [](const py_tec_network&                                                         network,
            const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress)& on_progress,
            const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)     strategy,
            const decltype(fiction::synthesis::fanout_substitution_params{}.degree)       degree,
@@ -97,7 +104,7 @@ Args:
             params.threshold   = threshold;
             params.seed        = seed;
             const nb::gil_scoped_release release{};
-            return fiction::synthesis::is_fanout_substituted<Ntk>(network, params);
+            return fiction::synthesis::is_fanout_substituted<py_tec_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy")  = fiction::synthesis::fanout_substitution_params{}.strategy,
@@ -113,28 +120,6 @@ Args:
     threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
     seed: Random seed; None selects a fresh random seed.
 )doc");
-}
-
-}  // namespace detail
-
-/**
- * @brief Binds fanout substitution helpers.
- * @param m Python module.
- */
-void register_fanout_substitution(nb::module_& m)
-{
-    nb::enum_<fiction::synthesis::fanout_substitution_params::substitution_strategy>(
-        m, "substitution_strategy", DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy))
-        .value("BREADTH", fiction::synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
-               DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_BREADTH))
-        .value("DEPTH", fiction::synthesis::fanout_substitution_params::substitution_strategy::DEPTH,
-               DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_DEPTH))
-        .value("RANDOM", fiction::synthesis::fanout_substitution_params::substitution_strategy::RANDOM,
-               DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_RANDOM))
-
-        ;
-
-    detail::register_fanout_substitution_impl<py_tec_network>(m);
 }
 
 }  // namespace pyfiction
