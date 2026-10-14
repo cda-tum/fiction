@@ -339,8 +339,8 @@ Native calls that wait for callback workers release the GIL so those workers can
 GIL release does not synchronize native objects. Do not access an object from another thread or callback while a
 released call uses it. Even read-only operations can update native traversal state. This restriction includes
 copies that share native storage and statistics objects supplied to a running algorithm. Use a Python lock around
-all such access or pass independent objects. A callback may consume its reported values; it must not inspect or
-modify native objects still in use by the algorithm.
+all such access or pass independent objects. A callback may read its supplied arguments; it must not access other
+native objects still in use by the algorithm.
 
 Binding contributors should use `nanobind::call_guard<nanobind::gil_scoped_release>()` for entirely native call
 bodies. Mixed wrappers need an inner release scope after Python validation and before Python result construction.

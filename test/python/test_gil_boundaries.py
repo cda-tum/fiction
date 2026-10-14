@@ -19,6 +19,7 @@ import pytest
 from mnt.pyfiction.layouts import cartesian_gate_layout, cartesian_layout
 from mnt.pyfiction.networks import random_network
 from mnt.pyfiction.physical_design import color_routing
+from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_surface_defects
 from mnt.pyfiction.synthesis import dynamic_truth_table
 
@@ -26,8 +27,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
     from typing import Any
-
-    from mnt.pyfiction.sidb import sidb_layout
 
 
 @pytest.mark.parametrize("kind", ["coordinates", "depth", "routing", "defects", "truth_table"])
@@ -79,6 +78,32 @@ def test_native_work_releases_the_gil(kind: str, tmp_path: Path) -> None:
     else:
         table = dynamic_truth_table(24)
         assert run_with_python_progress(table.to_binary) == "0" * (1 << 24)
+
+
+@pytest.mark.parametrize("kind", ["sites", "charges"])
+def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
+    """Large SiDB collections and charge construction permit Python thread progress.
+
+    Args:
+        kind: Native SiDB operation to exercise.
+    """
+    layout = sidb_layout()
+    for column in range(200_000):
+        layout.assign_sidb(lattice_site(column, 0, 0), sidb_dot_tag.INPUT)
+
+    if kind == "sites":
+        assert len(run_with_python_progress(layout.pis)) == 200_000
+    else:
+
+        def construct() -> charge_distribution:
+            """Construct a charge distribution over the layout's complete dot collection.
+
+            Returns:
+                The distribution containing one charge per dot.
+            """
+            return charge_distribution(layout)
+
+        assert run_with_python_progress(construct).size() == 200_000
 
 
 def run_with_python_progress(operation: Callable[[], Any]) -> Any:

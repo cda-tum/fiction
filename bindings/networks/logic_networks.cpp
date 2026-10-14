@@ -123,7 +123,10 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
                 ntk.foreach_fanin(n, [&fanins, &ntk](const auto& f) { fanins.push_back(ntk.get_node(f)); });
                 return fanins;
             },
-            nb::arg("n"), nb::call_guard<nb::gil_scoped_release>())
+            // Keep the GIL for AIG/XAG/MIG fanins: releasing it adds overhead for at most three inputs.
+            nb::arg("n"),
+            std::conditional_t<std::is_same_v<Ntk, py_tec_network>, nb::call_guard<nb::gil_scoped_release>,
+                               nb::call_guard<>>{})
 
         .def("is_constant", &Ntk::is_constant, nb::arg("n"))
         .def("is_pi", &Ntk::is_pi, nb::arg("n"))
