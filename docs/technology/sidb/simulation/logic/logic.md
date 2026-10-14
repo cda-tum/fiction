@@ -186,45 +186,45 @@ flood fill or contour tracing in three dimensions.
 
 ```
 
-```{figure} /_static/opdom_siqad_or_grid_search.png
+```{image} /_static/opdom_siqad_or_grid_search.png
 :alt: SiQAD OR gate operational domain from grid search, with purple operational and gray non-operational samples.
 :width: 100%
+```
 
 Grid search evaluates every point in the parameter grid.
-```
 
 ```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{figure} /_static/opdom_siqad_or_random_sampling.png
+```{image} /_static/opdom_siqad_or_random_sampling.png
 :alt: SiQAD OR gate operational domain from random sampling, with purple operational and gray non-operational samples.
 :width: 100%
+```
 
 Random sampling evaluates isolated points across the parameter grid.
-```
 
 ```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{figure} /_static/opdom_siqad_or_flood_fill.png
+```{image} /_static/opdom_siqad_or_flood_fill.png
 :alt: SiQAD OR gate operational domain from flood fill, with purple operational and gray non-operational samples.
 :width: 100%
+```
 
 Flood fill expands from operational seeds and evaluates their neighbors.
-```
 
 ```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{figure} /_static/opdom_siqad_or_contour_tracing.png
+```{image} /_static/opdom_siqad_or_contour_tracing.png
 :alt: SiQAD OR gate operational domain from contour tracing, with purple operational and gray non-operational samples.
 :width: 100%
+```
 
 Contour tracing samples the operational boundary and retains its initial random samples.
-```
 
 ```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
@@ -320,35 +320,35 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 ```{eval-rst}
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_grid_search
 
-.. figure:: /_static/opdom_siqad_or_grid_search.png
+.. image:: /_static/opdom_siqad_or_grid_search.png
    :alt: SiQAD OR gate operational domain from grid search, with purple operational and gray non-operational samples.
    :width: 100%
 
-   Grid search evaluates every point in the parameter grid.
+Grid search evaluates every point in the parameter grid.
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_random_sampling
 
-.. figure:: /_static/opdom_siqad_or_random_sampling.png
+.. image:: /_static/opdom_siqad_or_random_sampling.png
    :alt: SiQAD OR gate operational domain from random sampling, with purple operational and gray non-operational samples.
    :width: 100%
 
-   Random sampling evaluates isolated points across the parameter grid.
+Random sampling evaluates isolated points across the parameter grid.
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_flood_fill
 
-.. figure:: /_static/opdom_siqad_or_flood_fill.png
+.. image:: /_static/opdom_siqad_or_flood_fill.png
    :alt: SiQAD OR gate operational domain from flood fill, with purple operational and gray non-operational samples.
    :width: 100%
 
-   Flood fill expands from operational seeds and evaluates their neighbors.
+Flood fill expands from operational seeds and evaluates their neighbors.
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_contour_tracing
 
-.. figure:: /_static/opdom_siqad_or_contour_tracing.png
+.. image:: /_static/opdom_siqad_or_contour_tracing.png
    :alt: SiQAD OR gate operational domain from contour tracing, with purple operational and gray non-operational samples.
    :width: 100%
 
-   Contour tracing samples the operational boundary and retains its initial random samples.
+Contour tracing samples the operational boundary and retains its initial random samples.
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_grid_search
 
