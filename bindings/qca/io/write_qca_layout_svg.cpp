@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/qca/io/write_qca_layout_svg.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
@@ -40,16 +41,12 @@ namespace pyfiction
 
 /** @brief Native options constructed for each Python call. */
 using write_qca_layout_svg_options = fiction::qca::io::write_qca_layout_svg_params;
-namespace detail
-{
-
 /**
  * @brief Binds write qca layout svg helpers.
  * @param m Python module.
  */
-void register_write_qca_layout_svg_impl(nb::module_& m)
+void register_write_qca_layout_svg(nb::module_& m)
 {
-    // QCA plot
     m.def(
         "write_qca_layout_svg",
         [](const fiction::qca::layout& layout, const std::string_view& filename,
@@ -71,18 +68,6 @@ Args:
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     simple: Use a compact SVG drawing.
 )doc");
-}
-
-}  // namespace detail
-
-/**
- * @brief Binds write qca layout svg helpers.
- * @param m Python module.
- */
-void register_write_qca_layout_svg(nb::module_& m)
-{
-
-    detail::register_write_qca_layout_svg_impl(m);
 }
 
 }  // namespace pyfiction
