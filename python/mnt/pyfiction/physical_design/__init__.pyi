@@ -584,7 +584,10 @@ def apply_bestagon_library(
     """
 
 class graph_coloring_engine(enum.Enum):
-    """Graph-coloring engines used for routing."""
+    """
+    An enumeration of coloring engines to use for the graph coloring. All
+    but SAT are using the graph-coloring library by Brian Crites.
+    """
 
     MCS = 0
     """

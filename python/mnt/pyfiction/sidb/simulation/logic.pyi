@@ -55,14 +55,23 @@ class bdl_input_iterator:
         minimum_distance: float = 0.75,
         maximum_distance: float = 1.5,
         input_bdl_config: input_bdl_configuration = ...,
-    ) -> None: ...
+    ) -> None:
+        """
+        Iterate over SiDB input patterns using the selected BDL encoding.
+
+        Args:
+            threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+            minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+            maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+            input_bdl_config: Input encoding: perturber absence or perturber distance.
+        """
+
     @overload
     def __init__(
         self,
         lyt: mnt.pyfiction.sidb.sidb_layout,
         input_wires: Sequence[bdl_wire],
         *,
-        threshold_bdl_interdistance: float = 2.0,
         minimum_distance: float = 0.75,
         maximum_distance: float = 1.5,
         input_bdl_config: input_bdl_configuration = ...,
@@ -71,7 +80,6 @@ class bdl_input_iterator:
         Iterate over SiDB input patterns using the selected BDL encoding.
 
         Args:
-            threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
             minimum_distance: Minimum SiDB separation for a BDL pair in nm.
             maximum_distance: Maximum SiDB separation for a BDL pair in nm.
             input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -186,13 +194,24 @@ def generate_bdl_input_pattern_layouts(
     minimum_distance: float = 0.75,
     maximum_distance: float = 1.5,
     input_bdl_config: input_bdl_configuration = ...,
-) -> list[mnt.pyfiction.sidb.sidb_layout]: ...
+) -> list[mnt.pyfiction.sidb.sidb_layout]:
+    """
+    Return one SiDB layout per input pattern, starting with pattern zero.
+    The keyword options select BDL detection and input encoding.
+    The overload with input_wires bypasses automatic wire detection.
+
+    Args:
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+    """
+
 @overload
 def generate_bdl_input_pattern_layouts(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     input_wires: Sequence[bdl_wire],
     *,
-    threshold_bdl_interdistance: float = 2.0,
     minimum_distance: float = 0.75,
     maximum_distance: float = 1.5,
     input_bdl_config: input_bdl_configuration = ...,
@@ -203,7 +222,6 @@ def generate_bdl_input_pattern_layouts(
     The overload with input_wires bypasses automatic wire detection.
 
     Args:
-        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
         minimum_distance: Minimum SiDB separation for a BDL pair in nm.
         maximum_distance: Maximum SiDB separation for a BDL pair in nm.
         input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -603,7 +621,6 @@ def is_operational(
     epsilon_r: float = 5.6,
     lambda_tf: float = 5.0,
     sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
-    threshold_bdl_interdistance: float = 2.0,
     minimum_distance: float = 0.75,
     maximum_distance: float = 1.5,
     input_bdl_config: input_bdl_configuration = ...,
@@ -624,7 +641,6 @@ def is_operational(
     epsilon_r: float = 5.6,
     lambda_tf: float = 5.0,
     sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
-    threshold_bdl_interdistance: float = 2.0,
     minimum_distance: float = 0.75,
     maximum_distance: float = 1.5,
     input_bdl_config: input_bdl_configuration = ...,
@@ -644,7 +660,6 @@ def is_operational(
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
         sim_engine: SiDB simulation engine used for operational analysis.
-        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
         minimum_distance: Minimum SiDB separation for a BDL pair in nm.
         maximum_distance: Maximum SiDB separation for a BDL pair in nm.
         input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -703,7 +718,6 @@ def operational_input_patterns(
     epsilon_r: float = 5.6,
     lambda_tf: float = 5.0,
     sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
-    threshold_bdl_interdistance: float = 2.0,
     minimum_distance: float = 0.75,
     maximum_distance: float = 1.5,
     input_bdl_config: input_bdl_configuration = ...,
@@ -722,7 +736,6 @@ def operational_input_patterns(
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
         sim_engine: SiDB simulation engine used for operational analysis.
-        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
         minimum_distance: Minimum SiDB separation for a BDL pair in nm.
         maximum_distance: Maximum SiDB separation for a BDL pair in nm.
         input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -781,7 +794,6 @@ def kink_induced_non_operational_input_patterns(
     epsilon_r: float = 5.6,
     lambda_tf: float = 5.0,
     sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
-    threshold_bdl_interdistance: float = 2.0,
     minimum_distance: float = 0.75,
     maximum_distance: float = 1.5,
     input_bdl_config: input_bdl_configuration = ...,
@@ -800,7 +812,6 @@ def kink_induced_non_operational_input_patterns(
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
         sim_engine: SiDB simulation engine used for operational analysis.
-        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
         minimum_distance: Minimum SiDB separation for a BDL pair in nm.
         maximum_distance: Maximum SiDB separation for a BDL pair in nm.
         input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -859,7 +870,6 @@ def is_kink_induced_non_operational(
     epsilon_r: float = 5.6,
     lambda_tf: float = 5.0,
     sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
-    threshold_bdl_interdistance: float = 2.0,
     minimum_distance: float = 0.75,
     maximum_distance: float = 1.5,
     input_bdl_config: input_bdl_configuration = ...,
@@ -878,7 +888,6 @@ def is_kink_induced_non_operational(
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
         sim_engine: SiDB simulation engine used for operational analysis.
-        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
         minimum_distance: Minimum SiDB separation for a BDL pair in nm.
         maximum_distance: Maximum SiDB separation for a BDL pair in nm.
         input_bdl_config: Input encoding: perturber absence or perturber distance.

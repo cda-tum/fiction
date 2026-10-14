@@ -12,7 +12,6 @@
  * @file
  * @brief Python bindings for `fiction/synthesis/network_balancing.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include "pyfiction/types.hpp"

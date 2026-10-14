@@ -69,45 +69,24 @@ void register_on_the_fly_circuit_design(nb::module_& m)
     m.def(
         "on_the_fly_sidb_circuit_design",
         [](const py_hexagonal_gate_layout& layout, const decltype(on_the_fly_circuit_design_options{}.timeout) timeout,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                              .timeout)                                    design_gate_timeout,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params
-                              .base)                                       base,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params
-                              .mu_minus)                                   mu_minus,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params
-                              .epsilon_r)                                  epsilon_r,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params
-                              .lambda_tf)                                  lambda_tf,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                              .sim_engine)                                 sim_engine,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                              .input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance)                threshold_bdl_interdistance,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
+           const decltype(operational_options{}.timeout)              design_gate_timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .minimum_distance)                           minimum_distance,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .maximum_distance)                           maximum_distance,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                              .input_bdl_iterator_params.input_bdl_config) input_bdl_config,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                              .op_condition)                               op_condition,
-           const decltype(on_the_fly_circuit_design_options{}
-                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
-                              .strategy_to_analyze_operational_status)     strategy_to_analyze_operational_status,
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const decltype(on_the_fly_circuit_design_options{}
                               .sidb_on_the_fly_gate_library_parameters.design_gate_params.design_mode) design_mode,
            const decltype(on_the_fly_circuit_design_options{}

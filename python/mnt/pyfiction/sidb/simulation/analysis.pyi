@@ -158,32 +158,6 @@ def critical_temperature_gate_based(
     on_progress: Callable[[str, int, int], None] | None = None,
     on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: critical_temperature_stats | None = None,
-) -> float: ...
-@overload
-def critical_temperature_gate_based(
-    input_pattern_layouts: Sequence[mnt.pyfiction.sidb.sidb_layout],
-    spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    output_bdl_pairs: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_pair],
-    input_bdl_wires: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_wire],
-    output_bdl_wires: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_wire],
-    *,
-    timeout: int = ...,
-    base: int = 3,
-    mu_minus: float = -0.32,
-    epsilon_r: float = 5.6,
-    lambda_tf: float = 5.0,
-    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
-    threshold_bdl_interdistance: float = 2.0,
-    minimum_distance: float = 0.75,
-    maximum_distance: float = 1.5,
-    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
-    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
-    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
-    confidence_level: float = 0.99,
-    max_temperature: float = 400.0,
-    on_progress: Callable[[str, int, int], None] | None = None,
-    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
-    stats: critical_temperature_stats | None = None,
 ) -> float:
     """
     Determine the critical temperature of an SiDB gate implementing the truth tables.
@@ -210,6 +184,55 @@ def critical_temperature_gate_based(
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
+@overload
+def critical_temperature_gate_based(
+    input_pattern_layouts: Sequence[mnt.pyfiction.sidb.sidb_layout],
+    spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
+    output_bdl_pairs: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_pair],
+    input_bdl_wires: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_wire],
+    output_bdl_wires: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
+    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
+    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
+    confidence_level: float = 0.99,
+    max_temperature: float = 400.0,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
+    stats: critical_temperature_stats | None = None,
+) -> float:
+    """
+    Determine the critical temperature of an SiDB gate implementing the truth tables.
+    The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+    The overload with input and output wires bypasses automatic wire detection.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        confidence_level: Required probability of a correct gate output, between 0 and 1.
+        max_temperature: Maximum temperature examined in K.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
+    """
+
 def critical_temperature_non_gate_based(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     *,
@@ -219,12 +242,6 @@ def critical_temperature_non_gate_based(
     epsilon_r: float = 5.6,
     lambda_tf: float = 5.0,
     sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
-    threshold_bdl_interdistance: float = 2.0,
-    minimum_distance: float = 0.75,
-    maximum_distance: float = 1.5,
-    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
-    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
-    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
     confidence_level: float = 0.99,
     max_temperature: float = 400.0,
     on_progress: Callable[[str, int, int], None] | None = None,
@@ -241,18 +258,12 @@ def critical_temperature_non_gate_based(
         mu_minus: Negative-charge transition energy in eV.
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
-        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
-        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
-        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
-        input_bdl_config: Input encoding: perturber absence or perturber distance.
         confidence_level: Required ground-state population probability between 0 and 1.
         max_temperature: Maximum temperature examined in K.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
         stats: Statistics object filled by the algorithm; None discards statistics.
         sim_engine: SiDB simulation engine used for operational analysis.
-        op_condition: Require the selected operational condition for every input pattern.
-        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 class energy_state:
@@ -653,5 +664,5 @@ def time_to_solution_for_given_simulation_results(
                        ground state.
         results_heuristic: The results of the heuristic runs.
         confidence_level: Confidence level for the TTS computation.
-        ps: Receives the completed statistics when supplied.
+        ps: Statistics.
     """

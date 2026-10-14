@@ -11,7 +11,6 @@
 /**
  * @file
  * @brief Native operational options constructed from Python keyword values.
- * @author OpenAI Codex
  */
 
 #pragma once

@@ -27,15 +27,10 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
 
 /**
  * @brief Namespace alias for nanobind.
@@ -129,31 +124,29 @@ Args:
     m.def(
         "is_operational",
         [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
-           const decltype(is_operational_options{}.timeout)              timeout,
-           const decltype(is_operational_options{}.sim_params.base)      base,
-           const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
-           const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
-           const decltype(is_operational_options{}.sim_params.lambda_tf) lambda_tf,
-           const decltype(is_operational_options{}.sim_engine)           sim_engine,
-           const decltype(is_operational_options{}
-                              .input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance)              threshold_bdl_interdistance,
+           const decltype(is_operational_options{}.timeout)                                    timeout,
+           const decltype(is_operational_options{}.sim_params.base)                            base,
+           const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
+           const decltype(is_operational_options{}.sim_params.epsilon_r)                       epsilon_r,
+           const decltype(is_operational_options{}.sim_params.lambda_tf)                       lambda_tf,
+           const decltype(is_operational_options{}.sim_engine)                                 sim_engine,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .minimum_distance)                         minimum_distance,
+                              .minimum_distance)                                               minimum_distance,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .maximum_distance)                         maximum_distance,
+                              .maximum_distance)                                               maximum_distance,
            const decltype(is_operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
            const decltype(is_operational_options{}.op_condition)                               op_condition,
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            const auto params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            const auto params = make_operational_parameters(
+                timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+                minimum_distance, maximum_distance, input_bdl_config, op_condition,
+                strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::is_operational(lyt, spec, params, in, out, canvas_lyt);
         },
@@ -164,8 +157,6 @@ Args:
         nb::arg("epsilon_r")  = is_operational_options{}.sim_params.epsilon_r,
         nb::arg("lambda_tf")  = is_operational_options{}.sim_params.lambda_tf,
         nb::arg("sim_engine") = is_operational_options{}.sim_engine,
-        nb::arg("threshold_bdl_interdistance") =
-            is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
         nb::arg("minimum_distance") =
             is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance") =
@@ -186,7 +177,6 @@ Args:
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.
     sim_engine: SiDB simulation engine used for operational analysis.
-    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
     minimum_distance: Minimum SiDB separation for a BDL pair in nm.
     maximum_distance: Maximum SiDB separation for a BDL pair in nm.
     input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -198,30 +188,28 @@ Args:
         "is_operational",
         [](const std::vector<layout>& input_pattern_layouts, const std::vector<py_tt>& spec, const wires& in,
            const wires& out, const decltype(is_operational_options{}.timeout) timeout,
-           const decltype(is_operational_options{}.sim_params.base)      base,
-           const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
-           const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
-           const decltype(is_operational_options{}.sim_params.lambda_tf) lambda_tf,
-           const decltype(is_operational_options{}.sim_engine)           sim_engine,
-           const decltype(is_operational_options{}
-                              .input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance)              threshold_bdl_interdistance,
+           const decltype(is_operational_options{}.sim_params.base)                            base,
+           const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
+           const decltype(is_operational_options{}.sim_params.epsilon_r)                       epsilon_r,
+           const decltype(is_operational_options{}.sim_params.lambda_tf)                       lambda_tf,
+           const decltype(is_operational_options{}.sim_engine)                                 sim_engine,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .minimum_distance)                         minimum_distance,
+                              .minimum_distance)                                               minimum_distance,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .maximum_distance)                         maximum_distance,
+                              .maximum_distance)                                               maximum_distance,
            const decltype(is_operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
            const decltype(is_operational_options{}.op_condition)                               op_condition,
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            const auto params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            const auto params = make_operational_parameters(
+                timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+                minimum_distance, maximum_distance, input_bdl_config, op_condition,
+                strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::is_operational(input_pattern_layouts, spec, params, in, out,
                                                                     canvas_lyt);
@@ -233,8 +221,6 @@ Args:
         nb::arg("epsilon_r")  = is_operational_options{}.sim_params.epsilon_r,
         nb::arg("lambda_tf")  = is_operational_options{}.sim_params.lambda_tf,
         nb::arg("sim_engine") = is_operational_options{}.sim_engine,
-        nb::arg("threshold_bdl_interdistance") =
-            is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
         nb::arg("minimum_distance") =
             is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance") =
@@ -255,7 +241,6 @@ Args:
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.
     sim_engine: SiDB simulation engine used for operational analysis.
-    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
     minimum_distance: Minimum SiDB separation for a BDL pair in nm.
     maximum_distance: Maximum SiDB separation for a BDL pair in nm.
     input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -328,31 +313,29 @@ Args:
     m.def(
         "operational_input_patterns",
         [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
-           const decltype(is_operational_options{}.timeout)              timeout,
-           const decltype(is_operational_options{}.sim_params.base)      base,
-           const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
-           const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
-           const decltype(is_operational_options{}.sim_params.lambda_tf) lambda_tf,
-           const decltype(is_operational_options{}.sim_engine)           sim_engine,
-           const decltype(is_operational_options{}
-                              .input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance)              threshold_bdl_interdistance,
+           const decltype(is_operational_options{}.timeout)                                    timeout,
+           const decltype(is_operational_options{}.sim_params.base)                            base,
+           const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
+           const decltype(is_operational_options{}.sim_params.epsilon_r)                       epsilon_r,
+           const decltype(is_operational_options{}.sim_params.lambda_tf)                       lambda_tf,
+           const decltype(is_operational_options{}.sim_engine)                                 sim_engine,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .minimum_distance)                         minimum_distance,
+                              .minimum_distance)                                               minimum_distance,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .maximum_distance)                         maximum_distance,
+                              .maximum_distance)                                               maximum_distance,
            const decltype(is_operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
            const decltype(is_operational_options{}.op_condition)                               op_condition,
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            const auto params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            const auto params = make_operational_parameters(
+                timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+                minimum_distance, maximum_distance, input_bdl_config, op_condition,
+                strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params, in, out, canvas_lyt);
         },
@@ -363,8 +346,6 @@ Args:
         nb::arg("epsilon_r")  = is_operational_options{}.sim_params.epsilon_r,
         nb::arg("lambda_tf")  = is_operational_options{}.sim_params.lambda_tf,
         nb::arg("sim_engine") = is_operational_options{}.sim_engine,
-        nb::arg("threshold_bdl_interdistance") =
-            is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
         nb::arg("minimum_distance") =
             is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance") =
@@ -384,7 +365,6 @@ Args:
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.
     sim_engine: SiDB simulation engine used for operational analysis.
-    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
     minimum_distance: Minimum SiDB separation for a BDL pair in nm.
     maximum_distance: Maximum SiDB separation for a BDL pair in nm.
     input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -457,31 +437,29 @@ Args:
     m.def(
         "kink_induced_non_operational_input_patterns",
         [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
-           const decltype(is_operational_options{}.timeout)              timeout,
-           const decltype(is_operational_options{}.sim_params.base)      base,
-           const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
-           const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
-           const decltype(is_operational_options{}.sim_params.lambda_tf) lambda_tf,
-           const decltype(is_operational_options{}.sim_engine)           sim_engine,
-           const decltype(is_operational_options{}
-                              .input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance)              threshold_bdl_interdistance,
+           const decltype(is_operational_options{}.timeout)                                    timeout,
+           const decltype(is_operational_options{}.sim_params.base)                            base,
+           const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
+           const decltype(is_operational_options{}.sim_params.epsilon_r)                       epsilon_r,
+           const decltype(is_operational_options{}.sim_params.lambda_tf)                       lambda_tf,
+           const decltype(is_operational_options{}.sim_engine)                                 sim_engine,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .minimum_distance)                         minimum_distance,
+                              .minimum_distance)                                               minimum_distance,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .maximum_distance)                         maximum_distance,
+                              .maximum_distance)                                               maximum_distance,
            const decltype(is_operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
            const decltype(is_operational_options{}.op_condition)                               op_condition,
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            const auto params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            const auto params = make_operational_parameters(
+                timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+                minimum_distance, maximum_distance, input_bdl_config, op_condition,
+                strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params, in,
                                                                                                  out, canvas_lyt);
@@ -493,8 +471,6 @@ Args:
         nb::arg("epsilon_r")  = is_operational_options{}.sim_params.epsilon_r,
         nb::arg("lambda_tf")  = is_operational_options{}.sim_params.lambda_tf,
         nb::arg("sim_engine") = is_operational_options{}.sim_engine,
-        nb::arg("threshold_bdl_interdistance") =
-            is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
         nb::arg("minimum_distance") =
             is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance") =
@@ -514,7 +490,6 @@ Args:
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.
     sim_engine: SiDB simulation engine used for operational analysis.
-    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
     minimum_distance: Minimum SiDB separation for a BDL pair in nm.
     maximum_distance: Maximum SiDB separation for a BDL pair in nm.
     input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -587,31 +562,29 @@ Args:
     m.def(
         "is_kink_induced_non_operational",
         [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
-           const decltype(is_operational_options{}.timeout)              timeout,
-           const decltype(is_operational_options{}.sim_params.base)      base,
-           const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
-           const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
-           const decltype(is_operational_options{}.sim_params.lambda_tf) lambda_tf,
-           const decltype(is_operational_options{}.sim_engine)           sim_engine,
-           const decltype(is_operational_options{}
-                              .input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance)              threshold_bdl_interdistance,
+           const decltype(is_operational_options{}.timeout)                                    timeout,
+           const decltype(is_operational_options{}.sim_params.base)                            base,
+           const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
+           const decltype(is_operational_options{}.sim_params.epsilon_r)                       epsilon_r,
+           const decltype(is_operational_options{}.sim_params.lambda_tf)                       lambda_tf,
+           const decltype(is_operational_options{}.sim_engine)                                 sim_engine,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .minimum_distance)                         minimum_distance,
+                              .minimum_distance)                                               minimum_distance,
            const decltype(is_operational_options{}
                               .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .maximum_distance)                         maximum_distance,
+                              .maximum_distance)                                               maximum_distance,
            const decltype(is_operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
            const decltype(is_operational_options{}.op_condition)                               op_condition,
            const decltype(is_operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<layout>&                                canvas_lyt)
         {
-            const auto params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            const auto params = make_operational_parameters(
+                timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+                minimum_distance, maximum_distance, input_bdl_config, op_condition,
+                strategy_to_analyze_operational_status);
 
             return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params, in, out,
                                                                                      canvas_lyt);
@@ -623,8 +596,6 @@ Args:
         nb::arg("epsilon_r")  = is_operational_options{}.sim_params.epsilon_r,
         nb::arg("lambda_tf")  = is_operational_options{}.sim_params.lambda_tf,
         nb::arg("sim_engine") = is_operational_options{}.sim_engine,
-        nb::arg("threshold_bdl_interdistance") =
-            is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
         nb::arg("minimum_distance") =
             is_operational_options{}.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance") =
@@ -643,7 +614,6 @@ Args:
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.
     sim_engine: SiDB simulation engine used for operational analysis.
-    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
     minimum_distance: Minimum SiDB separation for a BDL pair in nm.
     maximum_distance: Maximum SiDB separation for a BDL pair in nm.
     input_bdl_config: Input encoding: perturber absence or perturber distance.

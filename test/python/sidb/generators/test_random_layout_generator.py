@@ -8,6 +8,10 @@
 
 from __future__ import annotations
 
+from typing import Any
+
+import pytest
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_layout
 from mnt.pyfiction.sidb.generators import generate_multiple_random_sidb_layouts, generate_random_sidb_layout
 
@@ -55,3 +59,11 @@ def test_impossible_design_of_multiple_layouts() -> None:
         sidb_layout(), maximal_attempts_for_multiple_layouts=5, number_of_sidbs=2
     )
     assert result_lyt is None
+
+
+@pytest.mark.parametrize("option", ["number_of_unique_generated_layouts", "maximal_attempts_for_multiple_layouts"])
+def test_single_layout_rejects_multiple_layout_options(option: str) -> None:
+    """Single-layout generation accepts only options used for one layout."""
+    options: dict[str, Any] = {option: 1}
+    with pytest.raises(TypeError):
+        generate_random_sidb_layout(**options)

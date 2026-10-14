@@ -68,10 +68,6 @@ void register_random_layout_generator(nb::module_& m)
            const decltype(generate_random_layout_options{}.sim_params.epsilon_r) epsilon_r,
            const decltype(generate_random_layout_options{}.sim_params.lambda_tf) lambda_tf,
            const decltype(generate_random_layout_options{}.maximal_attempts)     maximal_attempts,
-           const decltype(generate_random_layout_options{}
-                              .number_of_unique_generated_layouts)               number_of_unique_generated_layouts,
-           const decltype(generate_random_layout_options{}
-                              .maximal_attempts_for_multiple_layouts)            maximal_attempts_for_multiple_layouts,
            const decltype(generate_random_layout_options{}.on_progress)&         on_progress)
         {
             generate_random_layout_options params{};
@@ -80,25 +76,19 @@ void register_random_layout_generator(nb::module_& m)
             params.number_of_sidbs  = number_of_sidbs;
             params.positive_sidbs   = positive_sidbs;
             params.maximal_attempts = maximal_attempts;
-            params.number_of_unique_generated_layouts    = number_of_unique_generated_layouts;
-            params.maximal_attempts_for_multiple_layouts = maximal_attempts_for_multiple_layouts;
-            params.on_progress                           = on_progress;
+            params.on_progress      = on_progress;
             const nb::gil_scoped_release release{};
             return fiction::sidb::generators::generate_random_layout(params, skeleton);
         },
-        nb::arg("lyt_skeleton")     = std::nullopt, nb::kw_only(),
-        nb::arg("coordinate_pair")  = generate_random_layout_options{}.coordinate_pair,
-        nb::arg("number_of_sidbs")  = generate_random_layout_options{}.number_of_sidbs,
-        nb::arg("positive_sidbs")   = generate_random_layout_options{}.positive_sidbs,
-        nb::arg("base")             = generate_random_layout_options{}.sim_params.base,
-        nb::arg("mu_minus")         = generate_random_layout_options{}.sim_params.mu_minus,
-        nb::arg("epsilon_r")        = generate_random_layout_options{}.sim_params.epsilon_r,
-        nb::arg("lambda_tf")        = generate_random_layout_options{}.sim_params.lambda_tf,
-        nb::arg("maximal_attempts") = generate_random_layout_options{}.maximal_attempts,
-        nb::arg("number_of_unique_generated_layouts") =
-            generate_random_layout_options{}.number_of_unique_generated_layouts,
-        nb::arg("maximal_attempts_for_multiple_layouts") =
-            generate_random_layout_options{}.maximal_attempts_for_multiple_layouts,
+        nb::arg("lyt_skeleton")       = std::nullopt, nb::kw_only(),
+        nb::arg("coordinate_pair")    = generate_random_layout_options{}.coordinate_pair,
+        nb::arg("number_of_sidbs")    = generate_random_layout_options{}.number_of_sidbs,
+        nb::arg("positive_sidbs")     = generate_random_layout_options{}.positive_sidbs,
+        nb::arg("base")               = generate_random_layout_options{}.sim_params.base,
+        nb::arg("mu_minus")           = generate_random_layout_options{}.sim_params.mu_minus,
+        nb::arg("epsilon_r")          = generate_random_layout_options{}.sim_params.epsilon_r,
+        nb::arg("lambda_tf")          = generate_random_layout_options{}.sim_params.lambda_tf,
+        nb::arg("maximal_attempts")   = generate_random_layout_options{}.maximal_attempts,
         nb::arg("on_progress").none() = nb::none(),
         R"doc(Generate a random SiDB layout within coordinate_pair, optionally extending lyt_skeleton.
 The keyword options select physical values, charge restrictions, and attempt limits.
@@ -113,8 +103,6 @@ Args:
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.
     maximal_attempts: Maximum number of placement attempts.
-    number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_layouts`.
-    maximal_attempts_for_multiple_layouts: Maximum number of generation attempts for multiple layouts.
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 )doc");
 
@@ -174,7 +162,7 @@ Args:
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.
     maximal_attempts: Maximum number of placement attempts.
-    number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_layouts`.
+    number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_sidb_layouts`.
     maximal_attempts_for_multiple_layouts: Maximum number of generation attempts for multiple layouts.
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 )doc");

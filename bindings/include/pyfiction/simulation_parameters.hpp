@@ -11,7 +11,6 @@
 /**
  * @file
  * @brief Validated physical simulation values for Python bindings.
- * @author OpenAI Codex
  */
 
 #pragma once
@@ -28,6 +27,9 @@ namespace nb = nanobind;
 
 namespace pyfiction
 {
+
+/** @brief Physical simulation model shared by the keyword adapters. */
+using simulation_model = fiction::sidb::model::simulation_parameters;
 
 /**
  * @brief Construct physical values after validating the charge-state base.
