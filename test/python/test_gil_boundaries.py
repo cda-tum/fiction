@@ -95,7 +95,19 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
         layout.assign_sidb(lattice_site(column, 0, 0), sidb_dot_tag.INPUT)
 
     if kind == "sites":
-        assert len(run_with_python_progress(layout.pis)) == count
+
+        def sites() -> list[lattice_site]:
+            """Repeat bulk traversal so a waiting Python thread can observe the release.
+
+            Returns:
+                The input sites from the final traversal.
+            """
+            result = layout.pis()
+            for _ in range(7):
+                result = layout.pis()
+            return result
+
+        assert len(run_with_python_progress(sites)) == count
     else:
 
         def construct() -> charge_distribution:
@@ -184,7 +196,7 @@ def run_with_python_progress(operation: Callable[[], Any]) -> Any:
     ready.wait()
     try:
         # Suppress interpreter handoffs so progress requires a native GIL release.
-        sys.setswitchinterval(10)
+        sys.setswitchinterval(60)
         start.set()
         result = operation()
         refreshed_during_operation = refreshed.is_set()
