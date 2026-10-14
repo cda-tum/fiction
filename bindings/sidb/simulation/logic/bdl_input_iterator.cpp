@@ -109,8 +109,6 @@ Args:
             "__init__",
             [](bdl_input_iterator* self, const layout& lyt, const std::vector<bdl_wire>& input_wires,
                const decltype(bdl_input_iterator_options{}
-                                  .bdl_wire_params.threshold_bdl_interdistance)       threshold_bdl_interdistance,
-               const decltype(bdl_input_iterator_options{}
                                   .bdl_wire_params.bdl_pairs_params.minimum_distance) minimum_distance,
                const decltype(bdl_input_iterator_options{}
                                   .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
@@ -118,14 +116,11 @@ Args:
             {
                 validate_bdl_pair_distances(minimum_distance, maximum_distance);
                 const bdl_input_iterator_options params{
-                    {.threshold_bdl_interdistance = threshold_bdl_interdistance,
-                     .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
+                    {.bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                     input_bdl_config};
                 std::construct_at(self, lyt, params, input_wires);
             },
             nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),
-            nb::arg("threshold_bdl_interdistance") =
-                bdl_input_iterator_options{}.bdl_wire_params.threshold_bdl_interdistance,
             nb::arg("minimum_distance") =
                 bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
             nb::arg("maximum_distance") =
@@ -134,7 +129,6 @@ Args:
             R"doc(Iterate over SiDB input patterns using the selected BDL encoding.
 
 Args:
-    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
     minimum_distance: Minimum SiDB separation for a BDL pair in nm.
     maximum_distance: Maximum SiDB separation for a BDL pair in nm.
     input_bdl_config: Input encoding: perturber absence or perturber distance.
@@ -238,8 +232,6 @@ Args:
         "generate_bdl_input_pattern_layouts",
         [](const layout& lyt, const std::vector<bdl_wire>& input_wires,
            const decltype(bdl_input_iterator_options{}
-                              .bdl_wire_params.threshold_bdl_interdistance)       threshold_bdl_interdistance,
-           const decltype(bdl_input_iterator_options{}
                               .bdl_wire_params.bdl_pairs_params.minimum_distance) minimum_distance,
            const decltype(bdl_input_iterator_options{}
                               .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
@@ -247,14 +239,11 @@ Args:
         {
             validate_bdl_pair_distances(minimum_distance, maximum_distance);
             const bdl_input_iterator_options params{
-                {.threshold_bdl_interdistance = threshold_bdl_interdistance,
-                 .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
+                {.bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                 input_bdl_config};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params, input_wires);
         },
         nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),
-        nb::arg("threshold_bdl_interdistance") =
-            bdl_input_iterator_options{}.bdl_wire_params.threshold_bdl_interdistance,
         nb::arg("minimum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
         nb::arg("maximum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
         nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
@@ -263,7 +252,6 @@ The keyword options select BDL detection and input encoding.
 The overload with input_wires bypasses automatic wire detection.
 
 Args:
-    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
     minimum_distance: Minimum SiDB separation for a BDL pair in nm.
     maximum_distance: Maximum SiDB separation for a BDL pair in nm.
     input_bdl_config: Input encoding: perturber absence or perturber distance.

@@ -165,20 +165,7 @@ Args:
     m.def("time_to_solution_for_given_simulation_results",
           &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results, nb::arg("results_exact"),
           nb::arg("results_heuristic"), nb::arg("confidence_level") = 0.997, nb::arg("ps") = nullptr,
-          R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
-and a series of heuristic results: the accuracy is the share of
-heuristic runs that found the ground state, and TTS is the mean
-heuristic runtime scaled to reach the given confidence level, `t ·
-log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
-mean heuristic runtime, and infinite time-to-solution.
-
-Args:
-    results_exact: The result of an exact engine, which provides the
-                   ground state.
-    results_heuristic: The results of the heuristic runs.
-    confidence_level: Confidence level for the TTS computation.
-    ps: Receives the completed statistics when supplied.
-)doc");
+          DOC(fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results));
 }
 
 }  // namespace pyfiction

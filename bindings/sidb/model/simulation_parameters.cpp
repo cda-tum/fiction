@@ -51,8 +51,10 @@ void register_simulation_parameters(nb::module_& m)
                 std::construct_at(
                     self, make_simulation_parameters(base_number, mu_minus, relative_permittivity, screening_distance));
             },
-            nb::kw_only(), nb::arg("base_number") = 3, nb::arg("mu_minus") = -0.32,
-            nb::arg("relative_permittivity") = 5.6, nb::arg("screening_distance") = 5.0,
+            nb::kw_only(), nb::arg("base_number") = fiction::sidb::model::simulation_parameters{}.base,
+            nb::arg("mu_minus")              = fiction::sidb::model::simulation_parameters{}.mu_minus,
+            nb::arg("relative_permittivity") = fiction::sidb::model::simulation_parameters{}.epsilon_r,
+            nb::arg("screening_distance")    = fiction::sidb::model::simulation_parameters{}.lambda_tf,
             "Store physical model values. All arguments are keyword-only; base_number must be 2 or 3.")
         .def_rw("epsilon_r", &fiction::sidb::model::simulation_parameters::epsilon_r,
                 DOC(fiction_sidb_model_simulation_parameters_epsilon_r))

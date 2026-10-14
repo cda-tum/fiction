@@ -27,18 +27,10 @@
 #include <optional>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner): converts progress callbacks
-#include <nanobind/stl/map.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner): converts callback task names
-#include <nanobind/stl/tuple.h>          // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): converts progress callbacks
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 /**
  * @brief Namespace alias for nanobind.
@@ -80,26 +72,24 @@ void register_physically_valid_parameters(nb::module_& m)
     m.def(
         "physically_valid_parameters",
         [](const fiction::sidb::layout& lyt, const fiction::sidb::charge_distribution& cd,
-           const decltype(operational_domain_options{}.operational_params.timeout)              timeout,
-           const decltype(operational_domain_options{}.operational_params.sim_params.base)      base,
-           const decltype(operational_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
-           const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
-           const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
-           const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
-           const decltype(operational_domain_options{}
-                              .operational_params.input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
-           const decltype(operational_domain_options{}
-                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .minimum_distance)            minimum_distance,
-           const decltype(operational_domain_options{}
-                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .maximum_distance)            maximum_distance,
-           const decltype(operational_domain_options{}
-                              .operational_params.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
-           const decltype(operational_domain_options{}.operational_params.op_condition)       op_condition,
-           const decltype(operational_domain_options{}.operational_params.strategy_to_analyze_operational_status)
-               strategy_to_analyze_operational_status,
+           const decltype(operational_options{}.timeout)              timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
            const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
            const decltype(operational_domain_options{}.on_progress)&                     on_progress,

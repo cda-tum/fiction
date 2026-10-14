@@ -102,28 +102,25 @@ void register_displacement_robustness_domain(nb::module_& m)
     m.def(
         "determine_displacement_robustness_domain",
         [](const layout& lyt, const std::vector<py_tt>& spec,
-           const decltype(displacement_robustness_domain_options{}.analysis_mode)              analysis_mode,
-           const decltype(displacement_robustness_domain_options{}.displacement_variations)    displacement_variations,
-           const decltype(displacement_robustness_domain_options{}.operational_params.timeout) timeout,
-           const decltype(displacement_robustness_domain_options{}.operational_params.sim_params.base)      base,
-           const decltype(displacement_robustness_domain_options{}.operational_params.sim_params.mu_minus)  mu_minus,
-           const decltype(displacement_robustness_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
-           const decltype(displacement_robustness_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
-           const decltype(displacement_robustness_domain_options{}.operational_params.sim_engine)           sim_engine,
-           const decltype(displacement_robustness_domain_options{}
-                              .operational_params.input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance) threshold_bdl_interdistance,
-           const decltype(displacement_robustness_domain_options{}
-                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .minimum_distance)            minimum_distance,
-           const decltype(displacement_robustness_domain_options{}
-                              .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
-                              .maximum_distance)            maximum_distance,
-           const decltype(displacement_robustness_domain_options{}
-                              .operational_params.input_bdl_iterator_params.input_bdl_config)       input_bdl_config,
-           const decltype(displacement_robustness_domain_options{}.operational_params.op_condition) op_condition,
-           const decltype(displacement_robustness_domain_options{}
-                              .operational_params
+           const decltype(displacement_robustness_domain_options{}.analysis_mode)           analysis_mode,
+           const decltype(displacement_robustness_domain_options{}.displacement_variations) displacement_variations,
+           const decltype(operational_options{}.timeout)                                    timeout,
+           const decltype(operational_options{}.sim_params.base)                            base,
+           const decltype(operational_options{}.sim_params.mu_minus)                        mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r)                       epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf)                       lambda_tf,
+           const decltype(operational_options{}.sim_engine)                                 sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
                               .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<decltype(displacement_robustness_domain_options{}.fixed_sidbs)>&      fixed_sidbs,
            const decltype(displacement_robustness_domain_options{}.dimer_policy)                     dimer_policy,

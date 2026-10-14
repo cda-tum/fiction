@@ -33,9 +33,6 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-/** @brief Native options constructed for each Python call. */
-using simulation_model = fiction::sidb::model::simulation_parameters;
-
 /**
  * @brief Binds potential to distance conversion helpers.
  * @param m Python module.

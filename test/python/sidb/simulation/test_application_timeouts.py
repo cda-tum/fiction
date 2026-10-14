@@ -63,38 +63,24 @@ def test_zero_budgets(resources_dir: Path) -> None:
     """All existing simulation-application entry points expose the built-in TimeoutError."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
     spec = [create_and_tt()]
-    operational: dict[str, Any] = {
-        "timeout": 0,
-    }
-    domain = operational.copy()
-    temperature = operational.copy()
-    displacement = operational.copy()
-    ratio = domain.copy()
-    population: dict[str, Any] = {
-        "timeout": 0,
-    }
-    tts: dict[str, Any] = {
-        "timeout": 0,
-    }
-
     calls: list[Callable[[], object]] = [
-        lambda: is_operational(layout, spec, **operational),
-        lambda: operational_input_patterns(layout, spec, **operational),
-        lambda: operational_domain_grid_search(layout, spec, **domain),
-        lambda: operational_domain_random_sampling(layout, spec, 0, **domain),
-        lambda: operational_domain_flood_fill(layout, spec, 0, **domain),
-        lambda: operational_domain_contour_tracing(layout, spec, 0, **domain),
-        lambda: critical_temperature_domain_grid_search(layout, spec, **domain),
-        lambda: critical_temperature_domain_random_sampling(layout, spec, 0, **domain),
-        lambda: critical_temperature_domain_flood_fill(layout, spec, 0, **domain),
-        lambda: critical_temperature_domain_contour_tracing(layout, spec, 0, **domain),
-        lambda: critical_temperature_gate_based(layout, spec, **temperature),
-        lambda: critical_temperature_non_gate_based(layout, **temperature),
-        lambda: determine_displacement_robustness_domain(layout, spec, **displacement),
-        lambda: operational_domain_ratio(layout, spec, parameter_point([5.6, 5.0]), **ratio),
-        lambda: physically_valid_parameters(layout, charge_distribution(layout), **domain),
-        lambda: physical_population_stability(layout, **population),
-        lambda: time_to_solution(layout, **tts),
+        lambda: is_operational(layout, spec, timeout=0),
+        lambda: operational_input_patterns(layout, spec, timeout=0),
+        lambda: operational_domain_grid_search(layout, spec, timeout=0),
+        lambda: operational_domain_random_sampling(layout, spec, 0, timeout=0),
+        lambda: operational_domain_flood_fill(layout, spec, 0, timeout=0),
+        lambda: operational_domain_contour_tracing(layout, spec, 0, timeout=0),
+        lambda: critical_temperature_domain_grid_search(layout, spec, timeout=0),
+        lambda: critical_temperature_domain_random_sampling(layout, spec, 0, timeout=0),
+        lambda: critical_temperature_domain_flood_fill(layout, spec, 0, timeout=0),
+        lambda: critical_temperature_domain_contour_tracing(layout, spec, 0, timeout=0),
+        lambda: critical_temperature_gate_based(layout, spec, timeout=0),
+        lambda: critical_temperature_non_gate_based(layout, timeout=0),
+        lambda: determine_displacement_robustness_domain(layout, spec, timeout=0),
+        lambda: operational_domain_ratio(layout, spec, parameter_point([5.6, 5.0]), timeout=0),
+        lambda: physically_valid_parameters(layout, charge_distribution(layout), timeout=0),
+        lambda: physical_population_stability(layout, timeout=0),
+        lambda: time_to_solution(layout, timeout=0),
     ]
     for call in calls:
         with pytest.raises(TimeoutError, match="deadline"):

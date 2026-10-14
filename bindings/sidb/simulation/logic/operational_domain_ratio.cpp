@@ -61,32 +61,24 @@ void register_operational_domain_ratio(nb::module_& m)
     m.def(
         "operational_domain_ratio",
         [](const layout& lyt, const std::vector<py_tt>& spec, const parameter_point& pp,
-           const decltype(operational_domain_ratio_options{}.op_domain_params.operational_params.timeout) timeout,
-           const decltype(operational_domain_ratio_options{}.op_domain_params.operational_params.sim_params.base) base,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params.sim_params.mu_minus)                      mu_minus,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params.sim_params.epsilon_r)                     epsilon_r,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params.sim_params.lambda_tf)                     lambda_tf,
-           const decltype(operational_domain_ratio_options{}.op_domain_params.operational_params.sim_engine) sim_engine,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params
-                              .threshold_bdl_interdistance)                      threshold_bdl_interdistance,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params
-                              .bdl_pairs_params.minimum_distance)                minimum_distance,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params
-                              .bdl_pairs_params.maximum_distance)                maximum_distance,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params.input_bdl_iterator_params
-                              .input_bdl_config)                                 input_bdl_config,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params.op_condition) op_condition,
-           const decltype(operational_domain_ratio_options{}
-                              .op_domain_params.operational_params
-                              .strategy_to_analyze_operational_status)           strategy_to_analyze_operational_status,
+           const decltype(operational_options{}.timeout)              timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
            const std::optional<decltype(operational_domain_ratio_options{}.op_domain_params.sweep_dimensions)>&
                sweep_dimensions,
            const std::optional<decltype(operational_domain_ratio_options{}.op_domain_params.number_of_threads)>

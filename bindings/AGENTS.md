@@ -41,8 +41,7 @@ A new binding:
 6. Comes with regenerated stubs: run `nox -s stubs` and commit the `.pyi` changes. CI
    fails when the committed stubs differ from the generated ones. Where stubgen cannot infer a
    type, state it at the binding with `nanobind::sig`, or `nanobind::for_getter` and
-   `nanobind::for_setter` on a property; `pyfiction/progress.hpp` does so for the progress
-   callbacks.
+   `nanobind::for_setter` on a property.
 
 Never:
 
