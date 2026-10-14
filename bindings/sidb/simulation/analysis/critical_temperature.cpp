@@ -18,6 +18,7 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>

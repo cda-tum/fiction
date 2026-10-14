@@ -18,7 +18,6 @@
 #include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
-#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
 
 #include <nanobind/nanobind.h>
