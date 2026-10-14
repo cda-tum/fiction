@@ -1410,7 +1410,8 @@ def critical_temperature_domain_grid_search(
 ) -> critical_temperature_domain:
     """
     Compute the critical-temperature domain by exhaustively sweeping every parameter combination.
-    The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Confidence uses the native critical-temperature default of 0.99.
     Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
@@ -1458,7 +1459,8 @@ def critical_temperature_domain_random_sampling(
 ) -> critical_temperature_domain:
     """
     Compute the critical-temperature domain by randomly sampling parameter combinations.
-    The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Confidence uses the native critical-temperature default of 0.99.
     Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
@@ -1506,7 +1508,8 @@ def critical_temperature_domain_flood_fill(
 ) -> critical_temperature_domain:
     """
     Compute the critical-temperature domain by expanding from sampled operational points.
-    The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Confidence uses the native critical-temperature default of 0.99.
     Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
@@ -1554,7 +1557,8 @@ def critical_temperature_domain_contour_tracing(
 ) -> critical_temperature_domain:
     """
     Compute the critical-temperature domain by tracing operational boundaries.
-    The keyword options define the sweep, physical values, BDL encoding, analysis, confidence, and progress callbacks.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Confidence uses the native critical-temperature default of 0.99.
     Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
