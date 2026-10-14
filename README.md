@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/github/license/cda-tum/fiction?label=License&style=flat-square)](https://github.com/cda-tum/fiction/blob/main/LICENSE.txt)
 [![PyPI](https://img.shields.io/static/v1?label=PyPI&message=mnt.pyfiction&logo=pypi&color=informational&style=flat-square)](https://pypi.org/project/mnt.pyfiction/)
 [![Release](https://img.shields.io/github/v/release/cda-tum/fiction?label=fiction&style=flat-square)](https://github.com/cda-tum/fiction/releases)
-[![arXiv](https://img.shields.io/static/v1?label=arXiv&message=1905.02477&color=informational&style=flat-square)](https://arxiv.org/abs/1905.02477)
+[![arXiv](https://img.shields.io/static/v1?label=arXiv&message=1905.02477&color=informational&style=flat-square)](https://doi.org/10.48550/arXiv.1905.02477)
 
 <p align="center">
   <picture>
@@ -30,12 +30,12 @@ technology or cell design. Using an extensible set of gate libraries, technologi
 be compiled down to any desired FCN technology for physical simulation.
 
 For these use cases, _fiction_ provides
-a [C++ header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
+a [C++ header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#header-only)
 as well as [Python bindings](https://fiction.readthedocs.io/en/latest/getting_started.html#python-bindings)
 that provide data types and algorithms for recurring tasks, e.g., logic network and layout types on different
 abstraction levels, clocking schemes, gate libraries, design automation algorithms, etc. Additionally, _fiction_ comes
 with an ABC-like
-[CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
+[CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#cli-pip)
 that allows quick access to its core functionality.
 
 <p align="center">
@@ -142,8 +142,8 @@ target_link_libraries(fanfiction PRIVATE libfiction)
 Then include what you need:
 
 ```c++
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/...>
@@ -181,12 +181,12 @@ Additionally, output formats for external physical simulator engines are also su
 
 Gate libraries:
 
-- [QCA ONE](https://ieeexplore.ieee.org/document/7538997/)
+- [QCA ONE](https://doi.org/10.1109/ISCAS.2016.7538997)
 
 File formats:
 
 - `*.qca` for [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/)
-- `*.qll` for [MagCAD](https://topolinano.polito.it/) and [SCERPA](https://ieeexplore.ieee.org/document/8935211)
+- `*.qll` for [MagCAD](https://topolinano.polito.it/) and [SCERPA](https://doi.org/10.1109/TCAD.2019.2960360)
 - `*.svg` for visual representation
 
 Many thanks to Frank Sill Torres for his support with the QCADesigner format and to Sophia Kuhn for implementing the SVG writer!
@@ -212,7 +212,7 @@ Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their
 
 Gate libraries:
 
-- [Bestagon](https://dl.acm.org/doi/10.1145/3489517.3530525)
+- [Bestagon](https://doi.org/10.1145/3489517.3530525)
 
 File formats:
 
@@ -244,23 +244,23 @@ specification and output placed, routed, and clocked generic FCN circuits.
 
 Among these algorithms are
 
-- SMT-based [exact placement and routing](https://ieeexplore.ieee.org/document/8342060)
-- OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
-- SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
-- SAT-based [multi-path routing](https://dl.acm.org/doi/10.1145/3565478.3572539)
-- Graph-oriented [layout design](https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_a_star_is_born.pdf)
+- SMT-based [exact placement and routing](https://doi.org/10.23919/DATE.2018.8342060)
+- OGD-based [scalable placement and routing](https://doi.org/10.1145/3287624.3287705)
+- SAT-based [one-pass synthesis](https://doi.org/10.1145/3394885.3431607)
+- SAT-based [multi-path routing](https://doi.org/10.1145/3565478.3572539)
+- Graph-oriented [layout design](https://doi.org/10.1109/NANO61778.2024.10628808)
 
 plus several path-finding algorithms that work on generic layouts:
 
-- shortest path via the [A\* algorithm](https://ieeexplore.ieee.org/document/4082128)
-- _k_ shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
+- shortest path via the [A\* algorithm](https://doi.org/10.1109/TSSC.1968.300136)
+- _k_ shortest paths via [Yen's algorithm](https://doi.org/10.1287/mnsc.17.11.712)
 
-On top, there is a [hexagonalization algorithm](https://ieeexplore.ieee.org/document/10231278) to transform Cartesian
+On top, there is a [hexagonalization algorithm](https://doi.org/10.1109/NANO58406.2023.10231278) to transform Cartesian
 layouts suitable for QCA into hexagonal layouts suitable for SiDBs,
 and multiple algorithms to optimize gate-level layouts post-placement:
 
-- [post-layout optimization](https://dl.acm.org/doi/10.1145/3611315.3633247)
-- [wiring reduction](https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf)
+- [post-layout optimization](https://doi.org/10.1145/3611315.3633247)
+- [wiring reduction](https://doi.org/10.1145/3649329.3663491)
 
 ### Verification
 
@@ -269,7 +269,7 @@ using
 
 - [Design Rule Violation (DRV)](https://fiction.readthedocs.io/en/latest/verification/verification.html#design-rule-violations-drvs)
   checking
-- SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641) (equivalence checking)
+- SAT-based [formal verification](https://doi.org/10.1109/DAC18072.2020.9218641) (equivalence checking)
 
 ### Physical Simulation
 
@@ -281,11 +281,11 @@ simulated using a physical model. Currently, the following simulation algorithms
 - Silicon Dangling Bonds (SiDBs)
   - Electrostatic Ground State Simulation
     - [_ClusterComplete_](https://fiction.readthedocs.io/en/latest/technology/sidb/simulation/engines/engines.html#clustercomplete)
-    - [_QuickExact_](https://dl.acm.org/doi/10.1109/ASP-DAC58780.2024.10473946)
-    - [_QuickSim_](https://ieeexplore.ieee.org/document/10231266)
-    - [Exhaustive _(ExGS)_](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
-  - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
-  - [Operational Domain Computation](https://dl.acm.org/doi/10.1145/3611315.3633246)
+    - [_QuickExact_](https://doi.org/10.1109/ASP-DAC58780.2024.10473946)
+    - [_QuickSim_](https://doi.org/10.1109/NANO58406.2023.10231266)
+    - [Exhaustive _(ExGS)_](https://doi.org/10.14288/1.0392909)
+  - [Critical Temperature Simulation](https://doi.org/10.1109/NANO58406.2023.10231259)
+  - [Operational Domain Computation](https://doi.org/10.1145/3611315.3633246)
 
 ## ⏰ Clocking Schemes
 
@@ -296,19 +296,19 @@ with variable numbers of clock phases: for instance, QCA uses four phases, where
 
 Built-in schemes are
 
-|                                  [Columnar](https://ieeexplore.ieee.org/document/573740)                                  |                               [Row](https://ieeexplore.ieee.org/document/573740)                                |                                 [2DDWave](https://ieeexplore.ieee.org/document/1717097)                                 |
+|                                       [Columnar](https://doi.org/10.1109/5.573740)                                        |                                     [Row](https://doi.org/10.1109/5.573740)                                     |                                  [2DDWave](https://doi.org/10.1109/NANO.2006.1717097)                                   |
 | :-----------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/row.png" alt="Row" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
 
-|                               [USE](https://ieeexplore.ieee.org/document/7219390)                               |                    [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551)                     |                   [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf)                   |
+|                                [USE](https://doi.org/10.1109/TCAD.2015.2471996)                                 |                              [RES](https://doi.org/10.1080/21681724.2019.1570551)                               |                                [ESR](https://doi.org/10.1007/s10470-020-01760-4)                                |
 | :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/use.png" alt="USE" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/res.png" alt="RES" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/esr.png" alt="ESR" height="200"/> |
 
-|                [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096)                 |     [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses)      |                    [SRS](https://www.tandfonline.com/doi/abs/10.1080/21681724.2025.2453910)                     |
+|                                [CFE](https://doi.org/10.1049/iet-cds.2019.0096)                                 |     [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses)      |                              [SRS](https://doi.org/10.1080/21681724.2025.2453910)                               |
 | :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/cfe.png" alt="CFE" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/ripple.png" alt="Ripple" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/srs.png" alt="SRS" height="200"/> |
 
-|                                [BANCS](https://ieeexplore.ieee.org/document/8533251)                                |
+|                                 [BANCS](https://doi.org/10.1109/SBCCI.2018.8533251)                                 |
 | :-----------------------------------------------------------------------------------------------------------------: |
 | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
@@ -333,7 +333,7 @@ Wires are only allowed to cross other wires! Wires crossing gates is considered 
 
 A technology extension proposes to utilize the external clock signal generator in an unconventional way: by creating
 further asymmetric clock signals with extended _Hold_ phases that are assigned to specific wire
-tiles, [synchronization elements](https://ieeexplore.ieee.org/document/8626294) can be created that stall signals over
+tiles, [synchronization elements](https://doi.org/10.1109/NANO.2018.8626294) can be created that stall signals over
 multiple clock cycles. These artificial latches are able to feed information to any other clock number, but their usage
 reduces the overall throughput of the layout. In return, long wire detours for signal synchronization can be prevented.
 
@@ -348,11 +348,11 @@ Gate-level layouts:
 - Number of gate tiles
 - Number of wire tiles
 - Number of wire crossings
-- Number of [synchronization elements](#synchronization-elements)
+- Number of [synchronization elements](#-synchronization-elements)
 - Critical path
 - Throughput
 - Bounding box
-- Energy dissipation based on a [physical model](https://ieeexplore.ieee.org/document/8246526) (QCA only)
+- Energy dissipation based on a [physical model](https://doi.org/10.1109/TCAD.2018.2789782) (QCA only)
 
 Cell-level layouts:
 

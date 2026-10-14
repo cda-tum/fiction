@@ -249,8 +249,8 @@ throughput     1
 
 `exact` describes the placement and routing problem in first-order logic and lets the SMT solver
 [Z3](https://github.com/Z3Prover/z3) find a minimal layout, see
-[the paper](https://ieeexplore.ieee.org/document/8342060). Since minimal FCN layouts are an
-[NP-complete problem](https://dl.acm.org/doi/10.1145/3312661), only small networks finish in reasonable time.
+[the paper](https://doi.org/10.23919/DATE.2018.8342060). Since minimal FCN layouts are an
+[NP-complete problem](https://doi.org/10.1145/3312661), only small networks finish in reasonable time.
 The most important options:
 
 - `-s SCHEME` fixes the clocking scheme (`2ddwave`, `use`, `res`, `esr`, `cfe`, `ripple`, `srs`, `bancs`,
@@ -268,7 +268,7 @@ Solutions are found fastest with crossings, desynchronization, and 2DDWave: `exa
 ### OGD-based (`ortho`)
 
 `ortho` places and routes with a linear-time orthogonal graph drawing heuristic, see
-[the paper](https://dl.acm.org/doi/10.1145/3287624.3287705). It handles large networks and produces a 2DDWave-clocked
+[the paper](https://doi.org/10.1145/3287624.3287705). It handles large networks and produces a 2DDWave-clocked
 Cartesian layout by default; `--topology` also selects any of the four [hexagonal variants](#topology-and-synchronization-support).
 It needs a network whose gates have at most two inputs (AND, OR, and inverters after `map --and --or --inv`).
 `-n 3|4` sets the number of clock phases, four by default, and `-v` prints the statistics.
@@ -276,7 +276,7 @@ It needs a network whose gates have at most two inputs (AND, OR, and inverters a
 ### Graph-oriented layout design (`gold`)
 
 `gold` searches the space of partial layouts with A\*, where every placement is one step, see
-[the paper](https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_a_star_is_born.pdf). It handles large networks,
+[the paper](https://doi.org/10.1109/NANO61778.2024.10628808). It handles large networks,
 produces 2DDWave-clocked Cartesian layouts, and has the same two-input restriction as `ortho`. Options:
 
 - `-e high_efficiency|high_effort|highest_effort|maximum_effort` sets how many search space graphs to explore
@@ -304,14 +304,14 @@ ToPoliNano uses odd-column shifted Cartesian, and Bestagon uses even-row hexagon
 ### Hexagonalization (`hex`)
 
 `hex` turns the active 2DDWave-clocked Cartesian layout into a hexagonal, row-clocked one, which the Bestagon SiDB
-gate library needs, see [the paper](https://ieeexplore.ieee.org/document/10231278). `-i` and `-o` extend the
+gate library needs, see [the paper](https://doi.org/10.1109/NANO58406.2023.10231278). `-i` and `-o` extend the
 inputs to the top row and the outputs to the bottom row, and `-p` reroutes the extended pins without crossings.
 
 ### Post-layout optimization (`optimize`)
 
 `optimize` shrinks the active 2DDWave-clocked Cartesian layout by moving gates and shortening wires, see
-[this paper](https://dl.acm.org/doi/10.1145/3611315.3633247) and
-[this paper](https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf).
+[the post-layout optimization paper](https://doi.org/10.1145/3611315.3633247) and
+[the wiring reduction paper](https://doi.org/10.1145/3649329.3663491).
 The optimized copy is added to the store; the original stays. `-w` only reduces wiring, which suits very large
 layouts, `-m N` moves at most `N` gates (`-m 1` for layouts beyond 100000 tiles), `-p` only moves a gate when no
 crossing results, and `-t SECONDS` stops after a timeout.
@@ -324,7 +324,7 @@ structured report under `-l`. It is
 the quickest way to find bugs in layouts produced by custom algorithms.
 
 `equiv` checks a gate-level layout against a network or two store elements against each other, see
-[the paper](https://ieeexplore.ieee.org/abstract/document/9218641). `equiv -n -g` takes the active network as the
+[the paper](https://doi.org/10.1109/DAC18072.2020.9218641). `equiv -n -g` takes the active network as the
 specification and the active layout as the implementation; `equiv -n` or `equiv -g` compares the two most recent
 elements of one store. The result is one of four:
 
@@ -340,11 +340,11 @@ invalid command arguments remain command errors.
 
 `cell -l LIBRARY` compiles the active gate-level layout into a cell-level layout with a gate library:
 
-- `qca-one`, the default, is [QCA ONE](https://ieeexplore.ieee.org/document/7538997/) for Cartesian layouts
+- `qca-one`, the default, is [QCA ONE](https://doi.org/10.1109/ISCAS.2016.7538997) for Cartesian layouts
 - `sim7-mol` is the molecular QCA library for Cartesian layouts
 - `topolinano` is [ToPoliNano](https://topolinano.polito.it/)'s iNML library for shifted Cartesian layouts, which
   `exact --topolinano -s columnar --border-io` produces
-- `bestagon` is the [Bestagon](https://dl.acm.org/doi/10.1145/3489517.3530525) SiDB library for hexagonal layouts,
+- `bestagon` is the [Bestagon](https://doi.org/10.1145/3489517.3530525) SiDB library for hexagonal layouts,
   which `hex` produces, or `exact --topology hexagonal -s row -xbd`
 
 Cell-level layouts are much larger than gate-level ones, so `show -c` is the better way to look at them than
@@ -352,7 +352,7 @@ Cell-level layouts are much larger than gate-level ones, so `show -c` is the bet
 
 `area [-x WIDTH] [-y HEIGHT] [--hspace H] [--vspace V]` computes the physical area of the active cell-level layout
 in nm². Every unset dimension is the technology's own, from
-[QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/), [NMLSim](https://dl.acm.org/doi/10.1145/3338852.3339856),
+[QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/), [NMLSim](https://doi.org/10.1145/3338852.3339856),
 and the H-Si(100) 2x1 lattice:
 
 | Technology | Width    | Height   | Horizontal spacing | Vertical spacing |
@@ -380,7 +380,7 @@ Earlier results remain available through `current -c`.
 
 _QuickExact_ determines every physically valid charge distribution, three orders of magnitude faster than the
 exhaustive search of SiQAD through physically informed pruning, partial solution caching, and effective state
-enumeration, see [the paper](https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf).
+enumeration, see [the paper](https://doi.org/10.1109/ASP-DAC58780.2024.10473946).
 It detects whether two or three charge states per SiDB are needed. `-g` applies a global external potential.
 
 ### ClusterComplete (`clustercomplete`)
@@ -395,13 +395,13 @@ ALGLIB or Z3 still import the package and run commands that do not need those so
 ### QuickSim (`quicksim`)
 
 _QuickSim_ approximates the ground state with max-min diversity search space pruning, see
-[the paper](https://ieeexplore.ieee.org/document/10231266). `-i` sets the iterations (default 80) and `-a` the
+[the paper](https://doi.org/10.1109/NANO58406.2023.10231266). `-i` sets the iterations (default 80) and `-a` the
 $\alpha$ value (default 0.7).
 
 ### Critical temperature (`temp`)
 
 The critical temperature is the temperature at which the ground state's population probability drops below the
-confidence level `-c` (default 0.99), see [the paper](https://ieeexplore.ieee.org/document/10231259). `temp`
+confidence level `-c` (default 0.99), see [the paper](https://doi.org/10.1109/NANO58406.2023.10231259). `temp`
 searches up to `-t` K (default 400). With `-g`, the layout is a gate implementing the active truth table, and
 the erroneous states are those with a wrong output. `--engine quickexact|clustercomplete|quicksim|exgs` chooses the
 simulator and `--base 2|3` the charge states.
@@ -409,7 +409,7 @@ simulator and `--base 2|3` the charge states.
 ### Operational domain (`opdom`)
 
 The operational domain is the set of parameter points at which a gate implements the active truth table, see
-[the paper](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf).
+[the paper](https://doi.org/10.1145/3611315.3633246).
 `opdom FILE` computes it for the active SiDB layout and writes it as CSV. The input BDL pairs of the layout are
 assumed to be in the order of the truth table's inputs.
 
