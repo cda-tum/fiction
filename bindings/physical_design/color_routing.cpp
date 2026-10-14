@@ -104,7 +104,7 @@ void register_color_routing(nb::module_& m)
      * Graph coloring engine selector type.
      */
     nb::enum_<fiction::utils::graph::graph_coloring_engine>(m, "graph_coloring_engine",
-                                                            "Graph-coloring engines used for routing.")
+                                                            DOC(fiction_utils_graph_graph_coloring_engine))
         .value("MCS", fiction::utils::graph::graph_coloring_engine::MCS,
                DOC(fiction_utils_graph_graph_coloring_engine_MCS))
         .value("DSATUR", fiction::utils::graph::graph_coloring_engine::DSATUR,

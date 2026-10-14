@@ -43,9 +43,6 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-/** @brief Native options constructed for each Python call. */
-using simulation_model = fiction::sidb::model::simulation_parameters;
-
 /**
  * @brief Registers SiDB potential landscapes and charge-transition bounds.
  *

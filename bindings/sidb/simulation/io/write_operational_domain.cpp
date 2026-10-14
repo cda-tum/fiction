@@ -13,7 +13,6 @@
  * @brief Python bindings for `fiction/technology/sidb/simulation/io/write_operational_domain.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI Codex
  */
 
 #include "pyfiction/documentation.hpp"

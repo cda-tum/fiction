@@ -13,7 +13,6 @@
  * @brief Python bindings for `fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include "pyfiction/documentation.hpp"
@@ -61,7 +60,6 @@ void register_physical_population_stability(nb::module_& m)
                DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_POSITIVE))
         .value("POSITIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::POSITIVE_TO_NEUTRAL,
                DOC(fiction_sidb_simulation_analysis_transition_type_POSITIVE_TO_NEUTRAL));
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     using fiction::sidb::simulation::analysis::population_stability_information;
 

@@ -46,8 +46,6 @@ def generate_random_sidb_layout(
     epsilon_r: float = 5.6,
     lambda_tf: float = 5.0,
     maximal_attempts: int = 10000000,
-    number_of_unique_generated_layouts: int = 1,
-    maximal_attempts_for_multiple_layouts: int = 1000000,
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.sidb.sidb_layout | None:
     """
@@ -64,8 +62,6 @@ def generate_random_sidb_layout(
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
         maximal_attempts: Maximum number of placement attempts.
-        number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_layouts`.
-        maximal_attempts_for_multiple_layouts: Maximum number of generation attempts for multiple layouts.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     """
 
@@ -98,7 +94,7 @@ def generate_multiple_random_sidb_layouts(
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
         maximal_attempts: Maximum number of placement attempts.
-        number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_layouts`.
+        number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_sidb_layouts`.
         maximal_attempts_for_multiple_layouts: Maximum number of generation attempts for multiple layouts.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     """

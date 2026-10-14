@@ -230,6 +230,41 @@ def test_explicit_none_progress(mux21: technology_network) -> None:
     assert network_balancing(mux21, on_progress=None).num_gates() == network_balancing(mux21).num_gates()
 
 
+@pytest.mark.parametrize("name", ["bdl_input_iterator", "generate_bdl_input_pattern_layouts"])
+def test_explicit_wires_reject_detection_threshold(name: str) -> None:
+    """Supplying wires omits the threshold used only by automatic wire detection."""
+    algorithm = getattr(import_module("mnt.pyfiction.sidb.simulation.logic"), name)
+    with pytest.raises(TypeError):
+        algorithm(sidb_layout(), [], threshold_bdl_interdistance=1.0)
+
+
+@pytest.mark.parametrize(
+    "option",
+    [
+        "threshold_bdl_interdistance",
+        "minimum_distance",
+        "maximum_distance",
+        "input_bdl_config",
+        "op_condition",
+        "strategy_to_analyze_operational_status",
+    ],
+)
+def test_non_gate_temperature_rejects_gate_options(option: str) -> None:
+    """Non-gate temperature analysis accepts physical options rather than gate checks."""
+    algorithm = import_module("mnt.pyfiction.sidb.simulation.analysis").critical_temperature_non_gate_based
+    options: dict[str, Any] = {option: 1}
+    with pytest.raises(TypeError):
+        algorithm(sidb_layout(), **options)
+
+
+def test_supplied_operational_wires_reject_detection_threshold() -> None:
+    """Operational checks use the supplied wires rather than a detection threshold."""
+    _assert_native_rejection(
+        "is_operational(sidb_layout(), [], [], [], threshold_bdl_interdistance=1.0)",
+        "TypeError",
+    )
+
+
 @pytest.mark.parametrize("engine", [quickexact, quicksim])
 def test_engine_keyword_boundary(engine: Callable[..., Any]) -> None:
     """Every engine validates the physical model and rejects positional options."""

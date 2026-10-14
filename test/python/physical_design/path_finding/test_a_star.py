@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -137,51 +137,47 @@ def test_path_finding_with_obstructions_and_crossings(make_lyt: Callable[[], Gat
     lyt.obstruct_coordinate((1, 1, 0))
     lyt.obstruct_coordinate((1, 1, 1))
 
-    options: dict[str, Any] = {
-        "crossings": True,
-    }
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 0), crossings=True)) == 1
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 1), crossings=True)) == 2
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 1), crossings=True)) == 0
 
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 0), **options)) == 1
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 1), **options)) == 2
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 0), crossings=True)) == 1
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 0), crossings=True)) == 2
+    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 1), crossings=True)) == 3
 
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 0), **options)) == 1
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 0), **options)) == 2
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 1), **options)) == 3
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 1), crossings=True)) == 1
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 1), crossings=True)) == 0
 
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 1), **options)) == 1
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 1), **options)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 1), crossings=True)) == 1
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 1), crossings=True)) == 2
 
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 1), **options)) == 1
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 1), **options)) == 2
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 0), crossings=True)) == 1
+    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 1), crossings=True)) == 2
 
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 0), **options)) == 1
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 1), **options)) == 2
-
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 1), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 0), **options)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 1), **options)) == 1
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 1), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 0), crossings=True)) == 0
+    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 1), crossings=True)) == 1
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)
