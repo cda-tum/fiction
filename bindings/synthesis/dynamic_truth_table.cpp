@@ -71,6 +71,7 @@ inline void check_alphabet(const std::string& text, const std::string_view alpha
  */
 void register_dynamic_truth_table(nb::module_& m)
 {
+    // Keep the GIL for the constant constructor and size queries; each does bounded work.
     nb::class_<py_tt>(m, "dynamic_truth_table")
         .def(
             "__init__", [](py_tt* tt) { std::construct_at(tt, 0u); }, "Constructs the constant-zero truth table.")
@@ -84,7 +85,8 @@ void register_dynamic_truth_table(nb::module_& m)
                 }
                 std::construct_at(tt, num_vars);
             },
-            nb::arg("num_vars"), "Constructs a truth table with fewer than 38 variables.")
+            nb::arg("num_vars"), nb::call_guard<nb::gil_scoped_release>(),
+            "Constructs a truth table with fewer than 38 variables.")
 
         .def("num_vars", &py_tt::num_vars)
         .def("num_blocks", &py_tt::num_blocks)
@@ -104,7 +106,7 @@ void register_dynamic_truth_table(nb::module_& m)
 
                 kitty::create_from_binary_string(tt, binary);
             },
-            nb::arg("binary"),
+            nb::arg("binary"), nb::call_guard<nb::gil_scoped_release>(),
             "Sets the bits from a string of `0` and `1` characters, most significant bit first. The string must "
             "hold exactly `num_bits()` characters. Any other character raises a `ValueError`.")
         .def(
@@ -124,7 +126,7 @@ void register_dynamic_truth_table(nb::module_& m)
 
                 kitty::create_from_hex_string(tt, hex);
             },
-            nb::arg("hex"),
+            nb::arg("hex"), nb::call_guard<nb::gil_scoped_release>(),
             "Sets the bits from a hexadecimal string, most significant digit first. The string must hold exactly "
             "`num_bits() / 4` digits, or one digit for fewer than two variables. Any non-hexadecimal character "
             "raises a `ValueError`.")
@@ -147,18 +149,19 @@ void register_dynamic_truth_table(nb::module_& m)
                 }
                 tt = std::move(parsed);
             },
-            nb::arg("expression"),
+            nb::arg("expression"), nb::call_guard<nb::gil_scoped_release>(),
             "Sets the bits from a Boolean expression over the variables `a` to `p`: constants `0` and `1`, negation "
             "`!E`, conjunction `(E...E)`, disjunction `{E...E}`, exclusive OR `[E...E]`, and majority `<EEE>`. The "
             "truth table must have at least as many variables as the largest one the expression uses.")
         .def(
-            "create_random", [](py_tt& tt) { kitty::create_random(tt); }, "Sets every bit to a random value.")
+            "create_random", [](py_tt& tt) { kitty::create_random(tt); }, nb::call_guard<nb::gil_scoped_release>(),
+            "Sets every bit to a random value.")
 
         .def(
-            "to_binary", [](const py_tt& tt) { return kitty::to_binary(tt); },
+            "to_binary", [](const py_tt& tt) { return kitty::to_binary(tt); }, nb::call_guard<nb::gil_scoped_release>(),
             "Returns the bits as a string of `0` and `1` characters, most significant bit first.")
         .def(
-            "to_hex", [](const py_tt& tt) { return kitty::to_hex(tt); },
+            "to_hex", [](const py_tt& tt) { return kitty::to_hex(tt); }, nb::call_guard<nb::gil_scoped_release>(),
             "Returns the bits as a hexadecimal string, most significant digit first.")
 
         ;

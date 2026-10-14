@@ -49,6 +49,7 @@ using post_layout_optimization_options = fiction::physical_design::post_layout_o
 void register_post_layout_optimization(nb::module_& m)
 {
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::post_layout_optimization_stats>(
         m, "post_layout_optimization_stats", DOC(fiction_physical_design_post_layout_optimization_stats))
         .def(nb::init<>(), "Default constructor.")

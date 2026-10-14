@@ -48,7 +48,7 @@ void register_count_gate_types(nb::module_& m)
             fiction::verification::count_gate_types(ntk_or_lyt, &stats);
             return stats;
         },
-        nb::arg("ntk_or_lyt"), DOC(fiction_verification_count_gate_types));
+        nb::arg("ntk_or_lyt"), nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_verification_count_gate_types));
 }
 
 }  // namespace detail
@@ -59,6 +59,7 @@ void register_count_gate_types(nb::module_& m)
     /** @brief Bound gate type statistics. */
     using stats = fiction::verification::count_gate_types_stats;
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<stats>(m, "count_gate_types_stats",
                       "Counts logic gates and placed wires, excluding primary terminals and network constants.")
         .def(nb::init<>(), "Default constructor.")

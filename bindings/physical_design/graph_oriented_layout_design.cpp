@@ -76,6 +76,7 @@ void register_graph_oriented_layout_design(nb::module_& m)
         .value("CUSTOM", graph_oriented_layout_design_options::cost_objective::CUSTOM,
                DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective_CUSTOM));
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::graph_oriented_layout_design_stats>(
         m, "graph_oriented_layout_design_stats", DOC(fiction_physical_design_graph_oriented_layout_design_stats))
         .def(nb::init<>(), "Default constructor.")
