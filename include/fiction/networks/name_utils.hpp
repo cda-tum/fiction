@@ -48,7 +48,7 @@ std::string get_name(const NtkOrLyt& ntk_or_lyt)
     {
         return ntk_or_lyt.get_network_name();
     }
-    else if constexpr (fiction::has_get_layout_name_v<NtkOrLyt>)
+    else if constexpr (requires { ntk_or_lyt.get_layout_name(); })
     {
         return ntk_or_lyt.get_layout_name();
     }
@@ -70,7 +70,7 @@ void set_name(NtkOrLyt& ntk_or_lyt, const std::string_view& name)
     {
         return ntk_or_lyt.set_network_name(std::string{name});
     }
-    else if constexpr (fiction::has_set_layout_name_v<NtkOrLyt>)
+    else if constexpr (requires { ntk_or_lyt.set_layout_name(std::string{name}); })
     {
         return ntk_or_lyt.set_layout_name(std::string{name});
     }
@@ -101,7 +101,7 @@ void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_o
     {
         network_name = ntk_or_lyt_src.get_network_name();
     }
-    else if constexpr (fiction::has_get_layout_name_v<NtkOrLytSrc>)
+    else if constexpr (requires { ntk_or_lyt_src.get_layout_name(); })
     {
         network_name = ntk_or_lyt_src.get_layout_name();
     }
@@ -110,7 +110,7 @@ void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_o
     {
         ntk_or_lyt_dest.set_network_name(network_name);
     }
-    else if constexpr (fiction::has_set_layout_name_v<NtkOrLytDest>)
+    else if constexpr (requires { ntk_or_lyt_dest.set_layout_name(network_name); })
     {
         ntk_or_lyt_dest.set_layout_name(network_name);
     }

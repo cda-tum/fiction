@@ -137,7 +137,7 @@ class apply_gate_library_impl
         {
             GateLibrary::post_layout_optimization(cell_lyt);
         }
-        if constexpr (has_get_layout_name_v<GateLyt>)
+        if constexpr (requires { gate_lyt.get_layout_name(); })
         {
             cell_lyt.set_layout_name(gate_lyt.get_layout_name());
         }

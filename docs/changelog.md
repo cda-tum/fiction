@@ -568,6 +568,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 
+  - **Breaking:** Removed the non-network layout and gate-library capability traits and `cell<Lyt>`.
+    Use local `requires` expressions and `layouts::layout_base::coordinate`; network extension traits remain supported.
   - **Breaking:** Removed layout `volume()` and `volume_of`. Use `area() * layers()` to count coordinates.
   - **Breaking:** Layouts now reject more than two layers. Use one ground layer and an optional crossing layer;
     empty layouts remain supported.
@@ -577,7 +579,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
     `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
     `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
-    and `has_is_empty_v`. Use concrete gate-level layout arguments or `is_cell_grid_v`. The unused `is_offset_coord_v`
+    and `has_is_empty_v`. Use concrete gate-level layout arguments or local grid requirements. The unused `is_offset_coord_v`
     and `has_offset_coord_v` are gone as well.
   - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
     `wiring_reduction_layout`.
@@ -585,8 +587,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and `sidb_technology` with their predicates and `cell_mark` enums; the traits `technology`,
     `has_*_technology_v`, `is_cell_level_layout_v`, and `has_post_layout_optimization_v`; the aliases
     `qca_cell_clk_lyt`, `mol_qca_cell_clk_lyt`, `inml_cell_clk_lyt`, `sidb_cell_clk_lyt`, `sidb_cell_clk_lyt_cube`,
-    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts and
-    `is_cell_grid_v`.
+    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts.
   - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
     types of the other technologies.
 - Dependencies:

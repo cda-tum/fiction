@@ -18,9 +18,9 @@
 
 #pragma once
 
+#include "fiction/layouts/cell_grid.hpp"
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <concepts>
@@ -34,15 +34,15 @@ namespace fiction::layouts
  * @tparam Lyt Gate-level layout or cell grid.
  */
 template <typename Lyt>
+    requires(
+        requires { requires std::same_as<typename Lyt::object_id, layout_object_id>; } ||
+        requires { requires std::derived_from<Lyt, cell_grid<typename Lyt::cell_type>>; })
 class bounding_box
 {
   public:
     /** @brief Computes occupied bounds. @param lyt Layout whose occupied positions are enclosed. */
     explicit bounding_box(const Lyt& lyt) : layout{lyt}
     {
-        static_assert(requires {
-            requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>;
-        } || is_cell_grid_v<Lyt>);
         update_bounding_box();
     }
     /** @brief Recomputes bounds from live occupied coordinates. Empty layouts have no bounds. */
