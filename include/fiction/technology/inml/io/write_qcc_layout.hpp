@@ -101,6 +101,7 @@ inline constexpr const char* PROPERTY_LENGTH      = "length";
 
 }  // namespace qcc
 
+/** @brief Writes an iNML layout in QCC format. */
 class write_qcc_layout_impl
 {
   public:
@@ -120,6 +121,7 @@ class write_qcc_layout_impl
             ps{std::move(p)}
     {}
 
+    /** @brief Runs the write qcc layout algorithm. */
     void run()
     {
         if (!has_border_io_pins())

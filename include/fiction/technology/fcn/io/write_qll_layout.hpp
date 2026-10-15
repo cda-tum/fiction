@@ -106,6 +106,7 @@ inline constexpr const char* PIN =
 
 }  // namespace qll
 
+/** @brief Writes an FCN layout in QLL format. */
 template <typename Lyt>
 class write_qll_layout_impl
 {
@@ -125,6 +126,7 @@ class write_qll_layout_impl
             on_progress{std::move(callback)}
     {}
 
+    /** @brief Runs the write qll layout algorithm. */
     void run()
     {
         if (std::is_same_v<Lyt, inml::layout> && !has_border_io_pins())

@@ -304,6 +304,7 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
 
 }  // namespace svg
 
+/** @brief Draws a QCA layout as SVG. */
 class write_qca_layout_svg_impl
 {
   public:
@@ -319,6 +320,7 @@ class write_qca_layout_svg_impl
             ps{std::move(p)}
     {}
 
+    /** @brief Runs the write qca layout svg algorithm. */
     void run()
     {
         if (lyt.get_tile_size_x() == 1 && lyt.get_tile_size_y() == 1)

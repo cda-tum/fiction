@@ -158,6 +158,7 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
 
 }  // namespace svg
 
+/** @brief Draws a molecular QCA layout as SVG. */
 class write_mol_qca_layout_svg_impl
 {
   public:
@@ -174,6 +175,7 @@ class write_mol_qca_layout_svg_impl
             ps{std::move(p)}
     {}
 
+    /** @brief Runs the write mol qca layout svg algorithm. */
     void run()
     {
         generate_cell_based_svg();

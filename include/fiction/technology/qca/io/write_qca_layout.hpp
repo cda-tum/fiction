@@ -164,18 +164,29 @@ inline constexpr const float BB_CX_OFFSET    = 4.0f;
 inline constexpr const float BB_CY_OFFSET    = 23.0f;
 inline constexpr const float CHARACTER_WIDTH = 10.0f;
 
+/** @brief Position of a QCADesigner cell. */
 struct cell_pos
 {
-    float x, y;
+    /** @brief Horizontal cell coordinate in QCADesigner output. */
+    float x;
+    /** @brief Vertical cell coordinate in QCADesigner output. */
+    float y;
 };
 
+/** @brief RGB color used in QCADesigner output. */
 struct color
 {
-    unsigned red, green, blue;
+    /** @brief Red color component. */
+    unsigned red;
+    /** @brief Green color component. */
+    unsigned green;
+    /** @brief Blue color component. */
+    unsigned blue;
 };
 
 }  // namespace qcad
 
+/** @brief Writes a QCA layout in QCADesigner format. */
 class write_qca_layout_impl
 {
   public:
@@ -191,6 +202,7 @@ class write_qca_layout_impl
             ps{std::move(p)}
     {}
 
+    /** @brief Runs the write qca layout algorithm. */
     void run()
     {
 
