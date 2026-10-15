@@ -54,6 +54,23 @@ struct overloaded_annealing_cost
     }
 };
 
+/** @brief Schedule whose named-lvalue result is a reference accepted by std::clamp. */
+struct reference_annealing_schedule
+{
+    /** @brief Next temperature retained for reference-returning calls. */
+    double temperature{1.0};
+    /** @brief Returns the declared temperature value. @param value Current temperature. @return Next temperature. */
+    double operator()([[maybe_unused]] double&& value) const
+    {
+        return temperature;
+    }
+    /** @brief Returns the actual temperature reference. @param value Current temperature. @return Next temperature. */
+    const double& operator()([[maybe_unused]] double& value) const
+    {
+        return temperature;
+    }
+};
+
 /** @brief Cost callable only as an rvalue, unlike the algorithm's named callable parameters. */
 struct rvalue_annealing_cost
 {
@@ -103,6 +120,7 @@ TEST_CASE("Annealing accepts signed floating-point costs and actual callable for
     const auto next      = [](const auto& state) { return state; };
     const auto generator = [] { return 0; };
     CHECK((annealable<decltype(cost), decltype(schedule), decltype(next)>));
+    CHECK((annealable<decltype(cost), reference_annealing_schedule, decltype(next)>));
     CHECK((annealable<lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<rvalue_annealing_cost, decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<int, decltype(schedule), decltype(next)>));
@@ -127,6 +145,10 @@ TEST_CASE("Annealing accepts signed floating-point costs and actual callable for
     const auto result = simulated_annealing(0, 2.0, 1.0, 1, lvalue_cost, schedule, [](int state) { return state - 1; });
     CHECK(result.first == -1);
     CHECK(result.second == -1.0);
+    /** Reference-returning schedules use the same clamp operation as value-returning schedules. */
+    const auto reference_result = simulated_annealing(0, 2.0, 1.0, 1, lvalue_cost, reference_annealing_schedule{},
+                                                      [](int state) { return state - 1; });
+    CHECK(reference_result == result);
 }
 
 TEST_CASE("Annealing preserves the declared cost type with overloaded costs", "[sim-anneal]")
