@@ -69,7 +69,7 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
  *
  * @tparam State The state type.
  * @tparam CostFunc Cost function with a signed result for State, also invocable on const and mutable state lvalues.
- * @tparam TempFunc Lvalue-invocable temperature schedule returning exactly double.
+ * @tparam TempFunc Temperature schedule returning double and accepting a mutable temperature lvalue.
  * @tparam NextFunc Next-state function returning State and accepting a mutable state lvalue.
  * @param init_state The initial state to optimize.
  * @param init_temp The initial temperature.
@@ -88,8 +88,10 @@ template <typename State, typename CostFunc, typename TempFunc, typename NextFun
              std::same_as<std::invoke_result_t<TempFunc, double>, double> &&
              std::same_as<std::invoke_result_t<NextFunc, State>, State> && std::invocable<CostFunc&, const State&> &&
              std::invocable<CostFunc&, State&> && std::invocable<TempFunc&, double&> &&
-             std::invocable<NextFunc&, State&> && std::same_as<std::invoke_result_t<TempFunc&, double&>, double> &&
-             std::convertible_to<std::invoke_result_t<NextFunc&, State&>, State>
+             std::invocable<NextFunc&, State&> &&
+             requires(TempFunc& schedule, double& temperature, const double& bound) {
+                 std::clamp(schedule(temperature), bound, bound);
+             } && std::convertible_to<std::invoke_result_t<NextFunc&, State&>, State>
 std::pair<State, std::invoke_result_t<CostFunc, State>>
 simulated_annealing(const State& init_state, const double init_temp, const double final_temp, const std::size_t cycles,
                     CostFunc&& cost, TempFunc&& schedule, NextFunc&& next) noexcept
@@ -162,7 +164,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  *
  * @tparam RandStateFunc Lvalue-invocable generator returning a default-constructible state.
  * @tparam CostFunc Cost callable accepted by single-state annealing.
- * @tparam TempFunc Lvalue-invocable temperature schedule returning exactly double.
+ * @tparam TempFunc Temperature schedule returning double and accepting a mutable temperature lvalue.
  * @tparam NextFunc Next-state function returning State and accepting a mutable state lvalue.
  * @param init_temp The initial temperature.
  * @param final_temp The final temperature.
