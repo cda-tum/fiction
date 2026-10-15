@@ -22,6 +22,8 @@
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 
+#include <type_traits>
+
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
@@ -55,12 +57,19 @@ void register_area(nb::module_& m, const char* doc)
         "area",
         [](const Lyt& lyt, const double width, const double height, const double hspace, const double vspace)
         {
-            fiction::fcn::area_stats stats{};
+            const fiction::fcn::area_params<Lyt> params{.width  = width,
+                                                        .height = height,
+                                                        .hspace = hspace,
+                                                        .vspace = vspace};
 
-            return fiction::fcn::area(
-                lyt,
-                fiction::fcn::area_params<Lyt>{.width = width, .height = height, .hspace = hspace, .vspace = vspace},
-                &stats);
+            if constexpr (std::is_same_v<Lyt, fiction::sidb::layout>)
+            {
+                const nb::gil_scoped_release release{};
+                return fiction::fcn::area(lyt, params);
+            }
+
+            // Keep the GIL: cell-grid area uses only scalar dimensions.
+            return fiction::fcn::area(lyt, params);
         },
         nb::arg("layout"), nb::arg("width") = Lyt::CELL_WIDTH, nb::arg("height") = Lyt::CELL_HEIGHT,
         nb::arg("hspace") = Lyt::CELL_HSPACE, nb::arg("vspace") = Lyt::CELL_VSPACE, doc);

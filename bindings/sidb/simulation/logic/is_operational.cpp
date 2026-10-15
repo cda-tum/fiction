@@ -85,6 +85,7 @@ inline void register_is_operational_functions(nb::module_& m)
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_operational(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -148,6 +149,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_operational(lyt, spec, params, in, out, canvas_lyt);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"), nb::kw_only(),
@@ -211,6 +213,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_operational(input_pattern_layouts, spec, params, in, out,
                                                                     canvas_lyt);
         },
@@ -275,6 +278,7 @@ Args:
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -337,6 +341,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params, in, out, canvas_lyt);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"), nb::kw_only(),
@@ -399,6 +404,7 @@ Args:
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -461,6 +467,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params, in,
                                                                                                  out, canvas_lyt);
         },
@@ -524,6 +531,7 @@ Args:
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -586,6 +594,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params, in, out,
                                                                                      canvas_lyt);
         },

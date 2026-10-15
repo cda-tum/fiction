@@ -32,7 +32,7 @@ namespace fiction::sidb::simulation::analysis
 /**
  * Determines the physical parameters under which a given charge distribution of a layout is physically valid:
  * every parameter point of the sweep dimensions in `params` is checked, and for each one where the charge
- * distribution is valid, its excited-state number (the number of valid configurations with lower energy under
+ * distribution is valid, its excited-state number (the number of distinct valid energy levels below its energy under
  * those parameters) is recorded.
  *
  * @param lyt The layout.

@@ -46,6 +46,7 @@ namespace pyfiction
  */
 void register_lattice(nb::module_& m)
 {
+    // Keep the GIL for scalar lattice arithmetic and properties; releasing it costs more than these operations.
     nb::class_<fiction::sidb::lattice_site>(m, "lattice_site", DOC(fiction_sidb_lattice_site))
         .def(nb::init<>(), DOC(fiction_sidb_lattice_site_lattice_site))
         .def(nb::init<int32_t, int32_t, int8_t>(), nb::arg("x"), nb::arg("y"), nb::arg("z"),
@@ -82,8 +83,8 @@ void register_lattice(nb::module_& m)
 
     m.def("row_of", &fiction::sidb::row_of, nb::arg("site"), DOC(fiction_sidb_row_of));
     m.def("site_at_row", &fiction::sidb::site_at_row, nb::arg("x"), nb::arg("row"), DOC(fiction_sidb_site_at_row));
-    m.def("sites_in_area", &fiction::sidb::sites_in_area, nb::arg("first_corner"), nb::arg("second_corner"),
-          DOC(fiction_sidb_sites_in_area));
+    m.def("sites_in_area", &fiction::sidb::sites_in_area, nb::call_guard<nb::gil_scoped_release>(),
+          nb::arg("first_corner"), nb::arg("second_corner"), DOC(fiction_sidb_sites_in_area));
 
     nb::class_<fiction::sidb::lattice>(m, "lattice", DOC(fiction_sidb_lattice))
         .def(nb::init<>(), "Default constructor.")

@@ -47,6 +47,7 @@ namespace detail
  */
 inline nb::dict technology_mapping_keywords(const fiction::synthesis::technology_mapping_params& params)
 {
+    // Keep the GIL while constructing and populating the Python dictionary.
     nb::dict options{};
     options["decay"]   = params.decay;
     options["inv"]     = params.inv;
@@ -198,6 +199,7 @@ void register_technology_mapping(nb::module_& m)
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
         .def_ro("mapping_error", &mockturtle::emap_stats::mapping_error)
         .def_ro("area", &mockturtle::emap_stats::area)

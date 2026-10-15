@@ -36,7 +36,8 @@ namespace pyfiction
 void register_check_simulation_results_for_equivalence(nb::module_& m)
 {
     m.def("check_simulation_results_for_equivalence",
-          &fiction::sidb::simulation::check_simulation_results_for_equivalence, nb::arg("result1"), nb::arg("result2"),
+          &fiction::sidb::simulation::check_simulation_results_for_equivalence,
+          nb::call_guard<nb::gil_scoped_release>(), nb::arg("result1"), nb::arg("result2"),
           DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
 }
 

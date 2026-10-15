@@ -37,6 +37,7 @@ namespace pyfiction
  */
 void register_inml_layout(nb::module_& m)
 {
+    // Keep the GIL for cell access and mutation so calls on one layout remain serialized.
     using fiction::inml::layout;
     using fiction::inml::magnet_type;
 

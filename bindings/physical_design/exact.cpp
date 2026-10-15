@@ -85,6 +85,7 @@ void register_exact(nb::module_& m, const char* signature)
            const decltype(exact_physical_design_options{}.on_progress)&             on_progress,
            const decltype(exact_physical_design_options{}.on_worker_progress)&      on_worker_progress)
     {
+        // Python type comparison requires the GIL; release it only for native design below.
         if (!layout_type.is(nb::type<Lyt>()))
         {
             throw nb::next_overload();
@@ -197,6 +198,7 @@ void register_exact(nb::module_& m)
         .value("TOPOLINANO", fiction::physical_design::technology_constraints::TOPOLINANO,
                DOC(fiction_physical_design_technology_constraints_TOPOLINANO));
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::exact_physical_design_stats>(
         m, "exact_stats", DOC(fiction_physical_design_exact_physical_design_stats))
         .def(nb::init<>(), "Default constructor.")
@@ -255,6 +257,7 @@ void register_exact(nb::module_& m)
            "timeout: int = ..., technology_specifics: technology_constraints = ..., on_progress: Callable[[str, int, "
            "int], None] | None = ..., on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = "
            "...) -> mnt.pyfiction.layouts.hexagonal_gate_layout | None");
+    // Keep the GIL while rejecting an unsupported Python layout type.
     m.def(
         "exact",
         [](const py_tec_network&, const nb::handle, fiction::physical_design::exact_physical_design_stats*,

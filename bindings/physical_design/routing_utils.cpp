@@ -48,6 +48,7 @@ namespace detail
 template <typename Lyt>
 void register_routing_utils(nb::module_& m)
 {
+    // Keep the GIL for this bounded local query; releasing it costs more than the query.
     m.def("is_crossable_wire", &fiction::physical_design::is_crossable_wire<Lyt>, nb::arg("lyt"), nb::arg("src"),
           nb::arg("successor"), DOC(fiction_physical_design_is_crossable_wire));
 
@@ -60,7 +61,8 @@ void register_routing_utils(nb::module_& m)
 
             fiction::physical_design::route_path(lyt, converted_path, destination);
         },
-        nb::arg("layout"), nb::arg("path"), nb::arg("destination"), DOC(fiction_physical_design_route_path));
+        nb::arg("layout"), nb::arg("path"), nb::arg("destination"), nb::call_guard<nb::gil_scoped_release>(),
+        DOC(fiction_physical_design_route_path));
 
     m.def(
         "extract_routing_objectives",
@@ -79,11 +81,12 @@ void register_routing_utils(nb::module_& m)
 
             return converted_objectives;
         },
-        nb::arg("layout"), DOC(fiction_physical_design_extract_routing_objectives));
+        nb::arg("layout"), nb::call_guard<nb::gil_scoped_release>(),
+        DOC(fiction_physical_design_extract_routing_objectives));
 
     m.def(
         "clear_routing", [](Lyt& lyt) { fiction::physical_design::clear_routing(lyt); }, nb::arg("lyt"),
-        DOC(fiction_physical_design_clear_routing));
+        nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_physical_design_clear_routing));
 }
 
 }  // namespace detail

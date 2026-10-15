@@ -49,6 +49,7 @@ using wiring_reduction_options = fiction::physical_design::wiring_reduction_para
 void register_wiring_reduction(nb::module_& m)
 {
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::wiring_reduction_stats>(m, "wiring_reduction_stats",
                                                                  DOC(fiction_physical_design_wiring_reduction_stats))
         .def(nb::init<>(), "Default constructor.")

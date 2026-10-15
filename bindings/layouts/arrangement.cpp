@@ -37,6 +37,7 @@ void register_arrangement(nb::module_& m)
 {
     using fiction::layouts::arrangement;
 
+    // Keep the GIL while constructing Python enum members.
     nb::enum_<arrangement>(m, "arrangement", DOC(fiction_layouts_arrangement))
         .value("ODD_ROW", arrangement::ODD_ROW, DOC(fiction_layouts_arrangement_ODD_ROW))
         .value("EVEN_ROW", arrangement::EVEN_ROW, DOC(fiction_layouts_arrangement_EVEN_ROW))

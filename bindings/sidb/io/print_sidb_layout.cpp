@@ -51,8 +51,9 @@ void register_print_sidb_layout(nb::module_& m)
                                                  draw_lattice);
             return os.str();
         },
-        nb::arg("layout"), nb::arg("charge_distribution") = nb::none(), nb::arg("lat_color") = true,
-        nb::arg("crop_layout") = false, nb::arg("draw_lattice") = true, DOC(fiction_sidb_io_print_sidb_layout));
+        nb::call_guard<nb::gil_scoped_release>(), nb::arg("layout"), nb::arg("charge_distribution") = nb::none(),
+        nb::arg("lat_color") = true, nb::arg("crop_layout") = false, nb::arg("draw_lattice") = true,
+        DOC(fiction_sidb_io_print_sidb_layout));
 }
 
 }  // namespace pyfiction

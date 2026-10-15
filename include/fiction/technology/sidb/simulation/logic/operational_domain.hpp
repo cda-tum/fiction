@@ -1336,16 +1336,27 @@ class operational_domain_impl
                     const auto energy_dist =
                         sidb::simulation::analysis::calculate_energy_distribution(sim_results.charge_distributions);
 
-                    const auto degeneracy_of_layout_energy =
-                        energy_dist.degeneracy(potential_landscape{sidb_layout, sim_params}.energy(cd));
+                    const auto layout_energy = potential_landscape{sidb_layout, sim_params}.energy(cd);
 
-                    if (!degeneracy_of_layout_energy.has_value())
+                    // The excited-state number counts lower energy levels, not charge configurations.
+                    uint64_t excited_state_number{};
+                    bool     layout_energy_found{};
+                    energy_dist.for_each(
+                        [&](const double energy, const auto&)
+                        {
+                            if (std::abs(energy - layout_energy) < utils::math::ERROR_MARGIN)
+                            {
+                                layout_energy_found = true;
+                            }
+                            else if (energy < layout_energy)
+                            {
+                                ++excited_state_number;
+                            }
+                        });
+                    if (layout_energy_found)
                     {
-                        return;
+                        suitable_params_domain.add_value(param_point, std::make_tuple(excited_state_number));
                     }
-
-                    const auto excited_state_number = degeneracy_of_layout_energy.value();
-                    suitable_params_domain.add_value(param_point, std::make_tuple(excited_state_number));
                 }
             });
 

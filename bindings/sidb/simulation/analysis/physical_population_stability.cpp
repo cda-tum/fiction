@@ -49,6 +49,7 @@ using physical_population_stability_options = fiction::sidb::simulation::analysi
  */
 void register_physical_population_stability(nb::module_& m)
 {
+    // Keep the GIL for population-stability properties; the native analysis releases it.
     nb::enum_<fiction::sidb::simulation::analysis::transition_type>(
         m, "transition_type", DOC(fiction_sidb_simulation_analysis_transition_type))
         .value("NEUTRAL_TO_NEGATIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_NEGATIVE,
@@ -91,6 +92,7 @@ void register_physical_population_stability(nb::module_& m)
                 precision_for_distance_corresponding_to_potential;
             params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.timeout    = timeout;
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::analysis::physical_population_stability(lyt, params);
         },
         nb::arg("lyt"), nb::kw_only(), nb::arg("timeout") = physical_population_stability_options{}.timeout,
