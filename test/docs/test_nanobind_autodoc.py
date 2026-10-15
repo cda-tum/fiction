@@ -129,3 +129,40 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
         assert "- Keep `first` item." in output
         assert "```python\nroute(1, limit=42)\n```" in output
         assert r"\*, limit" in output
+
+
+def test_viewcode_source_index(tmp_path: Path) -> None:
+    """Index available source pages without linking to compiled modules."""
+    source = tmp_path / "source"
+    source.mkdir()
+    extension = Path(__file__).resolve().parents[2] / "docs" / "_ext"
+    (source / "conf.py").write_text(
+        f"import sys\nsys.path[:0] = [{str(extension)!r}, {str(source)!r}]\n"
+        "extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'nanobind_autodoc']\n"
+        "autodoc_use_legacy_class_based = True\n",
+        encoding="utf-8",
+    )
+    (source / "viewcode_fixture.py").write_text(
+        'def available_source() -> int:\n    """Return the documented value."""\n    return 1\n',
+        encoding="utf-8",
+    )
+    (source / "index.rst").write_text(
+        "Source pages\n============\n\n"
+        ".. autofunction:: viewcode_fixture.available_source\n\n"
+        ".. autofunction:: math.sin\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "out"
+    result = subprocess.run(
+        [sys.executable, "-m", "sphinx", "-b", "html", "-W", str(source), str(output)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    index = output / "_modules" / "index.html"
+    content = index.read_text(encoding="utf-8")
+    assert "viewcode_fixture.html" in content
+    assert "math.html" not in content
+    for target in re.findall(r'href="([^"#]+\.html)"', content):
+        assert (index.parent / target).is_file(), target

@@ -135,6 +135,19 @@ def qualify_type_references(_app: Sphinx, doctree: nodes.document) -> None:
                 reference["inventory"] = "python"
 
 
+def remove_unavailable_sources(app: Sphinx) -> tuple[()]:
+    """Keep the source index limited to modules with available source pages.
+
+    Returns:
+        No additional HTML pages.
+    """
+    modules = getattr(app.env, "_viewcode_modules", {})
+    for name, entry in list(modules.items()):
+        if entry is False:
+            del modules[name]
+    return ()
+
+
 def register_documenters(app: Sphinx, _config: Config) -> None:
     """Register nanobind renderers after Sphinx installs its default renderers."""
     app.add_autodocumenter(NanobindMethodDocumenter)
@@ -150,4 +163,5 @@ def setup(app: Sphinx) -> ExtensionMetadata:
     app.connect("config-inited", register_documenters, priority=800)
     app.connect("autodoc-process-docstring", prepare_docstring, priority=400)
     app.connect("doctree-read", qualify_type_references)
+    app.connect("html-collect-pages", remove_unavailable_sources, priority=400)
     return {"parallel_read_safe": True, "parallel_write_safe": True}
