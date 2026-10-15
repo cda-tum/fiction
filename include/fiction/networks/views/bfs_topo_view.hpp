@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Network view that yields a breadth-first instead of depth-first topological order.
+ * @brief Network view that reorders unsorted networks with a breadth-first traversal.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */
@@ -34,21 +34,23 @@ namespace fiction::networks::views
 {
 
 /**
- * Computes a breadth-first topological order (whereas Mockturtle's topo_view implements a depth-first search) for all
- * nodes reachable from the outputs of a logic network.
+ * Provides a topological traversal selected by the network's `is_topologically_sorted` trait.
  *
- * Overrides the methods `foreach_node`, `foreach_gate`, `size`, and `num_gates`.
- * The topological order is computed once upon construction and remains fixed for the lifetime of the view.
+ * The `sorted = false` specialization computes a queue-based order from constants and all combinational inputs.
+ * It follows fanouts and visits each gate after all of its fanins. Gates that do not drive an output are included
+ * when reached from those inputs; the traversal does not filter by output dependency cones.
+ * Constants precede combinational inputs, which retain their declared order.
  *
- * All constant nodes and primary inputs are included in the traversal, even if they are not reachable from the outputs.
- * Constant nodes precede primary inputs, and primary inputs are ordered according to their creation order.
+ * This specialization overrides `foreach_node`, `foreach_gate`, `size`, and `num_gates` and wraps
+ * `mockturtle::immutable_view`. It computes the order at construction; the underlying network must remain unchanged
+ * while the view is used.
  *
- * Modifications to the network are not allowed after construction, as the order is immutable.
- * Only reachable nodes are included in `foreach_node` and `foreach_gate`, which may exclude some network nodes.
+ * The `sorted = true` specialization inherits `Ntk` without reordering. An existing depth-first traversal stays
+ * depth-first. The default `sorted` argument selects this specialization for an already topologically sorted network.
  *
  * Required network functions:
  * - `get_constant`
- * - `foreach_pi`
+ * - `foreach_ci`
  * - `foreach_fanin`
  * - `incr_trav_id`
  * - `set_visited`
@@ -56,7 +58,7 @@ namespace fiction::networks::views
  * - `visited`
  *
  * @tparam Ntk Logic network type.
- * @tparam sorted Internal tag to indicate if the network is already topologically sorted (default: false).
+ * @tparam sorted Whether the network already provides a topological order.
  */
 template <class Ntk, bool sorted = mockturtle::is_topologically_sorted_v<Ntk>>
 class bfs_topo_view

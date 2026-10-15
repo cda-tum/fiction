@@ -2,14 +2,18 @@
 
 # Breadth-First Topological View (bfs_topo_view)
 
-Provides a **breadth-first topological ordering** for all nodes reachable from the outputs of a logic network.
-While `mockturtle`'s `topo_view` implements a depth-first traversal, this view constructs the node order level by level
-using a queue-based breadth-first search (BFS).
+`bfs_topo_view<Ntk, false>` computes a queue-based topological order from constant nodes
+and all combinational inputs. The traversal follows fanouts and visits a gate when all
+of its fanins have been visited. It includes input-fed gates that do not drive an output;
+the traversal does not restrict the order to output dependency cones.
 
-All constant nodes and primary inputs are included in the traversal order, even if they are not directly reachable from
-the outputs. Constants always precede primary inputs, and primary inputs retain their creation order.
-This view is immutable and should only be used on static networks—modifications to the underlying network are not
-reflected once the order is constructed.
+Constants precede combinational inputs, which retain their declared order. This
+specialization wraps `mockturtle::immutable_view` and computes its order at construction.
+Use it while the underlying network remains unchanged.
+
+`bfs_topo_view<Ntk, true>` inherits `Ntk` and preserves its traversal order. The default
+`sorted` argument selects this specialization when `Ntk` is already topologically sorted,
+so an existing depth-first order remains depth-first.
 
 Typical use cases include:
 
