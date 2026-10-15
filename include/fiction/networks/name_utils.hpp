@@ -19,7 +19,6 @@
 
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -76,9 +75,8 @@ void set_name(NtkOrLyt& ntk_or_lyt, const std::string_view& name)
     }
 }
 /**
- * Helper function to conveniently assign the name of a source network or layout to a target network or layout as they
- * use different function names for the same purpose. This function comes in handy when networks are translated or
- * layouts are being created from networks that are supposed to have the same name.
+ * Transfers the source network or gate-layout name. An unnamed source clears a supported destination name.
+ * A destination without naming support is unchanged.
  *
  * @tparam NtkOrLytSrc Source network or layout type.
  * @tparam NtkOrLytDest Target network or layout type.
@@ -92,25 +90,7 @@ template <typename NtkOrLytSrc, typename NtkOrLytDest>
              requires { requires std::same_as<typename NtkOrLytDest::object_id, layouts::layout_object_id>; })
 void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_or_lyt_dest)
 {
-    std::string network_name{};
-
-    if constexpr (mockturtle::has_get_network_name_v<NtkOrLytSrc>)
-    {
-        network_name = ntk_or_lyt_src.get_network_name();
-    }
-    else if constexpr (requires { ntk_or_lyt_src.get_layout_name(); })
-    {
-        network_name = ntk_or_lyt_src.get_layout_name();
-    }
-
-    if constexpr (mockturtle::has_set_network_name_v<NtkOrLytDest>)
-    {
-        ntk_or_lyt_dest.set_network_name(network_name);
-    }
-    else if constexpr (requires { ntk_or_lyt_dest.set_layout_name(network_name); })
-    {
-        ntk_or_lyt_dest.set_layout_name(network_name);
-    }
+    set_name(ntk_or_lyt_dest, get_name(ntk_or_lyt_src));
 }
 /**
  * Assigns input names from one network to another. Matching inputs are identified by their index.

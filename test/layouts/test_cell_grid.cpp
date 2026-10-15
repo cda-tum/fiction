@@ -20,7 +20,6 @@
 
 #include <fiction/layouts/cell_grid.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/traits.hpp>
 
 #include <concepts>
 #include <cstdint>
