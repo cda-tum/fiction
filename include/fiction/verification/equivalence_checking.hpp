@@ -68,11 +68,11 @@ struct equivalence_checking_stats
      * Stores the equivalence type.
      */
     eq_type eq = eq_type::NO;
-    /** @brief Specification throughput at which weak equivalence manifests. */
+    /** @brief Specification throughput denominator. Defaults to `1`. */
     int64_t tp_spec = 1ll;
-    /** @brief Implementation throughput at which weak equivalence manifests. */
+    /** @brief Implementation throughput denominator. Defaults to `1`. */
     int64_t tp_impl = 1ll;
-    /** @brief Absolute difference between implementation and specification throughput. */
+    /** @brief Absolute difference between the throughput denominators. Defaults to `0`. */
     int64_t tp_diff = 0ll;
     /**
      * Stores a possible counter example.
