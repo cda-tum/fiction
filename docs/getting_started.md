@@ -315,6 +315,8 @@ of `pip install`), make sure the Python interpreter CMake picks up has `nanobind
 `uv`-managed virtual environment already does, so pass
 `-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3` (or the equivalent `.venv\Scripts\python.exe` on
 Windows) if CMake would otherwise pick up a different interpreter.
+
+Use `-DCMAKE_BUILD_TYPE=Release` with this preset on MSVC to match the packaged `nanobind-backend` ABI.
 :::
 
 :::{note}
