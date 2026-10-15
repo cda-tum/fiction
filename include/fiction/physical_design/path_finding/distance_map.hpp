@@ -78,7 +78,7 @@ template <typename Lyt, typename Dist>
     lyt.foreach_coordinate(
         [&lyt, &dist_fn, &dist_map](const auto& c1, const unsigned src)
         {
-            lyt.foreach_coordinate([&lyt, &dist_fn, &dist_map, &c1, src](const auto& c2, const unsigned tgt)
+            lyt.foreach_coordinate([&dist_fn, &dist_map, &c1, src](const auto& c2, const unsigned tgt)
                                    { dist_map[src][tgt] = dist_fn(c1, c2); });
         });
 
@@ -113,7 +113,7 @@ template <typename Lyt, typename Dist>
     lyt.foreach_coordinate(
         [&lyt, &dist_fn, &dist_map](const auto& c1)
         {
-            lyt.foreach_coordinate([&lyt, &dist_fn, &dist_map, &c1](const auto& c2)
+            lyt.foreach_coordinate([&dist_fn, &dist_map, &c1](const auto& c2)
                                    { dist_map[{c1, c2}] = dist_fn(c1, c2); });
         });
 
