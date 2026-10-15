@@ -450,6 +450,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Physical-model attribute assignments preserve the constructor's base and screening constraints.
 
+  - Python SiDB model inputs and attribute assignments reject non-finite transition energies.
+
   - Python analyses reject invalid confidence, temperature limits, and displacement sampling fractions.
     Time-to-solution evaluation of supplied results accepts keyword-only options.
 

@@ -64,3 +64,14 @@ def test_unscreened_model_assignment() -> None:
     assert params.lambda_tf == float("inf")
     with pytest.raises(ValueError, match="epsilon_r"):
         params.epsilon_r = float("inf")
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+def test_transition_energy_preserves_finite_model(value: float) -> None:
+    """The model rejects non-finite transition energies during construction and assignment."""
+    with pytest.raises(ValueError, match="mu_minus"):
+        sidb_simulation_parameters(mu_minus=value)
+    params = sidb_simulation_parameters()
+    with pytest.raises(ValueError, match="mu_minus"):
+        params.mu_minus = value
+    assert params.mu_minus == -0.32

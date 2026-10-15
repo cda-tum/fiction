@@ -67,8 +67,11 @@ void register_simulation_parameters(nb::module_& m)
             [](fiction::sidb::model::simulation_parameters& self, const double value)
             { self = make_simulation_parameters(self.base, self.mu_minus, self.epsilon_r, value); },
             DOC(fiction_sidb_model_simulation_parameters_lambda_tf))
-        .def_rw("mu_minus", &fiction::sidb::model::simulation_parameters::mu_minus,
-                DOC(fiction_sidb_model_simulation_parameters_mu_minus))
+        .def_prop_rw(
+            "mu_minus", [](const fiction::sidb::model::simulation_parameters& self) { return self.mu_minus; },
+            [](fiction::sidb::model::simulation_parameters& self, const double value)
+            { self = make_simulation_parameters(self.base, value, self.epsilon_r, self.lambda_tf); },
+            DOC(fiction_sidb_model_simulation_parameters_mu_minus))
         .def_prop_rw(
             "base", [](const fiction::sidb::model::simulation_parameters& self) { return self.base; },
             [](fiction::sidb::model::simulation_parameters& self, const uint8_t value)
