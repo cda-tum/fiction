@@ -147,6 +147,9 @@ class physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information> run()
     {
+        // Validate conversion inputs even when the layout has no charge transitions.
+        static_cast<void>(model::potential_to_distance_conversion(
+            0.0, params.sim_params, params.precision_for_distance_corresponding_to_potential));
         const auto                       deadline = utils::make_deadline(params.timeout, params.deadline);
         const engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params, .deadline = deadline};
 
@@ -316,8 +319,8 @@ class physical_population_stability_impl
  * @param lyt The layout to analyze.
  * @param params Parameters.
  * @return The population stability information, one entry per distinct charge distribution.
- * @throws std::invalid_argument If a potential-to-distance conversion receives invalid physical parameters or
- * precision.
+ * @throws std::invalid_argument If the relative permittivity or screening distance is non-positive or non-finite,
+ * or precision exceeds the decimal precision of `double`.
  */
 [[nodiscard]] inline std::vector<population_stability_information>
 physical_population_stability(const layout& lyt, const physical_population_stability_params& params)

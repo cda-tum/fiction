@@ -83,8 +83,9 @@ namespace fiction::sidb::model
      */
     const auto below_inverse = [&](const double distance) noexcept
     {
-        const auto screened_potential = coefficient / (distance * 1e-9) * std::exp(-distance / params.lambda_tf);
-        if (std::isnormal(coefficient) && std::isnormal(screened_potential))
+        const auto screening          = std::exp(-distance / params.lambda_tf);
+        const auto screened_potential = coefficient / (distance * 1e-9) * screening;
+        if (std::isnormal(coefficient) && std::isnormal(screening) && std::isnormal(screened_potential))
         {
             return screened_potential > potential;
         }

@@ -117,6 +117,18 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
     }
 }
 
+TEST_CASE("Population stability validates conversion parameters before simulation",
+          "[assess-physical-population-stability]")
+{
+    const layout                         lyt{};
+    physical_population_stability_params params{};
+    params.precision_for_distance_corresponding_to_potential = std::numeric_limits<double>::digits10 + 1;
+    CHECK_THROWS_AS(physical_population_stability(lyt, params), std::invalid_argument);
+    params.precision_for_distance_corresponding_to_potential = 2;
+    params.sim_params.epsilon_r                              = 0.0;
+    CHECK_THROWS_AS(physical_population_stability(lyt, params), std::invalid_argument);
+}
+
 TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-population-stability]")
 {
     layout lyt{};

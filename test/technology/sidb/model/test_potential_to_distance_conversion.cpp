@@ -170,3 +170,13 @@ TEST_CASE("Potential-to-distance conversion rounds high precision upward", "[pot
         params.k() * ELEMENTARY_CHARGE / (distance * 1e-9) * std::exp(-distance / params.lambda_tf);
     REQUIRE(recovered_potential <= potential);
 }
+
+TEST_CASE("Potential-to-distance conversion avoids intermediate underflow", "[potential_to_distance_conversion]")
+{
+    const simulation_parameters params{3, -0.32, 1e-290, 1.0};
+    // The log form preserves a representable potential when exp(-distance / lambda_tf) is subnormal.
+    constexpr double target_distance = 743.305;
+    const auto       potential       = std::exp(std::log(K_E * ELEMENTARY_CHARGE * 1e9) - std::log(params.epsilon_r) -
+                                                std::log(target_distance) - target_distance / params.lambda_tf);
+    REQUIRE_THAT(potential_to_distance_conversion(potential, params), Catch::Matchers::WithinAbs(743.31, 1e-10));
+}
