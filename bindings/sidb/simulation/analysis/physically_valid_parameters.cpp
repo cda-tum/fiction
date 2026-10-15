@@ -78,10 +78,10 @@ void register_physically_valid_parameters(nb::module_& m)
            const decltype(operational_domain_options{}.operational_params.sim_params.epsilon_r) epsilon_r,
            const decltype(operational_domain_options{}.operational_params.sim_params.lambda_tf) lambda_tf,
            const decltype(operational_domain_options{}.operational_params.sim_engine)           sim_engine,
-           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
-           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
-           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
-           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress)
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>&        sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)>        number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                            on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&                     on_worker_progress)
         {
             operational_domain_options params{};
             params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);

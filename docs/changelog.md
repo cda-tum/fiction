@@ -429,14 +429,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Python bindings:
 
   - **Breaking:** Python algorithms accept keyword-only options; replace parameter objects with keyword arguments.
-    SiDB physics inputs use `base`, `mu_minus`, `epsilon_r`, and `lambda_tf`; physical result data remains typed.
-    The retained `sidb_simulation_parameters` constructor accepts keyword-only inputs.
+    SiDB inputs use scalar physics keywords; physical result data retains the keyword-only
+    `sidb_simulation_parameters` type.
 
   - Gate-set factories return keyword dictionaries for `technology_mapping`; nested timeout
     options use `design_gate_timeout` and `quicksim_timeout`.
 
   - Single-layout generation omits multiple-layout options; non-gate temperature analysis omits gate options.
     Supplied-wire overloads omit `threshold_bdl_interdistance`.
+
+  - Physical-validity sweeps omit gate-detection and operational-condition options.
 
   - Python bindings reject NaN or reversed BDL distance bounds, nonpositive or NaN conversion potentials,
     and conversion precisions that yield a zero or non-finite distance step.
@@ -447,8 +449,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Python analyses reject invalid confidence, temperature limits, and displacement sampling fractions.
     Time-to-solution evaluation of supplied results accepts keyword-only options.
-
-  - Physical-validity sweeps omit gate-detection and operational-condition options.
 
   - Physical-validity sweeps reject engines other than QuickExact, EXGS, and QuickSim.
 
@@ -595,7 +595,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - Potential-to-distance conversion now bisects the distance bracket, so fine precision does not stall the scan.
-
   - `random_coordinate` uses a separate random generator for each thread.
   - Dense distance maps now index every layer and reject coordinates outside the layout frame.
   - Physical-design border calculations and hexagonalization now preserve the maximum signed coordinate.
