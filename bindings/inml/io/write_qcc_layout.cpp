@@ -14,9 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
-
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
 
@@ -25,6 +22,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner): enables callback conversion
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner): enables keyword options
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
@@ -40,29 +38,37 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using write_qcc_layout_options = fiction::inml::io::write_qcc_layout_params;
+
 /**
  * @brief Binds write qcc layout helpers.
  * @param m Python module.
  */
 void register_write_qcc_layout(nb::module_& m)
 {
-    nb::class_<fiction::inml::io::write_qcc_layout_params>(
-        m, "write_qcc_layout_params", pyfiction::progress_type_slots<fiction::inml::io::write_qcc_layout_params>(),
-        DOC(fiction_inml_io_write_qcc_layout_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::inml::io::write_qcc_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
-        .def_rw("use_filename_as_component_name",
-                &fiction::inml::io::write_qcc_layout_params::use_filename_as_component_name,
-                DOC(fiction_inml_io_write_qcc_layout_params_use_filename_as_component_name));
 
     m.def(
         "write_qcc_layout",
         [](const fiction::inml::layout& lyt, const std::string_view& filename,
-           const fiction::inml::io::write_qcc_layout_params& params)
-        { fiction::inml::io::write_qcc_layout(lyt, filename, params); },
-        nb::arg("layout"), nb::arg("filename"), nb::arg("params") = fiction::inml::io::write_qcc_layout_params{},
-        DOC(fiction_inml_io_write_qcc_layout), nb::call_guard<nb::gil_scoped_release>());
+           const decltype(write_qcc_layout_options{}.on_progress)&                   on_progress,
+           const decltype(write_qcc_layout_options{}.use_filename_as_component_name) use_filename_as_component_name)
+        {
+            write_qcc_layout_options params{};
+            params.on_progress                    = on_progress;
+            params.use_filename_as_component_name = use_filename_as_component_name;
+            const nb::gil_scoped_release release{};
+            fiction::inml::io::write_qcc_layout(lyt, filename, params);
+        },
+        nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("use_filename_as_component_name") = write_qcc_layout_options{}.use_filename_as_component_name,
+        R"doc(Write the iNML layout to the supplied ToPoliNano and MagCAD filename.
+use_filename_as_component_name selects the component name; on_progress reports writing progress.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    use_filename_as_component_name: Use the output filename as the component name inside the QCC file.
+)doc");
 }
 
 }  // namespace pyfiction

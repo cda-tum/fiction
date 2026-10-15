@@ -10,13 +10,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.physical_design import (
     hexagonalization,
     hexagonalization_io_pin_extension_mode,
-    hexagonalization_params,
     hexagonalization_stats,
 )
 
@@ -58,13 +57,14 @@ def hex_command(session: Session, args: argparse.Namespace) -> Result:
         if args.planar
         else hexagonalization_io_pin_extension_mode.EXTEND
     )
-    params = hexagonalization_params()
-    params.on_progress = session.report_progress
+    options: dict[str, Any] = {
+        "on_progress": session.report_progress,
+    }
     if args.extend_inputs:
-        params.input_pin_extension = mode
+        options["input_pin_extension"] = mode
     if args.extend_outputs:
-        params.output_pin_extension = mode
+        options["output_pin_extension"] = mode
     stats = hexagonalization_stats()
-    hexagonal = hexagonalization(layout, params, stats)
+    hexagonal = hexagonalization(layout, statistics=stats, **options)
     session.gate_layouts.add(hexagonal)
     return _added(session, hexagonal, stats, verbose=args.verbose)

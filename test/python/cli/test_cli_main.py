@@ -29,6 +29,7 @@ from prompt_toolkit.output import DummyOutput
 from mnt.fiction.cli import Session, main
 from mnt.fiction.cli import repl as cli_app
 from mnt.fiction.cli.repl import CommandCompleter
+from mnt.pyfiction.sidb.simulation import engines
 from mnt.pyfiction.utils import __version__
 
 
@@ -270,3 +271,28 @@ def test_completion_respects_path_context(tmp_path: Path) -> None:
     candidates = list(CommandCompleter().get_completions(Document(f'read "{directory}/circ'), event))
     assert any("uit.v" in candidate.text for candidate in candidates)
     assert not list(CommandCompleter().get_completions(Document(f"tt {directory}/circ"), event))
+
+
+@pytest.mark.skipif(not hasattr(engines, "clustercomplete"), reason="pyfiction was built without ALGLIB")
+def test_clustercomplete_reports_ground_state_space(resources_dir: Path, tmp_path: Path) -> None:
+    """The reporting flag emits native Ground State Space statistics and logs a simulation result."""
+    log = tmp_path / "simulation.json"
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and trusted test resource
+        [
+            sys.executable,
+            "-m",
+            "mnt.fiction.cli",
+            "--log",
+            str(log),
+            "-c",
+            f'read "{resources_dir / "siqad_or_gate.sqd"}"; clustercomplete -r',
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=20,
+        shell=False,
+    )
+    assert "Ground State Space took" in result.stdout
+    entries = json.loads(log.read_text(encoding="utf-8"))
+    assert entries[-1]["result"]["cell_layout"]["simulation"]["stable_states"] >= 1

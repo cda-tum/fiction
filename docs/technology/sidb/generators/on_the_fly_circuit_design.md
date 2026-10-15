@@ -13,8 +13,8 @@ solution. Crossings and double wires use predefined implementations when possibl
 The required number of canvas SiDBs depends on the gates; the example uses three with QuickCell.
 The returned layout can be exported as SVG or SiQAD SQD.
 
-The circuit's `timeout` covers all gate designs; `design_gate_params.operational_params.timeout` can impose a
-shorter per-gate limit. Both use milliseconds; see {ref}`sidb_timeouts` for defaults and limits.
+The circuit's `timeout` covers all gate designs. Set `design_gate_params.operational_params.timeout` in C++
+or `design_gate_timeout` in Python for a shorter per-gate limit. Both use milliseconds; see {ref}`sidb_timeouts` for defaults and limits.
 
 ::::{tab-set}
 :sync-group: language
@@ -42,7 +42,7 @@ The call leaves its input unchanged and releases the GIL during circuit design.
 An unsupported gate type or orientation raises `ValueError`; an unsuccessful gate search
 raises `RuntimeError`. This interface does not accept defective surfaces or logic networks.
 
-Choose the gate-search algorithm through `design_gate_params.design_mode`, as shown below.
+Choose the gate-search algorithm with the `design_mode` keyword, as shown below.
 The `PRUNING_ONLY` mode skips operational simulation, so it does not verify the designed gates' functionality.
 
 ```python
@@ -50,7 +50,6 @@ from mnt.pyfiction.layouts import hexagonal_gate_layout
 from mnt.pyfiction.sidb.generators import (
     design_sidb_gates_mode,
     on_the_fly_sidb_circuit_design,
-    on_the_fly_sidb_circuit_design_params,
 )
 from mnt.pyfiction.sidb.io import write_sqd_layout
 
@@ -60,23 +59,14 @@ b = layout.create_pi("b", (1, 0, 0))
 gate = layout.create_and(a, b, (1, 1, 0))
 layout.create_po(gate, "f", (0, 2, 0))
 
-params = on_the_fly_sidb_circuit_design_params()
-params.timeout = 60_000  # one minute for the whole circuit
-gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params
-gates.design_mode = design_sidb_gates_mode.QUICKCELL
-gates.number_of_canvas_sidbs = 3
-circuit = on_the_fly_sidb_circuit_design(layout, params)
+circuit = on_the_fly_sidb_circuit_design(
+    layout, timeout=60_000, design_mode=design_sidb_gates_mode.QUICKCELL, number_of_canvas_sidbs=3
+)
 write_sqd_layout(circuit, "and.sqd")
 ```
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.sidb.generators.sidb_complex_gate_design_policy
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.generators.sidb_on_the_fly_gate_library_params
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.generators.on_the_fly_sidb_circuit_design_params
    :members:
 
 .. autofunction:: mnt.pyfiction.sidb.generators.on_the_fly_sidb_circuit_design

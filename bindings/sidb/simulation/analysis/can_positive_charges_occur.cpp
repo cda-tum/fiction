@@ -15,13 +15,13 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
-#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner): enables keyword options
 
 /**
  * @brief Namespace alias for nanobind.
@@ -39,9 +39,24 @@ void register_can_positive_charges_occur(nb::module_& m)
 {
     m.def(
         "can_positive_charges_occur",
-        [](const fiction::sidb::layout& lyt, const fiction::sidb::model::simulation_parameters& sim_params)
-        { return fiction::sidb::simulation::analysis::can_positive_charges_occur(lyt, sim_params); }, nb::arg("lyt"),
-        nb::arg("sim_params"), DOC(fiction_sidb_simulation_analysis_can_positive_charges_occur_2));
+        [](const fiction::sidb::layout& lyt, const decltype(simulation_model{}.base) base,
+           const decltype(simulation_model{}.mu_minus) mu_minus, const decltype(simulation_model{}.epsilon_r) epsilon_r,
+           const decltype(simulation_model{}.lambda_tf) lambda_tf)
+        {
+            const auto sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+            return fiction::sidb::simulation::analysis::can_positive_charges_occur(lyt, sim_params);
+        },
+        nb::arg("lyt"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
+        nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
+        nb::arg("lambda_tf") = simulation_model{}.lambda_tf,
+        R"doc(Check whether positively charged SiDBs can occur under the scalar physical model.
+
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+)doc");
 }
 
 }  // namespace pyfiction

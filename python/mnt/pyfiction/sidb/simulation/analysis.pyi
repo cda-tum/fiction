@@ -13,9 +13,7 @@ from collections.abc import Callable, Mapping, Sequence
 from typing import overload
 
 import mnt.pyfiction.sidb
-import mnt.pyfiction.sidb.model
 import mnt.pyfiction.sidb.simulation
-import mnt.pyfiction.sidb.simulation.engines
 import mnt.pyfiction.sidb.simulation.logic
 import mnt.pyfiction.synthesis
 
@@ -97,23 +95,21 @@ def calculate_energy_and_state_type_with_kinks_rejected(
     """
 
 def can_positive_charges_occur(
-    lyt: mnt.pyfiction.sidb.sidb_layout, sim_params: mnt.pyfiction.sidb.model.sidb_simulation_parameters
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
 ) -> bool:
     """
-    Checks whether positively charged SiDBs can occur in a layout under
-    the given physical parameters. See the `potential_landscape` overload.
+    Check whether positively charged SiDBs can occur under the scalar physical model.
 
     Args:
-        lyt: The layout to check.
-        sim_params: The physical parameters.
-
-    Returns:
-        `true` if at least one SiDB can be positively charged, `false`
-        otherwise.
-
-    Raises:
-        std::out_of_range: if a SiDB or defect site has an invalid lattice
-                           basis index.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
     """
 
 class critical_temperature_stats:
@@ -140,162 +136,137 @@ class critical_temperature_stats:
         excited state (unit: meV).
         """
 
-class critical_temperature_params:
-    """
-    This struct stores the parameters for the *Critical Temperature*
-    algorithm.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def operational_params(self) -> mnt.pyfiction.sidb.simulation.logic.is_operational_params:
-        """
-        This struct stores the parameters for the *Critical Temperature*
-        algorithm.
-        """
-
-    @operational_params.setter
-    def operational_params(self, arg: mnt.pyfiction.sidb.simulation.logic.is_operational_params, /) -> None: ...
-    @property
-    def confidence_level(self) -> float:
-        """
-        Probability threshold for ground state population. The temperature at
-        which the simulation finds the ground state to be populated with a
-        probability of less than the given percentage, is determined to be the
-        critical temperature. For gate-based simulation, this is the
-        probability of erroneous calculations of the gate.
-        """
-
-    @confidence_level.setter
-    def confidence_level(self, arg: float, /) -> None: ...
-    @property
-    def max_temperature(self) -> float:
-        """
-        Maximum simulation temperature beyond which no simulation will be
-        conducted (~ 126 °C by default) (unit: K).
-        """
-
-    @max_temperature.setter
-    def max_temperature(self, arg: float, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the number of simulated input patterns (gate-
-        based) or the progress of the physical simulation (non-gate-based).
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
-        """
-        Reports logical worker activity with a fixed worker count for each
-        invocation.
-        """
-
-    @on_worker_progress.setter
-    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
-
 @overload
 def critical_temperature_gate_based(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: critical_temperature_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
+    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
+    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
+    confidence_level: float = 0.99,
+    max_temperature: float = 400.0,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: critical_temperature_stats | None = None,
 ) -> float:
     """
-    This algorithm performs temperature-aware SiDB simulation as proposed
-    in \\"Temperature Behavior of Silicon Dangling Bond Logic\\" by J.
-    Drewniok, M. Walter, and R. Wille in IEEE NANO 2023
-    (https://ieeexplore.ieee.org/document/10231259). It comes in two
-    flavors: gate-based and non-gate based.
-
-    For *Gate-based Critical Temperature* Simulation, the Critical
-    Temperature is defined as follows: The temperature at which the
-    erroneous charge distributions are populated by more than :math:`1 -
-    \\eta`, where :math:`\\eta \\in [0,1]`.
+    Determine the critical temperature of an SiDB gate implementing the truth tables.
+    The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+    The overload with input and output wires bypasses automatic wire detection.
 
     Args:
-        lyt: The layout to simulate.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        params: Simulation and physical parameters.
-        pst: Statistics.
-
-    Returns:
-        The critical temperature (unit: K).
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        confidence_level: Required probability of a correct gate output, between 0 and 1.
+        max_temperature: Maximum temperature examined in K.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for charge simulation.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 @overload
 def critical_temperature_gate_based(
     input_pattern_layouts: Sequence[mnt.pyfiction.sidb.sidb_layout],
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: critical_temperature_params,
     output_bdl_pairs: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_pair],
     input_bdl_wires: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_wire],
     output_bdl_wires: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
+    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
+    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
+    confidence_level: float = 0.99,
+    max_temperature: float = 400.0,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: critical_temperature_stats | None = None,
 ) -> float:
     """
-    *Gate-based Critical Temperature* simulation of an SiDB layout from
-    its pre-generated input pattern layouts.
-
-    This overload takes one layout per input pattern together with the BDL
-    detection results, instead of deriving all of them from the layout.
-    Since neither the input configuration nor the BDL pairs and wires
-    depend on the simulation parameters, a caller that simulates the same
-    layout under many parameter settings can determine them once with
-    `generate_bdl_input_pattern_layouts`, `detect_bdl_pairs` and
-    `detect_bdl_wires` and pass them to every call, instead of re-deriving
-    them each time.
-
-    The layouts and the detection results are only read and may be shared
-    by concurrent calls.
+    Determine the critical temperature of an SiDB gate implementing the truth tables.
+    The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+    The overload with input and output wires bypasses automatic wire detection.
 
     Args:
-        input_pattern_layouts: One layout per input pattern, indexed by
-                               input pattern, as generated by
-                               `generate_bdl_input_pattern_layouts`.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        params: Simulation and physical parameters.
-        output_bdl_pairs: Output BDL pairs of the layout.
-        input_bdl_wires: BDL input wires of the layout.
-        output_bdl_wires: BDL output wires of the layout.
-        pst: Statistics.
-
-    Returns:
-        The critical temperature (unit: K).
-
-    Raises:
-        std::invalid_argument: if `spec` is empty, if the number of input
-                               pattern layouts does not match the number
-                               of input combinations of `spec`, or if the
-                               number of output BDL pairs does not match
-                               the number of truth tables.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        confidence_level: Required probability of a correct gate output, between 0 and 1.
+        max_temperature: Maximum temperature examined in K.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for charge simulation.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def critical_temperature_non_gate_based(
     lyt: mnt.pyfiction.sidb.sidb_layout,
-    params: critical_temperature_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    confidence_level: float = 0.99,
+    max_temperature: float = 400.0,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: critical_temperature_stats | None = None,
 ) -> float:
     """
-    For *Non-gate-based Critical Temperature* simulation, the Critical
-    Temperature is defined as follows: The temperature at which the
-    excited charge distributions are populated by more than :math:`1 -
-    \\eta`, where :math:`\\eta \\in [0,1]` is the confidence level for the
-    presence of a working gate.
+    Determine the critical temperature from the population of excited charge distributions.
+    The keyword options select physical values, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
 
     Args:
-        lyt: The layout to simulate.
-        params: Simulation and physical parameters.
-        pst: Statistics.
-
-    Returns:
-        The critical temperature (unit: K)
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        confidence_level: Required ground-state population probability between 0 and 1.
+        max_temperature: Maximum temperature examined in K.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for charge simulation.
     """
 
 class energy_state:
@@ -466,38 +437,6 @@ class transition_type(enum.Enum):
     POSITIVE_TO_NEUTRAL = 3
     """SiDB is positively charged, but is closest to being neutrally charged."""
 
-class physical_population_stability_params:
-    """Parameters of the population stability analysis."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def timeout(self) -> int:
-        """
-        Millisecond budget for simulation and population analysis. The maximum
-        value means unlimited; zero expires immediately. Expiration throws
-        `utils::timeout_error` without returning a partial result.
-        """
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """Parameters of the population stability analysis."""
-
-    @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
-    @property
-    def precision_for_distance_corresponding_to_potential(self) -> int:
-        """
-        Number of decimal places of the distance corresponding to a potential
-        difference, at most `std::numeric_limits<double>::digits10`.
-        """
-
-    @precision_for_distance_corresponding_to_potential.setter
-    def precision_for_distance_corresponding_to_potential(self, arg: int, /) -> None: ...
-
 class population_stability_information:
     """
     Population stability of one physically valid charge distribution: for
@@ -551,31 +490,30 @@ class population_stability_information:
     def system_energy(self, arg: float, /) -> None: ...
 
 def physical_population_stability(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: physical_population_stability_params = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    precision_for_distance_corresponding_to_potential: int = 2,
 ) -> list[population_stability_information]:
     """
-    Assesses the population stability of an SiDB layout: for every
-    physically valid charge distribution (found with *QuickExact*), it
-    determines the SiDB closest to each charge transition and the
-    potential change required for it, in ascending order of the
-    distributions' energies. The distance an SiDB would have to be placed
-    at to cause that potential change is reported as well. Distances
-    describe a single-charge perturbation with all other charge states
-    fixed, without lattice discretization.
-
-    Args:
-        lyt: The layout to analyze.
-        params: Parameters.
-
-    Returns:
-        The population stability information, one entry per distinct
-        charge distribution.
+    Determine the stability of the SiDB population under the physical model.
+    The keyword options select simulation, potential precision, and the execution budget.
+    Distance conversion bisects the distance bracket up to floating-point resolution.
 
     Raises:
-        ValueError: If relative permittivity is non-positive or
-                               non-finite, screening distance is non-
-                               positive or NaN, or precision exceeds the
-                               decimal precision of `double`.
+        ValueError: Invalid physical parameters or precision.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        precision_for_distance_corresponding_to_potential: Decimal places for distance conversion, from 0 to 15.
     """
 
 class physically_valid_parameters_domain:
@@ -589,89 +527,35 @@ class physically_valid_parameters_domain:
 def physically_valid_parameters(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     cd: mnt.pyfiction.sidb.charge_distribution,
-    params: mnt.pyfiction.sidb.simulation.logic.operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    sweep_dimensions: Sequence[mnt.pyfiction.sidb.simulation.logic.operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
 ) -> physically_valid_parameters_domain:
     """
-    Determines the physical parameters under which a given charge
-    distribution of a layout is physically valid: every parameter point of
-    the sweep dimensions in `params` is checked, and for each one where
-    the charge distribution is valid, its excited-state number (the number
-    of valid configurations with lower energy under those parameters) is
-    recorded.
+    Sweep physical parameter values for which the supplied charge distribution is physically valid.
+    The keyword options define the sweep, physical model, worker count, and progress callbacks.
+    Raises ValueError for engines other than QuickExact, EXGS, and QuickSim.
 
     Args:
-        lyt: The layout.
-        cd: The charge distribution whose validity is checked.
-        params: Parameters; the sweep dimensions and the engine that
-                determines the excited-state number.
-
-    Returns:
-        The parameter points where `cd` is physically valid, each with its
-        excited-state number; empty if `cd` does not cover the layout's
-        SiDBs in raster order.
-
-    Raises:
-        std::invalid_argument: if a sweep range has non-finite or reversed
-                               bounds, a non-positive or non-finite step,
-                               or more points than the storage range
-                               permits.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        sim_engine: SiDB simulation engine used to count lower-energy charge distributions.
     """
-
-class time_to_solution_params:
-    """Parameters for measuring heuristic accuracy and time-to-solution."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def timeout(self) -> int:
-        """
-        Millisecond budget for the reference simulation and all heuristic
-        repetitions together. The maximum value means unlimited; zero expires
-        immediately. Expiration throws `utils::timeout_error` without
-        publishing statistics. Finite budgets reject ClusterComplete;
-        QuickSim's separate timeout still applies to each heuristic attempt.
-        """
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def engine(self) -> mnt.pyfiction.sidb.simulation.exact_sidb_simulation_engine:
-        """
-        Exhaustive simulation algorithm used to simulate the ground state as
-        reference.
-        """
-
-    @engine.setter
-    def engine(self, arg: mnt.pyfiction.sidb.simulation.exact_sidb_simulation_engine, /) -> None: ...
-    @property
-    def repetitions(self) -> int:
-        """
-        Number of iterations of the heuristic algorithm used to determine the
-        simulation accuracy (`repetitions = 100` means that accuracy is
-        precise to 1 %).
-        """
-
-    @repetitions.setter
-    def repetitions(self, arg: int, /) -> None: ...
-    @property
-    def confidence_level(self) -> float:
-        """
-        The confidence level represents the probability that the confidence
-        interval calculated from the simulation contains the true value. For
-        example, a 99.7 % (0.997) confidence level means that if the
-        simulation were repeated many times, approximately 997 out of 1000 of
-        the calculated confidence intervals would contain the true value.
-        """
-
-    @confidence_level.setter
-    def confidence_level(self, arg: float, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Callback that receives the number of completed heuristic repetitions."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
 
 class time_to_solution_stats:
     """
@@ -715,44 +599,60 @@ class time_to_solution_stats:
 
 def time_to_solution(
     lyt: mnt.pyfiction.sidb.sidb_layout,
-    quicksim_params: mnt.pyfiction.sidb.simulation.engines.quicksim_params,
-    tts_params: time_to_solution_params = ...,
+    *,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    iteration_steps: int = 80,
+    alpha: float = 0.7,
+    number_threads: int | None = None,
+    quicksim_timeout: int = ...,
+    quicksim_on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
+    timeout: int = ...,
+    engine: mnt.pyfiction.sidb.simulation.exact_sidb_simulation_engine = ...,
+    repetitions: int = 100,
+    confidence_level: float = 0.997,
+    on_progress: Callable[[str, int, int], None] | None = None,
     ps: time_to_solution_stats | None = None,
 ) -> None:
     """
-    Computes the time-to-solution (TTS) of *QuickSim* for a layout: the
-    layout is simulated once with the exact engine of the parameters and
-    `tts_params.repetitions` times with *QuickSim*, and the runs are
-    combined with `time_to_solution_for_given_simulation_results`.
-
-    Failed attempts contribute elapsed wall time; successful attempts
-    retain the engine runtime.
+    Compute QuickSim time-to-solution from one exact run and repetitions heuristic runs.
+    quicksim_timeout bounds each heuristic run; timeout bounds the complete evaluation.
+    Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
+    ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
+    Raises ValueError for confidence outside (0, 1) or ClusterComplete with a finite timeout.
 
     Args:
-        lyt: The layout to simulate.
-        qs_params: *QuickSim* parameters.
-        tts_params: TTS parameters.
-        ps: Statistics.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        number_threads: Number of QuickSim workers; None uses the available hardware threads.
+        quicksim_timeout: Execution budget for each heuristic run in milliseconds.
+        quicksim_on_progress: Progress callback for heuristic iterations; None disables these reports.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        timeout: Execution budget in milliseconds.
+        engine: Exhaustive simulation algorithm used to simulate the ground state as reference.
+        repetitions: Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100` means that accuracy is precise to 1 %).
+        confidence_level: Probability of finding the ground state used to compute time-to-solution, between 0 and 1.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        ps: Statistics object filled by the algorithm; None discards statistics.
+        iteration_steps: Number of QuickSim iterations.
+        alpha: QuickSim heuristic alpha parameter.
     """
 
 def time_to_solution_for_given_simulation_results(
     results_exact: mnt.pyfiction.sidb.simulation.sidb_simulation_result,
     results_heuristic: Sequence[mnt.pyfiction.sidb.simulation.sidb_simulation_result],
+    *,
     confidence_level: float = 0.997,
     ps: time_to_solution_stats | None = None,
 ) -> None:
     """
-    Computes the time-to-solution (TTS) of *QuickSim* from an exact result
-    and a series of heuristic results: the accuracy is the share of
-    heuristic runs that found the ground state, and TTS is the mean
-    heuristic runtime scaled to reach the given confidence level, `t ·
-    log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
-    mean heuristic runtime, and infinite time-to-solution.
-
-    Args:
-        results_exact: The result of an exact engine, which provides the
-                       ground state.
-        results_heuristic: The results of the heuristic runs.
-        confidence_level: Confidence level for the TTS computation.
-        ps: Statistics.
+    Evaluate heuristic time-to-solution against an exact simulation result.
+    confidence_level must be strictly between 0 and 1; invalid values raise ValueError.
+    ps receives accuracy, runtimes, and time-to-solution statistics.
+    Empty heuristic results yield zero accuracy and infinite time-to-solution.
     """

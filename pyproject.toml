@@ -189,6 +189,10 @@ cache-keys = [
     { git = { commit = true, tags = true } },
     { file = "bindings/**/*.hpp" },
     { file = "bindings/**/*.cpp" },
+    { file = "include/fiction/**/*.hpp" },
+    { file = "CMakeLists.txt" },
+    { file = "bindings/CMakeLists.txt" },
+    { file = "cmake/**/*.cmake" },
 ]
 
 [tool.uv.dependency-groups]

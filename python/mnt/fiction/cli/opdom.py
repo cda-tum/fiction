@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import argparse
 from functools import partial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from rich.table import Table
 
@@ -27,7 +27,6 @@ from mnt.pyfiction.sidb import sidb_dot_tag
 from mnt.pyfiction.sidb.simulation.io import (
     sample_writing_mode,
     write_operational_domain,
-    write_operational_domain_params,
 )
 from mnt.pyfiction.sidb.simulation.logic import (
     bdl_wire_selection,
@@ -40,14 +39,13 @@ from mnt.pyfiction.sidb.simulation.logic import (
     operational_domain_contour_tracing,
     operational_domain_flood_fill,
     operational_domain_grid_search,
-    operational_domain_params,
     operational_domain_random_sampling,
     operational_domain_stats,
     operational_domain_value_range,
     sweep_parameter,
 )
 
-from .simulation import ENGINES, apply_physical, engine_argument, physical_arguments
+from .simulation import ENGINES, engine_argument, physical_arguments, physical_options
 
 if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
@@ -143,11 +141,8 @@ def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
     physical_arguments(parser, base=True)
     engine_argument(parser)
 
-    defaults = operational_domain_params()
-    operational = defaults.operational_params
-    wires = operational.input_bdl_iterator_params.bdl_wire_params
     advanced = parser.add_argument_group("operational analysis (advanced)")
-    advanced.add_argument("--threads", type=positive_int, default=defaults.number_of_threads, help="worker threads")
+    advanced.add_argument("--threads", type=positive_int, help="worker threads; native default when omitted")
     advanced.add_argument(
         "--timeout-ms",
         type=partial(integer, maximum=2**64 - 1),
@@ -167,19 +162,19 @@ def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
     advanced.add_argument(
         "--bdl-pair-min",
         type=finite_float,
-        default=wires.bdl_pairs_params.minimum_distance,
+        default=0.75,
         help="minimum BDL pair distance in nm",
     )
     advanced.add_argument(
         "--bdl-pair-max",
         type=finite_float,
-        default=wires.bdl_pairs_params.maximum_distance,
+        default=1.5,
         help="maximum BDL pair distance in nm",
     )
     advanced.add_argument(
         "--bdl-wire-distance",
         type=positive_float,
-        default=wires.threshold_bdl_interdistance,
+        default=2.0,
         help="BDL wire distance threshold in nm",
     )
     plot_arguments(parser)
@@ -263,15 +258,26 @@ def run_domain(
         "file": str(args.file) if args.file is not None else None,
         "plots": [str(path) for path in args.plot],
         "parameters": parameters,
-        "threads": params.number_of_threads,
-        "operational_parameters": stats_to_dict(params.operational_params),
+        "threads": args.threads,
+        "operational_parameters": {
+            "simulation_parameters": parameters,
+            "sim_engine": params["sim_engine"],
+            "timeout": params["timeout"],
+            "op_condition": params["op_condition"],
+            "strategy_to_analyze_operational_status": params["strategy_to_analyze_operational_status"],
+            "input_bdl_iterator_params": {
+                "input_bdl_config": params["input_bdl_config"],
+                "bdl_wire_params": {
+                    "threshold_bdl_interdistance": args.bdl_wire_distance,
+                    "bdl_pairs_params": {"minimum_distance": args.bdl_pair_min, "maximum_distance": args.bdl_pair_max},
+                },
+            },
+        },
     }
 
 
-def domain_parameters(
-    output: CommandOutput, args: argparse.Namespace
-) -> tuple[operational_domain_params, dict[str, object]]:
-    """Build native parameters and describe the fixed physical values.
+def domain_parameters(output: CommandOutput, args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build native keyword options and describe the fixed physical values.
 
     Args:
         output: Supplies progress callbacks.
@@ -283,47 +289,45 @@ def domain_parameters(
     Raises:
         CommandError: Simulation or sweep options are invalid.
     """
-    params = operational_domain_params()
-    params.on_progress = output.report_progress
-    params.on_worker_progress = output.report_worker_progress
-    params.operational_params.sim_engine = ENGINES[args.engine]
-    parameters = apply_physical(params.operational_params.simulation_parameters, args)
-    operational = params.operational_params
+    parameters = physical_options(args)
+    params: dict[str, Any] = {
+        **parameters,
+        "on_progress": output.report_progress,
+        "on_worker_progress": output.report_worker_progress,
+        "sim_engine": ENGINES[args.engine],
+    }
     if args.sketch and args.strategy not in {None, "filter_only"}:
         msg = "--sketch requires --strategy filter_only"
         raise CommandError(msg)
     if args.sketch and args.condition == "tolerate_kinks":
         msg = "Filter-only analysis requires --condition reject_kinks"
         raise CommandError(msg)
-    operational.strategy_to_analyze_operational_status = operational_analysis_strategy[
+    params["strategy_to_analyze_operational_status"] = operational_analysis_strategy[
         (args.strategy or ("filter_only" if args.sketch else "simulation_only")).upper()
     ]
-    operational.op_condition = operational_condition[
+    params["op_condition"] = operational_condition[
         (args.condition or ("reject_kinks" if args.sketch else "tolerate_kinks")).upper()
     ]
     if args.engine == "quicksim" and args.base != TWO_CHARGE_STATES:
         msg = "QuickSim requires --base 2"
         raise CommandError(msg)
-    if args.timeout_ms is not None:
-        if args.engine == "clustercomplete" and args.timeout_ms != 2**64 - 1:
-            msg = "ClusterComplete does not support a finite timeout"
-            raise CommandError(msg)
-        operational.timeout = args.timeout_ms
-    params.number_of_threads = args.threads
-    inputs = operational.input_bdl_iterator_params
-    inputs.input_bdl_config = (
+    if args.timeout_ms is not None and args.engine == "clustercomplete" and args.timeout_ms != 2**64 - 1:
+        msg = "ClusterComplete does not support a finite timeout"
+        raise CommandError(msg)
+    params["timeout"] = args.timeout_ms if args.timeout_ms is not None else 2**64 - 1
+    params["number_of_threads"] = args.threads
+    params["input_bdl_config"] = (
         input_bdl_configuration.PERTURBER_DISTANCE_ENCODED
         if args.input_encoding == "distance"
         else input_bdl_configuration.PERTURBER_ABSENCE_ENCODED
     )
-    wires = inputs.bdl_wire_params
     if not 0 <= args.bdl_pair_min <= args.bdl_pair_max:
         msg = "BDL pair distances require 0 <= min <= max"
         raise CommandError(msg)
-    wires.bdl_pairs_params.minimum_distance = args.bdl_pair_min
-    wires.bdl_pairs_params.maximum_distance = args.bdl_pair_max
-    wires.threshold_bdl_interdistance = args.bdl_wire_distance
-    params.sweep_dimensions = _sweep_dimensions(args)
+    params["minimum_distance"] = args.bdl_pair_min
+    params["maximum_distance"] = args.bdl_pair_max
+    params["threshold_bdl_interdistance"] = args.bdl_wire_distance
+    params["sweep_dimensions"] = _sweep_dimensions(args)
 
     return params, parameters
 
@@ -332,7 +336,7 @@ def compute_domain(
     layout: sidb_layout,
     spec: list[dynamic_truth_table],
     args: argparse.Namespace,
-    params: operational_domain_params,
+    params: dict[str, Any],
 ) -> tuple[operational_domain, operational_domain_stats]:
     """Run the selected reconstruction method once.
 
@@ -347,13 +351,13 @@ def compute_domain(
     """
     stats = operational_domain_stats()
     if args.algorithm == "random_sampling":
-        domain = operational_domain_random_sampling(layout, spec, args.samples, params, stats)
+        domain = operational_domain_random_sampling(layout, spec, args.samples, stats=stats, **params)
     elif args.algorithm == "flood_fill":
-        domain = operational_domain_flood_fill(layout, spec, args.samples, params, stats)
+        domain = operational_domain_flood_fill(layout, spec, args.samples, stats=stats, **params)
     elif args.algorithm == "contour_tracing":
-        domain = operational_domain_contour_tracing(layout, spec, args.samples, params, stats)
+        domain = operational_domain_contour_tracing(layout, spec, args.samples, stats=stats, **params)
     else:
-        domain = operational_domain_grid_search(layout, spec, params, stats)
+        domain = operational_domain_grid_search(layout, spec, stats=stats, **params)
 
     return domain, stats
 
@@ -367,18 +371,15 @@ def write_csv(domain: operational_domain, args: argparse.Namespace) -> None:
     """
     if args.file is None:
         return
-    writing = write_operational_domain_params()
-    writing.writing_mode = (
-        sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
-    )
+    writing_mode = sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
     with atomic_output(args.file) as temporary:
-        write_operational_domain(domain, str(temporary), writing)
+        write_operational_domain(domain, str(temporary), writing_mode=writing_mode)
 
 
 def gate_specification(
     layout: sidb_layout,
     args: argparse.Namespace,
-    params: operational_domain_params,
+    params: dict[str, Any],
     fallback_spec: list[dynamic_truth_table] | None = None,
 ) -> list[dynamic_truth_table]:
     """Resolve expected functions and validate the gate's detected BDL ports.
@@ -395,9 +396,14 @@ def gate_specification(
     Raises:
         CommandError: Ports or specifications do not match, or Sketch lacks a canvas.
     """
-    wire_params = params.operational_params.input_bdl_iterator_params.bdl_wire_params
-    inputs = detect_bdl_wires(layout, wire_params, bdl_wire_selection.INPUT)
-    outputs = detect_bdl_pairs(layout, sidb_dot_tag.OUTPUT, wire_params.bdl_pairs_params)
+    pair_options = {key: params[key] for key in ("minimum_distance", "maximum_distance")}
+    inputs = detect_bdl_wires(
+        layout,
+        wire_selection=bdl_wire_selection.INPUT,
+        threshold_bdl_interdistance=params["threshold_bdl_interdistance"],
+        **pair_options,
+    )
+    outputs = detect_bdl_pairs(layout, sidb_dot_tag.OUTPUT, **pair_options)
     if not inputs or not outputs:
         msg = "the layout needs detected BDL input and output ports"
         raise CommandError(msg)

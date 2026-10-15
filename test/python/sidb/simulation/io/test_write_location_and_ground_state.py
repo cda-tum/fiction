@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation.engines import quickexact, quickexact_params
+from mnt.pyfiction.sidb.simulation.engines import quickexact
 from mnt.pyfiction.sidb.simulation.io import write_location_and_ground_state
 
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ def test_write_location_and_ground_state(tmp_path: Path) -> None:
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
-    result = quickexact(layout, quickexact_params())
+    result = quickexact(layout)
     assert result.charge_distributions
 
     filename = tmp_path / "ground_state.txt"

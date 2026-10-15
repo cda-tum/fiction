@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 
@@ -18,8 +18,6 @@ from .parsing import finite_float, integer, positive_float
 
 if TYPE_CHECKING:
     import argparse
-
-    from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 
     from .parsing import Parser
 
@@ -58,24 +56,16 @@ def physical_arguments(parser: Parser, *, base: bool, base_default: int = 2, pot
         )
 
 
-def apply_physical(params: sidb_simulation_parameters, args: argparse.Namespace) -> dict[str, object]:
-    """Copy the physical parameters into the native simulation parameters.
-
-    Returns:
-        The fixed physical values for statistics logging.
-    """
-    params.epsilon_r = args.epsilon_r
-    params.lambda_tf = args.lambda_tf
-    params.mu_minus = args.mu_minus
-    description: dict[str, object] = {
+def physical_options(args: argparse.Namespace) -> dict[str, Any]:
+    """Return physical simulation keywords and their CLI report values."""
+    options: dict[str, Any] = {
         "epsilon_r": args.epsilon_r,
         "lambda_tf": args.lambda_tf,
         "mu_minus": args.mu_minus,
     }
     if hasattr(args, "base"):
-        params.base = args.base
-        description["base"] = args.base
-    return description
+        options["base"] = args.base
+    return options
 
 
 def engine_argument(parser: Parser) -> None:

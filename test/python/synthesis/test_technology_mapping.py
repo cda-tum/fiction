@@ -47,16 +47,16 @@ def test_mapping_default(mux21: technology_network) -> None:
         technology_mapping(mux21)
 
 
-@pytest.mark.parametrize("make_params", GATE_LIBRARIES)
-def test_mapping_with_parameters(mux21, make_params):
-    mapped_network = technology_mapping(mux21, make_params())
+@pytest.mark.parametrize("make_options", GATE_LIBRARIES)
+def test_mapping_with_parameters(mux21, make_options):
+    mapped_network = technology_mapping(mux21, **make_options())
 
     assert equivalence_checking(mux21, mapped_network) == eq_type.STRONG
 
 
-@pytest.mark.parametrize("make_params", GATE_LIBRARIES)
-def test_mapping_with_stats(mux21, make_params):
+@pytest.mark.parametrize("make_options", GATE_LIBRARIES)
+def test_mapping_with_stats(mux21, make_options):
     stats = technology_mapping_stats()
-    mapped_network = technology_mapping(mux21, params=make_params(), stats=stats)
+    mapped_network = technology_mapping(mux21, stats=stats, **make_options())
 
     assert equivalence_checking(mux21, mapped_network) == eq_type.STRONG

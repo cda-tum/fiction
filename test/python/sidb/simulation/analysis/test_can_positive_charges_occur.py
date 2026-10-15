@@ -8,8 +8,9 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 from mnt.pyfiction.sidb.simulation.analysis import can_positive_charges_occur
 
 
@@ -20,11 +21,11 @@ def test_three_sidbs_100_lattice() -> None:
     layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
-    assert can_positive_charges_occur(layout, sidb_simulation_parameters())
+    assert can_positive_charges_occur(layout, base=3, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
-    params = sidb_simulation_parameters()
-    params.mu_minus = -0.8
-    assert not can_positive_charges_occur(layout, params)
+    options: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options["mu_minus"] = -0.8
+    assert not can_positive_charges_occur(layout, **options)
 
 
 def test_three_sidbs_111_lattice() -> None:
@@ -34,10 +35,10 @@ def test_three_sidbs_111_lattice() -> None:
     layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
-    params = sidb_simulation_parameters()
-    params.mu_minus = -0.05
+    options: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options["mu_minus"] = -0.05
 
-    assert can_positive_charges_occur(layout, params)
+    assert can_positive_charges_occur(layout, **options)
 
-    params.mu_minus = -0.8
-    assert not can_positive_charges_occur(layout, params)
+    options["mu_minus"] = -0.8
+    assert not can_positive_charges_occur(layout, **options)

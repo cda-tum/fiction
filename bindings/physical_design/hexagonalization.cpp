@@ -16,7 +16,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/hexagonalization.hpp>
@@ -43,6 +42,9 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using hexagonalization_options = fiction::physical_design::hexagonalization_params;
+
 /**
  * @brief Binds hexagonalization helpers.
  * @param m Python module.
@@ -56,28 +58,15 @@ void register_hexagonalization(nb::module_& m)
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    nb::enum_<fiction::physical_design::hexagonalization_params::io_pin_extension_mode>(
+    nb::enum_<hexagonalization_options::io_pin_extension_mode>(
         m, "hexagonalization_io_pin_extension_mode",
         DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode))
-        .value("NONE", fiction::physical_design::hexagonalization_params::io_pin_extension_mode::NONE,
+        .value("NONE", hexagonalization_options::io_pin_extension_mode::NONE,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_NONE))
-        .value("EXTEND", fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND,
+        .value("EXTEND", hexagonalization_options::io_pin_extension_mode::EXTEND,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_EXTEND))
-        .value("EXTEND_PLANAR", fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR,
+        .value("EXTEND_PLANAR", hexagonalization_options::io_pin_extension_mode::EXTEND_PLANAR,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR));
-
-    nb::class_<fiction::physical_design::hexagonalization_params>(
-        m, "hexagonalization_params",
-        pyfiction::progress_type_slots<fiction::physical_design::hexagonalization_params>(),
-        DOC(fiction_physical_design_hexagonalization_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("input_pin_extension", &fiction::physical_design::hexagonalization_params::input_pin_extension,
-                DOC(fiction_physical_design_hexagonalization_params_input_pin_extension))
-        .def_rw("output_pin_extension", &fiction::physical_design::hexagonalization_params::output_pin_extension,
-                DOC(fiction_physical_design_hexagonalization_params_output_pin_extension))
-        .def_rw("on_progress", &fiction::physical_design::hexagonalization_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_physical_design_hexagonalization_params_on_progress));
 
     nb::class_<fiction::physical_design::hexagonalization_stats>(m, "hexagonalization_stats",
                                                                  DOC(fiction_physical_design_hexagonalization_stats))
@@ -104,11 +93,37 @@ void register_hexagonalization(nb::module_& m)
         .def_ro("num_crossings", &fiction::physical_design::hexagonalization_stats::num_crossings,
                 DOC(fiction_physical_design_hexagonalization_stats_num_crossings));
 
-    m.def("hexagonalization",
-          &fiction::physical_design::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout>,
-          nb::arg("layout"), nb::arg("parameters") = fiction::physical_design::hexagonalization_params{},
-          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-          DOC(fiction_physical_design_hexagonalization));
+    m.def(
+        "hexagonalization",
+        [](const py_cartesian_gate_layout&                                 layout,
+           const decltype(hexagonalization_options{}.input_pin_extension)  input_pin_extension,
+           const decltype(hexagonalization_options{}.output_pin_extension) output_pin_extension,
+           const decltype(hexagonalization_options{}.on_progress)&         on_progress,
+           fiction::physical_design::hexagonalization_stats*               statistics)
+        {
+            hexagonalization_options params{};
+            params.input_pin_extension  = input_pin_extension;
+            params.output_pin_extension = output_pin_extension;
+            params.on_progress          = on_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::physical_design::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout>(
+                layout, params, statistics);
+        },
+        nb::arg("layout"), nb::kw_only(),
+        nb::arg("input_pin_extension")  = hexagonalization_options{}.input_pin_extension,
+        nb::arg("output_pin_extension") = hexagonalization_options{}.output_pin_extension,
+        nb::arg("on_progress").none() = nb::none(), nb::arg("statistics") = nullptr,
+        R"doc(Convert a 2DDWave-clocked Cartesian gate layout to an even-row hexagonal layout.
+The keyword options select input and output pin extension and progress reporting.
+Raises ValueError for unsupported clocking or invalid occupied geometry.
+Raises OverflowError when transformed coordinates exceed the signed coordinate range.
+
+Args:
+    input_pin_extension: Input pin extension mode: NONE, EXTEND, or EXTEND_PLANAR.
+    output_pin_extension: Output pin extension mode: NONE, EXTEND, or EXTEND_PLANAR.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
+)doc");
 }
 
 }  // namespace pyfiction

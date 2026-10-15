@@ -10,12 +10,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_simulation_parameters
-from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact, quickexact_params
+from mnt.pyfiction.sidb.model import sidb_charge_state
+from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -29,28 +29,26 @@ def test_three_sidbs() -> None:
     layout.assign_sidb(lattice_site(1, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
 
-    params = quickexact_params()
-    params.simulation_parameters.base = 2
-    params.simulation_parameters.mu_minus = -0.25
-    params.base_number_detection = automatic_base_number_detection.OFF
-    assert params.simulation_parameters.mu_minus == -0.25
-    assert params.base_number_detection == automatic_base_number_detection.OFF
+    options: dict[str, Any] = {
+        "base": 2,
+        "mu_minus": -0.25,
+        "base_number_detection": automatic_base_number_detection.OFF,
+    }
 
-    result = quickexact(layout, params)
+    result = quickexact(layout, **options)
 
     assert result.algorithm_name == "QuickExact"
     assert result.layout == layout
     assert len(result.charge_distributions) <= 3
 
-    params.base_number_detection = automatic_base_number_detection.ON
-    assert params.base_number_detection == automatic_base_number_detection.ON
+    options["base_number_detection"] = automatic_base_number_detection.ON
 
-    result = quickexact(layout, params)
+    result = quickexact(layout, **options)
     assert len(result.charge_distributions) <= 4
 
-    params.simulation_parameters.epsilon_r = 2
-    params.simulation_parameters.lambda_tf = 2
-    result = quickexact(layout, params)
+    options["epsilon_r"] = 2
+    options["lambda_tf"] = 2
+    result = quickexact(layout, **options)
     assert len(result.charge_distributions) <= 2
 
 
@@ -63,12 +61,7 @@ def test_perturber_and_sidb_pair_111() -> None:
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
-    params = quickexact_params()
-    params.simulation_parameters.base = 2
-    params.simulation_parameters.mu_minus = -0.32
-    params.base_number_detection = automatic_base_number_detection.OFF
-
-    result = quickexact(layout, params)
+    result = quickexact(layout, base=2, mu_minus=-0.32, base_number_detection=automatic_base_number_detection.OFF)
 
     assert result.algorithm_name == "QuickExact"
 
@@ -95,13 +88,12 @@ def test_simulate_all_inputs_of_and_gate(resources_dir: Path) -> None:
     """
 
     and_gate = read_sqd_layout(str(resources_dir / "Bestagon_AND_mu_025_v0.sqd"))
-    physical_parameters = sidb_simulation_parameters()
-    physical_parameters.base = 2
-    physical_parameters.epsilon_r = 5.6
-    physical_parameters.lambda_tf = 5.0  # (nm)
-    physical_parameters.mu_minus = -0.25  # (eV)
-    quickexact_parameter = quickexact_params()
-    quickexact_parameter.simulation_parameters = physical_parameters
+    physical_parameters: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    physical_parameters["base"] = 2
+    physical_parameters["epsilon_r"] = 5.6
+    physical_parameters["lambda_tf"] = 5.0  # (nm)
+    physical_parameters["mu_minus"] = -0.25  # (eV)
+    quickexact_parameter = physical_parameters.copy()
 
     left_a, left_b = lattice_site(0, 0, 0), lattice_site(2, 1, 0)
     right_a, right_b = lattice_site(24, 1, 0), lattice_site(26, 0, 0)
@@ -111,7 +103,7 @@ def test_simulate_all_inputs_of_and_gate(resources_dir: Path) -> None:
         and_gate.assign_sidb(left, sidb_dot_tag.EMPTY)
         and_gate.assign_sidb(right, sidb_dot_tag.EMPTY)
 
-        assert len(quickexact(and_gate, quickexact_parameter).charge_distributions) > 0
+        assert len(quickexact(and_gate, **quickexact_parameter).charge_distributions) > 0
 
         # restore the original layout
         and_gate.assign_sidb(left, sidb_dot_tag.INPUT)

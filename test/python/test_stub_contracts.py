@@ -20,7 +20,7 @@ from mnt.pyfiction.layouts import (
     coordinate,
     layout_object_id,
 )
-from mnt.pyfiction.physical_design import place, post_layout_optimization_params
+from mnt.pyfiction.physical_design import place, post_layout_optimization
 from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 from mnt.pyfiction.sidb.simulation.logic import (
     bdl_wire,
@@ -52,17 +52,14 @@ def test_coordinate_input_and_output_types() -> None:
         assert_type(above, coordinate | None)
 
 
-def test_optional_relocation_limit() -> None:
-    """The relocation limit accepts an integer and can be cleared."""
-    params = post_layout_optimization_params()
-    if TYPE_CHECKING:
-        assert_type(params.max_gate_relocations, int | None)
-    params.max_gate_relocations = 7
-    assert params.max_gate_relocations == 7
-    params.max_gate_relocations = None
-    assert params.max_gate_relocations is None
+@pytest.mark.parametrize("limit", [None, 7])
+def test_optional_relocation_limit(limit: int | None) -> None:
+    """Optimization accepts an integer relocation limit or no limit."""
+    layout = cartesian_gate_layout((1, 1), "2DDWave")
+    post_layout_optimization(layout, max_gate_relocations=limit)
+    assert layout.is_empty()
     with pytest.raises(TypeError):
-        params.max_gate_relocations = "not a count"  # ty: ignore[invalid-assignment]
+        post_layout_optimization(layout, max_gate_relocations="not a count")  # ty: ignore[invalid-argument-type]
 
 
 def test_placed_input_mapping(mux21: technology_network) -> None:

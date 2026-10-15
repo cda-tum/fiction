@@ -35,9 +35,6 @@
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_input_iterator_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_input_iterator
    :members:
 
@@ -273,9 +270,6 @@ Contour tracing samples the operational boundary and retains its initial random 
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.is_operational_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.is_operational
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_input_patterns
@@ -297,9 +291,6 @@ Contour tracing samples the operational boundary and retains its initial random 
    :members:
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_value_range
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_params
    :members:
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_stats
@@ -358,9 +349,6 @@ Contour tracing samples the operational boundary and retains its initial random 
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_contour_tracing
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_ratio_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_ratio
 ```
 
@@ -397,9 +385,6 @@ Contour tracing samples the operational boundary and retains its initial random 
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_pair
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_pairs_params
    :members:
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_pairs
@@ -442,9 +427,6 @@ Contour tracing samples the operational boundary and retains its initial random 
 
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_wire_selection
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.detect_bdl_wires_params
    :members:
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.bdl_wire

@@ -94,6 +94,24 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
+
+    SECTION("High precision converges")
+    {
+        const auto distance = potential_to_distance_conversion(0.5, params, 15);
+        REQUIRE(distance > 0.4);
+        REQUIRE(distance < 0.5);
+        REQUIRE_THAT(params.k() / (distance * 1e-9) * std::exp(-distance / params.lambda_tf) * ELEMENTARY_CHARGE,
+                     Catch::Matchers::WithinAbs(0.5, 1e-12));
+    }
+
+    SECTION("Invalid conversion values throw")
+    {
+        REQUIRE(std::isinf(potential_to_distance_conversion(0, params)));
+        REQUIRE_THROWS_AS(potential_to_distance_conversion(0.5, params, 20), std::invalid_argument);
+        REQUIRE_THROWS_AS(potential_to_distance_conversion(0.5, params, 1000), std::invalid_argument);
+        params.lambda_tf = -1;
+        REQUIRE_THROWS_AS(potential_to_distance_conversion(0.5, params), std::invalid_argument);
+    }
 }
 
 TEST_CASE("Potential-to-distance conversion validates inputs", "[potential_to_distance_conversion]")

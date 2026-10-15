@@ -15,6 +15,7 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include "pyfiction/bdl_parameters.hpp"
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
@@ -41,6 +42,9 @@ namespace nb = nanobind;
 
 namespace pyfiction
 {
+
+/** @brief Native options constructed for each Python call. */
+using detect_bdl_pairs_options = fiction::sidb::simulation::logic::detect_bdl_pairs_params;
 
 /**
  * @brief Binds detect bdl pairs helpers.
@@ -70,22 +74,28 @@ void register_detect_bdl_pairs(nb::module_& m)
              { return std::hash<lattice_site>{}(p.upper) ^ (std::hash<lattice_site>{}(p.lower) << 1U); })
         .def("__repr__", [](const bdl_pair_t& p) { return "bdl_pair(" + p.upper.str() + ", " + p.lower.str() + ")"; });
 
-    nb::class_<fiction::sidb::simulation::logic::detect_bdl_pairs_params>(
-        m, "detect_bdl_pairs_params", DOC(fiction_sidb_simulation_logic_detect_bdl_pairs_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("minimum_distance", &fiction::sidb::simulation::logic::detect_bdl_pairs_params::minimum_distance,
-                DOC(fiction_sidb_simulation_logic_detect_bdl_pairs_params_minimum_distance))
-        .def_rw("maximum_distance", &fiction::sidb::simulation::logic::detect_bdl_pairs_params::maximum_distance,
-                DOC(fiction_sidb_simulation_logic_detect_bdl_pairs_params_maximum_distance));
-
     m.def(
         "detect_bdl_pairs",
         [](const layout& lyt, const std::optional<fiction::sidb::dot_tag>& type,
-           const fiction::sidb::simulation::logic::detect_bdl_pairs_params& params)
-        { return fiction::sidb::simulation::logic::detect_bdl_pairs(lyt, type, params); },
-        nb::arg("lyt"), nb::arg("type") = std::nullopt,
-        nb::arg("params") = fiction::sidb::simulation::logic::detect_bdl_pairs_params{},
-        DOC(fiction_sidb_simulation_logic_detect_bdl_pairs));
+           const decltype(detect_bdl_pairs_options{}.minimum_distance) minimum_distance,
+           const decltype(detect_bdl_pairs_options{}.maximum_distance) maximum_distance)
+        {
+            validate_bdl_pair_distances(minimum_distance, maximum_distance);
+            detect_bdl_pairs_options params{};
+            params.minimum_distance = minimum_distance;
+            params.maximum_distance = maximum_distance;
+            return fiction::sidb::simulation::logic::detect_bdl_pairs(lyt, type, params);
+        },
+        nb::arg("lyt"), nb::arg("type") = std::nullopt, nb::kw_only(),
+        nb::arg("minimum_distance") = detect_bdl_pairs_options{}.minimum_distance,
+        nb::arg("maximum_distance") = detect_bdl_pairs_options{}.maximum_distance,
+        R"doc(Detect uniquely paired SiDBs with the selected tag in increasing distance.
+The keyword minimum_distance and maximum_distance bound the pair separation in nm.
+
+Args:
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+)doc");
 }
 
 }  // namespace pyfiction

@@ -99,15 +99,19 @@ def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
     assert "in (0, 1]" in shell.fails("temp -c 2")
 
 
-@pytest.mark.parametrize("algorithm", ["", "--grid-search"])
+@pytest.mark.parametrize("algorithm", ["", "--grid-search", "--sketch"])
 def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path, algorithm: str) -> None:
+    """Grid and sketch requests write one CSV row per sweep point."""
     csv = tmp_path / "opdom.csv"
     xor_gate.ok(f'opdom "{csv}" {algorithm} --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert result["grid_search"] is True
+    assert result["sketch"] is (algorithm == "--sketch")
     assert result["num_evaluated_parameter_combinations"] == 9
-    assert "epsilon_r,lambda_tf" in csv.read_text(encoding="utf-8")
+    rows = csv.read_text(encoding="utf-8").splitlines()
+    assert rows[0].startswith("epsilon_r,lambda_tf")
+    assert len(rows) == 10
 
 
 def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:

@@ -26,25 +26,6 @@ namespace pyfiction
 {
 
 /**
- * @brief Maps a C++ invalid-argument exception heading to Python's ValueError.
- * @param documentation Extracted C++ documentation with at most one invalid-argument heading.
- * @return Documentation with the Python exception heading.
- */
-inline std::string value_error_doc(const char* documentation)
-{
-    /** C++ exception heading in the extracted documentation. */
-    constexpr std::string_view exception{"\n    std::invalid_argument:"};
-    /** Documentation owned while the exception heading is replaced. */
-    std::string result{documentation};
-    /** Position of the C++ exception heading, when present. */
-    if (const auto position = result.find(exception); position != std::string::npos)
-    {
-        result.replace(position, exception.size(), "\n    ValueError:");
-    }
-    return result;
-}
-
-/**
  * @brief Maps the C++ size parameter to the Python extent keyword in layout documentation.
  * @param documentation Extracted C++ documentation.
  * @return Documentation with the Python keyword.

@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.registry import Category, command
@@ -23,7 +23,6 @@ from mnt.pyfiction.synthesis import (
     all_standard_3_input_functions,
     all_supported_standard_functions,
     technology_mapping,
-    technology_mapping_params,
     technology_mapping_stats,
 )
 
@@ -57,7 +56,7 @@ GATE_FLAGS = (
     ("onehot", "onehot"),
     ("gamble", "gamble"),
 )
-"""The ``map`` flags and the ``technology_mapping_params`` fields they set, in gate-complexity order."""
+"""The ``map`` flags and the ``technology_mapping`` options they set, in gate-complexity order."""
 
 
 GATE_SHORT_FLAGS = {"and": "a", "or": "o", "xor": "x", "inv": "i", "maj": "m", "dot": "d"}
@@ -95,24 +94,24 @@ def map_command(session: Session, args: argparse.Namespace) -> Result:
 
     Select at least one gate type, e.g. 'map --and --or --inv' for AND-OR-inverter networks.
     """
-    params = technology_mapping_params()
+    options: dict[str, Any] = {}
     if args.all:
-        params = all_supported_standard_functions()
+        options.update(all_supported_standard_functions())
     elif args.all3:
-        params = all_standard_3_input_functions()
+        options.update(all_standard_3_input_functions())
     elif args.all2:
-        params = all_standard_2_input_functions()
+        options.update(all_standard_2_input_functions())
     selected = [field for flag, field in GATE_FLAGS if getattr(args, flag.replace("-", "_"))]
     for field in selected:
-        setattr(params, field, True)
+        options[field] = True
     if not selected and not (args.all or args.all2 or args.all3):
         msg = "select at least one gate type, e.g. 'map --and --or --inv'"
         raise CommandError(msg)
-    params.decay = args.decay
+    options["decay"] = args.decay
 
     network = session.networks.current()
     stats = technology_mapping_stats()
-    mapped = technology_mapping(network, params, stats)
+    mapped = technology_mapping(network, stats=stats, **options)
     if stats.mapper_stats.mapping_error:
         msg_0 = "mapping failed: the selected gate library cannot cover this network; the store is unchanged"
         error = CommandError(msg_0)

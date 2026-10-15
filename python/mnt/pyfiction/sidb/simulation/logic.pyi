@@ -18,7 +18,6 @@ from numpy.typing import NDArray
 from typing_extensions import Self
 
 import mnt.pyfiction.sidb
-import mnt.pyfiction.sidb.model
 import mnt.pyfiction.sidb.simulation
 import mnt.pyfiction.synthesis
 
@@ -37,28 +36,6 @@ class input_bdl_configuration(enum.Enum):
     away (as described in https://dl.acm.org/doi/10.1145/3489517.3530525).
     """
 
-class bdl_input_iterator_params:
-    """Parameters for the BDL input iterator."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def bdl_wire_params(self) -> detect_bdl_wires_params:
-        """Parameters to detect BDL wires."""
-
-    @bdl_wire_params.setter
-    def bdl_wire_params(self, arg: detect_bdl_wires_params, /) -> None: ...
-    @property
-    def input_bdl_config(self) -> input_bdl_configuration:
-        """
-        The `input_bdl_config` member allows selection between different modes
-        for handling input BDLs.
-        """
-
-    @input_bdl_config.setter
-    def input_bdl_config(self, arg: input_bdl_configuration, /) -> None: ...
-
 class bdl_input_iterator:
     """
     Iterator that assigns the input patterns to the input BDL pairs of an
@@ -72,37 +49,42 @@ class bdl_input_iterator:
     """
 
     @overload
-    def __init__(self, lyt: mnt.pyfiction.sidb.sidb_layout, params: bdl_input_iterator_params = ...) -> None:
+    def __init__(
+        self,
+        lyt: mnt.pyfiction.sidb.sidb_layout,
+        *,
+        threshold_bdl_interdistance: float = 2.0,
+        minimum_distance: float = 0.75,
+        maximum_distance: float = 1.5,
+        input_bdl_config: input_bdl_configuration = ...,
+    ) -> None:
         """
-        Detects the input BDL pairs and wires of `source_layout` and applies
-        input pattern `0`.
+        Iterate over SiDB input patterns using the selected BDL encoding.
 
         Args:
-            source_layout: The layout to iterate over.
-            ps: Parameters for the BDL pair and wire detection and the input
-                encoding.
-
-        Raises:
-            std::invalid_argument: if the layout has more than 63 input BDL
-                                   pairs.
+            threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+            minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+            maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+            input_bdl_config: Input encoding: perturber absence or perturber distance.
         """
 
     @overload
     def __init__(
-        self, lyt: mnt.pyfiction.sidb.sidb_layout, params: bdl_input_iterator_params, input_wires: Sequence[bdl_wire]
+        self,
+        lyt: mnt.pyfiction.sidb.sidb_layout,
+        input_wires: Sequence[bdl_wire],
+        *,
+        minimum_distance: float = 0.75,
+        maximum_distance: float = 1.5,
+        input_bdl_config: input_bdl_configuration = ...,
     ) -> None:
         """
-        Like the constructor above but with input wires that are already
-        known.
+        Iterate over SiDB input patterns using the selected BDL encoding.
 
         Args:
-            source_layout: The layout to iterate over.
-            ps: Parameters for the BDL pair detection and the input encoding.
-            source_input_wires: The input wires of `source_layout`.
-
-        Raises:
-            std::invalid_argument: if the layout has more than 63 input BDL
-                                   pairs.
+            minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+            maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+            input_bdl_config: Input encoding: perturber absence or perturber distance.
         """
 
     def __iter__(self) -> bdl_input_iterator: ...
@@ -208,45 +190,43 @@ class bdl_input_iterator:
 
 @overload
 def generate_bdl_input_pattern_layouts(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: bdl_input_iterator_params = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
 ) -> list[mnt.pyfiction.sidb.sidb_layout]:
     """
-    Applies every input pattern to the input BDL pairs of a layout and
-    returns the resulting layouts, pattern `0` first; the input wires are
-    detected first.
+    Return one SiDB layout per input pattern, starting with pattern zero.
+    The keyword options select BDL detection and input encoding.
+    The overload with input_wires bypasses automatic wire detection.
 
     Args:
-        lyt: The layout.
-        ps: Parameters for the BDL detection and the input encoding.
-
-    Returns:
-        One layout per input pattern.
-
-    Raises:
-        std::invalid_argument: if the layout has more than 63 input BDL
-                               pairs.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
     """
 
 @overload
 def generate_bdl_input_pattern_layouts(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: bdl_input_iterator_params, input_wires: Sequence[bdl_wire]
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    input_wires: Sequence[bdl_wire],
+    *,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
 ) -> list[mnt.pyfiction.sidb.sidb_layout]:
     """
-    Applies every input pattern to the input BDL pairs of a layout and
-    returns the resulting layouts, pattern `0` first, with the input wires
-    given by the caller.
+    Return one SiDB layout per input pattern, starting with pattern zero.
+    The keyword options select BDL detection and input encoding.
+    The overload with input_wires bypasses automatic wire detection.
 
     Args:
-        lyt: The layout.
-        ps: Parameters for the BDL pair detection and the input encoding.
-        input_wires: The input wires of `lyt`.
-
-    Returns:
-        One layout per input pattern.
-
-    Raises:
-        std::invalid_argument: if the layout has more than 63 input BDL
-                               pairs.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
     """
 
 class bdl_pair:
@@ -318,58 +298,20 @@ class bdl_pair:
 
     def __hash__(self) -> int: ...
 
-class detect_bdl_pairs_params:
-    """Parameters for the BDL pair detection algorithms."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def minimum_distance(self) -> float:
-        """
-        The minimum distance between two SiDBs to be considered a BDL pair.
-        This is useful to prevent, e.g., SiDBs of atomic wires to be
-        considered BDL pairs. (unit: nm).
-        """
-
-    @minimum_distance.setter
-    def minimum_distance(self, arg: float, /) -> None: ...
-    @property
-    def maximum_distance(self) -> float:
-        """
-        The maximum distance between two dots to be considered a BDL pair.
-        This is useful to prevent unlikely pairings of SiDBs that are far
-        apart and to improve performance of the matching algorithm. (unit:
-        nm).
-        """
-
-    @maximum_distance.setter
-    def maximum_distance(self, arg: float, /) -> None: ...
-
 def detect_bdl_pairs(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     type: mnt.pyfiction.sidb.sidb_dot_tag | None = None,
-    params: detect_bdl_pairs_params = ...,
+    *,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
 ) -> list[bdl_pair]:
     """
-    Detects the BDL pairs of an SiDB layout. Dots with the given tag are
-    uniquely paired in increasing distance. The closest unpaired dots
-    within `[params.minimum_distance, params.maximum_distance]` (defaults
-    of 0.75 nm and 1.5 nm) form a pair. The lower bound keeps, e.g., the
-    SiDBs of an atomic wire from being paired; the upper bound prevents
-    unlikely pairings and bounds the work. Distances follow the layout's
-    lattice. The pairs are returned sorted.
+    Detect uniquely paired SiDBs with the selected tag in increasing distance.
+    The keyword minimum_distance and maximum_distance bound the pair separation in nm.
 
     Args:
-        lyt: The layout to detect BDL pairs in.
-        type: Optional dot tag to restrict the detection to (`INPUT`,
-              `OUTPUT`, `NORMAL`, ...). If omitted, the BDL pairs of the
-              input, output, and normal SiDBs are detected and returned in
-              that order.
-        params: Parameters for the BDL pair detection.
-
-    Returns:
-        The detected BDL pairs.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
     """
 
 class bdl_wire_selection(enum.Enum):
@@ -389,28 +331,6 @@ ALL: bdl_wire_selection = ...
 INPUT: bdl_wire_selection = ...
 
 OUTPUT: bdl_wire_selection = ...
-
-class detect_bdl_wires_params:
-    """This struct encapsulates parameters used for detecting BDL wires."""
-
-    def __init__(self) -> None:
-        """This struct encapsulates parameters used for detecting BDL wires."""
-
-    @property
-    def threshold_bdl_interdistance(self) -> float:
-        """
-        A distance threshold, which is used to determine if two pairs of BDLs
-        are part of the same wire. (unit: nm).
-        """
-
-    @threshold_bdl_interdistance.setter
-    def threshold_bdl_interdistance(self, arg: float, /) -> None: ...
-    @property
-    def bdl_pairs_params(self) -> detect_bdl_pairs_params:
-        """Parameters for the `detect_bdl_pairs` algorithm."""
-
-    @bdl_pairs_params.setter
-    def bdl_pairs_params(self, arg: detect_bdl_pairs_params, /) -> None: ...
 
 class bdl_wire:
     """
@@ -554,21 +474,22 @@ class bdl_wire:
     def __ne__(self, arg: bdl_wire, /) -> bool: ...
 
 def detect_bdl_wires(
-    lyt: mnt.pyfiction.sidb.sidb_layout, params: detect_bdl_wires_params = ..., wire_selection: bdl_wire_selection = ...
+    lyt: mnt.pyfiction.sidb.sidb_layout,
+    *,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    wire_selection: bdl_wire_selection = ...,
 ) -> list[bdl_wire]:
     """
-    Detects the BDL wires of an SiDB layout: the BDL pairs of all types
-    are chained into wires along the layout's lattice whenever two pairs
-    lie within `params.threshold_bdl_interdistance` of each other.
+    Chain BDL pairs into wires along the SiDB lattice.
+    The keyword options select pair-distance bounds, inter-pair distance, and wire types.
 
     Args:
-        lyt: The layout.
-        params: Parameters for the BDL pair and wire detection.
-        wire_selection: Which wires to return: all, input, or output
-                        wires.
-
-    Returns:
-        The detected wires.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        wire_selection: Select all wires, input wires, or output wires.
     """
 
 class operational_status(enum.Enum):
@@ -651,279 +572,330 @@ class operational_analysis_strategy(enum.Enum):
     This only provides any runtime benefits if kinks are rejected.
     """
 
-class is_operational_params:
-    """Parameters for the `is_operational` algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def timeout(self) -> int:
-        """
-        Millisecond budget for the complete operation. Gate design, domains,
-        and critical-temperature calculations share this budget across all
-        nested checks. The maximum value means unlimited; zero expires
-        immediately. Expiration throws `utils::timeout_error` without
-        returning a partial result.
-        """
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """
-        The simulation parameters for the physical simulation of the ground
-        state.
-        """
-
-    @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
-    @property
-    def sim_engine(self) -> mnt.pyfiction.sidb.simulation.sidb_simulation_engine:
-        """
-        The simulation engine to be used for the operational domain
-        computation.
-        """
-
-    @sim_engine.setter
-    def sim_engine(self, arg: mnt.pyfiction.sidb.simulation.sidb_simulation_engine, /) -> None: ...
-    @property
-    def input_bdl_iterator_params(self) -> bdl_input_iterator_params:
-        """Parameters for the BDL input iterator."""
-
-    @input_bdl_iterator_params.setter
-    def input_bdl_iterator_params(self, arg: bdl_input_iterator_params, /) -> None: ...
-    @property
-    def op_condition(self) -> operational_condition:
-        """
-        Condition to decide whether a layout is operational or non-
-        operational.
-        """
-
-    @op_condition.setter
-    def op_condition(self, arg: operational_condition, /) -> None: ...
-    @property
-    def strategy_to_analyze_operational_status(self) -> operational_analysis_strategy:
-        """
-        Strategy to determine whether a layout is operational or non-
-        operational.
-        """
-
-    @strategy_to_analyze_operational_status.setter
-    def strategy_to_analyze_operational_status(self, arg: operational_analysis_strategy, /) -> None: ...
-
 @overload
 def is_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
 ) -> tuple[operational_status, int]:
     """
-    Determines whether an SiDB layout implements the given Boolean
-    function(s). Every input pattern is applied to the input BDL pairs,
-    the ground states are simulated with the configured engine, and the
-    charge states of the output BDL pairs are compared with the expected
-    truth-table entries. If the layout carries logic dots, they form the
-    canvas of the pruning filters that run before any simulation whenever
-    the parameters ask for filtering and reject kinks.
+    Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+    Overloads accept supplied wires or one layout per input pattern.
 
     Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        params: Parameters.
-
-    Returns:
-        The operational status and the number of simulator invocations.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 @overload
 def is_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
-) -> tuple[operational_status, int]:
-    """
-    Like the overload above, with the BDL wires and, optionally, the
-    canvas given by the caller.
-
-    Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        params: Parameters.
-        input_bdl_wire: The input BDL wires of `lyt`.
-        output_bdl_wire: The output BDL wires of `lyt`.
-        canvas_lyt: The canvas; defaults to the logic dots of `lyt`.
-
-    Returns:
-        The operational status and the number of simulator invocations.
-    """
-
+) -> tuple[operational_status, int]: ...
 @overload
 def is_operational(
     input_pattern_layouts: Sequence[mnt.pyfiction.sidb.sidb_layout],
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> tuple[operational_status, int]:
     """
-    Like the overloads above, but with one layout per input pattern given
-    by the caller instead of applying the patterns to the input BDL pairs.
+    Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+    Overloads accept supplied wires or one layout per input pattern.
 
     Args:
-        input_pattern_layouts: One layout per input pattern, pattern `0`
-                               first.
-        spec: The Boolean function(s) to implement.
-        params: Parameters.
-        input_bdl_wire: The input BDL wires.
-        output_bdl_wire: The output BDL wires.
-        canvas_lyt: The canvas; defaults to the logic dots of the first
-                    layout.
-
-    Returns:
-        The operational status and the number of simulator invocations.
-
-    Raises:
-        std::invalid_argument: if `spec` is empty or the number of layouts
-                               does not match the number of patterns.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        canvas_lyt: Optional canvas layout for operational analysis.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 @overload
 def operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
 ) -> set[int]:
     """
-    Determines the input patterns for which the layout is operational.
+    Return the input patterns for which the SiDB layout implements the truth tables.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 
     Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        params: Parameters.
-
-    Returns:
-        The operational input patterns.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 @overload
 def operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> set[int]:
     """
-    Like the overload above, with the BDL wires and, optionally, the
-    canvas given by the caller.
+    Return the input patterns for which the SiDB layout implements the truth tables.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 
     Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        params: Parameters.
-        input_bdl_wire: The input BDL wires of `lyt`.
-        output_bdl_wire: The output BDL wires of `lyt`.
-        canvas_lyt: The canvas; defaults to none.
-
-    Returns:
-        The operational input patterns.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        canvas_lyt: Optional canvas layout for operational analysis.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 @overload
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
 ) -> set[int]:
     """
-    Determines the input patterns for which kinks render the layout non-
-    operational.
+    Return the input patterns for which kinks render the SiDB layout non-operational.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 
     Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        params: Parameters; kinks are rejected regardless of
-                `params.op_condition`.
-
-    Returns:
-        The kink-induced non-operational input patterns.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 @overload
 def kink_induced_non_operational_input_patterns(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> set[int]:
     """
-    Like the overload above, with the BDL wires and, optionally, the
-    canvas given by the caller.
+    Return the input patterns for which kinks render the SiDB layout non-operational.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 
     Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        params: Parameters; kinks are rejected regardless of
-                `params.op_condition`.
-        input_bdl_wire: The input BDL wires of `lyt`.
-        output_bdl_wire: The output BDL wires of `lyt`.
-        canvas_lyt: The canvas; defaults to none.
-
-    Returns:
-        The kink-induced non-operational input patterns.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        canvas_lyt: Optional canvas layout for operational analysis.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 @overload
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
 ) -> bool:
     """
-    Determines whether kinks are the reason the layout is non-operational.
+    Check whether kinks cause the SiDB layout to be non-operational.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 
     Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        params: Parameters; kinks are rejected regardless of
-                `params.op_condition`.
-
-    Returns:
-        `true` if the layout is non-operational because of kinks.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 @overload
 def is_kink_induced_non_operational(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: is_operational_params,
     input_bdl_wire: Sequence[bdl_wire],
     output_bdl_wire: Sequence[bdl_wire],
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
 ) -> bool:
     """
-    Like the overload above, with the BDL wires and, optionally, the
-    canvas given by the caller.
+    Check whether kinks cause the SiDB layout to be non-operational.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
 
     Args:
-        lyt: The layout to check.
-        spec: The Boolean function(s) it has to implement.
-        params: Parameters; kinks are rejected regardless of
-                `params.op_condition`.
-        input_bdl_wire: The input BDL wires of `lyt`.
-        output_bdl_wire: The output BDL wires of `lyt`.
-        canvas_lyt: The canvas; defaults to none.
-
-    Returns:
-        `true` if the layout is non-operational because of kinks.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        canvas_lyt: Optional canvas layout for operational analysis.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 class parameter_point:
@@ -1210,72 +1182,6 @@ class operational_domain_value_range:
     @step.setter
     def step(self, arg: float, /) -> None: ...
 
-class operational_domain_params:
-    """
-    Parameters for the operational domain computation. The parameters are
-    used across the different operational domain computation algorithms.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def operational_params(self) -> is_operational_params:
-        """
-        Operational parameters. Their timeout bounds the entire domain
-        calculation across all parameter points and workers. Finite budgets
-        reject ClusterComplete and throw `utils::timeout_error` on expiration.
-        """
-
-    @operational_params.setter
-    def operational_params(self, arg: is_operational_params, /) -> None: ...
-    @property
-    def sweep_dimensions(self) -> list[operational_domain_value_range]:
-        """
-        Dimensions to sweep over together with their value ranges, ordered by
-        priority.
-
-        The first dimension is the x dimension, the second dimension is the y
-        dimension, etc. The default sweeps relative permittivity and screening
-        distance from 1.0 to 10.0 in steps of 0.1.
-        """
-
-    @sweep_dimensions.setter
-    def sweep_dimensions(self, arg: Sequence[operational_domain_value_range], /) -> None: ...
-    @property
-    def number_of_threads(self) -> int:
-        """
-        Number of worker threads to distribute the parameter points over.
-
-        Defaults to the number of hardware threads, or `1` when that count is
-        unavailable. Values below `1` are treated as `1`.
-
-        Pinning it makes wall-clock comparisons reproducible across runs and
-        machines, and allows an operational domain computation to leave cores
-        free for other work.
-        """
-
-    @number_of_threads.setter
-    def number_of_threads(self, arg: int, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the number of evaluated parameter points. The
-        total is known for grid search and random sampling only.
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def on_worker_progress(self, /) -> Callable[[int, int, str, int, int, bool], None] | None:
-        """
-        Reports logical worker activity with a fixed worker count for each
-        invocation.
-        """
-
-    @on_worker_progress.setter
-    def on_worker_progress(self, value: Callable[[int, int, str, int, int, bool], None] | None) -> None: ...
-
 class operational_domain_stats:
     """
     Statistics for the operational domain computation. The statistics are
@@ -1315,454 +1221,430 @@ class operational_domain_stats:
 def operational_domain_grid_search(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
-    Computes the operational domain of the given SiDB layout. The
-    operational domain is the set of all parameter combinations for which
-    the layout is logically operational. Logical operation is defined as
-    the layout implementing the given truth table. The input BDL pairs of
-    the layout are assumed to be in the same order as the inputs of the
-    truth table.
-
-    This algorithm uses a grid search to find the operational domain. The
-    grid search is performed by exhaustively sweeping all sweep
-    dimensions. Since grid search is exhaustive, the algorithm is
-    guaranteed to find the operational domain, if it exists within the
-    parameter range. However, the algorithm performs one operational check
-    per parameter combination, i.e., the product of the step counts of all
-    sweep dimensions, where each operational check consists of up to
-    :math:`2^n` exact ground state simulations, where :math:`n` is the
-    number of inputs of the layout. Each exact ground state simulation has
-    exponential complexity in of itself. Therefore, the algorithm is only
-    feasible for small layouts with few inputs.
+    Compute the operational domain by exhaustively sweeping every parameter combination.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean functions, one dynamic truth table per
-              output.
-        params: Parameters for the operational domain computation.
-        stats: Statistics of the process.
-
-    Returns:
-        The operational domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Any number of
-                               sweep dimensions is accepted.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def operational_domain_random_sampling(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
-    Computes the operational domain of the given SiDB layout. The
-    operational domain is the set of all parameter combinations for which
-    the layout is logically operational. Logical operation is defined as
-    the layout implementing the given truth table. The input BDL pairs of
-    the layout are assumed to be in the same order as the inputs of the
-    truth table.
-
-    This algorithm uses random sampling to find a part of the operational
-    domain that might not be complete. It performs a total of `samples`
-    uniformly-distributed random samples within the parameter range. For
-    each sample, the algorithm performs one operational check on the
-    layout, where each operational check consists of up to :math:`2^n`
-    exact ground state simulations, where :math:`n` is the number of
-    inputs of the layout. Each exact ground state simulation has
-    exponential complexity in of itself. Therefore, the algorithm is only
-    feasible for small layouts with few inputs.
+    Compute the operational domain by randomly sampling parameter combinations.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        params: Operational domain computation parameters.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The operational domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Any number of
-                               sweep dimensions is accepted.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def operational_domain_flood_fill(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
-    Computes the operational domain of the given SiDB layout. The
-    operational domain is the set of all parameter combinations for which
-    the layout is logically operational. Logical operation is defined as
-    the layout implementing the given truth table. The input BDL pairs of
-    the layout are assumed to be in the same order as the inputs of the
-    truth table.
-
-    This algorithm first uses random sampling to find several operational
-    points within the parameter range. From there, it employs the "flood
-    fill" algorithm to explore the operational domain. The algorithm is
-    guaranteed to determine all operational "islands" in their entirety if
-    the initial random sampling found at least one operational point
-    within them. Thereby, this algorithm works for disconnected
-    operational domains.
-
-    It performs `samples` uniformly-distributed random samples within the
-    parameter range. From there, it performs another number of samples
-    equal to the number of points within the operational domain plus the
-    first non-operational point in each direction. For each sample, the
-    algorithm performs one operational check on the layout, where each
-    operational check consists of up to :math:`2^n` exact ground state
-    simulations, where :math:`n` is the number of inputs of the layout.
-    Each exact ground state simulation has exponential complexity in of
-    itself. Therefore, the algorithm is only feasible for small layouts
-    with few inputs.
-
-    This flavor of operational domain computation was proposed in
-    \\"Reducing the Complexity of Operational Domain Computation in Silicon
-    Dangling Bond Logic\\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
-    Walus, and R. Wille in NANOARCH 2023.
+    Compute the operational domain by expanding from sampled operational points.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        params: Operational domain computation parameters.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The operational domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Flood fill and
-                               contour tracing additionally require at
-                               least two sweep dimensions; grid search and
-                               random sampling accept any number.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def operational_domain_contour_tracing(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> operational_domain:
     """
-    Computes the operational domain of the given SiDB layout. The
-    operational domain is the set of all parameter combinations for which
-    the layout is logically operational. Logical operation is defined as
-    the layout implementing the given truth table. The input BDL pairs of
-    the layout are assumed to be in the same order as the inputs of the
-    truth table.
-
-    This algorithm first uses random sampling to find a set of operational
-    point within the parameter range. From there, it traverses outwards to
-    find the edge of the operational area and performs Moore neighborhood
-    contour tracing to explore the contour of the operational domain. This
-    is repeated for all initially sampled points that do not lie within a
-    contour. The algorithm is guaranteed to determine the contours of all
-    operational "islands" if the initial random sampling found at least
-    one operational point within them. Thereby, this algorithm works for
-    disconnected operational domains.
-
-    It performs `samples` uniformly-distributed random samples within the
-    parameter range. For each thusly discovered operational island, it
-    performs another number of samples equal to the distance to an edge of
-    each operational area. Finally, it performs up to 8 samples for each
-    contour point (however, the actual number is usually lower). For each
-    sample, the algorithm performs one operational check on the layout,
-    where each operational check consists of up to :math:`2^n` exact
-    ground state simulations, where :math:`n` is the number of inputs of
-    the layout. Each exact ground state simulation has exponential
-    complexity in of itself. Therefore, the algorithm is only feasible for
-    small layouts with few inputs.
+    Compute the operational domain by tracing operational boundaries.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        params: Operational domain computation parameters.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The operational domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Flood fill and
-                               contour tracing additionally require at
-                               least two sweep dimensions; grid search and
-                               random sampling accept any number.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def critical_temperature_domain_grid_search(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
-    Computes the critical temperature domain of the given SiDB layout. The
-    critical temperature domain consists of all parameter combinations for
-    which the layout is logically operational, along with the critical
-    temperature for each specific parameter point.
-
-    This algorithm uses a grid search to find the operational domain. The
-    grid search is performed by exhaustively sweeping all sweep
-    dimensions. Since grid search is exhaustive, the algorithm is
-    guaranteed to find the operational domain, if it exists within the
-    parameter range. However, the algorithm performs one operational check
-    per parameter combination, i.e., the product of the step counts of all
-    sweep dimensions, where each operational check consists of up to
-    :math:`2^n` exact ground state simulations, where :math:`n` is the
-    number of inputs of the layout. Each exact ground state simulation has
-    exponential complexity in of itself. Therefore, the algorithm is only
-    feasible for small layouts with few inputs.
+    Compute the critical-temperature domain by exhaustively sweeping every parameter combination.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Confidence uses the native critical-temperature default of 0.99.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected vector of truth tables of the layout. Each truth
-              table represents an output of the Boolean function.
-        params: Operational domain computation parameters.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The critical temperature domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Any number of
-                               sweep dimensions is accepted.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def critical_temperature_domain_random_sampling(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
-    Computes the critical temperature domain of the given SiDB layout. The
-    critical temperature domain consists of all parameter combinations for
-    which the layout is logically operational, along with the critical
-    temperature for each specific parameter point.
-
-    This algorithm uses random sampling to find a part of the operational
-    domain that might not be complete. It performs a total of `samples`
-    uniformly-distributed random samples within the parameter range. For
-    each sample, the algorithm performs one operational check on the
-    layout, where each operational check consists of up to :math:`2^n`
-    exact ground state simulations, where :math:`n` is the number of
-    inputs of the layout. Each exact ground state simulation has
-    exponential complexity in of itself. Therefore, the algorithm is only
-    feasible for small layouts with few inputs.
+    Compute the critical-temperature domain by randomly sampling parameter combinations.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Confidence uses the native critical-temperature default of 0.99.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        params: Operational domain computation parameters.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The critical temperature domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Any number of
-                               sweep dimensions is accepted.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def critical_temperature_domain_flood_fill(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
-    Computes the critical temperature domain of the given SiDB layout. The
-    critical temperature domain consists of all parameter combinations for
-    which the layout is logically operational, along with the critical
-    temperature for each specific parameter point.
-
-    This algorithm first uses random sampling to find several operational
-    points within the parameter range. From there, it employs the "flood
-    fill" algorithm to explore the operational domain. The algorithm is
-    guaranteed to determine all operational "islands" in their entirety if
-    the initial random sampling found at least one operational point
-    within them. Thereby, this algorithm works for disconnected
-    operational domains.
-
-    It performs `samples` uniformly-distributed random samples within the
-    parameter range. From there, it performs another number of samples
-    equal to the number of points within the operational domain plus the
-    first non-operational point in each direction. For each sample, the
-    algorithm performs one operational check on the layout, where each
-    operational check consists of up to :math:`2^n` exact ground state
-    simulations, where :math:`n` is the number of inputs of the layout.
-    Each exact ground state simulation has exponential complexity in of
-    itself. Therefore, the algorithm is only feasible for small layouts
-    with few inputs.
+    Compute the critical-temperature domain by expanding from sampled operational points.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Confidence uses the native critical-temperature default of 0.99.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        params: Operational domain computation parameters.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The critical temperature domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Flood fill and
-                               contour tracing additionally require at
-                               least two sweep dimensions; grid search and
-                               random sampling accept any number.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 def critical_temperature_domain_contour_tracing(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     samples: int,
-    params: operational_domain_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
     stats: operational_domain_stats | None = None,
 ) -> critical_temperature_domain:
     """
-    Computes the critical temperature domain of the given SiDB layout. The
-    critical temperature domain consists of all parameter combinations for
-    which the layout is logically operational, along with the critical
-    temperature for each specific parameter point.
-
-    This algorithm first uses random sampling to find a set of operational
-    point within the parameter range. From there, it traverses outwards to
-    find the edge of the operational area and performs Moore neighborhood
-    contour tracing to explore the contour of the operational domain. This
-    is repeated for all initially sampled points that do not lie within a
-    contour. The algorithm is guaranteed to determine the contours of all
-    operational "islands" if the initial random sampling found at least
-    one operational point within them. Thereby, this algorithm works for
-    disconnected operational domains. The critical temperature is computed
-    for each operational point.
-
-    It performs `samples` uniformly-distributed random samples within the
-    parameter range. For each thusly discovered operational island, it
-    performs another number of samples equal to the distance to an edge of
-    each operational area. Finally, it performs up to 8 samples for each
-    contour point (however, the actual number is usually lower). For each
-    sample, the algorithm performs one operational check on the layout,
-    where each operational check consists of up to :math:`2^n` exact
-    ground state simulations, where :math:`n` is the number of inputs of
-    the layout. Each exact ground state simulation has exponential
-    complexity in of itself. Therefore, the algorithm is only feasible for
-    small layouts with few inputs.
+    Compute the critical-temperature domain by tracing operational boundaries.
+    The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+    Confidence uses the native critical-temperature default of 0.99.
+    Raises ValueError for invalid sweep dimensions, bounds, or steps.
 
     Args:
-        lyt: Layout to compute the operational domain for.
-        spec: Expected Boolean function of the layout given as a multi-
-              output truth table.
-        samples: Number of samples to perform.
-        params: Operational domain computation parameters.
-        stats: Operational domain computation statistics.
-
-    Returns:
-        The critical temperature domain of the layout.
-
-    Raises:
-        std::invalid_argument: if the given sweep parameters are invalid,
-                               or if the operational domain sketch is
-                               requested without rejecting kinks or on a
-                               layout without `LOGIC` dots. Flood fill and
-                               contour tracing additionally require at
-                               least two sweep dimensions; grid search and
-                               random sampling accept any number.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
-
-class operational_domain_ratio_params:
-    """
-    Parameters for computing the ratio of operational parameter points
-    around a specified parameter point to the total number of parameter
-    points in the given parameter space.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def op_domain_params(self) -> operational_domain_params:
-        """Parameters for the operational domain computation."""
-
-    @op_domain_params.setter
-    def op_domain_params(self, arg: operational_domain_params, /) -> None: ...
 
 def operational_domain_ratio(
     lyt: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
     pp: parameter_point,
-    params: operational_domain_ratio_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: input_bdl_configuration = ...,
+    op_condition: operational_condition = ...,
+    strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
+    sweep_dimensions: Sequence[operational_domain_value_range] | None = None,
+    number_of_threads: int | None = None,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
 ) -> float:
     """
-    Calculates the ratio of operational parameter points surrounding a
-    specified parameter point to the total number of parameter points in
-    the given parameter space. This function is useful for assessing how
-    robust a gate design is to variations in its parameters.
-
-    A ratio close to 1 indicates that the gate is robust, meaning it
-    functions correctly across a broad range of parameter values. A ratio
-    close to 0 indicates that the gate is highly sensitive to parameter
-    variations and may fail to operate correctly.
+    Compute the fraction of operational parameter points surrounding the given point.
+    The keyword options select the sweep, sampling, physical values, operational analysis, and progress.
 
     Args:
-        lyt: The SiDB layout for which to compute the ratio of operational
-             parameter points surrounding a specified parameter point to
-             the total number of parameter points.
-        spec: The expected Boolean function of the layout, provided as a
-              multi-output truth table.
-        params: Parameters.
-        pp: The specific parameter point around which the operational
-            ratio is computed.
-
-    Returns:
-        The ratio of operational parameter points to the total number of
-        parameter points in the parameter space.
-
-    Raises:
-        std::invalid_argument: if the sweep has fewer than two dimensions,
-                               a range is invalid, or the seed is non-
-                               finite, outside the grid, or has the wrong
-                               dimension count.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+        number_of_threads: Number of workers; None uses the native default.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """

@@ -13,7 +13,7 @@ from collections.abc import Callable, Sequence
 
 import mnt.pyfiction.layouts
 import mnt.pyfiction.sidb
-import mnt.pyfiction.sidb.model
+import mnt.pyfiction.sidb.simulation
 import mnt.pyfiction.sidb.simulation.logic
 import mnt.pyfiction.synthesis
 
@@ -35,104 +35,68 @@ class positive_charges(enum.Enum):
     they are.
     """
 
-class generate_random_sidb_layout_params:
-    """Parameters of the random layout generator."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def coordinate_pair(self) -> tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.lattice_site]:
-        """The area to place SiDBs in, as two opposite corners."""
-
-    @coordinate_pair.setter
-    def coordinate_pair(
-        self, arg: tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.lattice_site], /
-    ) -> None: ...
-    @property
-    def number_of_sidbs(self) -> int:
-        """Number of SiDBs to place."""
-
-    @number_of_sidbs.setter
-    def number_of_sidbs(self, arg: int, /) -> None: ...
-    @property
-    def positive_sidbs(self) -> positive_charges:
-        """Positive charge policy."""
-
-    @positive_sidbs.setter
-    def positive_sidbs(self, arg: positive_charges, /) -> None: ...
-    @property
-    def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """Physical parameters for the positive charge check."""
-
-    @simulation_parameters.setter
-    def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
-    @property
-    def maximal_attempts(self) -> int:
-        """Maximum number of placement attempts."""
-
-    @maximal_attempts.setter
-    def maximal_attempts(self, arg: int, /) -> None: ...
-    @property
-    def number_of_unique_generated_layouts(self) -> int:
-        """
-        Number of unique layouts to generate with
-        `generate_multiple_random_layouts`.
-        """
-
-    @number_of_unique_generated_layouts.setter
-    def number_of_unique_generated_layouts(self, arg: int, /) -> None: ...
-    @property
-    def maximal_attempts_for_multiple_layouts(self) -> int:
-        """Maximum number of generation attempts for multiple layouts."""
-
-    @maximal_attempts_for_multiple_layouts.setter
-    def maximal_attempts_for_multiple_layouts(self, arg: int, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """
-        Callback that receives the number of placed SiDBs and, for multiple
-        layouts, the number of generated layouts.
-        """
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-
 def generate_random_sidb_layout(
-    params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction.sidb.sidb_layout | None = None
+    lyt_skeleton: mnt.pyfiction.sidb.sidb_layout | None = None,
+    *,
+    coordinate_pair: tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.lattice_site] = ...,
+    number_of_sidbs: int = 0,
+    positive_sidbs: positive_charges = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    maximal_attempts: int = 10000000,
+    on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.sidb.sidb_layout | None:
     """
-    Generates a random SiDB layout by placing SiDBs at random sites of an
-    area, optionally on top of a skeleton. The skeleton's lattice, dots,
-    and defects carry over; sites that hold a defect or that a neutral
-    defect affects are left empty. Depending on the positive charge
-    policy, SiDBs that would allow positive charges are removed again, or
-    the generation is repeated until positive charges are possible.
+    Generate a random SiDB layout within coordinate_pair, optionally extending lyt_skeleton.
+    The keyword options select physical values, charge restrictions, and attempt limits.
+    Returns None when the attempt limit does not produce a layout.
 
     Args:
-        params: Parameters.
-        skeleton: The skeleton to place SiDBs on, if any.
-
-    Returns:
-        The generated layout, or `std::nullopt` if not all SiDBs could be
-        placed within the attempt limit.
+        coordinate_pair: The area to place SiDBs in, as two opposite corners.
+        number_of_sidbs: Number of SiDBs to place.
+        positive_sidbs: Allow positive charges, forbid positive charges, or require that positive charges may occur.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        maximal_attempts: Maximum number of placement attempts.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     """
 
 def generate_multiple_random_sidb_layouts(
-    params: generate_random_sidb_layout_params, lyt_skeleton: mnt.pyfiction.sidb.sidb_layout | None = None
+    lyt_skeleton: mnt.pyfiction.sidb.sidb_layout | None = None,
+    *,
+    coordinate_pair: tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.lattice_site] = ...,
+    number_of_sidbs: int = 0,
+    positive_sidbs: positive_charges = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    maximal_attempts: int = 10000000,
+    number_of_unique_generated_layouts: int = 1,
+    maximal_attempts_for_multiple_layouts: int = 1000000,
+    on_progress: Callable[[str, int, int], None] | None = None,
 ) -> list[mnt.pyfiction.sidb.sidb_layout] | None:
     """
-    Generates several unique random SiDB layouts with
-    `generate_random_layout`.
+    Generate distinct random SiDB layouts, optionally extending lyt_skeleton.
+    The keyword options select the area, physical values, requested count, and attempt limits.
+    Returns None if no layout is generated; the attempt limit can yield fewer layouts than requested.
 
     Args:
-        params: Parameters; `number_of_unique_generated_layouts` layouts
-                are requested.
-        skeleton: The skeleton to place SiDBs on, if any.
-
-    Returns:
-        The layouts, or `std::nullopt` if none could be generated within
-        the attempt limit.
+        coordinate_pair: The area to place SiDBs in, as two opposite corners.
+        number_of_sidbs: Number of SiDBs to place.
+        positive_sidbs: Allow positive charges, forbid positive charges, or require that positive charges may occur.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        maximal_attempts: Maximum number of placement attempts.
+        number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_sidb_layouts`.
+        maximal_attempts_for_multiple_layouts: Maximum number of generation attempts for multiple layouts.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     """
 
 class design_sidb_gates_stats:
@@ -170,109 +134,55 @@ class termination_condition(enum.Enum):
 
     ALL_COMBINATIONS_ENUMERATED = 1
 
-class design_sidb_gates_params:
-    """Parameters of the gate designers."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def operational_params(self) -> mnt.pyfiction.sidb.simulation.logic.is_operational_params:
-        """Parameters of the operational check."""
-
-    @operational_params.setter
-    def operational_params(self, arg: mnt.pyfiction.sidb.simulation.logic.is_operational_params, /) -> None: ...
-    @property
-    def design_mode(self) -> design_sidb_gates_mode:
-        """The design mode."""
-
-    @design_mode.setter
-    def design_mode(self, arg: design_sidb_gates_mode, /) -> None: ...
-    @property
-    def canvas(self) -> tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.lattice_site]:
-        """
-        The canvas: the area canvas SiDBs are placed in, as two opposite
-        corners.
-        """
-
-    @canvas.setter
-    def canvas(self, arg: tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.lattice_site], /) -> None: ...
-    @property
-    def number_of_canvas_sidbs(self) -> int:
-        """Number of canvas SiDBs."""
-
-    @number_of_canvas_sidbs.setter
-    def number_of_canvas_sidbs(self, arg: int, /) -> None: ...
-    @property
-    def maximal_random_design_attempts(self) -> int:
-        """
-        Maximum number of layouts evaluated by random gate design across all
-        threads.
-        """
-
-    @maximal_random_design_attempts.setter
-    def maximal_random_design_attempts(self, arg: int, /) -> None: ...
-    @property
-    def termination_cond(self) -> termination_condition:
-        """When to stop."""
-
-    @termination_cond.setter
-    def termination_cond(self, arg: termination_condition, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Callback that receives the progress of the design mode's main loop."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-
 def design_sidb_gates(
     skeleton: mnt.pyfiction.sidb.sidb_layout,
     spec: Sequence[mnt.pyfiction.synthesis.dynamic_truth_table],
-    params: design_sidb_gates_params = ...,
+    *,
+    timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
+    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
+    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
+    design_mode: design_sidb_gates_mode = ...,
+    canvas: tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.lattice_site] = ...,
+    number_of_canvas_sidbs: int = 1,
+    maximal_random_design_attempts: int = 1000000,
+    termination_cond: termination_condition = ...,
+    on_progress: Callable[[str, int, int], None] | None = None,
     stats: design_sidb_gates_stats | None = None,
 ) -> list[mnt.pyfiction.sidb.sidb_layout]:
     """
-    Designs SiDB gates on a skeleton: canvas SiDBs are placed in the
-    canvas area so that the skeleton's input and output wires implement
-    the given Boolean function(s). The design mode chooses between
-    simulating every combination of canvas SiDBs, *QuickCell*'s pruning
-    followed by simulation, random placement, and pruning only.
-
-    Worker exceptions propagate to the caller after all started workers
-    finish.
-
-    Random placement samples at most `maximal_random_design_attempts`
-    candidates without enumerating canvas layouts.
-
-    The timeout covers setup and all search phases. Expiration discards
-    partial results and stops all workers before throwing. Allocation and
-    non-interruptible setup may exceed the cooperative deadline.
-
-    *QuickCell* is described in "Towards Fast Automatic Design of Silicon
-    Dangling Bond Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus,
-    and R. Wille in DATE 2025
-    (https://ieeexplore.ieee.org/abstract/document/10992885) and
-    "QuickCell: Fast Automatic Design of Standard Cells for Silicon
-    Dangling Bond Logic" by the same authors in TCAD 2025
-    (https://ieeexplore.ieee.org/document/11146893). The exhaustive
-    designer is described in "Minimal Design of SiDB Gates: An Optimal
-    Basis for Circuits Based on Silicon Dangling Bonds" by J. Drewniok, M.
-    Walter, and R. Wille in NANOARCH 2023
-    (https://dl.acm.org/doi/10.1145/3611315.3633241).
+    Design SiDB gates implementing the supplied truth tables within the canvas.
+    The keyword options select physical values, BDL detection, the design mode, and termination.
+    Expiration raises TimeoutError; on_progress reports completed search work.
 
     Args:
-        skeleton: The skeleton with its input and output wires.
-        spec: The Boolean function(s) to implement; must not be empty.
-        params: Parameters.
-        stats: Statistics.
-
-    Returns:
-        The designed gates.
-
-    Raises:
-        std::invalid_argument: if `spec` is empty or the input wire count
-                               differs from the specification.
-        utils::timeout_error: if the gate-design deadline is reached.
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        design_mode: Gate-design approach: QUICKCELL, AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER, RANDOM, or PRUNING_ONLY.
+        canvas: The canvas: the area canvas SiDBs are placed in, as two opposite corners.
+        number_of_canvas_sidbs: Number of canvas SiDBs.
+        maximal_random_design_attempts: Maximum number of layouts evaluated by random gate design across all threads.
+        termination_cond: When to stop.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        stats: Statistics object filled by the algorithm; None discards statistics.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
 
 class sidb_complex_gate_design_policy(enum.Enum):
@@ -287,88 +197,64 @@ class sidb_complex_gate_design_policy(enum.Enum):
     DESIGN_ON_THE_FLY = 1
     """Design complex gates on-the-fly."""
 
-class sidb_on_the_fly_gate_library_params:
-    """
-    This struct encapsulates parameters for the parameterized SiDB gate
-    library.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def design_gate_params(self) -> design_sidb_gates_params:
-        """This struct holds parameters to design SiDB gates."""
-
-    @design_gate_params.setter
-    def design_gate_params(self, arg: design_sidb_gates_params, /) -> None: ...
-    @property
-    def canvas_sidb_complex_gates(self) -> int:
-        """
-        This variable defines the number of canvas SiDBs dedicated to complex
-        gates, such as crossing, double wire, and half-adder.
-        """
-
-    @canvas_sidb_complex_gates.setter
-    def canvas_sidb_complex_gates(self, arg: int, /) -> None: ...
-    @property
-    def using_predefined_crossing_and_double_wire_if_possible(self) -> sidb_complex_gate_design_policy:
-        """This variable specifies the policy for complex gate design."""
-
-    @using_predefined_crossing_and_double_wire_if_possible.setter
-    def using_predefined_crossing_and_double_wire_if_possible(
-        self, arg: sidb_complex_gate_design_policy, /
-    ) -> None: ...
-    @property
-    def influence_radius_charged_defects(self) -> float:
-        """
-        This variable specifies the radius in nanometers around the center of
-        the hexagon where atomic defects are incorporated into the gate
-        design.
-        """
-
-    @influence_radius_charged_defects.setter
-    def influence_radius_charged_defects(self, arg: float, /) -> None: ...
-
-class on_the_fly_sidb_circuit_design_params:
-    """This struct stores the parameters to design an SiDB circuit."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def timeout(self) -> int:
-        """
-        Total timeout in milliseconds for all gates and layout conversion. The
-        maximum value means unlimited; zero expires immediately. Every gate
-        shares the same deadline, including crossings and double wires.
-        Timeout checks are cooperative; allocation and non-interruptible setup
-        can exceed the budget.
-        """
-
-    @timeout.setter
-    def timeout(self, arg: int, /) -> None: ...
-    @property
-    def sidb_on_the_fly_gate_library_parameters(self) -> sidb_on_the_fly_gate_library_params:
-        """Parameters for the SiDB on-the-fly gate library."""
-
-    @sidb_on_the_fly_gate_library_parameters.setter
-    def sidb_on_the_fly_gate_library_parameters(self, arg: sidb_on_the_fly_gate_library_params, /) -> None: ...
-
 def on_the_fly_sidb_circuit_design(
-    layout: mnt.pyfiction.layouts.hexagonal_gate_layout, params: on_the_fly_sidb_circuit_design_params = ...
+    layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
+    *,
+    timeout: int = ...,
+    design_gate_timeout: int = ...,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+    sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
+    threshold_bdl_interdistance: float = 2.0,
+    minimum_distance: float = 0.75,
+    maximum_distance: float = 1.5,
+    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
+    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
+    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
+    design_mode: design_sidb_gates_mode = ...,
+    canvas: tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.lattice_site] = ...,
+    number_of_canvas_sidbs: int = 1,
+    maximal_random_design_attempts: int = 1000000,
+    termination_cond: termination_condition = ...,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    canvas_sidb_complex_gates: int = 3,
+    using_predefined_crossing_and_double_wire_if_possible: sidb_complex_gate_design_policy = ...,
+    influence_radius_charged_defects: float = 15.0,
 ) -> mnt.pyfiction.sidb.sidb_layout:
     """
     Design an SiDB circuit from a placed and routed pointy-top hexagonal gate-level layout.
 
-    The layout and parameters are copied before releasing the GIL. The input layout is not modified.
+    The function copies the layout and keyword options before releasing the GIL. The input layout is not modified.
     This function does not perform placement and routing or accept a defective surface.
     The optional timeout bounds the whole circuit search in milliseconds. Deadline checks are cooperative;
     use a separate process when an exact cutoff is required. A timeout never returns a partial circuit.
 
     Args:
         layout: A pointy-top hexagonal gate-level layout with a row arrangement and supported Bestagon port orientations.
-        params: Circuit and individual-gate design parameters.
+        timeout: Whole-circuit deadline in milliseconds.
+        design_gate_timeout: Deadline for each individual gate in milliseconds.
+        on_progress: Optional gate-design progress callback.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        canvas_sidb_complex_gates: Number of canvas SiDBs dedicated to complex gates.
+        using_predefined_crossing_and_double_wire_if_possible: Select predefined or synthesized crossing and double-wire gates.
+        influence_radius_charged_defects: Radius around each gate center in nm for incorporating charged defects.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        op_condition: Require the selected operational condition for every input pattern.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
+        design_mode: Gate-design approach: QUICKCELL, AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER, RANDOM, or PRUNING_ONLY.
+        canvas: Gate-design area as two opposite lattice-site corners.
+        number_of_canvas_sidbs: Number of SiDBs placed in the gate-design canvas.
+        maximal_random_design_attempts: Maximum candidate layouts evaluated across all random-design threads.
+        termination_cond: Stop after the first solution or collect all solutions allowed by the design mode.
 
     Returns:
         An SiDB layout that can be exported with write_sqd_layout or write_sidb_layout_svg.
