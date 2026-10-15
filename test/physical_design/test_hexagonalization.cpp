@@ -28,6 +28,8 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/hexagonalization.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 
@@ -80,7 +82,7 @@ static void check_no_explicit_obstructions(const HexLyt& hex_layout)
 template <typename Lyt, typename Ntk>
 static void check_mapping_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(ntk, {});
+    const auto layout = orthogonal<Lyt>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
 
     hexagonalization_stats  stats{};
     hexagonalization_params params{};

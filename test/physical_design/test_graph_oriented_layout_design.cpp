@@ -16,6 +16,7 @@
  */
 
 #include <catch2/catch_message.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
@@ -30,7 +31,9 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
@@ -41,6 +44,7 @@
 
 #include <algorithm>
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -57,6 +61,11 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
+
+static_assert(std::same_as<decltype(&graph_oriented_layout_design<cartesian_gate_layout>),
+                           std::optional<cartesian_gate_layout> (*)(
+                               const tec_nt&, graph_oriented_layout_design_params, graph_oriented_layout_design_stats*,
+                               std::function<uint64_t(const cartesian_gate_layout&)>)>);
 
 /**
  * @brief Accesses an optional after a Catch2 assertion established that it contains a value.
@@ -84,7 +93,8 @@ void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
     params.timeout      = 100000;
     params.return_first = true;
 
-    const auto layout = graph_oriented_layout_design<Lyt>(ntk, params, &stats);
+    const auto layout =
+        graph_oriented_layout_design<Lyt>(fiction::synthesis::convert_network<tec_nt>(ntk), params, &stats);
     REQUIRE(layout.has_value());
 
     check_eq(ntk, required_value(layout));
@@ -130,7 +140,8 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
         params.timeout      = 100000;
         params.return_first = true;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(
+            fiction::synthesis::convert_network<tec_nt>(ntk), params, &stats);
         REQUIRE(layout.has_value());
 
         CHECK_NOTHROW(apply_gate_library<qca_one_library>(required_value(layout)));
@@ -485,7 +496,8 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
     params.timeout      = 100000;
     params.return_first = true;
 
-    const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(maj, params, &stats);
+    const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(
+        fiction::synthesis::convert_network<tec_nt>(maj), params, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -697,4 +709,34 @@ TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-orient
     const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{1};
     CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extract_layout_network(required_value(result)), simulator) ==
           mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
+}
+
+TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_design", "[physical-network]",
+                   mockturtle::aig_network, mockturtle::xag_network, mockturtle::mig_network)
+{
+    mockturtle::names_view<TestType> source{};
+    source.set_network_name("named_spec");
+    const auto a = source.create_pi("left");
+    const auto b = source.create_pi("right");
+    source.create_po(source.create_and(a, b), "result");
+    const auto ntk = fiction::synthesis::convert_network<tec_nt>(source);
+    CHECK(ntk.get_network_name() == "named_spec");
+    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
+    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
+    CHECK(ntk.get_output_name(0) == "result");
+    graph_oriented_layout_design_params ps{};
+    ps.return_first   = true;
+    const auto result = graph_oriented_layout_design<cartesian_gate_layout>(ntk, ps);
+    REQUIRE(result.has_value());
+    const auto& lyt = result.value();
+    CHECK(lyt.get_layout_name() == "named_spec");
+    CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
+    CHECK(lyt.get_name(lyt.pi_at(1)) == "right");
+    CHECK(lyt.get_output_name(0) == "result");
+    const auto extracted = extract_layout_network(lyt);
+    CHECK(extracted.get_network_name() == "named_spec");
+    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(0))) == "left");
+    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
+    CHECK(extracted.get_output_name(0) == "result");
+    check_eq(source, extracted);
 }

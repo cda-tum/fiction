@@ -20,11 +20,10 @@
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/networks/network_utils.hpp"
-#include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
 
 #include <kitty/operations.hpp>
-#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
 #include <algorithm>
@@ -42,33 +41,21 @@ namespace fiction::physical_design
  * Place 0-input gates.
  *
  * @tparam Geometry Coordinate geometry of the gate-level layout.
- * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 0-input gate.
  * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
  * @param n Node in `ntk` to place onto `t` in `lyt`.
  * @return Output port pointing to the placed gate in `lyt`.
  */
-template <typename Geometry, typename Ntk>
+template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
-place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
-      const mockturtle::node<Ntk>& n)
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const tec_nt& ntk, const tec_nt::node& n)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    if constexpr (mockturtle::has_is_pi_v<Ntk>)
+    if (ntk.is_pi(n))
     {
-        if (ntk.is_pi(n))
-        {
-            if constexpr (mockturtle::has_has_name_v<Ntk> && mockturtle::has_get_name_v<Ntk>)
-            {
-                return lyt.create_pi(ntk.has_name(ntk.make_signal(n)) ? ntk.get_name(ntk.make_signal(n)) : "", t);
-            }
-            else
-            {
-                return lyt.create_pi("", t);
-            }
-        }
+        return lyt.create_pi(ntk.has_name(ntk.make_signal(n)) ? ntk.get_name(ntk.make_signal(n)) : "", t);
     }
     throw std::invalid_argument("Unsupported gate function");
 }
@@ -76,7 +63,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * Place 1-input gates.
  *
  * @tparam Geometry Coordinate geometry of the gate-level layout.
- * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 1-input gate.
  * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
@@ -84,26 +70,19 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * @param a Incoming signal to the newly placed gate in `lyt`.
  * @return Output port pointing to the placed gate in `lyt`.
  */
-template <typename Geometry, typename Ntk>
+template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
-place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
-      const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a)
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    if constexpr (has_is_inv_v<Ntk>)
+    if (ntk.is_inv(n))
     {
-        if (ntk.is_inv(n))
-        {
-            return lyt.create_not(a, t);
-        }
+        return lyt.create_not(a, t);
     }
-    if constexpr (has_is_buf_v<Ntk>)
+    if (ntk.is_buf(n))
     {
-        if (ntk.is_buf(n))
-        {
-            return lyt.create_buf(a, t);
-        }
+        return lyt.create_buf(a, t);
     }
     throw std::invalid_argument("Unsupported gate function");
 }
@@ -112,7 +91,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * Place 2-input gates.
  *
  * @tparam Geometry Coordinate geometry of the gate-level layout.
- * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 2-input gate.
  * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
@@ -123,132 +101,97 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * function when set, e.g., from a MAJ to an AND if `c == false`.
  * @return Output port pointing to the placed gate in `lyt`.
  */
-template <typename Geometry, typename Ntk>
+template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
-place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
-      const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
       const typename fiction::layouts::gate_layout<Geometry>::object_id& b, const std::optional<bool>& c = std::nullopt)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    if constexpr (mockturtle::has_is_and_v<Ntk>)
+    if (ntk.is_and(n))
     {
-        if (ntk.is_and(n))
-        {
-            return lyt.create_and(a, b, t);
-        }
+        return lyt.create_and(a, b, t);
     }
-    if constexpr (mockturtle::has_is_or_v<Ntk>)
+    if (ntk.is_or(n))
     {
-        if (ntk.is_or(n))
+        return lyt.create_or(a, b, t);
+    }
+    if (ntk.is_xor(n))
+    {
+        return lyt.create_xor(a, b, t);
+    }
+    if (ntk.is_nand(n))
+    {
+        return lyt.create_nand(a, b, t);
+    }
+    if (ntk.is_nor(n))
+    {
+        return lyt.create_nor(a, b, t);
+    }
+    if (ntk.is_lt(n))
+    {
+        return lyt.create_lt(a, b, t);
+    }
+    if (ntk.is_le(n))
+    {
+        return lyt.create_le(a, b, t);
+    }
+    if (ntk.is_gt(n))
+    {
+        return lyt.create_gt(a, b, t);
+    }
+    if (ntk.is_ge(n))
+    {
+        return lyt.create_ge(a, b, t);
+    }
+    if (ntk.is_maj(n))
+    {
+        if (!c.has_value())
+        {
+            throw std::invalid_argument("A two-input majority placement requires a constant input");
+        }
+
+        if (*c)  // constant signal c points to 1
         {
             return lyt.create_or(a, b, t);
         }
+        // constant signal c points to 0
+        return lyt.create_and(a, b, t);
     }
-    if constexpr (mockturtle::has_is_xor_v<Ntk>)
+    if (ntk.is_function(n))
     {
-        if (ntk.is_xor(n))
+        if (c.has_value())
         {
-            return lyt.create_xor(a, b, t);
-        }
-    }
-    if constexpr (fiction::has_is_nand_v<Ntk>)
-    {
-        if (ntk.is_nand(n))
-        {
-            return lyt.create_nand(a, b, t);
-        }
-    }
-    if constexpr (fiction::has_is_nor_v<Ntk>)
-    {
-        if (ntk.is_nor(n))
-        {
-            return lyt.create_nor(a, b, t);
-        }
-    }
-    if constexpr (fiction::has_is_lt_v<Ntk>)
-    {
-        if (ntk.is_lt(n))
-        {
-            return lyt.create_lt(a, b, t);
-        }
-    }
-    if constexpr (fiction::has_is_le_v<Ntk>)
-    {
-        if (ntk.is_le(n))
-        {
-            return lyt.create_le(a, b, t);
-        }
-    }
-    if constexpr (fiction::has_is_gt_v<Ntk>)
-    {
-        if (ntk.is_gt(n))
-        {
-            return lyt.create_gt(a, b, t);
-        }
-    }
-    if constexpr (fiction::has_is_ge_v<Ntk>)
-    {
-        if (ntk.is_ge(n))
-        {
-            return lyt.create_ge(a, b, t);
-        }
-    }
-    if constexpr (mockturtle::has_is_maj_v<Ntk>)
-    {
-        if (ntk.is_maj(n))
-        {
-            if (!c.has_value())
+            auto function = ntk.node_function(n);
+            if (function.num_vars() != 3)
             {
-                throw std::invalid_argument("A two-input majority placement requires a constant input");
+                throw std::invalid_argument("Constant reduction requires a three-input function");
             }
-
-            if (*c)  // constant signal c points to 1
-            {
-                return lyt.create_or(a, b, t);
-            }
-            // constant signal c points to 0
-            return lyt.create_and(a, b, t);
-        }
-    }
-    // more gate types go here
-    if constexpr (mockturtle::has_is_function_v<Ntk>)
-    {
-        if (ntk.is_function(n))
-        {
-            if (c.has_value())
-            {
-                auto function = ntk.node_function(n);
-                if (function.num_vars() != 3)
-                {
-                    throw std::invalid_argument("Constant reduction requires a three-input function");
-                }
-                uint8_t constant_index{};
-                ntk.foreach_fanin(n,
-                                  [&](const auto& f, const auto index)
+            uint8_t constant_index{};
+            ntk.foreach_fanin(n,
+                              [&](const auto& f, const auto index)
+                              {
+                                  if (ntk.is_constant(ntk.get_node(f)))
                                   {
-                                      if (ntk.is_constant(ntk.get_node(f)))
-                                      {
-                                          constant_index = static_cast<uint8_t>(index);
-                                      }
-                                  });
-                for (auto index = constant_index; index < 2; ++index)
-                {
-                    kitty::swap_inplace(function, index, static_cast<uint8_t>(index + 1));
-                }
-                if (*c)
-                {
-                    kitty::cofactor1_inplace(function, uint8_t{2});
-                }
-                else
-                {
-                    kitty::cofactor0_inplace(function, uint8_t{2});
-                }
-                return lyt.create_gate({a, b}, kitty::shrink_to(function, 2), t);
+                                      constant_index = static_cast<uint8_t>(index);
+                                  }
+                              });
+            for (auto index = constant_index; index < 2; ++index)
+            {
+                kitty::swap_inplace(function, index, static_cast<uint8_t>(index + 1));
             }
-
-            return lyt.create_gate({a, b}, ntk.node_function(n), t);
+            if (*c)
+            {
+                kitty::cofactor1_inplace(function, uint8_t{2});
+            }
+            else
+            {
+                kitty::cofactor0_inplace(function, uint8_t{2});
+            }
+            return lyt.create_gate({a, b}, kitty::shrink_to(function, 2), t);
         }
+
+        return lyt.create_gate({a, b}, ntk.node_function(n), t);
     }
 
     throw std::invalid_argument("Unsupported gate function");
@@ -257,7 +200,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * Place 3-input gates.
  *
  * @tparam Geometry Coordinate geometry of the gate-level layout.
- * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 3-input gate.
  * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
@@ -267,29 +209,21 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * @param c Third incoming signal to the newly placed gate in `lyt`.
  * @return Output port pointing to the placed gate in `lyt`.
  */
-template <typename Geometry, typename Ntk>
+template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
-place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
-      const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
       const typename fiction::layouts::gate_layout<Geometry>::object_id& b,
       const typename fiction::layouts::gate_layout<Geometry>::object_id& c)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    if constexpr (mockturtle::has_is_maj_v<Ntk>)
+    if (ntk.is_maj(n))
     {
-        if (ntk.is_maj(n))
-        {
-            return lyt.create_maj(a, b, c, t);
-        }
+        return lyt.create_maj(a, b, c, t);
     }
-    // more gate types go here
-    if constexpr (mockturtle::has_is_function_v<Ntk>)
+    if (ntk.is_function(n))
     {
-        if (ntk.is_function(n))
-        {
-            return lyt.create_gate({a, b, c}, ntk.node_function(n), t);
-        }
+        return lyt.create_gate({a, b, c}, ntk.node_function(n), t);
     }
 
     throw std::invalid_argument("Unsupported gate function");
@@ -300,7 +234,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * `mockturtle::node_map`.
  *
  * @tparam Geometry Coordinate geometry of the gate-level layout.
- * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place any gate.
  * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
@@ -309,13 +242,12 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
  * @return Output port of the newly placed gate in `lyt`.
  */
-template <typename Geometry, typename Ntk>
+template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
-place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
-      const mockturtle::node<Ntk>&                                                                  n,
-      const mockturtle::node_map<typename fiction::layouts::gate_layout<Geometry>::object_id, Ntk>& node2pos)
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const tec_nt& ntk, const tec_nt::node& n,
+      const mockturtle::node_map<typename fiction::layouts::gate_layout<Geometry>::object_id, tec_nt>& node2pos)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     const auto fc = networks::fanins(ntk, n);
 
@@ -346,7 +278,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
 
         return place(lyt, t, ntk, n, node2pos[fanin_signal_a], node2pos[fanin_signal_b], node2pos[fanin_signal_c]);
     }
-    // more fanin sizes go here
 
     // NOLINTEND(*-else-after-return)
 
@@ -357,10 +288,9 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * placed in a layout, fetching the node's fanins and looking for their locations in the layout does not work properly
  * when branching nodes like fanouts are involved that got extended by wire nodes. This container solves that issue.
  *
- * @tparam Ntk Logic network type.
  * @tparam fanout_size Maximum fanout size possible in the layout and/or the network.
  */
-template <typename Ntk, uint16_t fanout_size = 2>
+template <uint16_t fanout_size = 2>
 struct branching_signal_container
 {
     /**
@@ -371,7 +301,7 @@ struct branching_signal_container
         /**
          * Destination network node.
          */
-        const mockturtle::node<Ntk> ntk_node;
+        const tec_nt::node ntk_node;
         /**
          * Output port at the end of the route.
          */
@@ -380,12 +310,7 @@ struct branching_signal_container
         /**
          * Associates a network destination with a layout output port.
          */
-        branching_signal(const mockturtle::node<Ntk>& n, const layouts::layout_object_id& s) :
-                ntk_node{n},
-                lyt_signal{s}
-        {
-            static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        }
+        branching_signal(const tec_nt::node& n, const layouts::layout_object_id& s) : ntk_node{n}, lyt_signal{s} {}
     };
     /**
      * Accesses the branching container to find the location of a given node `n`. Returns the signal to that location if
@@ -394,7 +319,7 @@ struct branching_signal_container
      * @param n Node whose branching position is desired.
      * @return Signal to `n`'s layout location or the default signal if it wasn't found.
      */
-    [[nodiscard]] layouts::layout_object_id operator[](const mockturtle::node<Ntk>& n) const
+    [[nodiscard]] layouts::layout_object_id operator[](const tec_nt::node& n) const
     {
         if (const auto branch = std::ranges::find_if(branches,
                                                      [&n](const auto& b)
@@ -423,7 +348,7 @@ struct branching_signal_container
      * @param ntk_node Node whose branch is to be updated.
      * @param lyt_signal New signal pointing to the end of the branch.
      */
-    void update_branch(const mockturtle::node<Ntk>& ntk_node, const layouts::layout_object_id& lyt_signal)
+    void update_branch(const tec_nt::node& ntk_node, const layouts::layout_object_id& lyt_signal)
     {
         for (auto i = 0u; i < branches.size(); ++i)
         {
@@ -458,7 +383,6 @@ struct branching_signal_container
  * function does not update the `mockturtle::node_map`.
  *
  * @tparam Geometry Coordinate geometry of the gate-level layout.
- * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place any gate.
  * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
@@ -468,13 +392,12 @@ struct branching_signal_container
  * function.
  * @return Output port of the newly placed gate in `lyt`.
  */
-template <typename Geometry, typename Ntk, uint16_t fanout_size = 2>
+template <typename Geometry, uint16_t fanout_size = 2>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
-place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
-      const mockturtle::node<Ntk>&                                                   n,
-      const mockturtle::node_map<branching_signal_container<Ntk, fanout_size>, Ntk>& node2pos)
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
+      const tec_nt& ntk, const tec_nt::node& n,
+      const mockturtle::node_map<branching_signal_container<fanout_size>, tec_nt>& node2pos)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     const auto fc = networks::fanins(ntk, n);
 
@@ -506,7 +429,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
         return place(lyt, t, ntk, n, node2pos[fanin_signal_a][n], node2pos[fanin_signal_b][n],
                      node2pos[fanin_signal_c][n]);
     }
-    // more fanin sizes go here
 
     // NOLINTEND(*-else-after-return)
 

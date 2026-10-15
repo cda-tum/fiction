@@ -130,6 +130,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     throw `std::invalid_argument`.
   - Population stability now validates conversion parameters before simulation and returns infinity for zero potential differences.
   - Population stability now records neutral-to-negative margins even when the neutral-to-positive transition is closer.
+  - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
+    with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
   - Geometric distances accept coordinate pairs directly and use fixed `uint64_t` or `double` results.
     Squared Euclidean distance is `noexcept` and requires a result within the `uint64_t` range.
     Euclidean distance is a runtime `noexcept` function.
@@ -290,6 +292,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Physical-design experiments convert mapped networks before placement with unchanged computations.
   - Gate-layout experiments use canonical types with unchanged computations.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.

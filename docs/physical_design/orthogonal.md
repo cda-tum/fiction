@@ -22,7 +22,7 @@ to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
+```{doxygenfunction} fiction::physical_design::orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
 
 ```
 

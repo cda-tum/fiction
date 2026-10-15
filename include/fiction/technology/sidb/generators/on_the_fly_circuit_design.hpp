@@ -167,9 +167,8 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO 2024
  * (https://ieeexplore.ieee.org/abstract/document/10628962).
  *
- * @tparam Ntk The type of the input network.
  * @tparam GateLyt Gate-level layout type.
- * @param ntk The input network to be mapped onto the defective surface.
+ * @param ntk Named technology network to map onto the defective surface.
  * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param defective_surface The defective surface on which the SiDB circuit is designed.
  * @param params The parameters used for designing the circuit, encapsulated in an
@@ -180,11 +179,11 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @throws utils::timeout_error If a circuit or gate-design timeout expires.
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  */
-template <typename Ntk, typename GateLyt>
+template <typename GateLyt>
 [[nodiscard]] layout on_the_fly_circuit_design_on_defective_surface(
-    const Ntk& ntk, const GateLyt& lattice_tiling, const layout& defective_surface,
-    const on_the_fly_circuit_design_on_defective_surface_params&   params = {},
-    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>* stats  = nullptr)
+    const mockturtle::names_view<networks::technology_network>& ntk, const GateLyt& lattice_tiling,
+    const layout& defective_surface, const on_the_fly_circuit_design_on_defective_surface_params& params = {},
+    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>* stats = nullptr)
 {
     static_assert(
         requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
@@ -192,7 +191,6 @@ template <typename Ntk, typename GateLyt>
     static_assert((std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
                    !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>),
                   "GateLyt is not a hexagonal");
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
     deadline             = utils::make_deadline(params.timeout, deadline);
