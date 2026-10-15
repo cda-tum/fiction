@@ -71,7 +71,7 @@ class scheme
     /**
      * Standard constructor.
      *
-     * @param n The clocking scheme's name. The name is the key under which `get_scheme` finds the scheme.
+     * @param n The clocking scheme's stored name. Construction does not register the scheme with `get_scheme`.
      * @param cutout Rows of clock numbers. Row `y`, column `x` holds the clock number of every tile
      * \f$(x + i \cdot w, y + j \cdot h)\f$ for all integers \f$i, j\f$, where \f$w\f$ and \f$h\f$ are the width and
      * height of `cutout`.
@@ -188,7 +188,8 @@ class scheme
      * The view borrows storage from this scheme. Keep the scheme alive and unchanged while using the view,
      * or copy it with `std::string{scheme.name()}`.
      *
-     * @return The canonical name, e.g., `"2DDWAVE"`, without a phase-count suffix.
+     * @return The name supplied at construction, or `"OPEN"` for a default-constructed scheme. Catalog factories
+     * use canonical names, e.g., `"2DDWAVE"`, without a phase-count suffix.
      */
     [[nodiscard]] std::string_view name() const noexcept
     {
@@ -617,9 +618,9 @@ class unsupported_scheme_exception : public std::exception
     }
 };
 /**
- * Returns a clocking scheme by name. The lookup ignores case and accepts a trailing `3` or `4` that selects the phase
- * count of a scheme that supports it. Without a suffix, a scheme has its default phase count: 3 for BANCS and 4 for
- * all others. `2DDWAVEHEX` requires a hexagonal arrangement and falls back to `2DDWAVE` without one.
+ * Returns a catalog clocking scheme by name. The lookup ignores case and accepts a trailing `3` or `4` that selects
+ * the phase count of a scheme that supports it. Without a suffix, a scheme has its default phase count: 3 for BANCS and
+ * 4 for all others. `2DDWAVEHEX` requires a hexagonal arrangement and falls back to `2DDWAVE` without one.
  *
  * @param scheme_name Name of the desired clocking scheme.
  * @param hex Arrangement of the hexagonal layout the scheme is for, or `std::nullopt` for a non-hexagonal layout.
