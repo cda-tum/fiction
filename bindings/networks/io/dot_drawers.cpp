@@ -58,7 +58,17 @@ void register_write_dot_network(nb::module_& m)
                     ntk, filename);
             }
         },
-        nb::arg("network"), nb::arg("filename"), nb::arg("indexes") = true, DOC(fiction_networks_io_write_dot_network),
+        nb::arg("network"), nb::arg("filename"), nb::arg("indexes") = true,
+        R"doc(Write a logic network to a DOT file with gate-type colors.
+
+Args:
+    network: Logic network to write.
+    filename: Path of the output file.
+    indexes: Include node indices in labels. Defaults to True.
+
+Raises:
+    RuntimeError: The output file cannot be written.
+)doc",
         nb::call_guard<nb::gil_scoped_release>());
 }
 
