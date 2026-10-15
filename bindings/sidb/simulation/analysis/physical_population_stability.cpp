@@ -66,7 +66,7 @@ inline void register_physical_population_stability_functions(nb::module_& m)
     m.def("physical_population_stability", &fiction::sidb::simulation::analysis::physical_population_stability,
           nb::arg("lyt"),
           nb::arg("params") = fiction::sidb::simulation::analysis::physical_population_stability_params{},
-          DOC(fiction_sidb_simulation_analysis_physical_population_stability));
+          value_error_doc(DOC(fiction_sidb_simulation_analysis_physical_population_stability)).c_str());
 }
 
 }  // namespace detail
