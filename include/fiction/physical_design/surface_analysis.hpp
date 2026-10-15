@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -67,7 +67,7 @@ using surface_black_list =
 template <typename GateLibrary, typename Geometry>
     requires std::same_as<typename GateLibrary::layout, sidb::layout>
 [[nodiscard]] auto
-surface_analysis(const fiction::layouts::gate_level_layout<Geometry>& gate_lyt, const sidb::layout& surface,
+surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const sidb::layout& surface,
                  const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
                  const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt)
 {

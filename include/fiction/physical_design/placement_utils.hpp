@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
@@ -50,9 +50,9 @@ namespace fiction::physical_design
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Geometry, typename Ntk>
-[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
-place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const Ntk& ntk, const mockturtle::node<Ntk>& n)
+[[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
+      const mockturtle::node<Ntk>& n)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
@@ -85,10 +85,9 @@ place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Geometry, typename Ntk>
-[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
-place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const Ntk& ntk, const mockturtle::node<Ntk>& n,
-      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a)
+[[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
+      const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
@@ -125,12 +124,10 @@ place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Geometry, typename Ntk>
-[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
-place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const Ntk& ntk, const mockturtle::node<Ntk>& n,
-      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a,
-      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& b,
-      const std::optional<bool>&                                               c = std::nullopt)
+[[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
+      const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
+      const typename fiction::layouts::gate_layout<Geometry>::object_id& b, const std::optional<bool>& c = std::nullopt)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
@@ -271,12 +268,11 @@ place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Geometry, typename Ntk>
-[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
-place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const Ntk& ntk, const mockturtle::node<Ntk>& n,
-      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a,
-      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& b,
-      const typename fiction::layouts::gate_level_layout<Geometry>::object_id& c)
+[[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
+      const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
+      const typename fiction::layouts::gate_layout<Geometry>::object_id& b,
+      const typename fiction::layouts::gate_layout<Geometry>::object_id& c)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
@@ -314,10 +310,10 @@ place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts
  * @return Output port of the newly placed gate in `lyt`.
  */
 template <typename Geometry, typename Ntk>
-[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
-place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const Ntk& ntk, const mockturtle::node<Ntk>& n,
-      const mockturtle::node_map<typename fiction::layouts::gate_level_layout<Geometry>::object_id, Ntk>& node2pos)
+[[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
+      const mockturtle::node<Ntk>&                                                                  n,
+      const mockturtle::node_map<typename fiction::layouts::gate_layout<Geometry>::object_id, Ntk>& node2pos)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
@@ -473,9 +469,9 @@ struct branching_signal_container
  * @return Output port of the newly placed gate in `lyt`.
  */
 template <typename Geometry, typename Ntk, uint16_t fanout_size = 2>
-[[nodiscard]] typename fiction::layouts::gate_level_layout<Geometry>::object_id
-place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const Ntk& ntk, const mockturtle::node<Ntk>& n,
+[[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
+place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
+      const mockturtle::node<Ntk>&                                                   n,
       const mockturtle::node_map<branching_signal_container<Ntk, fanout_size>, Ntk>& node2pos)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");

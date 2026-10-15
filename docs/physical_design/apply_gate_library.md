@@ -2,10 +2,10 @@
 
 # Apply Gate Library
 
-Applies an FCN {ref}`gate library <fcn-gate-libraries>` to a `gate_level_layout` to obtain the layout of the gate
+Applies an FCN {ref}`gate library <fcn-gate-libraries>` to a `gate_layout` to obtain the layout of the gate
 library's {ref}`technology <fcn-cell-technologies>`: a `qca::layout` for QCA ONE, a `mol_qca::layout` for SIM(7), an
 `inml::layout` for ToPoliNano, and an `sidb::layout` for the SiDB libraries. Thereby, this function creates
-cell-accurate implementations for each gate present in the passed `gate_level_layout`. The variants that place gates on a defective
+cell-accurate implementations for each gate present in the passed `gate_layout`. The variants that place gates on a defective
 surface take the surface as a `sidb::layout` and return one, carrying the surface's defects.
 
 ::::{tab-set}
@@ -16,7 +16,7 @@ surface take the surface as a `sidb::layout` and return one, carrying the surfac
 
 **Header:** `fiction/physical_design/apply_gate_library.hpp`
 
-```{doxygenfunction} fiction::physical_design::apply_gate_library(const fiction::layouts::gate_level_layout<Geometry>& lyt, utils::progress_callback on_progress = {})
+```{doxygenfunction} fiction::physical_design::apply_gate_library(const fiction::layouts::gate_layout<Geometry>& lyt, utils::progress_callback on_progress = {})
 
 ```
 
@@ -24,15 +24,15 @@ surface take the surface as a `sidb::layout` and return one, carrying the surfac
 
 ```
 
-```{doxygenfunction} fiction::physical_design::apply_gate_library_to_defective_surface(const fiction::layouts::gate_level_layout<Geometry>& lyt, const sidb::layout& defect_surface)
+```{doxygenfunction} fiction::physical_design::apply_gate_library_to_defective_surface(const fiction::layouts::gate_layout<Geometry>& lyt, const sidb::layout& defect_surface)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library(const fiction::layouts::gate_level_layout<Geometry>& lyt, const Params& params)
+```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library(const fiction::layouts::gate_layout<Geometry>& lyt, const Params& params)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library_to_defective_surface(const fiction::layouts::gate_level_layout<Geometry>& lyt, const Params& params, const sidb::layout& defect_surface)
+```{doxygenfunction} fiction::physical_design::apply_parameterized_gate_library_to_defective_surface(const fiction::layouts::gate_layout<Geometry>& lyt, const Params& params, const sidb::layout& defect_surface)
 
 ```
 

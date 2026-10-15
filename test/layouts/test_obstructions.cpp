@@ -20,7 +20,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 
@@ -75,7 +75,7 @@ TEST_CASE("Coordinate obstruction: Cartesian layout", "[obstruction-layout]")
 
 TEST_CASE("Coordinate obstruction: Gate-level layout", "[obstruction-layout]")
 {
-    using layout = gate_level_layout<cartesian_layout>;
+    using layout = gate_layout<cartesian_layout>;
 
     const auto lyt = blueprints::xor_maj_gate_layout<layout>();
 
@@ -191,7 +191,7 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     }
     SECTION("Gate-level layout")
     {
-        using layout = gate_level_layout<cartesian_layout>;
+        using layout = gate_layout<cartesian_layout>;
 
         const auto lyt = blueprints::xor_maj_gate_layout<layout>();
 
@@ -280,8 +280,8 @@ TEST_CASE("Obstruction enumeration visits only manual entries", "[obstruction-la
     CHECK(positions == 2);
     CHECK(connections == 1);
 
-    gate_level_layout<cartesian_layout> layout{{2, 1, 1}, clocking::twoddwave()};
-    const auto                          input = layout.create_pi("a", {0, 0});
+    gate_layout<cartesian_layout> layout{{2, 1, 1}, clocking::twoddwave()};
+    const auto                    input = layout.create_pi("a", {0, 0});
     layout.create_po(input, "f", {1, 0});
     positions   = 0;
     connections = 0;

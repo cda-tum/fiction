@@ -18,7 +18,7 @@
 #pragma once
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
@@ -103,15 +103,15 @@ using py_hexagonal_layout = fiction::layouts::hexagonal_layout;
 /**
  * Cartesian gate layout.
  */
-using py_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_cartesian_layout>;
+using py_cartesian_gate_layout = fiction::layouts::gate_layout<py_cartesian_layout>;
 /**
  * Shifted Cartesian gate layout.
  */
-using py_shifted_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_shifted_cartesian_layout>;
+using py_shifted_cartesian_gate_layout = fiction::layouts::gate_layout<py_shifted_cartesian_layout>;
 /**
  * Hexagonal gate layout.
  */
-using py_hexagonal_gate_layout = fiction::layouts::gate_level_layout<py_hexagonal_layout>;
+using py_hexagonal_gate_layout = fiction::layouts::gate_layout<py_hexagonal_layout>;
 }  // namespace pyfiction
 
 namespace nanobind::detail

@@ -19,7 +19,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
@@ -139,7 +139,7 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
+        using clk_lyt = gate_layout<lyt>;
 
         SECTION("2DDWave")
         {
@@ -369,7 +369,7 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
+        using clk_lyt = gate_layout<lyt>;
 
         SECTION("2DDWave")
         {
@@ -474,7 +474,7 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
 
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction", "[k-shortest-paths]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout>;
+    using gate_lyt   = gate_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
@@ -626,7 +626,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction", "[k-shortest-paths]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout>;
+    using gate_lyt   = gate_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
@@ -731,7 +731,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
 
 TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "[k-shortest-paths]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout>;
+    using gate_lyt   = gate_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path;
 
     // enable crossings
@@ -855,7 +855,7 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 
 TEST_CASE("Path enumeration reaches targets in the crossing layer", "[k-shortest-paths]")
 {
-    using lyt  = gate_level_layout<cartesian_layout>;
+    using lyt  = gate_layout<cartesian_layout>;
     using path = layout_coordinate_path;
     lyt layout{lyt::extent{2, 2, 2}, clocking::twoddwave()};
     layout.create_pi("a", {0, 0});
@@ -872,7 +872,7 @@ TEST_CASE("Path enumeration reaches targets in the crossing layer", "[k-shortest
 
 TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", "[k-shortest-paths]")
 {
-    using lyt  = gate_level_layout<cartesian_layout>;
+    using lyt  = gate_layout<cartesian_layout>;
     using path = layout_coordinate_path;
     lyt layout{lyt::extent{4, 4, 1}, clocking::twoddwave()};
     layout.obstruct_coordinate({1, 0});

@@ -1,6 +1,6 @@
 # Gate-level Layout
 
-`gate_level_layout<CoordinateLayout>` places Boolean gates and wires on a coordinate layout.
+`gate_layout<CoordinateLayout>` places Boolean gates and wires on a coordinate layout.
 The layout owns its clocking scheme, synchronization delays, and persistent obstructions.
 Tile operations are available directly. Geometry remains a template argument; clocking
 schemes and obstruction assignments do not change the layout type.
@@ -40,9 +40,9 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 :::{tab-item} C++
 :sync: cpp
 
-**Header:** `fiction/layouts/gate_level_layout.hpp`
+**Header:** `fiction/layouts/gate_layout.hpp`
 
-```{doxygenclass} fiction::layouts::gate_level_layout
+```{doxygenclass} fiction::layouts::gate_layout
 :members:
 ```
 
@@ -72,7 +72,7 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 :sync: cpp
 
 ```cpp
-using layout = fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>;
+using layout = fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>;
 layout lyt{{4, 4}, fiction::layouts::clocking::twoddwave()};
 lyt.assign_synchronization_element({1, 1}, 2);
 lyt.obstruct_coordinate({2, 2});
