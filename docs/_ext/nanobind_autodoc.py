@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 
 from sphinx import addnodes
 from sphinx.ext.autodoc import AttributeDocumenter, ClassDocumenter, MethodDocumenter, ModuleDocumenter
+from sphinx.util.nodes import find_pending_xref_condition
 from typing_extensions import override
 
 if TYPE_CHECKING:
@@ -131,6 +132,8 @@ def qualify_type_references(_app: Sphinx, doctree: nodes.document) -> None:
                 and reference.get("reftype") == "class"
                 and reference.get("reftarget") == "type"
             ):
+                if content := find_pending_xref_condition(reference, "resolved"):
+                    reference[:] = content.children
                 reference["intersphinx"] = True
                 reference["inventory"] = "python"
 

@@ -44,6 +44,7 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
         "'nanobind_autodoc', 'llm_markdown']\n"
         f"intersphinx_mapping = {{'python': ('https://docs.python.org/3/', {str(source / 'python.inv')!r})}}\n"
         "autodoc_use_legacy_class_based = True\n"
+        "python_use_unqualified_type_names = True\n"
         "llms_txt_enabled = False\n",
         encoding="utf-8",
     )
