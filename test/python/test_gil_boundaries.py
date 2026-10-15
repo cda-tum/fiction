@@ -114,9 +114,9 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
 
 
 def test_progress_check_requires_a_native_gil_release() -> None:
-    """Repeated Python calls cannot satisfy the native progress check."""
+    """A Python call cannot satisfy the native progress check."""
     with pytest.raises(AssertionError):
-        run_with_python_progress(lambda: None)
+        run_with_python_progress(lambda: None, repeat=False)
 
 
 def test_bdl_iterator_serializes_cursor_updates() -> None:
