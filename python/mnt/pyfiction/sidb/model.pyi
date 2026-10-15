@@ -358,8 +358,8 @@ def potential_to_distance_conversion(
     Compute the distance corresponding to the potential with the requested precision.
     The physical model is supplied by the scalar keyword values.
     Potential must be positive. Precision must be a non-negative integer yielding a
-    positive finite step. Runtime grows exponentially with precision. Large precisions
-    can stall the native scan when floating-point increments lose resolution.
+    positive finite step. The search bisects the distance bracket; floating-point
+    resolution limits the effective precision. Permittivity and screening distance must be positive and finite.
 
     Args:
         base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.

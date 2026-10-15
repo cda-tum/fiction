@@ -20,9 +20,11 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/time_to_solution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <optional>
 #include <sstream>
+#include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -108,6 +110,7 @@ void register_time_to_solution(nb::module_& m)
            const decltype(time_to_solution_options{}.on_progress)&          on_progress,
            fiction::sidb::simulation::analysis::time_to_solution_stats*     ps)
         {
+            validate_confidence_level(confidence_level);
             quicksim_options qs_params{};
             qs_params.sim_params      = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             qs_params.iteration_steps = iteration_steps;
@@ -143,7 +146,7 @@ void register_time_to_solution(nb::module_& m)
 quicksim_timeout bounds each heuristic run; timeout bounds the complete evaluation.
 Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
 ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
-Raises ValueError when ClusterComplete is selected with a finite timeout.
+Raises ValueError for confidence outside (0, 1) or ClusterComplete with a finite timeout.
 
 Args:
     base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
@@ -163,11 +166,24 @@ Args:
     iteration_steps: Number of QuickSim iterations.
     alpha: QuickSim heuristic alpha parameter.
 )doc");
-    m.def("time_to_solution_for_given_simulation_results",
-          &fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results,
-          nb::call_guard<nb::gil_scoped_release>(), nb::arg("results_exact"), nb::arg("results_heuristic"),
-          nb::arg("confidence_level") = 0.997, nb::arg("ps") = nullptr,
-          DOC(fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results));
+    m.def(
+        "time_to_solution_for_given_simulation_results",
+        [](const fiction::sidb::simulation::result&              results_exact,
+           const std::vector<fiction::sidb::simulation::result>& results_heuristic, const double confidence_level,
+           fiction::sidb::simulation::analysis::time_to_solution_stats* ps)
+        {
+            validate_confidence_level(confidence_level);
+            const nb::gil_scoped_release release{};
+            fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results(
+                results_exact, results_heuristic, confidence_level, ps);
+        },
+        nb::arg("results_exact"), nb::arg("results_heuristic"), nb::kw_only(), nb::arg("confidence_level") = 0.997,
+        nb::arg("ps") = nullptr,
+        R"doc(Evaluate heuristic time-to-solution against an exact simulation result.
+confidence_level must be strictly between 0 and 1; invalid values raise ValueError.
+ps receives accuracy, runtimes, and time-to-solution statistics.
+Empty heuristic results yield zero accuracy and infinite time-to-solution.
+)doc");
 }
 
 }  // namespace pyfiction

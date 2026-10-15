@@ -15844,6 +15844,9 @@ under consideration) and given physical parameters. However, the
 function provided here serves the inverse purpose by calculating the
 distance for a given potential and given physical parameters.
 
+The search brackets the distance and bisects the bracket. The
+requested decimal precision is limited by floating-point resolution.
+
 Args:
     params: The physical parameters for a given hydrogen-passivated
             silicon surface.
@@ -15856,8 +15859,13 @@ Returns:
     The distance (unit: nm) corresponding to the given electrostatic
     potential.
 
-Note:
-    Runtime depends exponentially on the provided precision.
+Raises:
+    std::invalid_argument: If the potential is NaN or nonpositive, the
+                           permittivity or screening distance is
+                           nonpositive or non-finite, or the precision
+                           yields a zero step.
+    std::overflow_error: If the distance exceeds the finite floating-
+                         point range.
 
 )doc";
 
@@ -16841,8 +16849,9 @@ Returns:
 Raises:
     std::invalid_argument: if a sweep range has non-finite or reversed
                            bounds, a non-positive or non-finite step,
-                           or more points than the storage range
-                           permits.
+                           more points than the storage range permits,
+                           or the engine is not QuickExact, EXGS, or
+                           QuickSim.
 
 )doc";
 

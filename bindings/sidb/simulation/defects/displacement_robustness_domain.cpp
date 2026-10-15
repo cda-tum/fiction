@@ -131,6 +131,10 @@ void register_displacement_robustness_domain(nb::module_& m)
            const decltype(displacement_robustness_domain_options{}
                               .percentage_of_analyzed_displaced_layouts) percentage_of_analyzed_displaced_layouts)
         {
+            if (!(percentage_of_analyzed_displaced_layouts >= 0 && percentage_of_analyzed_displaced_layouts <= 1))
+            {
+                throw nb::value_error("percentage_of_analyzed_displaced_layouts must be between 0 and 1");
+            }
             displacement_robustness_domain_options params{};
             params.percentage_of_analyzed_displaced_layouts = percentage_of_analyzed_displaced_layouts;
             params.operational_params =

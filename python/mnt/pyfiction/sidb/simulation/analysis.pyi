@@ -162,6 +162,7 @@ def critical_temperature_gate_based(
     """
     Determine the critical temperature of an SiDB gate implementing the truth tables.
     The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
     The overload with input and output wires bypasses automatic wire detection.
 
     Args:
@@ -179,7 +180,7 @@ def critical_temperature_gate_based(
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
         stats: Statistics object filled by the algorithm; None discards statistics.
-        sim_engine: SiDB simulation engine used for operational analysis.
+        sim_engine: SiDB simulation engine used for charge simulation.
         op_condition: Require the selected operational condition for every input pattern.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
@@ -212,6 +213,7 @@ def critical_temperature_gate_based(
     """
     Determine the critical temperature of an SiDB gate implementing the truth tables.
     The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
     The overload with input and output wires bypasses automatic wire detection.
 
     Args:
@@ -228,7 +230,7 @@ def critical_temperature_gate_based(
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
         stats: Statistics object filled by the algorithm; None discards statistics.
-        sim_engine: SiDB simulation engine used for operational analysis.
+        sim_engine: SiDB simulation engine used for charge simulation.
         op_condition: Require the selected operational condition for every input pattern.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
@@ -251,6 +253,7 @@ def critical_temperature_non_gate_based(
     """
     Determine the critical temperature from the population of excited charge distributions.
     The keyword options select physical values, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
 
     Args:
         timeout: Execution budget in milliseconds.
@@ -263,7 +266,7 @@ def critical_temperature_non_gate_based(
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
         stats: Statistics object filled by the algorithm; None discards statistics.
-        sim_engine: SiDB simulation engine used for operational analysis.
+        sim_engine: SiDB simulation engine used for charge simulation.
     """
 
 class energy_state:
@@ -501,7 +504,7 @@ def physical_population_stability(
     Determine the stability of the SiDB population under the physical model.
     The keyword options select simulation, potential precision, and the execution budget.
     Raises ValueError for an invalid base or a precision yielding a zero or non-finite distance step.
-    Large precisions can make the native distance scan impractical or stall floating-point increments.
+    Distance conversion bisects the distance bracket up to floating-point resolution.
 
     Args:
         timeout: Execution budget in milliseconds.
@@ -509,7 +512,7 @@ def physical_population_stability(
         mu_minus: Negative-charge transition energy in eV.
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
-        precision_for_distance_corresponding_to_potential: Decimal places for the distance scan; runtime grows exponentially with precision.
+        precision_for_distance_corresponding_to_potential: Decimal places for distance conversion, limited by floating-point resolution.
     """
 
 class physically_valid_parameters_domain:
@@ -530,12 +533,6 @@ def physically_valid_parameters(
     epsilon_r: float = 5.6,
     lambda_tf: float = 5.0,
     sim_engine: mnt.pyfiction.sidb.simulation.sidb_simulation_engine = ...,
-    threshold_bdl_interdistance: float = 2.0,
-    minimum_distance: float = 0.75,
-    maximum_distance: float = 1.5,
-    input_bdl_config: mnt.pyfiction.sidb.simulation.logic.input_bdl_configuration = ...,
-    op_condition: mnt.pyfiction.sidb.simulation.logic.operational_condition = ...,
-    strategy_to_analyze_operational_status: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy = ...,
     sweep_dimensions: Sequence[mnt.pyfiction.sidb.simulation.logic.operational_domain_value_range] | None = None,
     number_of_threads: int | None = None,
     on_progress: Callable[[str, int, int], None] | None = None,
@@ -544,6 +541,7 @@ def physically_valid_parameters(
     """
     Sweep physical parameter values for which the supplied charge distribution is physically valid.
     The keyword options define the sweep, physical model, worker count, and progress callbacks.
+    Raises ValueError for engines other than QuickExact, EXGS, and QuickSim.
 
     Args:
         timeout: Execution budget in milliseconds.
@@ -551,17 +549,11 @@ def physically_valid_parameters(
         mu_minus: Negative-charge transition energy in eV.
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
-        threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
-        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
-        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
-        input_bdl_config: Input encoding: perturber absence or perturber distance.
         sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
         number_of_threads: Number of workers; None uses the native default.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
-        sim_engine: SiDB simulation engine used for operational analysis.
-        op_condition: Require the selected operational condition for every input pattern.
-        strategy_to_analyze_operational_status: Operational-status analysis strategy.
+        sim_engine: SiDB simulation engine used to count lower-energy charge distributions.
     """
 
 class time_to_solution_stats:
@@ -629,7 +621,7 @@ def time_to_solution(
     quicksim_timeout bounds each heuristic run; timeout bounds the complete evaluation.
     Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
     ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
-    Raises ValueError when ClusterComplete is selected with a finite timeout.
+    Raises ValueError for confidence outside (0, 1) or ClusterComplete with a finite timeout.
 
     Args:
         base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
@@ -653,21 +645,13 @@ def time_to_solution(
 def time_to_solution_for_given_simulation_results(
     results_exact: mnt.pyfiction.sidb.simulation.sidb_simulation_result,
     results_heuristic: Sequence[mnt.pyfiction.sidb.simulation.sidb_simulation_result],
+    *,
     confidence_level: float = 0.997,
     ps: time_to_solution_stats | None = None,
 ) -> None:
     """
-    Computes the time-to-solution (TTS) of *QuickSim* from an exact result
-    and a series of heuristic results: the accuracy is the share of
-    heuristic runs that found the ground state, and TTS is the mean
-    heuristic runtime scaled to reach the given confidence level, `t ·
-    log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
-    mean heuristic runtime, and infinite time-to-solution.
-
-    Args:
-        results_exact: The result of an exact engine, which provides the
-                       ground state.
-        results_heuristic: The results of the heuristic runs.
-        confidence_level: Confidence level for the TTS computation.
-        ps: Statistics.
+    Evaluate heuristic time-to-solution against an exact simulation result.
+    confidence_level must be strictly between 0 and 1; invalid values raise ValueError.
+    ps receives accuracy, runtimes, and time-to-solution statistics.
+    Empty heuristic results yield zero accuracy and infinite time-to-solution.
     """

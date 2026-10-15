@@ -57,14 +57,23 @@ void register_simulation_parameters(nb::module_& m)
             nb::arg("relative_permittivity") = fiction::sidb::model::simulation_parameters{}.epsilon_r,
             nb::arg("screening_distance")    = fiction::sidb::model::simulation_parameters{}.lambda_tf,
             "Store physical model values. All arguments are keyword-only; base_number must be 2 or 3.")
-        .def_rw("epsilon_r", &fiction::sidb::model::simulation_parameters::epsilon_r,
-                DOC(fiction_sidb_model_simulation_parameters_epsilon_r))
-        .def_rw("lambda_tf", &fiction::sidb::model::simulation_parameters::lambda_tf,
-                DOC(fiction_sidb_model_simulation_parameters_lambda_tf))
+        .def_prop_rw(
+            "epsilon_r", [](const fiction::sidb::model::simulation_parameters& self) { return self.epsilon_r; },
+            [](fiction::sidb::model::simulation_parameters& self, const double value)
+            { self = make_simulation_parameters(self.base, self.mu_minus, value, self.lambda_tf); },
+            DOC(fiction_sidb_model_simulation_parameters_epsilon_r))
+        .def_prop_rw(
+            "lambda_tf", [](const fiction::sidb::model::simulation_parameters& self) { return self.lambda_tf; },
+            [](fiction::sidb::model::simulation_parameters& self, const double value)
+            { self = make_simulation_parameters(self.base, self.mu_minus, self.epsilon_r, value); },
+            DOC(fiction_sidb_model_simulation_parameters_lambda_tf))
         .def_rw("mu_minus", &fiction::sidb::model::simulation_parameters::mu_minus,
                 DOC(fiction_sidb_model_simulation_parameters_mu_minus))
-        .def_rw("base", &fiction::sidb::model::simulation_parameters::base,
-                DOC(fiction_sidb_model_simulation_parameters_base))
+        .def_prop_rw(
+            "base", [](const fiction::sidb::model::simulation_parameters& self) { return self.base; },
+            [](fiction::sidb::model::simulation_parameters& self, const uint8_t value)
+            { self = make_simulation_parameters(value, self.mu_minus, self.epsilon_r, self.lambda_tf); },
+            DOC(fiction_sidb_model_simulation_parameters_base))
         .def("k", &fiction::sidb::model::simulation_parameters::k, DOC(fiction_sidb_model_simulation_parameters_k))
         .def("mu_plus", &fiction::sidb::model::simulation_parameters::mu_plus,
              DOC(fiction_sidb_model_simulation_parameters_mu_plus));

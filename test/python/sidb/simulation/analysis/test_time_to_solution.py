@@ -91,8 +91,8 @@ def test_time_to_solution_with_simulation_results() -> None:
     time_to_solution_for_given_simulation_results(
         simulation_results_quickexact,
         simulation_results_quicksim,
-        0.997,
-        st,
+        confidence_level=0.997,
+        ps=st,
     )
 
     assert st.time_to_solution > 0.0

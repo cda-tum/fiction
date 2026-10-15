@@ -88,6 +88,8 @@ inline void register_critical_temperature_functions(nb::module_& m)
            const decltype(critical_temperature_options{}.on_worker_progress)& on_worker_progress,
            critical_temperature_stats*                                        stats)
         {
+            validate_confidence_level(confidence_level);
+            validate_max_temperature(max_temperature);
             critical_temperature_options params{};
             params.operational_params =
                 make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
@@ -128,6 +130,7 @@ inline void register_critical_temperature_functions(nb::module_& m)
         nb::arg("stats") = nullptr,
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
 The overload with input and output wires bypasses automatic wire detection.
 
 Args:
@@ -145,7 +148,7 @@ Args:
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
     stats: Statistics object filled by the algorithm; None discards statistics.
-    sim_engine: SiDB simulation engine used for operational analysis.
+    sim_engine: SiDB simulation engine used for charge simulation.
     op_condition: Require the selected operational condition for every input pattern.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
@@ -175,6 +178,8 @@ Args:
            const decltype(critical_temperature_options{}.on_worker_progress)& on_worker_progress,
            critical_temperature_stats*                                        stats)
         {
+            validate_confidence_level(confidence_level);
+            validate_max_temperature(max_temperature);
             critical_temperature_options params{};
             params.operational_params = make_operational_parameters(
                 timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
@@ -217,6 +222,7 @@ Args:
         nb::arg("stats") = nullptr,
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
 The overload with input and output wires bypasses automatic wire detection.
 
 Args:
@@ -233,7 +239,7 @@ Args:
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
     stats: Statistics object filled by the algorithm; None discards statistics.
-    sim_engine: SiDB simulation engine used for operational analysis.
+    sim_engine: SiDB simulation engine used for charge simulation.
     op_condition: Require the selected operational condition for every input pattern.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
 )doc");
@@ -251,6 +257,8 @@ Args:
            const decltype(critical_temperature_options{}.on_worker_progress)& on_worker_progress,
            critical_temperature_stats*                                        stats)
         {
+            validate_confidence_level(confidence_level);
+            validate_max_temperature(max_temperature);
             critical_temperature_options params{};
             params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             params.operational_params.timeout    = timeout;
@@ -275,6 +283,7 @@ Args:
         nb::arg("stats") = nullptr,
         R"doc(Determine the critical temperature from the population of excited charge distributions.
 The keyword options select physical values, confidence, and temperature bounds.
+Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
 
 Args:
     timeout: Execution budget in milliseconds.
@@ -287,7 +296,7 @@ Args:
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
     stats: Statistics object filled by the algorithm; None discards statistics.
-    sim_engine: SiDB simulation engine used for operational analysis.
+    sim_engine: SiDB simulation engine used for charge simulation.
 )doc");
 }
 
