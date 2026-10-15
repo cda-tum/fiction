@@ -15,16 +15,17 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/utils/optimization/simulated_annealing.hpp>
 
-#include <fmt/format.h>
-
 #include <algorithm>
-#include <iostream>
+#include <cmath>
+#include <concepts>
 #include <random>
 #include <stdexcept>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::utils::optimization;
@@ -42,11 +43,8 @@ struct lvalue_annealing_cost
 /** @brief Cost with a distinct declared result type and actual state-evaluation overload. */
 struct overloaded_annealing_cost
 {
-    /** @brief Selects the declared double cost type. @param state State value. @return Cost value. */
-    double operator()(int&& state) const
-    {
-        return static_cast<double>(state) + 100.0;
-    }
+    /** @brief Selects the declared double cost type in unevaluated calls. @return Declared cost value. */
+    double operator()(int&&) const;
     /** @brief Evaluates the actual state. @param state State value. @return Cost value. */
     float operator()(const int& state) const
     {
@@ -167,9 +165,9 @@ TEST_CASE("Annealing preserves the declared cost type with overloaded costs", "[
     CHECK((std::same_as<typename decltype(single)::second_type, double>));
     CHECK((std::same_as<typename decltype(multi)::second_type, double>));
     CHECK(single.first == -1);
-    CHECK(single.second == -0.75f);
+    CHECK(single.second == -0.75);
     CHECK(multi.first == -1);
-    CHECK(multi.second == -0.75f);
+    CHECK(multi.second == -0.75);
 }
 
 /**
@@ -181,7 +179,7 @@ TEST_CASE("Annealing preserves the declared cost type with overloaded costs", "[
  */
 double schwefel_function_1d(const double& x) noexcept
 {
-    return 418.9829 - x * std::sin(std::sqrt(std::abs(x)));
+    return 418.9829 - (x * std::sin(std::sqrt(std::abs(x))));
 }
 /**
  * This function implements a randomized initial state generator for the 1D Schwefel function. It returns a random value
@@ -231,8 +229,8 @@ TEST_CASE("1D Schwefel function", "[sim-anneal]")
  */
 double drop_wave_function_2d(const std::pair<double, double>& x) noexcept
 {
-    return -((1.0 + std::cos(12.0 * std::sqrt(x.first * x.first + x.second * x.second))) /
-             (0.5 * (x.first * x.first + x.second * x.second) + 2.0));
+    return -((1.0 + std::cos(12.0 * std::sqrt((x.first * x.first) + (x.second * x.second)))) /
+             (0.5 * ((x.first * x.first) + (x.second * x.second)) + 2.0));
 }
 /**
  * This function implements a randomized initial state generator for the 2D Drop-Wave function. It returns a random pair
@@ -301,13 +299,6 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 
         CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Linear single_result: {}; Schwefel(x) = {}", single_result,
-                                 schwefel_function_1d(single_result))
-                  << std::endl;
-        std::cout << fmt::format("Linear multi_result: {}; Schwefel(x) = {}", multi_result,
-                                 schwefel_function_1d(multi_result))
-                  << std::endl;
     }
     SECTION("Geometric temperature schedule")
     {
@@ -324,14 +315,6 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 
         CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Geometric single_result: {}; Schwefel(x) = {}", single_result,
-                                 schwefel_function_1d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Geometric multi_result: {}; Schwefel(x) = {}", multi_result,
-                                 schwefel_function_1d(multi_result))
-                  << std::endl;
     }
 }
 TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-anneal]")
@@ -359,14 +342,6 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
 
         CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Linear single_result: ({}, {}); Drop-Wave(x) = {}", single_result.first,
-                                 single_result.second, drop_wave_function_2d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Linear multi_result: ({}, {}); Drop-Wave(x) = {}", multi_result.first,
-                                 multi_result.second, drop_wave_function_2d(multi_result))
-                  << std::endl;
     }
     SECTION("Geometric temperature schedule")
     {
@@ -383,14 +358,6 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
 
         CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Geometric single_result: ({}, {}); Drop-Wave(x) = {}", single_result.first,
-                                 single_result.second, drop_wave_function_2d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Geometric multi_result: ({}, {}); Drop-Wave(x) = {}", multi_result.first,
-                                 multi_result.second, drop_wave_function_2d(multi_result))
-                  << std::endl;
     }
 }
 

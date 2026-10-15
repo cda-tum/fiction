@@ -57,6 +57,15 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
         parent_view::clear_colors(0);
     }
     /**
+     * @brief Assigns the given color to all nodes and preserves edge colors.
+     *
+     * @param clr Color to assign to the nodes.
+     */
+    void clear_colors(const uint32_t clr) const
+    {
+        parent_view::clear_colors(clr);
+    }
+    /**
      * Returns the assigned color of a given edge.
      *
      * @param e Edge whose color is desired.
@@ -109,6 +118,8 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of `pred(color(e))`.
      */
     template <typename Pred>
+    // Keep the parent color view's lvalue predicate invocation.
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     [[nodiscard]] bool eval_edge_color(const edge& e, Pred&& pred) const
     {
         return pred(edge_color(e));
@@ -123,13 +134,14 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of `pred(color(a), color(b))`.
      */
     template <typename Pred>
+    // Keep the parent color view's lvalue predicate invocation.
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     [[nodiscard]] bool eval_edge_color(const edge& a, const edge& b, Pred&& pred) const
     {
         return pred(edge_color(a), edge_color(b));
     }
 
     // make functions from parent_view accessible in this scope
-    using parent_view::clear_colors;
     using parent_view::color;
     using parent_view::current_color;
     using parent_view::eval_color;

@@ -34,7 +34,7 @@
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>  // reader for simulated SiDB surfaces
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>      // writer for SiQAD files (physical simulation)
 #include <fiction/technology/sidb/layout.hpp>                   // SiDB layouts over a crystal lattice
-#include <fiction/types.hpp>                                    // pre-defined types suitable for the FCN domain
+#include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>  // output formatting

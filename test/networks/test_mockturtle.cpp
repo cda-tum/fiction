@@ -37,6 +37,9 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/tech_library.hpp>
 
+#include <array>
+#include <cstdint>
+#include <iterator>
 #include <sstream>
 #include <vector>
 
@@ -63,18 +66,20 @@ static_assert(!filtered_callback<int>);
 
 TEST_CASE("Filtered traversal transforms elements and stops on false", "[mockturtle]")
 {
-    int              values[]{1, 2, 3, 4, 5, 6};
+    /** Source values traversed through raw-pointer iterators. */
+    std::array       values{1, 2, 3, 4, 5, 6};
     const auto       even   = [](const int value) { return value % 2 == 0; };
     const auto       triple = [](const int value) { return 3 * value; };
     std::vector<int> visited{};
     mockturtle::detail::foreach_element_if_transform<int*, int>(
-        std::begin(values), std::end(values), even, triple, [&visited](const int value) { visited.push_back(value); });
+        values.data(), std::next(values.data(), std::ssize(values)), even, triple,
+        [&visited](const int value) { visited.push_back(value); });
     CHECK(visited == std::vector<int>{6, 12, 18});
 
     visited.clear();
     std::vector<uint32_t> indices{};
-    const auto            stopped = mockturtle::detail::foreach_element_if_transform<int*, int>(
-        std::begin(values), std::end(values), even, triple,
+    auto* const           stopped = mockturtle::detail::foreach_element_if_transform<int*, int>(
+        values.data(), std::next(values.data(), std::ssize(values)), even, triple,
         [&visited, &indices](const int value, const uint32_t index)
         {
             visited.push_back(value);
@@ -82,7 +87,7 @@ TEST_CASE("Filtered traversal transforms elements and stops on false", "[mocktur
             return value < 12;
         },
         5);
-    CHECK(stopped == std::begin(values) + 4);
+    CHECK(stopped == std::next(values.data(), 4));
     CHECK(visited == std::vector<int>{6, 12});
     CHECK(indices == std::vector<uint32_t>{5, 6});
 }

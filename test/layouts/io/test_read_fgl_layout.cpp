@@ -25,7 +25,6 @@
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <tinyxml2.h>
@@ -38,7 +37,6 @@
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::layouts::io;
-using namespace fiction::networks;
 
 namespace
 {

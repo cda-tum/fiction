@@ -392,7 +392,7 @@ def minimum_energy(charge_distributions: Sequence[mnt.pyfiction.sidb.charge_dist
         last: End of the range to examine.
 
     Template Args:
-        InputIt: Must meet the requirements of `LegacyInputIterator`.
+        InputIt: Forward iterator over charge distributions.
 
     Returns:
         Value of the minimum energy found in the input range (unit: eV),

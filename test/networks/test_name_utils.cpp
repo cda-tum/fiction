@@ -25,12 +25,16 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/physical_design/placement_utils.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <cstdint>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 
 using namespace fiction;

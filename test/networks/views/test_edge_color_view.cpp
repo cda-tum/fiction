@@ -171,4 +171,25 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
         CHECK(aig_ecv.eval_edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
                                       [yellow](const auto color) { return color != yellow; }));
     }
+    SECTION("clears current colors while preserving explicit node-color calls")
+    {
+        /** Const access to the mutable color storage. */
+        const auto& color_view = aig_ecv;
+        color_view.paint(color_view.get_node(f1), red);
+        color_view.paint_edge({color_view.get_node(f1), color_view.get_node(f3)}, red);
+        color_view.clear_colors();
+        CHECK(color_view.color(color_view.get_node(f1)) == 0u);
+        CHECK(color_view.edge_color({color_view.get_node(f1), color_view.get_node(f3)}) == 0u);
+
+        color_view.paint(color_view.get_node(f1), red);
+        color_view.paint_edge({color_view.get_node(f1), color_view.get_node(f3)}, red);
+        color_view.clear_colors(yellow);
+        CHECK(color_view.color(color_view.get_node(f1)) == yellow);
+        CHECK(color_view.edge_color({color_view.get_node(f1), color_view.get_node(f3)}) == red);
+
+        color_view.clear_colors(0u);
+        CHECK(color_view.color(color_view.get_node(f1)) == 0u);
+        CHECK(color_view.edge_color({color_view.get_node(f1), color_view.get_node(f3)}) == red);
+        CHECK(color_view.current_color() == red);
+    }
 }

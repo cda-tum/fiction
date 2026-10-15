@@ -24,7 +24,6 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/types.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
 
 #include <kitty/constructors.hpp>

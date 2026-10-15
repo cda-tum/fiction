@@ -17,6 +17,7 @@
 
 #pragma once
 
+// NOLINTNEXTLINE(misc-include-cleaner): is_balanced is used by assert-enabled consumers.
 #include "fiction/synthesis/network_balancing.hpp"
 
 #include <mockturtle/traits.hpp>

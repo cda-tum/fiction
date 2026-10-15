@@ -31,7 +31,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <lorina/common.hpp>
