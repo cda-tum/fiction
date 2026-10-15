@@ -623,6 +623,7 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
 
     const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
 
+    CHECK(static_cast<bool>(params.on_progress));
     REQUIRE(layout.has_value());
     check_eq(ntk, *layout);
 

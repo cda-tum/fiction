@@ -815,20 +815,20 @@ class graph_oriented_layout_design_impl
      * Constructor for the graph-oriented layout design algorithm.
      *
      * @param src The source network to be placed, already converted to a `technology_network`.
-     * @param p The parameters for the graph-enhanced layout search algorithm.
+     * @param p GOLD parameters transferred into owned invocation storage.
      * @param st The statistics object to record execution details.
      * @param custom The custom layout cost function.
      */
-    graph_oriented_layout_design_impl(const tec_nt& src, const graph_oriented_layout_design_params& p,
+    graph_oriented_layout_design_impl(const tec_nt& src, graph_oriented_layout_design_params&& p,
                                       graph_oriented_layout_design_stats&       st,
                                       const std::function<uint64_t(const Lyt&)> custom) :
             ntk{src},
-            ps{p},
+            ps{std::move(p)},
             pst{st},
             custom_cost_objective{custom},
             timeout{ps.timeout},
             start{std::chrono::high_resolution_clock::now()},
-            seed{p.seed ? *p.seed : std::random_device{}()}
+            seed{ps.seed ? *ps.seed : std::random_device{}()}
     {
         ntk.substitute_po_signals();
         ntk.foreach_po(
@@ -1053,7 +1053,7 @@ class graph_oriented_layout_design_impl
     /** @brief Number of constant outputs; every search graph preserves this source interface. */
     uint32_t constant_output_count{};
     /**
-     * Parameters.
+     * Parameters owned by this invocation.
      */
     graph_oriented_layout_design_params ps;
     /**
@@ -2692,7 +2692,7 @@ std::optional<Lyt> graph_oriented_layout_design(const tec_nt& ntk, graph_oriente
     }
 
     graph_oriented_layout_design_stats             st{};
-    detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), ps, st,
+    detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), std::move(ps), st,
                                                      custom_cost_objective};
 
     const auto result = p.run();
