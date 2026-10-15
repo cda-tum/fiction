@@ -769,6 +769,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Edge-color views now clear node and edge colors without an ambiguous call.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
   - Depth and rank view assignment now preserves wrapped network names and metadata.

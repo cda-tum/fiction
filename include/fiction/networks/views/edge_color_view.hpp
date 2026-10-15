@@ -62,6 +62,15 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
         parent_view::clear_colors(0);
     }
     /**
+     * @brief Assigns the given color to all nodes and preserves edge colors.
+     *
+     * @param clr Color to assign to the nodes.
+     */
+    void clear_colors(const uint32_t clr) const
+    {
+        parent_view::clear_colors(clr);
+    }
+    /**
      * Returns the assigned color of a given edge.
      *
      * @param e Edge whose color is desired.
@@ -136,7 +145,6 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
     }
 
     // make functions from parent_view accessible in this scope
-    using parent_view::clear_colors;
     using parent_view::color;
     using parent_view::current_color;
     using parent_view::eval_color;
