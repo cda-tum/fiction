@@ -20,8 +20,9 @@ limitation, not evidence that no related work exists.
 
 An audit request authorizes investigation and a report. If fixes are also authorized,
 implement and validate them without another approval checkpoint. Otherwise, stop at
-the report. Publish only when authorized. Group related changes for review and follow
-the repository's commit, disclosure, and PR rules.
+the report. Existing authorization, including cleanup required by the Working
+Principles, remains in force. Publish only when authorized. Group related changes
+for review and follow the repository's commit, disclosure, and PR rules.
 
 ## Establish the contract
 
@@ -35,7 +36,7 @@ interfaces, and downstream uses can expose requirements omitted from prose. A pl
 or implementation alone does not make every detail permanent. In _fiction_, inspect
 layout and clocking invariants, gate-library assumptions, numerical tolerances,
 binding defaults and exception translations, and formats consumed by other tools.
-Include a publication when the implementation promises the method it describes;
+Consult the cited publication when the implementation promises its method;
 a citation alone does not promise every detail of that method.
 
 Treat these as questions, never automatic findings:
@@ -86,7 +87,7 @@ when the question needs it. Remove disposable worktrees and their builds when do
 For performance claims, prefer existing tools. Keep ad hoc harnesses, measurements,
 and plots in `.ai/`. Record the workload, baseline, environment, measurements, and
 limits, including neutral results and regressions. Untested optimizations remain
-candidates. Preserve published experiment results under `experiments/`.
+candidates. Do not alter published experiment results under `experiments/`.
 
 ### What an experiment proves
 

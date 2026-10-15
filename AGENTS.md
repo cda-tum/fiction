@@ -256,6 +256,7 @@ before recommending a change. AI authorship and a surviving mutation do not just
 deleting code or tests. Report findings directly; keep useful records in ignored
 `.ai/audits/`. An audit alone authorizes investigation and a report; apply fixes or
 publish only when the maintainer has authorized that scope.
+Existing authorization, including the Working Principles, still applies.
 
 ## Code Review
 
