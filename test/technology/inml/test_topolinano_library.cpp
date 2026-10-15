@@ -45,8 +45,6 @@ using namespace fiction::verification;
 TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 {
     CHECK(std::is_same_v<topolinano_library::layout, inml::layout>);
-    CHECK(!has_get_functional_implementations_v<topolinano_library>);
-    CHECK(!has_get_gate_ports_v<topolinano_library>);
 }
 
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")

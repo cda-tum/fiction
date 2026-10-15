@@ -56,7 +56,7 @@ using surface_black_list =
  * library, the gate's SiDBs are placed at the tile's position, and if any of them is affected by a defect of the
  * surface, the gate's ports are blacklisted for that tile and function. Placement can then avoid those gates.
  *
- * @tparam GateLibrary SiDB gate library type.
+ * @tparam GateLibrary SiDB gate library with static implementation and position or direction port lookup.
  * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param gate_lyt The gate-level layout.
  * @param surface The defective surface.
@@ -65,16 +65,21 @@ using surface_black_list =
  * @return The black list.
  */
 template <typename GateLibrary, typename Geometry>
-    requires std::same_as<typename GateLibrary::layout, sidb::layout>
+    requires std::same_as<typename GateLibrary::layout, sidb::layout> &&
+             requires {
+                 { GateLibrary::get_functional_implementations() } -> std::same_as<typename GateLibrary::gate_functions>;
+             } && (requires {
+                 { GateLibrary::get_gate_ports() } ->
+                     std::same_as<typename GateLibrary::template gate_ports<fcn::port_position>>;
+             } || requires {
+                 { GateLibrary::get_gate_ports() } ->
+                     std::same_as<typename GateLibrary::template gate_ports<fcn::port_direction>>;
+             })
 [[nodiscard]] auto
 surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const sidb::layout& surface,
                  const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
                  const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt)
 {
-    static_assert(has_get_functional_implementations_v<GateLibrary>,
-                  "GateLibrary does not implement the get_functional_implementations function");
-    static_assert(has_get_gate_ports_v<GateLibrary>, "GateLibrary does not implement the get_gate_ports function");
-
     using port_type = typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type;
 
     surface_black_list<port_type> black_list{};

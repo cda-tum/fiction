@@ -39,8 +39,6 @@ using namespace fiction::mol_qca;
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 {
     CHECK(std::is_same_v<sim7_mol_library::layout, mol_qca::layout>);
-    CHECK(!has_get_functional_implementations_v<sim7_mol_library>);
-    CHECK(!has_get_gate_ports_v<sim7_mol_library>);
 }
 
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
