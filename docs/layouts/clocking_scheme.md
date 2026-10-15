@@ -17,6 +17,7 @@ can be overridden.
 
 ```{doxygenclass} fiction::layouts::clocking::unsupported_scheme_exception
 :members:
+:undoc-members:
 ```
 
 ```{doxygenclass} fiction::layouts::clocking::scheme

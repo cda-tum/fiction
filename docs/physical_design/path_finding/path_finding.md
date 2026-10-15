@@ -181,10 +181,12 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 
 ```{doxygenclass} fiction::physical_design::path_finding::unit_cost_functor
 :members:
+:undoc-members:
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::random_cost_functor
 :members:
+:undoc-members:
 ```
 
 ## A\* Shortest Path
