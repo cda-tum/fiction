@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <functional>
 #include <sstream>
+#include <utility>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -140,7 +141,7 @@ void register_graph_oriented_layout_design(nb::module_& m)
             params.on_worker_progress                  = on_worker_progress;
             const nb::gil_scoped_release release{};
             return fiction::physical_design::graph_oriented_layout_design<fiction::layouts::cartesian_gate_layout>(
-                network, params, statistics, custom_cost_objective);
+                network, std::move(params), statistics, custom_cost_objective);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("timeout") = graph_oriented_layout_design_options{}.timeout,
         nb::arg("num_vertex_expansions")     = graph_oriented_layout_design_options{}.num_vertex_expansions,
