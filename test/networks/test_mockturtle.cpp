@@ -49,12 +49,9 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    /** @brief Placed layout whose logic enters mockturtle through extraction. */
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    const auto and_or_layout   = blueprints::and_or_gate_layout<gate_layout>();
-    const auto xor_maj_layout  = blueprints::xor_maj_gate_layout<gate_layout>();
-    const auto crossing_layout = blueprints::crossing_layout<gate_layout>();
+    const auto and_or_layout   = blueprints::and_or_gate_layout<cartesian_gate_layout>();
+    const auto xor_maj_layout  = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
+    const auto crossing_layout = blueprints::crossing_layout<cartesian_gate_layout>();
 
     REQUIRE((mockturtle::has_compute_v<decltype(extract_layout_network(and_or_layout)), kitty::dynamic_truth_table>));
 
@@ -97,7 +94,7 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
 
     SECTION("Synchronization elements")
     {
-        const auto se_or_layout = blueprints::se_gate_layout<gate_layout>();
+        const auto se_or_layout = blueprints::se_gate_layout<cartesian_gate_layout>();
 
         const auto se_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(se_or_layout),

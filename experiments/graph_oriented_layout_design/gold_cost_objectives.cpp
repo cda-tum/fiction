@@ -62,8 +62,6 @@ Ntk read_ntk(const std::string& name)
 int main()
 try
 {
-    using gate_lyt = gate_layout<cartesian_layout>;
-
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, double, std::string>
         gold_cost_objectives_exp{"graph_oriented_layout_design_exp",
                                  "benchmark",
@@ -98,13 +96,14 @@ try
 
             auto network = read_ntk<tec_nt>(benchmark);
 
-            auto gate_layout = graph_oriented_layout_design<gate_lyt, tec_nt>(
+            auto gate_layout = graph_oriented_layout_design<cartesian_gate_layout, tec_nt>(
                 network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
 
             if (gate_layout.has_value())
             {
                 // check equivalence
-                const auto eq_stats = equivalence_checking<technology_network, gate_lyt>(network, *gate_layout);
+                const auto eq_stats =
+                    equivalence_checking<technology_network, cartesian_gate_layout>(network, *gate_layout);
 
                 std::string eq_result = "NO";
                 if (eq_stats == eq_type::STRONG)

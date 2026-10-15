@@ -370,9 +370,8 @@ class a_star_impl
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_layout<cartesian_layout>;
  * using path = layout_coordinate_path;
- * clk_lyt layout = ...;
+ * fiction::layouts::cartesian_gate_layout layout = ...;
  * auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
  *

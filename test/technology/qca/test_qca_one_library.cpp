@@ -49,9 +49,7 @@ TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    auto layout = blueprints::or_not_gate_layout<gate_layout>();
+    auto layout = blueprints::or_not_gate_layout<cartesian_gate_layout>();
 
     // clang-format off
 
@@ -94,9 +92,7 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 
 TEST_CASE("Setting up wires", "[qca-one-library]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    auto layout = blueprints::crossing_layout<gate_layout>();
+    auto layout = blueprints::crossing_layout<cartesian_gate_layout>();
 
     // clang-format off
 
@@ -145,9 +141,7 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
 
 TEST_CASE("Setting up fanouts", "[qca-one-library]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    auto layout = blueprints::fanout_layout<gate_layout>();
+    auto layout = blueprints::fanout_layout<cartesian_gate_layout>();
 
     // clang-format off
 

@@ -287,18 +287,18 @@ TEST_CASE("Hexagonal neighbor queries stay inside the layout for any 32-bit coor
 TEMPLATE_TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coordinate-contracts]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    /** @brief Gate layout with stable object identities. */
-    using lyt_t = gate_layout<TestType>;
     /** Coordinate value used for placement. */
     using tile = fiction::layouts::layout_base::coordinate;
 
     SECTION("The geometry rejects more than two layers")
     {
-        CHECK_THROWS_AS((blueprints::make_layout<lyt_t>(arrangement::EVEN_ROW, {6, 6, 3})), std::out_of_range);
+        CHECK_THROWS_AS((blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {6, 6, 3})),
+                        std::out_of_range);
     }
     SECTION("Every layer has distinct placement")
     {
-        auto lyt = blueprints::make_layout<lyt_t>(arrangement::EVEN_ROW, {4, 4, 2}, clocking::twoddwave());
+        auto lyt =
+            blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 4, 2}, clocking::twoddwave());
         /** Ground-layer primary input. */
         const auto ground = lyt.create_pi("a", {2, 0, 0});
         /** Primary input beyond the declared layer count. */
@@ -311,9 +311,10 @@ TEMPLATE_TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coor
     }
     SECTION("Negative coordinates identify placed objects")
     {
-        auto       lyt = blueprints::make_layout<lyt_t>(arrangement::EVEN_ROW, {4, 4, 2}, clocking::twoddwave());
-        const auto a   = lyt.create_pi("a", {std::numeric_limits<int32_t>::min(), 0, 0});
-        const auto b   = lyt.create_pi("b", {-1, -1, -1});
+        auto lyt =
+            blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 4, 2}, clocking::twoddwave());
+        const auto a = lyt.create_pi("a", {std::numeric_limits<int32_t>::min(), 0, 0});
+        const auto b = lyt.create_pi("b", {-1, -1, -1});
         CHECK(lyt.num_pis() == 2);
         CHECK(lyt.get_tile(a) == tile{std::numeric_limits<int32_t>::min(), 0, 0});
         CHECK(lyt.get_tile(b) == tile{-1, -1, -1});

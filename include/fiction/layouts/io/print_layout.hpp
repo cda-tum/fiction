@@ -67,9 +67,6 @@ template <typename Geometry>
 void print_gate_level_layout(std::ostream& os, const fiction::layouts::gate_layout<Geometry>& layout,
                              const bool io_color = true, const bool clk_color = false)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_layout<Geometry>;
-
     // empty layout
     if (layout.is_empty())
     {
@@ -77,13 +74,15 @@ void print_gate_level_layout(std::ostream& os, const fiction::layouts::gate_layo
         return;
     }
 
-    if constexpr ((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
+    if constexpr ((std::derived_from<fiction::layouts::gate_layout<Geometry>, fiction::layouts::hexagonal_layout> &&
+                   !std::derived_from<fiction::layouts::gate_layout<Geometry>,
+                                      fiction::layouts::shifted_cartesian_layout>))
     {
         os << "[e] hexagonal layout printing is not supported\n";
         return;
     }
-    else if constexpr (std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
+    else if constexpr (std::derived_from<fiction::layouts::gate_layout<Geometry>,
+                                         fiction::layouts::shifted_cartesian_layout>)
     {
         os << "[e] shifted cartesian layout printing is not supported\n";
         return;

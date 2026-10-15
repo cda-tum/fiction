@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Preset network, layout, and technology types that instantiate the algorithms.
+ * @brief Preset network and truth-table types that instantiate the algorithms.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
@@ -18,10 +18,6 @@
 
 #pragma once
 
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/gate_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/networks/technology_network.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -105,20 +101,6 @@ template <class Ntk>
 inline constexpr auto ntk_type_name = get_ntk_type_name<Ntk>();
 
 /**
- * FCN gate-level layouts.
- */
-using cart_gate_clk_lyt     = layouts::gate_layout<layouts::cartesian_layout>;
-using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
-
-using shifted_cart_gate_clk_lyt     = layouts::gate_layout<layouts::shifted_cartesian_layout>;
-using shifted_cart_gate_clk_lyt_ptr = std::shared_ptr<shifted_cart_gate_clk_lyt>;
-
-using hex_gate_clk_lyt     = layouts::gate_layout<layouts::hexagonal_layout>;
-using hex_gate_clk_lyt_ptr = std::shared_ptr<hex_gate_clk_lyt>;
-
-using gate_layout_t = std::variant<cart_gate_clk_lyt_ptr, shifted_cart_gate_clk_lyt_ptr, hex_gate_clk_lyt_ptr>;
-
-/**
  * Every `*_ptr` alias points at the type its name says (`aig_ptr` at `aig_nt`, and so on). The
  * aliases above are written by hand, so this pins each pair.
  */
@@ -127,8 +109,5 @@ static_assert(std::is_same_v<aig_ptr::element_type, aig_nt>);
 static_assert(std::is_same_v<xag_ptr::element_type, xag_nt>);
 static_assert(std::is_same_v<mig_ptr::element_type, mig_nt>);
 static_assert(std::is_same_v<tec_ptr::element_type, tec_nt>);
-static_assert(std::is_same_v<cart_gate_clk_lyt_ptr::element_type, cart_gate_clk_lyt>);
-static_assert(std::is_same_v<shifted_cart_gate_clk_lyt_ptr::element_type, shifted_cart_gate_clk_lyt>);
-static_assert(std::is_same_v<hex_gate_clk_lyt_ptr::element_type, hex_gate_clk_lyt>);
 
 }  // namespace fiction
