@@ -26,7 +26,6 @@
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
 #include <fiction/technology/sidb/layout.hpp>                // SiDB layouts
-#include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
