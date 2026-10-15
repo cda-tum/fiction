@@ -34,6 +34,7 @@
 
 #include <array>
 #include <concepts>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -47,6 +48,15 @@ TEST_CASE("Yen's algorithm respects a zero path limit", "[k-shortest-paths]")
     const lyt layout{lyt::extent{2, 2, 1}};
     CHECK(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {1, 1}}, 0).empty());
     CHECK(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 0}}, 0).empty());
+}
+
+TEST_CASE("Yen validates routing endpoints when paths are requested", "[k-shortest-paths]")
+{
+    const cartesian_layout layout{{1, 1}};
+    CHECK_THROWS_AS(yen_k_shortest_paths(layout, {.source = {2, 0}, .target = {1, 1}}, 1), std::invalid_argument);
+    CHECK_THROWS_AS(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 2}}, 1), std::invalid_argument);
+    CHECK(yen_k_shortest_paths(layout, {.source = {2, 0}, .target = {1, 1}}, 0).empty());
+    CHECK(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 2}}, 0).empty());
 }
 
 TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")

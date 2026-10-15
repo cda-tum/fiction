@@ -29,7 +29,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <stdexcept>
 
 namespace fiction::physical_design::path_finding
 {
@@ -82,11 +81,6 @@ class yen_k_shortest_paths_impl
      */
     [[nodiscard]] path_collection run()
     {
-        if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
-        {
-            throw std::invalid_argument("Routing endpoints must lie within the layout extent");
-        }
-
         // if there was no path to begin with, abort
         if (k_shortest_paths.back().empty())
         {
