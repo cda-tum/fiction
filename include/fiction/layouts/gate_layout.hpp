@@ -381,7 +381,13 @@ class gate_layout : public CoordinateLayout
         const auto it = occupancy.find(t);
         return it == occupancy.end() ? std::nullopt : std::optional{identity(it->second)};
     }
-    /** @brief Returns the object's coordinate. @throws std::invalid_argument If the identity is stale. */
+    /**
+     * @brief Returns the object's coordinate.
+     *
+     * @param id Object identity.
+     * @return Coordinate of the object.
+     * @throws std::invalid_argument If the identity is stale.
+     */
     [[nodiscard]] tile get_tile(const object_id id) const
     {
         return checked_object(id).position;
@@ -1379,7 +1385,11 @@ class gate_layout : public CoordinateLayout
         return clocking_state.get_synchronization_element(cz);
     }
 
-    /** @brief Counts zones with a nonzero Hold-phase extension. @return Synchronization element count. */
+    /**
+     * @brief Counts zones with a nonzero Hold-phase extension.
+     *
+     * @return Synchronization element count.
+     */
     [[nodiscard]] uint32_t num_se() const
     {
         return clocking_state.num_se();
