@@ -23,6 +23,7 @@
 #include <concepts>
 #include <cstdlib>
 #include <random>
+#include <stdexcept>
 #include <thread>
 #include <type_traits>
 #include <utility>
@@ -163,12 +164,13 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * @param init_temp The initial temperature.
  * @param final_temp The final temperature.
  * @param cycles The number of cycles for each temperature value.
- * @param instances The number of random initial states to generate.
+ * @param instances Positive number of random initial states to generate.
  * @param rand_state The random state generator function.
  * @param cost The cost function to minimize.
  * @param schedule The temperature schedule.
  * @param next The next state function that determines an adjacent state given a current one.
  * @return A pair of the overall best optimized state and its cost value.
+ * @throws std::invalid_argument If instances is zero.
  */
 // NOLINTBEGIN(cppcoreguidelines-missing-std-forward): the callables are shared by every annealing
 // instance, so forwarding them would move from them on the first one
@@ -181,9 +183,14 @@ std::pair<std::invoke_result_t<RandStateFunc&>,
           std::invoke_result_t<CostFunc&, const std::invoke_result_t<RandStateFunc&>&>>
 multi_simulated_annealing(const double init_temp, const double final_temp, const std::size_t cycles,
                           const std::size_t instances, RandStateFunc&& rand_state, CostFunc&& cost, TempFunc&& schedule,
-                          NextFunc&& next) noexcept
+                          NextFunc&& next)
 // NOLINTEND(cppcoreguidelines-missing-std-forward)
 {
+    if (instances == 0)
+    {
+        throw std::invalid_argument("instances must be greater than zero.");
+    }
+
     using state_t = std::invoke_result_t<RandStateFunc&>;
     using cost_t  = std::invoke_result_t<CostFunc&, const state_t&>;
 
