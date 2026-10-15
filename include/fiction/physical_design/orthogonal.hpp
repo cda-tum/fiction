@@ -162,14 +162,17 @@ inline void recursively_paint_edges(
                                     });
 }
 
-/** @brief Colors the named traversal for orthogonal placement. */
+/**
+ * @brief Colors the named traversal for orthogonal placement.
+ * @param ntk Topologically ordered named technology network to read.
+ * @return Traversal with its own node and edge color storage.
+ */
 inline coloring_container
 east_south_edge_coloring(const mockturtle::topo_view<mockturtle::fanout_view<tec_nt>>& ntk) noexcept
 {
-    coloring_container    ctn{ntk};
-    mockturtle::topo_view rtv{ntk};
+    coloring_container ctn{ntk};
 
-    rtv.foreach_gate_reverse(
+    ntk.foreach_gate_reverse(
         [&](const auto& n)
         {
             const auto finc = networks::fanin_edges(ctn.color_ntk, n);
