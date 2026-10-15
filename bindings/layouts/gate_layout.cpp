@@ -332,11 +332,14 @@ void register_gate_layout(nb::module_& m, const std::string& topology)
             "Returns the object's truth table.")
         .def("size", &GateLyt::size, DOC(fiction_layouts_gate_layout_size))
         .def("fanin_size", &GateLyt::fanin_size, nb::arg("object"), DOC(fiction_layouts_gate_layout_fanin_size))
-        .def("fanout_size", &GateLyt::fanout_size, nb::arg("object"), DOC(fiction_layouts_gate_layout_fanout_size))
-        .def("input_count", &GateLyt::input_count, nb::arg("object"), DOC(fiction_layouts_gate_layout_input_count))
+        .def("fanout_size", &GateLyt::fanout_size, nb::arg("object"),
+             DOC(fiction_layouts_gate_layout_fanout_size))
+        .def("input_count", &GateLyt::input_count, nb::arg("object"),
+             DOC(fiction_layouts_gate_layout_input_count))
         .def("find_object", &GateLyt::find_object, nb::arg("t"), DOC(fiction_layouts_gate_layout_find_object))
         .def("contains", &GateLyt::contains, nb::arg("object"), DOC(fiction_layouts_gate_layout_contains))
-        .def("get_tile", &GateLyt::get_tile, nb::arg("object"), DOC(fiction_layouts_gate_layout_get_tile))
+        .def("get_tile", &GateLyt::get_tile, nb::arg("object"),
+             parameter_doc(DOC(fiction_layouts_gate_layout_get_tile), {{"id", "object"}}).c_str())
         .def("source", &GateLyt::source, nb::arg("input"), DOC(fiction_layouts_gate_layout_source))
         .def("connect", &GateLyt::connect, nb::arg("source"), nb::arg("input"),
              DOC(fiction_layouts_gate_layout_connect))
