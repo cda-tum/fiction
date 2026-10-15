@@ -48,8 +48,6 @@ using namespace fiction::physical_design;
 using namespace fiction::utils::graph;
 using namespace fiction::verification;
 
-using gate_lyt = gate_layout<cartesian_layout>;
-
 using color_routing_experiment =
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, std::string, uint64_t, uint64_t, uint64_t,
                             uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, double, double, double, double,
@@ -183,7 +181,7 @@ void smt_sat_complete()
             exact_params.timeout       = 3'600'000;  // 1h in ms
 
             // perform layout generation with an SMT-based exact algorithm
-            auto gate_layout = exact<gate_lyt>(network, exact_params, &exact_stats);
+            auto gate_layout = exact<cartesian_gate_layout>(network, exact_params, &exact_stats);
 
             if (gate_layout.has_value())
             {
@@ -234,7 +232,7 @@ void ortho_sat_complete()
         const auto network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
-        auto gate_layout = orthogonal<gate_lyt>(network, {}, &ortho_stats);
+        auto gate_layout = orthogonal<cartesian_gate_layout>(network, {}, &ortho_stats);
 
         re_route_and_log(benchmark, network, gate_layout, routing_params, ortho_stats, color_routing_exp);
     }
@@ -279,7 +277,7 @@ void ortho_mcs()
         const auto network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
-        auto gate_layout = orthogonal<gate_lyt>(network, {}, &ortho_stats);
+        auto gate_layout = orthogonal<cartesian_gate_layout>(network, {}, &ortho_stats);
 
         re_route_and_log(benchmark, network, gate_layout, routing_params, ortho_stats, color_routing_exp);
     }

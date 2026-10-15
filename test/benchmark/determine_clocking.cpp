@@ -45,9 +45,7 @@ void remove_clocking(Lyt& lyt)
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    auto lyt = orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>());
+    auto lyt = orthogonal<cartesian_gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>());
     remove_clocking(lyt);
 
     auto params = determine_clocking_params{};

@@ -62,8 +62,6 @@ static Ntk read_ntk(const std::string& name)
 int main()
 try
 {
-    using gate_lyt = gate_layout<cartesian_layout>;
-
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint64_t, size_t, size_t, float, uint64_t, uint64_t, float, uint64_t, uint64_t,
                             float, double, double, float, std::string>
@@ -104,7 +102,7 @@ try
         const auto benchmark_network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto       gate_layout = orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        auto       gate_layout = orthogonal<cartesian_gate_layout>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy = gate_layout.clone();
 
         auto num_wires = gate_layout.num_wires();
@@ -130,7 +128,8 @@ try
         auto num_wires_after = gate_layout.num_wires();
 
         // check equivalence
-        const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_layout);
+        const auto eq_stats =
+            equivalence_checking<cartesian_gate_layout, cartesian_gate_layout>(layout_copy, gate_layout);
 
         std::string eq_result;
 

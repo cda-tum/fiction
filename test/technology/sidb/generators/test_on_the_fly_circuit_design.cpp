@@ -22,6 +22,7 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -48,9 +49,9 @@ using namespace fiction::sidb::generators;
 
 TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-design]")
 {
-    hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3}};
-    const auto       first  = gate_layout.create_pi("a", {0, 0});
-    const auto       second = gate_layout.create_pi("b", {1, 0});
+    hexagonal_gate_layout gate_layout{arrangement::EVEN_ROW, {3, 3}};
+    const auto            first  = gate_layout.create_pi("a", {0, 0});
+    const auto            second = gate_layout.create_pi("b", {1, 0});
     gate_layout.create_and(first, second, {1, 2});
 
     on_the_fly_circuit_design_params params{};
@@ -61,7 +62,7 @@ TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-de
 
 TEST_CASE("Circuit design rejects unsupported gates before gate search", "[on-the-fly-circuit-design]")
 {
-    hex_gate_clk_lyt                 gate_layout{arrangement::EVEN_ROW, {3, 2}, clocking::row()};
+    hexagonal_gate_layout            gate_layout{arrangement::EVEN_ROW, {3, 2}, clocking::row()};
     const auto                       first    = gate_layout.create_pi("a", {0, 0});
     const auto                       second   = gate_layout.create_pi("b", {1, 0});
     const auto                       third    = gate_layout.create_pi("c", {2, 0});
@@ -78,10 +79,10 @@ TEST_CASE("Circuit design rejects unsupported gates before gate search", "[on-th
 
 TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-circuit-design]")
 {
-    hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
-    const auto       first  = gate_layout.create_pi("a", {0, 0});
-    const auto       second = gate_layout.create_pi("b", {1, 0});
-    const auto       gate   = gate_layout.create_and(first, second, {1, 1});
+    hexagonal_gate_layout gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
+    const auto            first  = gate_layout.create_pi("a", {0, 0});
+    const auto            second = gate_layout.create_pi("b", {1, 0});
+    const auto            gate   = gate_layout.create_and(first, second, {1, 1});
     gate_layout.create_po(gate, "f", {0, 2});
 
     on_the_fly_circuit_design_params params{};
@@ -122,8 +123,8 @@ TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-cir
     const auto              second = network.create_pi();
     network.create_po(network.create_and(first, second));
 
-    const hex_gate_clk_lyt tiling{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
-    const sidb::layout     surface{};
+    const hexagonal_gate_layout tiling{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
+    const sidb::layout          surface{};
 
     on_the_fly_circuit_design_on_defective_surface_params params{};
     params.exact_design_parameters.scheme        = "Row";

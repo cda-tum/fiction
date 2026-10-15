@@ -75,9 +75,7 @@ TEST_CASE("Coordinate obstruction: Cartesian layout", "[obstruction-layout]")
 
 TEST_CASE("Coordinate obstruction: Gate-level layout", "[obstruction-layout]")
 {
-    using layout = gate_layout<cartesian_layout>;
-
-    const auto lyt = blueprints::xor_maj_gate_layout<layout>();
+    const auto lyt = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
 
     auto obstr_lyt = lyt.clone();
 
@@ -191,9 +189,8 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     }
     SECTION("Gate-level layout")
     {
-        using layout = gate_layout<cartesian_layout>;
 
-        const auto lyt = blueprints::xor_maj_gate_layout<layout>();
+        const auto lyt = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
 
         auto obstr_lyt = lyt.clone();
 

@@ -64,8 +64,6 @@ try
     const std::string layout_folder =
         fmt::format("{}/clock_number_assignment/versatility_benchmarks/", EXPERIMENTS_PATH);
 
-    using gate_lyt = gate_layout<cartesian_layout>;
-
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
                                     "clocking scheme",
@@ -91,7 +89,7 @@ try
                 const auto benchmark = path.stem().string();
 
                 // read layout from file
-                auto original_layout = read_fgl_layout<gate_lyt>(path.string(), benchmark);
+                auto original_layout = read_fgl_layout<cartesian_gate_layout>(path.string(), benchmark);
 
                 fmt::print("[i] processing {}\n", benchmark);
 

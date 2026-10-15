@@ -73,8 +73,6 @@ try
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 
-    using gate_lyt = gate_layout<cartesian_layout>;
-
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
                                     "benchmark",
@@ -115,7 +113,7 @@ try
         const auto mapped_network = mockturtle::map(network, gate_lib, map_params);
 
         // perform layout generation with an exact SMT-based algorithm
-        const auto original_layout = orthogonal<gate_lyt>(mapped_network);
+        const auto original_layout = orthogonal<cartesian_gate_layout>(mapped_network);
 
         // obtain layout characteristics
         const auto width  = original_layout.width();
