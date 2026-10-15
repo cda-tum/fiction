@@ -11,12 +11,12 @@
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_defect, sidb_defect_type, sidb_simulation_parameters
-from mnt.pyfiction.sidb.simulation.engines import quicksim, quicksim_params
+from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_defect, sidb_defect_type
+from mnt.pyfiction.sidb.simulation.engines import quicksim
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -30,22 +30,11 @@ def test_perturber_and_sidb_pair() -> None:
     layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
-    params = quicksim_params()
-    params.simulation_parameters = sidb_simulation_parameters()
-    params.iteration_steps = 80
-    params.alpha = 0.7
-    assert params.iteration_steps == 80
-    assert params.alpha == 0.7
+    options: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options["iteration_steps"] = 80
+    options["alpha"] = 0.7
 
-    params_one = quicksim_params()
-    params_one.iteration_steps = 50
-    params_one.alpha = 0.4
-    params_one.number_threads = 1
-    assert params_one.iteration_steps == 50
-    assert params_one.alpha == 0.4
-    assert params_one.number_threads == 1
-
-    result = quicksim(layout, params)
+    result = quicksim(layout, **options)
 
     assert result is not None
     assert result.algorithm_name == "QuickSim"
@@ -68,14 +57,12 @@ def test_perturber_and_sidb_pair_111() -> None:
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
-    params = quicksim_params()
-    params.simulation_parameters = sidb_simulation_parameters()
-    params.simulation_parameters.mu_minus = -0.32
-    params.iteration_steps = 80
-    params.alpha = 0.7
-    assert params.simulation_parameters.mu_minus == -0.32
+    options: dict[str, Any] = {"base": 3, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
+    options["mu_minus"] = -0.32
+    options["iteration_steps"] = 80
+    options["alpha"] = 0.7
 
-    result = quicksim(layout, params)
+    result = quicksim(layout, **options)
 
     assert result is not None
     assert result.algorithm_name == "QuickSim"
@@ -90,12 +77,12 @@ def test_perturber_and_sidb_pair_111() -> None:
     assert groundstate[0].get_charge_state(lattice_site(3, 0, 0)) == sidb_charge_state.NEGATIVE
 
     # test timeout
-    params.timeout = 1
-    params.iteration_steps = 10000
-    params.number_threads = 1
+    options["timeout"] = 1
+    options["iteration_steps"] = 10000
+    options["number_threads"] = 1
 
     # should return None since no solution can be found in 1 millisecond.
-    assert quicksim(layout, params) is None
+    assert quicksim(layout, **options) is None
 
 
 def test_charged_defects_are_not_supported() -> None:
@@ -113,9 +100,10 @@ def test_quicksim_reports_progress_from_worker_threads(resources_dir: Path) -> N
     """The iterations are reported by the worker threads, which needs the GIL released during the call."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
-    params = quicksim_params()
-    params.iteration_steps = 50000  # long enough for the throttled reporter to forward worker reports
-    params.number_threads = 2
+    options: dict[str, Any] = {
+        "iteration_steps": 50000,  # long enough for the throttled reporter to forward worker reports
+        "number_threads": 2,
+    }
 
     reports: list[tuple[str, int, int]] = []
     threads: set[int] = set()
@@ -124,11 +112,11 @@ def test_quicksim_reports_progress_from_worker_threads(resources_dir: Path) -> N
         threads.add(threading.get_ident())
         reports.append((task, done, total))
 
-    params.on_progress = on_progress
+    options["on_progress"] = on_progress
     workers = []
-    params.on_worker_progress = lambda *report: workers.append(report)
+    options["on_worker_progress"] = lambda *report: workers.append(report)
 
-    result = quicksim(layout, params)
+    result = quicksim(layout, **options)
 
     assert result is not None
     iterations = [(done, total) for task, done, total in reports if task == "iterations"]
@@ -140,6 +128,6 @@ def test_quicksim_reports_progress_from_worker_threads(resources_dir: Path) -> N
 
     final = {worker: (done, total) for worker, count, description, done, total, active in workers if not active}
     assert set(final) == {0, 1}
-    assert sum(done for done, total in final.values()) == params.iteration_steps
+    assert sum(done for done, total in final.values()) == options["iteration_steps"]
     assert all(done == total for done, total in final.values())
     assert all(count == 2 for worker, count, *rest in workers)

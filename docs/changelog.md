@@ -433,6 +433,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** Python algorithms accept keyword-only options; replace parameter objects with keyword arguments.
+    SiDB inputs use scalar physics keywords; physical result data retains the keyword-only
+    `sidb_simulation_parameters` type.
+
+  - Gate-set factories return keyword dictionaries for `technology_mapping`; nested timeout
+    options use `design_gate_timeout` and `quicksim_timeout`.
+
+  - Gate-set factories use `TechnologyMappingOptions` return types, so type checkers accept direct keyword expansion.
+
+  - Single-layout generation omits multiple-layout options; non-gate temperature analysis omits gate options.
+    Supplied-wire overloads omit `threshold_bdl_interdistance`.
+
+  - Physical-validity sweeps omit gate-detection and operational-condition options.
+
+  - Python bindings reject NaN or reversed BDL distance bounds, negative or NaN conversion potentials,
+    and conversion precisions outside 0 to 15.
+
+  - Python SiDB inputs reject bases other than 2 or 3, nonpositive screening values, and non-finite permittivity.
+
+  - Physical-model attribute assignments preserve the constructor's base and screening constraints.
+
+  - Python SiDB model inputs and attribute assignments reject non-finite transition energies.
+
+  - Python analyses reject invalid confidence, temperature limits, and displacement sampling fractions.
+    Time-to-solution evaluation of supplied results accepts keyword-only options.
+
+  - Physical-validity sweeps reject engines other than QuickExact, EXGS, and QuickSim.
+
   - **Breaking:** Use `read_network`, `read_fgl_layout`, `random_network`, `exact`, and `orthogonal`
     with keyword `network_type` or `layout_type`. Specialized function names were removed.
 
@@ -575,6 +603,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Potential-to-distance conversion now bisects the distance bracket, so fine precision does not stall the scan.
+    Zero potential returns infinity; invalid inputs throw `std::invalid_argument`.
   - `random_coordinate` uses a separate random generator for each thread.
   - Dense distance maps now index every layer and reject coordinates outside the layout frame.
   - Physical-design border calculations and hexagonalization now preserve the maximum signed coordinate.
@@ -708,6 +738,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Python keyword-only APIs document option meanings and units, including exact search bounds.
+  - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
   - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.
   - Gate-level layout editing examples now pass the object ID returned by `create_buf`.

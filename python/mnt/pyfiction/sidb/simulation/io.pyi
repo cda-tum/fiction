@@ -42,121 +42,84 @@ class sample_writing_mode(enum.Enum):
     and help with visibility in 3D plots.
     """
 
-class write_operational_domain_params:
-    """Parameters for writing an operational domain to a CSV file."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def operational_tag(self) -> str:
-        """The tag used to represent the operational value of a parameter set."""
-
-    @operational_tag.setter
-    def operational_tag(self, arg: str, /) -> None: ...
-    @property
-    def non_operational_tag(self) -> str:
-        """
-        The tag used to represent the non-operational value of a parameter
-        set.
-        """
-
-    @non_operational_tag.setter
-    def non_operational_tag(self, arg: str, /) -> None: ...
-    @property
-    def writing_mode(self) -> sample_writing_mode:
-        """
-        Whether to write non-operational samples to the CSV file. If set to
-        `OPERATIONAL_ONLY`, operational samples are written exclusively. This
-        yields a significantly smaller CSV file. It is recommended to set this
-        option for 3D plots because the non-operational samples would shadow
-        the operational samples anyway.
-        """
-
-    @writing_mode.setter
-    def writing_mode(self, arg: sample_writing_mode, /) -> None: ...
-
 def write_operational_domain(
     opdom: mnt.pyfiction.sidb.simulation.logic.operational_domain,
     filename: str,
-    params: write_operational_domain_params,
+    *,
+    operational_tag: str = "1",
+    non_operational_tag: str = "0",
+    writing_mode: sample_writing_mode = ...,
 ) -> None:
     """
-    Writes a CSV representation of an operational domain to the specified
-     output stream. The data are written as rows, each corresponding to
-     one set of simulation parameters and their corresponding operational
-     status.
-
-     The output CSV format is e.g. as follows:
-    ```
-    embed:rst
-    .. code-block:: RST
-
-    epsilon_r, lambda_tf, operational status
-    0.0, 0.0, 0
-    0.1, 0.0, 1
-    ... subsequent rows for each set of simulation parameters
-    ```
-
-
-
-
-     The operational status is a binary value represented by specified
-     tags in `params` indicating whether the simulation parameters are
-     within the operational domain or not.
+    Write the operational domain to the supplied filename as CSV.
+    CSV columns hold the sweep-parameter values followed by the operational-status tag.
+    The keyword options select status tags and which samples to write.
+    Raises ValueError unless the domain has one to three sweep dimensions.
 
     Args:
-        opdom: The operational domain to be written. It represents a
-               mapping between sets of simulation parameters (one to three
-               sweep parameters, written as the X, Y, and Z columns) and a
-               tuple containing detailed information about the SiDB layout
-               associated with those simulation parameters.
-        os: The output stream where the CSV representation of the
-            operational domain is written to.
-        params: The parameters used for writing, including the operational
-                and non-operational tags. Defaults to an empty
-                `write_operational_domain_params` object, which provides
-                standard tags.
-
-    Template Args:
-        OpDomain: The type of the operational domain.
-
-    Raises:
-        std::invalid_argument: if the number of dimensions in the
-                               operational domain is 0 or greater than 3.
-                               Three is the number of enumerators of
-                               `sweep_parameter`, so a fourth dimension
-                               could only repeat one of them.
+        operational_tag: The tag used to represent the operational value of a parameter set.
+        non_operational_tag: The tag used to represent the non-operational value of a parameter set.
+        writing_mode: Write all samples or only operational samples.
     """
 
 def write_operational_domain_to_string(
-    opdom: mnt.pyfiction.sidb.simulation.logic.operational_domain, params: write_operational_domain_params = ...
-) -> str: ...
+    opdom: mnt.pyfiction.sidb.simulation.logic.operational_domain,
+    *,
+    operational_tag: str = "1",
+    non_operational_tag: str = "0",
+    writing_mode: sample_writing_mode = ...,
+) -> str:
+    """
+    Return the domain CSV with a header and one row per selected sample.
+    Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
+    The keyword options select status tags and which samples to write.
+    Raises ValueError unless the domain has one to three sweep dimensions.
+
+    Args:
+        operational_tag: The tag used to represent the operational value of a parameter set.
+        non_operational_tag: The tag used to represent the non-operational value of a parameter set.
+        writing_mode: Write all samples or only operational samples.
+    """
+
 def write_critical_temperature_domain(
     opdom: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain,
     filename: str,
-    params: write_operational_domain_params,
+    *,
+    operational_tag: str = "1",
+    non_operational_tag: str = "0",
+    writing_mode: sample_writing_mode = ...,
 ) -> None:
     """
-    The `critical_temperature_domain` class collects the critical
-    temperature and the operational status for a range of different
-    physical parameters of a given SiDB layout. It allows for the
-    evaluation of how the critical temperature depends on variations in
-    the underlying parameter points. This enables simulations to explore
-    the critical temperature's behavior across different conditions and
-    configurations.
+    Write critical-temperature samples to a CSV file.
+    CSV columns hold sweep-parameter values, the operational-status tag, and critical temperature.
+    The keyword options select status tags and which samples to write.
+    Raises ValueError unless the domain has one to three sweep dimensions.
 
-    It was proposed in \\"The Operational Domain Explorer: A Comprehensive
-    Framework to Unveil the Thermal Landscape of Silicon Dangling Bond
-    Logic Beyond Conventional Operability\\" by M. Walter, J. Drewniok, and
-    R. Wille in IEEE-NANO 2025
-    (https://ieeexplore.ieee.org/abstract/document/11113672).
+    Args:
+        operational_tag: The tag used to represent the operational value of a parameter set.
+        non_operational_tag: The tag used to represent the non-operational value of a parameter set.
+        writing_mode: Write all samples or only operational samples.
     """
 
 def write_critical_temperature_domain_to_string(
     opdom: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain,
-    params: write_operational_domain_params = ...,
-) -> str: ...
+    *,
+    operational_tag: str = "1",
+    non_operational_tag: str = "0",
+    writing_mode: sample_writing_mode = ...,
+) -> str:
+    """
+    Return the domain CSV with a header and one row per selected sample.
+    Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
+    The keyword options select status tags and which samples to write.
+    Raises ValueError unless the domain has one to three sweep dimensions.
+
+    Args:
+        operational_tag: The tag used to represent the operational value of a parameter set.
+        non_operational_tag: The tag used to represent the non-operational value of a parameter set.
+        writing_mode: Write all samples or only operational samples.
+    """
+
 def write_location_and_ground_state(
     sim_result: mnt.pyfiction.sidb.simulation.sidb_simulation_result, filename: str
 ) -> None:

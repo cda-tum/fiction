@@ -16,9 +16,12 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+
+#include <optional>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
@@ -36,39 +39,67 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using quickexact_options = fiction::sidb::simulation::engines::quickexact_params;
+
 /**
  * @brief Binds quickexact helpers.
  * @param m Python module.
  */
 void register_quickexact(nb::module_& m)
 {
-    using fiction::sidb::simulation::engines::quickexact_params;
 
-    nb::enum_<quickexact_params::automatic_base_number_detection>(
+    nb::enum_<quickexact_options::automatic_base_number_detection>(
         m, "automatic_base_number_detection",
         DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection))
-        .value("ON", quickexact_params::automatic_base_number_detection::ON,
+        .value("ON", quickexact_options::automatic_base_number_detection::ON,
                DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection_ON))
-        .value("OFF", quickexact_params::automatic_base_number_detection::OFF,
+        .value("OFF", quickexact_options::automatic_base_number_detection::OFF,
                DOC(fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection_OFF));
+    m.def(
+        "quickexact",
+        [](const fiction::sidb::layout& lyt, const decltype(quickexact_options{}.sim_params.base) base,
+           const decltype(quickexact_options{}.sim_params.mu_minus)                      mu_minus,
+           const decltype(quickexact_options{}.sim_params.epsilon_r)                     epsilon_r,
+           const decltype(quickexact_options{}.sim_params.lambda_tf)                     lambda_tf,
+           const decltype(quickexact_options{}.base_number_detection)                    base_number_detection,
+           const std::optional<decltype(quickexact_options{}.local_external_potential)>& local_external_potential,
+           const decltype(quickexact_options{}.global_potential)                         global_potential,
+           const decltype(quickexact_options{}.on_progress)&                             on_progress)
+        {
+            quickexact_options params{};
+            params.sim_params            = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+            params.base_number_detection = base_number_detection;
+            if (local_external_potential)
+            {
+                params.local_external_potential = *local_external_potential;
+            }
+            params.global_potential = global_potential;
+            params.on_progress      = on_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::engines::quickexact(lyt, params);
+        },
+        nb::arg("lyt"), nb::kw_only(), nb::arg("base") = quickexact_options{}.sim_params.base,
+        nb::arg("mu_minus")                 = quickexact_options{}.sim_params.mu_minus,
+        nb::arg("epsilon_r")                = quickexact_options{}.sim_params.epsilon_r,
+        nb::arg("lambda_tf")                = quickexact_options{}.sim_params.lambda_tf,
+        nb::arg("base_number_detection")    = quickexact_options{}.base_number_detection,
+        nb::arg("local_external_potential") = nb::none(),
+        nb::arg("global_potential") = quickexact_options{}.global_potential, nb::arg("on_progress").none() = nb::none(),
+        R"doc(Simulate the SiDB layout with QuickExact.
+The keyword options select physical values, base detection, external potentials, and progress reporting.
+Raises ValueError when base is neither 2 nor 3.
 
-    nb::class_<quickexact_params>(m, "quickexact_params", pyfiction::progress_type_slots<quickexact_params>(),
-                                  DOC(fiction_sidb_simulation_engines_quickexact_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &quickexact_params::sim_params,
-                DOC(fiction_sidb_simulation_engines_quickexact_params_sim_params))
-        .def_rw("base_number_detection", &quickexact_params::base_number_detection,
-                DOC(fiction_sidb_simulation_engines_quickexact_params_base_number_detection))
-        .def_rw("local_external_potential", &quickexact_params::local_external_potential,
-                DOC(fiction_sidb_simulation_engines_quickexact_params_local_external_potential))
-        .def_rw("global_potential", &quickexact_params::global_potential,
-                DOC(fiction_sidb_simulation_engines_quickexact_params_global_potential))
-        .def_rw("on_progress", &quickexact_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_quickexact_params_on_progress));
-
-    m.def("quickexact", &fiction::sidb::simulation::engines::quickexact, nb::arg("lyt"),
-          nb::arg("params") = quickexact_params{}, nb::call_guard<nb::gil_scoped_release>(),
-          DOC(fiction_sidb_simulation_engines_quickexact));
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    base_number_detection: ON detects whether positive charges can occur; OFF uses base unchanged.
+    local_external_potential: External electrostatic potential per lattice site in V; None uses an empty map.
+    global_potential: External electrostatic potential applied to every SiDB in V.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+)doc");
 }
 
 }  // namespace pyfiction

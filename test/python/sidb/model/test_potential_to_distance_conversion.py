@@ -12,36 +12,30 @@ import math
 
 import pytest
 
-from mnt.pyfiction.sidb.model import potential_to_distance_conversion, sidb_simulation_parameters
+from mnt.pyfiction.sidb.model import potential_to_distance_conversion
 
 
 def test_potential_distance_limits() -> None:
     """Check the inverse limits and decimal rounding through the Python binding."""
-    params = sidb_simulation_parameters()
-    assert potential_to_distance_conversion(0.0, params, 2) == math.inf
-    assert potential_to_distance_conversion(math.inf, params, 2) == pytest.approx(0.01)
-    params.epsilon_r = 2.0
-    params.lambda_tf = 1.0
-    assert potential_to_distance_conversion(0.01, params, 3) == pytest.approx(3.135)
-    params.lambda_tf = math.inf
-    assert potential_to_distance_conversion(0.1, params, 2) == pytest.approx(7.2)
+    assert potential_to_distance_conversion(0.0, 2) == math.inf
+    assert potential_to_distance_conversion(math.inf, 2) == pytest.approx(0.01)
+    assert potential_to_distance_conversion(0.01, 3, epsilon_r=2.0, lambda_tf=1.0) == pytest.approx(3.135)
+    assert potential_to_distance_conversion(0.1, 2, epsilon_r=2.0, lambda_tf=math.inf) == pytest.approx(7.2)
 
 
 @pytest.mark.parametrize("potential", [-1.0, -math.inf, math.nan])
 def test_potential_distance_rejects_invalid_potential(potential: float) -> None:
     """Translate invalid C++ potential arguments to Python ValueError."""
     with pytest.raises(ValueError, match="potential-to-distance conversion"):
-        potential_to_distance_conversion(potential, sidb_simulation_parameters(), 2)
+        potential_to_distance_conversion(potential, 2)
 
 
 def test_potential_distance_rejects_invalid_parameters() -> None:
     """Reject unsupported precision and invalid physical parameters."""
-    params = sidb_simulation_parameters()
     with pytest.raises(ValueError, match="potential-to-distance conversion"):
-        potential_to_distance_conversion(0.1, params, 16)
-    params.epsilon_r = 0.0
-    with pytest.raises(ValueError, match="potential-to-distance conversion"):
-        potential_to_distance_conversion(0.1, params, 2)
+        potential_to_distance_conversion(0.1, 16)
+    with pytest.raises(ValueError, match="epsilon_r"):
+        potential_to_distance_conversion(0.1, 2, epsilon_r=0.0)
 
 
 def test_potential_distance_documents_python_exception() -> None:

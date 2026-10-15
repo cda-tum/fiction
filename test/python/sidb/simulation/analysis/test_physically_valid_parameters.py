@@ -11,12 +11,19 @@ from __future__ import annotations
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native deadlock regression
 import sys
 import textwrap
+from typing import Any
 
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
-from mnt.pyfiction.sidb.simulation.logic import parameter_point
+from mnt.pyfiction.sidb.simulation.logic import (
+    input_bdl_configuration,
+    operational_analysis_strategy,
+    operational_condition,
+    parameter_point,
+)
 
 
 def test_one_sidb_100_lattice() -> None:
@@ -51,6 +58,36 @@ def test_one_sidb_111_lattice() -> None:
         valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
 
 
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [
+        ("threshold_bdl_interdistance", 1.0),
+        ("minimum_distance", 1.0),
+        ("maximum_distance", 1.0),
+        ("input_bdl_config", input_bdl_configuration.PERTURBER_ABSENCE_ENCODED),
+        ("op_condition", operational_condition.REJECT_KINKS),
+        ("strategy_to_analyze_operational_status", operational_analysis_strategy.SIMULATION_ONLY),
+    ],
+)
+def test_physical_validity_rejects_gate_options(name: str, value: object) -> None:
+    """Physical-validity sweeps expose physical and sweep options without gate detection."""
+    layout = sidb_layout()
+    options: dict[str, Any] = {name: value}
+    with pytest.raises(TypeError):
+        physically_valid_parameters(layout, charge_distribution(layout), **options)
+
+
+@pytest.mark.skipif(not hasattr(sidb_simulation_engine, "CLUSTERCOMPLETE"), reason="ALGLIB is not available")
+def test_physical_validity_rejects_unsupported_engine() -> None:
+    """Physical-validity sweeps reject engines that cannot count excited states."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(0, 0), sidb_dot_tag.NORMAL)
+    with pytest.raises(ValueError, match="unsupported simulation engine"):
+        physically_valid_parameters(
+            layout, charge_distribution(layout), sim_engine=sidb_simulation_engine.CLUSTERCOMPLETE
+        )
+
+
 def test_progress_callback_completes() -> None:
     """Worker callbacks complete without blocking on the Python interpreter lock."""
     subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and test input
@@ -58,20 +95,17 @@ def test_progress_callback_completes() -> None:
             sys.executable,
             "-c",
             textwrap.dedent("""
+
                 import time
                 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
                 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
-                from mnt.pyfiction.sidb.simulation.logic import (
-                    operational_domain_params,
-                    operational_domain_value_range,
-                    sweep_parameter,
-                )
+                from mnt.pyfiction.sidb.simulation.logic import operational_domain_value_range, sweep_parameter
 
                 layout = sidb_layout()
                 layout.assign_sidb(lattice_site(0, 0), sidb_dot_tag.NORMAL)
-                params = operational_domain_params()
-                params.number_of_threads = 2
-                params.sweep_dimensions = [
+                options = {}
+                options['number_of_threads'] = 2
+                options['sweep_dimensions'] = [
                     operational_domain_value_range(sweep_parameter.EPSILON_R, 5, 6, 0.5)
                 ]
                 reports = []
@@ -82,8 +116,8 @@ def test_progress_callback_completes() -> None:
                     if done == 0:
                         time.sleep(0.2)
 
-                params.on_progress = report
-                physically_valid_parameters(layout, charge_distribution(layout), params)
+                options['on_progress'] = report
+                physically_valid_parameters(layout, charge_distribution(layout), **options)
                 assert reports[-1] == ("parameter points", 3, 3), reports
             """),
         ],

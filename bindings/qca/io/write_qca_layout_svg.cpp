@@ -14,9 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
-
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
 #include <fiction/technology/qca/layout.hpp>
 
@@ -40,28 +37,36 @@ namespace nb = nanobind;
 
 namespace pyfiction
 {
+
+/** @brief Native options constructed for each Python call. */
+using write_qca_layout_svg_options = fiction::qca::io::write_qca_layout_svg_params;
 /**
  * @brief Binds write qca layout svg helpers.
  * @param m Python module.
  */
 void register_write_qca_layout_svg(nb::module_& m)
 {
-    nb::class_<fiction::qca::io::write_qca_layout_svg_params>(
-        m, "write_qca_layout_svg_params",
-        pyfiction::progress_type_slots<fiction::qca::io::write_qca_layout_svg_params>(),
-        DOC(fiction_qca_io_write_qca_layout_svg_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::qca::io::write_qca_layout_svg_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER, "Receives serialization progress.")
-        .def_rw("simple", &fiction::qca::io::write_qca_layout_svg_params::simple,
-                DOC(fiction_qca_io_write_qca_layout_svg_params_simple));
+    m.def(
+        "write_qca_layout_svg",
+        [](const fiction::qca::layout& layout, const std::string_view& filename,
+           const decltype(write_qca_layout_svg_options{}.on_progress)& on_progress,
+           const decltype(write_qca_layout_svg_options{}.simple)       simple)
+        {
+            write_qca_layout_svg_options params{};
+            params.on_progress = on_progress;
+            params.simple      = simple;
+            const nb::gil_scoped_release release{};
+            fiction::qca::io::write_qca_layout_svg(layout, filename, params);
+        },
+        nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("simple") = write_qca_layout_svg_options{}.simple,
+        R"doc(Write an SVG representation of the QCA layout to the supplied filename.
+simple selects a compact drawing; on_progress reports writing progress.
 
-    m.def("write_qca_layout_svg",
-          nb::overload_cast<const fiction::qca::layout&, const std::string_view&,
-                            const fiction::qca::io::write_qca_layout_svg_params&>(
-              &fiction::qca::io::write_qca_layout_svg),
-          nb::arg("layout"), nb::arg("filename"), nb::arg("params") = fiction::qca::io::write_qca_layout_svg_params{},
-          DOC(fiction_qca_io_write_qca_layout_svg), nb::call_guard<nb::gil_scoped_release>());
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    simple: Use a compact SVG drawing.
+)doc");
 }
 
 }  // namespace pyfiction

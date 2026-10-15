@@ -165,64 +165,6 @@ def critical_path_length_and_throughput(layout: mnt.pyfiction.layouts.hexagonal_
                                input or a cycle.
     """
 
-class gate_level_drv_params:
-    """
-    Parameters for design rule violation checking that specify the checks
-    that are to be executed.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives completed work and the phase total."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def outside_extent(self) -> bool:
-        """Checks that every live object lies within the layout extent."""
-
-    @outside_extent.setter
-    def outside_extent(self, arg: bool, /) -> None: ...
-    @property
-    def non_adjacent_connections(self) -> bool:
-        """Check for nodes that are connected to non-adjacent ones."""
-
-    @non_adjacent_connections.setter
-    def non_adjacent_connections(self, arg: bool, /) -> None: ...
-    @property
-    def missing_connections(self) -> bool:
-        """Check for nodes without connections."""
-
-    @missing_connections.setter
-    def missing_connections(self, arg: bool, /) -> None: ...
-    @property
-    def crossing_gates(self) -> bool:
-        """Check for wires that are crossing gates."""
-
-    @crossing_gates.setter
-    def crossing_gates(self, arg: bool, /) -> None: ...
-    @property
-    def clocked_data_flow(self) -> bool:
-        """Check if all node connections obey the clocking scheme data flow."""
-
-    @clocked_data_flow.setter
-    def clocked_data_flow(self, arg: bool, /) -> None: ...
-    @property
-    def has_io(self) -> bool:
-        """Check if the layout has I/Os."""
-
-    @has_io.setter
-    def has_io(self, arg: bool, /) -> None: ...
-    @property
-    def border_io(self) -> bool:
-        """Check if the I/Os are located at the layout's border."""
-
-    @border_io.setter
-    def border_io(self, arg: bool, /) -> None: ...
-
 class gate_level_drv_stats:
     """Design rule report and issue counts."""
 
@@ -244,51 +186,64 @@ class gate_level_drv_stats:
 @overload
 def gate_level_drvs(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    params: gate_level_drv_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    outside_extent: bool = True,
+    non_adjacent_connections: bool = True,
+    missing_connections: bool = True,
+    crossing_gates: bool = True,
+    clocked_data_flow: bool = True,
+    has_io: bool = True,
+    border_io: bool = True,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    params: gate_level_drv_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    outside_extent: bool = True,
+    non_adjacent_connections: bool = True,
+    missing_connections: bool = True,
+    crossing_gates: bool = True,
+    clocked_data_flow: bool = True,
+    has_io: bool = True,
+    border_io: bool = True,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    params: gate_level_drv_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    outside_extent: bool = True,
+    non_adjacent_connections: bool = True,
+    missing_connections: bool = True,
+    crossing_gates: bool = True,
+    clocked_data_flow: bool = True,
+    has_io: bool = True,
+    border_io: bool = True,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]:
     """
-    Performs design rule violation (DRV) checking on the given gate-level
-    layout. The implementation of gate_level_layout allows for layouts
-    with structural defects like the connection of non-adjacent tiles or
-    connections that defy the clocking scheme. This function checks for
-    such violations and documents them in the statistics. A brief report
-    can be printed and more in-depth information including with error
-    sites can be obtained from a generated json object.
-
-    Furthermore, this function does not only find and log DRVs but can
-    also warn for instances that are not per se errors but defy best
-    practices of layout generation, e.g., I/Os not being placed at the
-    layout borders.
-
-    The checker inspects every live object through public ordered ports,
-    including placements outside the extent. Unplaced objects, placed dead
-    objects, empty terminals, and gate terminals cannot occur in the
-    placed-object API and have no corresponding checks.
+    Count design-rule violations in the gate-level layout.
+    Returns (warnings, drvs); statistics receives their counts.
+    The keyword options select which checks run.
 
     Args:
-        lyt: The gate-level layout that is to be examined for DRVs and
-             warnings.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Geometry: Coordinate geometry of the gate-level layout.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        non_adjacent_connections: Check for nodes that are connected to non-adjacent ones.
+        missing_connections: Check for nodes without connections.
+        crossing_gates: Check for wires that are crossing gates.
+        clocked_data_flow: Check if all node connections obey the clocking scheme data flow.
+        has_io: Check if the layout has I/Os.
+        border_io: Check whether primary inputs and outputs lie on the layout border.
+        print_report: Print the design-rule report to Python stdout.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
+        outside_extent: Check that every live object lies within the layout extent.
     """
 
 class eq_type(enum.Enum):

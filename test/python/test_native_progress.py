@@ -10,7 +10,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import gc
 import re
 import sys
@@ -22,7 +21,7 @@ import pytest
 
 from mnt.pyfiction import layouts, physical_design
 from mnt.pyfiction.fcn.io import write_qll_layout
-from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
+from mnt.pyfiction.inml.io import write_qcc_layout
 from mnt.pyfiction.layouts import arrangement, cartesian_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.layouts.io import write_dot_layout, write_fgl_layout
 from mnt.pyfiction.physical_design import (
@@ -30,32 +29,21 @@ from mnt.pyfiction.physical_design import (
     apply_sim7_mol_library,
     apply_topolinano_library,
     exact,
-    exact_params,
     graph_oriented_layout_design,
-    graph_oriented_layout_design_params,
     orthogonal,
     technology_constraints,
 )
 from mnt.pyfiction.qca import io as qca_io
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.generators import on_the_fly_sidb_circuit_design_params, sidb_on_the_fly_gate_library_params
-from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sidb_layout_svg_params, write_sqd_layout
+from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sqd_layout
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
-from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based, critical_temperature_params
-from mnt.pyfiction.sidb.simulation.engines import clustercomplete, clustercomplete_params
-from mnt.pyfiction.sidb.simulation.logic import operational_domain_ratio_params
-from mnt.pyfiction.synthesis import (
-    create_not_tt,
-    fanout_substitution,
-    fanout_substitution_params,
-    network_balancing,
-    network_balancing_params,
-)
+from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based
+from mnt.pyfiction.sidb.simulation.engines import clustercomplete
+from mnt.pyfiction.synthesis import create_not_tt, fanout_substitution, network_balancing
 from mnt.pyfiction.verification import (
     critical_path_length_and_throughput,
     eq_type,
     equivalence_checking,
-    gate_level_drv_params,
     gate_level_drvs,
 )
 
@@ -68,11 +56,12 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize("threads", [1, 4])
 def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> None:
     """Solver candidates use tile dimensions and leave no active worker after success."""
-    params = exact_params()
-    params.num_threads = threads
+    options: dict[str, Any] = {
+        "num_threads": threads,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    layout = exact(mux21, params)
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    layout = exact(mux21, **options)
     assert layout is not None
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert reports
@@ -90,15 +79,16 @@ def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> N
 @pytest.mark.parametrize("parallel", [False, True])
 def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> None:
     """Stable graphs report expansions, accepted solutions, and their final inactive state."""
-    params = graph_oriented_layout_design_params()
-    params.enable_multithreading = parallel
-    params.return_first = True
-    params.seed = 7
+    options: dict[str, Any] = {
+        "enable_multithreading": parallel,
+        "return_first": True,
+        "seed": 7,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
     counts: list[tuple[str, int, int]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    params.on_progress = lambda *report: counts.append(report)
-    layout = graph_oriented_layout_design(mux21, params)
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    options["on_progress"] = lambda *report: counts.append(report)
+    layout = graph_oriented_layout_design(mux21, **options)
     assert layout is not None
     assert equivalence_checking(mux21, layout) != eq_type.NO
     assert any("; best " in description for _, _, description, _, _, _ in reports)
@@ -126,19 +116,22 @@ def test_counted_native_phases(mux21: technology_network, command: str) -> None:
         return reports.append(report)
 
     if command == "balance":
-        balancing_params = network_balancing_params()
-        balancing_params.on_progress = callback
-        result = network_balancing(mux21, balancing_params)
+        balancing_options: dict[str, Any] = {
+            "on_progress": callback,
+        }
+        result = network_balancing(mux21, **balancing_options)
         assert equivalence_checking(mux21, result) != eq_type.NO
     elif command == "fanouts":
-        substitution_params = fanout_substitution_params()
-        substitution_params.on_progress = callback
-        result = fanout_substitution(mux21, substitution_params)
+        substitution_options: dict[str, Any] = {
+            "on_progress": callback,
+        }
+        result = fanout_substitution(mux21, **substitution_options)
         assert equivalence_checking(mux21, result) != eq_type.NO
     else:
-        drv_params = gate_level_drv_params()
-        drv_params.on_progress = callback
-        gate_level_drvs(orthogonal(mux21), drv_params)
+        drv_options: dict[str, Any] = {
+            "on_progress": callback,
+        }
+        gate_level_drvs(orthogonal(mux21), **drv_options)
     final = {task: (done, total) for task, done, total in reports}
     assert final
     assert all(done == total for done, total in final.values())
@@ -152,10 +145,8 @@ def test_progress_callback_exception_propagates(mux21: technology_network) -> No
         """Raise the original Python exception from inside a native algorithm."""
         raise error
 
-    params = network_balancing_params()
-    params.on_progress = fail
     with pytest.raises(RuntimeError, match="callback failed") as caught:
-        network_balancing(mux21, params)
+        network_balancing(mux21, on_progress=fail)
     assert caught.value is error
 
 
@@ -181,17 +172,11 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
             if kind == "sqd":
                 write_sqd_layout(layout, str(path), **kwargs)
             else:
-                params = write_sidb_layout_svg_params()
-                if callback:
-                    params.on_progress = callback
-                write_sidb_layout_svg(layout, str(path), params)
+                write_sidb_layout_svg(layout, str(path), **kwargs)
         else:
             qca_layout = apply_qca_one_library(gate_layout)
-            params = getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}_params")()
-            if callback:
-                params.on_progress = callback
             getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}")(
-                qca_layout, str(path), params
+                qca_layout, str(path), **kwargs
             )
     if kind == "sqd":
         assert read_sqd_layout(str(paths[0])) == read_sqd_layout(str(paths[1]))
@@ -209,14 +194,15 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
 def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> None:
     """Serial and stolen compositions contribute to the same aggregate count."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
-    params = clustercomplete_params()
-    params.available_threads = threads
-    params.simulation_parameters.base = 2
+    options: dict[str, Any] = {
+        "available_threads": threads,
+        "base": 2,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
     counts: list[tuple[str, int, int]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    params.on_progress = lambda *report: counts.append(report)
-    result = clustercomplete(layout, params)
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    options["on_progress"] = lambda *report: counts.append(report)
+    result = clustercomplete(layout, **options)
     assert result.charge_distributions
     assert reports
     final = {worker: done for worker, count, description, done, total, active in reports if not active}
@@ -226,22 +212,24 @@ def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> Non
 
 def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) -> None:
     """Candidates rejected by the area bound never appear as active solvers."""
-    params = exact_params()
-    params.upper_bound_area = 1
+    options: dict[str, Any] = {
+        "upper_bound_area": 1,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    assert exact(mux21, params) is None
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    assert exact(mux21, **options) is None
     assert not reports
 
 
 def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
     """A timeout leaves no active candidate, whether it interrupts a solver or prevents its start."""
-    params = exact_params()
-    params.num_threads = 4
-    params.timeout = 1
+    options: dict[str, Any] = {
+        "num_threads": 4,
+        "timeout": 1,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    exact(mux21, params)
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    exact(mux21, **options)
     active = {worker: running for worker, count, description, done, total, running in reports}
     assert not any(active.values())
 
@@ -249,14 +237,15 @@ def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
 def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
     """Temperature analysis keeps outer phases and forwards the active simulation's workers."""
     layout = read_sqd_layout(str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"))
-    params = critical_temperature_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.CLUSTERCOMPLETE
-    params.operational_params.simulation_parameters.base = 2
+    options: dict[str, Any] = {
+        "sim_engine": sidb_simulation_engine.CLUSTERCOMPLETE,
+        "base": 2,
+    }
     workers: list[tuple[int, int, str, int, int, bool]] = []
     phases: list[tuple[str, int, int]] = []
-    params.on_worker_progress = lambda *report: workers.append(report)
-    params.on_progress = lambda *report: phases.append(report)
-    critical_temperature_gate_based(layout, [create_not_tt()], params)
+    options["on_worker_progress"] = lambda *report: workers.append(report)
+    options["on_progress"] = lambda *report: phases.append(report)
+    critical_temperature_gate_based(layout, [create_not_tt()], **options)
     assert workers
     assert phases
     active = {worker: running for worker, count, description, done, total, running in workers}
@@ -303,118 +292,77 @@ def test_failed_mapping_retains_completed_count() -> None:
 
 def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path) -> None:
     """QCC callbacks count rows without changing the serialized layout."""
-    placement = exact_params()
-    placement.scheme = "COLUMNAR3"
-    placement.crossings = True
-    placement.border_io = True
-    placement.technology_specifics = technology_constraints.TOPOLINANO
-    placement.layout_arrangement = arrangement.ODD_COLUMN
-    gate_layout = exact(mux21, placement, layout_type=shifted_cartesian_gate_layout)
+    placement: dict[str, Any] = {
+        "scheme": "COLUMNAR3",
+        "crossings": True,
+        "border_io": True,
+        "technology_specifics": technology_constraints.TOPOLINANO,
+        "layout_arrangement": arrangement.ODD_COLUMN,
+    }
+    gate_layout = exact(mux21, layout_type=shifted_cartesian_gate_layout, **placement)
     assert gate_layout is not None
     layout = apply_topolinano_library(gate_layout)
     before = tmp_path / "before.qcc"
     after = tmp_path / "after.qcc"
     write_qcc_layout(layout, str(before))
-    params = write_qcc_layout_params()
+    options: dict[str, Any] = {}
     reports: list[tuple[str, int, int]] = []
-    params.on_progress = lambda *report: reports.append(report)
-    write_qcc_layout(layout, str(after), params)
+    options["on_progress"] = lambda *report: reports.append(report)
+    write_qcc_layout(layout, str(after), **options)
     assert before.read_bytes() == after.read_bytes()
     assert reports[-1][1] == reports[-1][2] > 0
 
 
 @pytest.mark.parametrize("kind", ["balance", "exact", "worker", "both"])
 @pytest.mark.parametrize("raises", [False, True])
-def test_progress_callback_cycles_are_collected(kind: str, *, raises: bool) -> None:
-    """Parameter callbacks and exception tracebacks do not keep unreachable objects alive."""
+def test_progress_callbacks_are_released(mux21: technology_network, kind: str, *, raises: bool) -> None:
+    """Native calls release callback objects after success and callback exceptions."""
 
-    def make_cycle() -> weakref.ReferenceType[Any]:
-        """Return a weak reference after the native callback retains its parameter owner."""
-        params: Any = network_balancing_params() if kind == "balance" else exact_params()
-        error = RuntimeError("callback failed")
+    def invoke() -> weakref.ReferenceType[Any]:
+        """Call an algorithm and release its callback.
 
-        def callback(*_report: object) -> None:
-            """Retain the callback owner and optionally an exception traceback."""
-            assert params is not None
-            if raises:
-                raise error
+        Returns:
+            A weak reference to the completed call's callback.
+        """
 
+        class Callback:
+            """Record invocation and optionally raise from a native callback."""
+
+            calls = 0
+
+            def __call__(self, *_report: object) -> None:
+                """Count progress and exercise exception propagation.
+
+                Raises:
+                    RuntimeError: When the test requests a callback exception.
+                """
+                self.calls += 1
+                if raises:
+                    msg = "callback failed"
+                    raise RuntimeError(msg)
+
+        callback = Callback()
+        callback_ref = weakref.ref(callback)
+        options: dict[str, Any] = {}
         if kind in {"worker", "both"}:
-            params.on_worker_progress = callback
+            options["on_worker_progress"] = callback
         if kind != "worker":
-            params.on_progress = callback
-        with contextlib.suppress(RuntimeError):
-            callback()
-        return weakref.ref(callback)
-
-    callback_ref = make_cycle()
-    gc.collect()
-    assert callback_ref() is None
-
-
-def test_uninitialized_progress_parameters_are_collected() -> None:
-    """Garbage collection accepts a parameter instance before its constructor runs."""
-    params = exact_params.__new__(exact_params)
-    gc.collect()
-    del params
-    gc.collect()
-
-
-@pytest.mark.parametrize("kind", ["library", "circuit", "ratio", "ratio_worker"])
-def test_nested_progress_callback_owner_cycles_are_collected(kind: str) -> None:
-    """Owning parameters expose callbacks copied into nested parameter values to GC."""
-
-    def make_cycle() -> weakref.ReferenceType[Any]:
-        """Return a callback weak reference after its closure retains the nested owner."""
-        params: Any = (
-            sidb_on_the_fly_gate_library_params()
-            if kind == "library"
-            else on_the_fly_sidb_circuit_design_params()
-            if kind == "circuit"
-            else operational_domain_ratio_params()
-        )
-
-        def callback(*_report: object) -> None:
-            """Retain the parameter object that owns this callback."""
-            assert params is not None
-
-        if kind == "library":
-            params.design_gate_params.on_progress = callback
-        elif kind == "circuit":
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress = callback
-        elif kind == "ratio":
-            params.op_domain_params.on_progress = callback
+            options["on_progress"] = callback
+        algorithm: Any = network_balancing if kind == "balance" else exact
+        if kind != "balance":
+            options["num_threads"] = 2
+        if raises:
+            with pytest.raises(RuntimeError, match="callback failed"):
+                algorithm(mux21, **options)
         else:
-            params.op_domain_params.on_worker_progress = callback
-        return weakref.ref(callback)
+            assert algorithm(mux21, **options) is not None
+        assert callback.calls > 0
+        return callback_ref
 
-    callback_ref = make_cycle()
-    gc.collect()
-    assert callback_ref() is None
-
-
-def test_borrowed_progress_parameters_preserve_live_owner_callback() -> None:
-    """Collecting a borrowed child does not release a live parent's callback."""
-    params = sidb_on_the_fly_gate_library_params()
-
-    def install_callback() -> weakref.ReferenceType[Any]:
-        """Return a weak reference to a callback that retains the borrowed parameter view."""
-        child = params.design_gate_params
-
-        def callback(*_report: object) -> None:
-            """Use the borrowed child while its owner remains live."""
-            assert child is not None
-
-        child.on_progress = callback
-        return weakref.ref(callback)
-
-    callback_ref = install_callback()
-    gc.collect()
-    callback = params.design_gate_params.on_progress
-    assert callback is not None
-    assert callback is callback_ref()
-    callback("probe", 0, 1)
-    params.design_gate_params.on_progress = None
+    for _ in range(2):
+        callback_ref = invoke()
+        gc.collect()
+        assert callback_ref() is None
 
 
 def test_long_route_statistics_release_the_gil() -> None:

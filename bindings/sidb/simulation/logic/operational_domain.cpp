@@ -17,7 +17,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -27,6 +27,7 @@
 #include <fmt/format.h>
 
 #include <cstddef>
+#include <optional>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -56,6 +57,9 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using operational_domain_options = fiction::sidb::simulation::logic::operational_domain_params;
+
 namespace detail
 {
 
@@ -67,87 +71,761 @@ namespace detail
 inline void register_operational_domain_functions(nb::module_& m)
 {
     using fiction::sidb::layout;
-    using fiction::sidb::simulation::logic::operational_domain_params;
+
     using fiction::sidb::simulation::logic::operational_domain_stats;
 
     m.def(
         "operational_domain_grid_search",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const operational_domain_params& params,
-           operational_domain_stats* stats)
-        { return fiction::sidb::simulation::logic::operational_domain_grid_search(lyt, spec, params, stats); },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("params") = operational_domain_params{}, nb::arg("stats") = nullptr,
-        nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_logic_operational_domain_grid_search));
+        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(operational_options{}.timeout) timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
+           operational_domain_stats*                                                     stats)
+        {
+            operational_domain_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::logic::operational_domain_grid_search(lyt, spec, params, stats);
+        },
+        nb::arg("lyt"), nb::arg("spec"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr,
+        R"doc(Compute the operational domain by exhaustively sweeping every parameter combination.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
     m.def(
         "operational_domain_random_sampling",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_options{}.timeout)              timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::operational_domain_random_sampling(lyt, spec, samples, params,
                                                                                         stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_operational_domain_random_sampling));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Compute the operational domain by randomly sampling parameter combinations.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
     m.def(
         "operational_domain_flood_fill",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
-        { return fiction::sidb::simulation::logic::operational_domain_flood_fill(lyt, spec, samples, params, stats); },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_operational_domain_flood_fill));
+           const decltype(operational_options{}.timeout)              timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
+           operational_domain_stats*                                                     stats)
+        {
+            operational_domain_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::logic::operational_domain_flood_fill(lyt, spec, samples, params, stats);
+        },
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Compute the operational domain by expanding from sampled operational points.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
     m.def(
         "operational_domain_contour_tracing",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_options{}.timeout)              timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::operational_domain_contour_tracing(lyt, spec, samples, params,
                                                                                         stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_operational_domain_contour_tracing));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Compute the operational domain by tracing operational boundaries.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
     m.def(
         "critical_temperature_domain_grid_search",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const operational_domain_params& params,
-           operational_domain_stats* stats)
-        { return fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(lyt, spec, params, stats); },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("params") = operational_domain_params{}, nb::arg("stats") = nullptr,
-        nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_grid_search));
+        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(operational_options{}.timeout) timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
+           operational_domain_stats*                                                     stats)
+        {
+            operational_domain_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(lyt, spec, params, stats);
+        },
+        nb::arg("lyt"), nb::arg("spec"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr,
+        R"doc(Compute the critical-temperature domain by exhaustively sweeping every parameter combination.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Confidence uses the native critical-temperature default of 0.99.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
     m.def(
         "critical_temperature_domain_random_sampling",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_options{}.timeout)              timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling(lyt, spec, samples,
                                                                                                  params, stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_random_sampling));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr,
+        R"doc(Compute the critical-temperature domain by randomly sampling parameter combinations.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Confidence uses the native critical-temperature default of 0.99.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
     m.def(
         "critical_temperature_domain_flood_fill",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_options{}.timeout)              timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill(lyt, spec, samples, params,
                                                                                             stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_flood_fill));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr,
+        R"doc(Compute the critical-temperature domain by expanding from sampled operational points.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Confidence uses the native critical-temperature default of 0.99.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
     m.def(
         "critical_temperature_domain_contour_tracing",
         [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
-           const operational_domain_params& params, operational_domain_stats* stats)
+           const decltype(operational_options{}.timeout)              timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const std::optional<decltype(operational_domain_options{}.sweep_dimensions)>& sweep_dimensions,
+           const std::optional<decltype(operational_domain_options{}.number_of_threads)> number_of_threads,
+           const decltype(operational_domain_options{}.on_progress)&                     on_progress,
+           const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
+           operational_domain_stats*                                                     stats)
         {
+            operational_domain_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            if (sweep_dimensions)
+            {
+                params.sweep_dimensions = *sweep_dimensions;
+            }
+            if (number_of_threads)
+            {
+                params.number_of_threads = *number_of_threads;
+            }
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+
             return fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing(lyt, spec, samples,
                                                                                                  params, stats);
         },
-        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::arg("params") = operational_domain_params{},
-        nb::arg("stats") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_sidb_simulation_logic_critical_temperature_domain_contour_tracing));
+        nb::arg("lyt"), nb::arg("spec"), nb::arg("samples"), nb::kw_only(),
+        nb::arg("timeout")    = operational_domain_options{}.operational_params.timeout,
+        nb::arg("base")       = operational_domain_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = operational_domain_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = operational_domain_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = operational_domain_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = operational_domain_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            operational_domain_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            operational_domain_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = operational_domain_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            operational_domain_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("sweep_dimensions") = nb::none(), nb::arg("number_of_threads") = nb::none(),
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("stats") = nullptr, R"doc(Compute the critical-temperature domain by tracing operational boundaries.
+The keyword options define the sweep, physical values, BDL encoding, analysis, and progress callbacks.
+Confidence uses the native critical-temperature default of 0.99.
+Raises ValueError for invalid sweep dimensions, bounds, or steps.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    sweep_dimensions: Ordered parameter ranges; None sweeps relative permittivity and screening distance with the native ranges.
+    number_of_threads: Number of workers; None uses the native default.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
 }
 
 }  // namespace detail
@@ -400,24 +1078,6 @@ void register_operational_domain(nb::module_& m)
                 DOC(fiction_sidb_simulation_logic_operational_domain_value_range_step))
 
         ;
-
-    nb::class_<fiction::sidb::simulation::logic::operational_domain_params>(
-        m, "operational_domain_params",
-        pyfiction::progress_type_slots<fiction::sidb::simulation::logic::operational_domain_params>(),
-        DOC(fiction_sidb_simulation_logic_operational_domain_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("operational_params", &fiction::sidb::simulation::logic::operational_domain_params::operational_params,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_operational_params))
-        .def_rw("sweep_dimensions", &fiction::sidb::simulation::logic::operational_domain_params::sweep_dimensions,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_sweep_dimensions))
-        .def_rw("number_of_threads", &fiction::sidb::simulation::logic::operational_domain_params::number_of_threads,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_number_of_threads))
-        .def_rw("on_progress", &fiction::sidb::simulation::logic::operational_domain_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_on_progress))
-        .def_rw("on_worker_progress", &fiction::sidb::simulation::logic::operational_domain_params::on_worker_progress,
-                pyfiction::ON_WORKER_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_sidb_simulation_logic_operational_domain_params_on_worker_progress));
 
     nb::class_<fiction::sidb::simulation::logic::operational_domain_stats>(
         m, "operational_domain_stats", DOC(fiction_sidb_simulation_logic_operational_domain_stats))

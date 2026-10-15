@@ -13,7 +13,7 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_simulation_parameters
+from mnt.pyfiction.sidb.model import sidb_charge_state
 from mnt.pyfiction.sidb.simulation import is_ground_state, potential_landscape, sidb_simulation_result
 
 
@@ -34,7 +34,7 @@ def test_three_sidbs(lat: lattice) -> None:
     layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(6, 0, 1), sidb_dot_tag.NORMAL)
 
-    landscape = potential_landscape(layout, sidb_simulation_parameters())
+    landscape = potential_landscape(layout, base=3, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
     cd1 = landscape.evaluate(charge_distribution(layout))  # all negative
     cd2 = landscape.evaluate(charge_distribution(layout, sidb_charge_state.NEUTRAL))  # all neutral

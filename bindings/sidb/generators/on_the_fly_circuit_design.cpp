@@ -15,7 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -28,6 +28,10 @@
 #include <stdexcept>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): converts progress callbacks
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner): enables keyword options
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner): converts gate-design canvas endpoints
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 
 /**
  * @brief Namespace alias for nanobind.
@@ -36,6 +40,9 @@ namespace nb = nanobind;
 
 namespace pyfiction
 {
+
+/** @brief Native options constructed for each Python call. */
+using on_the_fly_circuit_design_options = fiction::sidb::generators::on_the_fly_circuit_design_params;
 
 /**
  * @brief Registers SiDB circuit design and its gate-library parameters.
@@ -52,11 +59,6 @@ void register_on_the_fly_circuit_design(nb::module_& m)
      * Choice between predefined and synthesized complex gates.
      */
     using complex_policy = library_params::complex_gate_design_policy;
-    /**
-     * Parameters for circuit design on a placed and routed layout.
-     */
-    using circuit_params = fiction::sidb::generators::on_the_fly_circuit_design_params;
-
     nb::enum_<complex_policy>(m, "sidb_complex_gate_design_policy",
                               DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy))
         .value("USING_PREDEFINED", complex_policy::USING_PREDEFINED,
@@ -64,34 +66,73 @@ void register_on_the_fly_circuit_design(nb::module_& m)
         .value("DESIGN_ON_THE_FLY", complex_policy::DESIGN_ON_THE_FLY,
                DOC(fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_DESIGN_ON_THE_FLY));
 
-    nb::class_<library_params>(m, "sidb_on_the_fly_gate_library_params",
-                               pyfiction::progress_type_slots<library_params>(),
-                               DOC(fiction_sidb_on_the_fly_gate_library_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("design_gate_params", &library_params::design_gate_params,
-                DOC(fiction_sidb_on_the_fly_gate_library_params_design_gate_params))
-        .def_rw("canvas_sidb_complex_gates", &library_params::canvas_sidb_complex_gates,
-                DOC(fiction_sidb_on_the_fly_gate_library_params_canvas_sidb_complex_gates))
-        .def_rw("using_predefined_crossing_and_double_wire_if_possible",
-                &library_params::using_predefined_crossing_and_double_wire_if_possible,
-                DOC(fiction_sidb_on_the_fly_gate_library_params_using_predefined_crossing_and_double_wire_if_possible))
-        .def_rw("influence_radius_charged_defects", &library_params::influence_radius_charged_defects,
-                DOC(fiction_sidb_on_the_fly_gate_library_params_influence_radius_charged_defects));
-
-    nb::class_<circuit_params>(m, "on_the_fly_sidb_circuit_design_params",
-                               pyfiction::progress_type_slots<circuit_params>(),
-                               DOC(fiction_sidb_generators_on_the_fly_circuit_design_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("timeout", &circuit_params::timeout,
-                DOC(fiction_sidb_generators_on_the_fly_circuit_design_params_timeout))
-        .def_rw("sidb_on_the_fly_gate_library_parameters", &circuit_params::sidb_on_the_fly_gate_library_parameters,
-                DOC(fiction_sidb_generators_on_the_fly_circuit_design_params_sidb_on_the_fly_gate_library_parameters));
-
     m.def(
         "on_the_fly_sidb_circuit_design",
-        // NOLINTNEXTLINE(performance-unnecessary-value-param): Own parameters while Python can mutate the original.
-        [](const py_hexagonal_gate_layout& layout, const circuit_params params)
+        [](const py_hexagonal_gate_layout& layout, const decltype(on_the_fly_circuit_design_options{}.timeout) timeout,
+           const decltype(operational_options{}.timeout)              design_gate_timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status) strategy_to_analyze_operational_status,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.design_mode) design_mode,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.canvas)      canvas,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters.design_gate_params
+                              .number_of_canvas_sidbs)         number_of_canvas_sidbs,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters.design_gate_params
+                              .maximal_random_design_attempts) maximal_random_design_attempts,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters.design_gate_params
+                              .termination_cond)               termination_cond,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress)& on_progress,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters
+                              .canvas_sidb_complex_gates) canvas_sidb_complex_gates,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters
+                              .using_predefined_crossing_and_double_wire_if_possible)
+                                                                 using_predefined_crossing_and_double_wire_if_possible,
+           const decltype(on_the_fly_circuit_design_options{}
+                              .sidb_on_the_fly_gate_library_parameters
+                              .influence_radius_charged_defects) influence_radius_charged_defects)
         {
+            on_the_fly_circuit_design_options params{};
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params =
+                make_operational_parameters(design_gate_timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            params.timeout                                                                = timeout;
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.design_mode = design_mode;
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.canvas      = canvas;
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs =
+                number_of_canvas_sidbs;
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.maximal_random_design_attempts =
+                maximal_random_design_attempts;
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.termination_cond = termination_cond;
+            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress      = on_progress;
+            params.sidb_on_the_fly_gate_library_parameters.canvas_sidb_complex_gates = canvas_sidb_complex_gates;
+            params.sidb_on_the_fly_gate_library_parameters.using_predefined_crossing_and_double_wire_if_possible =
+                using_predefined_crossing_and_double_wire_if_possible;
+            params.sidb_on_the_fly_gate_library_parameters.influence_radius_charged_defects =
+                influence_radius_charged_defects;
+
             // Own the layout before releasing the GIL so Python edits cannot race the design.
             const auto                   snapshot = layout.clone();
             const nb::gil_scoped_release release{};
@@ -110,17 +151,97 @@ void register_on_the_fly_circuit_design(nb::module_& m)
                 throw std::invalid_argument{fmt::format("Unsupported gate orientation at tile {}", error.where())};
             }
         },
-        nb::arg("layout"), nb::arg("params") = circuit_params{},
+        nb::arg("layout"), nb::kw_only(), nb::arg("timeout") = on_the_fly_circuit_design_options{}.timeout,
+        nb::arg("design_gate_timeout") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.timeout,
+        nb::arg("base") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params.base,
+        nb::arg("mu_minus") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.input_bdl_iterator_params
+                .bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") = on_the_fly_circuit_design_options{}
+                                          .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
+                                          .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") = on_the_fly_circuit_design_options{}
+                                          .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
+                                          .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") = on_the_fly_circuit_design_options{}
+                                          .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
+                                          .input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params
+                .strategy_to_analyze_operational_status,
+        nb::arg("design_mode") =
+            on_the_fly_circuit_design_options{}.sidb_on_the_fly_gate_library_parameters.design_gate_params.design_mode,
+        nb::arg("canvas") =
+            on_the_fly_circuit_design_options{}.sidb_on_the_fly_gate_library_parameters.design_gate_params.canvas,
+        nb::arg("number_of_canvas_sidbs") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs,
+        nb::arg("maximal_random_design_attempts") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.design_gate_params.maximal_random_design_attempts,
+        nb::arg("termination_cond") = on_the_fly_circuit_design_options{}
+                                          .sidb_on_the_fly_gate_library_parameters.design_gate_params.termination_cond,
+        nb::arg("on_progress").none() = nb::none(),
+        nb::arg("canvas_sidb_complex_gates") =
+            on_the_fly_circuit_design_options{}.sidb_on_the_fly_gate_library_parameters.canvas_sidb_complex_gates,
+        nb::arg("using_predefined_crossing_and_double_wire_if_possible") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.using_predefined_crossing_and_double_wire_if_possible,
+        nb::arg("influence_radius_charged_defects") =
+            on_the_fly_circuit_design_options{}
+                .sidb_on_the_fly_gate_library_parameters.influence_radius_charged_defects,
         R"doc(Design an SiDB circuit from a placed and routed pointy-top hexagonal gate-level layout.
 
-The layout and parameters are copied before releasing the GIL. The input layout is not modified.
+The function copies the layout and keyword options before releasing the GIL. The input layout is not modified.
 This function does not perform placement and routing or accept a defective surface.
 The optional timeout bounds the whole circuit search in milliseconds. Deadline checks are cooperative;
 use a separate process when an exact cutoff is required. A timeout never returns a partial circuit.
 
 Args:
     layout: A pointy-top hexagonal gate-level layout with a row arrangement and supported Bestagon port orientations.
-    params: Circuit and individual-gate design parameters.
+    timeout: Whole-circuit deadline in milliseconds.
+    design_gate_timeout: Deadline for each individual gate in milliseconds.
+    on_progress: Optional gate-design progress callback.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    canvas_sidb_complex_gates: Number of canvas SiDBs dedicated to complex gates.
+    using_predefined_crossing_and_double_wire_if_possible: Select predefined or synthesized crossing and double-wire gates.
+    influence_radius_charged_defects: Radius around each gate center in nm for incorporating charged defects.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+    design_mode: Gate-design approach: QUICKCELL, AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER, RANDOM, or PRUNING_ONLY.
+    canvas: Gate-design area as two opposite lattice-site corners.
+    number_of_canvas_sidbs: Number of SiDBs placed in the gate-design canvas.
+    maximal_random_design_attempts: Maximum candidate layouts evaluated across all random-design threads.
+    termination_cond: Stop after the first solution or collect all solutions allowed by the design mode.
 
 Returns:
     An SiDB layout that can be exported with write_sqd_layout or write_sidb_layout_svg.

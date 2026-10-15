@@ -26,9 +26,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.engines.quicksim_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.sidb.simulation.engines.quicksim
 ```
 
@@ -80,16 +77,10 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.engines.quickexact_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.sidb.simulation.engines.automatic_base_number_detection
    :members:
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.engines.quickexact
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.engines.clustercomplete_params
-   :members:
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.engines.ground_state_space_reporting
    :members:

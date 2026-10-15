@@ -16,7 +16,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): defines the nanobind coordinate type casters
 
 #include <fiction/physical_design/wiring_reduction.hpp>
@@ -43,19 +42,12 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using wiring_reduction_options = fiction::physical_design::wiring_reduction_params;
+
 /** @brief Registers mutable wiring_reduction operations. @param m Python module. */
 void register_wiring_reduction(nb::module_& m)
 {
-    nb::class_<fiction::physical_design::wiring_reduction_params>(
-        m, "wiring_reduction_params",
-        pyfiction::progress_type_slots<fiction::physical_design::wiring_reduction_params>(),
-        DOC(fiction_physical_design_wiring_reduction_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("timeout", &fiction::physical_design::wiring_reduction_params::timeout,
-                DOC(fiction_physical_design_wiring_reduction_params_timeout))
-        .def_rw("on_progress", &fiction::physical_design::wiring_reduction_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_physical_design_wiring_reduction_params_on_progress));
 
     nb::class_<fiction::physical_design::wiring_reduction_stats>(m, "wiring_reduction_stats",
                                                                  DOC(fiction_physical_design_wiring_reduction_stats))
@@ -90,9 +82,30 @@ void register_wiring_reduction(nb::module_& m)
 
         ;
 
-    m.def("wiring_reduction", &fiction::physical_design::wiring_reduction, nb::arg("layout"),
-          nb::arg("parameters") = fiction::physical_design::wiring_reduction_params{}, nb::arg("statistics") = nullptr,
-          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_physical_design_wiring_reduction));
+    m.def(
+        "wiring_reduction",
+        [](py_cartesian_gate_layout& layout, const decltype(wiring_reduction_options{}.timeout) timeout,
+           const decltype(wiring_reduction_options{}.on_progress)& on_progress,
+           fiction::physical_design::wiring_reduction_stats*       statistics)
+        {
+            wiring_reduction_options params{};
+            params.timeout     = timeout;
+            params.on_progress = on_progress;
+            const nb::gil_scoped_release release{};
+            fiction::physical_design::wiring_reduction(layout, params, statistics);
+        },
+        nb::arg("layout"), nb::kw_only(), nb::arg("timeout") = wiring_reduction_options{}.timeout,
+        nb::arg("on_progress").none() = nb::none(), nb::arg("statistics") = nullptr,
+        R"doc(Reduce wires in a 2DDWave-clocked gate layout in place with A* routing.
+The keyword options bound runtime and report progress.
+Raises ValueError for unsupported clocking or invalid occupied geometry.
+Raises OverflowError when the extent exceeds signed routing coordinates.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
+)doc");
 }
 
 }  // namespace pyfiction

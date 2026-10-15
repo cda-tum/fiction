@@ -16856,8 +16856,9 @@ Returns:
 Raises:
     std::invalid_argument: if a sweep range has non-finite or reversed
                            bounds, a non-positive or non-finite step,
-                           or more points than the storage range
-                           permits.
+                           more points than the storage range permits,
+                           or the engine is not QuickExact, EXGS, or
+                           QuickSim.
 
 )doc";
 
