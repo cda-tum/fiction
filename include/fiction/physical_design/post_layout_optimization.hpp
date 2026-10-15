@@ -663,8 +663,8 @@ class post_layout_optimization_impl
         physical_design::path_finding::a_star_params astar_params{};
         astar_params.crossings = !ps.planar_optimization;
 
-        const auto path = physical_design::path_finding::a_star<layout_coordinate_path>(
-            lyt, {.source = start_tile, .target = end_tile}, dist(), cost(), astar_params, search_obstructions);
+        const auto path = physical_design::path_finding::a_star(lyt, {.source = start_tile, .target = end_tile}, dist(),
+                                                                cost(), astar_params, search_obstructions);
 
         // obstruct the tiles along the computed path.
         for (const auto& tile : path)

@@ -262,9 +262,9 @@ TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-ut
 TEST_CASE("Routing paths propagate allocation failure", "[routing-utils]")
 {
     require_allocation_failure_support();
-    layout_coordinate_path                  path{};
-    path_collection<layout_coordinate_path> collection{};
-    path_set<layout_coordinate_path>        paths{};
+    layout_coordinate_path path{};
+    path_collection        collection{};
+    path_set               paths{};
     /** @brief Checks that a failed path allocation reaches the caller. */
     const auto fail = [&](auto&& append)
     {
@@ -297,4 +297,27 @@ TEST_CASE("Routing paths propagate allocation failure", "[routing-utils]")
     paths.add(path);
     CHECK(collection.front() == path);
     CHECK(paths.contains(path));
+}
+
+TEST_CASE("Coordinate path containers preserve endpoints and duplicates", "[routing-utils]")
+{
+    const layout_coordinate_path empty{};
+    CHECK(empty.source() == fiction::layouts::layout_base::coordinate{});
+    CHECK(empty.target() == fiction::layouts::layout_base::coordinate{});
+    const layout_coordinate_path path{{{-2, -1}, {-1, -2}}};
+    CHECK(path.source() == fiction::layouts::layout_base::coordinate{-2, -1});
+    CHECK(path.target() == fiction::layouts::layout_base::coordinate{-1, -2});
+    path_collection collection{};
+    path_set        unique{};
+    for (auto i = 0; i < 2; ++i)
+    {
+        collection.add(path);
+        unique.add(path);
+    }
+    CHECK(collection.size() == 2);
+    CHECK(unique.size() == 1);
+    CHECK(collection.contains(path));
+    CHECK(unique.contains(path));
+    CHECK_FALSE(collection.contains(empty));
+    CHECK_FALSE(unique.contains(empty));
 }

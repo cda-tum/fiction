@@ -66,8 +66,8 @@ void register_enumerate_all_paths_impl(nb::module_& m)
             const auto                  obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
             params.crossings                         = crossings;
 
-            const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<
-                fiction::physical_design::layout_coordinate_path, Lyt>(lyt, {source, target}, params, obstructions);
+            const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<Lyt>(
+                lyt, {source, target}, params, obstructions);
 
             std::vector<std::vector<fiction::layouts::layout_base::coordinate>> paths{};
             paths.reserve(all_paths.size());

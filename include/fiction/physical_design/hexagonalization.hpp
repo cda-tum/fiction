@@ -663,7 +663,7 @@ class hexagonalization_impl
 
                 // perform routing using A*
                 layouts::obstructions search_obstructions{};
-                using path           = layout_coordinate_path;
+
                 const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
                 using dist = physical_design::path_finding::manhattan_distance_functor;
@@ -684,7 +684,7 @@ class hexagonalization_impl
                         update_target = true;
                     }
 
-                    if (auto new_path = physical_design::path_finding::a_star<path>(
+                    if (auto new_path = physical_design::path_finding::a_star(
                             hex_layout, {obj.source, target}, dist(), cost(), params_astar, search_obstructions);
                         !new_path.empty())
                     {
@@ -762,7 +762,7 @@ class hexagonalization_impl
 
                 // perform routing using A*
                 layouts::obstructions search_obstructions{};
-                using path = layout_coordinate_path;
+
                 const auto crossings =
                     ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const physical_design::path_finding::a_star_params params_astar{crossings};
@@ -808,7 +808,7 @@ class hexagonalization_impl
                         update_source = true;
                     }
 
-                    if (auto new_path = physical_design::path_finding::a_star<path>(
+                    if (auto new_path = physical_design::path_finding::a_star(
                             hex_layout, {source, obj.target}, dist(), cost(), params_astar, search_obstructions);
                         !new_path.empty())
                     {

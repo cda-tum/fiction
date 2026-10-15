@@ -211,6 +211,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
+    arguments from C++ calls and container declarations.
   - `bounding_box_2d` is renamed to `bounding_box` in C++ and Python.
   - Coordinate aliases and geometry traits are removed; use `layout_base` types and concrete layout arguments.
   - Gate-level layouts now keep large-arity input storage outside the common object record.

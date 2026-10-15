@@ -23,6 +23,7 @@
 #include <fiction/physical_design/generate_edge_intersection_graph.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
+#include <algorithm>
 #include <vector>
 
 using namespace fiction;
@@ -285,5 +286,37 @@ TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersectio
         const auto graph = generate_edge_intersection_graph(layout, objectives, {.path_limit = limit});
         CHECK(graph.size_vertices() == 2);
         CHECK(graph.size_edges() == 1);
+    }
+}
+
+TEST_CASE("Candidate labels retain their routing objective", "[generate-edge-intersection-graph]")
+{
+    const gate_level_layout<cartesian_layout> layout{{2, 2}, clocking::twoddwave()};
+    const std::vector<routing_objective>      objectives{{{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}, {{0, 0}, {0, 1}}};
+    for (const auto limited : {false, true})
+    {
+        generate_edge_intersection_graph_params params{};
+        if (limited)
+        {
+            params.path_limit = 2;
+        }
+        generate_edge_intersection_graph_stats st{};
+        const auto graph = generate_edge_intersection_graph(layout, objectives, params, &st);
+        CHECK(graph.size_vertices() == 3);
+        CHECK(st.number_of_unroutable_objectives == 1);
+        REQUIRE(st.cliques.size() == 2);
+        CHECK(st.cliques[0].size() == 2);
+        CHECK(st.cliques[1].size() == 1);
+        CHECK(std::count(st.objective_indices.begin(), st.objective_indices.end(), 0) == 2);
+        CHECK(std::count(st.objective_indices.begin(), st.objective_indices.end(), 2) == 1);
+        for (const auto& clique : st.cliques)
+        {
+            for (const auto id : clique)
+            {
+                const auto& objective = objectives.at(st.objective_indices.at(id));
+                CHECK(graph.at_vertex(id).source() == objective.source);
+                CHECK(graph.at_vertex(id).target() == objective.target);
+            }
+        }
     }
 }
