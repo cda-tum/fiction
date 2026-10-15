@@ -18,8 +18,8 @@
 // Pre-compiled header for the fiction test suite
 // Included automatically in every test translation unit when FICTION_ENABLE_PCH is on
 //
-// Only headers that are stable, expensive, and pulled in by a large share of the 118 test
-// translation units belong here. `fiction/types.hpp` supplies the shared network presets.
+// Only headers that are stable, expensive, and common to the test translation units belong here. `fiction/types.hpp`
+// supplies the shared network presets.
 //
 
 #pragma once
