@@ -21,6 +21,10 @@ bfs_topo_view
 
 **Header:** `fiction/networks/views/static_depth_view.hpp`
 
+```{doxygenstruct} fiction::networks::views::depth_view_params
+:members:
+```
+
 ```{doxygenclass} fiction::networks::views::static_depth_view
 :members:
 ```

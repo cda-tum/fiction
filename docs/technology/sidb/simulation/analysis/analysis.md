@@ -67,6 +67,10 @@
 
 **Header:** `fiction/technology/sidb/simulation/analysis/critical_temperature.hpp`
 
+```{doxygenstruct} fiction::sidb::simulation::analysis::critical_temperature_stats
+:members:
+```
+
 ```{doxygenstruct} fiction::sidb::simulation::analysis::critical_temperature_params
 :members:
 ```

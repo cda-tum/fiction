@@ -28,6 +28,12 @@ io/io
 
 **Header:** `fiction/layouts/layout_utils.hpp`
 
+```{doxygenfunction} fiction::layouts::require_arrangement
+```
+
+```{doxygenfunction} fiction::layouts::make_gate_level_layout
+```
+
 ```{doxygenfunction} fiction::layouts::num_adjacent_coordinates
 
 ```

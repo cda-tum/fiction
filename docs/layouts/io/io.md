@@ -120,7 +120,7 @@ illegal XML control characters are rejected before writing. Editing checkpoints 
 **Header:** `fiction/layouts/io/layout_drawers.hpp`
 
 ```{doxygenclass} fiction::layouts::io::simple_gate_layout_tile_drawer
-
+:members:
 ```
 
 ```{doxygenclass} fiction::layouts::io::gate_layout_cartesian_drawer

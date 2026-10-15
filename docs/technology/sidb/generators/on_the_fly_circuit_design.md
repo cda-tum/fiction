@@ -26,6 +26,10 @@ or `design_gate_timeout` in Python for a shorter per-gate limit. Both use millis
 
 **Header:** `fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp`
 
+```{doxygenclass} fiction::sidb::generators::unsuccessful_gate_design_error
+:members:
+```
+
 ```{doxygenstruct} fiction::sidb::generators::on_the_fly_circuit_design_params
 :members:
 ```
@@ -90,6 +94,10 @@ If gate design fails, the algorithm blacklists the failing gate-tile-port combin
 placement and routing. It raises `unsuccessful_pr_error` when no placement is possible.
 
 **Header:** `fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp`
+
+```{doxygenclass} fiction::sidb::generators::unsuccessful_pr_error
+:members:
+```
 
 ```{doxygenstruct} fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface_params
 :members:

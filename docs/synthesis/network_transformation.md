@@ -129,6 +129,9 @@ an output-name dictionary, so duplicate names overwrite earlier entries.
 :members:
 ```
 
+```{doxygenfunction} fiction::synthesis::is_balanced
+```
+
 ```{doxygenfunction} fiction::synthesis::network_balancing
 
 ```
@@ -160,6 +163,9 @@ an output-name dictionary, so duplicate names overwrite earlier entries.
 
 ```{doxygenstruct} fiction::synthesis::fanout_substitution_params
 :members:
+```
+
+```{doxygenfunction} fiction::synthesis::is_fanout_substituted
 ```
 
 ```{doxygenfunction} fiction::synthesis::fanout_substitution
@@ -210,12 +216,18 @@ an output-name dictionary, so duplicate names overwrite earlier entries.
 
 ```
 
+```{doxygenfunction} fiction::synthesis::all_2_input_functions
+```
+
 ```{doxygenfunction} fiction::synthesis::all_standard_2_input_functions
 
 ```
 
 ```{doxygenfunction} fiction::synthesis::all_standard_3_input_functions
 
+```
+
+```{doxygenfunction} fiction::synthesis::all_supported_functions
 ```
 
 ```{doxygenfunction} fiction::synthesis::all_supported_standard_functions
@@ -329,6 +341,9 @@ assert table.to_hex() == create_maj_tt().to_hex() == "e8"
 :sync: cpp
 
 **Header:** `fiction/synthesis/truth_tables.hpp`
+
+```{doxygenfunction} fiction::synthesis::evaluate_output
+```
 
 ```{doxygenfunction} fiction::synthesis::create_id_tt
 

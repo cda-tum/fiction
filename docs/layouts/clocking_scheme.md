@@ -15,6 +15,10 @@ can be overridden.
 
 ## Scheme Types
 
+```{doxygenclass} fiction::layouts::clocking::unsupported_scheme_exception
+:members:
+```
+
 ```{doxygenclass} fiction::layouts::clocking::scheme
 :members:
 ```

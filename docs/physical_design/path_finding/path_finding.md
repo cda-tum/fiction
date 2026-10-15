@@ -85,23 +85,23 @@ Distance functions compute (an approximation for) the distance between two coord
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::manhattan_distance_functor
-
+:members:
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::euclidean_distance_functor
-
+:members:
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::squared_euclidean_distance_functor
-
+:members:
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::twoddwave_distance_functor
-
+:members:
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::chebyshev_distance_functor
-
+:members:
 ```
 
 :::
@@ -180,11 +180,11 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::unit_cost_functor
-
+:members:
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::random_cost_functor
-
+:members:
 ```
 
 ## A\* Shortest Path
@@ -210,7 +210,7 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 ```
 
 ```{doxygenclass} fiction::physical_design::path_finding::a_star_distance_functor
-
+:members:
 ```
 
 :::

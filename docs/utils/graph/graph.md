@@ -16,6 +16,10 @@ mincross
 
 **Header:** `fiction/utils/graph/graph_coloring.hpp`
 
+```{doxygenclass} fiction::utils::graph::vertex_coloring
+:members:
+```
+
 ```{doxygenenum} fiction::utils::graph::graph_coloring_engine
 
 ```

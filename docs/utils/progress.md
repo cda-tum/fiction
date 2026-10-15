@@ -71,6 +71,10 @@ layout = exact(
 ```{doxygentypedef} fiction::utils::worker_progress_callback
 ```
 
+```{doxygenclass} fiction::utils::worker_progress_scope
+:members:
+```
+
 ```{doxygenclass} fiction::utils::worker_progress_reporter
 :members:
 ```
