@@ -30,6 +30,8 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <bill/sat/interface/common.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -122,7 +124,8 @@ TEST_CASE("Determine clock numbers for simple layouts", "[determine-clocking]")
 TEST_CASE("Determine clock numbers for a 3-phase layout", "[determine-clocking]")
 {
     remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
-        blueprints::maj1_network<mockturtle::aig_network>(), {.number_of_clock_phases = clocking::num_clks::THREE}));
+        fiction::synthesis::convert_network<tec_nt>(blueprints::maj1_network<mockturtle::aig_network>()),
+        {.number_of_clock_phases = clocking::num_clks::THREE}));
 }
 
 TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[determine-clocking]")
@@ -157,12 +160,12 @@ TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[deter
 
 TEST_CASE("Determine clock numbers for complex layouts", "[determine-clocking]")
 {
-    remove_assign_and_check_clocking(
-        orthogonal<cartesian_gate_layout>(blueprints::maj1_network<mockturtle::aig_network>()));
-    remove_assign_and_check_clocking(
-        orthogonal<cartesian_gate_layout>(blueprints::maj4_network<mockturtle::aig_network>()));
-    remove_assign_and_check_clocking(
-        orthogonal<cartesian_gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>()));
+    remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
+        fiction::synthesis::convert_network<tec_nt>(blueprints::maj1_network<mockturtle::aig_network>())));
+    remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
+        fiction::synthesis::convert_network<tec_nt>(blueprints::maj4_network<mockturtle::aig_network>())));
+    remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
+        fiction::synthesis::convert_network<tec_nt>(blueprints::nary_operation_network<mockturtle::aig_network>())));
 }
 
 TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-clocking]")

@@ -23,6 +23,8 @@
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -45,7 +47,8 @@ void remove_clocking(Lyt& lyt)
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    auto lyt = orthogonal<cartesian_gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>());
+    auto lyt = orthogonal<cartesian_gate_layout>(
+        fiction::synthesis::convert_network<tec_nt>(blueprints::nary_operation_network<mockturtle::aig_network>()));
     remove_clocking(lyt);
 
     auto params = determine_clocking_params{};

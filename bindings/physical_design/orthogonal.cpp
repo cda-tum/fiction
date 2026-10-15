@@ -77,7 +77,7 @@ void register_orthogonal(nb::module_& m, const char* signature)
         parameters.layout_arrangement     = layout_arrangement;
         parameters.on_progress            = on_progress;
         const nb::gil_scoped_release release{};
-        return fiction::physical_design::orthogonal<Lyt, py_tec_network>(network, parameters, statistics);
+        return fiction::physical_design::orthogonal<Lyt>(network, parameters, statistics);
     };
     if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {

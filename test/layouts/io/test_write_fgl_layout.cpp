@@ -36,6 +36,7 @@
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
@@ -124,7 +125,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
 template <typename Lyt, typename Ntk>
 void check_parsing_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(ntk, {});
+    const auto layout = orthogonal<Lyt>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
 
     std::stringstream layout_stream{};
     write_fgl_layout(layout, layout_stream);
