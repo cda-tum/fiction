@@ -763,6 +763,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Python API docs now state writable-member defaults, name Python exceptions, and retain distinct overload descriptions.
     Parameter names and wrapper return values now match Python signatures.
   - API rendering now reads native binding docstrings instead of executing type stubs.
+  - API deep links now scroll to targets in an already selected language tab.
   - Documentation builds reject warnings and preserve signatures and citations in Markdown exports.
   - Corrected test, benchmark, experiment, and documentation build instructions.
 
