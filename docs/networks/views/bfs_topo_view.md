@@ -3,7 +3,7 @@
 # Breadth-First Topological View (bfs_topo_view)
 
 Provides a **breadth-first topological ordering** for all nodes reachable from the outputs of a logic network.
-While Mockturtle's `topo_view` implements a depth-first traversal, this view constructs the node order level by level
+While `mockturtle`'s `topo_view` implements a depth-first traversal, this view constructs the node order level by level
 using a queue-based breadth-first search (BFS).
 
 All constant nodes and primary inputs are included in the traversal order, even if they are not directly reachable from
@@ -12,8 +12,8 @@ This view is immutable and should only be used on static networks—modification
 reflected once the order is constructed.
 
 Typical use cases include:
-: - Building rank or level-based data structures for planarization or visualization.
 
+- Building rank or level-based data structures for planarization or visualization.
 - Constructing balanced rank views (e.g., for crossing minimization).
 - Performing topological analyses in breadth-first order rather than depth-first.
 
