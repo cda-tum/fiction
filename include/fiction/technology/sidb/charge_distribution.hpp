@@ -23,7 +23,6 @@
 #include "fiction/utils/stl/hash.hpp"
 
 #include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>

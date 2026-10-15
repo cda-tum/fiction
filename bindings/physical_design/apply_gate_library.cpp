@@ -16,7 +16,6 @@
  */
 
 #include "fiction/layouts/layout_base.hpp"
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/apply_gate_library.hpp>
