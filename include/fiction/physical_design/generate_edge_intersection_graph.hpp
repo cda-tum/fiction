@@ -163,7 +163,8 @@ class generate_edge_intersection_graph_impl
                 create_intersection_edges(obj_paths);
 
                 // add the collection to all paths gathered thus far
-                all_paths.insert(all_paths.end(), obj_paths.cbegin(), obj_paths.cend());
+                all_paths.insert(all_paths.end(), std::make_move_iterator(obj_paths.begin()),
+                                 std::make_move_iterator(obj_paths.end()));
             });
 
         // store size of the generated graph
@@ -252,7 +253,7 @@ class generate_edge_intersection_graph_impl
      * Given a collection of paths belonging to the same objective, this function assigns them unique labels and
      * generates corresponding nodes in the edge intersection graph.
      *
-     * Since each path of the same objective objective belongs to a clique in the final graph, this function
+     * Since each path of the same objective belongs to a clique in the final graph, this function
      * additionally stores their node IDs in the statistics.
      *
      * @param objective_paths Collection of paths belonging to the same objective.
@@ -274,7 +275,7 @@ class generate_edge_intersection_graph_impl
 
         if (!clique.empty())
         {
-            pst.cliques.push_back(clique);
+            pst.cliques.push_back(std::move(clique));
         }
     }
     /**
