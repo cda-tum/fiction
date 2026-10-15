@@ -37,6 +37,58 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 
+/** @brief Named network missing node traversal required for signal-name transfer. */
+struct incomplete_named_network : mockturtle::names_view<mockturtle::aig_network>
+{
+    /**
+     * @brief Disables node traversal.
+     * @tparam Fn Node callback type.
+     */
+    template <typename Fn>
+    void foreach_node(Fn&&) const = delete;
+};
+
+/**
+ * @brief Checks signal-name transfer and its forwarding wrapper.
+ * @tparam Src Source network type.
+ * @tparam Dest Destination network type.
+ */
+template <typename Src, typename Dest>
+concept signal_names_transferable =
+    requires(const Src& src, Dest& dest, mockturtle::node_map<mockturtle::aig_network::signal, Src>& map) {
+        restore_signal_names(src, dest, map);
+    };
+
+/**
+ * @brief Checks whether the full name-transfer wrapper accepts a source and destination.
+ * @tparam Src Source network type.
+ * @tparam Dest Destination network type.
+ */
+template <typename Src, typename Dest>
+concept all_names_transferable =
+    requires(const Src& src, Dest& dest, mockturtle::node_map<mockturtle::aig_network::signal, Src>& map) {
+        restore_names(src, dest, map);
+    };
+
+static_assert(!all_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(signal_names_transferable<mockturtle::aig_network, mockturtle::aig_network>);
+static_assert(signal_names_transferable<incomplete_named_network, mockturtle::aig_network>);
+static_assert(!signal_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+
+TEST_CASE("Unnamed network name transfers clear names and remain optional", "[name-utils]")
+{
+    mockturtle::aig_network                         unnamed{};
+    mockturtle::names_view<mockturtle::aig_network> named{};
+    named.set_network_name("old");
+    restore_network_name(unnamed, named);
+    CHECK(named.get_network_name().empty());
+    named.set_network_name("source");
+    restore_names(named, unnamed);
+    CHECK(get_name(unnamed).empty());
+    restore_names(unnamed, named);
+    CHECK(named.get_network_name().empty());
+}
+
 TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bounds", "[name-utils]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {

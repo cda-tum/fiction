@@ -45,6 +45,17 @@
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
+
+/**
+ * @brief Checks whether a network can form a mutable rank view.
+ * @tparam Ntk Network type to test.
+ */
+template <typename Ntk>
+concept rank_viewable = requires { typename mutable_rank_view<Ntk>; };
+
+static_assert(rank_viewable<technology_network>);
+static_assert(!rank_viewable<int>);
+static_assert(requires(const mutable_rank_view<technology_network>& ntk) { mutable_rank_view{ntk}; });
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 

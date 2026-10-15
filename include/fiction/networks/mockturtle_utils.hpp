@@ -21,14 +21,28 @@
 namespace mockturtle::detail
 {
 
+/**
+ * @brief Applies a transform and callback to elements that satisfy a predicate. A false callback result stops
+ * traversal.
+ * @tparam Iterator Iterator over the source elements.
+ * @tparam ElementType Transformed element type passed to the callback.
+ * @tparam Pred Predicate selecting source elements.
+ * @tparam Transform Transform applied to selected elements.
+ * @tparam Fn Void or Boolean callback, optionally accepting an index.
+ * @param begin First source element.
+ * @param end End of the source range.
+ * @param pred Selection predicate.
+ * @param transform Element transform.
+ * @param fn Callback for transformed elements.
+ * @param counter_offset First callback index.
+ * @return Iterator after the last visited source element.
+ */
 template <class Iterator, class ElementType, class Pred, class Transform, class Fn>
+    requires(is_callable_with_index_v<Fn, ElementType, void> || is_callable_without_index_v<Fn, ElementType, void> ||
+             is_callable_with_index_v<Fn, ElementType, bool> || is_callable_without_index_v<Fn, ElementType, bool>)
 Iterator foreach_element_if_transform(Iterator begin, Iterator end, Pred&& pred, Transform&& transform, Fn&& fn,
                                       uint32_t counter_offset = 0)
 {
-    static_assert(
-        is_callable_with_index_v<Fn, ElementType, void> || is_callable_without_index_v<Fn, ElementType, void> ||
-        is_callable_with_index_v<Fn, ElementType, bool> || is_callable_without_index_v<Fn, ElementType, bool>);
-
     if constexpr (is_callable_without_index_v<Fn, ElementType, bool>)
     {
         (void)counter_offset;
