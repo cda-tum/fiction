@@ -212,7 +212,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
-  - **Breaking:** Layout presets leave `types.hpp`; use the canonical gate-layout types from their defining header.
+  - **Breaking:** `cart_gate_clk_lyt`, `hex_gate_clk_lyt`, and `shifted_cart_gate_clk_lyt` leave `types.hpp`;
+    use the canonical gate-layout types from their defining header.
   - **Breaking:** `gate_level_layout` is now `gate_layout` in `fiction/layouts/gate_layout.hpp`.
     Update C++ includes and template names; Python class names remain unchanged.
   - `bounding_box_2d` is renamed to `bounding_box` in C++ and Python.
@@ -280,7 +281,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Experiments:
 
   - Gate-layout experiments use canonical types with unchanged computations.
-  - Gate-layout experiments use the `gate_layout` C++ type; computations remain unchanged.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
