@@ -256,7 +256,6 @@ enum class layout_invalidity_reason : uint8_t
  * simulates the ground states, and compares the charge states of the output BDL pairs with the expected truth-table
  * entries. With a canvas, the three pruning filters (positive charges, physical infeasibility, I/O instability) run
  * before any simulation on the layout's potential landscape.
- *
  */
 class is_operational_impl
 {
@@ -1172,7 +1171,7 @@ make_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec
     return is_operational_impl{lyt, spec, params};
 }
 /**
- * The input patterns that are not operational for the given reasons.
+ * Collects the input patterns whose simulation results satisfy the operational check.
  *
  * @param p The implementation object.
  * @param num_patterns The number of input patterns.
