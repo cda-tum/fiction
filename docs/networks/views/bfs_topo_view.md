@@ -29,6 +29,14 @@ Typical use cases include:
 :members:
 ```
 
+```{doxygenclass} fiction::networks::views::bfs_topo_view< Ntk, true >
+:members:
+```
+
+```{doxygenclass} fiction::networks::views::bfs_topo_view< Ntk, false >
+:members:
+```
+
 :::
 
 ::::

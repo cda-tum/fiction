@@ -35,7 +35,7 @@ leaves an existing destination layout unchanged.
 ```
 
 ```{doxygenclass} fiction::layouts::io::fgl_parsing_error
-
+:members:
 ```
 
 :::
@@ -124,15 +124,15 @@ illegal XML control characters are rejected before writing. Editing checkpoints 
 ```
 
 ```{doxygenclass} fiction::layouts::io::gate_layout_cartesian_drawer
-
+:members:
 ```
 
 ```{doxygenclass} fiction::layouts::io::gate_layout_shifted_cartesian_drawer
-
+:members:
 ```
 
 ```{doxygenclass} fiction::layouts::io::gate_layout_hexagonal_drawer
-
+:members:
 ```
 
 ```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {}, utils::progress_callback on_progress = {})

@@ -34,11 +34,11 @@ may lie outside the frame; physical design-rule checks validate frame membership
 ```
 
 ```{doxygenstruct} fiction::layouts::layout_base::coordinate
-
+:members:
 ```
 
 ```{doxygenstruct} fiction::layouts::layout_base::extent
-
+:members:
 ```
 
 :::
@@ -65,7 +65,7 @@ may lie outside the frame; physical design-rule checks validate frame membership
 An iterator type that allows to enumerate coordinates in order within a boundary.
 
 ```{doxygenclass} fiction::layouts::layout_base::coordinate_iterator
-
+:members:
 ```
 
 ## Utility Functions

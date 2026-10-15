@@ -54,7 +54,7 @@ views/views
 ```
 
 ```{doxygenclass} fiction::networks::high_degree_fanin_exception
-
+:members:
 ```
 
 ```{doxygenfunction} fiction::networks::has_high_degree_fanin_nodes

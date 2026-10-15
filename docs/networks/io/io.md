@@ -38,15 +38,15 @@
 **Header:** `fiction/networks/io/dot_drawers.hpp`
 
 ```{doxygenclass} fiction::networks::io::technology_dot_drawer
-
+:members:
 ```
 
 ```{doxygenclass} fiction::networks::io::color_view_drawer
-
+:members:
 ```
 
 ```{doxygenclass} fiction::networks::io::edge_color_view_drawer
-
+:members:
 ```
 
 ```{doxygenfunction} fiction::networks::io::write_dot_network(const Ntk& ntk, std::ostream& os, const Drawer& drawer = {})

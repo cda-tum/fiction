@@ -19,6 +19,7 @@
 ```
 
 ```{doxygenclass} fiction::sidb::io::sqd_parsing_error
+:members:
 ```
 
 :::
@@ -56,9 +57,11 @@
 ```
 
 ```{doxygenclass} fiction::sidb::io::unsupported_defect_index_exception
+:members:
 ```
 
 ```{doxygenclass} fiction::sidb::io::missing_position_exception
+:members:
 ```
 
 :::

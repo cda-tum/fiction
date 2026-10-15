@@ -17,6 +17,7 @@ node is considered a fanout node (or splitter in some contexts) that copies an i
 
 ```{doxygenclass} fiction::networks::technology_network
 :members:
+:undoc-members:
 ```
 
 :::
