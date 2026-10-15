@@ -18,7 +18,6 @@
 
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/layout.hpp>
-#include <fiction/traits.hpp>
 
 #include <type_traits>
 

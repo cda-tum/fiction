@@ -27,7 +27,6 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>

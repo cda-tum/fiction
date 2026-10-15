@@ -27,7 +27,6 @@
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <cstdint>

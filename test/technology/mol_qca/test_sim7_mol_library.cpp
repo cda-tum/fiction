@@ -27,7 +27,6 @@
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/mol_qca/sim7_mol_library.hpp>
-#include <fiction/traits.hpp>
 
 #include <type_traits>
 
