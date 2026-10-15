@@ -23,6 +23,8 @@ def test_potential_distance_limits() -> None:
     params.epsilon_r = 2.0
     params.lambda_tf = 1.0
     assert potential_to_distance_conversion(0.01, params, 3) == pytest.approx(3.135)
+    params.lambda_tf = math.inf
+    assert potential_to_distance_conversion(0.1, params, 2) == pytest.approx(7.2)
 
 
 @pytest.mark.parametrize("potential", [-1.0, -math.inf, math.nan])

@@ -121,10 +121,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - `potential_to_distance_conversion` now uses a bounded inverse search, avoids intermediate underflow,
-    and returns infinity for zero potential.
-    It throws `std::invalid_argument` for invalid physical parameters, negative or NaN potential,
-    and precision beyond `double`'s decimal precision.
+  - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
+    Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
+    throw `std::invalid_argument`.
   - Population stability now validates conversion parameters before simulation and returns infinity for zero potential differences.
   - Population stability now records neutral-to-negative margins even when the neutral-to-positive transition is closer.
   - Geometric distances accept coordinate pairs directly and use fixed `uint64_t` or `double` results.

@@ -111,9 +111,12 @@ TEST_CASE("Potential-to-distance conversion validates inputs", "[potential_to_di
         auto params      = simulation_parameters{};
         params.epsilon_r = value;
         REQUIRE_THROWS_AS(potential_to_distance_conversion(0.1, params), std::invalid_argument);
-        params           = simulation_parameters{};
-        params.lambda_tf = value;
-        REQUIRE_THROWS_AS(potential_to_distance_conversion(0.1, params), std::invalid_argument);
+        if (!std::isinf(value))
+        {
+            params           = simulation_parameters{};
+            params.lambda_tf = value;
+            REQUIRE_THROWS_AS(potential_to_distance_conversion(0.1, params), std::invalid_argument);
+        }
     }
 }
 
@@ -177,6 +180,13 @@ TEST_CASE("Potential-to-distance conversion avoids intermediate underflow", "[po
     // The log form preserves a representable potential when exp(-distance / lambda_tf) is subnormal.
     constexpr double target_distance = 743.305;
     const auto       potential       = std::exp(std::log(K_E * ELEMENTARY_CHARGE * 1e9) - std::log(params.epsilon_r) -
-                                                std::log(target_distance) - target_distance / params.lambda_tf);
+                                                std::log(target_distance) - (target_distance / params.lambda_tf));
     REQUIRE_THAT(potential_to_distance_conversion(potential, params), Catch::Matchers::WithinAbs(743.31, 1e-10));
+}
+
+TEST_CASE("Potential-to-distance conversion supports the unscreened Coulomb limit",
+          "[potential_to_distance_conversion]")
+{
+    const simulation_parameters params{3, -0.32, 5.6, std::numeric_limits<double>::infinity()};
+    REQUIRE_THAT(potential_to_distance_conversion(0.1, params), Catch::Matchers::WithinAbs(2.58, 1e-12));
 }

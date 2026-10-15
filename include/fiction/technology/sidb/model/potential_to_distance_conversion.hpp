@@ -40,24 +40,25 @@ namespace fiction::sidb::model
  * The distance rounds upward to the requested decimal precision, with a minimum of `10^-precision` nm.
  * Floating-point evaluation error can exceed the requested decimal precision, especially for extreme physical
  * parameters. Zero potential returns positive infinity. Positive infinite potential returns the minimum distance.
+ * Positive infinite screening distance gives the unscreened Coulomb potential.
  *
  * @param params The physical parameters for a given hydrogen-passivated silicon surface.
  * @param potential The electrostatic potential (unit: V) to be converted to a distance.
  * @param precision Number of decimal places, at most `std::numeric_limits<double>::digits10`.
  * @return The distance (unit: nm), or positive infinity if no finite `double` distance can represent the inverse.
- * @throws std::invalid_argument If potential is negative or NaN, the relative permittivity or screening distance is
- * non-positive or non-finite, or precision exceeds the decimal precision of `double`.
+ * @throws std::invalid_argument If potential is negative or NaN, relative permittivity is non-positive or non-finite,
+ * screening distance is non-positive or NaN, or precision exceeds the decimal precision of `double`.
  */
 [[nodiscard]] inline double potential_to_distance_conversion(
     const double potential, const sidb::model::simulation_parameters& params = sidb::model::simulation_parameters{},
     const uint64_t precision = 2)
 {
     if (std::isnan(potential) || potential < 0 || !std::isfinite(params.epsilon_r) || params.epsilon_r <= 0 ||
-        !std::isfinite(params.lambda_tf) || params.lambda_tf <= 0 || precision > std::numeric_limits<double>::digits10)
+        std::isnan(params.lambda_tf) || params.lambda_tf <= 0 || precision > std::numeric_limits<double>::digits10)
     {
         throw std::invalid_argument{
-            "potential-to-distance conversion requires a non-negative potential, positive finite "
-            "physical parameters, and precision within double's decimal precision"};
+            "potential-to-distance conversion requires a non-negative potential, positive finite permittivity, "
+            "positive screening distance, and precision within double's decimal precision"};
     }
 
     if (potential == 0)

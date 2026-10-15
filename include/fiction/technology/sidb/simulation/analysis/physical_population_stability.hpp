@@ -51,7 +51,7 @@ namespace fiction::sidb::simulation::analysis
 enum class transition_type : uint8_t
 {
     /**
-     * SiDB is neutrally charged, but is closest to being negatively charged.
+     * Transition from neutral to negative charge.
      */
     NEUTRAL_TO_NEGATIVE,
     /**
@@ -59,7 +59,7 @@ enum class transition_type : uint8_t
      */
     NEGATIVE_TO_NEUTRAL,
     /**
-     * SiDB is neutrally charged, but is closest to being positively charged.
+     * Transition from neutral to positive charge.
      */
     NEUTRAL_TO_POSITIVE,
     /**
@@ -321,8 +321,8 @@ class physical_population_stability_impl
  * @param lyt The layout to analyze.
  * @param params Parameters.
  * @return The population stability information, one entry per distinct charge distribution.
- * @throws std::invalid_argument If the relative permittivity or screening distance is non-positive or non-finite,
- * or precision exceeds the decimal precision of `double`.
+ * @throws std::invalid_argument If relative permittivity is non-positive or non-finite, screening distance is
+ * non-positive or NaN, or precision exceeds the decimal precision of `double`.
  */
 [[nodiscard]] inline std::vector<population_stability_information>
 physical_population_stability(const layout& lyt, const physical_population_stability_params& params)
