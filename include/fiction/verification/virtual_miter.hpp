@@ -21,6 +21,7 @@
 
 #include <fiction/synthesis/delete_virtual_pis.hpp>
 
+// NOLINTNEXTLINE(misc-include-cleaner): Provides cleanup_dangling for argument-dependent lookup.
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
