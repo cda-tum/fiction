@@ -24,6 +24,9 @@ import pytest
         ("out_of_range", "IndexError"),
         ("overflow_error", "OverflowError"),
         ("length_error", "ValueError"),
+        ("bad_alloc", "MemoryError"),
+        ("ifstream::failure", "RuntimeError"),
+        ("ofstream::failure", "RuntimeError"),
     ],
 )
 def test_python_exception_docstrings(cpp_name: str, python_name: str, monkeypatch: pytest.MonkeyPatch) -> None:

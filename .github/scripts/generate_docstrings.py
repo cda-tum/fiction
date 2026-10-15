@@ -32,6 +32,9 @@ def main() -> int:
         "out_of_range": "IndexError",
         "overflow_error": "OverflowError",
         "length_error": "ValueError",
+        "bad_alloc": "MemoryError",
+        "ifstream::failure": "RuntimeError",
+        "ofstream::failure": "RuntimeError",
     }.items():
         generator.mkdoc_lib.INLINE_DOXYGEN_REPLACEMENTS.append((
             re.compile(r"(?<![\w:])std::" + cpp_name + r"(?!\w|::)"),
