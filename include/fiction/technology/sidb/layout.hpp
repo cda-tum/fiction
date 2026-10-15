@@ -110,6 +110,43 @@ class layout
     explicit layout(lattice lat, std::string name = "") : surface_lattice{std::move(lat)}, layout_name{std::move(name)}
     {}
     /**
+     * Copies a layout with independent storage.
+     *
+     * @param other Layout to copy.
+     */
+    layout(const layout& other) = default;
+    /**
+     * Moves a layout and transfers its storage.
+     *
+     * @param other Layout to move.
+     */
+    layout(layout&& other) noexcept = default;
+    /**
+     * Copies a layout. Allocation failure leaves this layout unchanged.
+     *
+     * @param other Layout to copy.
+     * @return This layout.
+     */
+    layout& operator=(const layout& other)
+    {
+        if (this != &other)
+        {
+            *this = layout{other};
+        }
+        return *this;
+    }
+    /**
+     * Moves a layout and transfers its storage.
+     *
+     * @param other Layout to move.
+     * @return This layout.
+     */
+    layout& operator=(layout&& other) noexcept = default;
+    /**
+     * Destroys the layout and releases its storage.
+     */
+    ~layout() = default;
+    /**
      * The lattice of the surface.
      *
      * @return The lattice.
