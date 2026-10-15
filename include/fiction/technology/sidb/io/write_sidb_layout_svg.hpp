@@ -357,9 +357,10 @@ inline void write_sidb_layout_svg(const layout& lyt, const std::string_view& fil
  *
  * @param lyt Layout to draw.
  * @param cd Charge distribution over the layout's SiDBs.
- * @throws std::invalid_argument if the charge distribution sites differ from the layout.
  * @param os Output stream to write into.
  * @param ps Drawing parameters.
+ * @throws std::invalid_argument if the charge distribution sites differ from the layout.
+ * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
  */
 inline void write_sidb_layout_svg(const layout& lyt, const charge_distribution& cd, std::ostream& os,
                                   const write_sidb_layout_svg_params& ps = {})
@@ -377,6 +378,7 @@ inline void write_sidb_layout_svg(const layout& lyt, const charge_distribution& 
  * @param ps Drawing parameters.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  * @throws std::invalid_argument if the charge distribution sites differ from the layout.
+ * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
  */
 inline void write_sidb_layout_svg(const layout& lyt, const charge_distribution& cd, const std::string_view& filename,
                                   const write_sidb_layout_svg_params& ps = {})
