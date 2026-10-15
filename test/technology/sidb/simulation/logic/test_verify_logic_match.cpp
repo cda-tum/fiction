@@ -103,7 +103,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
     const quickexact_params params{.sim_params = simulation_parameters{2, -0.32}};
 
-    SECTION("Input zero")
+    SECTION("Left input one and right input zero")
     {
         bii = 2;
 
@@ -117,7 +117,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
                                  input_wires, output_wires) == operational_status::OPERATIONAL);
     }
 
-    SECTION("Input one")
+    SECTION("Left input zero and right input one")
     {
         bii = 1;
 

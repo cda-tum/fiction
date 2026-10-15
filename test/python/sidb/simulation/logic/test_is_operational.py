@@ -76,6 +76,11 @@ def test_is_operational():
     canvas_lyt = sidb_layout()
     canvas_lyt.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.LOGIC)
     canvas_lyt.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.LOGIC)
+    [op_status, _evaluated_input_combinations] = is_operational(
+        lyt, [create_and_tt()], input_bdl_wires, output_bdl_wires, canvas_lyt=canvas_lyt, **options
+    )
+    assert op_status == operational_status.NON_OPERATIONAL
+
     canvas_lyt.assign_sidb(lattice_site(1000, 0, 0), sidb_dot_tag.LOGIC)
     options.update(
         mu_minus=-0.28,

@@ -127,7 +127,9 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
  * @param input_bdl_wires The input BDL wires of `lyt`.
  * @param output_bdl_wires The output BDL wires of `lyt`.
  * @return The energies with their state types.
- * @throws std::out_of_range if logic validation encounters an invalid lattice basis index.
+ * @throws std::invalid_argument if logic validation encounters an empty specification or mixed variable counts.
+ * @throws std::out_of_range if logic validation encounters an input pattern outside the specification or an
+ * invalid lattice basis index.
  */
 [[nodiscard]] inline energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
     const layout& lyt, const energy_distribution& energy_dist,
