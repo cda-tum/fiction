@@ -61,13 +61,13 @@ class lattice_site:
 
     @property
     def x(self) -> int:
-        """Steps along the first lattice vector."""
+        """Steps along the first lattice vector. Defaults to 0."""
 
     @x.setter
     def x(self, arg: int, /) -> None: ...
     @property
     def y(self) -> int:
-        """Steps along the second lattice vector."""
+        """Steps along the second lattice vector. Defaults to 0."""
 
     @y.setter
     def y(self, arg: int, /) -> None: ...
@@ -240,20 +240,20 @@ class lattice:
     def name(self) -> str:
         """
         Name of the reconstruction as SiQAD spells it in SQD files, e.g.,
-        `"Si(100) 2x1"`.
+        `"Si(100) 2x1"`. Defaults to an empty string.
         """
 
     @name.setter
     def name(self, arg: str, /) -> None: ...
     @property
     def a1(self) -> tuple[float, float]:
-        """First lattice vector (unit: Å)."""
+        """First lattice vector (unit: Å). Defaults to `(0, 0)`."""
 
     @a1.setter
     def a1(self, arg: tuple[float, float], /) -> None: ...
     @property
     def a2(self) -> tuple[float, float]:
-        """Second lattice vector (unit: Å)."""
+        """Second lattice vector (unit: Å). Defaults to `(0, 0)`."""
 
     @a2.setter
     def a2(self, arg: tuple[float, float], /) -> None: ...
@@ -261,7 +261,7 @@ class lattice:
     def basis(self) -> list[tuple[float, float]]:
         """
         The two basis sites of the unit cell (unit: Å). The first one is the
-        origin.
+        origin. Both sites default to `(0, 0)`.
         """
 
     @basis.setter

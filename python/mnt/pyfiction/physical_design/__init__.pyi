@@ -37,11 +37,17 @@ class exact_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta: ...
+    def time_total(self) -> datetime.timedelta:
+        """Total algorithm runtime."""
+
     @property
-    def x_size(self) -> int: ...
+    def x_size(self) -> int:
+        """Layout extent along the x axis."""
+
     @property
-    def y_size(self) -> int: ...
+    def y_size(self) -> int:
+        """Layout extent along the y axis."""
+
     @property
     def num_gates(self) -> int:
         """Number of logic gates, excluding primary inputs and outputs."""
@@ -55,7 +61,8 @@ class exact_stats:
         """Number of crossing-layer wires above occupied ground-layer tiles."""
 
     @property
-    def num_aspect_ratios(self) -> int: ...
+    def num_aspect_ratios(self) -> int:
+        """Number of examined aspect ratios."""
 
 @overload
 def exact(
@@ -206,15 +213,23 @@ class num_clks(enum.Enum):
     """Four clocks."""
 
 class orthogonal_stats:
+    """Statistics for orthogonal physical design."""
+
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta: ...
+    def time_total(self) -> datetime.timedelta:
+        """Total algorithm runtime."""
+
     @property
-    def x_size(self) -> int: ...
+    def x_size(self) -> int:
+        """Layout extent along the x axis."""
+
     @property
-    def y_size(self) -> int: ...
+    def y_size(self) -> int:
+        """Layout extent along the y axis."""
+
     @property
     def num_gates(self) -> int:
         """Number of logic gates, excluding primary inputs and outputs."""

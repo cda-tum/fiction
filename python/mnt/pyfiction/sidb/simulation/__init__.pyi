@@ -386,31 +386,51 @@ class sidb_simulation_result:
 
     @property
     def algorithm_name(self) -> str:
-        """Name of the algorithm used to determine the charge distributions."""
+        """
+        Name of the algorithm used to determine the charge distributions.
+
+        Defaults to an empty string.
+        """
 
     @algorithm_name.setter
     def algorithm_name(self, arg: str, /) -> None: ...
     @property
     def simulation_runtime(self) -> datetime.timedelta:
-        """Total simulation runtime in seconds."""
+        """
+        Total simulation runtime in seconds.
+
+        Defaults to zero seconds.
+        """
 
     @simulation_runtime.setter
     def simulation_runtime(self, arg: datetime.timedelta, /) -> None: ...
     @property
     def layout(self) -> mnt.pyfiction.sidb.sidb_layout:
-        """The simulated layout."""
+        """
+        The simulated layout.
+
+        Defaults to an empty Si(100)-2x1 layout.
+        """
 
     @layout.setter
     def layout(self, arg: mnt.pyfiction.sidb.sidb_layout, /) -> None: ...
     @property
     def charge_distributions(self) -> list[mnt.pyfiction.sidb.charge_distribution]:
-        """Charge distributions determined by the algorithm."""
+        """
+        Charge distributions determined by the algorithm.
+
+        Defaults to an empty vector.
+        """
 
     @charge_distributions.setter
     def charge_distributions(self, arg: Sequence[mnt.pyfiction.sidb.charge_distribution], /) -> None: ...
     @property
     def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """Physical parameters used in the simulation."""
+        """
+        Physical parameters used in the simulation.
+
+        Defaults to `model::simulation_parameters{}`.
+        """
 
     @simulation_parameters.setter
     def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...

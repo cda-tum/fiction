@@ -406,25 +406,25 @@ class bdl_wire:
 
     @property
     def pairs(self) -> list[bdl_pair]:
-        """The BDL pairs of the wire."""
+        """The BDL pairs of the wire. Defaults to an empty vector."""
 
     @pairs.setter
     def pairs(self, arg: Sequence[bdl_pair], /) -> None: ...
     @property
     def direction(self) -> bdl_wire.port_direction:
-        """Port direction of the wire."""
+        """Port direction of the wire. Defaults to `fcn::port_direction::NONE`."""
 
     @direction.setter
     def direction(self, arg: bdl_wire.port_direction, /) -> None: ...
     @property
     def first_bdl_pair(self) -> bdl_pair | None:
-        """First BDL pair of the wire."""
+        """First BDL pair of the wire. Defaults to `std::nullopt`."""
 
     @first_bdl_pair.setter
     def first_bdl_pair(self, arg: bdl_pair | None, /) -> None: ...
     @property
     def last_bdl_pair(self) -> bdl_pair | None:
-        """Last BDL pair of the wire."""
+        """Last BDL pair of the wire. Defaults to `std::nullopt`."""
 
     @last_bdl_pair.setter
     def last_bdl_pair(self, arg: bdl_pair | None, /) -> None: ...
@@ -1151,19 +1151,19 @@ class operational_domain_value_range:
     def dimension(self, arg: sweep_parameter, /) -> None: ...
     @property
     def min(self) -> float:
-        """The minimum value of the dimension sweep."""
+        """The minimum value of the dimension sweep. Defaults to 1.0."""
 
     @min.setter
     def min(self, arg: float, /) -> None: ...
     @property
     def max(self) -> float:
-        """The maximum value of the dimension sweep."""
+        """The maximum value of the dimension sweep. Defaults to 10.0."""
 
     @max.setter
     def max(self, arg: float, /) -> None: ...
     @property
     def step(self) -> float:
-        """The step size of the dimension sweep."""
+        """The step size of the dimension sweep. Defaults to 0.1."""
 
     @step.setter
     def step(self, arg: float, /) -> None: ...

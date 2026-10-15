@@ -344,7 +344,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl = R"doc(Writes an FCN layout in QLL format.)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb = R"doc()doc";
 
@@ -389,7 +389,7 @@ static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_on_progre
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_os = R"doc()doc";
 
-static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_run = R"doc(Writes the FCN layout to the output stream in QLL format.)doc";
 
 static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pi_list = R"doc()doc";
 
@@ -528,7 +528,7 @@ static const char *mkd_doc_fiction_fcn_port_direction_cardinal_SOUTH_WEST = R"do
 
 static const char *mkd_doc_fiction_fcn_port_direction_cardinal_WEST = R"doc(West direction.)doc";
 
-static const char *mkd_doc_fiction_fcn_port_direction_dir = R"doc(Direction.)doc";
+static const char *mkd_doc_fiction_fcn_port_direction_dir = R"doc(Direction. Defaults to `NORTH` (0).)doc";
 
 static const char *mkd_doc_fiction_fcn_port_direction_operator_eq =
 R"doc(Comparator for equality tests.
@@ -552,9 +552,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_fcn_port_direction_pi = R"doc(Primary input port.)doc";
+static const char *mkd_doc_fiction_fcn_port_direction_pi = R"doc(Primary input port. Defaults to `false`.)doc";
 
-static const char *mkd_doc_fiction_fcn_port_direction_po = R"doc(Primary output port.)doc";
+static const char *mkd_doc_fiction_fcn_port_direction_po = R"doc(Primary output port. Defaults to `false`.)doc";
 
 static const char *mkd_doc_fiction_fcn_port_direction_port_direction = R"doc(Default constructor.)doc";
 
@@ -566,7 +566,7 @@ R"doc(Port lists are collections of input and output ports.
 Template Args:
     PortType: A port type, e.g., port_position or port_direction.)doc";
 
-static const char *mkd_doc_fiction_fcn_port_list_inp = R"doc(Input and output positions.)doc";
+static const char *mkd_doc_fiction_fcn_port_list_inp = R"doc(Input ports.)doc";
 
 static const char *mkd_doc_fiction_fcn_port_list_operator_eq =
 R"doc(Comparator for port lists.
@@ -591,7 +591,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_fcn_port_list_out = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_port_list_out = R"doc(Output ports.)doc";
 
 static const char *mkd_doc_fiction_fcn_port_list_port_list = R"doc(Default constructor.)doc";
 
@@ -621,17 +621,17 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_fcn_port_position_pi = R"doc(Primary input port.)doc";
+static const char *mkd_doc_fiction_fcn_port_position_pi = R"doc(Primary input port. Defaults to `false`.)doc";
 
-static const char *mkd_doc_fiction_fcn_port_position_po = R"doc(Primary output port.)doc";
+static const char *mkd_doc_fiction_fcn_port_position_po = R"doc(Primary output port. Defaults to `false`.)doc";
 
 static const char *mkd_doc_fiction_fcn_port_position_port_position = R"doc(Default constructor.)doc";
 
 static const char *mkd_doc_fiction_fcn_port_position_port_position_2 = R"doc(Standard constructor.)doc";
 
-static const char *mkd_doc_fiction_fcn_port_position_x = R"doc(Positions.)doc";
+static const char *mkd_doc_fiction_fcn_port_position_x = R"doc(Horizontal port coordinate.)doc";
 
-static const char *mkd_doc_fiction_fcn_port_position_y = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_port_position_y = R"doc(Vertical port coordinate.)doc";
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception =
 R"doc(Exception to be thrown when a layout hosts a gate with an orientation
@@ -645,7 +645,7 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_co
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_ports = R"doc(Ports of the unsupported gate orientation.)doc";
 
-static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_unsupported_gate_orientation_exception = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_unsupported_gate_orientation_exception = R"doc(Records a gate coordinate and unsupported port orientation.)doc";
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_where =
 R"doc(Coordinate at which the unsupported gate orientation was found.
@@ -672,9 +672,9 @@ Template Args:
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_coord = R"doc(Coordinate at which the unsupported gate type was found.)doc";
 
-static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_unsupported_gate_type_exception = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_unsupported_gate_type_exception = R"doc(Records the coordinate of an unsupported gate.)doc";
 
-static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R"doc()doc";
+static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R"doc(Returns the coordinate of the unsupported gate.)doc";
 
 static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
 
@@ -755,7 +755,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl = R"doc(Writes an iNML layout in QCC format.)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb = R"doc()doc";
 
@@ -799,7 +799,7 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_os = R"d
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_run = R"doc(Writes the iNML layout to the output stream in QCC format.)doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_sorted_pi_list = R"doc()doc";
 
@@ -5477,12 +5477,13 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_write_dot_layout_2 =
-R"doc(Writes layout in DOT format into a file
+R"doc(Writes a layout in DOT format to a file.
 
 Args:
-    lyt: Layout
+    lyt: Layout.
+    filename: Output filename.
+    drawer: Drawer that supplies DOT layout attributes.
     on_progress: Receives completed drawing work.
-    filename: Filename
 
 )doc";
 
@@ -6473,7 +6474,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl = R"doc()doc";
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl = R"doc(Draws a molecular QCA layout as SVG.)doc";
 
 static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_generate_cell_based_svg =
 R"doc(Generates an SVG string representing the layout and appends it to the
@@ -6500,7 +6501,11 @@ static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_im
 
 static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_run =
+R"doc(Writes an SVG drawing of the molecular QCA layout to the output
+stream.
+
+)doc";
 
 static const char *mkd_doc_fiction_mol_qca_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl =
 R"doc(Stores the layout and drawing parameters.
@@ -6692,10 +6697,11 @@ Each node without predecessors is considered a terminal and a path is
 defined as a sequence of edges.
 
 Args:
+    ntk: Network containing the node.
     n: Node whose paths are desired.
 
 Returns:
-    A vector of all possible edge paths leading from terminals to `v`.
+    A vector of all possible edge paths leading from terminals to `n`.
 
 )doc";
 
@@ -6976,9 +6982,9 @@ Template Args:
     Ntk: Logic network type.
     DrawIndexes: Flag to toggle the drawing of node indices.)doc";
 
-static const char *mkd_doc_fiction_networks_io_color_view_drawer_node_fillcolor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_io_color_view_drawer_node_fillcolor = R"doc(Returns the DOT fill color for a network node.)doc";
 
-static const char *mkd_doc_fiction_networks_io_color_view_drawer_node_label = R"doc()doc";
+static const char *mkd_doc_fiction_networks_io_color_view_drawer_node_label = R"doc(Returns the DOT label for a network node.)doc";
 
 static const char *mkd_doc_fiction_networks_io_edge_color_view_drawer =
 R"doc(A DOT drawer for networks with colored edges. Node colors represent
@@ -6998,7 +7004,7 @@ on the way mockturtle's dot drawer works.
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_io_edge_color_view_drawer_signal_style = R"doc()doc";
+static const char *mkd_doc_fiction_networks_io_edge_color_view_drawer_signal_style = R"doc(Returns the DOT edge style for a colored signal.)doc";
 
 static const char *mkd_doc_fiction_networks_io_network_reader =
 R"doc(Helper class to read directories of mockturtle networks of certain
@@ -7071,9 +7077,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_fillcolor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_fillcolor = R"doc(Returns the DOT fill color for a network node.)doc";
 
-static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_label = R"doc()doc";
+static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_label = R"doc(Returns the DOT label for a network node.)doc";
 
 static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_label_callback = R"doc()doc";
 
@@ -7325,11 +7331,11 @@ indexing.
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_clone = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_clone = R"doc(Returns a network with independent storage.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_clone_node = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_clone_node = R"doc(Copies a node function with the supplied children.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_and = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_and = R"doc(Creates an AND gate with the supplied signals.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_create_buf =
 R"doc(Creates a buffer node in the network that computes the identity
@@ -7344,49 +7350,67 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_dot = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_dot = R"doc(Creates a DOT gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_ge = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_ge = R"doc(Creates a GE gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_gt = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_gt = R"doc(Creates a GT gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_ite = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_ite = R"doc(Creates an ITE gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_le = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_le = R"doc(Creates an LE gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_lt = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_lt = R"doc(Creates an LT gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_maj = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_maj = R"doc(Creates a MAJ gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_nand = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_nand = R"doc(Creates a NAND gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_nary_and = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_nary_and =
+R"doc(Reduces the supplied signals through a tree of binary AND gates.
 
-static const char *mkd_doc_fiction_networks_technology_network_create_nary_or = R"doc()doc";
+An empty input returns constant `true`; a single input returns that
+signal.
 
-static const char *mkd_doc_fiction_networks_technology_network_create_nary_xor = R"doc()doc";
+)doc";
+
+static const char *mkd_doc_fiction_networks_technology_network_create_nary_or =
+R"doc(Reduces the supplied signals through a tree of binary OR gates.
+
+An empty input returns constant `false`; a single input returns that
+signal.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_technology_network_create_nary_xor =
+R"doc(Reduces the supplied signals through a tree of binary XOR gates.
+
+An empty input returns constant `false`; a single input returns that
+signal.
+
+)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_create_node = R"doc(Disable structural hashing.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_create_node_2 = R"doc(Disable structural hashing.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_nor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_nor = R"doc(Creates a NOR gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_not = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_not = R"doc(Creates a NOT gate with the supplied signal.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_or = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_or = R"doc(Creates an OR gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_xnor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_xnor = R"doc(Creates an XNOR gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_xor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_xor = R"doc(Creates an XOR gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_xor3 = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_xor3 = R"doc(Creates an XOR3 gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_and = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_and = R"doc(Returns whether the node implements the AND function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_and3 = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_and3 = R"doc(Returns whether the node implements the AND3 function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_and_xor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_and_xor = R"doc(Returns whether the node implements the AND XOR function.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_is_buf =
 R"doc(Returns whether the given node `n` is a buffer node, i.e., whether `n`
@@ -7401,7 +7425,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_dot = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_dot = R"doc(Returns whether the node implements the DOT function.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_is_fanout =
 R"doc(Returns whether the given node `n` is a fanout node, i.e., whether `n`
@@ -7415,11 +7439,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_gamble = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_gamble = R"doc(Returns whether the node implements the GAMBLE function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_ge = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_ge = R"doc(Returns whether the node implements the GE function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_gt = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_gt = R"doc(Returns whether the node implements the GT function.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_is_inv =
 R"doc(Returns whether the given node `n` is an inverter node.
@@ -7432,23 +7456,23 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_ite = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_ite = R"doc(Returns whether the node implements the ITE function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_le = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_le = R"doc(Returns whether the node implements the LE function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_lt = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_lt = R"doc(Returns whether the node implements the LT function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_maj = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_maj = R"doc(Returns whether the node implements the MAJ function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_nand = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_nand = R"doc(Returns whether the node implements the NAND function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_nor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_nor = R"doc(Returns whether the node implements the NOR function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_onehot = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_onehot = R"doc(Returns whether the node implements the ONEHOT function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_or = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_or = R"doc(Returns whether the node implements the OR function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_or_and = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_or_and = R"doc(Returns whether the node implements the OR AND function.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_is_po =
 R"doc(Checks whether a node is primary output by considering the signal
@@ -7463,13 +7487,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_xnor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_xnor = R"doc(Returns whether the node implements the XNOR function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_xor = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_xor = R"doc(Returns whether the node implements the XOR function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_xor3 = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_xor3 = R"doc(Returns whether the node implements the XOR3 function.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_is_xor_and = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_is_xor_and = R"doc(Returns whether the node implements the XOR AND function.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_substitute_po_signals =
 R"doc(Adds additional buffer nodes for each primary output that does not
@@ -7479,7 +7503,7 @@ already point to a buffer.
 
 static const char *mkd_doc_fiction_networks_technology_network_technology_network = R"doc()doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_technology_network_2 = R"doc()doc";
+static const char *mkd_doc_fiction_networks_technology_network_technology_network_2 = R"doc(Constructs a network sharing the supplied LUT storage.)doc";
 
 static const char *mkd_doc_fiction_networks_views =
 R"doc(Deduction guide for bfs_topo_view.
@@ -7536,32 +7560,39 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_networks_views_bfs_topo_view =
-R"doc(Computes a breadth-first topological order (whereas Mockturtle's
-topo_view implements a depth-first search) for all nodes reachable
-from the outputs of a logic network.
+R"doc(Provides a topological traversal selected by the network's
+`is_topologically_sorted` trait.
 
-Overrides the methods `foreach_node`, `foreach_gate`, `size`, and
-`num_gates`. The topological order is computed once upon construction
-and remains fixed for the lifetime of the view.
+The `sorted = false` specialization computes a queue-based order from
+constants and all combinational inputs. It follows fanouts and visits
+each gate after all of its fanins. Gates that do not drive an output
+are included when reached from those inputs; the traversal does not
+filter by output dependency cones. Constants precede combinational
+inputs, which retain their declared order. This specialization
+requires a combinational network with `num_cis() == num_pis()`: gate
+counts and traversal offsets skip the primary-input count. Sequential
+networks with register outputs are unsupported.
 
-All constant nodes and primary inputs are included in the traversal,
-even if they are not reachable from the outputs. Constant nodes
-precede primary inputs, and primary inputs are ordered according to
-their creation order.
+This specialization overrides `foreach_node`, `foreach_gate`, `size`,
+and `num_gates` and wraps `mockturtle::immutable_view`. It computes
+the order at construction; the underlying network must remain
+unchanged while the view is used.
 
-Modifications to the network are not allowed after construction, as
-the order is immutable. Only reachable nodes are included in
-`foreach_node` and `foreach_gate`, which may exclude some network
-nodes.
+The `sorted = true` specialization inherits `Ntk` without reordering.
+An existing depth-first traversal stays depth-first. The default
+`sorted` argument selects this specialization for an already
+topologically sorted network.
 
-Required network functions:
-- `get_constant` - `foreach_pi` - `foreach_fanin` - `incr_trav_id` -
-  `set_visited` - `trav_id` - `visited`
+Network operations used by the computed-order specialization
+(`foreach_fanout` is supplied by `mockturtle::fanout_view`):
+- `size` - `get_constant` - `get_node` - `num_pis` - `foreach_pi`
+  (required by the constructor) - `foreach_ci` - `foreach_node` -
+  `foreach_fanin` - `foreach_fanout` - `incr_trav_id` - `set_visited`
+  - `trav_id` - `visited`
 
 Template Args:
     Ntk: Logic network type.
-    sorted: Internal tag to indicate if the network is already
-            topologically sorted (default: false).)doc";
+    sorted: Whether the network already provides a topological order.)doc";
 
 static const char *mkd_doc_fiction_networks_views_depth_view_params = R"doc(Parameters for depth view.)doc";
 
@@ -7570,7 +7601,9 @@ static const char *mkd_doc_fiction_networks_views_depth_view_params_count_comple
 static const char *mkd_doc_fiction_networks_views_depth_view_params_pi_cost = R"doc(Whether PIs have costs.)doc";
 
 static const char *mkd_doc_fiction_networks_views_mutable_rank_view =
-R"doc(Provides a view with node ranks for given networks. It adds
+R"doc(Extends the network rank interface with mutable ranks.
+
+Provides a view with node ranks for given networks. It adds
 functionalities to modify ranks. Most importantly, the new
 `init_ranks()` function allows an array of nodes to be provided, which
 sets the levels and ranks of the nodes in the network. Additionally,
@@ -7702,7 +7735,18 @@ Template Args:
                          if the provided Ntk supports the depth
                          interface.)doc";
 
-static const char *mkd_doc_fiction_networks_virtual_pi_network = R"doc()doc";
+static const char *mkd_doc_fiction_networks_virtual_pi_network =
+R"doc(Network with additional "virtual" PIs.
+
+"Virtual" PIs are used to manage the duplication of PIs in the
+network. Each "real" PI can have an arbitrary number of "virtual" PIs,
+which are copies of the original "real" PI. A "virtual" PI can be
+created by passing a "real" PI to `create_virtual_pi()`. To keep track
+of this relationship, there is a mapping of each "virtual" PI to its
+corresponding "real" PI in the network.
+
+Template Args:
+    Ntk: Network type.)doc";
 
 static const char *mkd_doc_fiction_networks_virtual_pi_network_clone = R"doc(Clones the `virtual_pi_network` object.)doc";
 
@@ -7891,7 +7935,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_virtual_pi_network_virtual_storage = R"doc()doc";
+static const char *mkd_doc_fiction_networks_virtual_pi_network_virtual_storage = R"doc(Stores virtual primary input nodes.)doc";
 
 static const char *mkd_doc_fiction_networks_virtual_pi_network_virtual_storage_map_virtual_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
 
@@ -8240,7 +8284,7 @@ R"doc(If a value is given, for each objective, only up to the `path_limit`
 shortest paths will be enumerated (using Yen's algorithm) instead of
 all paths.)doc";
 
-static const char *mkd_doc_fiction_physical_design_color_routing_stats = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_color_routing_stats = R"doc(Statistics for graph-coloring-based routing.)doc";
 
 static const char *mkd_doc_fiction_physical_design_color_routing_stats_color_stats = R"doc(Statistics of the vertex coloring.)doc";
 
@@ -8269,7 +8313,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl = R"doc(Maps gate-level tiles to cell-level gate implementations.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl =
 R"doc(Prepares cell mapping with optional gate counts.
@@ -8399,9 +8443,9 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl = R"doc(Routes objectives using an edge intersection graph coloring.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl_color_routing_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl_color_routing_impl = R"doc(Stores the layout, routing objectives, parameters, and statistics.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl_conduct_routing =
 R"doc(Extracts the routing paths of the given color from the vertex coloring
@@ -8430,21 +8474,25 @@ static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl_ps 
 
 static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl_pst = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_color_routing_impl_run =
+R"doc(Routes objectives, allowing incomplete routing when
+`conduct_partial_routing` is set.
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_east = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container = R"doc(Stores edge colors for eastward and southward routing.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_ntk = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_east = R"doc(Color for eastward edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_null = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_ntk = R"doc(Network with routing colors assigned to edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_south = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_null = R"doc(Color for unassigned edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_coloring_container = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_south = R"doc(Color for southward edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_opposite_color = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_coloring_container = R"doc(Initializes the network and its routing direction colors.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_opposite_color = R"doc(Returns the other routing direction color.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_compare_gate_tiles =
 R"doc(Custom comparison function for sorting tiles based on the sum of their
@@ -8710,7 +8758,11 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_result_exte
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_result_extent_mutex = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_run =
+R"doc(Returns a gate-level layout satisfying the exact design constraints,
+if found.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_run_asynchronously =
 R"doc(Launches params.num_threads threads and evaluates their return
@@ -8968,6 +9020,7 @@ R"doc(Returns an ncl variable from the stored context representing node n's
 
 Args:
     n: Node to be considered.
+    clk: Clock phase of the node.
 
 Returns:
     ncl variable from ctx.
@@ -9001,6 +9054,7 @@ clock number.
 
 Args:
     t: Tile to be considered.
+    clk: Clock phase of the tile.
 
 Returns:
     tcl variable from ctx.
@@ -9313,6 +9367,7 @@ Args:
     t: Initial tile to start recursion from (not included in model
        evaluations).
     e: Edge to check for.
+    model: Satisfying SMT model containing the routing solution.
 
 )doc";
 
@@ -9375,6 +9430,8 @@ Args:
          created layout.
     ps: The parameters to respect in the SMT instance generation
         process.
+    ntk: Topologically ordered input network.
+    sbl: Forbidden gate port configurations on layout tiles.
 
 )doc";
 
@@ -9789,6 +9846,8 @@ Args:
     new_gate_loc: Enum indicating if the src or dest have to host a
                   new gate and therefore have to be empty. Defaults to
                   `new_gate_location::NONE`.
+    check_straight_inverter: Whether to check for a straight inverter
+                             at the destination.
 
 Returns:
     A path from `src` to `dest` if one exists.
@@ -10663,35 +10722,43 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view =
-R"doc(Custom view class derived from mockturtle::topo_view.
-
-This class inherits from mockturtle::topo_view and overrides certain
-functions to provide custom behavior.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view = R"doc(Immutable network view with optional randomized topological traversal.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_create_topo_rec = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate = R"doc(Calls the supplied function for each gate in topological order.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate_reverse = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate_reverse =
+R"doc(Calls the supplied function for each gate in reverse topological
+order.
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_node = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_index_to_node = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_node = R"doc(Calls the supplied function for each node in topological order.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_node_to_index = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_index_to_node = R"doc(Returns the node at the supplied topological position.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_num_gates = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_node_to_index = R"doc(Returns the node position in the topological order.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_num_gates = R"doc(Returns the number of non-input, non-constant nodes.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_offset = R"doc()doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_rng = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_size = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_size = R"doc(Returns the number of nodes in the view.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_order = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view =
+R"doc(Builds a topological order, randomized only when `Randomize` is true.
+
+Args:
+    ntk: Network to traverse.
+    seed_val: Random seed; ignored when `Randomize` is false, the
+              default.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_update_topo = R"doc(Orders dependencies and includes every declared primary input.)doc";
 
@@ -11136,7 +11203,7 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_aspect_ratios = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_aspect_ratios = R"doc(Number of examined aspect ratios.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_crossings = R"doc(Number of crossing-layer wires above occupied ground-layer tiles.)doc";
 
@@ -11144,13 +11211,13 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_n
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_num_wires = R"doc(Number of physical wires, excluding primary inputs and outputs.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_report = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_report = R"doc(Writes the collected statistics to the output stream.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_time_total = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_time_total = R"doc(Total algorithm runtime.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_x_size = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_x_size = R"doc(Layout extent along the x axis.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_y_size = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats_y_size = R"doc(Layout extent along the y axis.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_with_blacklist =
 R"doc(The same as `exact` but with a black list of tiles that are not
@@ -11242,7 +11309,7 @@ R"doc(If a value is given, for each objective, only up to the `path_limit`
 shortest paths will be enumerated (using Yen's algorithm) instead of
 all paths.)doc";
 
-static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats = R"doc(Statistics for edge intersection graph generation.)doc";
 
 static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_cliques =
 R"doc(Stores all cliques in the resulting graph that were created during
@@ -11250,9 +11317,9 @@ path enumeration. There might be more cliques in the overall graph but
 these ones correspond to one routing objective each, which could be
 useful information to have in certain algorithms.)doc";
 
-static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_num_edges = R"doc(Stores the size of the generated edge intersection graph.)doc";
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_num_edges = R"doc(Number of edges in the intersection graph.)doc";
 
-static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_num_vertices = R"doc(Stores the size of the generated edge intersection graph.)doc";
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_num_vertices = R"doc(Number of vertices in the intersection graph.)doc";
 
 static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_number_of_unroutable_objectives =
 R"doc(For each routing objective that cannot be fulfilled in the given
@@ -11724,7 +11791,7 @@ static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_pa
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_params_on_progress = R"doc(Callback that receives the progress of the gate placement.)doc";
 
-static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats = R"doc(Statistics for orthogonal physical design.)doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_num_crossings = R"doc(Number of crossing-layer wires above occupied ground-layer tiles.)doc";
 
@@ -11732,13 +11799,13 @@ static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_st
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_num_wires = R"doc(Number of physical wires, excluding primary inputs and outputs.)doc";
 
-static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_report = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_report = R"doc(Writes the collected statistics to the output stream.)doc";
 
-static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_time_total = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_time_total = R"doc(Total algorithm runtime.)doc";
 
-static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_x_size = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_x_size = R"doc(Layout extent along the x axis.)doc";
 
-static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_y_size = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_y_size = R"doc(Layout extent along the y axis.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_collection =
 R"doc(An ordered collection of multiple paths in a layout.
@@ -11938,7 +12005,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl = R"doc(Finds a layout path using A* search.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_a_star_impl =
 R"doc(Initializes the A* search.
@@ -12094,7 +12161,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl = R"doc(Enumerates paths between layout coordinates.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_collection = R"doc(Collection of all enumerated paths.)doc";
 
@@ -12170,7 +12237,7 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_visited = R"doc(Set of visited coordinates.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl = R"doc(Finds the k shortest paths with Yen's algorithm.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_initial_obstructions = R"doc(Caller constraints retained across spur searches.)doc";
 
@@ -12731,7 +12798,7 @@ allocation fails.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_set_contains = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_set_contains = R"doc(Returns whether the set contains the supplied path.)doc";
 
 static const char *mkd_doc_fiction_physical_design_place =
 R"doc(Place 0-input gates.
@@ -13172,21 +13239,21 @@ static const char *mkd_doc_fiction_qca_cell_type_NORMAL = R"doc(Regular cell.)do
 
 static const char *mkd_doc_fiction_qca_cell_type_OUTPUT = R"doc(Primary output cell.)doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_qcad_cell_pos = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_qcad_cell_pos = R"doc(Position of a QCADesigner cell.)doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_qcad_cell_pos_x = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_qcad_cell_pos_x = R"doc(Horizontal cell coordinate in QCADesigner output.)doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_qcad_cell_pos_y = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_qcad_cell_pos_y = R"doc(Vertical cell coordinate in QCADesigner output.)doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_qcad_color = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_qcad_color = R"doc(RGB color used in QCADesigner output.)doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_qcad_color_blue = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_qcad_color_blue = R"doc(Blue color component.)doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_qcad_color_green = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_qcad_color_green = R"doc(Green color component.)doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_qcad_color_red = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_qcad_color_red = R"doc(Red color component.)doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl = R"doc(Writes a QCA layout in QCADesigner format.)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_lyt = R"doc()doc";
 
@@ -13194,7 +13261,7 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_os = R"do
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_run = R"doc(Writes the QCA layout to the output stream in QCADesigner format.)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_via_counter = R"doc()doc";
 
@@ -13228,7 +13295,7 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_qua
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_via_cells = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl = R"doc(Draws a QCA layout as SVG.)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_generate_cell_based_svg =
 R"doc(Generates an SVG string representing the cell-based clocked cell
@@ -13261,7 +13328,7 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_os = 
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_run = R"doc(Writes an SVG drawing of the QCA layout to the output stream.)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl =
 R"doc(Stores the layout and drawing parameters.
@@ -15049,17 +15116,17 @@ reconstructions SiQAD defines are available as `si_100_2x1()` and
 `si_111_1x1()`; any other reconstruction with a two-site basis can be
 described by setting the vectors directly.)doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_a1 = R"doc(First lattice vector (unit: Å).)doc";
+static const char *mkd_doc_fiction_sidb_lattice_a1 = R"doc(First lattice vector (unit: Å). Defaults to `(0, 0)`.)doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_a2 = R"doc(Second lattice vector (unit: Å).)doc";
+static const char *mkd_doc_fiction_sidb_lattice_a2 = R"doc(Second lattice vector (unit: Å). Defaults to `(0, 0)`.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_basis =
 R"doc(The two basis sites of the unit cell (unit: Å). The first one is the
-origin.)doc";
+origin. Both sites default to `(0, 0)`.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_name =
 R"doc(Name of the reconstruction as SiQAD spells it in SQD files, e.g.,
-`"Si(100) 2x1"`.)doc";
+`"Si(100) 2x1"`. Defaults to an empty string.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_nm_distance =
 R"doc(The Euclidean distance between two sites.
@@ -15218,9 +15285,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_site_x = R"doc(Steps along the first lattice vector.)doc";
+static const char *mkd_doc_fiction_sidb_lattice_site_x = R"doc(Steps along the first lattice vector. Defaults to 0.)doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_site_y = R"doc(Steps along the second lattice vector.)doc";
+static const char *mkd_doc_fiction_sidb_lattice_site_y = R"doc(Steps along the second lattice vector. Defaults to 0.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_site_z = R"doc(Basis site within the unit cell, 0 or 1.)doc";
 
@@ -16875,7 +16942,7 @@ have to be placed at to induce that potential change.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_critical_dot =
 R"doc(SiDB with the minimum potential difference to any charge transition
-threshold.)doc";
+threshold. Defaults to `(0, 0, 0)`.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_distance_corresponding_to_potential =
 R"doc(For each transition type, the distance (unit: nm) an additional SiDB
@@ -16884,13 +16951,15 @@ difference. A zero potential difference corresponds to positive
 infinity. An absent transition also has infinite distance; its entry
 in `transition_potentials` has infinite potential. Distances use the
 potential magnitude of one elementary charge with all other charge
-states fixed.)doc";
+states fixed. Defaults to an empty map.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_system_energy = R"doc(Electrostatic potential energy of the charge distribution (unit: eV).)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_system_energy =
+R"doc(Electrostatic potential energy of the charge distribution (unit: eV).
+Defaults to 0.0.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_transition_potentials =
 R"doc(For each transition type, the SiDB closest to it and the required
-potential difference (unit: V).)doc";
+potential difference (unit: V). Defaults to an empty map.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_state_type = R"doc(Label to categorize ground and excited states of an SiDB layout.)doc";
 
@@ -17648,7 +17717,9 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustne
 R"doc(The displacement robustness domain of an SiDB gate: every analyzed
 displaced layout together with its operational status.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_operational_values = R"doc(The displaced layouts and their operational status.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_operational_values =
+R"doc(The displaced layouts and their operational status. Defaults to an
+empty vector.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params = R"doc(Parameters of the displacement robustness analysis.)doc";
 
@@ -17689,11 +17760,11 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustne
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats = R"doc(Statistics of the displacement robustness analysis.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_non_operational_sidb_displacements = R"doc(Number of non-operational displaced layouts.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_non_operational_sidb_displacements = R"doc(Number of non-operational displaced layouts. Defaults to 0.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_operational_sidb_displacements = R"doc(Number of operational displaced layouts.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_num_operational_sidb_displacements = R"doc(Number of operational displaced layouts. Defaults to 0.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_time_total = R"doc(Total runtime.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_stats_time_total = R"doc(Total runtime. Defaults to zero.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_charge_distribution_history =
 R"doc(Whether the local potentials are updated from the record of changed
@@ -21711,7 +21782,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire. Defaults to `std::nullopt`.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_index_distance =
 R"doc(Euclidean distance of two sites in units of lattice indices, ignoring
@@ -21727,7 +21798,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire. Defaults to `std::nullopt`.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_operator_eq =
 R"doc(Equality operator. Also provides `operator!=` via `= default`.
@@ -21740,9 +21811,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_pairs = R"doc(The BDL pairs of the wire.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_pairs = R"doc(The BDL pairs of the wire. Defaults to an empty vector.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_port = R"doc(Port direction of the wire.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_port = R"doc(Port direction of the wire. Defaults to `fcn::port_direction::NONE`.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection = R"doc(An enumeration of the selection of different types of wires.)doc";
 
@@ -23737,11 +23808,11 @@ minimum value, a maximum value and a step size.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_dimension = R"doc(The sweep parameter of the dimension.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_max = R"doc(The maximum value of the dimension sweep.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_max = R"doc(The maximum value of the dimension sweep. Defaults to 10.0.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_min = R"doc(The minimum value of the dimension sweep.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_min = R"doc(The minimum value of the dimension sweep. Defaults to 1.0.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_step = R"doc(The step size of the dimension sweep.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_step = R"doc(The step size of the dimension sweep. Defaults to 0.1.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_input_patterns =
 R"doc(Determines the input patterns for which the layout is operational.
@@ -24283,9 +24354,15 @@ algorithm-dependent parameters that are not part of the
 The key of the map is the name of the parameter, the element is the
 value of the parameter.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_result_algorithm_name = R"doc(Name of the algorithm used to determine the charge distributions.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_result_algorithm_name =
+R"doc(Name of the algorithm used to determine the charge distributions.
 
-static const char *mkd_doc_fiction_sidb_simulation_result_charge_distributions = R"doc(Charge distributions determined by the algorithm.)doc";
+Defaults to an empty string.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_result_charge_distributions =
+R"doc(Charge distributions determined by the algorithm.
+
+Defaults to an empty vector.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_result_charge_state =
 R"doc(The charge state of an SiDB in one of the charge distributions.
@@ -24315,11 +24392,20 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_result_lyt = R"doc(The simulated layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_result_lyt =
+R"doc(The simulated layout.
 
-static const char *mkd_doc_fiction_sidb_simulation_result_sim_params = R"doc(Physical parameters used in the simulation.)doc";
+Defaults to an empty Si(100)-2x1 layout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_result_simulation_runtime = R"doc(Total simulation runtime in seconds.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_result_sim_params =
+R"doc(Physical parameters used in the simulation.
+
+Defaults to `model::simulation_parameters{}`.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_result_simulation_runtime =
+R"doc(Total simulation runtime in seconds.
+
+Defaults to zero seconds.)doc";
 
 static const char *mkd_doc_fiction_sidb_site_at_row =
 R"doc(The site at a given column and single-SiDB row, the inverse of
@@ -24788,9 +24874,9 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_detail_convert_network_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl = R"doc(Copies a network without virtual primary inputs.)doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_delete_virtual_pis_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_delete_virtual_pis_impl = R"doc(Stores the source network and its topological view.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_initialize_copy_virtual_pi_network =
 R"doc(Initialize a network without virtual primary inputs by copying the
@@ -24817,9 +24903,9 @@ static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_ntk 
 
 static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_ntk_topo = R"doc(Topological view of the input network.)doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_run = R"doc(Returns a network copy without virtual primary inputs.)doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl = R"doc(Replaces high fanout with fanout trees.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_available_fanouts = R"doc(Queue map of available fanouts.)doc";
 
@@ -24903,11 +24989,11 @@ static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_ps 
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_rng = R"doc(Optional helper struct holding the RNG and its distribution.)doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_run = R"doc(Returns a network with fanouts replaced by fanout trees.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_get_po_levels = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl = R"doc(Checks whether network paths have balanced depths.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_balanced = R"doc()doc";
 
@@ -24926,9 +25012,9 @@ static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_ntk_depth =
 
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_run = R"doc(Returns whether all network paths have balanced depths.)doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl = R"doc(Checks whether fanouts satisfy the substitution constraints.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_is_fanout_substituted_impl =
 R"doc(Stores the network and algorithm parameters.
@@ -24943,11 +25029,11 @@ static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_n
 
 static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_run = R"doc(Returns whether the network satisfies fanout substitution constraints.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_substituted = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl = R"doc(Balances network paths by inserting buffers.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_network_balancing_impl =
 R"doc(Stores the network and algorithm parameters.
@@ -24966,7 +25052,7 @@ static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_ntk_t
 
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_run = R"doc(Returns a network with paths balanced by inserted buffers.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_rng_state =
 R"doc(A lightweight container that groups together the two objects required
@@ -24990,7 +25076,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl = R"doc(Maps a network into a technology network.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl_ntk = R"doc(Input network to be mapped.)doc";
 
@@ -25011,7 +25097,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl_run = R"doc(Returns the source network mapped to the supplied technology library.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl_set_up_gates =
 R"doc(Create a mockturtle gate library from the given parameters.
@@ -25023,7 +25109,7 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl_stats = R"doc(Technology mapping statistics.)doc";
 
-static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl_technology_mapping_impl = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl_technology_mapping_impl = R"doc(Stores the source network, mapping parameters, and statistics.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_technology_mapping_impl_validate_required_gates =
 R"doc(Validate that the technology library contains the required gates for
@@ -25204,7 +25290,11 @@ static const char *mkd_doc_fiction_synthesis_missing_required_gates_exception =
 R"doc(Exception thrown when a technology mapping library does not contain
 the required gates for the base network type.)doc";
 
-static const char *mkd_doc_fiction_synthesis_missing_required_gates_exception_missing_required_gates_exception = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_missing_required_gates_exception_missing_required_gates_exception =
+R"doc(Reports the network type and gates missing from the technology
+library.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_network_balancing =
 R"doc(Balances a logic network with buffer nodes that compute the identity
@@ -25273,7 +25363,7 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_synthesis_technology_mapping_params = R"doc()doc";
+static const char *mkd_doc_fiction_synthesis_technology_mapping_params = R"doc(Parameters for technology mapping.)doc";
 
 static const char *mkd_doc_fiction_synthesis_technology_mapping_params_and2 = R"doc(2-input AND gate.)doc";
 
@@ -25338,7 +25428,7 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl = R"doc(Assigns colors to graph vertices.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_convert_node_index =
 R"doc(Converts the given node ID of a Brian Crites graph to the
@@ -25371,7 +25461,7 @@ Returns:
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_graph = R"doc(The graph to be colored.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_graph_coloring_impl = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_graph_coloring_impl = R"doc(Stores the graph, coloring parameters, and statistics.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_is_brian_crites_engine =
 R"doc(Checks whether the given engine points towards the usage of an
@@ -25402,7 +25492,7 @@ static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_ps = R
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_pst = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run = R"doc(Returns a vertex coloring using the selected coloring algorithm.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run_brian_crites_engine = R"doc()doc";
 
@@ -25430,25 +25520,25 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler = R"doc(Finds vertex colorings with a SAT solver.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_at_least_one_color_per_vertex = R"doc()doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_at_most_one_color_per_vertex = R"doc()doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_check_k_coloring = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_check_k_coloring = R"doc(Checks whether the graph admits a coloring with k colors.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_check_sat = R"doc()doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_color = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_color = R"doc(Returns a minimum vertex coloring when the solver finds one.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_color_frequency_equal_to_largest_clique_size = R"doc()doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_binary_search = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_binary_search = R"doc(Finds a minimum coloring by binary search over color counts.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_linearly_ascending_search = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_linearly_ascending_search = R"doc(Finds a minimum coloring by increasing the color count.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_linearly_descending_search = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_linearly_descending_search = R"doc(Finds a minimum coloring by decreasing the color count.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_exclude_identical_adjacent_colors = R"doc()doc";
 
@@ -25480,7 +25570,7 @@ static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_pst =
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_q = R"doc(Largest clique size.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_sat_coloring_handler = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_sat_coloring_handler = R"doc(Initializes SAT coloring with the graph, parameters, and statistics.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance = R"doc()doc";
 
@@ -25524,6 +25614,7 @@ of lower index.
 
 Args:
     instance: Pointer to the solver instance.
+    clique_first_ordering: Vertex ordering with clique vertices first.
 
 )doc";
 
@@ -25604,7 +25695,7 @@ static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_sat_par
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_sat_params_sat_search_tactic = R"doc(The search tactic to apply.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats = R"doc(Statistics for vertex coloring.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_chromatic_number =
 R"doc(The determined chromatic number (could be non-optimal depending on the
@@ -26762,13 +26853,13 @@ Template Args:
     Container: The type of the underlying container.
     Compare: A Compare type providing a strict weak ordering.)doc";
 
-static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_begin = R"doc()doc";
+static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_begin = R"doc(Returns an iterator to the first stored element.)doc";
 
-static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_begin_2 = R"doc()doc";
+static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_begin_2 = R"doc(Returns an iterator to the first stored element.)doc";
 
-static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_cbegin = R"doc()doc";
+static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_cbegin = R"doc(Returns a constant iterator to the first stored element.)doc";
 
-static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_cend = R"doc()doc";
+static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_cend = R"doc(Returns a constant iterator past the last stored element.)doc";
 
 static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_contains =
 R"doc(Returns `true` if the provided value is stored in the queue and
@@ -26782,9 +26873,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_end = R"doc()doc";
+static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_end = R"doc(Returns an iterator past the last stored element.)doc";
 
-static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_end_2 = R"doc()doc";
+static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_end_2 = R"doc(Returns an iterator past the last stored element.)doc";
 
 static const char *mkd_doc_fiction_utils_stl_searchable_priority_queue_find =
 R"doc(Returns an iterator to the provided value if it is contained in the
@@ -27365,17 +27456,19 @@ static const char *mkd_doc_fiction_verification_equivalence_checking_stats_count
 
 static const char *mkd_doc_fiction_verification_equivalence_checking_stats_eq = R"doc(Stores the equivalence type.)doc";
 
-static const char *mkd_doc_fiction_verification_equivalence_checking_stats_impl_drv_stats = R"doc()doc";
+static const char *mkd_doc_fiction_verification_equivalence_checking_stats_impl_drv_stats = R"doc(Design rule violations in the implementation layout.)doc";
 
 static const char *mkd_doc_fiction_verification_equivalence_checking_stats_runtime = R"doc(Stores the runtime.)doc";
 
-static const char *mkd_doc_fiction_verification_equivalence_checking_stats_spec_drv_stats = R"doc(Stores DRVs.)doc";
+static const char *mkd_doc_fiction_verification_equivalence_checking_stats_spec_drv_stats = R"doc(Design rule violations in the specification layout.)doc";
 
-static const char *mkd_doc_fiction_verification_equivalence_checking_stats_tp_diff = R"doc(Throughput values at which weak equivalence manifests.)doc";
+static const char *mkd_doc_fiction_verification_equivalence_checking_stats_tp_diff =
+R"doc(Absolute difference between the throughput denominators. Defaults to
+`0`.)doc";
 
-static const char *mkd_doc_fiction_verification_equivalence_checking_stats_tp_impl = R"doc(Throughput values at which weak equivalence manifests.)doc";
+static const char *mkd_doc_fiction_verification_equivalence_checking_stats_tp_impl = R"doc(Implementation throughput denominator. Defaults to `1`.)doc";
 
-static const char *mkd_doc_fiction_verification_equivalence_checking_stats_tp_spec = R"doc(Throughput values at which weak equivalence manifests.)doc";
+static const char *mkd_doc_fiction_verification_equivalence_checking_stats_tp_spec = R"doc(Specification throughput denominator. Defaults to `1`.)doc";
 
 static const char *mkd_doc_fiction_verification_gate_level_drv_params =
 R"doc(Parameters for design rule violation checking that specify the checks
@@ -27472,9 +27565,9 @@ Returns:
 
 static const char *mkd_doc_fmt_formatter = R"doc(Formats a coordinate.)doc";
 
-static const char *mkd_doc_fmt_formatter_2 = R"doc()doc";
+static const char *mkd_doc_fmt_formatter_2 = R"doc(Formats `fiction::fcn::port_position` values.)doc";
 
-static const char *mkd_doc_fmt_formatter_3 = R"doc()doc";
+static const char *mkd_doc_fmt_formatter_3 = R"doc(Formats `fiction::fcn::port_direction` values.)doc";
 
 static const char *mkd_doc_fmt_formatter_format =
 R"doc(Formats a coordinate. @param c Coordinate. @param ctx Format context.
@@ -27482,9 +27575,9 @@ R"doc(Formats a coordinate. @param c Coordinate. @param ctx Format context.
 
 )doc";
 
-static const char *mkd_doc_fmt_formatter_format_2 = R"doc()doc";
+static const char *mkd_doc_fmt_formatter_format_2 = R"doc(Writes the port representation to the format context.)doc";
 
-static const char *mkd_doc_fmt_formatter_format_3 = R"doc()doc";
+static const char *mkd_doc_fmt_formatter_format_3 = R"doc(Writes the port representation to the format context.)doc";
 
 static const char *mkd_doc_fmt_formatter_parse =
 R"doc(Parses coordinate formatting. @param ctx Parse context. @return Parse
@@ -27492,9 +27585,9 @@ position.
 
 )doc";
 
-static const char *mkd_doc_fmt_formatter_parse_2 = R"doc()doc";
+static const char *mkd_doc_fmt_formatter_parse_2 = R"doc(Parses the format specification.)doc";
 
-static const char *mkd_doc_fmt_formatter_parse_3 = R"doc()doc";
+static const char *mkd_doc_fmt_formatter_parse_3 = R"doc(Parses the format specification.)doc";
 
 static const char *mkd_doc_formatter = R"doc(`fmt` formatter for lattice sites, printing `(x,y,z)`.)doc";
 
@@ -27546,17 +27639,17 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_mockturtle_edge_source = R"doc()doc";
+static const char *mkd_doc_mockturtle_edge_source = R"doc(Source node of the directed edge.)doc";
 
-static const char *mkd_doc_mockturtle_edge_target = R"doc()doc";
+static const char *mkd_doc_mockturtle_edge_target = R"doc(Target node of the directed edge.)doc";
 
 static const char *mkd_doc_std_hash = R"doc(Hashes both parts of an object identity.)doc";
 
 static const char *mkd_doc_std_hash_2 = R"doc(Hashes every bit of all three coordinate axes.)doc";
 
-static const char *mkd_doc_std_hash_3 = R"doc()doc";
+static const char *mkd_doc_std_hash_3 = R"doc(Hashes `fiction::fcn::port_position` values.)doc";
 
-static const char *mkd_doc_std_hash_4 = R"doc()doc";
+static const char *mkd_doc_std_hash_4 = R"doc(Hashes `fiction::fcn::port_direction` values.)doc";
 
 static const char *mkd_doc_std_hash_5 = R"doc(Hash for charge distributions, over the charge states.)doc";
 
@@ -27576,9 +27669,9 @@ R"doc(Args:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_3 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call_3 = R"doc(Hashes the horizontal and vertical port coordinates.)doc";
 
-static const char *mkd_doc_std_hash_operator_call_4 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call_4 = R"doc(Hashes the cardinal port direction.)doc";
 
 static const char *mkd_doc_std_hash_operator_call_5 =
 R"doc(Computes a hash from the ordered charge states.
@@ -27643,7 +27736,7 @@ satisfy `std::input_or_output_iterator` (e.g., for
 
 static const char *mkd_doc_std_iterator_traits_2 = R"doc(Iterator traits for enumerating SiDB input patterns.)doc";
 
-static const char *mkd_doc_std_iterator_traits_3 = R"doc()doc";
+static const char *mkd_doc_std_iterator_traits_3 = R"doc(Standard iterator traits for the specialized iterator.)doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop

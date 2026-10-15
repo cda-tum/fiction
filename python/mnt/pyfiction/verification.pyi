@@ -279,15 +279,18 @@ class equivalence_checking_stats:
 
     @property
     def tp_spec(self) -> int:
-        """Throughput values at which weak equivalence manifests."""
+        """Specification throughput denominator. Defaults to `1`."""
 
     @property
     def tp_impl(self) -> int:
-        """Throughput values at which weak equivalence manifests."""
+        """Implementation throughput denominator. Defaults to `1`."""
 
     @property
     def tp_diff(self) -> int:
-        """Throughput values at which weak equivalence manifests."""
+        """
+        Absolute difference between the throughput denominators. Defaults to
+        `0`.
+        """
 
     @property
     def counter_example(self) -> list[bool]:
@@ -299,10 +302,11 @@ class equivalence_checking_stats:
 
     @property
     def spec_drv_stats(self) -> gate_level_drv_stats:
-        """Stores DRVs."""
+        """Design rule violations in the specification layout."""
 
     @property
-    def impl_drv_stats(self) -> gate_level_drv_stats: ...
+    def impl_drv_stats(self) -> gate_level_drv_stats:
+        """Design rule violations in the implementation layout."""
 
 @overload
 def equivalence_checking(

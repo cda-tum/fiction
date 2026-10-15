@@ -457,7 +457,7 @@ class population_stability_information:
     def critical_dot(self) -> mnt.pyfiction.sidb.lattice_site:
         """
         SiDB with the minimum potential difference to any charge transition
-        threshold.
+        threshold. Defaults to `(0, 0, 0)`.
         """
 
     @critical_dot.setter
@@ -466,7 +466,7 @@ class population_stability_information:
     def transition_potentials(self) -> dict[transition_type, tuple[mnt.pyfiction.sidb.lattice_site, float]]:
         """
         For each transition type, the SiDB closest to it and the required
-        potential difference (unit: V).
+        potential difference (unit: V). Defaults to an empty map.
         """
 
     @transition_potentials.setter
@@ -482,14 +482,17 @@ class population_stability_information:
         infinity. An absent transition also has infinite distance; its entry
         in `transition_potentials` has infinite potential. Distances use the
         potential magnitude of one elementary charge with all other charge
-        states fixed.
+        states fixed. Defaults to an empty map.
         """
 
     @distance_corresponding_to_potential.setter
     def distance_corresponding_to_potential(self, arg: Mapping[transition_type, float], /) -> None: ...
     @property
     def system_energy(self) -> float:
-        """Electrostatic potential energy of the charge distribution (unit: eV)."""
+        """
+        Electrostatic potential energy of the charge distribution (unit: eV).
+        Defaults to 0.0.
+        """
 
     @system_energy.setter
     def system_energy(self, arg: float, /) -> None: ...
