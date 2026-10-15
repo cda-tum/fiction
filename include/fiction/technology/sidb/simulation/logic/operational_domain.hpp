@@ -1389,8 +1389,8 @@ class operational_domain_impl
     /**
      * Builds the indices and values of each validated sweep dimension.
      *
-     * @throws std::invalid_argument if a sweep range is invalid, exceeds the storage range, or generates coordinates
-     * in the same `parameter_point` identity cell.
+     * @throws std::invalid_argument if a sweep range is invalid, the grid point count exceeds the storage range, or
+     * coordinates occupy the same `parameter_point` identity cell.
      */
     void initialize_sweep()
     {
@@ -1430,6 +1430,12 @@ class operational_domain_impl
                 }
                 values.at(d).push_back(value);
             }
+
+            if (num_parameter_points > std::numeric_limits<std::size_t>::max() / values.at(d).size())
+            {
+                throw std::invalid_argument("Sweep grid point count exceeds the storage range");
+            }
+            num_parameter_points *= values.at(d).size();
         }
     }
     /**
@@ -1456,6 +1462,10 @@ class operational_domain_impl
      * The number of dimensions.
      */
     const std::size_t num_dimensions;
+    /**
+     * Number of parameter combinations in the validated sweep grid.
+     */
+    std::size_t num_parameter_points{1};
     /**
      * Dimension steps.
      */
@@ -1802,7 +1812,7 @@ class operational_domain_impl
     }
     /**
      * Generates unique random `step_points` in the stored parameter range. The number of generated points is at most
-     * equal to `samples`. Each call owns its random number generator.
+     * equal to `samples`. Sampling stops when every grid point has been collected. Each call owns its random generator.
      *
      * @param samples Maximum number of random `step_point`s to generate.
      * @return A vector of unique random `step_point`s in the stored parameter range of size at most equal to `samples`.
@@ -1824,7 +1834,7 @@ class operational_domain_impl
         // container for the random samples
         phmap::btree_set<step_point> step_point_samples{};
 
-        for (std::size_t i = 0; i < samples; ++i)
+        for (std::size_t i = 0; i < samples && step_point_samples.size() < num_parameter_points; ++i)
         {
             utils::check_deadline(params.operational_params.deadline);
             std::vector<std::size_t> dimension_samples{};
@@ -2310,9 +2320,7 @@ class operational_domain_impl
                 }
             });
 
-        stats.num_total_parameter_points =
-            std::accumulate(values.cbegin(), values.cend(), static_cast<std::size_t>(1),
-                            [](std::size_t product, const auto& val) { return product * val.size(); });
+        stats.num_total_parameter_points = num_parameter_points;
     }
 };
 
@@ -2367,10 +2375,11 @@ operational_domain_grid_search(const layout& lyt, const std::vector<kitty::dynam
  * inputs of the truth table.
  *
  * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
- * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
- * performs one operational check on the layout, where each operational check consists of up to \f$2^n\f$ exact
- * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
- * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ * up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected. For each
+ * sample, the algorithm performs one operational check on the layout, where each operational check consists of up to
+ * \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground
+ * state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts
+ * with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2413,12 +2422,12 @@ operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::d
  * operational "islands" in their entirety if the initial random sampling found at least one operational point within
  * them. Thereby, this algorithm works for disconnected operational domains.
  *
- * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
- * another number of samples equal to the number of points within the operational domain plus the first non-operational
- * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
- * operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of
- * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
- * algorithm is only feasible for small layouts with few inputs.
+ * It performs up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected.
+ * From there, it performs another number of samples equal to the number of points within the operational domain plus
+ * the first non-operational point in each direction. For each sample, the algorithm performs one operational check on
+ * the layout, where each operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is
+ * the number of inputs of the layout. Each exact ground state simulation has exponential complexity in of itself.
+ * Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
  * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
@@ -2468,13 +2477,13 @@ operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynami
  * random sampling found at least one operational point within them. Thereby, this algorithm works for disconnected
  * operational domains.
  *
- * It performs `samples` uniformly-distributed random samples within the parameter range. For each thusly discovered
- * operational island, it performs another number of samples equal to the distance to an edge of each operational
- * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually lower).
- * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
- * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
- * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
- * layouts with few inputs.
+ * It performs up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected.
+ * For each discovered operational island, it performs another number of samples equal to the distance to an edge of
+ * each operational area. Finally, it performs up to 8 samples for each contour point (however, the actual number is
+ * usually lower). For each sample, the algorithm performs one operational check on the layout, where each operational
+ * check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the
+ * layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only
+ * feasible for small layouts with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2556,10 +2565,11 @@ critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kit
  * temperature for each specific parameter point.
  *
  * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
- * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
- * performs one operational check on the layout, where each operational check consists of up to \f$2^n\f$ exact
- * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
- * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ * up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected. For each
+ * sample, the algorithm performs one operational check on the layout, where each operational check consists of up to
+ * \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground
+ * state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts
+ * with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2602,12 +2612,12 @@ critical_temperature_domain_random_sampling(const layout& lyt, const std::vector
  * operational "islands" in their entirety if the initial random sampling found at least one operational point within
  * them. Thereby, this algorithm works for disconnected operational domains.
  *
- * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
- * another number of samples equal to the number of points within the operational domain plus the first non-operational
- * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
- * operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of
- * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
- * algorithm is only feasible for small layouts with few inputs.
+ * It performs up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected.
+ * From there, it performs another number of samples equal to the number of points within the operational domain plus
+ * the first non-operational point in each direction. For each sample, the algorithm performs one operational check on
+ * the layout, where each operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is
+ * the number of inputs of the layout. Each exact ground state simulation has exponential complexity in of itself.
+ * Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2653,13 +2663,13 @@ critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<kitt
  * random sampling found at least one operational point within them. Thereby, this algorithm works for disconnected
  * operational domains. The critical temperature is computed for each operational point.
  *
- * It performs `samples` uniformly-distributed random samples within the parameter range. For each thusly discovered
- * operational island, it performs another number of samples equal to the distance to an edge of each operational
- * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually lower).
- * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
- * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
- * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
- * layouts with few inputs.
+ * It performs up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected.
+ * For each discovered operational island, it performs another number of samples equal to the distance to an edge of
+ * each operational area. Finally, it performs up to 8 samples for each contour point (however, the actual number is
+ * usually lower). For each sample, the algorithm performs one operational check on the layout, where each operational
+ * check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the
+ * layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only
+ * feasible for small layouts with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.

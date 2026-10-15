@@ -1221,6 +1221,7 @@ TEST_CASE("Domain algorithms share one budget across parameter points", "[operat
     operational_domain_params params{};
     operational_domain_stats  stats{};
     stats.num_evaluated_parameter_combinations                                                      = 42;
+    stats.num_total_parameter_points                                                                = 43;
     params.operational_params.timeout                                                               = 0;
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
@@ -1240,6 +1241,38 @@ TEST_CASE("Domain algorithms share one budget across parameter points", "[operat
     { std::this_thread::sleep_until(params.operational_params.deadline); };
     CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
     CHECK(stats.num_evaluated_parameter_combinations == 42);
+    CHECK(stats.num_total_parameter_points == 43);
+}
+
+TEST_CASE("Random sampling finishes when the whole grid is sampled", "[operational-domain]")
+{
+    const layout              lyt{blueprints::siqad_and_gate()};
+    operational_domain_params params{};
+    params.number_of_threads             = 1;
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.operational_params.timeout    = 2000;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
+    operational_domain_stats stats{};
+    const auto domain = operational_domain_random_sampling(lyt, std::vector{create_and_tt()},
+                                                           std::numeric_limits<std::size_t>::max(), params, &stats);
+    CHECK(domain.size() == 1);
+    CHECK(stats.num_total_parameter_points == 1);
+    CHECK(stats.num_evaluated_parameter_combinations == 1);
+    CHECK(stats.num_operational_parameter_combinations == 1);
+}
+
+TEST_CASE("Operational-domain sweeps reject overflowing grid products", "[operational-domain]")
+{
+    const layout              lyt{blueprints::siqad_and_gate()};
+    operational_domain_params params{};
+    params.sweep_dimensions.assign(std::numeric_limits<std::size_t>::digits,
+                                   {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.7, .step = 0.1});
+    operational_domain_stats stats{};
+    stats.num_total_parameter_points = 42;
+    CHECK_THROWS_AS(operational_domain_random_sampling(lyt, std::vector{create_and_tt()}, 0, params, &stats),
+                    std::invalid_argument);
+    CHECK(stats.num_total_parameter_points == 42);
 }
 
 TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")

@@ -122,6 +122,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - SiDB domain sampling now stops once every grid point has been collected.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
     throw `std::invalid_argument`.
@@ -608,7 +609,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - SiDB contour tracing now terminates for isolated operational points.
-  - SiDB parameter sweeps now reject grids that collapse distinct coordinates into one parameter-point identity.
+  - SiDB parameter sweeps now reject colliding coordinates and overflowing point counts.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.
