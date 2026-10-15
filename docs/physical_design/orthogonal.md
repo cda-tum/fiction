@@ -3,8 +3,8 @@
 # Scalable Orthogonal Physical Design
 
 Utilizes approximations to the graph-theoretical problem of _Orthogonal Graph Drawing_ to generate FCN gate-level
-layouts from logic network specifications. This approach is scalable but requires that the input network is restricted
-to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked and has a large area overhead.
+layouts from named technology networks. Gates may have at most two nonconstant fanins; fanout normalization produces
+a 3-graph. The output layout is 2DDWave-clocked and has a large area overhead.
 
 ::::{tab-set}
 :sync-group: language

@@ -23,9 +23,8 @@
 #include <fiction/physical_design/orthogonal.hpp>          // scalable heuristic for physical design of FCN layouts
 #include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>  // library for technology mapping
-#include <fiction/types.hpp>
-#include <fiction/types.hpp>                              // pre-defined types
-#include <fiction/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
+#include <fiction/types.hpp>                                 // pre-defined types
+#include <fiction/verification/equivalence_checking.hpp>     // SAT-based equivalence checking
 
 #include <fmt/format.h>  // output formatting
 #include <lorina/common.hpp>

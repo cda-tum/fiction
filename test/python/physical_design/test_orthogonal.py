@@ -103,9 +103,9 @@ def test_orthogonal_rejects_invalid_selectors(mux21: technology_network, selecto
 
 def test_named_specification_and_place_overloads(tmp_path: Path) -> None:
     """Placement preserves the named technology-network contract."""
-    path = tmp_path / "named.v"
+    path = tmp_path / "named_spec.v"
     path.write_text(
-        "module named_spec(left, right, result);\n"
+        "module top(left, right, result);\n"
         "input left, right;\noutput result;\nassign result = left & right;\nendmodule\n",
         encoding="utf-8",
     )
@@ -116,9 +116,9 @@ def test_named_specification_and_place_overloads(tmp_path: Path) -> None:
     assert layout.get_output_name(0) == "result"
     assert equivalence_checking(network, layout) == eq_type.STRONG
 
-    placed = cartesian_gate_layout((2, 2), "2DDWave")
+    placed = cartesian_gate_layout((3, 2), "2DDWave")
     left, right = network.pis()
-    a = place(placed, (0, 0), network, left)
+    a = place(placed, (0, 1), network, left)
     b = place(placed, (1, 0), network, right)
     gate = place(placed, (1, 1), network, network.gates()[0], a, b, None)
     placed.create_po(gate, "result", (2, 1))
