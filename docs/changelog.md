@@ -609,8 +609,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.
-  - Potential-to-distance conversion now bisects the distance bracket, so fine precision does not stall the scan.
-    Zero potential returns infinity; invalid inputs throw `std::invalid_argument`.
   - `random_coordinate` uses a separate random generator for each thread.
   - Dense distance maps now index every layer and reject coordinates outside the layout frame.
   - Physical-design border calculations and hexagonalization now preserve the maximum signed coordinate.
