@@ -285,7 +285,13 @@ def _assert_native_rejection(call: str, exception_type: str, message: str = "") 
     """Check native input rejection in a child that cannot hang the test suite."""
     script = f"""from mnt.pyfiction.sidb import sidb_layout
 from mnt.pyfiction.sidb.model import potential_to_distance_conversion
-from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability
+from mnt.pyfiction.sidb.simulation.analysis import (
+    physical_population_stability, critical_temperature_non_gate_based,
+    time_to_solution_for_given_simulation_results,
+    critical_temperature_gate_based, time_to_solution,
+)
+from mnt.pyfiction.sidb.simulation.defects import determine_displacement_robustness_domain
+from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 from mnt.pyfiction.sidb.simulation.logic import (
     bdl_input_iterator, detect_bdl_pairs, detect_bdl_wires,
     generate_bdl_input_pattern_layouts, is_operational,
@@ -395,3 +401,41 @@ def test_bdl_distance_bounds_reject_invalid_intervals(call: str, bounds: str) ->
 def test_bdl_distance_bounds_preserve_ordered_intervals(minimum: float, maximum: float) -> None:
     """Zero, negative, and infinite bounds preserve the native ordered interval contract."""
     assert detect_bdl_pairs(sidb_layout(), minimum_distance=minimum, maximum_distance=maximum) == []
+
+
+@pytest.mark.parametrize("confidence", [-0.1, 0.0, 1.0, 1.1, float("nan"), float("inf")])
+@pytest.mark.parametrize(
+    "call",
+    [
+        "critical_temperature_non_gate_based(sidb_layout(), {option})",
+        "critical_temperature_gate_based(sidb_layout(), [], {option})",
+        "time_to_solution(sidb_layout(), {option})",
+        "time_to_solution_for_given_simulation_results(sidb_simulation_result(), [], {option})",
+    ],
+)
+def test_invalid_analysis_confidence(call: str, confidence: float) -> None:
+    """Analysis rejects confidence outside the open unit interval before simulation."""
+    _assert_native_rejection(
+        call.format(option=f"confidence_level=float({str(confidence)!r})"), "ValueError", "confidence_level"
+    )
+
+
+@pytest.mark.parametrize("temperature", [-1.0, float("nan"), float("inf"), 1e20])
+def test_invalid_temperature_limit(temperature: float) -> None:
+    """Temperature limits must fit the native unsigned iteration count."""
+    _assert_native_rejection(
+        f"critical_temperature_non_gate_based(sidb_layout(), max_temperature=float({str(temperature)!r}))",
+        "ValueError",
+        "max_temperature",
+    )
+
+
+@pytest.mark.parametrize("fraction", [-0.1, 1.1, float("nan"), float("inf")])
+def test_invalid_displacement_fraction(fraction: float) -> None:
+    """Displacement analysis rejects fractions outside the closed unit interval."""
+    _assert_native_rejection(
+        "determine_displacement_robustness_domain(sidb_layout(), [], "
+        f"percentage_of_analyzed_displaced_layouts=float({str(fraction)!r}))",
+        "ValueError",
+        "percentage_of_analyzed_displaced_layouts",
+    )

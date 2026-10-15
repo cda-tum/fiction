@@ -162,6 +162,7 @@ def critical_temperature_gate_based(
     """
     Determine the critical temperature of an SiDB gate implementing the truth tables.
     The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
     The overload with input and output wires bypasses automatic wire detection.
 
     Args:
@@ -179,7 +180,7 @@ def critical_temperature_gate_based(
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
         stats: Statistics object filled by the algorithm; None discards statistics.
-        sim_engine: SiDB simulation engine used for operational analysis.
+        sim_engine: SiDB simulation engine used for charge simulation.
         op_condition: Require the selected operational condition for every input pattern.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
@@ -212,6 +213,7 @@ def critical_temperature_gate_based(
     """
     Determine the critical temperature of an SiDB gate implementing the truth tables.
     The keyword options select physical values, operational analysis, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
     The overload with input and output wires bypasses automatic wire detection.
 
     Args:
@@ -228,7 +230,7 @@ def critical_temperature_gate_based(
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
         stats: Statistics object filled by the algorithm; None discards statistics.
-        sim_engine: SiDB simulation engine used for operational analysis.
+        sim_engine: SiDB simulation engine used for charge simulation.
         op_condition: Require the selected operational condition for every input pattern.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
     """
@@ -251,6 +253,7 @@ def critical_temperature_non_gate_based(
     """
     Determine the critical temperature from the population of excited charge distributions.
     The keyword options select physical values, confidence, and temperature bounds.
+    Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
 
     Args:
         timeout: Execution budget in milliseconds.
@@ -263,7 +266,7 @@ def critical_temperature_non_gate_based(
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
         stats: Statistics object filled by the algorithm; None discards statistics.
-        sim_engine: SiDB simulation engine used for operational analysis.
+        sim_engine: SiDB simulation engine used for charge simulation.
     """
 
 class energy_state:
@@ -624,7 +627,7 @@ def time_to_solution(
     quicksim_timeout bounds each heuristic run; timeout bounds the complete evaluation.
     Failed attempts contribute elapsed wall time, while successful attempts retain the engine runtime.
     ps receives completed statistics; expiration of the complete evaluation raises TimeoutError.
-    Raises ValueError when ClusterComplete is selected with a finite timeout.
+    Raises ValueError for confidence outside (0, 1) or ClusterComplete with a finite timeout.
 
     Args:
         base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
@@ -648,21 +651,13 @@ def time_to_solution(
 def time_to_solution_for_given_simulation_results(
     results_exact: mnt.pyfiction.sidb.simulation.sidb_simulation_result,
     results_heuristic: Sequence[mnt.pyfiction.sidb.simulation.sidb_simulation_result],
+    *,
     confidence_level: float = 0.997,
     ps: time_to_solution_stats | None = None,
 ) -> None:
     """
-    Computes the time-to-solution (TTS) of *QuickSim* from an exact result
-    and a series of heuristic results: the accuracy is the share of
-    heuristic runs that found the ground state, and TTS is the mean
-    heuristic runtime scaled to reach the given confidence level, `t ·
-    log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
-    mean heuristic runtime, and infinite time-to-solution.
-
-    Args:
-        results_exact: The result of an exact engine, which provides the
-                       ground state.
-        results_heuristic: The results of the heuristic runs.
-        confidence_level: Confidence level for the TTS computation.
-        ps: Statistics.
+    Evaluate heuristic time-to-solution against an exact simulation result.
+    confidence_level must be strictly between 0 and 1; invalid values raise ValueError.
+    ps receives accuracy, runtimes, and time-to-solution statistics.
+    Empty heuristic results yield zero accuracy and infinite time-to-solution.
     """

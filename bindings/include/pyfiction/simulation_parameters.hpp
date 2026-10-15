@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <limits>
 
 #include <nanobind/nanobind.h>
 
@@ -70,6 +71,32 @@ inline void validate_distance_conversion_precision(const uint64_t precision)
     if (step == 0 || !std::isfinite(step))
     {
         throw nb::value_error("precision must yield a positive finite step");
+    }
+}
+
+/**
+ * @brief Validate a probability used by analysis algorithms.
+ * @param confidence_level Required success probability.
+ * @throws nb::value_error If the confidence is outside the open unit interval.
+ */
+inline void validate_confidence_level(const double confidence_level)
+{
+    if (!(confidence_level > 0 && confidence_level < 1))
+    {
+        throw nb::value_error("confidence_level must be strictly between 0 and 1");
+    }
+}
+
+/**
+ * @brief Validate the temperature range used by the native centikelvin loop.
+ * @param max_temperature Maximum temperature in K.
+ * @throws nb::value_error If the temperature is negative, non-finite, or exceeds the loop's range.
+ */
+inline void validate_max_temperature(const double max_temperature)
+{
+    if (!(max_temperature >= 0 && max_temperature < static_cast<double>(std::numeric_limits<uint64_t>::max()) / 100))
+    {
+        throw nb::value_error("max_temperature must be nonnegative and fit the centikelvin iteration range");
     }
 }
 
