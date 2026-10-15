@@ -443,10 +443,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Physical-validity sweeps omit gate-detection and operational-condition options.
 
-  - Python bindings reject NaN or reversed BDL distance bounds, nonpositive or NaN conversion potentials,
-    and conversion precisions that yield a zero or non-finite distance step.
+  - Python bindings reject NaN or reversed BDL distance bounds, negative or NaN conversion potentials,
+    and conversion precisions outside 0 to 15.
 
-  - Python SiDB inputs reject bases other than 2 or 3 and nonpositive or non-finite screening values.
+  - Python SiDB inputs reject bases other than 2 or 3, nonpositive screening values, and non-finite permittivity.
 
   - Physical-model attribute assignments preserve the constructor's base and screening constraints.
 
@@ -601,6 +601,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.
   - Potential-to-distance conversion now bisects the distance bracket, so fine precision does not stall the scan.
+    Zero potential returns infinity; invalid inputs throw `std::invalid_argument`.
   - `random_coordinate` uses a separate random generator for each thread.
   - Dense distance maps now index every layer and reject coordinates outside the layout frame.
   - Physical-design border calculations and hexagonalization now preserve the maximum signed coordinate.

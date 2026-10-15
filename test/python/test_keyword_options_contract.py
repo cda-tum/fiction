@@ -312,13 +312,13 @@ def test_distance_conversion_rejects_non_unsigned_precision(precision: float) ->
     _assert_native_rejection(f"potential_to_distance_conversion(0.5, {precision!r})", "TypeError")
 
 
-@pytest.mark.parametrize("potential", [0.0, -0.1, float("nan"), -float("inf")])
+@pytest.mark.parametrize("potential", [-0.1, float("nan"), -float("inf")])
 def test_distance_conversion_rejects_invalid_potential(potential: float) -> None:
     """Invalid potentials fail before entering the native distance scan."""
     _assert_native_rejection(
         f"potential_to_distance_conversion(float({str(potential)!r}), 2)",
         "ValueError",
-        "potential must be positive",
+        "non-negative potential",
     )
 
 
@@ -329,7 +329,7 @@ def test_distance_conversion_precision_and_infinite_potential() -> None:
     _assert_native_rejection(
         "potential_to_distance_conversion(0.5, 1000)",
         "ValueError",
-        "precision must yield a positive finite step",
+        "precision within double",
     )
 
 
@@ -341,7 +341,7 @@ def test_distance_conversion_high_precision_completes() -> None:
             "-c",
             (
                 "from mnt.pyfiction.sidb.model import potential_to_distance_conversion; "
-                "assert 0.4 < potential_to_distance_conversion(0.5, 20) < 0.5"
+                "assert 0.4 < potential_to_distance_conversion(0.5, 15) < 0.5"
             ),
         ],
         check=True,
@@ -351,7 +351,7 @@ def test_distance_conversion_high_precision_completes() -> None:
 
 
 @pytest.mark.parametrize("option", ["epsilon_r", "lambda_tf"])
-@pytest.mark.parametrize("value", [0.0, -1.0, float("nan"), float("inf")])
+@pytest.mark.parametrize("value", [0.0, -1.0, float("nan")])
 def test_physics_rejects_invalid_positive_values(option: str, value: float) -> None:
     """The physical model rejects nonpositive and non-finite screening values."""
     _assert_native_rejection(
@@ -366,7 +366,7 @@ def test_population_stability_rejects_zero_distance_step() -> None:
     _assert_native_rejection(
         "physical_population_stability(sidb_layout(), precision_for_distance_corresponding_to_potential=1000)",
         "ValueError",
-        "precision must yield a positive finite step",
+        "precision within double",
     )
 
 
@@ -439,3 +439,13 @@ def test_invalid_displacement_fraction(fraction: float) -> None:
         "ValueError",
         "percentage_of_analyzed_displaced_layouts",
     )
+
+
+def test_distance_conversion_zero_and_unscreened_limit() -> None:
+    """The inverse supports zero potential and infinite screening distance."""
+    assert potential_to_distance_conversion(0.0, 2) == float("inf")
+    assert potential_to_distance_conversion(0.5, 2, lambda_tf=float("inf")) > 0.5
+    with pytest.raises(ValueError, match="precision within double"):
+        potential_to_distance_conversion(0.5, 20)
+    with pytest.raises(ValueError, match="epsilon_r"):
+        potential_to_distance_conversion(0.5, 2, epsilon_r=float("inf"))

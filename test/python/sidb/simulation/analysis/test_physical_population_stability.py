@@ -52,3 +52,18 @@ def test_three_sidbs_111_lattice() -> None:
     options["mu_minus"] = -0.32
     result = physical_population_stability(layout, **options)
     assert len(result) == 2
+
+
+def test_zero_transition_potential() -> None:
+    """A charge transition at zero potential has infinite perturbing-charge distance."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(0, 0), sidb_dot_tag.NORMAL)
+    results = physical_population_stability(layout, mu_minus=0.0)
+    zero_transitions = [
+        info.distance_corresponding_to_potential[transition]
+        for info in results
+        for transition, (_, potential) in info.transition_potentials.items()
+        if potential == 0.0
+    ]
+    assert zero_transitions
+    assert all(distance == float("inf") for distance in zero_transitions)

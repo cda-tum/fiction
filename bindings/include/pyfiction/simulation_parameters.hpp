@@ -39,7 +39,8 @@ using simulation_model = fiction::sidb::model::simulation_parameters;
  * @param epsilon_r Relative permittivity.
  * @param lambda_tf Screening distance in nm.
  * @return Validated native physical simulation values.
- * @throws nb::value_error If base is neither 2 nor 3, or a screening value is nonpositive or non-finite.
+ * @throws nb::value_error If base is neither 2 nor 3, permittivity is nonpositive or non-finite, or screening distance
+ * is nonpositive or NaN.
  */
 inline fiction::sidb::model::simulation_parameters
 make_simulation_parameters(const uint8_t base, const double mu_minus, const double epsilon_r, const double lambda_tf)
@@ -52,26 +53,11 @@ make_simulation_parameters(const uint8_t base, const double mu_minus, const doub
     {
         throw nb::value_error("epsilon_r must be positive and finite");
     }
-    if (!std::isfinite(lambda_tf) || lambda_tf <= 0)
+    if (std::isnan(lambda_tf) || lambda_tf <= 0)
     {
-        throw nb::value_error("lambda_tf must be positive and finite");
+        throw nb::value_error("lambda_tf must be positive and not NaN");
     }
     return fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
-}
-
-/**
- * @brief Validate that the native distance scan has a positive finite increment.
- * @param precision Number of decimal places.
- * @throws nb::value_error If the distance increment is zero or non-finite.
- */
-inline void validate_distance_conversion_precision(const uint64_t precision)
-{
-    /** @brief Distance increment used by the native scan. */
-    const auto step = std::pow(10, -static_cast<double>(precision));
-    if (step == 0 || !std::isfinite(step))
-    {
-        throw nb::value_error("precision must yield a positive finite step");
-    }
 }
 
 /**

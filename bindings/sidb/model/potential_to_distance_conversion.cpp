@@ -19,7 +19,6 @@
 
 #include <fiction/technology/sidb/model/potential_to_distance_conversion.hpp>
 
-#include <cmath>
 #include <cstdint>
 
 #include <nanobind/nanobind.h>
@@ -44,11 +43,6 @@ void register_potential_to_distance_conversion(nb::module_& m)
            const decltype(simulation_model{}.mu_minus) mu_minus, const decltype(simulation_model{}.epsilon_r) epsilon_r,
            const decltype(simulation_model{}.lambda_tf) lambda_tf)
         {
-            if (std::isnan(potential) || potential <= 0)
-            {
-                throw nb::value_error("potential must be positive");
-            }
-            validate_distance_conversion_precision(precision);
             const auto params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
             /** @brief Releases the GIL during native distance conversion. */
             const nb::gil_scoped_release release{};
@@ -59,9 +53,10 @@ void register_potential_to_distance_conversion(nb::module_& m)
         nb::arg("lambda_tf") = simulation_model{}.lambda_tf,
         R"doc(Compute the distance corresponding to the potential with the requested precision.
 The physical model is supplied by the scalar keyword values.
-Potential must be positive. Precision must be a non-negative integer yielding a
-positive finite step. The search bisects the distance bracket; floating-point
-resolution limits the effective precision. Permittivity and screening distance must be positive and finite.
+Zero potential returns positive infinity; positive infinite potential returns the minimum distance.
+Precision must be an integer from 0 to 15. The search bisects the distance bracket;
+floating-point resolution limits the effective precision. Invalid conversion inputs raise ValueError.
+Positive infinite screening distance selects the unscreened Coulomb potential.
 
 Args:
     base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
