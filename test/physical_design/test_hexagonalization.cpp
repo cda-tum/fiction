@@ -28,7 +28,6 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/hexagonalization.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
-#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 

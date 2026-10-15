@@ -14,8 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/types.hpp"
-
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 

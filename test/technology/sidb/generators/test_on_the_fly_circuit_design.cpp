@@ -27,7 +27,6 @@
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
 #include <array>

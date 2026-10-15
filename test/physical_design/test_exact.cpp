@@ -41,7 +41,6 @@
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
