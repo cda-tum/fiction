@@ -97,9 +97,11 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
     assert(std::isfinite(init_temp) && "init_temp must be a finite number");
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
-    static std::mt19937_64 generator{std::random_device{}()};
+    /** @brief Random engine for this thread's acceptance decisions. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
-    static std::uniform_real_distribution<double> random_functor(0, 1);
+    /** @brief Acceptance draw distribution local to this thread. */
+    static thread_local std::uniform_real_distribution<double> random_functor{0.0, 1.0};
 
     auto current_cost  = cost(init_state);
     auto current_state = init_state;
@@ -153,7 +155,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * number of random initial states using a provided random state generator. SA as specified above is then run on all
  * these random initial states where the best result of all generated states is finally returned.
  *
- * Each initial state runs in its own thread.
+ * Each initial state runs in its own thread. The provided callables must support concurrent invocation.
  *
  * @note The State type must be default constructible.
  *

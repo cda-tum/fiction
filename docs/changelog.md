@@ -620,6 +620,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Simulated annealing now keeps acceptance random state local to each worker thread.
   - Multi-state simulated annealing now rejects zero instances with `std::invalid_argument`.
   - Minimum-energy searches now require forward iterators. Vector and forward-list ranges remain supported.
   - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
