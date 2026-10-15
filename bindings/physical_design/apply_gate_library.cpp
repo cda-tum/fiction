@@ -102,7 +102,23 @@ void register_apply_gate_library(nb::module_& m, const std::string& lib_name)
 {
     m.def(fmt::format("apply_{}_library", lib_name).c_str(), &checked_apply_gate_library<GateLibrary, GateLyt>,
           nb::arg("layout"), nb::arg("on_progress").none() = nb::none(), nb::call_guard<nb::gil_scoped_release>(),
-          DOC(fiction_physical_design_apply_gate_library));
+          R"doc(Apply the selected gate library to produce a cell-level layout.
+The cell grid spans the gate-level layout. Tile-based clock zones follow the
+gate-level clocking. Supported synchronization elements apply each gate tile's
+delay to its entire clock zone, including cells added later. Input and output
+cells retain their object names. The Bestagon library produces an SiDB layout
+on the H-Si(100)-2x1 lattice.
+
+Args:
+    layout: Gate-level layout to map.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+
+Returns:
+    The QCA, molQCA, iNML, or SiDB layout produced by the selected library.
+
+Raises:
+    ValueError: The library cannot implement a gate type or orientation; the message names its tile.
+)doc");
 }
 
 }  // namespace detail
