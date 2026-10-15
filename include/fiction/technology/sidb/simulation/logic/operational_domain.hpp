@@ -361,6 +361,8 @@ class critical_temperature_domain : public sidb::simulation::domain<parameter_po
 
 /**
  * A range of values for a dimension sweep. The range is defined by a minimum value, a maximum value and a step size.
+ * Generated coordinates must occupy distinct `parameter_point` identity cells, whose width is
+ * `utils::math::ERROR_MARGIN`. Domain algorithms throw `std::invalid_argument` if coordinates collide.
  */
 struct operational_domain_value_range
 {
@@ -944,7 +946,8 @@ class operational_domain_impl
 
             auto current_neighborhood = moore_neighborhood_2d(current_contour_point);
 
-            auto next_point = contour_starting_point;
+            auto        next_point = contour_starting_point;
+            std::size_t non_operational_neighbors{0};
 
             if (!current_neighborhood.empty())
             {
@@ -963,10 +966,15 @@ class operational_domain_impl
                     current_contour_point = next_point;
 
                     contour.insert(current_contour_point);
+                    non_operational_neighbors = 0;
                 }
                 else
                 {
                     backtrack_point = next_point;
+                    if (++non_operational_neighbors == current_neighborhood.size())
+                    {
+                        break;
+                    }
                 }
 
                 current_neighborhood = moore_neighborhood_2d(current_contour_point);
@@ -1385,7 +1393,8 @@ class operational_domain_impl
     /**
      * Builds the indices and values of each validated sweep dimension.
      *
-     * @throws std::invalid_argument if a sweep range is invalid or exceeds the storage range.
+     * @throws std::invalid_argument if a sweep range is invalid, exceeds the storage range, or generates coordinates
+     * in the same `parameter_point` identity cell.
      */
     void initialize_sweep()
     {
@@ -1415,8 +1424,15 @@ class operational_domain_impl
             // generate the values for the dimension
             for (const auto i : indices.at(d))
             {
-                values.at(d).push_back(params.sweep_dimensions.at(d).min +
-                                       (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
+                const auto value =
+                    params.sweep_dimensions.at(d).min + (static_cast<double>(i) * params.sweep_dimensions.at(d).step);
+                if (!values.at(d).empty() &&
+                    parameter_point::quantize(values.at(d).back()) == parameter_point::quantize(value))
+                {
+                    throw std::invalid_argument(
+                        "Sweep coordinates must occupy distinct parameter-point identity cells");
+                }
+                values.at(d).push_back(value);
             }
         }
     }

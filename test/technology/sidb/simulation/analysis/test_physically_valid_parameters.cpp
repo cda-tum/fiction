@@ -63,6 +63,15 @@ TEST_CASE("Reject charge distributions from another layout", "[determine-physica
     CHECK(physically_valid_parameters(lyt, charge_distribution{other}).empty());
 }
 
+TEST_CASE("Physical-validity sweeps reject colliding coordinates", "[determine-physically-valid-parameters]")
+{
+    const layout              lyt{};
+    operational_domain_params params{};
+    params.sweep_dimensions = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001}};
+    CHECK_THROWS_AS(physically_valid_parameters(lyt, charge_distribution{lyt}, params), std::invalid_argument);
+}
+
 TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 input combination",
           "[determine-physically-valid-parameters]")
 {

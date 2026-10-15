@@ -2143,6 +2143,83 @@ TEST_CASE("Operational-domain flood fill requires two dimensions", "[operational
                     std::invalid_argument);
 }
 
+TEST_CASE("Operational-domain sweeps preserve distinct parameter identities", "[operational-domain]")
+{
+    const layout              lyt{blueprints::siqad_and_gate()};
+    const std::vector         spec{create_and_tt()};
+    operational_domain_params params{};
+    params.number_of_threads             = 1;
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.sweep_dimensions              = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
+
+    SECTION("reject colliding coordinates before sampling")
+    {
+        CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params), std::invalid_argument);
+        CHECK_THROWS_AS(operational_domain_random_sampling(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(operational_domain_flood_fill(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(operational_domain_contour_tracing(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_domain_grid_search(lyt, spec, params), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_domain_random_sampling(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_domain_flood_fill(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_domain_contour_tracing(lyt, spec, 0, params), std::invalid_argument);
+    }
+    SECTION("accept singleton sweeps with fine steps")
+    {
+        params.sweep_dimensions.front().max = 5.6;
+        CHECK(operational_domain_grid_search(lyt, spec, params).size() == 1);
+    }
+    SECTION("reject collisions after distinct coordinates")
+    {
+        params.sweep_dimensions.front() = {.dimension = sweep_parameter::EPSILON_R,
+                                           .min       = 5.6000004,
+                                           .max       = 5.6000022,
+                                           .step      = 0.0000006};
+        CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params), std::invalid_argument);
+    }
+    SECTION("accept fine steps across distinct identity cells")
+    {
+        params.sweep_dimensions.front() = {.dimension = sweep_parameter::EPSILON_R,
+                                           .min       = 5.6000004,
+                                           .max       = 5.600001,
+                                           .step      = 0.0000006};
+        operational_domain_stats stats{};
+        CHECK(operational_domain_grid_search(lyt, spec, params, &stats).size() == 2);
+        CHECK(stats.num_total_parameter_points == 2);
+        CHECK(stats.num_evaluated_parameter_combinations == 2);
+    }
+}
+
+TEST_CASE("Contour tracing finishes isolated operational points", "[operational-domain]")
+{
+    const layout              lyt{blueprints::siqad_and_gate()};
+    const std::vector         spec{create_and_tt()};
+    operational_domain_params params{};
+    params.number_of_threads             = 1;
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.operational_params.timeout    = 2000;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::MU_MINUS, .min = -1.32, .max = 0.68, .step = 1.0},
+                               {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
+    operational_domain_stats reference_stats{};
+    REQUIRE(operational_domain_grid_search(lyt, spec, params, &reference_stats).size() == 3);
+    REQUIRE(reference_stats.num_operational_parameter_combinations == 1);
+
+    operational_domain_stats stats{};
+    SECTION("operational domain")
+    {
+        const auto domain = operational_domain_contour_tracing(lyt, spec, 1024, params, &stats);
+        CHECK(domain.contains(parameter_point{{-0.32, 5.6}}).has_value());
+    }
+    SECTION("critical temperature domain")
+    {
+        const auto domain = critical_temperature_domain_contour_tracing(lyt, spec, 1024, params, &stats);
+        CHECK(domain.contains(parameter_point{{-0.32, 5.6}}).has_value());
+    }
+    CHECK(stats.num_operational_parameter_combinations == 1);
+    CHECK(stats.num_evaluated_parameter_combinations == 3);
+}
+
 TEST_CASE("Flood fill propagates a worker's storage failure", "[operational-domain]")
 {
     /**
