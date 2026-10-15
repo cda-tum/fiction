@@ -209,7 +209,7 @@ class generate_edge_intersection_graph_impl
          * @param other The other path.
          * @return `true` iff this path contains an interior coordinate of the other path.
          */
-        bool has_intersection_with(const layout_coordinate_path& other) const noexcept
+        [[nodiscard]] bool has_intersection_with(const layout_coordinate_path& other) const noexcept
         {
             if (other.size() <= 2)
             {
@@ -226,7 +226,7 @@ class generate_edge_intersection_graph_impl
          * @return `true` iff this path and the given one are overlapping, i.e., share at least one coordinate segment
          * of size 2.
          */
-        bool has_overlap_with(const layout_coordinate_path& other) const noexcept
+        [[nodiscard]] bool has_overlap_with(const layout_coordinate_path& other) const noexcept
         {
             // Include endpoints when checking for a shared segment.
             return fiction::utils::stl::find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this),

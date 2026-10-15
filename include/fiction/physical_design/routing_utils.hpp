@@ -172,7 +172,7 @@ class path_set : public std::set<layout_coordinate_path>
     /** @brief Checks membership. @param p Path to find. @return Whether the set contains the path. */
     [[nodiscard]] bool contains(const layout_coordinate_path& p) const noexcept
     {
-        return this->count(p) > 0;
+        return base::contains(p);
     }
 
   protected:

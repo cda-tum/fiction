@@ -23,7 +23,6 @@
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
-#include <fiction/physical_design/routing_utils.hpp>
 
 #include <cstdint>
 #include <optional>

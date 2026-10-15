@@ -17,6 +17,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
@@ -911,7 +912,7 @@ TEST_CASE("Searches share concrete coordinate paths across geometries", "[k-shor
     /** @brief Checks endpoint and membership contracts. @param layout Geometry to search. */
     const auto check_paths = [](const auto& layout)
     {
-        const routing_objective      objective{{0, 0}, {1, 1}};
+        const routing_objective      objective{.source = {0, 0}, .target = {1, 1}};
         const layout_coordinate_path shortest = a_star(layout, objective);
         const path_collection        all      = enumerate_all_paths(layout, objective);
         const path_collection        limited  = yen_k_shortest_paths(layout, objective, 10);

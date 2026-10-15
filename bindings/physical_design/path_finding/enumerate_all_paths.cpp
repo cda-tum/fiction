@@ -23,7 +23,6 @@
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
-#include <fiction/physical_design/routing_utils.hpp>
 
 #include <optional>
 #include <vector>
