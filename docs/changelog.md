@@ -121,6 +121,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
+    Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
+    throw `std::invalid_argument`.
+  - Population stability now validates conversion parameters before simulation and returns infinity for zero potential differences.
+  - Population stability now records neutral-to-negative margins even when the neutral-to-positive transition is closer.
   - Geometric distances accept coordinate pairs directly and use fixed `uint64_t` or `double` results.
     Squared Euclidean distance is `noexcept` and requires a result within the `uint64_t` range.
     Euclidean distance is a runtime `noexcept` function.
@@ -742,6 +747,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
+  - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.
   - Gate-level layout editing examples now pass the object ID returned by `create_buf`.
   - API documentation now resolves current declarations without duplicate enum entries.
   - The documentation session builds Python bindings with the installed Z3 dependency.
