@@ -50,10 +50,8 @@ layouts; `orthogonal` also supports hexagonal layouts. Non-Cartesian layouts req
 ```python
 from mnt.pyfiction.layouts import arrangement, hexagonal_gate_layout
 from mnt.pyfiction.networks.io import read_network
-from mnt.pyfiction.physical_design import exact, exact_params
+from mnt.pyfiction.physical_design import exact
 
 network = read_network("network.v")
-params = exact_params()
-params.layout_arrangement = arrangement.EVEN_ROW
-layout = exact(network, params, layout_type=hexagonal_gate_layout)
+layout = exact(network, layout_type=hexagonal_gate_layout, layout_arrangement=arrangement.EVEN_ROW)
 ```
