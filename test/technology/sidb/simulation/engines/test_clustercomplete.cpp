@@ -419,6 +419,7 @@ TEST_CASE("three DBs next to each other, small mu-", "[clustercomplete]")
 
 TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
 {
+
     layout lyt{};
 
     lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);

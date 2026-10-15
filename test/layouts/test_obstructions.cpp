@@ -189,7 +189,6 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     }
     SECTION("Gate-level layout")
     {
-
         const auto lyt = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
 
         auto obstr_lyt = lyt.clone();
