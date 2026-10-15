@@ -129,6 +129,19 @@ TEST_CASE("Population stability validates conversion parameters before simulatio
     CHECK_THROWS_AS(physical_population_stability(lyt, params), std::invalid_argument);
 }
 
+TEST_CASE("Neutral SiDB records both transition margins", "[assess-physical-population-stability]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0});
+    const physical_population_stability_params params{.sim_params = simulation_parameters{3, 0.5}};
+    const auto                                 result = physical_population_stability(lyt, params);
+    REQUIRE(result.size() == 1);
+    CHECK_THAT(result.front().transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second,
+               Catch::Matchers::WithinAbs(0.5, 1e-14));
+    CHECK_THAT(result.front().transition_potentials.at(transition_type::NEUTRAL_TO_POSITIVE).second,
+               Catch::Matchers::WithinAbs(0.09, 1e-14));
+}
+
 TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-population-stability]")
 {
     layout lyt{};

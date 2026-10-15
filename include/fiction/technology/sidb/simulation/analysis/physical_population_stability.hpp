@@ -278,8 +278,7 @@ class physical_population_stability_impl
         const auto to_negative = std::abs(-local_potential + params.sim_params.mu_minus);
         const auto to_positive = std::abs(-local_potential + params.sim_params.mu_plus());
 
-        if (to_negative < to_positive &&
-            to_negative < info.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second)
+        if (to_negative < info.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second)
         {
             info.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE) = {c, to_negative};
         }
