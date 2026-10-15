@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - CLI:
 
   - Dedicated operational-domain commands now run without loading the interactive shell or its stores.
+  - `fiction opdom` now requires an explicit `--csv` or `--plot` destination instead of choosing a PNG filename.
   - Operational-domain help now emphasizes `--algorithm` and `--samples`; legacy algorithm flags remain accepted.
   - `fiction opdom` runs the dedicated workflow; `fiction repl` explicitly selects the shell.
     Bare `fiction`, shell flags, and piped input retain their behavior.

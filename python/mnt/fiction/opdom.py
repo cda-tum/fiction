@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 from mnt.pyfiction.sidb.io import read_sqd_layout
 
-from .cli.errors import HelpRequested
+from .cli.errors import CommandError, HelpRequested
 from .cli.opdom import domain_arguments, run_domain
 from .cli.opdom_plotting import validate_outputs
 from .cli.output import CommandOutput
@@ -78,9 +78,13 @@ def _configure_session(session: CommandOutput, args: argparse.Namespace, entry: 
         session: The command session.
         args: Parsed options.
         entry: The log entry.
+
+    Raises:
+        CommandError: No CSV or plot destination was requested.
     """
     if args.file is None and not args.plot:
-        args.plot = [Path(f"{args.input.stem}_opdom.png")]
+        msg = "choose --csv FILE or --plot FILE; example: fiction opdom gate.sqd --gate xor --csv domain.csv"
+        raise CommandError(msg)
     validate_outputs(args, log_path=args.log)
     session.log_path = args.log
     session.quiet = args.quiet

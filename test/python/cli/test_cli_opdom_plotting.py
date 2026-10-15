@@ -174,15 +174,25 @@ def test_entry_points_share_results_and_compute_once(
     assert b"Plotly.newPlot" in html.read_bytes()
 
 
-def test_default_png(resource: Callable[[str], str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """The dedicated command defaults to a PNG in the working directory."""
+def test_requires_explicit_output(
+    resource: Callable[[str], str],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An omitted destination cannot replace a plot or create a log."""
     main = importlib.import_module("mnt.fiction.opdom").main
     monkeypatch.chdir(tmp_path)
+    plot = tmp_path / "hex_21_inputsdbp_xor_v1_opdom.png"
+    plot.write_bytes(b"existing plot")
+    log = tmp_path / "run.json"
     assert (
         main([
             resource("hex_21_inputsdbp_xor_v1.sqd"),
             "--gate",
             "xor",
+            "--log",
+            str(log),
             "--x-min",
             "5.6",
             "--x-max",
@@ -192,9 +202,11 @@ def test_default_png(resource: Callable[[str], str], tmp_path: Path, monkeypatch
             "--y-max",
             "5",
         ])
-        == 0
+        != 0
     )
-    assert (tmp_path / "hex_21_inputsdbp_xor_v1_opdom.png").read_bytes().startswith(b"\x89PNG")
+    assert "--csv" in capsys.readouterr().err
+    assert plot.read_bytes() == b"existing plot"
+    assert not log.exists()
 
 
 @pytest.mark.parametrize("failure", [OSError, CommandError])

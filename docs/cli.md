@@ -490,8 +490,8 @@ The positional arguments differ by context: terminal `fiction opdom INPUT.sqd` r
 shell `opdom OUTPUT.csv` writes a domain for the active layout. Use `--csv FILE` for the dedicated route's CSV output.
 
 Each invocation computes one reconstruction method. Repeat `--plot FILE` to export the same domain
-as PNG, SVG, PDF, or HTML. The dedicated command writes `<input-stem>_opdom.png` in the current directory
-when no output paths are given. `--csv FILE` requests CSV; a CSV-only invocation needs no plotting packages.
+as PNG, SVG, PDF, or HTML. The dedicated command requires `--csv FILE` or `--plot FILE`, or both.
+Omitting outputs reports an example without computing or writing files. A CSV-only invocation needs no plotting packages.
 `--show` opens plots after all exports and statistics are written. Viewer failures report an error
 and preserve the exports and statistics. HTML files embed Plotly and work offline, with hover information,
 zoom, pan, 3D rotation, and legend toggles. Both backends draw the returned samples and leave missing
