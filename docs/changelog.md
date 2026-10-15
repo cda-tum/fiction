@@ -277,6 +277,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Documented all three gate-layout geometries and MSVC Release builds for Python.
   - Python layout docstrings use `extent` for the extent argument.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
@@ -442,6 +443,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     it that carries the toctree
 
 - Python bindings:
+
+  - Gate-layout docstrings document the Cartesian default for the C++ template.
 
   - **Breaking:** More native computation, collection traversal, and file I/O release the GIL across `pyfiction` bindings.
     Callers must synchronize shared native objects; Python object operations and small accessors retain the GIL.

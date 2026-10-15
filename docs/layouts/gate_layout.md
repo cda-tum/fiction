@@ -81,6 +81,9 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 
 .. autoclass:: mnt.pyfiction.layouts.hexagonal_gate_layout
    :members:
+
+.. autoclass:: mnt.pyfiction.layouts.shifted_cartesian_gate_layout
+   :members:
 ```
 
 :::
