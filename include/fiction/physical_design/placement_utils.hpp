@@ -321,19 +321,8 @@ struct branching_signal_container
      */
     [[nodiscard]] layouts::layout_object_id operator[](const tec_nt::node& n) const
     {
-        if (const auto branch = std::ranges::find_if(branches,
-                                                     [&n](const auto& b)
-                                                     {
-                                                         if (b != nullptr)
-                                                         {
-                                                             if (b->ntk_node == n)
-                                                             {
-                                                                 return true;
-                                                             }
-                                                         }
-
-                                                         return false;
-                                                     });
+        if (const auto branch =
+                std::ranges::find_if(branches, [&n](const auto& b) { return b != nullptr && b->ntk_node == n; });
             branch != branches.cend())
         {
             return (*branch)->lyt_signal;
