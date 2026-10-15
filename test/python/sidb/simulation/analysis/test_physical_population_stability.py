@@ -8,8 +8,22 @@
 
 from __future__ import annotations
 
+import pytest
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability, physical_population_stability_params
+
+
+def test_population_stability_documents_python_exception() -> None:
+    """Document the exception raised for invalid analysis parameters."""
+    documentation = physical_population_stability.__doc__
+    assert documentation is not None
+    assert "ValueError:" in documentation
+    assert "std::invalid_argument" not in documentation
+    params = physical_population_stability_params()
+    params.precision_for_distance_corresponding_to_potential = 16
+    with pytest.raises(ValueError, match="potential-to-distance conversion"):
+        physical_population_stability(sidb_layout(), params)
 
 
 def test_three_sidbs_100_lattice() -> None:

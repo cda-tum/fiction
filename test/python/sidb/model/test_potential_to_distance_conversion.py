@@ -42,3 +42,11 @@ def test_potential_distance_rejects_invalid_parameters() -> None:
     params.epsilon_r = 0.0
     with pytest.raises(ValueError, match="potential-to-distance conversion"):
         potential_to_distance_conversion(0.1, params, 2)
+
+
+def test_potential_distance_documents_python_exception() -> None:
+    """Document the exception callers can catch in Python."""
+    documentation = potential_to_distance_conversion.__doc__
+    assert documentation is not None
+    assert "ValueError:" in documentation
+    assert "std::invalid_argument" not in documentation

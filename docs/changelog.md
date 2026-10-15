@@ -709,6 +709,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
+  - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.
   - Gate-level layout editing examples now pass the object ID returned by `create_buf`.
   - API documentation now resolves current declarations without duplicate enum entries.
   - The documentation session builds Python bindings with the installed Z3 dependency.
