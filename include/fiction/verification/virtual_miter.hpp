@@ -21,9 +21,11 @@
 
 #include <fiction/synthesis/delete_virtual_pis.hpp>
 
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <optional>
 #include <vector>
 
