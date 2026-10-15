@@ -1846,7 +1846,7 @@ class operational_domain_impl
                 dimension_samples.push_back(distributions.at(d)(generator));
             }
 
-            step_point_samples.insert(step_point{dimension_samples});
+            step_point_samples.insert(step_point{std::move(dimension_samples)});
         }
 
         return std::vector<step_point>(step_point_samples.cbegin(), step_point_samples.cend());
