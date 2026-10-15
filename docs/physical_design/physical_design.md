@@ -20,6 +20,9 @@ path_finding/path_finding
 
 **Header:** `fiction/physical_design/generate_edge_intersection_graph.hpp`
 
+```{doxygentypedef} fiction::physical_design::edge_intersection_graph
+```
+
 ```{doxygenstruct} fiction::physical_design::generate_edge_intersection_graph_params
 :members:
 ```

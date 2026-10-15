@@ -152,6 +152,9 @@ landscape across worker threads; it evaluates local potentials, energy, and phys
 
 **Header:** `fiction/technology/sidb/simulation/engine.hpp`
 
+```{doxygenfunction} fiction::sidb::simulation::get_engine
+```
+
 ```{doxygenenum} fiction::sidb::simulation::engine
 
 ```

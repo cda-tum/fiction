@@ -161,3 +161,41 @@ The {doc}`hexagonal_layout` page documents the `arrangement` type.
 ```{doxygenfunction} fiction::layouts::clocking::get_scheme
 
 ```
+
+## Scheme Names
+
+```{doxygenvariable} fiction::layouts::clocking::OPEN_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::COLUMNAR_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::ROW_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::TWODDWAVE_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::TWODDWAVE_HEX_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::USE_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::RES_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::ESR_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::CFE_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::RIPPLE_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::SRS_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::BANCS_NAME
+```

@@ -26,6 +26,18 @@ always optimal.
 :members:
 ```
 
+```{doxygenfunction} fiction::physical_design::to_string(const graph_oriented_layout_design_params::effort_mode mode) noexcept
+```
+
+```{doxygenfunction} fiction::physical_design::operator<<(std::ostream& os, const graph_oriented_layout_design_params::effort_mode mode) noexcept
+```
+
+```{doxygenfunction} fiction::physical_design::to_string(const graph_oriented_layout_design_params::cost_objective cost) noexcept
+```
+
+```{doxygenfunction} fiction::physical_design::operator<<(std::ostream& os, const graph_oriented_layout_design_params::cost_objective cost) noexcept
+```
+
 ```{doxygenfunction} fiction::physical_design::graph_oriented_layout_design
 
 ```

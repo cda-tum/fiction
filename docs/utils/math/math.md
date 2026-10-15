@@ -40,6 +40,9 @@
 
 ```
 
+```{doxygenfunction} fiction::utils::math::cost_function_chi
+```
+
 ```{doxygenfunction} fiction::utils::math::round_to_n_decimal_places
 
 ```

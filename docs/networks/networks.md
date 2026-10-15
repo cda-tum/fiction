@@ -25,6 +25,9 @@ views/views
 
 ```
 
+```{doxygentypedef} fiction::networks::edge_path
+```
+
 ```{doxygenfunction} fiction::networks::foreach_edge
 
 ```

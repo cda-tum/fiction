@@ -56,6 +56,9 @@ io/io
 :members:
 ```
 
+```{doxygenfunction} fiction::fcn::area(const sidb::layout& lyt, const area_params<sidb::layout>& ps = {}, area_stats* pst = nullptr) noexcept
+```
+
 ```{doxygenfunction} fiction::fcn::area(const Lyt& lyt, const area_params<Dims>& ps = {}, area_stats* pst = nullptr)
 
 ```

@@ -37,6 +37,9 @@ may lie outside the frame; physical design-rule checks validate frame membership
 :members:
 ```
 
+```{doxygenfunction} fiction::layouts::operator<<
+```
+
 ```{doxygenstruct} fiction::layouts::layout_base::extent
 :members:
 ```

@@ -10,6 +10,9 @@
 
 **Header:** `fiction/technology/fcn/io/write_qll_layout.hpp`
 
+```{doxygenconcept} fiction::fcn::io::qll_layout
+```
+
 ```{doxygenfunction} fiction::fcn::io::write_qll_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 
 ```
