@@ -99,7 +99,7 @@ def sidb_simulation_engine_name(engine: heuristic_sidb_simulation_engine) -> str
     Returns the name of the given simulation engine.
 
     Args:
-        eng: An SiDB simulation engine.
+        engine: An SiDB simulation engine.
 
     Template Args:
         EngineType: The type of the SiDB simulation engine
@@ -189,11 +189,10 @@ class potential_landscape:
 
     def sites(self) -> list[mnt.pyfiction.sidb.lattice_site]:
         """
-        The SiDB sites in raster order, shared with the charge distributions
-        built over this landscape.
+        Returns a copy of the SiDB sites in raster order.
 
         Returns:
-            The shared site list.
+            A Python list of lattice sites. Changing the list does not change the landscape.
         """
 
     def defects(self) -> list[tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.model.sidb_defect]]:
@@ -453,10 +452,10 @@ class sidb_simulation_result:
 
         Args:
             distribution: Index into `charge_distributions`.
-            s: Site of the SiDB.
+            site: Site of the SiDB.
 
         Returns:
-            The charge state, `charge_state::NONE` if `s` holds no SiDB.
+            The charge state, `charge_state::NONE` if `site` holds no SiDB.
 
         Raises:
             std::out_of_range: if the distribution index is out of range.
@@ -483,7 +482,7 @@ def is_ground_state(heuristic_results: sidb_simulation_result, exhaustive_result
 
     Args:
         heuristic_results: Result of a heuristic simulation.
-        exact_results: Result of an exact simulation of the same layout.
+        exhaustive_results: Result of an exact simulation of the same layout.
 
     Returns:
         `true` iff the heuristic result contains every ground state of the

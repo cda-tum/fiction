@@ -48,7 +48,7 @@ def calculate_energy_and_state_type_with_kinks_accepted(
     pairs are inspected.
 
     Args:
-        energy_dist: The energy distribution of the charge distributions.
+        energy_distribution: The energy distribution of the charge distributions.
         valid_charge_distributions: The physically valid charge
                                     distributions.
         output_bdl_pairs: The output BDL pairs of the layout.
@@ -77,7 +77,7 @@ def calculate_energy_and_state_type_with_kinks_rejected(
 
     Args:
         lyt: The layout the charge distributions belong to.
-        energy_dist: The energy distribution of the charge distributions.
+        energy_distribution: The energy distribution of the charge distributions.
         valid_charge_distributions: The physically valid charge
                                     distributions.
         spec: The Boolean function(s) to implement.
@@ -383,21 +383,13 @@ def calculate_energy_distribution(
 
 def minimum_energy(charge_distributions: Sequence[mnt.pyfiction.sidb.charge_distribution]) -> float:
     """
-    Computes the minimum energy of a range of charge distributions. If the
-    range is empty, infinity is returned to indicate no valid energy value
-    exists.
+    Computes the minimum energy of a sequence of charge distributions.
 
     Args:
-        first: Begin of the range to examine.
-        last: End of the range to examine.
-
-    Template Args:
-        InputIt: Must meet the requirements of `LegacyInputIterator`.
+        charge_distributions: Charge distributions to examine.
 
     Returns:
-        Value of the minimum energy found in the input range (unit: eV),
-        or `std::numeric_limits<double>::infinity()` if the range is
-        empty.
+        Minimum energy in eV, or positive infinity if the sequence is empty.
     """
 
 def occupation_probability_gate_based(
@@ -409,7 +401,7 @@ def occupation_probability_gate_based(
     according the truth table) at a given temperature.
 
     Args:
-        est: This contains the energies of all possible charge
+        energy_and_state_type: This contains the energies of all possible charge
              distributions together with the information if the charge
              distribution (state) is transparent or erroneous.
         temperature: System temperature to assume (unit: K).

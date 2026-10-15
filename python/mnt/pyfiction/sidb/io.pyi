@@ -22,7 +22,7 @@ def write_sqd_layout(
     the file's content.
 
     Args:
-        lyt: Layout to write.
+        layout: Layout to write.
         filename: File to write into.
         on_progress: Receives completed dot and defect records.
 
@@ -39,7 +39,7 @@ def read_sqd_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.sidb.
 
     Args:
         filename: The file to read.
-        name: The name to give to the layout.
+        layout_name: The name to give to the layout.
 
     Returns:
         The layout read from the file.
@@ -60,7 +60,7 @@ def read_surface_defects(filename: str, layout_name: str = "") -> mnt.pyfiction.
 
     Args:
         filename: The file to read.
-        name: The name to give to the layout.
+        layout_name: The name to give to the layout.
 
     Returns:
         The layout holding the defects.
@@ -172,27 +172,25 @@ def print_sidb_layout(
     draw_lattice: bool = True,
 ) -> str:
     """
-    Prints an `sidb::layout` as a lattice picture: one symbol per lattice
-    site of the bounding box, row by row, with a blank line between the
-    dimer rows of an H-Si(100)-2x1 surface and an indented second row per
-    unit cell of an H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs,
-    defects, and empty sites differ by color and symbol. With a charge
-    distribution, a charged SiDB is a filled circle colored by its sign
-    and a neutral one a hollow circle.
+    Returns a SiDB layout as a lattice picture in a string.
+
+    The picture contains one symbol per lattice site of the bounding box, row by row,
+    with a blank line between the dimer rows of an H-Si(100)-2x1 surface and an indented
+    second row per unit cell of an H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs,
+    defects, and empty sites differ by color and symbol. With a charge distribution,
+    a charged SiDB is a filled circle colored by its sign and a neutral one a hollow circle.
 
     Args:
-        os: Output stream to print into.
-        lyt: Layout to print.
-        cd: Charge distribution over the layout's SiDBs, or `nullptr` to
-            print dot tags only.
+        layout: Layout to render.
+        charge_distribution: Charge distribution over the layout's SiDBs, or None to render dot tags only.
         lat_color: Whether to color the picture.
-        crop_layout: Whether to pad the bounding box by two columns and
-                     one unit cell instead of printing it tight.
-        draw_lattice: Whether to print empty lattice sites as dots.
+        crop_layout: Whether to pad the bounding box by two columns and one unit cell instead of rendering it tight.
+        draw_lattice: Whether to render empty lattice sites as dots.
+
+    Returns:
+        The lattice picture.
 
     Raises:
-        std::invalid_argument: if the charge distribution sites differ
-                               from the layout.
-        std::out_of_range: if padding exceeds the lattice-site coordinate
-                           range.
+        ValueError: The charge distribution sites differ from the layout.
+        IndexError: Padding exceeds the lattice-site coordinate range.
     """

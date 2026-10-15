@@ -36,11 +36,12 @@ def write_qll_layout(
     (https://ieeexplore.ieee.org/document/8935211), a physical simulator
     for the molQCA (mQCA) technology platform.
 
-    This overload uses an output stream to write into.
+    This overload uses a file name to create and write into.
 
     Args:
-        lyt: The layout to be written.
-        os: The output stream to write into.
+        layout: The layout to be written.
+        filename: The file name to create and write into. Should
+                  preferably use the `.qll` extension.
         on_progress: Receives completed serialization work.
 
     Template Args:

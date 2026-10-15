@@ -28,8 +28,13 @@ class count_gate_types_stats:
 
     def report(self, detailed: bool = False) -> str:
         """
-        Prints gate counts. @param out Output stream. @param detailed Whether
-        to print every gate type.
+        Return the gate-count report as a string.
+
+        Args:
+            detailed: List every gate type when True; otherwise combine less-common types under other. Defaults to False.
+
+        Returns:
+            The formatted report.
         """
 
     @property
@@ -94,20 +99,15 @@ def count_gate_types(ntk_or_lyt: mnt.pyfiction.layouts.shifted_cartesian_gate_la
 @overload
 def count_gate_types(ntk_or_lyt: mnt.pyfiction.layouts.hexagonal_gate_layout) -> count_gate_types_stats:
     """
-    Gives a detailed listing of all gate types present in the provided
-    network (or layout). This function can distinguish most gate types
-    available as atomic building blocks. Primary terminals and network
-    constants do not enter the counts. Placed wires count as fanout
-    objects when they drive multiple inputs, or as buffers otherwise. The
-    given network (or layout) has to implement a function to test whether
-    a node is of the respective gate type.
+    Return gate-type counts for a logic network or gate-level layout.
+    Primary terminals and network constants do not enter the counts. Placed wires
+    count as fanouts when they drive multiple inputs, or as buffers otherwise.
 
     Args:
-        ntk: The network (or layout).
-        pst: Statistics.
+        ntk_or_lyt: Network or gate-level layout to inspect.
 
-    Template Args:
-        Ntk: Logic network (or layout) type.
+    Returns:
+        A count_gate_types_stats object containing the counts.
     """
 
 @overload
@@ -119,50 +119,21 @@ def critical_path_length_and_throughput(
 @overload
 def critical_path_length_and_throughput(layout: mnt.pyfiction.layouts.hexagonal_gate_layout) -> tuple[int, int]:
     """
-    Computes the critical path length (CP) length and the throughput (TP)
-    of a gate-level layout.
-
-    The critical path length counts every placed object on the longest
-    path to any PO, including wires and terminals. Traversal follows
-    declared input ports, independent of physical adjacency and clocking
-    legality. Only output dependencies enter the analysis. Explicit placed
-    zero-input functions act as path sources.
-
-    The throughput is defined as :math:`\\frac{1}{x}` where :math:`x` is
-    the highest path length difference between any sets of paths that lead
-    to the same gate. This function provides only the denominator
-    :math:`x`, as the numerator is always :math:`1`. Furthermore,
-    :math:`x` is given in clock cycles rather than clock phases because it
-    is assumed that a path length difference smaller than
-    `lyt.num_clocks()` does not lead to any delay. Contrary, for any
-    throughput value :math:`\\frac{1}{x}` with :math:`x > 1`, the layout
-    computes its represented Boolean function only every :math:`x` full
-    clock cycles after the first inputs have been propagated through the
-    design. Thereby, all PIs need to be held constant for :math:`x` clock
-    phases to ensure proper computation.
-
-    For more information on the concept of throughput and delay see
-    \\"Synchronization of Clocked Field-Coupled Circuits\\" by F. Sill
-    Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO
-    2018; or \\"Design Automation for Field-coupled Nanotechnologies\\" by
-    M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
-    Springer Nature in 2022.
-
-    The complexity is :math:`\\mathcal{O}(|V| + |E|)` for objects and
-    connections in the output dependency cones.
+    Return the critical path length and throughput denominator of a gate-level layout.
+    The critical path counts every placed object on the longest path to a primary
+    output, including wires and terminals. Only output dependencies enter the
+    analysis. Traversal follows declared input ports, independent of physical
+    adjacency and clocking legality; zero-input functions act as path sources.
+    The throughput is one result per returned denominator of full clock cycles.
 
     Args:
-        lyt: The gate-level layout whose CP and TP are desired.
-
-    Template Args:
-        Geometry: Coordinate geometry of the gate-level layout.
+        layout: Gate-level layout to analyze.
 
     Returns:
-        A struct containing the CP and TP.
+        A tuple (critical_path_length, throughput_denominator).
 
     Raises:
-        std::invalid_argument: If an output dependency has a disconnected
-                               input or a cycle.
+        ValueError: An output dependency has a disconnected input or a cycle.
     """
 
 class gate_level_drv_stats:
@@ -434,14 +405,14 @@ def equivalence_checking(
     Große, and R. Drechsler in DAC 2020.
 
     Args:
-        spec: The specification.
-        impl: The implementation.
-        pst: Statistics.
+        specification: The specification.
+        implementation: The implementation.
+        statistics: Statistics.
 
     Template Args:
         Spec: Specification type.
         Impl: Implementation type.
 
     Returns:
-        The equivalence type of `spec` and `impl`.
+        The equivalence type of `specification` and `implementation`.
     """

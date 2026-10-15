@@ -39,9 +39,9 @@ class coordinate:
         coordinate_y, coordinate_z).
 
         Args:
-            coordinate_x: x position.
-            coordinate_y: y position.
-            coordinate_z: z position.
+            x: x position.
+            y: y position.
+            z: z position.
 
         Template Args:
             X: Type of x.
@@ -878,7 +878,7 @@ class shifted_cartesian_layout:
         extent is empty.
 
         Args:
-            a: Arrangement of shifted rows or columns.
+            arrangement: Arrangement of shifted rows or columns.
             extent: Axis sizes.
 
         Raises:
@@ -1523,7 +1523,7 @@ class hexagonal_layout:
         extent is empty.
 
         Args:
-            a: Arrangement of shifted rows or columns.
+            arrangement: Arrangement of shifted rows or columns.
             extent: Axis sizes.
 
         Raises:
@@ -3101,9 +3101,9 @@ class cartesian_gate_layout(cartesian_layout):
         Assigns a synchronization element to the provided clock zone.
 
         Args:
-            cz: Clock zone to turn into a synchronization element.
-            se: Number of full clock cycles to extend `cz`'s Hold phase by. If
-                this value is 0, `cz` is turned back into a normal clock zone.
+            coordinate: Clock zone to turn into a synchronization element.
+            delay: Number of full clock cycles to extend `coordinate`'s Hold phase by. If
+                this value is 0, `coordinate` is turned back into a normal clock zone.
         """
 
     def is_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -3111,22 +3111,22 @@ class cartesian_gate_layout(cartesian_layout):
         Check whether the provided clock zone is a synchronization element.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
-            `true` iff `cz` is a synchronization element.
+            `true` iff `coordinate` is a synchronization element.
         """
 
     def get_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
-        Returns the Hold phase extension in clock cycles of clock zone `cz`.
+        Returns the Hold phase extension in clock cycles of clock zone `coordinate`.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
             Synchronization element value, i.e., Hold phase extension, of
-            clock zone `cz`.
+            clock zone `coordinate`.
         """
 
     def num_se(self) -> int:
@@ -4080,9 +4080,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         Assigns a synchronization element to the provided clock zone.
 
         Args:
-            cz: Clock zone to turn into a synchronization element.
-            se: Number of full clock cycles to extend `cz`'s Hold phase by. If
-                this value is 0, `cz` is turned back into a normal clock zone.
+            coordinate: Clock zone to turn into a synchronization element.
+            delay: Number of full clock cycles to extend `coordinate`'s Hold phase by. If
+                this value is 0, `coordinate` is turned back into a normal clock zone.
         """
 
     def is_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -4090,22 +4090,22 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         Check whether the provided clock zone is a synchronization element.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
-            `true` iff `cz` is a synchronization element.
+            `true` iff `coordinate` is a synchronization element.
         """
 
     def get_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
-        Returns the Hold phase extension in clock cycles of clock zone `cz`.
+        Returns the Hold phase extension in clock cycles of clock zone `coordinate`.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
             Synchronization element value, i.e., Hold phase extension, of
-            clock zone `cz`.
+            clock zone `coordinate`.
         """
 
     def num_se(self) -> int:
@@ -5059,9 +5059,9 @@ class hexagonal_gate_layout(hexagonal_layout):
         Assigns a synchronization element to the provided clock zone.
 
         Args:
-            cz: Clock zone to turn into a synchronization element.
-            se: Number of full clock cycles to extend `cz`'s Hold phase by. If
-                this value is 0, `cz` is turned back into a normal clock zone.
+            coordinate: Clock zone to turn into a synchronization element.
+            delay: Number of full clock cycles to extend `coordinate`'s Hold phase by. If
+                this value is 0, `coordinate` is turned back into a normal clock zone.
         """
 
     def is_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -5069,22 +5069,22 @@ class hexagonal_gate_layout(hexagonal_layout):
         Check whether the provided clock zone is a synchronization element.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
-            `true` iff `cz` is a synchronization element.
+            `true` iff `coordinate` is a synchronization element.
         """
 
     def get_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
-        Returns the Hold phase extension in clock cycles of clock zone `cz`.
+        Returns the Hold phase extension in clock cycles of clock zone `coordinate`.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
             Synchronization element value, i.e., Hold phase extension, of
-            clock zone `cz`.
+            clock zone `coordinate`.
         """
 
     def num_se(self) -> int:

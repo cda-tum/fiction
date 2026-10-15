@@ -85,7 +85,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         Args:
             extent: Half-open cell sizes; a nonzero layer count selects one
                   layer.
-            name: Layout name.
+            layout_name: Layout name.
 
         Raises:
             std::invalid_argument: If a size exceeds the coordinate domain.

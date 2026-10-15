@@ -41,9 +41,9 @@ class lattice_site:
         parameter types before the call.
 
         Args:
-            x_coord: Steps along the first lattice vector.
-            y_coord: Steps along the second lattice vector.
-            basis_site: Basis site, 0 or 1.
+            x: Steps along the first lattice vector.
+            y: Steps along the second lattice vector.
+            z: Basis site, 0 or 1.
 
         Raises:
             std::out_of_range: if the basis index is not 0 or 1.
@@ -55,8 +55,8 @@ class lattice_site:
         Creates the site `(x, y, 0)`.
 
         Args:
-            x_coord: Steps along the first lattice vector.
-            y_coord: Steps along the second lattice vector.
+            x: Steps along the first lattice vector.
+            y: Steps along the second lattice vector.
         """
 
     @property
@@ -145,10 +145,10 @@ def row_of(site: lattice_site) -> int:
     libraries describe their gates on a grid of such rows.
 
     Args:
-        s: Site.
+        site: Site.
 
     Returns:
-        Row of `s`.
+        Row of `site`.
     """
 
 def site_at_row(x: int, row: int) -> lattice_site:
@@ -271,10 +271,10 @@ class lattice:
         The position of a site relative to the site `(0, 0, 0)`.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            The `(x, y)` position of `s` (unit: nm).
+            The `(x, y)` position of `site` (unit: nm).
 
         Raises:
             std::out_of_range: if the basis index is not 0 or 1.
@@ -351,7 +351,7 @@ class sidb_layout:
         Creates an empty layout on the given lattice.
 
         Args:
-            lat: Lattice of the surface.
+            lattice: Lattice of the surface.
             name: Layout name.
         """
 
@@ -369,7 +369,7 @@ class sidb_layout:
         positions change.
 
         Args:
-            lat: New lattice.
+            lattice: New lattice.
         """
 
     def get_layout_name(self) -> str:
@@ -396,8 +396,8 @@ class sidb_layout:
         leaves the dots unchanged.
 
         Args:
-            s: Site.
-            tag: Dot tag to assign; defaults to `dot_tag::NORMAL`.
+            site: Site.
+            dot_tag: Dot tag to assign; defaults to `dot_tag::NORMAL`.
         """
 
     def get_dot_tag(self, site: lattice_site) -> sidb_dot_tag:
@@ -405,10 +405,10 @@ class sidb_layout:
         The dot tag at a site.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            Dot tag at `s`, `dot_tag::EMPTY` if no SiDB is there.
+            Dot tag at `site`, `dot_tag::EMPTY` if no SiDB is there.
         """
 
     def is_empty_site(self, site: lattice_site) -> bool:
@@ -416,10 +416,10 @@ class sidb_layout:
         Whether no SiDB sits at a site.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            `true` iff `s` holds no SiDB.
+            `true` iff `site` holds no SiDB.
         """
 
     def is_empty(self) -> bool:
@@ -443,10 +443,10 @@ class sidb_layout:
         Number of tagged SiDBs.
 
         Args:
-            tag: Dot tag.
+            dot_tag: Dot tag.
 
         Returns:
-            Number of SiDBs with tag `tag`.
+            Number of SiDBs with tag `dot_tag`.
         """
 
     def dots_with_tag(self, dot_tag: sidb_dot_tag) -> list[lattice_site]:
@@ -454,10 +454,10 @@ class sidb_layout:
         All sites holding an SiDB of a given dot tag, in raster order.
 
         Args:
-            tag: Dot tag.
+            dot_tag: Dot tag.
 
         Returns:
-            Sites with tag `tag`.
+            Sites with tag `dot_tag`.
         """
 
     def sidbs(self) -> list[lattice_site]:
@@ -474,10 +474,10 @@ class sidb_layout:
         The index of a site in `sidbs()`.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            Index of `s`, or `std::nullopt` if `s` holds no SiDB.
+            Index of `site`, or `std::nullopt` if `site` holds no SiDB.
         """
 
     def num_pis(self) -> int:
@@ -501,10 +501,10 @@ class sidb_layout:
         Whether a site holds an input SiDB.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            `true` iff `s` holds an input SiDB.
+            `true` iff `site` holds an input SiDB.
         """
 
     def is_po(self, site: lattice_site) -> bool:
@@ -512,10 +512,10 @@ class sidb_layout:
         Whether a site holds an output SiDB.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            `true` iff `s` holds an output SiDB.
+            `true` iff `site` holds an output SiDB.
         """
 
     def pis(self) -> list[lattice_site]:
@@ -530,8 +530,8 @@ class sidb_layout:
         `defect_type::NONE` removes the defect from the site.
 
         Args:
-            s: Site.
-            d: Defect to place.
+            site: Site.
+            defect: Defect to place.
         """
 
     def move_defect(self, source: lattice_site, target: lattice_site) -> None:
@@ -550,10 +550,10 @@ class sidb_layout:
         The defect at a site.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            Defect at `s`, or a defect of type `defect_type::NONE` if there is
+            Defect at `site`, or a defect of type `defect_type::NONE` if there is
             none.
         """
 
@@ -619,7 +619,7 @@ class sidb_layout:
         coordinates.
 
         Args:
-            s: Site of the defect.
+            site: Site of the defect.
             charged_defect_spacing_overwrite: Horizontal and vertical extent
                                               to use for charged defects
                                               instead of the default.
@@ -628,7 +628,7 @@ class sidb_layout:
                                               instead of the default.
 
         Returns:
-            Sites influenced by the defect at `s`; empty if `s` holds no
+            Sites influenced by the defect at `site`; empty if `site` holds no
             defect.
         """
 
@@ -697,8 +697,8 @@ class charge_distribution:
         one charge state.
 
         Args:
-            lyt: Layout whose SiDBs the distribution covers.
-            cs: Charge state of every SiDB.
+            layout: Layout whose SiDBs the distribution covers.
+            charge_state: Charge state of every SiDB.
         """
 
     def sites(self) -> list[lattice_site]:
@@ -730,11 +730,11 @@ class charge_distribution:
         The index of a site in the distribution.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            Index of `s`, or `std::nullopt` if the distribution covers no SiDB
-            at `s`.
+            Index of `site`, or `std::nullopt` if the distribution covers no SiDB
+            at `site`.
         """
 
     def get_charge_state(self, site: lattice_site) -> model.sidb_charge_state:
@@ -742,11 +742,11 @@ class charge_distribution:
         The charge state of the SiDB at a site.
 
         Args:
-            s: Site.
+            site: Site.
 
         Returns:
-            Charge state at `s`, `charge_state::NONE` if the distribution
-            covers no SiDB at `s`.
+            Charge state at `site`, `charge_state::NONE` if the distribution
+            covers no SiDB at `site`.
         """
 
     def get_charge_state_by_index(self, index: int) -> model.sidb_charge_state:
@@ -767,8 +767,8 @@ class charge_distribution:
         distribution does not cover is ignored.
 
         Args:
-            s: Site.
-            cs: Charge state to assign.
+            site: Site.
+            charge_state: Charge state to assign.
         """
 
     def assign_charge_state_by_index(self, index: int, charge_state: model.sidb_charge_state) -> None:
@@ -777,7 +777,7 @@ class charge_distribution:
 
         Args:
             index: Index in raster order.
-            cs: Charge state to assign.
+            charge_state: Charge state to assign.
 
         Raises:
             std::out_of_range: if the index is out of range.
@@ -788,7 +788,7 @@ class charge_distribution:
         Assigns one charge state to every SiDB.
 
         Args:
-            cs: Charge state to assign.
+            charge_state: Charge state to assign.
         """
 
     def charge_states(self) -> list[model.sidb_charge_state]:
@@ -812,7 +812,7 @@ class charge_distribution:
         Sets the electrostatic potential energy of the distribution.
 
         Args:
-            e: Energy (unit: eV).
+            energy: Energy (unit: eV).
         """
 
     def charge_exists(self, charge_state: model.sidb_charge_state) -> bool:
@@ -820,10 +820,10 @@ class charge_distribution:
         Whether any SiDB has a given charge state.
 
         Args:
-            cs: Charge state.
+            charge_state: Charge state.
 
         Returns:
-            `true` iff at least one SiDB is in state `cs`.
+            `true` iff at least one SiDB is in state `charge_state`.
         """
 
     def num_negative_sidbs(self) -> int:

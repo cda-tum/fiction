@@ -234,10 +234,10 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
         Sets the tile width.
 
         Args:
-            tile_size_x: Tile width in cells.
+            size: Tile width in cells.
 
         Raises:
-            std::invalid_argument: if `tile_size_x` is zero.
+            std::invalid_argument: if `size` is zero.
         """
 
     def get_tile_size_y(self) -> int:
@@ -253,10 +253,10 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
         Sets the tile height.
 
         Args:
-            tile_size_y: Tile height in cells.
+            size: Tile height in cells.
 
         Raises:
-            std::invalid_argument: if `tile_size_y` is zero.
+            std::invalid_argument: if `size` is zero.
         """
 
     def get_clock_zone(
