@@ -93,7 +93,7 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    const auto lyt = [](const arrangement layout_arrangement)
+    const auto lyt = []([[maybe_unused]] const arrangement layout_arrangement)
     {
         if constexpr (std::derived_from<TestType, fiction::layouts::cartesian_layout>)
         {
