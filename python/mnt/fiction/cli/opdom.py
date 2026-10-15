@@ -18,7 +18,7 @@ from rich.table import Table
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.opdom_plotting import plot_arguments, write_plot
-from mnt.fiction.cli.output import CommandOutput, atomic_output, open_viewer
+from mnt.fiction.cli.output import CommandOutput, open_viewer
 from mnt.fiction.cli.parsing import finite_float, integer, positive_float, positive_int
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.truth_tables import table_from_string
@@ -372,8 +372,7 @@ def write_csv(domain: operational_domain, args: argparse.Namespace) -> None:
     if args.file is None:
         return
     writing_mode = sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
-    with atomic_output(args.file) as temporary:
-        write_operational_domain(domain, str(temporary), writing_mode=writing_mode)
+    write_operational_domain(domain, str(args.file), writing_mode=writing_mode)
 
 
 def gate_specification(
@@ -426,8 +425,8 @@ def gate_specification(
             spec.append(table)
     else:
         if fallback_spec is None:
-            msg_0 = "provide --gate, --table, or --expression"
-            raise CommandError(msg_0)
+            msg = "provide --gate, --table, or --expression"
+            raise CommandError(msg)
         spec = fallback_spec
     if len(spec) != len(outputs) or any(table.num_vars() != len(inputs) for table in spec):
         msg = f"the specification must have {len(outputs)} output table(s), each with {len(inputs)} input(s)"

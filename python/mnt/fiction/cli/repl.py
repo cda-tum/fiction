@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import argparse
-import importlib
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -35,9 +34,6 @@ if TYPE_CHECKING:
 
     from prompt_toolkit.completion import CompleteEvent
     from prompt_toolkit.formatted_text import StyleAndTextTuples
-
-# importing the commands package registers every command with the registry
-importlib.import_module(".commands", __package__)
 
 PROMPT_STYLE = Style.from_dict({
     "prompt": "bold",

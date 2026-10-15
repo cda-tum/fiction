@@ -32,7 +32,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         from mnt.fiction.opdom import main as opdom_main  # ruff: ignore[import-outside-top-level] -- load the selected interface
 
         return opdom_main(args[1:])
-    if args in (["-h"], ["--help"]):
+    if args and args[0] in {"-h", "--help"}:
         parser = argparse.ArgumentParser(
             prog="fiction",
             description="Design automation for field-coupled nanotechnologies.",

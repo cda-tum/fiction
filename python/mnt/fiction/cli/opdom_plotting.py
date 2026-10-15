@@ -87,6 +87,7 @@ def validate_outputs(args: argparse.Namespace, *, log_path: Path | None = None) 
 
     Raises:
         CommandError: An output or plotting option is invalid or a dependency is missing.
+        ModuleNotFoundError: An installed plotting package lacks an internal dependency.
     """
     if args.show and not args.plot:
         msg = "--show requires a --plot output"
@@ -109,7 +110,9 @@ def validate_outputs(args: argparse.Namespace, *, log_path: Path | None = None) 
         try:
             __import__("numpy")
             _validate_colors(args, html=path.suffix.lower() == ".html")
-        except ImportError as error:
+        except ModuleNotFoundError as error:
+            if error.name not in {"numpy", "matplotlib", "plotly"}:
+                raise
             msg = "plotting requires uv tool install 'mnt-pyfiction[plot]' (or uv pip install in a virtual environment)"
             raise CommandError(msg) from error
         except ValueError as error:

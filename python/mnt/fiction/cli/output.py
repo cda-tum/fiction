@@ -6,7 +6,7 @@
 #
 # Licensed under the MIT License
 
-"""Atomic staging for CLI output files."""
+"""Console output, progress, logs, atomic files, and viewers shared by CLI entry points."""
 
 from __future__ import annotations
 

@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
+  - Leading `fiction --help` and `fiction -h` flags show route help even with additional options.
+    Plotting preserves broken dependency diagnostics and uses installation hints only for missing packages.
   - Dedicated operational-domain commands now run without loading the interactive shell or its stores.
   - `fiction opdom` now requires an explicit `--csv` or `--plot` destination instead of choosing a PNG filename.
   - Operational-domain help now emphasizes `--algorithm` and `--samples`; legacy algorithm flags remain accepted.

@@ -345,7 +345,7 @@ def test_missing_plot_dependency_is_reported_before_computation(
 
     def without_dependency(name: str, *args: Any, **kwargs: Any) -> object:
         if name.startswith(dependency):
-            raise ModuleNotFoundError(name)
+            raise ModuleNotFoundError(name, name=dependency)
         return original_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", without_dependency)
@@ -354,6 +354,37 @@ def test_missing_plot_dependency_is_reported_before_computation(
         f'opdom "{csv}" --plot "{tmp_path / "plot.html"}" ' + " ".join(SMALL_SWEEP)
     )
     assert not csv.exists()
+
+
+@pytest.mark.parametrize("missing_module", [None, "numpy._core"])
+def test_broken_plot_dependency_preserves_error(
+    xor_gate: Shell, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, missing_module: str | None
+) -> None:
+    """A broken backend retains its diagnostic rather than suggesting an absent extra."""
+    original_import = builtins.__import__
+
+    def broken_numpy(name: str, *args: Any, **kwargs: Any) -> object:
+        if name == "numpy":
+            msg = "broken NumPy installation"
+            if missing_module:
+                raise ModuleNotFoundError(msg, name=missing_module)
+            raise ImportError(msg)
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", broken_numpy)
+    csv = tmp_path / "domain.csv"
+    error = xor_gate.fails(f'opdom "{csv}" --plot "{tmp_path / "plot.png"}" ' + " ".join(SMALL_SWEEP))
+    assert "broken NumPy installation" in error
+    assert "mnt-pyfiction[plot]" not in error
+    assert not csv.exists()
+
+
+def test_shell_quiet_keeps_domain_statistics(xor_gate: Shell, tmp_path: Path) -> None:
+    """Quiet mode keeps the requested statistics and suppresses write notices."""
+    xor_gate.session.quiet = True
+    xor_gate.ok(f'opdom "{tmp_path / "domain.csv"}" ' + " ".join(SMALL_SWEEP))
+    assert "Simulator calls" in xor_gate.output
+    assert "wrote" not in xor_gate.output
 
 
 def test_installed_console_command(resource: Callable[[str], str], tmp_path: Path) -> None:

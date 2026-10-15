@@ -446,7 +446,7 @@ status is `1` when a command fails, which stops the string at that command. `fic
 of a file, one line per line, in the same way; a missing file exits with `2`. `quit` ends either without failing,
 leaving the commands after it unrun. `-i` continues into the interactive shell once the commands are done, and
 `-q` suppresses notices and keeps requested results, including `version`, `print`, `store`, `simulate`, `equiv`,
-and `area`.
+`area`, and `opdom` statistics.
 
 Piped standard input runs as a batch stream without constructing an interactive prompt, for example
 `printf 'version\nquit\n' | fiction --quiet` on a POSIX shell. Scripts must use UTF-8; decoding failures identify

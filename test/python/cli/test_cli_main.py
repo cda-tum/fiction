@@ -49,9 +49,10 @@ def test_script_file(tmp_path: Path, prefix: list[str]) -> None:
     assert main([*prefix, "-f", str(script)]) == 0
 
 
-def test_entry_point_help(capsys: pytest.CaptureFixture[str]) -> None:
+@pytest.mark.parametrize("options", [["--help"], ["--help", "-q"], ["-h", "-q"]])
+def test_entry_point_help(capsys: pytest.CaptureFixture[str], options: list[str]) -> None:
     """Top-level help introduces the dedicated workflow and explicit shell route."""
-    assert main(["--help"]) == 0
+    assert main(options) == 0
     help_text = capsys.readouterr().out
     assert "opdom" in help_text
     assert "repl" in help_text
