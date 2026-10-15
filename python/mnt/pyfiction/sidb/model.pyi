@@ -362,6 +362,9 @@ def potential_to_distance_conversion(
     floating-point resolution limits the effective precision. Invalid conversion inputs raise ValueError.
     Positive infinite screening distance selects the unscreened Coulomb potential.
 
+    Raises:
+        ValueError: Invalid physical parameters, potential, or precision.
+
     Args:
         base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
         mu_minus: Negative-charge transition energy in eV.

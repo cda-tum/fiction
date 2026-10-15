@@ -502,6 +502,9 @@ def physical_population_stability(
     Raises ValueError for invalid physical values or a precision outside 0 to 15.
     Distance conversion bisects the distance bracket up to floating-point resolution.
 
+    Raises:
+        ValueError: Invalid physical parameters or precision.
+
     Args:
         timeout: Execution budget in milliseconds.
         base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
