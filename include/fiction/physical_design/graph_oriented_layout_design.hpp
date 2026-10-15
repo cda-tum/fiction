@@ -531,10 +531,7 @@ struct search_space_graph
         graph_oriented_layout_design_params::cost_objective::AREA;
 };
 /**
- * @brief Custom view class derived from mockturtle::topo_view.
- *
- * This class inherits from mockturtle::topo_view and overrides certain functions
- * to provide custom behavior.
+ * @brief Immutable network view with optional randomized topological traversal.
  */
 template <typename Ntk, bool CiToCo = false, bool Randomize = false>
 class topo_view : public mockturtle::immutable_view<Ntk>
@@ -549,7 +546,12 @@ class topo_view : public mockturtle::immutable_view<Ntk>
      */
     using signal = Ntk::signal;
 
-    /** @brief Builds a randomized topological order using the supplied seed. */
+    /**
+     * @brief Builds a topological order, randomized only when `Randomize` is true.
+     *
+     * @param ntk Network to traverse.
+     * @param seed_val Random seed; ignored when `Randomize` is false, the default.
+     */
     explicit topo_view(const Ntk& ntk, const uint32_t seed_val = 42) :
             mockturtle::immutable_view<Ntk>(ntk),
             rng(seed_val)
