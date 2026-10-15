@@ -259,7 +259,7 @@ inline uint32_t is_eastern_po_orientation_available(const coloring_container& ct
                                      return false;
                                  });
 
-    return eastern_side_available;
+    return static_cast<uint32_t>(eastern_side_available);
 }
 
 /** @brief Computes the extent required by colored gates and primary outputs. */

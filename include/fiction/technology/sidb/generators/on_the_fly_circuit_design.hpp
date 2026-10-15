@@ -46,7 +46,6 @@
 #include "fiction/types.hpp"
 
 #include <fmt/format.h>
-#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <optional>

@@ -23,6 +23,7 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 

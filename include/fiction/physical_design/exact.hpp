@@ -45,7 +45,6 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 #include <z3++.h>
 #include <z3_api.h>
