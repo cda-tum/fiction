@@ -99,8 +99,7 @@ TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     };
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    check(read_fgl_layout<gate_layout>(layout_stream));
+    check(read_fgl_layout<cartesian_gate_layout>(layout_stream));
 }
 
 TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
@@ -207,8 +206,7 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
         CHECK((primary_output.has_value() && lyt.get_name(*primary_output) == "po0"));
     };
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    check(read_fgl_layout<gate_layout>(layout_stream));
+    check(read_fgl_layout<cartesian_gate_layout>(layout_stream));
 }
 
 TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
@@ -315,8 +313,7 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
         CHECK((primary_output.has_value() && lyt.get_name(*primary_output) == "po0"));
     };
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    check(read_fgl_layout<gate_layout>(layout_stream));
+    check(read_fgl_layout<cartesian_gate_layout>(layout_stream));
 }
 
 TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
@@ -343,7 +340,7 @@ TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
     SECTION("Cartesian layouts default to Cartesian topology")
     {
         std::istringstream layout_stream{document};
-        const auto         lyt = read_fgl_layout<cart_gate_clk_lyt>(layout_stream);
+        const auto         lyt = read_fgl_layout<cartesian_gate_layout>(layout_stream);
         CHECK(lyt.width() == 1);
         CHECK(lyt.height() == 1);
         CHECK(lyt.get_layout_name() == "Test");
@@ -353,13 +350,13 @@ TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
     SECTION("Shifted Cartesian layouts require a topology")
     {
         std::istringstream layout_stream{document};
-        CHECK_THROWS_AS(read_fgl_layout<shifted_cart_gate_clk_lyt>(layout_stream), fgl_parsing_error);
+        CHECK_THROWS_AS(read_fgl_layout<shifted_cartesian_gate_layout>(layout_stream), fgl_parsing_error);
     }
 
     SECTION("Hexagonal layouts require a topology")
     {
         std::istringstream layout_stream{document};
-        CHECK_THROWS_AS(read_fgl_layout<hex_gate_clk_lyt>(layout_stream), fgl_parsing_error);
+        CHECK_THROWS_AS(read_fgl_layout<hexagonal_gate_layout>(layout_stream), fgl_parsing_error);
     }
 }
 
@@ -372,13 +369,13 @@ TEST_CASE("Read FGL layout takes the arrangement from the file", "[read-fgl-layo
     {
         std::istringstream layout_stream{fgl_with_topology(fmt::format("{}_cartesian", to_string(a)))};
 
-        CHECK(read_fgl_layout<shifted_cart_gate_clk_lyt>(layout_stream).get_arrangement() == a);
+        CHECK(read_fgl_layout<shifted_cartesian_gate_layout>(layout_stream).get_arrangement() == a);
     }
     SECTION("hexagonal")
     {
         std::istringstream layout_stream{fgl_with_topology(fmt::format("{}_hex", to_string(a)))};
 
-        CHECK(read_fgl_layout<hex_gate_clk_lyt>(layout_stream).get_arrangement() == a);
+        CHECK(read_fgl_layout<hexagonal_gate_layout>(layout_stream).get_arrangement() == a);
     }
 }
 
@@ -386,7 +383,7 @@ TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-lay
 {
     std::stringstream stream{R"(<fgl><layout><size><x>0</x><y>0</y><z>1</z></size>
       <clocking><name>2DDWave</name></clocking></layout></fgl>)"};
-    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    const auto        layout = read_fgl_layout<cartesian_gate_layout>(stream);
     CHECK(layout.width() == 1);
     CHECK(layout.height() == 1);
     CHECK(layout.layers() == 2);
@@ -394,8 +391,7 @@ TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-lay
 
 TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout]")
 {
-    using sync_layout = gate_layout<cartesian_layout>;
-    sync_layout original{{2, 1, 1}};
+    cartesian_gate_layout original{{2, 1, 1}};
     original.set_layout_name("A & B < C");
     const auto input = original.create_pi("in<&>", {0, 0, 0});
     original.create_po(input, "out<&>", {1, 0, 0});
@@ -403,7 +399,7 @@ TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout
     original.assign_synchronization_element({1, 0, 0}, 255);
     std::stringstream stream{};
     write_fgl_layout(original, stream);
-    const auto restored = read_fgl_layout<sync_layout>(stream);
+    const auto restored = read_fgl_layout<cartesian_gate_layout>(stream);
     CHECK(restored.get_layout_name() == original.get_layout_name());
     CHECK(restored.num_pis() == 1);
     CHECK(restored.num_pos() == 1);
@@ -424,7 +420,7 @@ TEST_CASE("Legacy FGL keeps editable physical placement", "[read-fgl-layout]")
 <clocking><name>2DDWave</name></clocking></layout><gates>
 <gate><id>0</id><type>PI</type><name>a</name><loc><x>1</x><y>0</y><z>0</z></loc></gate>
 </gates></fgl>)"};
-    const auto        layout = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    const auto        layout = read_fgl_layout<cartesian_gate_layout>(stream);
     CHECK(layout.width() == 1);
     CHECK(layout.find_object({1, 0}).has_value());
 }
@@ -453,7 +449,7 @@ TEST_CASE("FGL requires layout, clocking, placement, and signal fields", "[read-
 <gate><id>3</id><type>PO</type><name>po0</name><loc><x>2</x><y>1</y><z>0</z></loc><incoming>
 <signal><x>1</x><y>1</y><z>0</z></signal></incoming></gate></gates></fgl>)";
     std::istringstream valid_stream{fixture};
-    CHECK_NOTHROW(read_fgl_layout<cart_gate_clk_lyt>(valid_stream));
+    CHECK_NOTHROW(read_fgl_layout<cartesian_gate_layout>(valid_stream));
     tinyxml2::XMLDocument document{};
     REQUIRE(document.Parse(fixture.c_str()) == tinyxml2::XML_SUCCESS);
     tinyxml2::XMLNode* parent = &document;
@@ -480,7 +476,7 @@ TEST_CASE("FGL requires layout, clocking, placement, and signal fields", "[read-
     tinyxml2::XMLPrinter printer{};
     document.Print(&printer);
     std::istringstream invalid_stream{printer.CStr()};
-    CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(invalid_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(invalid_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: malformed xml", "[read-fgl-layout]")
@@ -502,8 +498,7 @@ TEST_CASE("Parsing error: malformed xml", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: unknown clocking scheme", "[read-fgl-layout]")
@@ -526,8 +521,7 @@ TEST_CASE("Parsing error: unknown clocking scheme", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: unknown topology", "[read-fgl-layout]")
@@ -550,8 +544,7 @@ TEST_CASE("Parsing error: unknown topology", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-fgl-layout]")
@@ -574,8 +567,7 @@ TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<shifted_cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<shifted_cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-fgl-layout]")
@@ -598,8 +590,7 @@ TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-fgl-lay
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-fgl-layout]")
@@ -622,8 +613,7 @@ TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<shifted_cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<shifted_cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: target layout has another arrangement than the file", "[read-fgl-layout]")
@@ -635,7 +625,7 @@ TEST_CASE("Parsing error: target layout has another arrangement than the file", 
 
     std::istringstream layout_stream{fgl_with_topology(fmt::format("{}_hex", to_string(file_arrangement)))};
 
-    hex_gate_clk_lyt target{target_arrangement};
+    hexagonal_gate_layout target{target_arrangement};
 
     if (target_arrangement == file_arrangement)
     {
@@ -673,7 +663,7 @@ TEST_CASE("Parsing error: size exceeds the coordinate domain", "[read-fgl-layout
                                                  "</fgl>\n",
                                                  x, y, z)};
 
-    CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-fgl-layout]")
@@ -756,8 +746,7 @@ TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-fgl-layout]")
@@ -839,8 +828,7 @@ TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-fgl-
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-fgl-layout]")
@@ -923,8 +911,7 @@ TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-fgl-layout]")
@@ -1022,8 +1009,7 @@ TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", "[read-fgl-layout]")
@@ -1146,13 +1132,11 @@ TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", 
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
 {
-    using sync_layout = gate_layout<cartesian_layout>;
     std::string x{"0"};
     std::string clock{"0"};
     std::string delay{"0"};
@@ -1215,12 +1199,12 @@ TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
         "</clock></zone></zones><synchronization_elements><element><x>0</x><y>0</y><z>0</z><delay>" + delay +
         "</delay></element></synchronization_elements></clocking></layout><gates><gate><id>" + id +
         "</id><type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>"};
-    CHECK_THROWS_AS(read_fgl_layout<sync_layout>(stream), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(stream), fgl_parsing_error);
 }
 
 TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layout]")
 {
-    cart_gate_clk_lyt layout{{2, 1, 1}, clocking::twoddwave(), "original"};
+    cartesian_gate_layout layout{{2, 1, 1}, clocking::twoddwave(), "original"};
     layout.create_pi("kept", {0, 0, 0});
     std::stringstream stream{R"(<fgl version="2"><layout><size><x>2</x><y>1</y><z>1</z></size>
       <clocking><name>2DDWave</name></clocking><inputs></inputs><outputs><id>1</id></outputs></layout>
@@ -1244,7 +1228,7 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
     SECTION("Sources can follow destinations and use the full ID range")
     {
         std::stringstream stream{xml};
-        const auto        restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+        const auto        restored = read_fgl_layout<cartesian_gate_layout>(stream);
         CHECK(restored.get_input_name(0).empty());
         CHECK(restored.get_output_name(0).empty());
         /** @brief Output object restored from the destination-first XML. */
@@ -1253,13 +1237,13 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
         /** @brief Source connected to the restored output. */
         const auto source =
             restored.source({*output, 0});  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
-        CHECK((source.has_value() && restored.get_tile(*source) == cart_gate_clk_lyt::tile{0, 0, 0}));
+        CHECK((source.has_value() && restored.get_tile(*source) == cartesian_gate_layout::tile{0, 0, 0}));
     }
     SECTION("Missing input")
     {
         xml.erase(xml.find("<signal>"), xml.find("</signal>") + 9 - xml.find("<signal>"));
         std::stringstream stream{xml};
-        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(stream), fgl_parsing_error);
     }
     SECTION("Duplicate input connection")
     {
@@ -1268,31 +1252,31 @@ TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-la
         const auto duplicate = xml.substr(start, length);
         xml.insert(start, duplicate);
         std::stringstream stream{xml};
-        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(stream), fgl_parsing_error);
     }
     SECTION("Input index exceeds arity")
     {
         xml.replace(xml.find("<input>0</input>"), 16, "<input>1</input>");
         std::stringstream stream{xml};
-        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(stream), fgl_parsing_error);
     }
     SECTION("Invalid output index")
     {
         xml.replace(xml.find("<index>0</index>"), 16, "<index>1</index>");
         std::stringstream stream{xml};
-        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(stream), fgl_parsing_error);
     }
     SECTION("Wrong interface role")
     {
         xml.replace(xml.find("<outputs><id>2</id>"), 19, "<outputs><id>4294967295</id>");
         std::stringstream stream{xml};
-        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(stream), fgl_parsing_error);
     }
     SECTION("Unsupported version")
     {
         xml.replace(xml.find("version=\"2\""), 11, "version=\"3\"");
         std::stringstream stream{xml};
-        CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(stream), fgl_parsing_error);
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(stream), fgl_parsing_error);
     }
 }
 
@@ -1304,7 +1288,7 @@ TEST_CASE("FGL rejects more than two layers", "[read-fgl-layout]")
                               std::string{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>3</z></size>
           <clocking><name>2DDWave</name></clocking></layout></fgl>)"});
     /** Target layout that a rejected read preserves. */
-    cart_gate_clk_lyt target{{2, 3, 1}, clocking::twoddwave(), "kept"};
+    cartesian_gate_layout target{{2, 3, 1}, clocking::twoddwave(), "kept"};
     /** Input with an unsupported layer extent. */
     std::stringstream stream{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, stream), fgl_parsing_error);
@@ -1322,8 +1306,8 @@ TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read
         std::string{"<coordinates><coordinate><x>-9223372036854775809</x><y>0</y><z>0</z></coordinate></coordinates>"},
         std::string{"<coordinates><coordinate><x>1junk</x><y>0</y><z>0</z></coordinate></coordinates>"},
         std::string{"<connections><connection><source><x>0</x><y>0</y><z>0</z></source></connection></connections>"});
-    cart_gate_clk_lyt target{{1, 1, 1}, clocking::twoddwave(), "kept"};
-    const auto        id = target.create_pi("input", {0, 0});
+    cartesian_gate_layout target{{1, 1, 1}, clocking::twoddwave(), "kept"};
+    const auto            id = target.create_pi("input", {0, 0});
     target.obstruct_coordinate({-4, -5, -6});
     target.obstruct_connection({-4, -5, -6}, {7, 8, 9});
     std::string xml{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>1</z></size>
@@ -1341,8 +1325,8 @@ TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read
 
 TEST_CASE("Version-2 FGL requires a finished layout before assigning the target", "[read-fgl-layout]")
 {
-    cart_gate_clk_lyt original{{3, 2, 1}, clocking::twoddwave()};
-    const auto        input = original.create_pi("a", {0, 0});
+    cartesian_gate_layout original{{3, 2, 1}, clocking::twoddwave()};
+    const auto            input = original.create_pi("a", {0, 0});
     original.create_po(input, "f", {1, 0});
     const auto wire = original.create_buf(input, {0, 1});
     original.create_buf(wire, {1, 1});
@@ -1372,8 +1356,8 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
     {
         xml.insert(xml.find("</zones>"), "<zone><x>1</x><y>0</y><clock>0</clock></zone>");
     }
-    cart_gate_clk_lyt target{{1, 1, 1}, clocking::twoddwave(), "kept"};
-    const auto        kept = target.create_pi("input", {0, 0});
+    cartesian_gate_layout target{{1, 1, 1}, clocking::twoddwave(), "kept"};
+    const auto            kept = target.create_pi("input", {0, 0});
     target.obstruct_coordinate({-1, -2, -3});
     std::stringstream malformed{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
@@ -1383,5 +1367,5 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
     CHECK((retained.has_value() && *retained == kept));
     CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
     std::stringstream rejected{xml};
-    CHECK_THROWS_AS(read_fgl_layout<cart_gate_clk_lyt>(rejected), fgl_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_gate_layout>(rejected), fgl_parsing_error);
 }

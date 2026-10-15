@@ -48,27 +48,22 @@ void check(const Lyt& lyt, const uint64_t length, const uint64_t throughput)
 
 TEST_CASE("Balanced layout", "[throughput]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    check(blueprints::and_or_gate_layout<gate_layout>(), 3, 1);
-    check(blueprints::xor_maj_gate_layout<gate_layout>(), 3, 1);
-    check(blueprints::or_not_gate_layout<gate_layout>(), 4, 1);
-    check(blueprints::fanout_layout<gate_layout>(), 5, 1);
-    check(blueprints::crossing_layout<gate_layout>(), 4, 1);
+    check(blueprints::and_or_gate_layout<cartesian_gate_layout>(), 3, 1);
+    check(blueprints::xor_maj_gate_layout<cartesian_gate_layout>(), 3, 1);
+    check(blueprints::or_not_gate_layout<cartesian_gate_layout>(), 4, 1);
+    check(blueprints::fanout_layout<cartesian_gate_layout>(), 5, 1);
+    check(blueprints::crossing_layout<cartesian_gate_layout>(), 4, 1);
 
     SECTION("Synchronization Elements")
     {
-        using se_gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
-        check(blueprints::se_gate_layout<se_gate_layout>(), 4, 1);
+        check(blueprints::se_gate_layout<cartesian_gate_layout>(), 4, 1);
     }
 }
 
 TEST_CASE("Unbalanced layout", "[throughput]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    check(blueprints::unbalanced_and_layout<gate_layout>(), 6, 2);
+    check(blueprints::unbalanced_and_layout<cartesian_gate_layout>(), 6, 2);
 }
 
 TEST_CASE("Timing counts declared wire paths independently of placement", "[throughput][placed-objects]")
@@ -106,12 +101,10 @@ TEST_CASE("Timing rejects required holes and cycles without rejecting dangling o
 
 TEST_CASE("Critical path analysis handles long routes", "[throughput]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    constexpr int64_t length{1'000'000};
-    gate_layout       layout{{length + 1, 2}, clocking::twoddwave()};
-    auto              signal = layout.create_pi("in", {0, 0});
-    auto              branch = signal;
+    constexpr int64_t     length{1'000'000};
+    cartesian_gate_layout layout{{length + 1, 2}, clocking::twoddwave()};
+    auto                  signal = layout.create_pi("in", {0, 0});
+    auto                  branch = signal;
     for (int64_t x = 1; x < length; ++x)
     {
         signal = x == length / 2 ? layout.create_not(signal, {x, 0}) : layout.create_buf(signal, {x, 0});
