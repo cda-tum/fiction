@@ -9604,9 +9604,9 @@ R"doc(Given a collection of paths belonging to the same objective, this
 function assigns them unique labels and generates corresponding nodes
 in the edge intersection graph.
 
-Since each path of the same objective objective belongs to a clique in
-the final graph, this function additionally stores their node IDs in
-the statistics.
+Since each path of the same objective belongs to a clique in the final
+graph, this function additionally stores their node IDs in the
+statistics.
 
 Args:
     objective_paths: Collection of paths belonging to the same
@@ -9627,9 +9627,6 @@ path.
 Args:
     other: The other path.
 
-Template Args:
-    Path: Type of other path.
-
 Returns:
     `true` iff this path contains an interior coordinate of the other
     path.
@@ -9643,9 +9640,6 @@ crossings.
 Args:
     other: The other path.
 
-Template Args:
-    Path: Type of other path.
-
 Returns:
     `true` iff this path and the given one are overlapping, i.e.,
     share at least one coordinate segment of size 2.
@@ -9653,6 +9647,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_label = R"doc(Label to identify the path in the edge intersection graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_labeled_layout_coordinate_path = R"doc(Takes ownership of a coordinate path. @param path Path to label.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_layout = R"doc(Reference to the layout.)doc";
 
@@ -11761,11 +11757,7 @@ static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_st
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_y_size = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_path_collection =
-R"doc(An ordered collection of multiple paths in a layout.
-
-Template Args:
-    Path: Path type.)doc";
+static const char *mkd_doc_fiction_physical_design_path_collection = R"doc(An ordered collection of multiple paths in a layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_collection_add =
 R"doc(Adds a path. @param p Path to add. @throws std::bad_alloc If storage
@@ -11820,9 +11812,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
+auto shortest_path = a_star(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
 
@@ -11848,7 +11839,6 @@ Args:
                   the search does not modify them.
 
 Template Args:
-    Path: Type of the returned path.
     Lyt: Type of the layout to perform path finding on.
     Dist: Distance value type to be used in the heuristic estimation
           function.
@@ -11958,7 +11948,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl =
+R"doc(Implements A* search. @tparam Lyt Layout type.
+
+Template Args:
+    Dist: Distance value type. @tparam Cost Step cost value type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_a_star_impl =
 R"doc(Initializes the A* search.
@@ -12114,7 +12108,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl = R"doc(Implements loop-free path enumeration. @tparam Lyt Layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_collection = R"doc(Collection of all enumerated paths.)doc";
 
@@ -12190,7 +12184,7 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_visited = R"doc(Set of visited coordinates.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl = R"doc(Implements Yen's path enumeration. @tparam Lyt Layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_initial_obstructions = R"doc(Caller constraints retained across spur searches.)doc";
 
@@ -12363,9 +12357,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
+auto all_paths = enumerate_all_paths(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
 
@@ -12378,7 +12371,6 @@ Args:
                   the search does not modify them.
 
 Template Args:
-    Path: Type of the returned individual paths.
     Lyt: Type of the layout to perform path finding on.
 
 Returns:
@@ -12701,9 +12693,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
+auto k_paths = yen_k_shortest_paths(static_cast<cartesian_layout>(layout), {source, target}, k);
 ```
 
 
@@ -12724,7 +12715,6 @@ Args:
                   obstructions remain unchanged.
 
 Template Args:
-    Path: Type of the returned individual paths.
     Lyt: Type of the layout to perform path finding on.
 
 Returns:
@@ -12737,11 +12727,7 @@ static const char *mkd_doc_fiction_physical_design_path_finding_yen_k_shortest_p
 
 static const char *mkd_doc_fiction_physical_design_path_finding_yen_k_shortest_paths_params_astar_params = R"doc(Parameters for the internal A* algorithm.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_set =
-R"doc(A set of multiple paths in a layout.
-
-Template Args:
-    Path: Path type.)doc";
+static const char *mkd_doc_fiction_physical_design_path_set = R"doc(A set of multiple paths in a layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_set_add =
 R"doc(Adds a path. @param p Path to add. @throws std::bad_alloc If storage
@@ -12749,7 +12735,11 @@ allocation fails.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_set_contains = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_set_contains =
+R"doc(Checks membership. @param p Path to find. @return Whether the set
+contains the path.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_place =
 R"doc(Place 0-input gates.
@@ -13000,7 +12990,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Path: Coordinate path type.
 
 Raises:
     std::invalid_argument: If an endpoint or intermediate placement is
