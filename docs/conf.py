@@ -36,6 +36,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinx_llm.txt",
+    "llm_markdown",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
