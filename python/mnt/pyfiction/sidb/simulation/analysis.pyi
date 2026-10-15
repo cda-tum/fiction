@@ -473,7 +473,8 @@ class population_stability_information:
         """
         For each transition type, the distance (unit: nm) an additional SiDB
         would have to be placed at to induce the required potential
-        difference.
+        difference. Zero potential difference corresponds to positive
+        infinity.
         """
 
     @distance_corresponding_to_potential.setter
