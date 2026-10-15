@@ -121,6 +121,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Path enumeration transfers result and candidate storage without copying coordinate buffers.
   - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
     with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.

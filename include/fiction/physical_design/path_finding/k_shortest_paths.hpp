@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <utility>
 
 namespace fiction::physical_design::path_finding
 {
@@ -135,7 +136,7 @@ class yen_k_shortest_paths_impl
                     final_path.insert(final_path.end(), std::make_move_iterator(spur_path.begin()),
                                       std::make_move_iterator(spur_path.end()));
 
-                    shortest_path_candidates.add(final_path);
+                    shortest_path_candidates.insert(std::move(final_path));
                 }
 
                 // clear obstructions again (prepare for the next potential path)
@@ -154,12 +155,14 @@ class yen_k_shortest_paths_impl
                                              { return path_cost(p1) < path_cost(p2); });
                 lowest_cost_path_it != shortest_path_candidates.cend())
             {
-                k_shortest_paths.add(*lowest_cost_path_it);
-                shortest_path_candidates.erase(lowest_cost_path_it);
+                /** @brief Candidate detached from the set for transfer to the result. */
+                auto selected = shortest_path_candidates.extract(lowest_cost_path_it);
+                k_shortest_paths.push_back(std::move(selected.value()));
             }
         }
 
-        return k_shortest_paths;
+        // The public search consumes this implementation's result.
+        return std::move(k_shortest_paths);
     }
 
   private:

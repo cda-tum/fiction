@@ -26,6 +26,7 @@
 #include <cassert>
 #include <concepts>
 #include <stdexcept>
+#include <utility>
 
 namespace fiction::physical_design::path_finding
 {
@@ -78,7 +79,8 @@ class enumerate_all_paths_impl
 
         recursively_enumerate_all_paths(objective.source, objective.target, layout_coordinate_path{});
 
-        return collection;
+        // The public search consumes this implementation's result.
+        return std::move(collection);
     }
 
   private:
