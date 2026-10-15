@@ -25,6 +25,7 @@ from mnt.pyfiction.sidb.simulation import potential_landscape
 from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact, quicksim
 from mnt.pyfiction.sidb.simulation.logic import detect_bdl_pairs
 from mnt.pyfiction.synthesis import (
+    TechnologyMappingOptions,
     and_or_not,
     is_balanced,
     missing_required_gates_exception,
@@ -52,9 +53,9 @@ def test_gate_factory_keyword_options(mux21: technology_network) -> None:
     """Gate factories produce mapping keywords."""
     options = and_or_not()
     if TYPE_CHECKING:
-        assert_type(options, dict[str, bool])
+        assert_type(options, TechnologyMappingOptions)
     assert isinstance(options, dict)
-    assert technology_mapping(mux21, **cast("dict[str, Any]", options)).num_gates() > 0
+    assert technology_mapping(mux21, **options).num_gates() > 0
 
 
 @pytest.mark.parametrize(
@@ -213,9 +214,10 @@ def test_factory_gate_sets(factory_name: str, enabled: set[str], mux21: technolo
     """Each factory enables its documented gates and returns usable mapping keywords."""
     factory = getattr(import_module("mnt.pyfiction.synthesis"), factory_name)
     options = factory()
+    assert set(options) == TechnologyMappingOptions.__required_keys__
     assert {name for name, selected in options.items() if selected} == enabled
     assert all(isinstance(selected, bool) for selected in options.values())
-    assert technology_mapping(mux21, **cast("dict[str, Any]", options)).num_gates() > 0
+    assert technology_mapping(mux21, **options).num_gates() > 0
 
 
 @pytest.mark.parametrize("base", [-1, 256])
@@ -278,7 +280,7 @@ def test_mapping_default_gate_set(mux21: technology_network) -> None:
     """No gates are enabled by default, so mapping requires an explicit gate set."""
     with pytest.raises(missing_required_gates_exception, match="missing required gates"):
         technology_mapping(mux21)
-    assert technology_mapping(mux21, **cast("dict[str, Any]", and_or_not())).num_gates() > 0
+    assert technology_mapping(mux21, **and_or_not()).num_gates() > 0
 
 
 def _assert_native_rejection(call: str, exception_type: str, message: str = "") -> None:

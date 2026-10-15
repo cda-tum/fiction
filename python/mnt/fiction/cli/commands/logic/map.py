@@ -96,11 +96,11 @@ def map_command(session: Session, args: argparse.Namespace) -> Result:
     """
     options: dict[str, Any] = {}
     if args.all:
-        options = all_supported_standard_functions()
+        options.update(all_supported_standard_functions())
     elif args.all3:
-        options = all_standard_3_input_functions()
+        options.update(all_standard_3_input_functions())
     elif args.all2:
-        options = all_standard_2_input_functions()
+        options.update(all_standard_2_input_functions())
     selected = [field for flag, field in GATE_FLAGS if getattr(args, flag.replace("-", "_"))]
     for field in selected:
         options[field] = True
