@@ -817,15 +817,15 @@ class graph_oriented_layout_design_impl
      * @param src The source network to be placed, already converted to a `technology_network`.
      * @param p GOLD parameters transferred into owned invocation storage.
      * @param st The statistics object to record execution details.
-     * @param custom The custom layout cost function.
+     * @param custom Custom layout cost function transferred into owned storage.
      */
     graph_oriented_layout_design_impl(const tec_nt& src, graph_oriented_layout_design_params&& p,
-                                      graph_oriented_layout_design_stats&       st,
-                                      const std::function<uint64_t(const Lyt&)> custom) :
+                                      graph_oriented_layout_design_stats& st,
+                                      std::function<uint64_t(const Lyt&)> custom) :
             ntk{src},
             ps{std::move(p)},
             pst{st},
-            custom_cost_objective{custom},
+            custom_cost_objective{std::move(custom)},
             timeout{ps.timeout},
             start{std::chrono::high_resolution_clock::now()},
             seed{ps.seed ? *ps.seed : std::random_device{}()}
@@ -1061,7 +1061,7 @@ class graph_oriented_layout_design_impl
      */
     graph_oriented_layout_design_stats& pst;
     /**
-     * Custom cost objective.
+     * Owned custom cost objective.
      */
     const std::function<uint64_t(const Lyt&)> custom_cost_objective;
     /**
@@ -2694,7 +2694,7 @@ std::optional<Lyt> graph_oriented_layout_design(const tec_nt& ntk, graph_oriente
 
     graph_oriented_layout_design_stats             st{};
     detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), std::move(ps), st,
-                                                     custom_cost_objective};
+                                                     std::move(custom_cost_objective)};
 
     const auto result = p.run();
 
