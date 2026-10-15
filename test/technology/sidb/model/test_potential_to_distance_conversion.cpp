@@ -19,6 +19,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/technology/sidb/model/physical_constants.hpp>
 #include <fiction/technology/sidb/model/potential_to_distance_conversion.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 
