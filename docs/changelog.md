@@ -443,6 +443,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Python SiDB inputs reject bases other than 2 or 3 and nonpositive or non-finite screening values.
 
+  - Physical-model attribute assignments preserve the constructor's base and screening constraints.
+
   - **Breaking:** Use `read_network`, `read_fgl_layout`, `random_network`, `exact`, and `orthogonal`
     with keyword `network_type` or `layout_type`. Specialized function names were removed.
 
