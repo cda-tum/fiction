@@ -519,5 +519,98 @@ assert table.to_hex() == create_maj_tt().to_hex() == "e8"
 
 **Header:** `fiction/synthesis/technology_mapping_library.hpp`
 
-```{doxygenfile} technology_mapping_library.hpp
+```{doxygenvariable} fiction::synthesis::GATE_ZERO
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_ONE
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_BUF
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_INV
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_AND2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_NAND2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_OR2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_NOR2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_XOR2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_XNOR2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_LT2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_GT2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_LE2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_GE2
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_AND3
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_AND3
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_XOR_AND
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_XOR_AND
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_OR_AND
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_OR_AND
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_ONEHOT
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_ONEHOT
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_MAJ3
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_MAJ3
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_GAMBLE
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_GAMBLE
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_DOT
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_DOT
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_MUX
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_MUX
+```
+
+```{doxygenvariable} fiction::synthesis::GATE_AND_XOR
+```
+
+```{doxygenvariable} fiction::synthesis::DECAY_AND_XOR
 ```
