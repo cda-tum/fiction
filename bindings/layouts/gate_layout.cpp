@@ -24,9 +24,12 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 
 #include <fmt/format.h>
 
@@ -631,15 +634,18 @@ void register_gate_layout(nb::module_& m)
     /**
      * Gate-level clocked Cartesian layout.
      */
-    detail::register_gate_layout<py_cartesian_layout, py_cartesian_gate_layout>(m, "cartesian");
+    detail::register_gate_layout<fiction::layouts::cartesian_layout, fiction::layouts::cartesian_gate_layout>(
+        m, "cartesian");
     /**
      * Gate-level clocked shifted Cartesian layout.
      */
-    detail::register_gate_layout<py_shifted_cartesian_layout, py_shifted_cartesian_gate_layout>(m, "shifted_cartesian");
+    detail::register_gate_layout<fiction::layouts::shifted_cartesian_layout,
+                                 fiction::layouts::shifted_cartesian_gate_layout>(m, "shifted_cartesian");
     /**
      * Gate-level clocked hexagonal layout.
      */
-    detail::register_gate_layout<py_hexagonal_layout, py_hexagonal_gate_layout>(m, "hexagonal");
+    detail::register_gate_layout<fiction::layouts::hexagonal_layout, fiction::layouts::hexagonal_gate_layout>(
+        m, "hexagonal");
 }
 
 }  // namespace pyfiction
