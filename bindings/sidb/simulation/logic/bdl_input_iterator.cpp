@@ -166,7 +166,7 @@ Args:
         .def(
             "__ge__", [](const bdl_input_iterator& self, const uint64_t n) { return self >= n; }, nb::arg("m"))
         .def(
-            // These independent snapshots may release the GIL; synchronize them with cursor updates.
+            // Callers must synchronize these snapshots with cursor updates because they release the GIL.
             "__add__", [](const bdl_input_iterator& self, const int n) { return self + n; },
             nb::call_guard<nb::gil_scoped_release>(), nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_add))

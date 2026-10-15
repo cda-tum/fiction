@@ -342,6 +342,8 @@ copies that share native storage and statistics objects supplied to a running al
 all such access or pass independent objects. A callback may read its supplied arguments; it must not access other
 native objects still in use by the algorithm.
 
+Retaining the GIL in a small accessor or mutation does not protect that object from calls that release the GIL.
+
 On GIL-enabled Python builds, BDL iterator cursor updates retain the GIL so concurrent `next()` calls consume
 distinct patterns. Do not peek with `it + n`, `it - n`, or `it[n]` while another thread advances `it`.
 

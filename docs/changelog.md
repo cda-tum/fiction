@@ -428,6 +428,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - **Breaking:** More native computation, collection traversal, and file I/O release the GIL across `pyfiction` bindings.
+    Callers must synchronize shared native objects; Python object operations and small accessors retain the GIL.
+
   - **Breaking:** Python algorithms accept keyword-only options; replace parameter objects with keyword arguments.
     SiDB physics inputs use `base`, `mu_minus`, `epsilon_r`, and `lambda_tf`; physical result data remains typed.
     The retained `sidb_simulation_parameters` constructor accepts keyword-only inputs.
@@ -780,8 +783,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - **Breaking:** More native computation, collection traversal, and file I/O release the GIL across `pyfiction` bindings.
-    Callers must synchronize shared native objects; Python object operations and small accessors retain the GIL.
   - Cell-grid clocking names now remain valid when converted to Python strings.
   - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
     Mutable extents are unhashable.
