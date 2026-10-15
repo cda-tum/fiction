@@ -129,7 +129,7 @@ def test_gate_layout_inheritance(
     make_layout: Callable[[], GateLayout],
     geometry: type[cartesian_layout | shifted_cartesian_layout | hexagonal_layout],
 ) -> None:
-    """Expose clocked geometry through the placed layout."""
+    """Preserve geometry, tuple placement, and the concrete class when cloning."""
     layout = make_layout()
     assert isinstance(layout, geometry)
     source = layout.create_pi("a", (0, 0))
@@ -137,9 +137,8 @@ def test_gate_layout_inheritance(
     clone = layout.clone()
     assert type(clone) is type(layout)
     assert clone.get_extent() == layout.get_extent()
-    if isinstance(layout, (shifted_cartesian_gate_layout, hexagonal_gate_layout)) and isinstance(
-        clone, (shifted_cartesian_gate_layout, hexagonal_gate_layout)
-    ):
+    if isinstance(layout, (shifted_cartesian_gate_layout, hexagonal_gate_layout)):
+        assert isinstance(clone, (shifted_cartesian_gate_layout, hexagonal_gate_layout))
         assert clone.get_arrangement() == layout.get_arrangement()
 
     assert layout.incoming_clocked_zones((0, 0)) == []
