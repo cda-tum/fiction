@@ -23,6 +23,7 @@
 #include "fiction/types.hpp"
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/emap.hpp>
 #include <mockturtle/io/genlib_reader.hpp>
