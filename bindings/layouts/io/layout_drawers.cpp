@@ -122,6 +122,9 @@ Args:
     clock_colors: Color tiles by clock number instead of gate type. Defaults to False.
     indexes: Label tiles with object indices. Defaults to False.
     on_progress: Receives completed drawing work. Defaults to None.
+
+Raises:
+    RuntimeError: If the output file cannot be created or written.
 )doc",
         nb::call_guard<nb::gil_scoped_release>());
 }
