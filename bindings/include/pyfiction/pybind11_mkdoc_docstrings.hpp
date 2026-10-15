@@ -2758,7 +2758,8 @@ visitors must also preserve the traversed input or sink connections,
 as specified on each visitor.
 
 Template Args:
-    CoordinateLayout: Coordinate geometry used for placement.)doc";
+    CoordinateLayout: Coordinate geometry used for placement. Defaults
+                      to `cartesian_layout`.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_adjacent_opposite_tiles =
 R"doc(Returns pairs of opposite adjacent tiles.
@@ -11898,9 +11899,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_layout<cartesian_layout>;
 using path = layout_coordinate_path;
-clk_lyt layout = ...;
+fiction::layouts::cartesian_gate_layout layout = ...;
 auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
@@ -12443,9 +12443,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_layout<cartesian_layout>;
 using path = layout_coordinate_path;
-clk_lyt layout = ...;
+fiction::layouts::cartesian_gate_layout layout = ...;
 auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
@@ -12782,9 +12781,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_layout<cartesian_layout>;
 using path = layout_coordinate_path;
-clk_lyt layout = ...;
+fiction::layouts::cartesian_gate_layout layout = ...;
 auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
 ```
 
