@@ -76,6 +76,7 @@ void register_a_star_impl(nb::module_& m)
         },
         nb::arg("layout"), nb::arg("source"), nb::arg("target"), nb::kw_only(),
         nb::arg("crossings") = a_star_options{}.crossings, nb::arg("obstructions") = nb::none(),
+        nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Find a shortest loop-free path from source to target in the layout.
 The keyword options select obstructions and crossing constraints.
 Raises ValueError when source or target lies outside the layout extent.
@@ -87,7 +88,7 @@ Args:
 
     m.def("a_star_distance", &fiction::physical_design::path_finding::a_star_distance<Lyt>, nb::arg("layout"),
           nb::arg("source"), nb::arg("target"), nb::arg("obstructions") = fiction::layouts::obstructions{},
-          DOC(fiction_physical_design_path_finding_a_star_distance));
+          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_physical_design_path_finding_a_star_distance));
 }
 
 }  // namespace detail

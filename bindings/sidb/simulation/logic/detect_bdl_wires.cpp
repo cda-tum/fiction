@@ -52,6 +52,7 @@ using detect_bdl_wires_options = fiction::sidb::simulation::logic::detect_bdl_wi
  */
 void register_detect_bdl_wires(nb::module_& m)
 {
+    // Keep the GIL for wire properties converted through the Python API; native pair scans and updates release it.
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_wire;
 
@@ -86,22 +87,25 @@ void register_detect_bdl_wires(nb::module_& m)
         .def_rw("pi", &fiction::fcn::port_direction::pi, "Whether the port is a primary input.")
         .def_rw("po", &fiction::fcn::port_direction::po, "Whether the port is a primary output.");
     wire.def(nb::init<>(), DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire))
-        .def(nb::init<std::vector<fiction::sidb::simulation::logic::bdl_pair>>(), nb::arg("p"),
+        .def(nb::init<std::vector<fiction::sidb::simulation::logic::bdl_pair>>(),
+             nb::call_guard<nb::gil_scoped_release>(), nb::arg("p"),
              DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire_2))
         .def_rw("pairs", &bdl_wire::pairs, DOC(fiction_sidb_simulation_logic_bdl_wire_pairs))
         .def_rw("direction", &bdl_wire::port, DOC(fiction_sidb_simulation_logic_bdl_wire_port))
         .def_rw("first_bdl_pair", &bdl_wire::first_bdl_pair, DOC(fiction_sidb_simulation_logic_bdl_wire_first_bdl_pair))
         .def_rw("last_bdl_pair", &bdl_wire::last_bdl_pair, DOC(fiction_sidb_simulation_logic_bdl_wire_last_bdl_pair))
-        .def("add_bdl_pair", &bdl_wire::add_bdl_pair, nb::arg("pair"),
+        .def("add_bdl_pair", &bdl_wire::add_bdl_pair, nb::call_guard<nb::gil_scoped_release>(), nb::arg("pair"),
              DOC(fiction_sidb_simulation_logic_bdl_wire_add_bdl_pair))
-        .def("erase_bdl_pair", &bdl_wire::erase_bdl_pair, nb::arg("pair"),
+        .def("erase_bdl_pair", &bdl_wire::erase_bdl_pair, nb::call_guard<nb::gil_scoped_release>(), nb::arg("pair"),
              DOC(fiction_sidb_simulation_logic_bdl_wire_erase_bdl_pair))
-        .def("find_bdl_pair_by_type", &bdl_wire::find_bdl_pair_by_type, nb::arg("t"),
-             DOC(fiction_sidb_simulation_logic_bdl_wire_find_bdl_pair_by_type))
+        .def("find_bdl_pair_by_type", &bdl_wire::find_bdl_pair_by_type, nb::call_guard<nb::gil_scoped_release>(),
+             nb::arg("t"), DOC(fiction_sidb_simulation_logic_bdl_wire_find_bdl_pair_by_type))
         .def(
             "__eq__", [](const bdl_wire& lhs, const bdl_wire& rhs) { return lhs == rhs; },
-            DOC(fiction_sidb_simulation_logic_bdl_wire_operator_eq))
-        .def("__ne__", [](const bdl_wire& lhs, const bdl_wire& rhs) { return lhs != rhs; });
+            nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_logic_bdl_wire_operator_eq))
+        .def(
+            "__ne__", [](const bdl_wire& lhs, const bdl_wire& rhs) { return lhs != rhs; },
+            nb::call_guard<nb::gil_scoped_release>());
 
     m.def(
         "detect_bdl_wires",
@@ -116,6 +120,7 @@ void register_detect_bdl_wires(nb::module_& m)
             params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
             params.bdl_pairs_params.minimum_distance = minimum_distance;
             params.bdl_pairs_params.maximum_distance = maximum_distance;
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::detect_bdl_wires(lyt, params, wire_selection);
         },
         nb::arg("lyt"), nb::kw_only(),

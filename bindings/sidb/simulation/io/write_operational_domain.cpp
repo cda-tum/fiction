@@ -74,7 +74,7 @@ void register_domain_writer(nb::module_& m, const char* file_name, const char* s
             params.writing_mode        = writing_mode;
             fiction::sidb::simulation::io::write_operational_domain(opdom, filename, params);
         },
-        nb::arg("opdom"), nb::arg("filename"), nb::kw_only(),
+        nb::call_guard<nb::gil_scoped_release>(), nb::arg("opdom"), nb::arg("filename"), nb::kw_only(),
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,
         nb::arg("non_operational_tag") = write_operational_domain_options{}.non_operational_tag,
         nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode, file_doc);
@@ -94,7 +94,7 @@ void register_domain_writer(nb::module_& m, const char* file_name, const char* s
             fiction::sidb::simulation::io::write_operational_domain(opdom, oss, params);
             return oss.str();
         },
-        nb::arg("opdom"), nb::kw_only(),
+        nb::call_guard<nb::gil_scoped_release>(), nb::arg("opdom"), nb::kw_only(),
         nb::arg("operational_tag")     = write_operational_domain_options{}.operational_tag,
         nb::arg("non_operational_tag") = write_operational_domain_options{}.non_operational_tag,
         nb::arg("writing_mode")        = write_operational_domain_options{}.writing_mode,

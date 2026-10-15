@@ -68,6 +68,7 @@ void register_hexagonalization(nb::module_& m)
         .value("EXTEND_PLANAR", hexagonalization_options::io_pin_extension_mode::EXTEND_PLANAR,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR));
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::hexagonalization_stats>(m, "hexagonalization_stats",
                                                                  DOC(fiction_physical_design_hexagonalization_stats))
         .def(nb::init<>(), "Default constructor.")

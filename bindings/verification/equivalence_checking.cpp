@@ -97,6 +97,7 @@ void register_equivalence_checking(nb::module_& m)
 
         ;
 
+    // Keep the GIL for statistics construction and field access; conversions can create Python objects.
     nb::class_<fiction::verification::equivalence_checking_stats>(m, "equivalence_checking_stats",
                                                                   DOC(fiction_verification_equivalence_checking_stats))
         .def(nb::init<>(), "Default constructor.")

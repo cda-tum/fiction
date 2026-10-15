@@ -83,6 +83,7 @@ void register_gate_level_drvs_impl(nb::module_& m)
 
             if (print_report)
             {
+                // Python stdout access requires the GIL after the native check.
                 nb::print(report_stream.str().c_str());
             }
 
@@ -125,6 +126,7 @@ Args:
 void register_design_rule_violations(nb::module_& m)
 {
 
+    // Keep the GIL for statistics construction and field access; conversions can create Python objects.
     nb::class_<fiction::verification::gate_level_drv_stats>(m, "gate_level_drv_stats",
                                                             DOC(fiction_verification_gate_level_drv_stats))
         .def(nb::init<>(), "Default constructor.")
@@ -134,6 +136,7 @@ void register_design_rule_violations(nb::module_& m)
                 DOC(fiction_verification_gate_level_drv_stats_warnings))
         .def_prop_ro(
             "report", [](const fiction::verification::gate_level_drv_stats& stats) { return stats.report.dump(); },
+            nb::for_getter(nb::call_guard<nb::gil_scoped_release>()),
             "The full design rule check report as a JSON string.")
 
         ;

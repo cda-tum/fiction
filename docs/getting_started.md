@@ -330,6 +330,32 @@ message naming that version.
 
 ## Advanced Configuration
 
+### GIL handling
+
+`pyfiction` releases Python's global interpreter lock (GIL) during substantial native computation, collection
+traversal, and file I/O. Other Python threads can run while these calls execute. Small accessors and mutations
+retain the GIL because a release would add overhead. Python object construction, imports, and printing also
+require the GIL; wrappers release it only around their native work.
+
+Python callbacks passed through nanobind's `std::function` conversion acquire the GIL for each invocation.
+Native calls that wait for callback workers release the GIL so those workers can enter Python.
+
+GIL release does not synchronize native objects. Do not access an object from another thread or callback while a
+released call uses it. Even read-only operations can update native traversal state. This restriction includes
+copies that share native storage and statistics objects supplied to a running algorithm. Use a Python lock around
+all such access or pass independent objects. A callback may read its supplied arguments; it must not access other
+native objects still in use by the algorithm.
+
+Retaining the GIL in a small accessor or mutation does not protect that object from calls that release the GIL.
+
+On GIL-enabled Python builds, BDL iterator cursor updates retain the GIL so concurrent `next()` calls consume
+distinct patterns. Do not peek with `it + n`, `it - n`, or `it[n]` while another thread advances `it`.
+
+Binding contributors should use `nanobind::call_guard<nanobind::gil_scoped_release>()` for entirely native call
+bodies. Mixed wrappers need an inner release scope after Python validation and before Python result construction.
+Keep Python-owned objects and callback wrappers alive until the GIL is reacquired. Explain retained-GIL decisions
+once per binding group and locally at Python-sensitive boundaries.
+
 ### Enabling dependent functions
 
 Some functionalities require the presence of third-party dependencies. In the following, it is discussed how to enable

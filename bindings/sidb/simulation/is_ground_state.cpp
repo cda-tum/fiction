@@ -34,8 +34,8 @@ namespace pyfiction
  */
 void register_is_ground_state(nb::module_& m)
 {
-    m.def("is_ground_state", &fiction::sidb::simulation::is_ground_state, nb::arg("heuristic_results"),
-          nb::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state));
+    m.def("is_ground_state", &fiction::sidb::simulation::is_ground_state, nb::call_guard<nb::gil_scoped_release>(),
+          nb::arg("heuristic_results"), nb::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state));
 }
 
 }  // namespace pyfiction

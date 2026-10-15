@@ -16662,8 +16662,7 @@ R"doc(Returns the degeneracy value (number of states) with the given energy
 value.
 
 Args:
-    energy: The energy value for which the excited state number is to
-            be determined.
+    energy: The energy value whose degeneracy is requested.
 
 Returns:
     The degeneracy of the given energy. If the energy value is not
@@ -16715,6 +16714,9 @@ R"doc(Returns the maximum energy value in the energy distribution.
 Returns:
     The maximum energy value in the energy distribution.
 
+Raises:
+    std::invalid_argument: If the energy distribution is empty.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution_min_energy =
@@ -16722,6 +16724,9 @@ R"doc(Returns the minimum energy value in the energy distribution.
 
 Returns:
     The minimum energy value in the energy distribution.
+
+Raises:
+    std::invalid_argument: If the energy distribution is empty.
 
 )doc";
 
@@ -16868,8 +16873,8 @@ R"doc(Determines the physical parameters under which a given charge
 distribution of a layout is physically valid: every parameter point of
 the sweep dimensions in `params` is checked, and for each one where
 the charge distribution is valid, its excited-state number (the number
-of valid configurations with lower energy under those parameters) is
-recorded.
+of distinct valid energy levels below its energy under those
+parameters) is recorded.
 
 Args:
     lyt: The layout.

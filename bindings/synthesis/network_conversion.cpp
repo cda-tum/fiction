@@ -85,6 +85,7 @@ nb::object convert_to(const any_network& network)
                 const nb::gil_scoped_release release{};
                 return fiction::synthesis::convert_network<NtkDest, std::remove_cvref_t<decltype(*ntk)>>(*ntk);
             }();
+            // Python object construction requires the GIL after native conversion.
             return nb::cast(std::move(converted));
         },
         network);

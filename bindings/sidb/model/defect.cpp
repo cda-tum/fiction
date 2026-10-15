@@ -40,6 +40,7 @@ namespace pyfiction
  */
 void register_defect(nb::module_& m)
 {
+    // Keep the GIL for defect properties and scalar predicates; these calls do no substantial native work.
     nb::enum_<fiction::sidb::model::defect_type>(m, "sidb_defect_type", DOC(fiction_sidb_model_defect_type))
         .value("NONE", fiction::sidb::model::defect_type::NONE, DOC(fiction_sidb_model_defect_type_NONE))
         .value("DB", fiction::sidb::model::defect_type::DB, DOC(fiction_sidb_model_defect_type_DB))

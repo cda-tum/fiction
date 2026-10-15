@@ -163,6 +163,7 @@ struct coordinate_constructor_caster
      */
     bool from_python(nb::handle src, std::uint32_t flags, cleanup_list* cleanup) noexcept
     {
+        // Keep the GIL: the registered-class caster inspects Python instances.
         type_caster_base<Coordinate> caster;
         if (!caster.from_python(src, flags, cleanup))
         {

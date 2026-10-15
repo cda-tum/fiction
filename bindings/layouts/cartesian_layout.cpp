@@ -58,6 +58,7 @@ void register_cartesian_layout(nb::module_& m, const char* name)
     /**
      * Cartesian layout.
      */
+    // Keep the GIL for constant-time geometry access and mutation; releasing it costs more than these operations.
     nb::class_<Lyt>(m, name, CARTESIAN_LAYOUT_DOC)
         .def(nb::init<>(), extent_doc(DOC(fiction_layouts_cartesian_layout_cartesian_layout)).c_str())
         .def(nb::init<const typename Lyt::extent&>(), nb::arg("extent"),
@@ -152,7 +153,8 @@ void register_cartesian_layout(nb::module_& m, const char* name)
             },
             nb::arg("start") = nb::none(), nb::arg("stop") = nb::none(),
             "Returns coordinates in z/y/x order from the inclusive start to the exclusive stop. None uses the frame "
-            "boundary.")
+            "boundary.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def(
             "ground_coordinates",
             [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
@@ -167,7 +169,8 @@ void register_cartesian_layout(nb::module_& m, const char* name)
             },
             nb::arg("start") = nb::none(), nb::arg("stop") = nb::none(),
             "Returns layer-zero coordinates from the inclusive start to the exclusive stop. None uses the frame "
-            "boundary. Bounds outside layer zero raise ValueError.")
+            "boundary. Bounds outside layer zero raise ValueError.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def("adjacent_coordinates", &Lyt::adjacent_coordinates, nb::arg("c"),
              DOC(fiction_layouts_cartesian_layout_adjacent_coordinates))
         .def("adjacent_opposite_coordinates", &Lyt::adjacent_opposite_coordinates, nb::arg("c"),
@@ -187,7 +190,7 @@ void register_cartesian_layout(nb::module_& m, const char* name)
                 fiction::layouts::io::print_layout(lyt, stream);
                 return stream.str();
             },
-            "Returns a string representation of the layout.")
+            "Returns a string representation of the layout.", nb::call_guard<nb::gil_scoped_release>())
 
         ;
 }

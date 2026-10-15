@@ -313,8 +313,7 @@ class energy_distribution:
         value.
 
         Args:
-            energy: The energy value for which the excited state number is to
-                    be determined.
+            energy: The energy value whose degeneracy is requested.
 
         Returns:
             The degeneracy of the given energy. If the energy value is not
@@ -351,6 +350,9 @@ class energy_distribution:
 
         Returns:
             The maximum energy value in the energy distribution.
+
+        Raises:
+            std::invalid_argument: If the energy distribution is empty.
         """
 
     def min_energy(self) -> float:
@@ -359,6 +361,9 @@ class energy_distribution:
 
         Returns:
             The minimum energy value in the energy distribution.
+
+        Raises:
+            std::invalid_argument: If the energy distribution is empty.
         """
 
 def calculate_energy_distribution(

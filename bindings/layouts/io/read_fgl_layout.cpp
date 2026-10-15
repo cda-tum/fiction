@@ -49,6 +49,7 @@ void register_read_fgl_layout(nb::module_& m, const char* signature)
     const auto read =
         [](const std::string_view& filename, const std::string_view& layout_name, const nb::handle layout_type)
     {
+        // Keep the GIL for Python type dispatch, then release it for native parsing.
         if (!layout_type.is(nb::type<Lyt>()))
         {
             throw nb::next_overload();

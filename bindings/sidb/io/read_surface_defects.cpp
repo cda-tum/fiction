@@ -50,7 +50,8 @@ void register_read_surface_defects(nb::module_& m)
 
     m.def("read_surface_defects",
           nb::overload_cast<const std::string_view&, const std::string_view&>(&fiction::sidb::io::read_surface_defects),
-          nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_sidb_io_read_surface_defects_2));
+          nb::call_guard<nb::gil_scoped_release>(), nb::arg("filename"), nb::arg("layout_name") = "",
+          DOC(fiction_sidb_io_read_surface_defects_2));
 }
 
 }  // namespace pyfiction

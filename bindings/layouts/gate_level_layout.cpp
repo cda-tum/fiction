@@ -68,6 +68,7 @@ namespace detail
 template <typename LytBase, typename GateLyt>
 void register_gate_level_layout(nb::module_& m, const std::string& topology)
 {
+    // Keep the GIL for constructors, cached counts, local queries, and mutations; a release adds overhead.
     nb::class_<GateLyt, LytBase> cls(m, fmt::format("{}_gate_layout", topology).c_str(),
                                      DOC(fiction_layouts_gate_level_layout));
 
@@ -205,7 +206,8 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
                 lyt.foreach_obstructed_coordinate([&coordinates](const auto& c) { coordinates.push_back(c); });
                 return coordinates;
             },
-            "Returns manual coordinate obstructions in unspecified order, without implicit occupancy.")
+            "Returns manual coordinate obstructions in unspecified order, without implicit occupancy.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def(
             "obstructed_connections",
             [](const GateLyt& lyt)
@@ -215,7 +217,8 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
                                                   { connections.emplace_back(source, target); });
                 return connections;
             },
-            "Returns manual directed-connection obstructions in unspecified order, without physical connections.")
+            "Returns manual directed-connection obstructions in unspecified order, without physical connections.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def("is_obstructed_coordinate", &GateLyt::is_obstructed_coordinate, nb::arg("c"),
              DOC(fiction_layouts_gate_level_layout_is_obstructed_coordinate))
         .def("is_obstructed_connection", &GateLyt::is_obstructed_connection, nb::arg("src"), nb::arg("tgt"),
@@ -251,11 +254,14 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
         .def("set_layout_name", &GateLyt::set_layout_name, nb::arg("name"),
              DOC(fiction_layouts_gate_level_layout_set_layout_name))
         .def("get_layout_name", &GateLyt::get_layout_name, DOC(fiction_layouts_gate_level_layout_get_layout_name))
-        .def("clone", &GateLyt::clone, DOC(fiction_layouts_gate_level_layout_clone))
-        .def("__copy__", &GateLyt::clone, "Returns an independent layout copy, including placed objects and metadata.")
+        .def("clone", &GateLyt::clone, DOC(fiction_layouts_gate_level_layout_clone),
+             nb::call_guard<nb::gil_scoped_release>())
+        .def("__copy__", &GateLyt::clone, "Returns an independent layout copy, including placed objects and metadata.",
+             nb::call_guard<nb::gil_scoped_release>())
         .def(
             "__deepcopy__", [](const GateLyt& lyt, const nb::dict&) { return lyt.clone(); }, nb::arg("memo"),
-            "Returns an independent layout copy, including placed objects and metadata.")
+            "Returns an independent layout copy, including placed objects and metadata.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def("set_input_name", &GateLyt::set_input_name, nb::arg("index"), nb::arg("name"),
              DOC(fiction_layouts_gate_level_layout_set_input_name))
         .def("get_input_name", &GateLyt::get_input_name, nb::arg("index"),
@@ -317,6 +323,7 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             "object_function",
             [](const GateLyt& lyt, const typename GateLyt::object_id id)
             {
+                // Keep the GIL: importing synthesis accesses Python module state.
                 nb::module_::import_("mnt.pyfiction.synthesis");
                 return lyt.object_function(id);
             },
@@ -344,10 +351,12 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
         .def("po_at", &GateLyt::po_at, nb::arg("index"), DOC(fiction_layouts_gate_level_layout_po_at))
         .def(
             "set_input_order", [](GateLyt& lyt, const std::vector<typename GateLyt::object_id>& order)
-            { lyt.set_input_order(order); }, nb::arg("order"), DOC(fiction_layouts_gate_level_layout_set_input_order))
+            { lyt.set_input_order(order); }, nb::arg("order"), DOC(fiction_layouts_gate_level_layout_set_input_order),
+            nb::call_guard<nb::gil_scoped_release>())
         .def(
             "set_output_order", [](GateLyt& lyt, const std::vector<typename GateLyt::object_id>& order)
-            { lyt.set_output_order(order); }, nb::arg("order"), DOC(fiction_layouts_gate_level_layout_set_output_order))
+            { lyt.set_output_order(order); }, nb::arg("order"), DOC(fiction_layouts_gate_level_layout_set_output_order),
+            nb::call_guard<nb::gil_scoped_release>())
         .def("create_po",
              nb::overload_cast<const std::string&, const fiction::layouts::layout_base::coordinate&>(
                  &GateLyt::create_po),
@@ -370,7 +379,8 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
                 }
                 return inputs;
             },
-            nb::arg("object"), "Returns input sources in port-index order, including None for disconnected ports.")
+            nb::arg("object"), "Returns input sources in port-index order, including None for disconnected ports.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def(
             "sinks",
             [](const GateLyt& lyt, const typename GateLyt::object_id object)
@@ -383,7 +393,8 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             nb::arg("object"),
             "Returns the destination input ports driven by this object's output. Each sink identifies the destination "
             "object and its input index. If the source drives several inputs of one destination, each input is a "
-            "separate sink. Connections need not be physically legal; order is unspecified.")
+            "separate sink. Connections need not be physically legal; order is unspecified.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def("clear_tile", &GateLyt::clear_tile, nb::arg("t"), DOC(fiction_layouts_gate_level_layout_clear_tile))
 
         .def("is_gate_tile", &GateLyt::is_gate_tile, nb::arg("t"), DOC(fiction_layouts_gate_level_layout_is_gate_tile))
@@ -391,38 +402,46 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
         .def("is_empty_tile", &GateLyt::is_empty_tile, nb::arg("t"),
              DOC(fiction_layouts_gate_level_layout_is_empty_tile))
 
-        .def("pis",
-             [](const GateLyt& lyt)
-             {
-                 std::vector<typename GateLyt::object_id> pis{};
-                 pis.reserve(lyt.num_pis());
-                 lyt.foreach_pi([&pis](const auto& pi) { pis.push_back(pi); });
-                 return pis;
-             })
-        .def("pos",
-             [](const GateLyt& lyt)
-             {
-                 std::vector<typename GateLyt::object_id> pos{};
-                 pos.reserve(lyt.num_pos());
-                 lyt.foreach_po([&pos](const auto& po) { pos.push_back(po); });
-                 return pos;
-             })
-        .def("gates",
-             [](const GateLyt& lyt)
-             {
-                 std::vector<typename GateLyt::object_id> gates{};
-                 gates.reserve(lyt.num_gates());
-                 lyt.foreach_gate([&gates](const auto& g) { gates.push_back(g); });
-                 return gates;
-             })
-        .def("wires",
-             [](const GateLyt& lyt)
-             {
-                 std::vector<typename GateLyt::object_id> wires{};
-                 wires.reserve(lyt.num_wires());
-                 lyt.foreach_wire([&wires](const auto& w) { wires.push_back(w); });
-                 return wires;
-             })
+        .def(
+            "pis",
+            [](const GateLyt& lyt)
+            {
+                std::vector<typename GateLyt::object_id> pis{};
+                pis.reserve(lyt.num_pis());
+                lyt.foreach_pi([&pis](const auto& pi) { pis.push_back(pi); });
+                return pis;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "pos",
+            [](const GateLyt& lyt)
+            {
+                std::vector<typename GateLyt::object_id> pos{};
+                pos.reserve(lyt.num_pos());
+                lyt.foreach_po([&pos](const auto& po) { pos.push_back(po); });
+                return pos;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "gates",
+            [](const GateLyt& lyt)
+            {
+                std::vector<typename GateLyt::object_id> gates{};
+                gates.reserve(lyt.num_gates());
+                lyt.foreach_gate([&gates](const auto& g) { gates.push_back(g); });
+                return gates;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "wires",
+            [](const GateLyt& lyt)
+            {
+                std::vector<typename GateLyt::object_id> wires{};
+                wires.reserve(lyt.num_wires());
+                lyt.foreach_wire([&wires](const auto& w) { wires.push_back(w); });
+                return wires;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
 
         .def(
             "incoming_data_flow", [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
@@ -561,7 +580,7 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
                 const auto bb = fiction::layouts::bounding_box<GateLyt>(layout);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
-            BOUNDING_BOX_DOC)
+            BOUNDING_BOX_DOC, nb::call_guard<nb::gil_scoped_release>())
         .def(
             "__repr__",
             [](const GateLyt& lyt) -> std::string
@@ -570,7 +589,7 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
                 fiction::layouts::io::print_layout(lyt, stream);
                 return stream.str();
             },
-            "Returns a string representation of the layout.")
+            "Returns a string representation of the layout.", nb::call_guard<nb::gil_scoped_release>())
 
         .def("assign_synchronization_element", &GateLyt::assign_synchronization_element, nb::arg("coordinate"),
              nb::arg("delay"), DOC(fiction_layouts_gate_level_layout_assign_synchronization_element))
@@ -590,6 +609,7 @@ void register_gate_level_layout(nb::module_& m)
     using object_id = fiction::layouts::layout_object_id;
     /** @brief Ordered input endpoint. */
     using input_port = fiction::layouts::layout_input_port;
+    // Keep the GIL for these value operations; the input-port hash also creates a Python tuple.
     nb::class_<object_id>(m, "layout_object_id", "Layout-local generation-checked object identity.")
         .def(nb::init<uint32_t, uint32_t>(), nb::arg("index"), nb::arg("generation"))
         .def_ro("index", &object_id::index)

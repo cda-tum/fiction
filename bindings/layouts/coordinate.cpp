@@ -60,6 +60,7 @@ void set_axis(py_coordinate& self, int32_t py_coordinate::* axis, const int64_t 
  */
 void register_coordinate(nb::module_& m)
 {
+    // Keep the GIL: tuple constructors access Python objects; the remaining value operations are too short to release.
     nb::class_<py_coordinate>(m, "coordinate", DOC(fiction_layouts_layout_base_coordinate))
         .def(nb::init<>(), DOC(fiction_layouts_layout_base_coordinate_coordinate))
         .def(
@@ -167,6 +168,7 @@ void register_coordinate(nb::module_& m)
  */
 void register_coordinate_utility(nb::module_& m)
 {
+    // Keep the GIL for the constant-time extent calculation.
     m.def("area", &fiction::layouts::area_of, nb::arg("extent"), extent_doc(DOC(fiction_layouts_area_of)).c_str());
 }
 

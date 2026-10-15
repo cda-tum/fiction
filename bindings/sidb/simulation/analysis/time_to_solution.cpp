@@ -58,6 +58,7 @@ using quicksim_options = fiction::sidb::simulation::engines::quicksim_params;
  */
 void register_time_to_solution(nb::module_& m)
 {
+    // Keep the GIL for statistics properties and formatting; native time-to-solution analyses release it.
     /**
      * Statistics.
      */
@@ -172,6 +173,7 @@ Args:
            fiction::sidb::simulation::analysis::time_to_solution_stats* ps)
         {
             validate_confidence_level(confidence_level);
+            const nb::gil_scoped_release release{};
             fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results(
                 results_exact, results_heuristic, confidence_level, ps);
         },

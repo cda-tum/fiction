@@ -35,6 +35,7 @@ namespace pyfiction
  */
 void register_truth_tables(nb::module_& m)
 {
+    // Keep the GIL: these fixed-size gate truth tables require only bounded native work.
     m.def("create_id_tt", &fiction::synthesis::create_id_tt, DOC(fiction_synthesis_create_id_tt));
     m.def("create_not_tt", &fiction::synthesis::create_not_tt, DOC(fiction_synthesis_create_not_tt));
     m.def("create_and_tt", &fiction::synthesis::create_and_tt, DOC(fiction_synthesis_create_and_tt));

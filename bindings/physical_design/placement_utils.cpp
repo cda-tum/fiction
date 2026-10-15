@@ -42,6 +42,7 @@ namespace detail
 template <typename Lyt, typename Ntk>
 void register_place(nb::module_& m)
 {
+    // Keep the GIL: each overload places one gate with at most three inputs.
     m.def(
         "place",
         [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)

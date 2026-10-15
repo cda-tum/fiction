@@ -53,6 +53,7 @@ namespace detail
 template <typename Lyt>
 void register_num_adjacent_coordinates(nb::module_& m)
 {
+    // Keep the GIL for bounded neighbor queries; a release adds overhead.
     m.def("num_adjacent_coordinates", &fiction::layouts::num_adjacent_coordinates<Lyt>, nb::arg("lyt"), nb::arg("c"),
           DOC(fiction_layouts_num_adjacent_coordinates));
 }
@@ -66,7 +67,7 @@ template <typename Lyt>
 void register_normalize_layout_coordinates(nb::module_& m)
 {
     m.def("normalize_layout_coordinates", &fiction::layouts::normalize_layout_coordinates<Lyt>, nb::arg("lyt"),
-          DOC(fiction_layouts_normalize_layout_coordinates));
+          DOC(fiction_layouts_normalize_layout_coordinates), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -87,6 +88,7 @@ void register_layout_utils(nb::module_& m)
     detail::register_normalize_layout_coordinates<fiction::mol_qca::layout>(m);
     detail::register_normalize_layout_coordinates<fiction::inml::layout>(m);
 
+    // Keep the GIL for this constant-size random draw.
     m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
           nb::arg("corner1"), nb::arg("corner2"), DOC(fiction_layouts_random_coordinate));
 }

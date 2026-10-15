@@ -51,6 +51,7 @@ using design_gates_options = fiction::sidb::generators::design_gates_params;
  */
 void register_design_gates(nb::module_& m)
 {
+    // Keep the GIL for statistics formatting; native gate design releases it.
     using fiction::sidb::layout;
 
     using fiction::sidb::generators::design_gates_stats;

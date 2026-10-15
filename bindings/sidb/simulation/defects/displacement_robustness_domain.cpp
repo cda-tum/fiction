@@ -53,6 +53,7 @@ using displacement_robustness_domain_options =
  */
 void register_displacement_robustness_domain(nb::module_& m)
 {
+    // Keep the GIL for domain and statistics properties; the native robustness analysis releases it.
     using fiction::sidb::layout;
     using fiction::sidb::simulation::defects::displacement_robustness_domain;
 
