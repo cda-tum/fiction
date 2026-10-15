@@ -23,6 +23,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt.fiction.cli.opdom import run_domain
+from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.stores import CellEntry
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import write_sqd_layout
@@ -88,6 +90,28 @@ def test_opdom_explicit_specification_overrides_active_table(xor_gate: Shell, tm
     path = tmp_path / "domain.csv"
     xor_gate.ok(f'opdom "{path}" --table 0110 ' + " ".join(SMALL_SWEEP))
     assert len(path.read_text(encoding="utf-8").splitlines()) == 5
+
+
+def test_shared_workflow_preserves_options(shell: Shell, wire_with_canvas: sidb_layout, tmp_path: Path) -> None:
+    """Computation keeps the caller's requested options intact while reporting effective settings."""
+
+    args = REGISTRY["opdom"].parser.parse_args([
+        str(tmp_path / "domain.csv"),
+        "--gate",
+        "id",
+        "--algorithm",
+        "random_sampling",
+        "--samples",
+        "4",
+        "--strategy",
+        "filter_only",
+        *SMALL_SWEEP,
+    ])
+    requested = vars(args).copy()
+    result = run_domain(wire_with_canvas, shell.session, args)
+    assert vars(args) == requested
+    assert result["sketch"] is True
+    assert result["grid_search"] is False
 
 
 @pytest.mark.parametrize(

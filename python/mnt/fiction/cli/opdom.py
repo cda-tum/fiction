@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import argparse
 from functools import partial
 from typing import TYPE_CHECKING
 
@@ -49,8 +50,6 @@ from mnt.pyfiction.sidb.simulation.logic import (
 from .simulation import ENGINES, apply_physical, engine_argument, physical_arguments
 
 if TYPE_CHECKING:
-    import argparse
-
     from mnt.fiction.cli.parsing import Parser
     from mnt.pyfiction.sidb import sidb_layout
     from mnt.pyfiction.synthesis import dynamic_truth_table
@@ -101,27 +100,26 @@ def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
         parser: The command parser.
         require_spec: Require an explicit logic specification.
     """
-    logic = parser.add_mutually_exclusive_group(required=require_spec)
+    logic = parser.add_argument_group("logic specification").add_mutually_exclusive_group(required=require_spec)
     logic.add_argument("--gate", choices=list(GATES), help="expected gate function")
     logic.add_argument(
         "--table", action="append", metavar="BITS", help="binary or 0x-prefixed hex table; repeat per output"
     )
     logic.add_argument("--expression", action="append", metavar="EXPR", help="Boolean expression; repeat per output")
-    algorithm = parser.add_mutually_exclusive_group()
+    reconstruction = parser.add_argument_group("reconstruction")
+    algorithm = reconstruction.add_mutually_exclusive_group()
     algorithm.add_argument(
         "--algorithm",
         choices=["grid_search", "random_sampling", "flood_fill", "contour_tracing"],
         help="reconstruction method; grid_search by default; add --sketch for filters only",
     )
-    parser.add_argument("--samples", type=positive_int, metavar="N", help="random samples for a named sampling method")
-    algorithm.add_argument(
-        "-g", "--grid-search", action="store_true", help="reconstruct the domain by grid search; the default"
+    reconstruction.add_argument(
+        "--samples", type=positive_int, metavar="N", help="random samples for a named sampling method"
     )
-    algorithm.add_argument("-r", "--random-sampling", type=positive_int, metavar="N", help="sample N random points")
-    algorithm.add_argument("-f", "--flood-fill", type=positive_int, metavar="N", help="flood fill from N random points")
-    algorithm.add_argument(
-        "-c", "--contour-tracing", type=positive_int, metavar="N", help="trace contours from N random points"
-    )
+    algorithm.add_argument("-g", "--grid-search", action="store_true", help=argparse.SUPPRESS)
+    algorithm.add_argument("-r", "--random-sampling", type=positive_int, metavar="N", help=argparse.SUPPRESS)
+    algorithm.add_argument("-f", "--flood-fill", type=positive_int, metavar="N", help=argparse.SUPPRESS)
+    algorithm.add_argument("-c", "--contour-tracing", type=positive_int, metavar="N", help=argparse.SUPPRESS)
     parser.add_argument(
         "-s",
         "--sketch",
@@ -148,7 +146,7 @@ def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
     defaults = operational_domain_params()
     operational = defaults.operational_params
     wires = operational.input_bdl_iterator_params.bdl_wire_params
-    advanced = parser.add_argument_group("operational analysis")
+    advanced = parser.add_argument_group("operational analysis (advanced)")
     advanced.add_argument("--threads", type=positive_int, default=defaults.number_of_threads, help="worker threads")
     advanced.add_argument(
         "--timeout-ms",
@@ -187,6 +185,33 @@ def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
     plot_arguments(parser)
 
 
+def normalize_options(args: argparse.Namespace) -> argparse.Namespace:
+    """Resolve legacy algorithm flags and Sketch into a copy of the requested options.
+
+    Args:
+        args: Parsed options owned by the caller.
+
+    Returns:
+        Options with one effective algorithm, sample count, and Sketch selection.
+
+    Raises:
+        CommandError: The algorithm and sample count do not agree.
+    """
+    normalized = argparse.Namespace(**vars(args))
+    sampling_methods = ("random_sampling", "flood_fill", "contour_tracing")
+    if args.samples is not None and args.algorithm not in sampling_methods:
+        msg = "--samples requires --algorithm random_sampling, flood_fill, or contour_tracing"
+        raise CommandError(msg)
+    legacy = next((name for name in sampling_methods if getattr(args, name) is not None), None)
+    normalized.algorithm = args.algorithm or legacy or "grid_search"
+    normalized.samples = getattr(args, legacy) if legacy else args.samples
+    if normalized.algorithm in sampling_methods and normalized.samples is None:
+        msg = f"--algorithm {normalized.algorithm} requires --samples N"
+        raise CommandError(msg)
+    normalized.sketch = args.sketch or args.strategy == "filter_only"
+    return normalized
+
+
 def run_domain(
     layout: sidb_layout,
     output: CommandOutput,
@@ -205,19 +230,8 @@ def run_domain(
 
     Returns:
         Statistics and output paths for the log.
-
-    Raises:
-        CommandError: The algorithm and sample count do not agree.
     """
-    if args.algorithm in {"random_sampling", "flood_fill", "contour_tracing"}:
-        if args.samples is None:
-            msg = f"--algorithm {args.algorithm} requires --samples N"
-            raise CommandError(msg)
-        setattr(args, args.algorithm, args.samples)
-    elif args.samples is not None:
-        msg = "--samples requires --algorithm random_sampling, flood_fill, or contour_tracing"
-        raise CommandError(msg)
-    samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
+    args = normalize_options(args)
 
     params, parameters = domain_parameters(output, args)
     spec = gate_specification(layout, args, params, fallback_spec)
@@ -241,7 +255,7 @@ def run_domain(
     return {
         **stats_to_dict(stats),
         "engine": args.engine,
-        "grid_search": samples is None,
+        "grid_search": args.algorithm == "grid_search",
         "sketch": args.sketch,
         "sweeps": [
             {"parameter": getattr(args, f"{axis}_sweep")} for axis in ("x", "y", "z") if getattr(args, f"{axis}_sweep")
@@ -278,7 +292,6 @@ def domain_parameters(
     if args.sketch and args.strategy not in {None, "filter_only"}:
         msg = "--sketch requires --strategy filter_only"
         raise CommandError(msg)
-    args.sketch = args.sketch or args.strategy == "filter_only"
     if args.sketch and args.condition == "tolerate_kinks":
         msg = "Filter-only analysis requires --condition reject_kinks"
         raise CommandError(msg)
@@ -333,12 +346,12 @@ def compute_domain(
         The domain and native statistics.
     """
     stats = operational_domain_stats()
-    if args.random_sampling is not None:
-        domain = operational_domain_random_sampling(layout, spec, args.random_sampling, params, stats)
-    elif args.flood_fill is not None:
-        domain = operational_domain_flood_fill(layout, spec, args.flood_fill, params, stats)
-    elif args.contour_tracing is not None:
-        domain = operational_domain_contour_tracing(layout, spec, args.contour_tracing, params, stats)
+    if args.algorithm == "random_sampling":
+        domain = operational_domain_random_sampling(layout, spec, args.samples, params, stats)
+    elif args.algorithm == "flood_fill":
+        domain = operational_domain_flood_fill(layout, spec, args.samples, params, stats)
+    elif args.algorithm == "contour_tracing":
+        domain = operational_domain_contour_tracing(layout, spec, args.samples, params, stats)
     else:
         domain = operational_domain_grid_search(layout, spec, params, stats)
 

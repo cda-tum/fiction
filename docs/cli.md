@@ -426,6 +426,8 @@ The x and y axes sweep `epsilon_r` from 1 to 10 and `lambda_tf` from 1 to 10 in 
 needs its own parameter; sweeping one on two axes would produce a degenerate domain and is refused.
 
 Both entry points accept `--algorithm grid_search|random_sampling|flood_fill|contour_tracing`.
+Help groups the logic specification, reconstruction, sweeps, plotting, and advanced operational analysis.
+Examples use the named algorithm selector; the legacy algorithm flags remain accepted but are omitted from help.
 Grid search is the default and evaluates every point. Random sampling, flood fill, and contour tracing require
 `--samples N`. Add `--sketch` to any reconstruction method for filter-only analysis. The named selector and
 the existing `-g`, `-r N`, `-f N`, and `-c N` flags are mutually exclusive. The short flags keep their sample
