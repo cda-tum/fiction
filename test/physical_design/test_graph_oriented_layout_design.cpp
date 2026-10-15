@@ -487,6 +487,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     params.seed           = 12345;
     custom_cost_evaluated = false;
 
+    /** @brief Maximum-effort placement result for the custom cost objective. */
     const auto layout_maximum_effort = graph_oriented_layout_design<cartesian_gate_layout>(
         ntk, params, &stats, std::function<uint64_t(const cartesian_gate_layout&)>{custom_cost_objective});
 
