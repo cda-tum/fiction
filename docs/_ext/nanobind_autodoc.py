@@ -122,14 +122,16 @@ def prepare_docstring(_app: Sphinx, _what: str, name: str, _obj: object, _option
 
 def qualify_type_references(_app: Sphinx, doctree: nodes.document) -> None:
     """Keep Python's built-in type distinct from binding properties named type."""
-    for reference in doctree.findall(addnodes.pending_xref):
-        if (
-            reference.get("refdomain") == "py"
-            and reference.get("reftype") == "class"
-            and reference.get("reftarget") == "type"
-            and (reference.get("py:module") or "").startswith("mnt.pyfiction")
-        ):
-            reference["reftarget"] = "builtins.type"
+    for signature in doctree.findall(addnodes.desc_signature):
+        if not (signature.get("module") or "").startswith("mnt.pyfiction"):
+            continue
+        for reference in signature.findall(addnodes.pending_xref):
+            if (
+                reference.get("refdomain") == "py"
+                and reference.get("reftype") == "class"
+                and reference.get("reftarget") == "type"
+            ):
+                reference["reftarget"] = "builtins.type"
 
 
 def register_documenters(app: Sphinx, _config: Config) -> None:

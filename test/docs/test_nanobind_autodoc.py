@@ -67,7 +67,6 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
         "Rendering\n=========\n\n"
         ".. py:class:: sidb_defect\n\n   .. py:property:: type\n\n"
         ".. py:class:: bdl_pair\n\n   .. py:property:: type\n\n"
-        ".. automodule:: mnt.pyfiction\n\n"
         ".. autofunction:: mnt.pyfiction.route\n\n"
         ".. py:function:: keyword(*, value: int = 42)\n\n"
         ".. py:attribute:: setting\n   :type: int\n\n"
