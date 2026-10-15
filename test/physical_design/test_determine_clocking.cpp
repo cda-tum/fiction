@@ -25,9 +25,7 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 

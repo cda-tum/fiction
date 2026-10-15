@@ -20,7 +20,6 @@
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/post_layout_optimization.hpp>
