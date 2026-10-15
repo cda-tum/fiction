@@ -1,4 +1,6 @@
-# Logic Simulation
+(logic-simulation)=
+
+# Logic
 
 ## BDL Input Iterator
 

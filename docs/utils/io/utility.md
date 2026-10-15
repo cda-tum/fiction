@@ -1,6 +1,8 @@
-# Utility
+(utility)=
 
-Utility code for I/O.
+# I/O
+
+## CSV Writer
 
 **Header:** `fiction/utils/io/csv_writer.hpp`
 

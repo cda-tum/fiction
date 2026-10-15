@@ -40,7 +40,9 @@ path_finding/path_finding
 :members:
 ```
 
-## Placement Utils
+(placement-utils)=
+
+## Placement Utilities
 
 ::::{tab-set}
 :sync-group: language
@@ -91,7 +93,9 @@ path_finding/path_finding
 
 ::::
 
-## Routing Utils
+(routing-utils)=
+
+## Routing Utilities
 
 ::::{tab-set}
 :sync-group: language

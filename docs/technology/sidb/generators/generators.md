@@ -47,7 +47,9 @@ on_the_fly_circuit_design
 
 ::::
 
-## Is SiDB gate design deemed impossible
+(is-sidb-gate-design-deemed-impossible)=
+
+## Gate Design Feasibility
 
 **Header:** `fiction/technology/sidb/generators/is_gate_design_impossible.hpp`
 

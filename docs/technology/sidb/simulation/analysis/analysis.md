@@ -1,4 +1,6 @@
-# Simulation Analysis
+(simulation-analysis)=
+
+# Analysis
 
 ## Energy Calculation
 

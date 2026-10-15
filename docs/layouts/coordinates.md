@@ -21,6 +21,8 @@ and the crossing layer at `z = 1`. Construction and resize reject valid extents 
 Gate-level layouts store object identity separately from placement coordinates. An editing object
 may lie outside the frame; physical design-rule checks validate frame membership.
 
+## Coordinate Types
+
 ::::{tab-set}
 :sync-group: language
 
@@ -56,7 +58,9 @@ may lie outside the frame; physical design-rule checks validate frame membership
 
 ::::
 
-## Coordinate iterator
+(coordinate-iterator)=
+
+## Coordinate Iterator
 
 An iterator type that allows to enumerate coordinates in order within a boundary.
 
@@ -64,7 +68,9 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 ```
 
-## Utility functions
+(utility-functions)=
+
+## Utility Functions
 
 ::::{tab-set}
 :sync-group: language

@@ -2,7 +2,9 @@
 
 # On-the-fly SiDB Circuit Design
 
-## Placed and routed layouts
+(placed-and-routed-layouts)=
+
+## Placed and Routed Layouts
 
 The circuit designer implements each tile of a hexagonal gate-level layout with SiDBs.
 The input must be placed and routed with port orientations supported by the Bestagon skeletons.
@@ -76,7 +78,9 @@ write_sqd_layout(circuit, "and.sqd")
 
 ::::
 
-## Defective surfaces
+(defective-surfaces)=
+
+## Defective Surfaces
 
 The C++ interface for defective surfaces requires Z3. It excludes gate-tile combinations whose
 skeletons overlap neutral defects, then uses `exact` for placement and routing. The gate designer

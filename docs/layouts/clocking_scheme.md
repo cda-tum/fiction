@@ -13,6 +13,8 @@ $(x, y)$ of a gate-level or tile-clocked cell-level layout by repeating a rectan
 as pre-defined schemes from the literature. Schemes can be copied, assigned, and compared, and individual clock numbers
 can be overridden.
 
+## Scheme Types
+
 ```{doxygenclass} fiction::layouts::clocking::scheme
 :members:
 ```
@@ -22,7 +24,9 @@ can be overridden.
 
 The {doc}`hexagonal_layout` page documents the `arrangement` type.
 
-## Pre-defined schemes
+(pre-defined-schemes)=
+
+## Pre-defined Schemes
 
 ### Open
 
@@ -144,7 +148,9 @@ The {doc}`hexagonal_layout` page documents the `arrangement` type.
 
 ```
 
-## Utility functions
+(utility-functions)=
+
+## Utility Functions
 
 ```{doxygenfunction} fiction::layouts::clocking::is_linear
 

@@ -1,4 +1,8 @@
-# Distance Functions
+# Path Finding
+
+(distance-functions)=
+
+## Distance Functions
 
 Distance functions compute (an approximation for) the distance between two coordinates.
 

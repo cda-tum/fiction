@@ -1,6 +1,8 @@
 # STL Utilities
 
-## Array Utils
+(array-utils)=
+
+## Array Utilities
 
 **Header:** `fiction/utils/stl/array_utils.hpp`
 

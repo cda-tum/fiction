@@ -8,7 +8,9 @@
 :members:
 ```
 
-## Map utils
+(map-utils)=
+
+## Map Utilities
 
 ::::{tab-set}
 :sync-group: language
@@ -26,7 +28,11 @@
 
 ::::
 
-## Math Utils
+(math-utils)=
+
+(math-utilities)=
+
+## Arithmetic
 
 **Header:** `fiction/utils/math/math_utils.hpp`
 
@@ -45,6 +51,8 @@
 ```{doxygenfunction} fiction::utils::math::binomial_coefficient
 
 ```
+
+## Combinations
 
 **Header:** `fiction/utils/math/combination_utils.hpp`
 

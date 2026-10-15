@@ -1,4 +1,6 @@
-# Defect Simulation
+(defect-simulation)=
+
+# Defects
 
 ## Displacement Robustness Domain
 

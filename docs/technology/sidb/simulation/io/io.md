@@ -1,4 +1,6 @@
-# Simulation I/O
+(simulation-i/o)=
+
+# I/O
 
 ## SiDB Operational Domain
 
