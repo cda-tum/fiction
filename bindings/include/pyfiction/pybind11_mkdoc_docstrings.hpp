@@ -6950,6 +6950,25 @@ number of fanins.)doc";
 
 static const char *mkd_doc_fiction_networks_high_degree_fanin_exception_high_degree_fanin_exception = R"doc()doc";
 
+static const char *mkd_doc_fiction_networks_initialize_copy_network_with_virtual_pis =
+R"doc(Creates an empty network of the same type as `src` with copies of its
+constants and primary inputs, virtual primary inputs included, and a
+map from the nodes of `src` to their copies. Primary inputs are
+created in the order that `foreach_pi_unranked` yields when `Ntk`
+offers it, so that rank bookkeeping of the copy matches `src`.
+
+Args:
+    src: Source network.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    The destination network and the node map from `src` to the
+    destination.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_interface_matching = R"doc(Complete permutations from the left interface to the right interface.)doc";
 
 static const char *mkd_doc_fiction_networks_interface_matching_inputs = R"doc(Right primary input index for each left primary input index.)doc";
