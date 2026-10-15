@@ -176,7 +176,10 @@ template <typename NtkSrc, typename NtkDest>
             (!(mockturtle::has_has_output_name_v<NtkSrc> && mockturtle::has_get_output_name_v<NtkSrc> && (requires {
                    requires std::same_as<typename NtkDest::object_id, layouts::layout_object_id>;
                } || mockturtle::has_set_output_name_v<NtkDest>)) ||
-             requires(const NtkSrc& src) { src.foreach_po([](const auto&, const auto) {}); })
+             requires(const NtkSrc& src, NtkDest& dest) {
+                 src.foreach_po([](const auto&, const auto) {});
+                 dest.set_output_name(uint32_t{}, src.get_output_name(uint32_t{}));
+             })
 void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 {
     if constexpr (mockturtle::has_has_output_name_v<NtkSrc> && mockturtle::has_get_output_name_v<NtkSrc> && (requires {
@@ -203,8 +206,8 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
  * @tparam NtkSrc Source logic network type.
  * @tparam NtkDest Target network or gate-level layout type.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
- * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
  * @tparam Signal Target signal or layout output port type.
+ * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
  * @param old2new Mapping of signals from `ntk_src` to `ntk_dest`.
  */
 template <typename NtkSrc, typename NtkDest, typename Signal>
