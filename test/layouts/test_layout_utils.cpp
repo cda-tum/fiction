@@ -43,6 +43,24 @@ using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
 
+/** @brief Tests coordinate-neighbor API availability. @tparam Lyt Layout type. */
+template <typename Lyt>
+concept adjacent_coordinate_layout =
+    requires(const Lyt& lyt) { num_adjacent_coordinates(lyt, layout_base::coordinate{}); };
+
+/** @brief Tests cell-position conversion availability. @tparam Lyt Gate-level layout type. */
+template <typename Lyt>
+concept relative_position_layout = requires(const Lyt& lyt) {
+    relative_to_absolute_cell_position<3, 3>(lyt, layout_base::coordinate{}, layout_base::coordinate{});
+};
+
+static_assert(adjacent_coordinate_layout<cartesian_layout>);
+static_assert(!adjacent_coordinate_layout<int>);
+static_assert(relative_position_layout<cartesian_gate_layout>);
+static_assert(relative_position_layout<shifted_cartesian_gate_layout>);
+static_assert(relative_position_layout<hexagonal_gate_layout>);
+static_assert(!relative_position_layout<cartesian_layout>);
+
 TEST_CASE("Gate-level layouts are created with the required arrangement", "[layout-utils]")
 {
     const auto a =

@@ -199,13 +199,12 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      * @throws utils::timeout_error if the per-gate or enclosing deadline is reached.
      */
     template <typename GateLyt, typename Params>
+        requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
+                 std::derived_from<GateLyt, layouts::hexagonal_layout> &&
+                 (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
     static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t,
                             const Params& parameters, const std::optional<layout>& defect_surface = std::nullopt)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-
         auto params               = parameters;
         params.design_gate_params = simulation::logic::detail::checked_parameters(params.design_gate_params);
 

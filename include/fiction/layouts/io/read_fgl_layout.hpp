@@ -738,12 +738,9 @@ class read_fgl_layout_impl
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 [[nodiscard]] Lyt read_fgl_layout(std::istream& is, const std::string_view& name = "")
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     detail::read_fgl_layout_impl<Lyt> p{is, name};
 
     return p.run();
@@ -762,12 +759,9 @@ template <typename Lyt>
  * @param is The input stream to read from.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 void read_fgl_layout(Lyt& lyt, std::istream& is)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     detail::read_fgl_layout_impl<Lyt> p{lyt, is};
 
     lyt = p.run();
@@ -782,6 +776,7 @@ void read_fgl_layout(Lyt& lyt, std::istream& is)
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 [[nodiscard]] Lyt read_fgl_layout(const std::string_view& filename, const std::string_view& name = "")
 {
     std::ifstream is{std::string{filename}, std::ifstream::in};
@@ -805,6 +800,7 @@ template <typename Lyt>
  * @param filename The file name to open and read from.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
 {
     std::ifstream is{std::string{filename}, std::ifstream::in};
