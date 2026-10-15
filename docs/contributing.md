@@ -38,7 +38,7 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 
 - ["Commit early and push often"](https://www.worklytics.co/blog/commit-early-push-often).
 - Write meaningful commit messages. Prefix each subject with a single [gitmoji](https://gitmoji.dev) character matching the change's dominant nature; `AGENTS.md` documents the convention in full.
-- Focus on a single feature/bug at a time and only touch relevant files. Split multiple features into multiple contributions.
+- Focus on one feature or bug. Include fixes and cleanups found during the work as separate commits; discuss redesigns first. Keep dependency updates in separate pull requests.
 - If you added a new feature, you should add tests that ensure it works as intended. Furthermore, the new feature should be documented appropriately.
 - If you fixed a bug, you should add tests that demonstrate that the bug has been fixed.
 - Document your code thoroughly and write readable code.
@@ -68,7 +68,7 @@ every eligible C++ file.
 
 - Create PRs early. It is ok to create work-in-progress PRs. You may mark these as draft PRs on GitHub.
 
-- Describe your PR. Start with a descriptive title, reference any related issues by including the issue number in the PR description, and add a comprehensive description of the changes. We provide a PR template that you can (and should) follow to create a PR.
+- Follow the PR template. Use a descriptive title and a short paragraph explaining the need, resulting behavior, and any decision the diff cannot explain. Reference related issues and complete the checklist.
 
 - Whenever a PR is created or updated, the `CI` workflow runs. Its `🔍 Change` job classifies your diff and skips the jobs your changes cannot affect, so a documentation-only PR does not pay for the C++ matrix. `🚦 Check` aggregates every job and is the one status that has to be green. Here are some tips for finding the cause of certain failures:
 
@@ -190,8 +190,8 @@ This document was inspired by and partially adapted from
 
 Install [uv](https://docs.astral.sh/uv/), Doxygen, and the C++ build prerequisites
 listed in {doc}`getting_started`. The documentation session uses Python 3.12 and
-builds the checkout's Python bindings. Install Z3 and make its headers and library
-available to CMake, as required by the `pyfiction` preset.
+builds the checkout's Python bindings. The session installs the Python build dependencies,
+including `z3-solver`; CMake discovers Z3 from that environment.
 
 Run these commands from the repository root:
 
