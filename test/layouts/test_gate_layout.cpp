@@ -15,6 +15,9 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <fiction/layouts/gate_layout.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -25,7 +28,6 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
