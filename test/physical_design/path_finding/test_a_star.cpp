@@ -82,7 +82,6 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
     }
     SECTION("clocking paths")
     {
-
         SECTION("2DDWave")
         {
             const gate_layout<lyt> layout{gate_layout<lyt>::extent{2, 2, 1}, clocking::twoddwave()};
@@ -171,7 +170,6 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
     }
     SECTION("clocking paths")
     {
-
         SECTION("2DDWave")
         {
             const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::twoddwave()};
@@ -668,7 +666,6 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
     }
     SECTION("clocking paths")
     {
-
         SECTION("2DDWave")
         {
             const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::twoddwave()};

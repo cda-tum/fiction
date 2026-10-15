@@ -56,7 +56,6 @@ TEST_CASE("Balanced layout", "[throughput]")
 
     SECTION("Synchronization Elements")
     {
-
         check(blueprints::se_gate_layout<cartesian_gate_layout>(), 4, 1);
     }
 }
