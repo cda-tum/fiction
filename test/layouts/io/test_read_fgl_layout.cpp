@@ -37,7 +37,6 @@
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::layouts::io;
-using namespace fiction::networks;
 
 namespace
 {
