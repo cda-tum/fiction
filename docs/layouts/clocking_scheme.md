@@ -31,7 +31,7 @@ The {doc}`hexagonal_layout` page documents the `arrangement` type.
 
 (pre-defined-schemes)=
 
-## Pre-defined Schemes
+## Pre-Defined Schemes
 
 ### Open
 

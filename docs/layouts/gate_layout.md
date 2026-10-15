@@ -1,4 +1,4 @@
-# Gate-level Layout
+# Gate-Level Layout
 
 `gate_layout<CoordinateLayout>` places Boolean gates and wires on a coordinate layout.
 The layout owns its clocking scheme, synchronization delays, and persistent obstructions.

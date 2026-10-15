@@ -2,7 +2,7 @@
 
 (post_layout_opt)=
 
-# Optimizing 2DDWave-clocked Cartesian Layouts
+# Optimizing 2DDWave-Clocked Cartesian Layouts
 
 This algorithm aims to decrease the overall layout area of a given 2DDWave-clocked Cartesian layout that has been
 generated using either heuristic methods or machine learning techniques. It achieves this objective by strategically

@@ -320,7 +320,7 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 
 ```
 
-## Binary-dot Logic (BDL) Pair Detection
+## Binary-Dot Logic (BDL) Pair Detection
 
 ::::{tab-set}
 :sync-group: language
@@ -358,7 +358,7 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 
 ::::
 
-## Binary-dot Logic (BDL) Wire Detection
+## Binary-Dot Logic (BDL) Wire Detection
 
 ::::{tab-set}
 :sync-group: language

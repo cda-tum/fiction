@@ -1,6 +1,6 @@
 (wiring_reduction)=
 
-# Wiring Reduction in 2DDWave-clocked Cartesian Layouts
+# Wiring Reduction in 2DDWave-Clocked Cartesian Layouts
 
 **Header:** `fiction/physical_design/wiring_reduction.hpp`
 

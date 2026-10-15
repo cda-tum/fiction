@@ -1,6 +1,6 @@
 (graph_oriented_layout_design)=
 
-# Graph-oriented Layout Design
+# Graph-Oriented Layout Design
 
 Generates FCN gate-level layouts from logic network specifications by spanning a search space graph where each placement
 event can be represented as a search space vertex characterized by a partial layout at that instance. Edges between a

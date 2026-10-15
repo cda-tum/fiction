@@ -1,6 +1,6 @@
 (on_the_fly_design)=
 
-# On-the-fly SiDB Circuit Design
+# On-the-Fly SiDB Circuit Design
 
 (placed-and-routed-layouts)=
 

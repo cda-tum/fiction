@@ -1,6 +1,6 @@
 (exact)=
 
-# SMT-based Exact Physical Design
+# SMT-Based Exact Physical Design
 
 Utilizes the SMT solver [Z3](https://github.com/Z3Prover/z3) to generate minimal FCN gate-level layouts from logic
 network specifications under constraints. This approach finds exact results but has a large runtime overhead.

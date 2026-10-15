@@ -139,7 +139,7 @@ distribution per physically valid state beside a single copy of the simulated la
 
 ::::
 
-## Gate-library Coordinates
+## Gate-Library Coordinates
 
 SiDB gate libraries describe their gates on a grid whose rows are single SiDB rows. `apply_gate_library` maps these
 grid coordinates onto lattice sites with the following function.

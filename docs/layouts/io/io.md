@@ -1,6 +1,6 @@
 # Layout I/O
 
-## Gate-level Layouts
+## Gate-Level Layouts
 
 Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
@@ -54,7 +54,7 @@ leaves an existing destination layout unchanged.
 
 ::::
 
-## Technology-independent Gate-level Layouts
+## Technology-Independent Gate-Level Layouts
 
 Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
