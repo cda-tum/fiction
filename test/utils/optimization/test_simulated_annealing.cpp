@@ -39,6 +39,21 @@ struct lvalue_annealing_cost
     }
 };
 
+/** @brief Cost with a distinct declared result type and actual state-evaluation overload. */
+struct overloaded_annealing_cost
+{
+    /** @brief Selects the declared double cost type. @param state State value. @return Cost value. */
+    double operator()(int&& state) const
+    {
+        return static_cast<double>(state) + 100.0;
+    }
+    /** @brief Evaluates the actual state. @param state State value. @return Cost value. */
+    float operator()(const int& state) const
+    {
+        return static_cast<float>(state) + 0.25f;
+    }
+};
+
 /** @brief Cost callable only as an rvalue, unlike the algorithm's named callable parameters. */
 struct rvalue_annealing_cost
 {
@@ -88,14 +103,14 @@ TEST_CASE("Annealing accepts signed floating-point costs and actual callable for
     const auto next      = [](const auto& state) { return state; };
     const auto generator = [] { return 0; };
     CHECK((annealable<decltype(cost), decltype(schedule), decltype(next)>));
-    CHECK((annealable<lvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK((annealable<lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<rvalue_annealing_cost, decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<int, decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
     CHECK_FALSE((annealable<decltype(cost), decltype(schedule), decltype([](int) { return 0.0; })>));
     CHECK((multi_annealable<decltype(generator), decltype(cost), decltype(schedule), decltype(next)>));
-    CHECK((multi_annealable<decltype(generator), lvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK((multi_annealable<decltype(generator), lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
     CHECK_FALSE((multi_annealable<decltype(generator), rvalue_annealing_cost, decltype(schedule), decltype(next)>));
     CHECK_FALSE(
         (multi_annealable<decltype(generator), decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
@@ -107,10 +122,32 @@ TEST_CASE("Annealing accepts signed floating-point costs and actual callable for
     CHECK_FALSE((multi_annealable<decltype([] { return nondefault_annealing_state{0}; }), decltype(cost),
                                   decltype(schedule), decltype(next)>));
 
-    const auto result =
-        simulated_annealing(0, 2.0, 1.0, 1, lvalue_annealing_cost{}, schedule, [](int& state) { return state - 1; });
+    /** Cost callable passed as a named lvalue. */
+    lvalue_annealing_cost lvalue_cost{};
+    const auto result = simulated_annealing(0, 2.0, 1.0, 1, lvalue_cost, schedule, [](int state) { return state - 1; });
     CHECK(result.first == -1);
     CHECK(result.second == -1.0);
+}
+
+TEST_CASE("Annealing preserves the declared cost type with overloaded costs", "[sim-anneal]")
+{
+    /** Temperature schedule that completes one temperature step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** Neighbor with a lower cost than the initial state. */
+    const auto next = [](int state) { return state - 1; };
+    /** Initial state for each independent worker. */
+    const auto generator = [] { return 0; };
+    /** Single-state result retains the declared double result while evaluating the lvalue state. */
+    const auto single = simulated_annealing(0, 2.0, 1.0, 1, overloaded_annealing_cost{}, schedule, next);
+    /** Multi-state result retains the same declared cost type. */
+    const auto multi =
+        multi_simulated_annealing(2.0, 1.0, 1, 2, generator, overloaded_annealing_cost{}, schedule, next);
+    CHECK((std::same_as<typename decltype(single)::second_type, double>));
+    CHECK((std::same_as<typename decltype(multi)::second_type, double>));
+    CHECK(single.first == -1);
+    CHECK(single.second == -0.75f);
+    CHECK(multi.first == -1);
+    CHECK(multi.second == -0.75f);
 }
 
 /**
