@@ -440,7 +440,7 @@ void write_dot_network(const Ntk& ntk, std::ostream& os, const Drawer& drawer = 
  * @param ntk Network to write.
  * @param filename Path of the file to write.
  * @param drawer Drawer that decides the node labels, colors, and styles.
- * @throws std::ofstream::failure if the file cannot be opened.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <typename Ntk, typename Drawer = technology_dot_drawer<Ntk, true>>
 void write_dot_network(const Ntk& ntk, const std::string_view& filename, const Drawer& drawer = {})

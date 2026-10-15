@@ -305,12 +305,11 @@ inline void write_mol_qca_layout_svg(const mol_qca::layout& lyt, std::ostream& o
 /**
  * Writes an SVG representation of a molQCA layout to a file. Each regular cell is colored by its clock phase.
  *
- * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout. May throw an
- * `std::ofstream::failure` if it cannot open the file.
- *
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.svg` extension.
  * @param ps Parameters.
+ * @throws fcn::io::unsupported_cell_type_exception If the layout contains an unsupported cell type.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_mol_qca_layout_svg(const mol_qca::layout& lyt, const std::string_view& filename,
                                      const write_mol_qca_layout_svg_params& ps = {})

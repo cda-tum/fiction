@@ -596,6 +596,7 @@ inline void write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.qca` extension.
  * @param ps Parameters.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_qca_layout(const qca::layout& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 {

@@ -663,6 +663,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
  * @param filename Output filename.
  * @param drawer Drawer that supplies DOT layout attributes.
  * @param on_progress Receives completed drawing work.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <class Lyt, class Drawer>
 void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {},
