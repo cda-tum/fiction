@@ -37,7 +37,7 @@ void register_potential_to_distance_conversion(nb::module_& m)
 {
     m.def("potential_to_distance_conversion", &fiction::sidb::model::potential_to_distance_conversion,
           nb::arg("potential"), nb::arg("params"), nb::arg("precision"),
-          DOC(fiction_sidb_model_potential_to_distance_conversion));
+          value_error_doc(DOC(fiction_sidb_model_potential_to_distance_conversion)).c_str());
 }
 
 }  // namespace pyfiction
