@@ -20,6 +20,7 @@
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
+#include <fiction/networks/views/static_depth_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/traits.hpp>
@@ -37,6 +38,7 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <stdexcept>
@@ -59,7 +61,7 @@ concept rank_viewable = requires { typename mutable_rank_view<Ntk>; };
 struct network_without_visited : mockturtle::aig_network
 {
     /** @brief Disables visited-state lookup. @param n Node to inspect. */
-    uint32_t visited(const node& n) const = delete;
+    [[nodiscard]] uint32_t visited(const node& n) const = delete;
 };
 
 /** @brief Checks the rank view's inherited depth interface. @tparam Ntk Network to test. */

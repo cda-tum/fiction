@@ -15,13 +15,17 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/utils/optimization/simulated_annealing.hpp>
 
 #include <algorithm>
+#include <cmath>
+#include <concepts>
 #include <random>
 #include <stdexcept>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::utils::optimization;
@@ -39,11 +43,8 @@ struct lvalue_annealing_cost
 /** @brief Cost with a distinct declared result type and actual state-evaluation overload. */
 struct overloaded_annealing_cost
 {
-    /** @brief Selects the declared double cost type. @param state State value. @return Cost value. */
-    double operator()(int&& state) const
-    {
-        return static_cast<double>(state) + 100.0;
-    }
+    /** @brief Selects the declared double cost type in unevaluated calls. @return Declared cost value. */
+    double operator()(int&&) const;
     /** @brief Evaluates the actual state. @param state State value. @return Cost value. */
     float operator()(const int& state) const
     {
@@ -178,7 +179,7 @@ TEST_CASE("Annealing preserves the declared cost type with overloaded costs", "[
  */
 double schwefel_function_1d(const double& x) noexcept
 {
-    return 418.9829 - x * std::sin(std::sqrt(std::abs(x)));
+    return 418.9829 - (x * std::sin(std::sqrt(std::abs(x))));
 }
 /**
  * This function implements a randomized initial state generator for the 1D Schwefel function. It returns a random value
@@ -228,8 +229,8 @@ TEST_CASE("1D Schwefel function", "[sim-anneal]")
  */
 double drop_wave_function_2d(const std::pair<double, double>& x) noexcept
 {
-    return -((1.0 + std::cos(12.0 * std::sqrt(x.first * x.first + x.second * x.second))) /
-             (0.5 * (x.first * x.first + x.second * x.second) + 2.0));
+    return -((1.0 + std::cos(12.0 * std::sqrt((x.first * x.first) + (x.second * x.second)))) /
+             (0.5 * ((x.first * x.first) + (x.second * x.second)) + 2.0));
 }
 /**
  * This function implements a randomized initial state generator for the 2D Drop-Wave function. It returns a random pair

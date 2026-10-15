@@ -43,6 +43,8 @@ concept bfs_viewable = requires { typename bfs_topo_view<Ntk>; };
 struct sorted_pass_through
 {
     /** @brief Selects the pass-through specialization. */
+    // mockturtle detects this exact marker spelling.
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_topologically_sorted = true;
 };
 

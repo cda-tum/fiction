@@ -18,6 +18,8 @@
 
 #include <mockturtle/networks/detail/foreach.hpp>
 
+#include <cstdint>
+
 namespace mockturtle::detail
 {
 
@@ -40,8 +42,12 @@ namespace mockturtle::detail
 template <class Iterator, class ElementType, class Pred, class Transform, class Fn>
     requires(is_callable_with_index_v<Fn, ElementType, void> || is_callable_without_index_v<Fn, ElementType, void> ||
              is_callable_with_index_v<Fn, ElementType, bool> || is_callable_without_index_v<Fn, ElementType, bool>)
-Iterator foreach_element_if_transform(Iterator begin, Iterator end, Pred&& pred, Transform&& transform, Fn&& fn,
-                                      uint32_t counter_offset = 0)
+Iterator foreach_element_if_transform(
+    Iterator begin, Iterator end,
+    Pred&&      pred,       // NOLINT(cppcoreguidelines-missing-std-forward): preserve repeated lvalue invocation
+    Transform&& transform,  // NOLINT(cppcoreguidelines-missing-std-forward): preserve repeated lvalue invocation
+    Fn&&        fn,         // NOLINT(cppcoreguidelines-missing-std-forward): preserve repeated lvalue invocation
+    uint32_t    counter_offset = 0)
 {
     if constexpr (is_callable_without_index_v<Fn, ElementType, bool>)
     {
