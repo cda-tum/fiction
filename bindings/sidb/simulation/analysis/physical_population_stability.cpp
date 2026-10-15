@@ -102,7 +102,6 @@ void register_physical_population_stability(nb::module_& m)
             physical_population_stability_options{}.precision_for_distance_corresponding_to_potential,
         R"doc(Determine the stability of the SiDB population under the physical model.
 The keyword options select simulation, potential precision, and the execution budget.
-Raises ValueError for invalid physical values or a precision outside 0 to 15.
 Distance conversion bisects the distance bracket up to floating-point resolution.
 
 Raises:
