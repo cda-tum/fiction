@@ -131,7 +131,8 @@ def qualify_type_references(_app: Sphinx, doctree: nodes.document) -> None:
                 and reference.get("reftype") == "class"
                 and reference.get("reftarget") == "type"
             ):
-                reference["reftarget"] = "builtins.type"
+                reference["intersphinx"] = True
+                reference["inventory"] = "python"
 
 
 def register_documenters(app: Sphinx, _config: Config) -> None:

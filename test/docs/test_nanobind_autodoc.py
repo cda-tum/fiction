@@ -14,6 +14,7 @@ import html
 import re
 import subprocess
 import sys
+import zlib
 from pathlib import Path
 
 import pytest
@@ -25,6 +26,11 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
     source = tmp_path / "source"
     source.mkdir()
     extension = Path(__file__).resolve().parents[2] / "docs" / "_ext"
+    (source / "python.inv").write_bytes(
+        b"# Sphinx inventory version 2\n# Project: Python\n# Version: 3\n"
+        b"# The remainder of this file is compressed using zlib.\n"
+        + zlib.compress(b"type py:class 1 library/functions.html#type -\n")
+    )
     (source / "conf.py").write_text(
         f"import sys\nsys.path[:0] = [{str(extension)!r}, {str(source)!r}]\n"
         "import importlib.util\n"
@@ -34,8 +40,9 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
         "    module = importlib.util.module_from_spec(spec)\n"
         "    sys.modules[name] = module\n"
         "    spec.loader.exec_module(module)\n"
-        "extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_llm.txt', "
+        "extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_llm.txt', "
         "'nanobind_autodoc', 'llm_markdown']\n"
+        f"intersphinx_mapping = {{'python': ('https://docs.python.org/3/', {str(source / 'python.inv')!r})}}\n"
         "autodoc_use_legacy_class_based = True\n"
         "llms_txt_enabled = False\n",
         encoding="utf-8",
@@ -92,6 +99,8 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
     assert result.returncode == 0, result.stdout + result.stderr
     output = (tmp_path / "out" / ("index.html" if builder == "html" else "index.md")).read_text(encoding="utf-8")
     text = html.unescape(re.sub(r"<[^>]+>", "", output)) if builder == "html" else output
+    text = re.sub(r"\[([^]]+)\]\([^)]+\)", r"\1", text).replace("`", "")
+    type_url = "https://docs.python.org/3/library/functions.html#type"
     assert "Integer overload prose" in text
     assert "String overload prose" in text
     assert "first" in text
@@ -109,11 +118,13 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
     assert "2. `route(" not in text
     assert text.count("layout:") == 2
     if builder == "html":
+        assert output.count(f'href="{type_url}"') == 2
         assert 'href="#sidb_defect"' in output
         assert "<ul>" in output
         assert 'class="highlight-python' in output
         assert "*," in text
     else:
+        assert output.count(f"[type]({type_url})") == 2
         assert "[`sidb_defect`](sphinx-llm:" in output
         assert "- Keep `first` item." in output
         assert "```python\nroute(1, limit=42)\n```" in output
