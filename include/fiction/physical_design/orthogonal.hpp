@@ -111,8 +111,12 @@ struct coloring_container
     /** @brief Named traversal with separate node and edge colors. */
     networks::views::out_of_place_edge_color_view<mockturtle::topo_view<mockturtle::fanout_view<tec_nt>>> color_ntk;
 
-    /** @brief Uncolored, eastward, and southward color identifiers. */
-    uint32_t color_null = 0ul, color_east, color_south;
+    /** @brief Identifier for uncolored edges. */
+    uint32_t color_null = 0ul;
+    /** @brief Identifier for eastward edges. */
+    uint32_t color_east;
+    /** @brief Identifier for southward edges. */
+    uint32_t color_south;
 
     /** @brief Returns the other direction color. */
     [[nodiscard]] uint32_t opposite_color(const uint32_t c) const noexcept
