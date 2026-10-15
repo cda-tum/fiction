@@ -668,8 +668,8 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
 TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty",
           "[graph-oriented-layout-design]")
 {
-    mockturtle::names_view<technology_network> empty{};
-    graph_oriented_layout_design_params        params{};
+    const mockturtle::names_view<technology_network> empty{};
+    graph_oriented_layout_design_params              params{};
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
@@ -728,7 +728,7 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     ps.return_first   = true;
     const auto result = graph_oriented_layout_design<cartesian_gate_layout>(ntk, ps);
     REQUIRE(result.has_value());
-    const auto& lyt = result.value();
+    const auto& lyt = required_value(result);
     CHECK(lyt.get_layout_name() == "named_spec");
     CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
     CHECK(lyt.get_name(lyt.pi_at(1)) == "right");

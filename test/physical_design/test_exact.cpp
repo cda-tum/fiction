@@ -17,7 +17,6 @@
  */
 
 #include <catch2/catch_message.hpp>
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
@@ -26,6 +25,8 @@
 #include <fiction/layouts/gate_layout.hpp>
 
 #if (FICTION_Z3_SOLVER)
+
+#include <catch2/catch_template_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -922,13 +923,6 @@ TEST_CASE("Exact physical design requires an arrangement for shifted Cartesian a
     CHECK_THROWS_AS(exact_with_blacklist<hexagonal_gate_layout>(ntk, {}), std::invalid_argument);
 }
 
-#else  // FICTION_Z3_SOLVER
-
-TEST_CASE("Exact physical design", "[exact]")
-{
-    CHECK(true);  // workaround for empty test case
-}
-
 TEMPLATE_TEST_CASE("Named specification conversion for exact", "[physical-network]", mockturtle::aig_network,
                    mockturtle::xag_network, mockturtle::mig_network)
 {
@@ -944,6 +938,7 @@ TEMPLATE_TEST_CASE("Named specification conversion for exact", "[physical-networ
     CHECK(ntk.get_output_name(0) == "result");
     const auto result = exact<cartesian_gate_layout>(ntk);
     REQUIRE(result.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
     const auto& lyt = result.value();
     CHECK(lyt.get_layout_name() == "named_spec");
     CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
@@ -955,6 +950,13 @@ TEMPLATE_TEST_CASE("Named specification conversion for exact", "[physical-networ
     CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
     CHECK(extracted.get_output_name(0) == "result");
     check_eq(source, extracted);
+}
+
+#else  // FICTION_Z3_SOLVER
+
+TEST_CASE("Exact physical design", "[exact]")
+{
+    CHECK(true);  // workaround for empty test case
 }
 
 #endif  // FICTION_Z3_SOLVER
