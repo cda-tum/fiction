@@ -12,37 +12,18 @@ from collections.abc import Callable
 
 import mnt.pyfiction.mol_qca
 
-class write_mol_qca_layout_svg_params:
-    """Parameters for writing SVG molQCA layouts."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives serialization progress."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def simple(self) -> bool:
-        """Limit details to create smaller file sizes."""
-
-    @simple.setter
-    def simple(self, arg: bool, /) -> None: ...
-
 def write_mol_qca_layout_svg(
-    layout: mnt.pyfiction.mol_qca.mol_qca_layout, filename: str, params: write_mol_qca_layout_svg_params = ...
+    layout: mnt.pyfiction.mol_qca.mol_qca_layout,
+    filename: str,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    simple: bool = False,
 ) -> None:
     """
-    Writes an SVG representation of a molQCA layout to an output stream.
-    Each regular cell is colored by its clock phase.
-
-    May throw an `unsupported_cell_type_exception` if it encounters
-    unsupported cell types in the layout.
+    Write an SVG representation of the molQCA layout to the supplied filename.
+    simple selects a compact drawing; on_progress reports writing progress.
 
     Args:
-        lyt: The layout to be written.
-        os: The output stream to write into.
-        ps: Parameters.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        simple: Limit details to create smaller file sizes.
     """

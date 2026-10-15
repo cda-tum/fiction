@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import pytest
@@ -50,8 +51,12 @@ def test_ortho_converts_other_network_types(shell: Shell, resource: Callable[[st
 
 
 def test_gold(mux21_shell: Shell) -> None:
-    mux21_shell.ok("gold -r -e high_efficiency -c wires --seed 1")
+    """Timed GOLD creates a layout that implements the active network."""
+    mux21_shell.ok("gold -r -e high_efficiency -c wires --seed 1 -t 60")
     assert isinstance(mux21_shell.session.gate_layouts.current(), cartesian_gate_layout)
+    assert simulate_outputs(mux21_shell.session.gate_layouts.current()) == simulate_outputs(
+        mux21_shell.session.networks.current()
+    )
     assert "at least 1" in mux21_shell.fails("gold -n 0")
 
 
@@ -62,12 +67,15 @@ def test_hex(mux21_shell: Shell) -> None:
 
 
 def test_optimize(mux21_shell: Shell) -> None:
+    """Timed, relocation-limited optimization preserves the original and circuit function."""
     mux21_shell.ok("ortho")
     original = mux21_shell.session.gate_layouts.current()
     area_before = original.area()
-    mux21_shell.ok("optimize -v; optimize -w")
+    mux21_shell.ok("optimize -v -m 1 -t 10; optimize -w -t 10")
     assert len(mux21_shell.session.gate_layouts) == 3
     assert original.area() == area_before
+    expected = simulate_outputs(mux21_shell.session.networks.current())
+    assert all(simulate_outputs(layout) == expected for layout in mux21_shell.session.gate_layouts.items)
     assert mux21_shell.session.gate_layouts.items[1].area() <= area_before
     assert "must be positive" in mux21_shell.fails("optimize -t 0")
 
@@ -78,11 +86,14 @@ def test_optimize_needs_2ddwave(mux21_shell: Shell) -> None:
 
 
 @pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
-def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s 2ddwave -t 60')
+def test_exact(shell: Shell, resource: Callable[[str], str], monkeypatch: pytest.MonkeyPatch) -> None:
+    """All-core exact synthesis preserves the input truth table with a finite budget."""
+    monkeypatch.setattr(os, "cpu_count", lambda: 2)
+    shell.ok(f'read "{resource("xor2.v")}"; exact --async-max -x -b -s 2ddwave -t 60')
     layout = shell.session.gate_layouts.current()
     assert isinstance(layout, cartesian_gate_layout)
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
+    assert simulate_outputs(layout) == simulate_outputs(shell.session.networks.current())
     assert "not a clocking scheme" in shell.fails("exact -s nope")
 
 

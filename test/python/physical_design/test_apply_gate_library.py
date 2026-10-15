@@ -17,7 +17,6 @@ from mnt.pyfiction.physical_design import (
     apply_sim7_mol_library,
     apply_topolinano_library,
     exact,
-    exact_params,
     orthogonal,
     technology_constraints,
 )
@@ -48,13 +47,15 @@ def test_apply_sim7_mol_library(mux21: technology_network) -> None:
 
 def test_apply_bestagon_library(mux21: technology_network) -> None:
     """Map the library and report every processed source gate."""
-    params = exact_params()
-    params.scheme = "ROW"
-    params.crossings = True
-    params.border_io = True
-    params.layout_arrangement = arrangement.EVEN_ROW
 
-    layout = exact(mux21, params, layout_type=hexagonal_gate_layout)
+    layout = exact(
+        mux21,
+        layout_type=hexagonal_gate_layout,
+        scheme="ROW",
+        crossings=True,
+        border_io=True,
+        layout_arrangement=arrangement.EVEN_ROW,
+    )
     assert layout is not None
 
     reports: list[tuple[str, int, int]] = []
@@ -64,14 +65,16 @@ def test_apply_bestagon_library(mux21: technology_network) -> None:
 
 def test_apply_topolinano_library(mux21: technology_network) -> None:
     """Map the library and report every processed source gate."""
-    params = exact_params()
-    params.scheme = "COLUMNAR3"
-    params.crossings = True
-    params.border_io = True
-    params.technology_specifics = technology_constraints.TOPOLINANO
-    params.layout_arrangement = arrangement.ODD_COLUMN
 
-    layout = exact(mux21, params, layout_type=shifted_cartesian_gate_layout)
+    layout = exact(
+        mux21,
+        layout_type=shifted_cartesian_gate_layout,
+        scheme="COLUMNAR3",
+        crossings=True,
+        border_io=True,
+        technology_specifics=technology_constraints.TOPOLINANO,
+        layout_arrangement=arrangement.ODD_COLUMN,
+    )
     assert layout is not None
 
     reports: list[tuple[str, int, int]] = []

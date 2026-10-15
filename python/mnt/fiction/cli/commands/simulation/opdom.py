@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import finite_float, positive_int
@@ -20,7 +20,6 @@ from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.pyfiction.sidb.simulation.io import (
     sample_writing_mode,
     write_operational_domain,
-    write_operational_domain_params,
 )
 from mnt.pyfiction.sidb.simulation.logic import (
     operational_analysis_strategy,
@@ -28,7 +27,6 @@ from mnt.pyfiction.sidb.simulation.logic import (
     operational_domain_contour_tracing,
     operational_domain_flood_fill,
     operational_domain_grid_search,
-    operational_domain_params,
     operational_domain_random_sampling,
     operational_domain_stats,
     operational_domain_value_range,
@@ -41,7 +39,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
+from ._common import ENGINES, _active_sidb_layout, _engine_argument, _physical_arguments, _physical_options
 
 SWEEPS = {
     "epsilon_r": sweep_parameter.EPSILON_R,
@@ -114,31 +112,30 @@ def opdom(session: Session, args: argparse.Namespace) -> Result:
     spec = [session.truth_tables.current()]
     samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
 
-    params = operational_domain_params()
-    params.on_progress = session.report_progress
-    params.on_worker_progress = session.report_worker_progress
-    params.operational_params.sim_engine = ENGINES[args.engine]
-    parameters = _apply_physical(params.operational_params.simulation_parameters, args)
+    options: dict[str, Any] = {
+        "on_progress": session.report_progress,
+        "on_worker_progress": session.report_worker_progress,
+        "sim_engine": ENGINES[args.engine],
+    }
+    parameters = _physical_options(args)
+    options.update(parameters)
     if args.sketch:
-        params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
-        params.operational_params.op_condition = operational_condition.REJECT_KINKS
-    params.sweep_dimensions = _sweep_dimensions(args)
+        options["strategy_to_analyze_operational_status"] = operational_analysis_strategy.FILTER_ONLY
+        options["op_condition"] = operational_condition.REJECT_KINKS
+    options["sweep_dimensions"] = _sweep_dimensions(args)
 
     stats = operational_domain_stats()
     if args.random_sampling is not None:
-        domain = operational_domain_random_sampling(layout, spec, args.random_sampling, params, stats)
+        domain = operational_domain_random_sampling(layout, spec, args.random_sampling, stats=stats, **options)
     elif args.flood_fill is not None:
-        domain = operational_domain_flood_fill(layout, spec, args.flood_fill, params, stats)
+        domain = operational_domain_flood_fill(layout, spec, args.flood_fill, stats=stats, **options)
     elif args.contour_tracing is not None:
-        domain = operational_domain_contour_tracing(layout, spec, args.contour_tracing, params, stats)
+        domain = operational_domain_contour_tracing(layout, spec, args.contour_tracing, stats=stats, **options)
     else:
-        domain = operational_domain_grid_search(layout, spec, params, stats)
+        domain = operational_domain_grid_search(layout, spec, stats=stats, **options)
 
-    writing = write_operational_domain_params()
-    writing.writing_mode = (
-        sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
-    )
-    write_operational_domain(domain, str(args.file), writing)
+    writing_mode = sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
+    write_operational_domain(domain, str(args.file), writing_mode=writing_mode)
     session.info(
         f"{stats.num_operational_parameter_combinations} of {stats.num_evaluated_parameter_combinations} "
         f"evaluated points are operational; wrote {args.file}"

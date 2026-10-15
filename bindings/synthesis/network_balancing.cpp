@@ -14,8 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/network_balancing.hpp>
@@ -40,25 +38,50 @@ namespace pyfiction
  */
 void register_network_balancing(nb::module_& m)
 {
-    nb::class_<fiction::synthesis::network_balancing_params>(
-        m, "network_balancing_params", pyfiction::progress_type_slots<fiction::synthesis::network_balancing_params>(),
-        DOC(fiction_synthesis_network_balancing_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::synthesis::network_balancing_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                "Receives completed work and the phase total.")
-        .def_rw("unify_outputs", &fiction::synthesis::network_balancing_params::unify_outputs,
-                DOC(fiction_synthesis_network_balancing_params_unify_outputs))
+    m.def(
+        "network_balancing",
+        [](const py_tec_network&                                                        network,
+           const decltype(fiction::synthesis::network_balancing_params{}.on_progress)&  on_progress,
+           const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs)
+        {
+            fiction::synthesis::network_balancing_params params{};
+            params.on_progress   = on_progress;
+            params.unify_outputs = unify_outputs;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::network_balancing<py_tec_network, py_tec_network>(network, params);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
+        R"doc(Insert identity nodes to balance network paths.
+Returns a fresh technology network that is logically equivalent to the input.
+Set unify_outputs to place every output at the same logic depth.
 
-        ;
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    unify_outputs: Flag to indicate that all output nodes should be in the same rank.
+)doc");
 
-    m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, py_tec_network>,
-          nb::arg("network"), nb::arg("params") = fiction::synthesis::network_balancing_params{},
-          DOC(fiction_synthesis_network_balancing), nb::call_guard<nb::gil_scoped_release>());
+    m.def(
+        "is_balanced",
+        [](const py_tec_network&                                                        network,
+           const decltype(fiction::synthesis::network_balancing_params{}.on_progress)&  on_progress,
+           const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs)
+        {
+            fiction::synthesis::network_balancing_params params{};
+            params.on_progress   = on_progress;
+            params.unify_outputs = unify_outputs;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::is_balanced<py_tec_network>(network, params);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("unify_outputs") = fiction::synthesis::network_balancing_params{}.unify_outputs,
+        R"doc(Check whether network paths are balanced.
+Set unify_outputs to require every output at the same logic depth.
 
-    m.def("is_balanced", &fiction::synthesis::is_balanced<py_tec_network>, nb::arg("network"),
-          nb::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_is_balanced),
-          nb::call_guard<nb::gil_scoped_release>());
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    unify_outputs: Flag to indicate that all output nodes should be in the same rank.
+)doc");
 }
 
 }  // namespace pyfiction

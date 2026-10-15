@@ -42,9 +42,6 @@
 .. autoclass:: mnt.pyfiction.sidb.simulation.defects.displacement_analysis_mode
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.defects.displacement_robustness_domain_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.sidb.simulation.defects.displacement_robustness_domain_stats
    :members:
 

@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import integer, positive_float, positive_int, seed
@@ -21,7 +21,6 @@ from mnt.pyfiction.physical_design import (
     gold_cost_objective,
     gold_effort_mode,
     graph_oriented_layout_design,
-    graph_oriented_layout_design_params,
     graph_oriented_layout_design_stats,
 )
 
@@ -83,28 +82,29 @@ def gold(session: Session, args: argparse.Namespace) -> Result:
     The result is a 2DDWave-clocked Cartesian layout. The network must not have gates with more
     than two inputs.
     """
-    params = graph_oriented_layout_design_params()
-    params.on_progress = session.report_progress
-    params.on_worker_progress = session.report_worker_progress
-    params.num_vertex_expansions = args.expansions
-    params.mode = getattr(gold_effort_mode, args.effort.upper())
-    params.cost = getattr(gold_cost_objective, args.cost.upper())
-    params.return_first = args.return_first
-    params.planar = args.planar
-    params.enable_multithreading = args.multithreading
-    params.straight_inverters = args.straight_inverters
-    params.tiles_to_skip_between_pis = args.skip_tiles
-    params.randomize_tiles_to_skip_between_pis = args.randomize_skip_tiles
-    params.verbose = False
+    options: dict[str, Any] = {
+        "on_progress": session.report_progress,
+        "on_worker_progress": session.report_worker_progress,
+        "num_vertex_expansions": args.expansions,
+        "mode": getattr(gold_effort_mode, args.effort.upper()),
+        "cost": getattr(gold_cost_objective, args.cost.upper()),
+        "return_first": args.return_first,
+        "planar": args.planar,
+        "enable_multithreading": args.multithreading,
+        "straight_inverters": args.straight_inverters,
+        "tiles_to_skip_between_pis": args.skip_tiles,
+        "randomize_tiles_to_skip_between_pis": args.randomize_skip_tiles,
+        "verbose": False,
+    }
     if args.seed is not None:
-        params.seed = args.seed
+        options["seed"] = args.seed
     timeout = _seconds_to_ms(args.timeout)
     if timeout is not None:
-        params.timeout = timeout
+        options["timeout"] = timeout
 
     network = session.as_technology_network(session.networks.current())
     stats = graph_oriented_layout_design_stats()
-    layout = graph_oriented_layout_design(network, params, stats)
+    layout = graph_oriented_layout_design(network, statistics=stats, **options)
     if layout is None:
         msg = f"no layout found for '{get_name(network)}' within the search bounds or timeout"
         error = CommandError(msg)

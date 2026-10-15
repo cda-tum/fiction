@@ -122,9 +122,6 @@
 .. autoclass:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_stats
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_gate_based
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.analysis.critical_temperature_non_gate_based
@@ -177,9 +174,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.sidb.simulation.analysis.time_to_solution_stats
    :members:
 
@@ -290,9 +284,6 @@
    :members:
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.analysis.population_stability_information
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.analysis.physical_population_stability_params
    :members:
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.analysis.physical_population_stability

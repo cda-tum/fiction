@@ -16,7 +16,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/verification/design_rule_violations.hpp>
@@ -27,6 +26,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner): enables keyword options
 #include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner): enables return-value conversion
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner): enables return-value conversion
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
@@ -39,6 +39,9 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using gate_level_drv_options = fiction::verification::gate_level_drv_params;
+
 namespace detail
 {
 
@@ -48,9 +51,26 @@ void register_gate_level_drvs_impl(nb::module_& m)
 {
     m.def(
         "gate_level_drvs",
-        [](const Lyt& lyt, fiction::verification::gate_level_drv_params params = {}, const bool print_report = false,
-           fiction::verification::gate_level_drv_stats* statistics = nullptr) -> std::pair<std::size_t, std::size_t>
+        [](const Lyt& lyt, const decltype(gate_level_drv_options{}.on_progress)& on_progress,
+           const decltype(gate_level_drv_options{}.outside_extent)           outside_extent,
+           const decltype(gate_level_drv_options{}.non_adjacent_connections) non_adjacent_connections,
+           const decltype(gate_level_drv_options{}.missing_connections)      missing_connections,
+           const decltype(gate_level_drv_options{}.crossing_gates)           crossing_gates,
+           const decltype(gate_level_drv_options{}.clocked_data_flow)        clocked_data_flow,
+           const decltype(gate_level_drv_options{}.has_io)                   has_io,
+           const decltype(gate_level_drv_options{}.border_io) border_io, const bool print_report,
+           fiction::verification::gate_level_drv_stats* statistics) -> std::pair<std::size_t, std::size_t>
         {
+            gate_level_drv_options params{};
+            params.on_progress              = on_progress;
+            params.outside_extent           = outside_extent;
+            params.non_adjacent_connections = non_adjacent_connections;
+            params.missing_connections      = missing_connections;
+            params.crossing_gates           = crossing_gates;
+            params.clocked_data_flow        = clocked_data_flow;
+            params.has_io                   = has_io;
+            params.border_io                = border_io;
+
             std::ostringstream report_stream{};
             params.out = &report_stream;
 
@@ -73,8 +93,30 @@ void register_gate_level_drvs_impl(nb::module_& m)
 
             return {stats.warnings, stats.drvs};
         },
-        nb::arg("layout"), nb::arg("params") = fiction::verification::gate_level_drv_params{},
-        nb::arg("print_report") = false, nb::arg("statistics") = nullptr, DOC(fiction_verification_gate_level_drvs));
+        nb::arg("layout"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("outside_extent")           = gate_level_drv_options{}.outside_extent,
+        nb::arg("non_adjacent_connections") = gate_level_drv_options{}.non_adjacent_connections,
+        nb::arg("missing_connections")      = gate_level_drv_options{}.missing_connections,
+        nb::arg("crossing_gates")           = gate_level_drv_options{}.crossing_gates,
+        nb::arg("clocked_data_flow")        = gate_level_drv_options{}.clocked_data_flow,
+        nb::arg("has_io") = gate_level_drv_options{}.has_io, nb::arg("border_io") = gate_level_drv_options{}.border_io,
+        nb::arg("print_report") = false, nb::arg("statistics") = nullptr,
+        R"doc(Count design-rule violations in the gate-level layout.
+Returns (warnings, drvs); statistics receives their counts.
+The keyword options select which checks run.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    non_adjacent_connections: Check for nodes that are connected to non-adjacent ones.
+    missing_connections: Check for nodes without connections.
+    crossing_gates: Check for wires that are crossing gates.
+    clocked_data_flow: Check if all node connections obey the clocking scheme data flow.
+    has_io: Check if the layout has I/Os.
+    border_io: Check whether primary inputs and outputs lie on the layout border.
+    print_report: Print the design-rule report to Python stdout.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
+    outside_extent: Check that every live object lies within the layout extent.
+)doc");
 }
 
 }  // namespace detail
@@ -82,31 +124,6 @@ void register_gate_level_drvs_impl(nb::module_& m)
 /** @brief Registers design rule checks and reports. @param m Python module. */
 void register_design_rule_violations(nb::module_& m)
 {
-    nb::class_<fiction::verification::gate_level_drv_params>(
-        m, "gate_level_drv_params", pyfiction::progress_type_slots<fiction::verification::gate_level_drv_params>(),
-        DOC(fiction_verification_gate_level_drv_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::verification::gate_level_drv_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                "Receives completed work and the phase total.")
-
-        .def_rw("outside_extent", &fiction::verification::gate_level_drv_params::outside_extent,
-                "Checks that every live object lies within the layout extent.")
-        .def_rw("non_adjacent_connections", &fiction::verification::gate_level_drv_params::non_adjacent_connections,
-                DOC(fiction_verification_gate_level_drv_params_non_adjacent_connections))
-        .def_rw("missing_connections", &fiction::verification::gate_level_drv_params::missing_connections,
-                DOC(fiction_verification_gate_level_drv_params_missing_connections))
-        .def_rw("crossing_gates", &fiction::verification::gate_level_drv_params::crossing_gates,
-                DOC(fiction_verification_gate_level_drv_params_crossing_gates))
-        .def_rw("clocked_data_flow", &fiction::verification::gate_level_drv_params::clocked_data_flow,
-                DOC(fiction_verification_gate_level_drv_params_clocked_data_flow))
-        .def_rw("has_io", &fiction::verification::gate_level_drv_params::has_io,
-                DOC(fiction_verification_gate_level_drv_params_has_io))
-
-        .def_rw("border_io", &fiction::verification::gate_level_drv_params::border_io,
-                DOC(fiction_verification_gate_level_drv_params_border_io))
-
-        ;
 
     nb::class_<fiction::verification::gate_level_drv_stats>(m, "gate_level_drv_stats",
                                                             DOC(fiction_verification_gate_level_drv_stats))

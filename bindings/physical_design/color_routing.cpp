@@ -39,6 +39,9 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using color_routing_options = fiction::physical_design::color_routing_params;
+
 namespace detail
 {
 
@@ -52,8 +55,19 @@ void register_color_routing_impl(nb::module_& m)
         [](Lyt&                                                                                lyt,
            const std::vector<std::tuple<fiction::layouts::layout_base::coordinate,
                                         fiction::layouts::layout_base::coordinate, uint32_t>>& objectives,
-           const fiction::physical_design::color_routing_params&                               params)
+           const decltype(color_routing_options{}.conduct_partial_routing)                     conduct_partial_routing,
+           const decltype(color_routing_options{}.crossings)                                   crossings,
+           const decltype(color_routing_options{}.path_limit)                                  path_limit,
+           const decltype(color_routing_options{}.engine)                                      engine,
+           const decltype(color_routing_options{}.partial_sat)                                 partial_sat)
         {
+            color_routing_options params{};
+            params.conduct_partial_routing = conduct_partial_routing;
+            params.crossings               = crossings;
+            params.path_limit              = path_limit;
+            params.engine                  = engine;
+            params.partial_sat             = partial_sat;
+
             std::vector<fiction::physical_design::routing_objective> objs{};
             objs.reserve(objectives.size());
 
@@ -64,8 +78,21 @@ void register_color_routing_impl(nb::module_& m)
 
             return fiction::physical_design::color_routing(lyt, objs, params);
         },
-        nb::arg("layout"), nb::arg("objectives"), nb::arg("params") = fiction::physical_design::color_routing_params{},
-        DOC(fiction_physical_design_color_routing));
+        nb::arg("layout"), nb::arg("objectives"), nb::kw_only(),
+        nb::arg("conduct_partial_routing") = color_routing_options{}.conduct_partial_routing,
+        nb::arg("crossings")               = color_routing_options{}.crossings,
+        nb::arg("path_limit") = color_routing_options{}.path_limit, nb::arg("engine") = color_routing_options{}.engine,
+        nb::arg("partial_sat") = color_routing_options{}.partial_sat,
+        R"doc(Route the supplied connections in place by coloring their path intersections.
+Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
+
+Args:
+    conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
+    crossings: Allow wires to cross on separate layers.
+    path_limit: Maximum paths considered per objective; None enumerates all paths.
+    engine: The engine to use.
+    partial_sat: Allow partial solutions when the SAT coloring engine is selected.
+)doc");
 }
 
 }  // namespace detail
@@ -88,20 +115,6 @@ void register_color_routing(nb::module_& m)
                DOC(fiction_utils_graph_graph_coloring_engine_TABUCOL))
         .value("SAT", fiction::utils::graph::graph_coloring_engine::SAT,
                DOC(fiction_utils_graph_graph_coloring_engine_SAT));
-
-    nb::class_<fiction::physical_design::color_routing_params>(m, "color_routing_params",
-                                                               DOC(fiction_physical_design_color_routing_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("conduct_partial_routing", &fiction::physical_design::color_routing_params::conduct_partial_routing,
-                DOC(fiction_physical_design_color_routing_params_conduct_partial_routing))
-        .def_rw("crossings", &fiction::physical_design::color_routing_params::crossings,
-                DOC(fiction_physical_design_color_routing_params_crossings))
-        .def_rw("path_limit", &fiction::physical_design::color_routing_params::path_limit,
-                DOC(fiction_physical_design_color_routing_params_path_limit))
-        .def_rw("engine", &fiction::physical_design::color_routing_params::engine,
-                DOC(fiction_physical_design_color_routing_params_engine))
-        .def_rw("partial_sat", &fiction::physical_design::color_routing_params::partial_sat,
-                DOC(fiction_physical_design_color_routing_params_partial_sat));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

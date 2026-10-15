@@ -40,6 +40,18 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::logic;
 
+#if (FICTION_ALGLIB_ENABLED)
+TEST_CASE("Reject unsupported physical-validity simulation engines", "[determine-physically-valid-parameters]")
+{
+    const layout              lyt{};
+    const charge_distribution cd{lyt};
+    operational_domain_params params{};
+    params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
+
+    CHECK_THROWS_AS(physically_valid_parameters(lyt, cd, params), std::invalid_argument);
+}
+#endif  // FICTION_ALGLIB_ENABLED
+
 TEST_CASE("Reject charge distributions from another layout", "[determine-physically-valid-parameters]")
 {
     layout lyt{};

@@ -10,16 +10,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.parsing import integer, positive_float
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.physical_design import (
     post_layout_optimization,
-    post_layout_optimization_params,
     post_layout_optimization_stats,
     wiring_reduction,
-    wiring_reduction_params,
     wiring_reduction_stats,
 )
 
@@ -59,21 +57,23 @@ def optimize(session: Session, args: argparse.Namespace) -> Result:
     timeout = _seconds_to_ms(args.timeout)
     stats: post_layout_optimization_stats | wiring_reduction_stats
     if args.wiring_only:
-        wiring_params = wiring_reduction_params()
-        wiring_params.on_progress = session.report_progress
+        wiring_options: dict[str, Any] = {
+            "on_progress": session.report_progress,
+        }
         if timeout is not None:
-            wiring_params.timeout = timeout
+            wiring_options["timeout"] = timeout
         stats = wiring_reduction_stats()
-        wiring_reduction(layout, wiring_params, stats)
+        wiring_reduction(layout, statistics=stats, **wiring_options)
     else:
-        params = post_layout_optimization_params()
-        params.on_progress = session.report_progress
-        params.planar_optimization = args.planar
+        options: dict[str, Any] = {
+            "on_progress": session.report_progress,
+            "planar_optimization": args.planar,
+        }
         if args.max_relocations is not None:
-            params.max_gate_relocations = args.max_relocations
+            options["max_gate_relocations"] = args.max_relocations
         if timeout is not None:
-            params.timeout = timeout
+            options["timeout"] = timeout
         stats = post_layout_optimization_stats()
-        post_layout_optimization(layout, params, stats)
+        post_layout_optimization(layout, statistics=stats, **options)
     session.gate_layouts.add(layout)
     return _added(session, layout, stats, verbose=args.verbose)

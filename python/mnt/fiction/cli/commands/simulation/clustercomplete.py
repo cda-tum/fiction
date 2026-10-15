@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import _active_sidb_layout, _apply_physical, _physical_arguments, _store_result
+from ._common import _active_sidb_layout, _physical_arguments, _physical_options, _store_result
 
 
 def _clustercomplete_arguments(parser: Parser) -> None:
@@ -51,18 +51,20 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     The witness limits tune the first pruning stage; -r prints its statistics.
     """
     layout = _active_sidb_layout(session)
-    params = engines.clustercomplete_params()
-    params.on_progress = session.report_progress
-    params.on_worker_progress = session.report_worker_progress
-    parameters = _apply_physical(params.simulation_parameters, args)
-    params.global_potential = args.global_potential
-    params.validity_witness_partitioning_max_cluster_size_gss = args.witness_limit
-    params.num_overlapping_witnesses_limit_gss = args.overlap_limit
+    options: dict[str, Any] = {
+        "on_progress": session.report_progress,
+        "on_worker_progress": session.report_worker_progress,
+    }
+    parameters = _physical_options(args)
+    options.update(parameters)
+    options["global_potential"] = args.global_potential
+    options["validity_witness_partitioning_max_cluster_size_gss"] = args.witness_limit
+    options["num_overlapping_witnesses_limit_gss"] = args.overlap_limit
     if args.report_stats:
-        params.report_gss_stats = engines.ground_state_space_reporting.ON
+        options["report_gss_stats"] = engines.ground_state_space_reporting.ON
     parameters.update(
         global_potential=args.global_potential,
         witness_partitioning_limit=args.witness_limit,
         overlapping_witnesses_limit=args.overlap_limit,
     )
-    return _store_result(session, layout, engines.clustercomplete(layout, params), parameters)
+    return _store_result(session, layout, engines.clustercomplete(layout, **options), parameters)

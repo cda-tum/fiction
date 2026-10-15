@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import positive_float, positive_int
@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-    from mnt.pyfiction.physical_design import exact_params
 from ._common import _added, _seconds_to_ms
 
 
@@ -110,10 +109,10 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     border. Only small networks finish in reasonable time.
     """
     topology = "shifted_cartesian" if args.topolinano else args.topology
-    params = _exact_parameters(args, _clocking_scheme(args.scheme, topology))
-    params.on_progress = session.report_progress
-    params.on_worker_progress = session.report_worker_progress
-    family, params.layout_arrangement = SPECS[canonical(topology)]
+    options = _exact_options(args, _clocking_scheme(args.scheme, topology))
+    options["on_progress"] = session.report_progress
+    options["on_worker_progress"] = session.report_worker_progress
+    family, options["layout_arrangement"] = SPECS[canonical(topology)]
     cls = getattr(layouts, f"{family}_gate_layout")
     if args.synchronization_elements and topology != "cartesian":
         msg_0 = "synchronization elements require Cartesian topology"
@@ -121,7 +120,7 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
 
     network = session.as_technology_network(session.networks.current())
     stats = physical_design.exact_stats()
-    layout = physical_design.exact(network, params, stats, layout_type=cls)
+    layout = physical_design.exact(network, statistics=stats, layout_type=cls, **options)
     if layout is None:
         msg = f"no layout found for '{get_name(network)}' within the search bounds or timeout"
         error = CommandError(msg)
@@ -131,34 +130,37 @@ def exact(session: Session, args: argparse.Namespace) -> Result:
     return _added(session, layout, stats, verbose=args.verbose)
 
 
-def _exact_parameters(args: argparse.Namespace, scheme: str) -> exact_params:
-    """Build exact placement parameters from validated command options."""
-    params = physical_design.exact_params()
-    params.scheme = scheme
-    params.synchronization_elements = args.synchronization_elements
-    params.crossings = args.crossings
-    params.border_io = args.border_io
-    params.straight_inverters = args.straight_inverters
-    params.desynchronize = args.desynchronize
-    params.minimize_wires = args.minimize_wires
-    params.minimize_crossings = args.minimize_crossings
-    for name, value in (
-        ("upper_bound_x", args.upper_x),
-        ("upper_bound_y", args.upper_y),
-        ("upper_bound_area", args.upper_area),
-    ):
-        if value is not None:
-            setattr(params, name, value)
+def _exact_options(args: argparse.Namespace, scheme: str) -> dict[str, Any]:
+    """Build exact placement options from validated command options."""
+    options: dict[str, Any] = {
+        "scheme": scheme,
+        "synchronization_elements": args.synchronization_elements,
+        "crossings": args.crossings,
+        "border_io": args.border_io,
+        "straight_inverters": args.straight_inverters,
+        "desynchronize": args.desynchronize,
+        "minimize_wires": args.minimize_wires,
+        "minimize_crossings": args.minimize_crossings,
+    }
+    options.update({
+        name: value
+        for name, value in (
+            ("upper_bound_x", args.upper_x),
+            ("upper_bound_y", args.upper_y),
+            ("upper_bound_area", args.upper_area),
+        )
+        if value is not None
+    })
     if args.fixed_size is not None:
-        params.fixed_size = True
-        params.upper_bound_area = args.fixed_size
+        options["fixed_size"] = True
+        options["upper_bound_area"] = args.fixed_size
     timeout = _seconds_to_ms(args.timeout)
     if timeout is not None:
-        params.timeout = timeout
+        options["timeout"] = timeout
     if args.async_max:
-        params.num_threads = os.cpu_count() or 1
+        options["num_threads"] = os.cpu_count() or 1
     elif args.threads is not None:
-        params.num_threads = args.threads
+        options["num_threads"] = args.threads
     if args.topolinano:
-        params.technology_specifics = physical_design.technology_constraints.TOPOLINANO
-    return params
+        options["technology_specifics"] = physical_design.technology_constraints.TOPOLINANO
+    return options

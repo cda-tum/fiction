@@ -1,0 +1,94 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Validated physical simulation values for Python bindings.
+ */
+
+#pragma once
+
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+
+#include <cmath>
+#include <cstdint>
+#include <limits>
+
+#include <nanobind/nanobind.h>
+
+/** @brief Namespace alias for nanobind. */
+namespace nb = nanobind;
+
+namespace pyfiction
+{
+
+/** @brief Physical simulation model shared by the keyword adapters. */
+using simulation_model = fiction::sidb::model::simulation_parameters;
+
+/**
+ * @brief Construct physical values after validating the charge-state base and screening values.
+ * @param base Number of charge states, either 2 or 3.
+ * @param mu_minus Negative-charge transition energy in eV.
+ * @param epsilon_r Relative permittivity.
+ * @param lambda_tf Screening distance in nm.
+ * @return Validated native physical simulation values.
+ * @throws nb::value_error If base is neither 2 nor 3, transition energy is non-finite, permittivity is nonpositive or
+ * non-finite, or screening distance is nonpositive or NaN.
+ */
+inline fiction::sidb::model::simulation_parameters
+make_simulation_parameters(const uint8_t base, const double mu_minus, const double epsilon_r, const double lambda_tf)
+{
+    if (base != 2 && base != 3)
+    {
+        throw nb::value_error("base must be 2 or 3");
+    }
+    if (!std::isfinite(mu_minus))
+    {
+        throw nb::value_error("mu_minus must be finite");
+    }
+    if (!std::isfinite(epsilon_r) || epsilon_r <= 0)
+    {
+        throw nb::value_error("epsilon_r must be positive and finite");
+    }
+    if (std::isnan(lambda_tf) || lambda_tf <= 0)
+    {
+        throw nb::value_error("lambda_tf must be positive and not NaN");
+    }
+    return fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
+}
+
+/**
+ * @brief Validate a probability used by analysis algorithms.
+ * @param confidence_level Required success probability.
+ * @throws nb::value_error If the confidence is outside the open unit interval.
+ */
+inline void validate_confidence_level(const double confidence_level)
+{
+    if (std::isnan(confidence_level) || confidence_level <= 0 || confidence_level >= 1)
+    {
+        throw nb::value_error("confidence_level must be strictly between 0 and 1");
+    }
+}
+
+/**
+ * @brief Validate the temperature range used by the native centikelvin loop.
+ * @param max_temperature Maximum temperature in K.
+ * @throws nb::value_error If the temperature is negative, non-finite, or exceeds the loop's range.
+ */
+inline void validate_max_temperature(const double max_temperature)
+{
+    if (std::isnan(max_temperature) || max_temperature < 0 ||
+        max_temperature >= static_cast<double>(std::numeric_limits<uint64_t>::max()) / 100)
+    {
+        throw nb::value_error("max_temperature must be nonnegative and fit the centikelvin iteration range");
+    }
+}
+
+}  // namespace pyfiction

@@ -16,7 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
+#include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/generators/design_gates.hpp>
@@ -27,6 +27,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner): enables keyword options
 #include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner): Converts the statistics representation.
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
@@ -40,15 +41,18 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using design_gates_options = fiction::sidb::generators::design_gates_params;
+
 /**
- * @brief Registers SiDB gate design, its parameters, and statistics.
+ * @brief Registers SiDB gate design, and statistics.
  *
  * @param m Python module.
  */
 void register_design_gates(nb::module_& m)
 {
     using fiction::sidb::layout;
-    using fiction::sidb::generators::design_gates_params;
+
     using fiction::sidb::generators::design_gates_stats;
 
     nb::class_<design_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_sidb_generators_design_gates_stats))
@@ -66,52 +70,65 @@ void register_design_gates(nb::module_& m)
     /**
      * Design approach selector type.
      */
-    nb::enum_<design_gates_params::design_gates_mode>(
+    nb::enum_<design_gates_options::design_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_sidb_generators_design_gates_params_design_gates_mode))
-        .value("QUICKCELL", design_gates_params::design_gates_mode::QUICKCELL,
+        .value("QUICKCELL", design_gates_options::design_gates_mode::QUICKCELL,
                DOC(fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL))
         .value("AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER",
-               design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+               design_gates_options::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
                DOC(fiction_sidb_generators_design_gates_params_design_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER))
-        .value("RANDOM", design_gates_params::design_gates_mode::RANDOM,
+        .value("RANDOM", design_gates_options::design_gates_mode::RANDOM,
                DOC(fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM))
-        .value("PRUNING_ONLY", design_gates_params::design_gates_mode::PRUNING_ONLY,
+        .value("PRUNING_ONLY", design_gates_options::design_gates_mode::PRUNING_ONLY,
                DOC(fiction_sidb_generators_design_gates_params_design_gates_mode_PRUNING_ONLY));
 
     /**
      * Termination condition selector type.
      */
-    nb::enum_<design_gates_params::termination_condition>(m, "termination_condition")
-        .value("AFTER_FIRST_SOLUTION", design_gates_params::termination_condition::AFTER_FIRST_SOLUTION)
-        .value("ALL_COMBINATIONS_ENUMERATED", design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED);
-
-    /**
-     * Parameters.
-     */
-    nb::class_<design_gates_params>(m, "design_sidb_gates_params",
-                                    pyfiction::progress_type_slots<design_gates_params>(),
-                                    DOC(fiction_sidb_generators_design_gates_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("operational_params", &design_gates_params::operational_params,
-                DOC(fiction_sidb_generators_design_gates_params_operational_params))
-        .def_rw("design_mode", &design_gates_params::design_mode,
-                DOC(fiction_sidb_generators_design_gates_params_design_mode))
-        .def_rw("canvas", &design_gates_params::canvas, DOC(fiction_sidb_generators_design_gates_params_canvas))
-        .def_rw("number_of_canvas_sidbs", &design_gates_params::number_of_canvas_sidbs,
-                DOC(fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs))
-        .def_rw("maximal_random_design_attempts", &design_gates_params::maximal_random_design_attempts,
-                DOC(fiction_sidb_generators_design_gates_params_maximal_random_design_attempts))
-        .def_rw("termination_cond", &design_gates_params::termination_cond,
-                DOC(fiction_sidb_generators_design_gates_params_termination_condition))
-        .def_rw("on_progress", &design_gates_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_generators_design_gates_params_on_progress));
-
+    nb::enum_<design_gates_options::termination_condition>(m, "termination_condition")
+        .value("AFTER_FIRST_SOLUTION", design_gates_options::termination_condition::AFTER_FIRST_SOLUTION)
+        .value("ALL_COMBINATIONS_ENUMERATED", design_gates_options::termination_condition::ALL_COMBINATIONS_ENUMERATED);
     m.def(
         "design_sidb_gates",
-        // NOLINTNEXTLINE(performance-unnecessary-value-param): Own inputs while Python can mutate the originals.
-        [](const layout skeleton, const std::vector<py_tt> spec, const design_gates_params params,
-           design_gates_stats* stats)
+        // NOLINTNEXTLINE(performance-unnecessary-value-param): Copy Python inputs before releasing the GIL.
+        [](const layout skeleton, const std::vector<py_tt> spec, const decltype(operational_options{}.timeout) timeout,
+           const decltype(operational_options{}.sim_params.base)      base,
+           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(operational_options{}.sim_engine)           sim_engine,
+           const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
+                                                                                            threshold_bdl_interdistance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .minimum_distance)                                            minimum_distance,
+           const decltype(operational_options{}
+                              .input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params
+                              .maximum_distance)                                            maximum_distance,
+           const decltype(operational_options{}.input_bdl_iterator_params.input_bdl_config) input_bdl_config,
+           const decltype(operational_options{}.op_condition)                               op_condition,
+           const decltype(operational_options{}
+                              .strategy_to_analyze_operational_status)           strategy_to_analyze_operational_status,
+           const decltype(design_gates_options{}.design_mode)                    design_mode,
+           const decltype(design_gates_options{}.canvas)                         canvas,
+           const decltype(design_gates_options{}.number_of_canvas_sidbs)         number_of_canvas_sidbs,
+           const decltype(design_gates_options{}.maximal_random_design_attempts) maximal_random_design_attempts,
+           const decltype(design_gates_options{}.termination_cond)               termination_cond,
+           const decltype(design_gates_options{}.on_progress)& on_progress, design_gates_stats* stats)
         {
+            design_gates_options params{};
+            params.operational_params =
+                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+
+            params.design_mode                    = design_mode;
+            params.canvas                         = canvas;
+            params.number_of_canvas_sidbs         = number_of_canvas_sidbs;
+            params.maximal_random_design_attempts = maximal_random_design_attempts;
+            params.termination_cond               = termination_cond;
+            params.on_progress                    = on_progress;
+
             // Copy Python-owned inputs before releasing the GIL; publish statistics after reacquiring it.
             design_gates_stats  local_stats{};
             std::vector<layout> result{};
@@ -125,8 +142,57 @@ void register_design_gates(nb::module_& m)
             }
             return result;
         },
-        nb::arg("skeleton"), nb::arg("spec"), nb::arg("params") = design_gates_params{}, nb::arg("stats") = nullptr,
-        DOC(fiction_sidb_generators_design_gates));
+        nb::arg("skeleton"), nb::arg("spec"), nb::kw_only(),
+        nb::arg("timeout")    = design_gates_options{}.operational_params.timeout,
+        nb::arg("base")       = design_gates_options{}.operational_params.sim_params.base,
+        nb::arg("mu_minus")   = design_gates_options{}.operational_params.sim_params.mu_minus,
+        nb::arg("epsilon_r")  = design_gates_options{}.operational_params.sim_params.epsilon_r,
+        nb::arg("lambda_tf")  = design_gates_options{}.operational_params.sim_params.lambda_tf,
+        nb::arg("sim_engine") = design_gates_options{}.operational_params.sim_engine,
+        nb::arg("threshold_bdl_interdistance") =
+            design_gates_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") =
+            design_gates_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") =
+            design_gates_options{}
+                .operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") =
+            design_gates_options{}.operational_params.input_bdl_iterator_params.input_bdl_config,
+        nb::arg("op_condition") = design_gates_options{}.operational_params.op_condition,
+        nb::arg("strategy_to_analyze_operational_status") =
+            design_gates_options{}.operational_params.strategy_to_analyze_operational_status,
+        nb::arg("design_mode") = design_gates_options{}.design_mode, nb::arg("canvas") = design_gates_options{}.canvas,
+        nb::arg("number_of_canvas_sidbs")         = design_gates_options{}.number_of_canvas_sidbs,
+        nb::arg("maximal_random_design_attempts") = design_gates_options{}.maximal_random_design_attempts,
+        nb::arg("termination_cond")               = design_gates_options{}.termination_cond,
+        nb::arg("on_progress").none() = nb::none(), nb::arg("stats") = nullptr,
+        R"doc(Design SiDB gates implementing the supplied truth tables within the canvas.
+The keyword options select physical values, BDL detection, the design mode, and termination.
+Expiration raises TimeoutError; on_progress reports completed search work.
+
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+    design_mode: Gate-design approach: QUICKCELL, AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER, RANDOM, or PRUNING_ONLY.
+    canvas: The canvas: the area canvas SiDBs are placed in, as two opposite corners.
+    number_of_canvas_sidbs: Number of canvas SiDBs.
+    maximal_random_design_attempts: Maximum number of layouts evaluated by random gate design across all threads.
+    termination_cond: When to stop.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+    sim_engine: SiDB simulation engine used for operational analysis.
+    op_condition: Require the selected operational condition for every input pattern.
+    strategy_to_analyze_operational_status: Operational-status analysis strategy.
+)doc");
 }
 
 }  // namespace pyfiction

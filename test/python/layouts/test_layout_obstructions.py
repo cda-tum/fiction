@@ -21,7 +21,7 @@ from mnt.pyfiction.layouts import (
     obstructions,
     shifted_cartesian_gate_layout,
 )
-from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drv_params, gate_level_drvs
+from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drvs
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -280,8 +280,7 @@ def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
     assert cp == 4
     assert tp == 1
 
-    drv_params = gate_level_drv_params()
-    assert gate_level_drvs(layout, drv_params) == (0, 0)
+    assert gate_level_drvs(layout) == (0, 0)
 
 
 @pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)

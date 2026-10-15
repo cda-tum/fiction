@@ -35,9 +35,6 @@ on_the_fly_circuit_design
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.generators.generate_random_sidb_layout_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.sidb.generators.positive_charges
    :members:
 

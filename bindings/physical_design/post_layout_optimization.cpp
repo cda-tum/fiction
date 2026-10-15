@@ -16,7 +16,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): defines the nanobind coordinate type casters
 
 #include <fiction/physical_design/post_layout_optimization.hpp>
@@ -43,26 +42,12 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using post_layout_optimization_options = fiction::physical_design::post_layout_optimization_params;
+
 /** @brief Registers mutable post_layout_optimization operations. @param m Python module. */
 void register_post_layout_optimization(nb::module_& m)
 {
-    nb::class_<fiction::physical_design::post_layout_optimization_params>(
-        m, "post_layout_optimization_params",
-        pyfiction::progress_type_slots<fiction::physical_design::post_layout_optimization_params>(),
-        DOC(fiction_physical_design_post_layout_optimization_params))
-        .def(nb::init<>(), "Default constructor.")
-        .def_rw("max_gate_relocations",
-                &fiction::physical_design::post_layout_optimization_params::max_gate_relocations,
-                DOC(fiction_physical_design_post_layout_optimization_params_max_gate_relocations))
-        .def_rw("optimize_pos_only", &fiction::physical_design::post_layout_optimization_params::optimize_pos_only,
-                DOC(fiction_physical_design_post_layout_optimization_params_optimize_pos_only))
-        .def_rw("planar_optimization", &fiction::physical_design::post_layout_optimization_params::planar_optimization,
-                DOC(fiction_physical_design_post_layout_optimization_params_planar_optimization))
-        .def_rw("timeout", &fiction::physical_design::post_layout_optimization_params::timeout,
-                DOC(fiction_physical_design_post_layout_optimization_params_timeout))
-        .def_rw("on_progress", &fiction::physical_design::post_layout_optimization_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_physical_design_post_layout_optimization_params_on_progress));
 
     nb::class_<fiction::physical_design::post_layout_optimization_stats>(
         m, "post_layout_optimization_stats", DOC(fiction_physical_design_post_layout_optimization_stats))
@@ -97,10 +82,44 @@ void register_post_layout_optimization(nb::module_& m)
         .def_ro("num_crossings_after", &fiction::physical_design::post_layout_optimization_stats::num_crossings_after,
                 DOC(fiction_physical_design_post_layout_optimization_stats_num_crossings_after));
 
-    m.def("post_layout_optimization", &fiction::physical_design::post_layout_optimization, nb::arg("layout"),
-          nb::arg("parameters") = fiction::physical_design::post_layout_optimization_params{},
-          nb::arg("statistics") = nullptr, nb::call_guard<nb::gil_scoped_release>(),
-          DOC(fiction_physical_design_post_layout_optimization));
+    m.def(
+        "post_layout_optimization",
+        [](py_cartesian_gate_layout&                                               layout,
+           const decltype(post_layout_optimization_options{}.max_gate_relocations) max_gate_relocations,
+           const decltype(post_layout_optimization_options{}.optimize_pos_only)    optimize_pos_only,
+           const decltype(post_layout_optimization_options{}.planar_optimization)  planar_optimization,
+           const decltype(post_layout_optimization_options{}.timeout)              timeout,
+           const decltype(post_layout_optimization_options{}.on_progress)&         on_progress,
+           fiction::physical_design::post_layout_optimization_stats*               statistics)
+        {
+            post_layout_optimization_options params{};
+            params.max_gate_relocations = max_gate_relocations;
+            params.optimize_pos_only    = optimize_pos_only;
+            params.planar_optimization  = planar_optimization;
+            params.timeout              = timeout;
+            params.on_progress          = on_progress;
+            const nb::gil_scoped_release release{};
+            fiction::physical_design::post_layout_optimization(layout, params, statistics);
+        },
+        nb::arg("layout"), nb::kw_only(),
+        nb::arg("max_gate_relocations") = post_layout_optimization_options{}.max_gate_relocations,
+        nb::arg("optimize_pos_only")    = post_layout_optimization_options{}.optimize_pos_only,
+        nb::arg("planar_optimization")  = post_layout_optimization_options{}.planar_optimization,
+        nb::arg("timeout") = post_layout_optimization_options{}.timeout, nb::arg("on_progress").none() = nb::none(),
+        nb::arg("statistics") = nullptr,
+        R"doc(Optimize a 2DDWave-clocked Cartesian gate layout in place.
+The keyword options bound relocations and runtime; statistics receives the completed result.
+Raises ValueError for unsupported clocking or invalid occupied geometry.
+Raises OverflowError when the extent exceeds signed routing coordinates.
+
+Args:
+    max_gate_relocations: Maximum number of relocations to try for each gate. Defaults to the number of tiles in the given layout if not specified.
+    optimize_pos_only: Only optimize PO positions.
+    planar_optimization: Require crossing-free wiring during optimization.
+    timeout: Execution budget in milliseconds.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
+)doc");
 }
 
 }  // namespace pyfiction
