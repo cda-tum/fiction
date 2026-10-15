@@ -71,7 +71,7 @@ make_simulation_parameters(const uint8_t base, const double mu_minus, const doub
  */
 inline void validate_confidence_level(const double confidence_level)
 {
-    if (!(confidence_level > 0 && confidence_level < 1))
+    if (std::isnan(confidence_level) || confidence_level <= 0 || confidence_level >= 1)
     {
         throw nb::value_error("confidence_level must be strictly between 0 and 1");
     }
@@ -84,7 +84,8 @@ inline void validate_confidence_level(const double confidence_level)
  */
 inline void validate_max_temperature(const double max_temperature)
 {
-    if (!(max_temperature >= 0 && max_temperature < static_cast<double>(std::numeric_limits<uint64_t>::max()) / 100))
+    if (std::isnan(max_temperature) || max_temperature < 0 ||
+        max_temperature >= static_cast<double>(std::numeric_limits<uint64_t>::max()) / 100)
     {
         throw nb::value_error("max_temperature must be nonnegative and fit the centikelvin iteration range");
     }
