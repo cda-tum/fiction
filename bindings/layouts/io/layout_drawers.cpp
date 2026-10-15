@@ -14,11 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>

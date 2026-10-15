@@ -21,7 +21,6 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
-#include <fiction/types.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <kitty/constructors.hpp>
