@@ -16609,12 +16609,6 @@ Returns:
     The population stability information, one entry per distinct
     charge distribution.
 
-Raises:
-    std::invalid_argument: If permittivity is nonpositive or non-
-                           finite, screening distance is nonpositive
-                           or NaN, or precision exceeds the decimal
-                           precision of `double`.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_sidb_layout = R"doc(The layout to analyze.)doc";
@@ -16808,7 +16802,9 @@ physically valid charge distribution (found with *QuickExact*), it
 determines the SiDB closest to each charge transition and the
 potential change required for it, in ascending order of the
 distributions' energies. The distance an SiDB would have to be placed
-at to cause that potential change is reported as well.
+at to cause that potential change is reported as well. Distances
+describe a single-charge perturbation with all other charge states
+fixed, without lattice discretization.
 
 Args:
     lyt: The layout to analyze.
@@ -16819,10 +16815,10 @@ Returns:
     charge distribution.
 
 Raises:
-    std::invalid_argument: If permittivity is nonpositive or non-
-                           finite, screening distance is nonpositive
-                           or NaN, or precision exceeds the decimal
-                           precision of `double`.
+    std::invalid_argument: If relative permittivity is non-positive or
+                           non-finite, screening distance is non-
+                           positive or NaN, or precision exceeds the
+                           decimal precision of `double`.
 
 )doc";
 
@@ -16834,7 +16830,7 @@ budget unlimited.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_precision_for_distance_corresponding_to_potential =
 R"doc(Number of decimal places of the distance corresponding to a potential
-difference.)doc";
+difference, at most `std::numeric_limits<double>::digits10`.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_sim_params = R"doc(Physical parameters of the simulation.)doc";
 
@@ -16884,8 +16880,11 @@ threshold.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_distance_corresponding_to_potential =
 R"doc(For each transition type, the distance (unit: nm) an additional SiDB
 would have to be placed at to induce the required potential
-difference. Zero potential difference corresponds to positive
-infinity.)doc";
+difference. A zero potential difference corresponds to positive
+infinity. An absent transition also has infinite distance; its entry
+in `transition_potentials` has infinite potential. Distances use the
+potential magnitude of one elementary charge with all other charge
+states fixed.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_system_energy = R"doc(Electrostatic potential energy of the charge distribution (unit: eV).)doc";
 
@@ -17007,9 +17006,9 @@ neutral to positive, and positive to neutral.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_NEGATIVE_TO_NEUTRAL = R"doc(SiDB is negatively charged, but is closest to being neutrally charged.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_NEGATIVE = R"doc(SiDB is neutrally charged, but is closest to being negatively charged.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_NEGATIVE = R"doc(Transition from neutral to negative charge.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_POSITIVE = R"doc(SiDB is neutrally charged, but is closest to being positively charged.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_POSITIVE = R"doc(Transition from neutral to positive charge.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_POSITIVE_TO_NEUTRAL = R"doc(SiDB is positively charged, but is closest to being neutrally charged.)doc";
 
