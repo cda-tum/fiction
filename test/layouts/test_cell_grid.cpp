@@ -21,7 +21,6 @@
 #include <fiction/layouts/cell_grid.hpp>
 #include <fiction/layouts/layout_base.hpp>
 
-#include <concepts>
 #include <cstdint>
 #include <set>
 
