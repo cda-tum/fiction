@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import importlib
 import io
 from typing import TYPE_CHECKING
 
@@ -21,6 +22,10 @@ from mnt.fiction.cli import Session
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from pathlib import Path
+
+
+# Parser tests need registration even when they do not construct a shell session.
+importlib.import_module("mnt.fiction.cli.commands")
 
 
 class Shell:
