@@ -975,7 +975,6 @@ def route_path(
 
     Template Args:
         Geometry: Coordinate geometry of the gate-level layout.
-        Path: Coordinate path type.
 
     Raises:
         std::invalid_argument: If an endpoint or intermediate placement is
