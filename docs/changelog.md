@@ -58,6 +58,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
+  - Added missing public API entries and short C++/Python examples for design and simulation.
 
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
@@ -758,6 +759,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Removed duplicate bounding-box entries and corrected the critical-temperature overload reference.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
   - SiDB reader documentation now lists every overload without ambiguous signatures.
+  - API navigation now separates simulation topics and links Python and C++ truth-table types.
+  - Python API docs now state writable-member defaults and retain distinct overload descriptions.
+  - Documentation builds reject warnings and preserve signatures and citations in Markdown exports.
+  - Corrected test, benchmark, experiment, and documentation build instructions.
 
 - Experiments:
   - Layout experiments now reject failed GENLIB and Verilog reads in Release builds.
