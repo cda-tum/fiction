@@ -11,12 +11,21 @@ from __future__ import annotations
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native deadlock regression
 import sys
 import textwrap
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
-from mnt.pyfiction.sidb.simulation.logic import parameter_point
+from mnt.pyfiction.sidb.simulation.logic import (
+    input_bdl_configuration,
+    operational_analysis_strategy,
+    operational_condition,
+    parameter_point,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def test_one_sidb_100_lattice() -> None:
@@ -49,6 +58,24 @@ def test_one_sidb_111_lattice() -> None:
     # Testing for an invalid parameter point that raises an exception
     with pytest.raises(ValueError, match="no excited state number available"):
         valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [
+        ("threshold_bdl_interdistance", 1.0),
+        ("minimum_distance", 1.0),
+        ("maximum_distance", 1.0),
+        ("input_bdl_config", input_bdl_configuration.PERTURBER_ABSENCE_ENCODED),
+        ("op_condition", operational_condition.REJECT_KINKS),
+        ("strategy_to_analyze_operational_status", operational_analysis_strategy.SIMULATION_ONLY),
+    ],
+)
+def test_physical_validity_rejects_gate_options(name: str, value: object) -> None:
+    """Physical-validity sweeps expose physical and sweep options without gate detection."""
+    layout = sidb_layout()
+    with pytest.raises(TypeError):
+        cast("Callable[..., Any]", physically_valid_parameters)(layout, charge_distribution(layout), **{name: value})
 
 
 def test_progress_callback_completes() -> None:

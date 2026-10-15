@@ -448,6 +448,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Python analyses reject invalid confidence, temperature limits, and displacement sampling fractions.
     Time-to-solution evaluation of supplied results accepts keyword-only options.
 
+  - Physical-validity sweeps omit gate-detection and operational-condition options.
+
   - **Breaking:** Use `read_network`, `read_fgl_layout`, `random_network`, `exact`, and `orthogonal`
     with keyword `network_type` or `layout_type`. Specialized function names were removed.
 
