@@ -18,6 +18,7 @@
 #pragma once
 
 #include "fiction/networks/name_utils.hpp"
+#include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
