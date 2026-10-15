@@ -359,7 +359,7 @@ def potential_to_distance_conversion(
     The physical model is supplied by the scalar keyword values.
     Zero potential returns positive infinity; positive infinite potential returns the minimum distance.
     Precision must be an integer from 0 to 15. The search bisects the distance bracket;
-    floating-point resolution limits the effective precision. Invalid conversion inputs raise ValueError.
+    floating-point resolution limits the effective precision.
     Positive infinite screening distance selects the unscreened Coulomb potential.
 
     Raises:

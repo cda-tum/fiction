@@ -426,13 +426,13 @@ class transition_type(enum.Enum):
     """
 
     NEUTRAL_TO_NEGATIVE = 0
-    """SiDB is neutrally charged, but is closest to being negatively charged."""
+    """Transition from neutral to negative charge."""
 
     NEGATIVE_TO_NEUTRAL = 1
     """SiDB is negatively charged, but is closest to being neutrally charged."""
 
     NEUTRAL_TO_POSITIVE = 2
-    """SiDB is neutrally charged, but is closest to being positively charged."""
+    """Transition from neutral to positive charge."""
 
     POSITIVE_TO_NEUTRAL = 3
     """SiDB is positively charged, but is closest to being neutrally charged."""
@@ -473,8 +473,11 @@ class population_stability_information:
         """
         For each transition type, the distance (unit: nm) an additional SiDB
         would have to be placed at to induce the required potential
-        difference. Zero potential difference corresponds to positive
-        infinity.
+        difference. A zero potential difference corresponds to positive
+        infinity. An absent transition also has infinite distance; its entry
+        in `transition_potentials` has infinite potential. Distances use the
+        potential magnitude of one elementary charge with all other charge
+        states fixed.
         """
 
     @distance_corresponding_to_potential.setter
@@ -499,7 +502,6 @@ def physical_population_stability(
     """
     Determine the stability of the SiDB population under the physical model.
     The keyword options select simulation, potential precision, and the execution budget.
-    Raises ValueError for invalid physical values or a precision outside 0 to 15.
     Distance conversion bisects the distance bracket up to floating-point resolution.
 
     Raises:
