@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::utils::optimization;
@@ -326,4 +327,11 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
                                  multi_result.second, drop_wave_function_2d(multi_result))
                   << std::endl;
     }
+}
+
+TEST_CASE("Multi-state annealing rejects zero instances", "[sim-anneal]")
+{
+    CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 0, schwefel_1d_init_state_generator, schwefel_function_1d,
+                                              linear_temperature_schedule, random_next_schwefel),
+                    std::invalid_argument);
 }
