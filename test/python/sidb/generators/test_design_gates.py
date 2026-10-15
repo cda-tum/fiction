@@ -8,13 +8,14 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.generators import (
     design_sidb_gates,
     design_sidb_gates_mode,
-    design_sidb_gates_params,
     design_sidb_gates_stats,
     termination_condition,
 )
@@ -80,27 +81,24 @@ def test_siqad_and_gate_skeleton_100():
 
     layout.assign_sidb(lattice_site(10, 9, 1), sidb_dot_tag.NORMAL)
 
-    params = design_sidb_gates_params()
-    params.operational_params.simulation_parameters.base = 2
-    params.operational_params.simulation_parameters.mu_minus = -0.28
-    params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
-    params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
-    params.canvas = (lattice_site(4, 4, 0), lattice_site(14, 5, 1))
-    params.number_of_canvas_sidbs = 1
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    options: dict[str, Any] = {
+        "base": 2,
+        "mu_minus": -0.28,
+        "design_mode": design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        "termination_cond": termination_condition.ALL_COMBINATIONS_ENUMERATED,
+        "canvas": (lattice_site(4, 4, 0), lattice_site(14, 5, 1)),
+        "number_of_canvas_sidbs": 1,
+        "sim_engine": sidb_simulation_engine.QUICKEXACT,
+    }
 
-    assert params.operational_params.simulation_parameters.mu_minus == -0.28
-    assert params.number_of_canvas_sidbs == 1
-    assert params.maximal_random_design_attempts == 1_000_000
-    assert params.operational_params.timeout == 2**64 - 1
-    assert params.canvas[0] == lattice_site(4, 4, 0)
-    assert params.canvas[1] == lattice_site(14, 5, 1)
+    assert options["canvas"][0] == lattice_site(4, 4, 0)
+    assert options["canvas"][1] == lattice_site(14, 5, 1)
 
     reports: list[tuple[str, int, int]] = []
-    params.on_progress = lambda task, done, total: reports.append((task, done, total))
+    options["on_progress"] = lambda task, done, total: reports.append((task, done, total))
 
     stats = design_sidb_gates_stats()
-    designed_gates = design_sidb_gates(layout, [create_and_tt()], params, stats)
+    designed_gates = design_sidb_gates(layout, [create_and_tt()], stats=stats, **options)
 
     assert len(designed_gates) == 23
     assert "total time" in repr(stats)
@@ -110,53 +108,51 @@ def test_siqad_and_gate_skeleton_100():
 
 def test_nor_gate_111(nor_gate_skeleton):
     layout = nor_gate_skeleton
-    params = design_sidb_gates_params()
-    params.operational_params.simulation_parameters.base = 2
-    params.operational_params.simulation_parameters.mu_minus = -0.32
-    params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
-    params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
-    params.canvas = (lattice_site(10, 11, 0), lattice_site(14, 17, 0))
-    params.number_of_canvas_sidbs = 3
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-    params.operational_params.op_condition = operational_condition.REJECT_KINKS
+    options: dict[str, Any] = {
+        "base": 2,
+        "mu_minus": -0.32,
+        "design_mode": design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        "termination_cond": termination_condition.ALL_COMBINATIONS_ENUMERATED,
+        "canvas": (lattice_site(10, 11, 0), lattice_site(14, 17, 0)),
+        "number_of_canvas_sidbs": 3,
+        "sim_engine": sidb_simulation_engine.QUICKEXACT,
+        "op_condition": operational_condition.REJECT_KINKS,
+    }
 
-    assert params.operational_params.simulation_parameters.mu_minus == -0.32
-    assert params.number_of_canvas_sidbs == 3
-    assert params.canvas[0] == lattice_site(10, 11, 0)
-    assert params.canvas[1] == lattice_site(14, 17, 0)
+    assert options["canvas"][0] == lattice_site(10, 11, 0)
+    assert options["canvas"][1] == lattice_site(14, 17, 0)
 
-    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    designed_gates = design_sidb_gates(layout, [create_nor_tt()], **options)
     assert len(designed_gates) == 44
 
-    params.design_mode = design_sidb_gates_mode.PRUNING_ONLY
-    designed_gate_candidates = design_sidb_gates(layout, [create_nor_tt()], params)
+    options["design_mode"] = design_sidb_gates_mode.PRUNING_ONLY
+    designed_gate_candidates = design_sidb_gates(layout, [create_nor_tt()], **options)
     assert len(designed_gate_candidates) == 44
 
     # tolerate kink states
-    params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
-    params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
-    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    options["design_mode"] = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+    options["op_condition"] = operational_condition.TOLERATE_KINKS
+    designed_gates = design_sidb_gates(layout, [create_nor_tt()], **options)
     assert len(designed_gates) == 175
 
 
 def test_nor_gate_111_quickcell(nor_gate_skeleton):
     layout = nor_gate_skeleton
-    params = design_sidb_gates_params()
-    params.operational_params.simulation_parameters.base = 2
-    params.operational_params.simulation_parameters.mu_minus = -0.32
-    params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
-    params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
+    options: dict[str, Any] = {
+        "base": 2,
+        "mu_minus": -0.32,
+        "design_mode": design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        "termination_cond": termination_condition.ALL_COMBINATIONS_ENUMERATED,
+    }
 
-    params.canvas = (lattice_site(10, 13, 0), lattice_site(14, 17, 0))
-    params.number_of_canvas_sidbs = 3
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    options["canvas"] = (lattice_site(10, 13, 0), lattice_site(14, 17, 0))
+    options["number_of_canvas_sidbs"] = 3
+    options["sim_engine"] = sidb_simulation_engine.QUICKEXACT
 
-    assert params.operational_params.simulation_parameters.mu_minus == -0.32
-    assert params.number_of_canvas_sidbs == 3
-    assert params.canvas[0] == lattice_site(10, 13, 0)
-    assert params.canvas[1] == lattice_site(14, 17, 0)
+    assert options["canvas"][0] == lattice_site(10, 13, 0)
+    assert options["canvas"][1] == lattice_site(14, 17, 0)
 
-    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    designed_gates = design_sidb_gates(layout, [create_nor_tt()], **options)
     assert len(designed_gates) == 14
 
 
@@ -171,19 +167,21 @@ def test_nor_gate_111_quickcell(nor_gate_skeleton):
 )
 def test_gate_design_timeout(nor_gate_skeleton: sidb_layout, mode: design_sidb_gates_mode) -> None:
     """Every search mode raises TimeoutError without changing its inputs or publishing partial statistics."""
-    params = design_sidb_gates_params()
-    params.operational_params.timeout = 0
-    params.design_mode = mode
-    params.number_of_canvas_sidbs = 3
-    params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
     stats = design_sidb_gates_stats()
     initial_stats = repr(stats)
     initial_dots = nor_gate_skeleton.sidbs()
 
     with pytest.raises(TimeoutError):
-        design_sidb_gates(nor_gate_skeleton, [create_nor_tt()], params, stats)
+        design_sidb_gates(
+            nor_gate_skeleton,
+            [create_nor_tt()],
+            stats=stats,
+            timeout=0,
+            design_mode=mode,
+            number_of_canvas_sidbs=3,
+            termination_cond=termination_condition.ALL_COMBINATIONS_ENUMERATED,
+        )
 
     assert nor_gate_skeleton.sidbs() == initial_dots
-    assert params.operational_params.timeout == 0
-    assert params.number_of_canvas_sidbs == 3
+
     assert repr(stats) == initial_stats

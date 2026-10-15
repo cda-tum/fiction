@@ -29,88 +29,176 @@
 #include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner): Required by nanobind return-value conversion.
 #include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 namespace detail
 {
 
-template <typename Ntk>
-void technology_mapping_impl(nanobind::module_& m)
+/**
+ * @brief Convert native gate choices to Python mapping keywords.
+ * @param params Native gate choices.
+ * @return Boolean keyword options accepted by technology_mapping.
+ */
+inline nb::dict technology_mapping_keywords(const fiction::synthesis::technology_mapping_params& params)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    nb::dict options{};
+    options["decay"]   = params.decay;
+    options["inv"]     = params.inv;
+    options["and2"]    = params.and2;
+    options["nand2"]   = params.nand2;
+    options["or2"]     = params.or2;
+    options["nor2"]    = params.nor2;
+    options["xor2"]    = params.xor2;
+    options["xnor2"]   = params.xnor2;
+    options["lt2"]     = params.lt2;
+    options["gt2"]     = params.gt2;
+    options["le2"]     = params.le2;
+    options["ge2"]     = params.ge2;
+    options["and3"]    = params.and3;
+    options["xor_and"] = params.xor_and;
+    options["or_and"]  = params.or_and;
+    options["onehot"]  = params.onehot;
+    options["maj3"]    = params.maj3;
+    options["gamble"]  = params.gamble;
+    options["dot"]     = params.dot;
+    options["mux"]     = params.mux;
+    options["and_xor"] = params.and_xor;
+    return options;
+}
 
-    m.def("technology_mapping", &fiction::synthesis::technology_mapping<Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::technology_mapping_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_synthesis_technology_mapping), py::call_guard<py::gil_scoped_release>());
+/**
+ * @brief Binds technology mapping helpers.
+ * @param m Python module.
+ * @tparam Ntk Network type.
+ */
+template <typename Ntk>
+void register_technology_mapping_impl(nb::module_& m)
+{
+    m.def(
+        "technology_mapping",
+        [](const Ntk& network, const decltype(fiction::synthesis::technology_mapping_params{}.decay) decay,
+           const decltype(fiction::synthesis::technology_mapping_params{}.inv)     inv,
+           const decltype(fiction::synthesis::technology_mapping_params{}.and2)    and2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.nand2)   nand2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.or2)     or2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.nor2)    nor2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.xor2)    xor2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.xnor2)   xnor2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.lt2)     lt2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.gt2)     gt2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.le2)     le2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.ge2)     ge2,
+           const decltype(fiction::synthesis::technology_mapping_params{}.and3)    and3,
+           const decltype(fiction::synthesis::technology_mapping_params{}.xor_and) xor_and,
+           const decltype(fiction::synthesis::technology_mapping_params{}.or_and)  or_and,
+           const decltype(fiction::synthesis::technology_mapping_params{}.onehot)  onehot,
+           const decltype(fiction::synthesis::technology_mapping_params{}.maj3)    maj3,
+           const decltype(fiction::synthesis::technology_mapping_params{}.gamble)  gamble,
+           const decltype(fiction::synthesis::technology_mapping_params{}.dot)     dot,
+           const decltype(fiction::synthesis::technology_mapping_params{}.mux)     mux,
+           const decltype(fiction::synthesis::technology_mapping_params{}.and_xor) and_xor,
+           fiction::synthesis::technology_mapping_stats*                           stats)
+        {
+            fiction::synthesis::technology_mapping_params params{};
+            params.decay   = decay;
+            params.inv     = inv;
+            params.and2    = and2;
+            params.nand2   = nand2;
+            params.or2     = or2;
+            params.nor2    = nor2;
+            params.xor2    = xor2;
+            params.xnor2   = xnor2;
+            params.lt2     = lt2;
+            params.gt2     = gt2;
+            params.le2     = le2;
+            params.ge2     = ge2;
+            params.and3    = and3;
+            params.xor_and = xor_and;
+            params.or_and  = or_and;
+            params.onehot  = onehot;
+            params.maj3    = maj3;
+            params.gamble  = gamble;
+            params.dot     = dot;
+            params.mux     = mux;
+            params.and_xor = and_xor;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::technology_mapping<Ntk>(network, params, stats);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("decay") = fiction::synthesis::technology_mapping_params{}.decay,
+        nb::arg("inv")     = fiction::synthesis::technology_mapping_params{}.inv,
+        nb::arg("and2")    = fiction::synthesis::technology_mapping_params{}.and2,
+        nb::arg("nand2")   = fiction::synthesis::technology_mapping_params{}.nand2,
+        nb::arg("or2")     = fiction::synthesis::technology_mapping_params{}.or2,
+        nb::arg("nor2")    = fiction::synthesis::technology_mapping_params{}.nor2,
+        nb::arg("xor2")    = fiction::synthesis::technology_mapping_params{}.xor2,
+        nb::arg("xnor2")   = fiction::synthesis::technology_mapping_params{}.xnor2,
+        nb::arg("lt2")     = fiction::synthesis::technology_mapping_params{}.lt2,
+        nb::arg("gt2")     = fiction::synthesis::technology_mapping_params{}.gt2,
+        nb::arg("le2")     = fiction::synthesis::technology_mapping_params{}.le2,
+        nb::arg("ge2")     = fiction::synthesis::technology_mapping_params{}.ge2,
+        nb::arg("and3")    = fiction::synthesis::technology_mapping_params{}.and3,
+        nb::arg("xor_and") = fiction::synthesis::technology_mapping_params{}.xor_and,
+        nb::arg("or_and")  = fiction::synthesis::technology_mapping_params{}.or_and,
+        nb::arg("onehot")  = fiction::synthesis::technology_mapping_params{}.onehot,
+        nb::arg("maj3")    = fiction::synthesis::technology_mapping_params{}.maj3,
+        nb::arg("gamble")  = fiction::synthesis::technology_mapping_params{}.gamble,
+        nb::arg("dot")     = fiction::synthesis::technology_mapping_params{}.dot,
+        nb::arg("mux")     = fiction::synthesis::technology_mapping_params{}.mux,
+        nb::arg("and_xor") = fiction::synthesis::technology_mapping_params{}.and_xor, nb::arg("stats") = nullptr,
+        R"doc(Map the input network to the gates enabled by the boolean keyword options.
+No gates are enabled by default; missing required gates raise missing_required_gates_exception.
+Returns a technology network; stats receives mapper statistics when supplied.
+Gate-set factory dictionaries can be expanded into these keywords.
+
+Args:
+    decay: Enforce the application of at least one constant input to three-input gates.
+    inv: 1-input NOT gate (inverter).
+    and2: 2-input AND gate.
+    nand2: 2-input NAND gate.
+    or2: 2-input OR gate.
+    nor2: 2-input NOR gate.
+    xor2: 2-input XOR gate.
+    xnor2: 2-input XNOR gate.
+    lt2: 2-input less-than gate.
+    gt2: 2-input greater-than gate.
+    le2: 2-input less-or-equal gate.
+    ge2: 2-input greater-or-equal gate.
+    and3: 3-input AND gate.
+    xor_and: 3-input XOR-AND gate.
+    or_and: 3-input OR-AND gate.
+    onehot: 3-input ONEHOT gate.
+    maj3: 3-input MAJ gate.
+    gamble: 3-input GAMBLE gate.
+    dot: 3-input DOT gate.
+    mux: 3-input MUX gate (ITE).
+    and_xor: 3-input AND-XOR gate.
+    stats: Statistics object filled by the algorithm; None discards statistics.
+)doc");
 }
 
 }  // namespace detail
 
-void technology_mapping(nanobind::module_& m)
+/**
+ * @brief Binds technology mapping helpers.
+ * @param m Python module.
+ */
+void register_technology_mapping(nb::module_& m)
 {
-    namespace py = nanobind;
-
+    m.attr("TechnologyMappingOptions") = nb::module_::import_("mnt.pyfiction._types").attr("TechnologyMappingOptions");
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
-    py::exception<fiction::synthesis::missing_required_gates_exception>(
+    nb::exception<fiction::synthesis::missing_required_gates_exception>(
         m, "missing_required_gates_exception",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    py::class_<fiction::synthesis::technology_mapping_params>(m, "technology_mapping_params",
-                                                              DOC(fiction_synthesis_technology_mapping_params))
-        .def(py::init<>(), "Default constructor.")
-
-        .def_rw("decay", &fiction::synthesis::technology_mapping_params::decay,
-                DOC(fiction_synthesis_technology_mapping_params_decay))
-
-        .def_rw("inv", &fiction::synthesis::technology_mapping_params::inv,
-                DOC(fiction_synthesis_technology_mapping_params_inv))
-
-        .def_rw("and2", &fiction::synthesis::technology_mapping_params::and2,
-                DOC(fiction_synthesis_technology_mapping_params_and2))
-        .def_rw("nand2", &fiction::synthesis::technology_mapping_params::nand2,
-                DOC(fiction_synthesis_technology_mapping_params_nand2))
-        .def_rw("or2", &fiction::synthesis::technology_mapping_params::or2,
-                DOC(fiction_synthesis_technology_mapping_params_or2))
-        .def_rw("nor2", &fiction::synthesis::technology_mapping_params::nor2,
-                DOC(fiction_synthesis_technology_mapping_params_nor2))
-        .def_rw("xor2", &fiction::synthesis::technology_mapping_params::xor2,
-                DOC(fiction_synthesis_technology_mapping_params_xor2))
-        .def_rw("xnor2", &fiction::synthesis::technology_mapping_params::xnor2,
-                DOC(fiction_synthesis_technology_mapping_params_xnor2))
-
-        .def_rw("lt2", &fiction::synthesis::technology_mapping_params::lt2,
-                DOC(fiction_synthesis_technology_mapping_params_lt2))
-        .def_rw("gt2", &fiction::synthesis::technology_mapping_params::gt2,
-                DOC(fiction_synthesis_technology_mapping_params_gt2))
-        .def_rw("le2", &fiction::synthesis::technology_mapping_params::le2,
-                DOC(fiction_synthesis_technology_mapping_params_le2))
-        .def_rw("ge2", &fiction::synthesis::technology_mapping_params::ge2,
-                DOC(fiction_synthesis_technology_mapping_params_ge2))
-        .def_rw("and3", &fiction::synthesis::technology_mapping_params::and3,
-                DOC(fiction_synthesis_technology_mapping_params_and3))
-        .def_rw("xor_and", &fiction::synthesis::technology_mapping_params::xor_and,
-                DOC(fiction_synthesis_technology_mapping_params_xor_and))
-        .def_rw("or_and", &fiction::synthesis::technology_mapping_params::or_and,
-                DOC(fiction_synthesis_technology_mapping_params_or_and))
-        .def_rw("onehot", &fiction::synthesis::technology_mapping_params::onehot,
-                DOC(fiction_synthesis_technology_mapping_params_onehot))
-        .def_rw("maj3", &fiction::synthesis::technology_mapping_params::maj3,
-                DOC(fiction_synthesis_technology_mapping_params_maj3))
-        .def_rw("gamble", &fiction::synthesis::technology_mapping_params::gamble,
-                DOC(fiction_synthesis_technology_mapping_params_gamble))
-        .def_rw("dot", &fiction::synthesis::technology_mapping_params::dot,
-                DOC(fiction_synthesis_technology_mapping_params_dot))
-        .def_rw("mux", &fiction::synthesis::technology_mapping_params::mux,
-                DOC(fiction_synthesis_technology_mapping_params_mux))
-        .def_rw("and_xor", &fiction::synthesis::technology_mapping_params::and_xor,
-                DOC(fiction_synthesis_technology_mapping_params_and_xor))
-
-        ;
-
-    py::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
+    nb::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
         .def_ro("mapping_error", &mockturtle::emap_stats::mapping_error)
         .def_ro("area", &mockturtle::emap_stats::area)
         .def_ro("delay", &mockturtle::emap_stats::delay)
@@ -121,33 +209,68 @@ void technology_mapping(nanobind::module_& m)
         .def_ro("time_total", &mockturtle::emap_stats::time_total)
         .def_ro("round_stats", &mockturtle::emap_stats::round_stats);
 
-    py::class_<fiction::synthesis::technology_mapping_stats>(m, "technology_mapping_stats",
+    nb::class_<fiction::synthesis::technology_mapping_stats>(m, "technology_mapping_stats",
                                                              DOC(fiction_synthesis_technology_mapping_stats))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def("report", &fiction::synthesis::technology_mapping_stats::report,
              DOC(fiction_synthesis_technology_mapping_stats_report))
         .def_ro("mapper_stats", &fiction::synthesis::technology_mapping_stats::mapper_stats,
                 DOC(fiction_synthesis_technology_mapping_stats_mapper_stats));
 
-    m.def("and_or_not", &fiction::synthesis::and_or_not, DOC(fiction_synthesis_and_or_not),
-          py::call_guard<py::gil_scoped_release>());
+    m.def(
+        "and_or_not",
+        []()
+        {
+            const auto params = fiction::synthesis::and_or_not();
+            return detail::technology_mapping_keywords(params);
+        },
+        nb::sig("def and_or_not() -> TechnologyMappingOptions"),
+        "Return boolean mapping keywords for AND, OR, and NOT gates.");
 
-    m.def("and_or_not_maj", &fiction::synthesis::and_or_not_maj, DOC(fiction_synthesis_and_or_not_maj),
-          py::call_guard<py::gil_scoped_release>());
+    m.def(
+        "and_or_not_maj",
+        []()
+        {
+            const auto params = fiction::synthesis::and_or_not_maj();
+            return detail::technology_mapping_keywords(params);
+        },
+        nb::sig("def and_or_not_maj() -> TechnologyMappingOptions"),
+        "Return boolean mapping keywords for AND, OR, NOT, and MAJ gates.");
 
-    m.def("all_standard_2_input_functions", &fiction::synthesis::all_standard_2_input_functions,
-          DOC(fiction_synthesis_all_standard_2_input_functions), py::call_guard<py::gil_scoped_release>());
+    m.def(
+        "all_standard_2_input_functions",
+        []()
+        {
+            const auto params = fiction::synthesis::all_standard_2_input_functions();
+            return detail::technology_mapping_keywords(params);
+        },
+        nb::sig("def all_standard_2_input_functions() -> TechnologyMappingOptions"),
+        "Return boolean mapping keywords for standard two-input functions.");
 
-    m.def("all_standard_3_input_functions", &fiction::synthesis::all_standard_3_input_functions,
-          DOC(fiction_synthesis_all_standard_3_input_functions), py::call_guard<py::gil_scoped_release>());
+    m.def(
+        "all_standard_3_input_functions",
+        []()
+        {
+            const auto params = fiction::synthesis::all_standard_3_input_functions();
+            return detail::technology_mapping_keywords(params);
+        },
+        nb::sig("def all_standard_3_input_functions() -> TechnologyMappingOptions"),
+        "Return boolean mapping keywords for standard three-input functions.");
 
-    m.def("all_supported_standard_functions", &fiction::synthesis::all_supported_standard_functions,
-          DOC(fiction_synthesis_all_supported_standard_functions), py::call_guard<py::gil_scoped_release>());
+    m.def(
+        "all_supported_standard_functions",
+        []()
+        {
+            const auto params = fiction::synthesis::all_supported_standard_functions();
+            return detail::technology_mapping_keywords(params);
+        },
+        nb::sig("def all_supported_standard_functions() -> TechnologyMappingOptions"),
+        "Return boolean mapping keywords for all supported standard functions.");
 
-    detail::technology_mapping_impl<py_tec_network>(m);
-    detail::technology_mapping_impl<py_aig_network>(m);
-    detail::technology_mapping_impl<py_xag_network>(m);
-    detail::technology_mapping_impl<py_mig_network>(m);
+    detail::register_technology_mapping_impl<py_tec_network>(m);
+    detail::register_technology_mapping_impl<py_aig_network>(m);
+    detail::register_technology_mapping_impl<py_xag_network>(m);
+    detail::register_technology_mapping_impl<py_mig_network>(m);
 }
 
 }  // namespace pyfiction

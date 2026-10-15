@@ -15,6 +15,7 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
@@ -22,7 +23,6 @@
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
-#include <fiction/traits.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -34,54 +34,61 @@
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 namespace detail
 {
 
+/**
+ * @brief Registers the number of adjacent coordinates for a geometry.
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
-void num_adjacent_coordinates(nanobind::module_& m)
+void register_num_adjacent_coordinates(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("num_adjacent_coordinates", &fiction::layouts::num_adjacent_coordinates<Lyt>, py::arg("lyt"), py::arg("c"),
+    m.def("num_adjacent_coordinates", &fiction::layouts::num_adjacent_coordinates<Lyt>, nb::arg("lyt"), nb::arg("c"),
           DOC(fiction_layouts_num_adjacent_coordinates));
 }
 
+/**
+ * @brief Registers occupied coordinate normalization for a cell layout.
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
-void normalize_layout_coordinates(nanobind::module_& m)
+void register_normalize_layout_coordinates(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("normalize_layout_coordinates", &fiction::layouts::normalize_layout_coordinates<Lyt>, py::arg("lyt"),
+    m.def("normalize_layout_coordinates", &fiction::layouts::normalize_layout_coordinates<Lyt>, nb::arg("lyt"),
           DOC(fiction_layouts_normalize_layout_coordinates));
-}
-
-template <typename Lyt>
-void random_coordinate(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::coordinate<Lyt>>, py::arg("coordinate1"),
-          py::arg("coordinate_2"), DOC(fiction_layouts_random_coordinate));
 }
 
 }  // namespace detail
 
-void layout_utils(nanobind::module_& m)
+/**
+ * @brief Registers layout coordinate utilities.
+ * @param m Python module.
+ */
+void register_layout_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::num_adjacent_coordinates<py_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
-    detail::num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
+    detail::register_num_adjacent_coordinates<py_cartesian_gate_layout>(m);
+    detail::register_num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
+    detail::register_num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
 
-    detail::normalize_layout_coordinates<fiction::qca::layout>(m);
-    detail::normalize_layout_coordinates<fiction::mol_qca::layout>(m);
-    detail::normalize_layout_coordinates<fiction::inml::layout>(m);
+    detail::register_normalize_layout_coordinates<fiction::qca::layout>(m);
+    detail::register_normalize_layout_coordinates<fiction::mol_qca::layout>(m);
+    detail::register_normalize_layout_coordinates<fiction::inml::layout>(m);
 
-    detail::random_coordinate<py_cartesian_gate_layout>(m);
+    m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
+          nb::arg("corner1"), nb::arg("corner2"), DOC(fiction_layouts_random_coordinate));
 }
 
 }  // namespace pyfiction

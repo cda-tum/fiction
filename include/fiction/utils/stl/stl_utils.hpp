@@ -45,11 +45,16 @@ namespace fiction::utils::stl
  * @param s_first Begin of the range to search for.
  * @param s_last End of the range to search for.
  * @return Iterator in the range `[first, last)` to the first position of the first 2-element sub-sequence shared
- * between the two ranges, or `last` if no such shared sub-sequence exists.
+ * between the two ranges, or `last` if either range has fewer than two elements or no shared sub-sequence exists.
  */
 template <std::random_access_iterator InputIt, std::random_access_iterator ForwardIt>
 InputIt find_first_two_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last) noexcept
 {
+    if (last - first < 2 || s_last - s_first < 2)
+    {
+        return last;
+    }
+
     for (; first != last - 1; ++first)
     {
         for (ForwardIt it = s_first; it != s_last - 1; ++it)

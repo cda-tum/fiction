@@ -16,6 +16,11 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -24,44 +29,44 @@ namespace pyfiction
  *
  * @param m Python module.
  */
-void write_sqd_layout(nanobind::module_& m);
+void register_write_sqd_layout(nb::module_& m);
 /**
  * @brief Registers SQD import and parsing errors.
  *
  * @param m Python module.
  */
-void read_sqd_layout(nanobind::module_& m);
+void register_read_sqd_layout(nb::module_& m);
 /**
  * @brief Registers surface-defect import.
  *
  * @param m Python module.
  */
-void read_surface_defects(nanobind::module_& m);
+void register_read_surface_defects(nb::module_& m);
 /**
  * @brief Registers SVG export and its rendering parameters.
  *
  * @param m Python module.
  */
-void write_sidb_layout_svg(nanobind::module_& m);
+void register_write_sidb_layout_svg(nb::module_& m);
 /**
  * @brief Registers the textual layout printer.
  *
  * @param m Python module.
  */
-void print_sidb_layout(nanobind::module_& m);
+void register_print_sidb_layout(nb::module_& m);
 
 /**
  * @brief Registers SiDB layout import and export.
  *
  * @param m Python module.
  */
-void register_sidb_io(nanobind::module_& m)
+void register_sidb_io(nb::module_& m)
 {
-    write_sqd_layout(m);
-    read_sqd_layout(m);
-    read_surface_defects(m);
-    write_sidb_layout_svg(m);
-    print_sidb_layout(m);
+    register_write_sqd_layout(m);
+    register_read_sqd_layout(m);
+    register_read_surface_defects(m);
+    register_write_sidb_layout_svg(m);
+    register_print_sidb_layout(m);
 }
 
 }  // namespace pyfiction

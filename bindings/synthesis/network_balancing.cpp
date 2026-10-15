@@ -12,10 +12,9 @@
  * @file
  * @brief Python bindings for `fiction/synthesis/network_balancing.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/network_balancing.hpp>
@@ -26,46 +25,76 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-namespace detail
+/**
+ * @brief Binds network balancing helpers.
+ * @param m Python module.
+ */
+void register_network_balancing(nb::module_& m)
 {
+    m.def(
+        "network_balancing",
+        [](const py_tec_network&                                                        network,
+           const decltype(fiction::synthesis::network_balancing_params{}.on_progress)&  on_progress,
+           const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs,
+           const decltype(fiction::synthesis::network_balancing_params{}
+                              .buffer_constant_outputs)                                 buffer_constant_outputs)
+        {
+            fiction::synthesis::network_balancing_params params{};
+            params.on_progress             = on_progress;
+            params.unify_outputs           = unify_outputs;
+            params.buffer_constant_outputs = buffer_constant_outputs;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::network_balancing<py_tec_network, py_tec_network>(network, params);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("unify_outputs")           = fiction::synthesis::network_balancing_params{}.unify_outputs,
+        nb::arg("buffer_constant_outputs") = fiction::synthesis::network_balancing_params{}.buffer_constant_outputs,
+        R"doc(Insert identity nodes to balance network paths.
+Returns a fresh technology network that is logically equivalent to the input.
+Set unify_outputs to place every output at the same logic depth.
 
-template <typename Ntk>
-void network_balancing_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    unify_outputs: Flag to indicate that all output nodes should be in the same rank.
+    buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
+        set to False for flows that do not place constants, which then also ignore them in the check.
+)doc");
 
-    m.def("network_balancing", &fiction::synthesis::network_balancing<py_tec_network, Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_network_balancing),
-          py::call_guard<py::gil_scoped_release>());
+    m.def(
+        "is_balanced",
+        [](const py_tec_network&                                                        network,
+           const decltype(fiction::synthesis::network_balancing_params{}.on_progress)&  on_progress,
+           const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs,
+           const decltype(fiction::synthesis::network_balancing_params{}
+                              .buffer_constant_outputs)                                 buffer_constant_outputs)
+        {
+            fiction::synthesis::network_balancing_params params{};
+            params.on_progress             = on_progress;
+            params.unify_outputs           = unify_outputs;
+            params.buffer_constant_outputs = buffer_constant_outputs;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::is_balanced<py_tec_network>(network, params);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("unify_outputs")           = fiction::synthesis::network_balancing_params{}.unify_outputs,
+        nb::arg("buffer_constant_outputs") = fiction::synthesis::network_balancing_params{}.buffer_constant_outputs,
+        R"doc(Check whether network paths are balanced.
+Set unify_outputs to require every output at the same logic depth.
 
-    m.def("is_balanced", &fiction::synthesis::is_balanced<Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::network_balancing_params{}, DOC(fiction_synthesis_is_balanced),
-          py::call_guard<py::gil_scoped_release>());
-}
-
-}  // namespace detail
-
-void network_balancing(nanobind::module_& m)
-{
-    namespace py = nanobind;
-
-    py::class_<fiction::synthesis::network_balancing_params>(m, "network_balancing_params",
-                                                             DOC(fiction_synthesis_network_balancing_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::synthesis::network_balancing_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                "Receives completed work and the phase total.")
-        .def_rw("unify_outputs", &fiction::synthesis::network_balancing_params::unify_outputs,
-                DOC(fiction_synthesis_network_balancing_params_unify_outputs))
-        .def_rw("buffer_constant_outputs", &fiction::synthesis::network_balancing_params::buffer_constant_outputs,
-                DOC(fiction_synthesis_network_balancing_params_buffer_constant_outputs))
-
-        ;
-
-    detail::network_balancing_impl<py_tec_network>(m);
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    unify_outputs: Flag to indicate that all output nodes should be in the same rank.
+    buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
+        set to False for flows that do not place constants, which then also ignore them in the check.
+)doc");
 }
 
 }  // namespace pyfiction

@@ -38,17 +38,18 @@ def write_dot_layout(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:
     """
-    Writes layout in DOT format into output stream
-
-    An overloaded variant exists that writes the layout into a file.
-
-    **Required network functions:**
-    - is_pi - foreach_node - foreach_fanin
+    Writes a layout in DOT format into an output stream. Terminal names
+    use quoted DOT strings.
 
     Args:
-        lyt: Layout
+        lyt: Layout.
+        os: Output stream.
+        drawer: Formats the layout's tiles and topology.
         on_progress: Receives completed drawing work.
-        os: Output stream
+
+    Template Args:
+        Lyt: Gate-level layout type.
+        Drawer: DOT drawer type.
     """
 
 @overload
@@ -70,7 +71,8 @@ def write_fgl_layout(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:
     """
-    Writes an FGL layout to a file.
+    Writes a finished layout in FGL version 2 with extent counts and
+    declared interface order.
 
     This overload uses a file name to create and write into.
 
@@ -81,16 +83,21 @@ def write_fgl_layout(
                   preferably use the .fgl extension.
 
     Template Args:
-        Lyt: Layout.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Raises:
-        std::invalid_argument: If a node is unplaced or placed on a tile
-                               with a negative coordinate.
+        std::invalid_argument: If the layout is incomplete, cyclic,
+                               physically invalid, uses an unsupported
+                               scheme, or contains illegal XML text
+                               controls.
     """
 
 class fgl_parsing_error(RuntimeError): ...
 
-def read_cartesian_fgl_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.layouts.cartesian_gate_layout:
+@overload
+def read_fgl_layout(
+    filename: str, layout_name: str = "", *, layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout] = ...
+) -> mnt.pyfiction.layouts.cartesian_gate_layout:
     """
     Reads a gate-level layout from an FGL file provided as a file name.
 
@@ -104,32 +111,26 @@ def read_cartesian_fgl_layout(filename: str, layout_name: str = "") -> mnt.pyfic
         Lyt: The layout type to be created from an input.
     """
 
-def read_shifted_cartesian_fgl_layout(
-    filename: str, layout_name: str = ""
-) -> mnt.pyfiction.layouts.shifted_cartesian_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
-
-def read_hexagonal_fgl_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.layouts.hexagonal_gate_layout:
-    """
-    Reads a gate-level layout from an FGL file provided as a file name.
-
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
-
-    Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
-
-    Template Args:
-        Lyt: The layout type to be created from an input.
-    """
+@overload
+def read_fgl_layout(
+    filename: str, layout_name: str = "", *, layout_type: type[mnt.pyfiction.layouts.shifted_cartesian_gate_layout]
+) -> mnt.pyfiction.layouts.shifted_cartesian_gate_layout: ...
+@overload
+def read_fgl_layout(
+    filename: str, layout_name: str = "", *, layout_type: type[mnt.pyfiction.layouts.hexagonal_gate_layout]
+) -> mnt.pyfiction.layouts.hexagonal_gate_layout: ...
+@overload
+def read_fgl_layout(
+    filename: str,
+    layout_name: str = "",
+    *,
+    layout_type: type[
+        mnt.pyfiction.layouts.cartesian_gate_layout
+        | mnt.pyfiction.layouts.shifted_cartesian_gate_layout
+        | mnt.pyfiction.layouts.hexagonal_gate_layout
+    ],
+) -> (
+    mnt.pyfiction.layouts.cartesian_gate_layout
+    | mnt.pyfiction.layouts.shifted_cartesian_gate_layout
+    | mnt.pyfiction.layouts.hexagonal_gate_layout
+): ...

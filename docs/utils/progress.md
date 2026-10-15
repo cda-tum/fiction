@@ -1,6 +1,7 @@
 # Progress Reporting
 
-Long-running algorithms report their progress through a callback in their parameters. The callback receives the name
+Long-running algorithms report their progress through a callback in their C++ parameters or an `on_progress`
+keyword argument in Python. The callback receives the name
 of the task the algorithm is working on, the number of work items completed so far, and the total number of work items,
 where `0` stands for an unknown total. The `fiction` shell renders these reports as progress bars. Passing no callback
 turns the reporting off.
@@ -33,10 +34,9 @@ params.on_progress = [](const std::string_view task, const std::size_t done, con
 :sync: python
 
 ```python
-from mnt.pyfiction.physical_design import orthogonal_params
+from mnt.pyfiction.physical_design import orthogonal
 
-params = orthogonal_params()
-params.on_progress = lambda task, done, total: print(f"{task}: {done}/{total}")
+layout = orthogonal(network, on_progress=lambda task, done, total: print(f"{task}: {done}/{total}"))
 ```
 
 The algorithms release the global interpreter lock while they run. Callbacks acquire the lock and may run on the calling
@@ -54,15 +54,17 @@ reporters must synchronize access to shared state, including Python callbacks th
 Parallel algorithms accept an optional `on_worker_progress` callback. Its arguments are the stable logical
 worker ID, fixed worker count, description, completed count, total (`0` for unknown), and active state.
 Descriptions can change without changing the worker ID. `gold` uses search-space graph IDs across rounds;
-`exact` describes dimensions in tiles. A candidate's placed-node count describes that candidate, not the
+`exact` describes candidate extents in tiles. A candidate's placed-node count describes that candidate, not the
 fraction of the search completed.
 
 ```python
-from mnt.pyfiction.physical_design import exact_params
+from mnt.pyfiction.physical_design import exact
 
-params = exact_params()
-params.on_worker_progress = lambda worker, count, description, done, total, active: print(
-    worker, description, done, total, active
+layout = exact(
+    network,
+    on_worker_progress=lambda worker, count, description, done, total, active: print(
+        worker, description, done, total, active
+    ),
 )
 ```
 
@@ -78,7 +80,7 @@ transitions publish immediately. Inactive reports retain the final completed cou
 Algorithms join their workers before destroying callback state. Callbacks run outside solver, queue, and
 result locks. A callback must not throw or re-enter its reporter.
 
-Gate-library application and layout writers also accept aggregate callbacks, either as `on_progress`
-arguments or in their parameter structs. Counted phases use their actual units: gates, rows, tiles, cell
+Gate-library application and layout writers also accept aggregate callbacks through `on_progress`.
+Python callbacks are keyword-only; C++ callbacks can also be members of parameter structs. Counted phases use their actual units: gates, rows, tiles, cell
 positions, dots, defects, or rendering passes. The shell hides empty phases and keeps the last completed
 count on failure. Readers do not scan input solely to determine progress totals.

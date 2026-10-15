@@ -39,7 +39,7 @@ TEST_CASE("molQCA layouts are planar", "[mol-qca-layout]")
 {
     layout lyt{{9, 9, 1}, "wire"};
 
-    CHECK(lyt.z() == 0);
+    CHECK(lyt.layers() == 1);
     CHECK(lyt.get_layout_name() == "wire");
 
     lyt.assign_cell_type({0, 4}, cell_type::INPUT);

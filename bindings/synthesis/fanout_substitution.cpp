@@ -17,7 +17,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/fanout_substitution.hpp>
@@ -29,33 +28,21 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-namespace detail
+/**
+ * @brief Binds fanout substitution helpers.
+ * @param m Python module.
+ */
+void register_fanout_substitution(nb::module_& m)
 {
-
-template <typename Ntk>
-void fanout_substitution_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("fanout_substitution", &fiction::synthesis::fanout_substitution<py_tec_network, Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::fanout_substitution_params{},
-          DOC(fiction_synthesis_fanout_substitution), py::call_guard<py::gil_scoped_release>());
-
-    m.def("is_fanout_substituted", &fiction::synthesis::is_fanout_substituted<Ntk>, py::arg("network"),
-          py::arg("params") = fiction::synthesis::fanout_substitution_params{},
-          DOC(fiction_synthesis_is_fanout_substituted), py::call_guard<py::gil_scoped_release>());
-}
-
-}  // namespace detail
-
-void fanout_substitution(nanobind::module_& m)
-{
-    namespace py = nanobind;
-
-    py::enum_<fiction::synthesis::fanout_substitution_params::substitution_strategy>(
+    nb::enum_<fiction::synthesis::fanout_substitution_params::substitution_strategy>(
         m, "substitution_strategy", DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy))
         .value("BREADTH", fiction::synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
                DOC(fiction_synthesis_fanout_substitution_params_substitution_strategy_BREADTH))
@@ -66,24 +53,72 @@ void fanout_substitution(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::synthesis::fanout_substitution_params>(m, "fanout_substitution_params",
-                                                               DOC(fiction_synthesis_fanout_substitution_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::synthesis::fanout_substitution_params::on_progress,
-                pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                "Receives completed work and the phase total.")
-        .def_rw("strategy", &fiction::synthesis::fanout_substitution_params::strategy,
-                DOC(fiction_synthesis_fanout_substitution_params_strategy))
-        .def_rw("degree", &fiction::synthesis::fanout_substitution_params::degree,
-                DOC(fiction_synthesis_fanout_substitution_params_degree))
-        .def_rw("threshold", &fiction::synthesis::fanout_substitution_params::threshold,
-                DOC(fiction_synthesis_fanout_substitution_params_threshold))
-        .def_rw("seed", &fiction::synthesis::fanout_substitution_params::seed,
-                DOC(fiction_synthesis_fanout_substitution_params_seed))
+    m.def(
+        "fanout_substitution",
+        [](const py_tec_network&                                                         network,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress)& on_progress,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)     strategy,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.degree)       degree,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.threshold)    threshold,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.seed)         seed)
+        {
+            fiction::synthesis::fanout_substitution_params params{};
+            params.on_progress = on_progress;
+            params.strategy    = strategy;
+            params.degree      = degree;
+            params.threshold   = threshold;
+            params.seed        = seed;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::fanout_substitution<py_tec_network, py_tec_network>(network, params);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("strategy")  = fiction::synthesis::fanout_substitution_params{}.strategy,
+        nb::arg("degree")    = fiction::synthesis::fanout_substitution_params{}.degree,
+        nb::arg("threshold") = fiction::synthesis::fanout_substitution_params{}.threshold,
+        nb::arg("seed")      = fiction::synthesis::fanout_substitution_params{}.seed,
+        R"doc(Insert identity nodes so the network respects the keyword fanout limits.
+Returns a fresh technology network that is logically equivalent to the input.
 
-        ;
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
+    degree: Maximum output degree of each fan-out node. Must be at least two.
+    threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
+    seed: Random seed; None selects a fresh random seed.
+)doc");
 
-    detail::fanout_substitution_impl<py_tec_network>(m);
+    m.def(
+        "is_fanout_substituted",
+        [](const py_tec_network&                                                         network,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress)& on_progress,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)     strategy,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.degree)       degree,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.threshold)    threshold,
+           const decltype(fiction::synthesis::fanout_substitution_params{}.seed)         seed)
+        {
+            fiction::synthesis::fanout_substitution_params params{};
+            params.on_progress = on_progress;
+            params.strategy    = strategy;
+            params.degree      = degree;
+            params.threshold   = threshold;
+            params.seed        = seed;
+            const nb::gil_scoped_release release{};
+            return fiction::synthesis::is_fanout_substituted<py_tec_network>(network, params);
+        },
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("strategy")  = fiction::synthesis::fanout_substitution_params{}.strategy,
+        nb::arg("degree")    = fiction::synthesis::fanout_substitution_params{}.degree,
+        nb::arg("threshold") = fiction::synthesis::fanout_substitution_params{}.threshold,
+        nb::arg("seed")      = fiction::synthesis::fanout_substitution_params{}.seed,
+        R"doc(Check whether every network node respects the keyword fanout limits.
+
+Args:
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
+    degree: Maximum output degree of each fan-out node. Must be at least two.
+    threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
+    seed: Random seed; None selects a fresh random seed.
+)doc");
 }
 
 }  // namespace pyfiction

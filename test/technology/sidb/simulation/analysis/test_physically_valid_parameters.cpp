@@ -40,6 +40,18 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::logic;
 
+#if (FICTION_ALGLIB_ENABLED)
+TEST_CASE("Reject unsupported physical-validity simulation engines", "[determine-physically-valid-parameters]")
+{
+    const layout              lyt{};
+    const charge_distribution cd{lyt};
+    operational_domain_params params{};
+    params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
+
+    CHECK_THROWS_AS(physically_valid_parameters(lyt, cd, params), std::invalid_argument);
+}
+#endif  // FICTION_ALGLIB_ENABLED
+
 TEST_CASE("Reject charge distributions from another layout", "[determine-physically-valid-parameters]")
 {
     layout lyt{};
@@ -277,7 +289,7 @@ TEST_CASE(
     }
 }
 
-TEST_CASE("Physical-validity sweeps report their total", "[physically-valid-parameters]")
+TEST_CASE("Physical-validity sweeps report their total", "[determine-physically-valid-parameters]")
 {
     layout lyt{};
     lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
@@ -297,7 +309,7 @@ TEST_CASE("Physical-validity sweeps report their total", "[physically-valid-para
     CHECK(reports.back().total == 3);
 }
 
-TEST_CASE("Physical-validity sweep boundaries", "[physically-valid-parameters]")
+TEST_CASE("Physical-validity sweep boundaries", "[determine-physically-valid-parameters]")
 {
     layout lyt{};
     lyt.assign_sidb({0, 0}, dot_tag::NORMAL);

@@ -17,10 +17,11 @@ from mnt.pyfiction.layouts import (
     arrangement,
     cartesian_gate_layout,
     hexagonal_gate_layout,
+    layout_input_port,
     shifted_cartesian_gate_layout,
 )
-from mnt.pyfiction.networks.io import read_technology_network
-from mnt.pyfiction.physical_design import orthogonal, orthogonal_params
+from mnt.pyfiction.networks.io import read_network
+from mnt.pyfiction.physical_design import orthogonal
 from mnt.pyfiction.qca import qca_layout
 
 if TYPE_CHECKING:
@@ -30,56 +31,55 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"),
+        pytest.param(lambda: cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout"), id="cartesian_gate_layout"),
         pytest.param(
-            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 0), "2DDWave", "Layout"),
+            lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 1), "2DDWave", "Layout"),
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
-            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "2DDWave", "Layout"),
+            lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 1), "2DDWave", "Layout"),
             id="hexagonal_gate_layout",
         ),
     ],
 )
 def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
     layout = make_layout()
-    min_coord, max_coord = layout.bounding_box_2d()
-    assert min_coord == layout.coord(0, 0)
-    assert max_coord == layout.coord(0, 0)
-    assert max_coord.x - min_coord.x == 0
-    assert max_coord.y - min_coord.y == 0
+    min_coord, max_coord = layout.bounding_box()
+    assert min_coord is None
+    assert max_coord is None
 
 
 @pytest.mark.parametrize("verilog", ["mux21.v", "xnor2.v", "xor2.v", "FA.v"])
 def test_initialize_gate_level_with_ortho_bounding_box(resources_dir: Path, verilog: str) -> None:
     """Orthogonal placement fills the layout's declared extent."""
-    network = read_technology_network(str(resources_dir / verilog))
-    layout = orthogonal(network, orthogonal_params())
-    min_coord, max_coord = layout.bounding_box_2d()
+    network = read_network(str(resources_dir / verilog))
+    layout = orthogonal(network)
+    min_coord, max_coord = layout.bounding_box()
 
     assert min_coord == layout.coord(0, 0)
-    assert max_coord == layout.coord(layout.x(), layout.y())
+    assert max_coord == layout.coord(layout.width() - 1, layout.height() - 1)
 
 
 def test_update_gate_level_bounding_box() -> None:
     """Clearing and moving occupied boundary tiles updates both bounding-box axes."""
-    layout = cartesian_gate_layout((8, 8), "2DDWave")
+    layout = cartesian_gate_layout((9, 9), "2DDWave")
     source = layout.create_pi("a", (0, 0))
     wire = layout.create_buf(source, (4, 6))
     edge = layout.create_buf(wire, (4, 7))
-    layout.create_po(edge, "out", (5, 7))
-    min_coord, max_coord = layout.bounding_box_2d()
+    output = layout.create_po(edge, "out", (5, 7))
+    min_coord, max_coord = layout.bounding_box()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 7)
 
     layout.clear_tile((4, 7))
-    layout.move_node(layout.get_node((5, 7)), (5, 6), [wire])
-    min_coord, max_coord = layout.bounding_box_2d()
+    layout.move_object(output, (5, 6))
+    layout.connect(wire, layout_input_port(output, 0))
+    min_coord, max_coord = layout.bounding_box()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(5, 6)
 
-    layout.move_node(layout.get_node((5, 6)), (4, 7), [wire])
-    min_coord, max_coord = layout.bounding_box_2d()
+    layout.move_object(output, (4, 7))
+    min_coord, max_coord = layout.bounding_box()
     assert min_coord == layout.coord(0, 0)
     assert max_coord == layout.coord(4, 7)
 
@@ -87,14 +87,12 @@ def test_update_gate_level_bounding_box() -> None:
 @pytest.mark.parametrize(
     "make_layout",
     [
-        pytest.param(lambda: qca_layout((2, 2, 0), "2DDWave", "Layout"), id="qca_layout"),
-        pytest.param(lambda: inml_layout((2, 2, 0), "2DDWave", "Layout"), id="inml_layout"),
+        pytest.param(lambda: qca_layout((3, 3, 1), "2DDWave", "Layout"), id="qca_layout"),
+        pytest.param(lambda: inml_layout((3, 3, 1), "2DDWave", "Layout"), id="inml_layout"),
     ],
 )
 def test_bounding_box_around_cell_level_layout(make_layout):
     layout = make_layout()
-    min_coord, max_coord = layout.bounding_box_2d()
-    assert min_coord == layout.coord(0, 0)
-    assert max_coord == layout.coord(0, 0)
-    assert max_coord.x - min_coord.x == 0
-    assert max_coord.y - min_coord.y == 0
+    min_coord, max_coord = layout.bounding_box()
+    assert min_coord is None
+    assert max_coord is None

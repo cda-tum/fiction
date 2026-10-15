@@ -8,9 +8,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from mnt.pyfiction.synthesis import is_balanced, network_balancing, network_balancing_params
+from mnt.pyfiction.synthesis import is_balanced, network_balancing
 
 if TYPE_CHECKING:
     from mnt.pyfiction.networks import technology_network
@@ -26,28 +26,31 @@ def test_balancing(mux21: technology_network) -> None:
     assert balanced_default.num_gates() == 6
     assert is_balanced(balanced_default)
 
-    unify_params = network_balancing_params()
-    unify_params.unify_outputs = True
-    balanced_unify = network_balancing(mux21, unify_params)
+    unify_options: dict[str, Any] = {
+        "unify_outputs": True,
+    }
+    balanced_unify = network_balancing(mux21, **unify_options)
     assert balanced_unify.num_gates() == 6
-    assert is_balanced(balanced_unify, unify_params)
+    assert is_balanced(balanced_unify, **unify_options)
 
 
 def test_balancing_keeps_constant_outputs_unbuffered_on_request(interface_network: technology_network) -> None:
     """A network with two constant outputs gets buffer chains for them only when asked to."""
-    params = network_balancing_params()
-    assert params.buffer_constant_outputs is True
+    buffered_options: dict[str, Any] = {
+        "unify_outputs": True,
+        "buffer_constant_outputs": True,
+    }
+    buffered = network_balancing(interface_network, **buffered_options)
+    assert is_balanced(buffered, **buffered_options)
 
-    params.unify_outputs = True
-    buffered = network_balancing(interface_network, params)
-    assert is_balanced(buffered, params)
-
-    params.buffer_constant_outputs = False
-    unbuffered = network_balancing(interface_network, params)
-    assert is_balanced(unbuffered, params)
+    unbuffered_options: dict[str, Any] = {
+        "unify_outputs": True,
+        "buffer_constant_outputs": False,
+    }
+    unbuffered = network_balancing(interface_network, **unbuffered_options)
+    assert is_balanced(unbuffered, **unbuffered_options)
 
     # the two constant outputs receive no buffers, so the unbuffered network is smaller and does not count as
     # balanced once the constant outputs take part in the comparison again
     assert unbuffered.num_gates() < buffered.num_gates()
-    params.buffer_constant_outputs = True
-    assert not is_balanced(unbuffered, params)
+    assert not is_balanced(unbuffered, **buffered_options)

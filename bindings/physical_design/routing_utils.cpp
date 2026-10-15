@@ -14,24 +14,25 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/traits.hpp>
 
 #include <algorithm>
-#include <utility>
+#include <cstdint>
+#include <tuple>
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/tuple.h>  // NOLINT(misc-include-cleaner): Converts objective triples to Python tuples.
+#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner): Converts paths and objective collections to Python lists.
+
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
@@ -39,84 +40,62 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Registers crossing queries, routing, objectives, and routing removal for a layout type.
+ * @tparam Lyt Layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
-void is_crossable_wire(nanobind::module_& m)
+void register_routing_utils(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("is_crossable_wire", &fiction::physical_design::is_crossable_wire<Lyt>, py::arg("lyt"), py::arg("src"),
-          py::arg("successor"), DOC(fiction_physical_design_is_crossable_wire));
-}
-
-template <typename Lyt>
-void route_path(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    m.def("is_crossable_wire", &fiction::physical_design::is_crossable_wire<Lyt>, nb::arg("lyt"), nb::arg("src"),
+          nb::arg("successor"), DOC(fiction_physical_design_is_crossable_wire));
 
     m.def(
         "route_path",
-        [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path)
+        [](Lyt& lyt, const std::vector<fiction::layouts::layout_base::coordinate>& path,
+           const typename Lyt::input_port destination)
         {
-            fiction::physical_design::layout_coordinate_path<Lyt> converted_path{};
-            converted_path.resize(path.size());
-            converted_path.assign(path.cbegin(), path.cend());
+            const fiction::physical_design::layout_coordinate_path converted_path{path.cbegin(), path.cend()};
 
-            fiction::physical_design::route_path(lyt, converted_path);
+            fiction::physical_design::route_path(lyt, converted_path, destination);
         },
-        py::arg("layout"), py::arg("path"), DOC(fiction_physical_design_route_path));
-}
-
-template <typename Lyt>
-void extract_routing_objectives(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+        nb::arg("layout"), nb::arg("path"), nb::arg("destination"), DOC(fiction_physical_design_route_path));
 
     m.def(
         "extract_routing_objectives",
-        [](Lyt& lyt) -> std::vector<std::pair<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>>>
+        [](Lyt& lyt) -> std::vector<std::tuple<fiction::layouts::layout_base::coordinate,
+                                               fiction::layouts::layout_base::coordinate, uint32_t>>
         {
-            std::vector<std::pair<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>>> converted_objectives{};
+            std::vector<std::tuple<fiction::layouts::layout_base::coordinate, fiction::layouts::layout_base::coordinate,
+                                   uint32_t>>
+                converted_objectives{};
 
             const auto objectives = fiction::physical_design::extract_routing_objectives(lyt);
 
-            std::for_each(objectives.cbegin(), objectives.cend(), [&converted_objectives](const auto& objective)
-                          { converted_objectives.emplace_back(objective.source, objective.target); });
+            std::for_each(
+                objectives.cbegin(), objectives.cend(), [&converted_objectives](const auto& objective)
+                { converted_objectives.emplace_back(objective.source, objective.target, objective.input_index); });
 
             return converted_objectives;
         },
-        py::arg("layout"), DOC(fiction_physical_design_extract_routing_objectives));
-}
+        nb::arg("layout"), DOC(fiction_physical_design_extract_routing_objectives));
 
-template <typename Lyt>
-void clear_routing(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("clear_routing", &fiction::physical_design::clear_routing<Lyt>, py::arg("lyt"),
-          DOC(fiction_physical_design_clear_routing));
+    m.def(
+        "clear_routing", [](Lyt& lyt) { fiction::physical_design::clear_routing(lyt); }, nb::arg("lyt"),
+        DOC(fiction_physical_design_clear_routing));
 }
 
 }  // namespace detail
 
-void routing_utils(nanobind::module_& m)
+/** @brief Registers routing helpers. @param m Python module. */
+void register_routing_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::is_crossable_wire<py_cartesian_gate_layout>(m);
-    detail::is_crossable_wire<py_shifted_cartesian_gate_layout>(m);
-    detail::is_crossable_wire<py_hexagonal_gate_layout>(m);
-
-    detail::route_path<py_cartesian_gate_layout>(m);
-    detail::route_path<py_shifted_cartesian_gate_layout>(m);
-    detail::route_path<py_hexagonal_gate_layout>(m);
-
-    detail::extract_routing_objectives<py_cartesian_gate_layout>(m);
-    detail::extract_routing_objectives<py_shifted_cartesian_gate_layout>(m);
-    detail::extract_routing_objectives<py_hexagonal_gate_layout>(m);
-
-    detail::clear_routing<py_cartesian_gate_layout>(m);
-    detail::clear_routing<py_shifted_cartesian_gate_layout>(m);
-    detail::clear_routing<py_hexagonal_gate_layout>(m);
+    detail::register_routing_utils<py_cartesian_gate_layout>(m);
+    detail::register_routing_utils<py_shifted_cartesian_gate_layout>(m);
+    detail::register_routing_utils<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

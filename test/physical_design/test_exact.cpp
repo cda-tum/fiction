@@ -19,6 +19,10 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/layout_base.hpp"
+
+#include <fiction/layouts/clocking_scheme.hpp>
+
 #if (FICTION_Z3_SOLVER)
 
 #include "utils/blueprints/network_blueprints.hpp"
@@ -36,7 +40,6 @@
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
@@ -217,26 +220,22 @@ exact_physical_design_params&& topolinano(exact_physical_design_params&& ps) noe
 }
 
 /**
- * @tparam Lyt Gate-level layout type.
  * @return An empty surface blacklist.
  */
-template <typename Lyt>
-surface_black_list<Lyt, port_direction> blacklist()
+surface_black_list<port_direction> blacklist()
 {
     return {};
 }
 
 /**
- * @tparam Lyt Gate-level layout type.
  * @param t Tile at which wires are forbidden.
  * @param ports Forbidden port combinations.
  * @param sbl Blacklist to extend.
  * @return The extended blacklist.
  */
-template <typename Lyt>
-surface_black_list<Lyt, port_direction>&& blacklist_wire(const tile<Lyt>&                              t,
-                                                         const std::vector<port_list<port_direction>>& ports,
-                                                         surface_black_list<Lyt, port_direction>&&     sbl)
+surface_black_list<port_direction>&& blacklist_wire(const layout_base::coordinate&                t,
+                                                    const std::vector<port_list<port_direction>>& ports,
+                                                    surface_black_list<port_direction>&&          sbl)
 {
     sbl[t].insert({create_id_tt(), ports});
 
@@ -244,16 +243,14 @@ surface_black_list<Lyt, port_direction>&& blacklist_wire(const tile<Lyt>&       
 }
 
 /**
- * @tparam Lyt Gate-level layout type.
  * @param t Tile at which AND gates are forbidden.
  * @param ports Forbidden port combinations.
  * @param sbl Blacklist to extend.
  * @return The extended blacklist.
  */
-template <typename Lyt>
-surface_black_list<Lyt, port_direction>&& blacklist_and(const tile<Lyt>&                              t,
-                                                        const std::vector<port_list<port_direction>>& ports,
-                                                        surface_black_list<Lyt, port_direction>&&     sbl)
+surface_black_list<port_direction>&& blacklist_and(const layout_base::coordinate&                t,
+                                                   const std::vector<port_list<port_direction>>& ports,
+                                                   surface_black_list<port_direction>&&          sbl)
 {
     sbl[t].insert({create_and_tt(), ports});
 
@@ -261,16 +258,14 @@ surface_black_list<Lyt, port_direction>&& blacklist_and(const tile<Lyt>&        
 }
 
 /**
- * @tparam Lyt Gate-level layout type.
  * @param t Tile at which OR gates are forbidden.
  * @param ports Forbidden port combinations.
  * @param sbl Blacklist to extend.
  * @return The extended blacklist.
  */
-template <typename Lyt>
-surface_black_list<Lyt, port_direction>&& blacklist_or(const tile<Lyt>&                              t,
-                                                       const std::vector<port_list<port_direction>>& ports,
-                                                       surface_black_list<Lyt, port_direction>&&     sbl)
+surface_black_list<port_direction>&& blacklist_or(const layout_base::coordinate&                t,
+                                                  const std::vector<port_list<port_direction>>& ports,
+                                                  surface_black_list<port_direction>&&          sbl)
 {
     sbl[t].insert({create_or_tt(), ports});
 
@@ -291,13 +286,20 @@ exact_physical_design_params&& minimize_crossings(exact_physical_design_params&&
     return std::move(ps);
 }
 
-void check_stats(const exact_physical_design_stats& st)
+/**
+ * @brief Check statistics against the resulting layout.
+ * @tparam Lyt Gate-level layout type.
+ * @param st Reported physical-design statistics.
+ * @param lyt Resulting layout.
+ */
+template <typename Lyt>
+void check_stats(const exact_physical_design_stats& st, const Lyt& lyt)
 {
     CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
     CHECK(st.x_size > 0);
     CHECK(st.y_size > 0);
     CHECK(st.num_gates > 0);
-    CHECK(st.num_wires > 0);
+    CHECK(st.num_wires == lyt.num_wires());
 }
 
 template <typename Lyt>
@@ -331,13 +333,13 @@ Lyt generate_layout(const Ntk& ntk, exact_physical_design_params ps, const std::
 
     REQUIRE(layout.has_value());
 
-    check_drvs(layout.value());  // NOLINT(bugprone-unchecked-optional-access)
-    check_stats(stats);
+    check_drvs(layout.value());          // NOLINT(bugprone-unchecked-optional-access)
+    check_stats(stats, layout.value());  // NOLINT(bugprone-unchecked-optional-access): REQUIRE guards the value.
 
     return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 template <typename Lyt, typename Ntk>
-Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
+Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<port_direction>& black_list,
                                     const exact_physical_design_params& ps)
 {
     exact_physical_design_stats stats{};
@@ -346,8 +348,8 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
 
     REQUIRE(layout.has_value());
 
-    check_drvs(layout.value());  // NOLINT(bugprone-unchecked-optional-access)
-    check_stats(stats);
+    check_drvs(layout.value());          // NOLINT(bugprone-unchecked-optional-access)
+    check_stats(stats, layout.value());  // NOLINT(bugprone-unchecked-optional-access): REQUIRE guards the value.
 
     return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
@@ -399,23 +401,23 @@ void check_without_gate_library(const Ntk& ntk, const exact_physical_design_para
     check_tp(layout, 1);
 }
 
+/**
+ * @brief Checks whether each inverter has opposite incoming and outgoing signals.
+ * @tparam Lyt Native gate-level layout type.
+ * @param lyt Layout to inspect.
+ * @return Whether every inverter is straight.
+ */
 template <typename Lyt>
-bool has_straight_inverters(const Lyt& lyt) noexcept
+bool has_straight_inverters(const Lyt& lyt)
 {
     bool only_straight_inverters = true;
     lyt.foreach_gate(
         [&lyt, &only_straight_inverters](const auto& g)
         {
-            if constexpr (has_is_inv_v<Lyt>)
+            if (lyt.is_inv(g) && !lyt.has_opposite_incoming_and_outgoing_signals(lyt.get_tile(g)))
             {
-                if (lyt.is_inv(g))
-                {
-                    if (!lyt.has_opposite_incoming_and_outgoing_signals(lyt.get_tile(g)))
-                    {
-                        only_straight_inverters = false;
-                        return false;  // break loop
-                    }
-                }
+                only_straight_inverters = false;
+                return false;  // break loop
             }
 
             return true;  // continue
@@ -425,6 +427,17 @@ bool has_straight_inverters(const Lyt& lyt) noexcept
 }
 
 }  // namespace
+
+TEST_CASE("Straight inverter validation", "[exact]")
+{
+    cart_gate_clk_lyt lyt{cart_gate_clk_lyt::extent{3, 2, 1}, clocking::twoddwave()};
+    const auto        input    = lyt.create_pi("a", {0, 0});
+    const auto        inverter = lyt.create_not(input, {1, 0});
+    const auto        output   = lyt.create_po(inverter, "f", {2, 0});
+    CHECK(has_straight_inverters(lyt));
+    lyt.move_object(output, {1, 1});
+    CHECK_FALSE(has_straight_inverters(lyt));
+}
 
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
@@ -502,54 +515,57 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         {
             const auto lyt = generate_layout_with_black_list<cart_gate_clk_lyt>(
                 blueprints::and_or_network<technology_network>(),
-                blacklist_and<cart_gate_clk_lyt>(
+                blacklist_and(
                     {2, 2}, {},
-                    blacklist_wire<cart_gate_clk_lyt>(
-                        {2, 2}, {},
-                        blacklist_or<cart_gate_clk_lyt>(
-                            {1, 2}, {},
-                            blacklist_wire<cart_gate_clk_lyt>({2, 0}, {}, blacklist<cart_gate_clk_lyt>())))),
+                    blacklist_wire({2, 2}, {}, blacklist_or({1, 2}, {}, blacklist_wire({2, 0}, {}, blacklist())))),
                 twoddwave(crossings(configuration())));
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
-            CHECK(!lyt.is_and(lyt.get_node({2, 2})));
-            CHECK(!lyt.is_wire(lyt.get_node({2, 2})));
-            CHECK(!lyt.is_or(lyt.get_node({1, 2})));
-            CHECK(!lyt.is_wire(lyt.get_node({2, 0})));
+            /** @brief Object at the position blacklisted for AND gates and wires. */
+            const auto shared_object = lyt.find_object({2, 2});
+            /** @brief Object at the position blacklisted for OR gates. */
+            const auto or_object = lyt.find_object({1, 2});
+            /** @brief Object at the second position blacklisted for wires. */
+            const auto wire_object = lyt.find_object({2, 0});
+            CHECK((!shared_object.has_value() || !lyt.is_and(*shared_object)));
+            CHECK((!shared_object.has_value() || !lyt.is_wire(*shared_object)));
+            CHECK((!or_object.has_value() || !lyt.is_or(*or_object)));
+            CHECK((!wire_object.has_value() || !lyt.is_wire(*wire_object)));
         }
         SECTION("With port info")
         {
             const auto lyt = generate_layout_with_black_list<cart_gate_clk_lyt>(
                 blueprints::and_or_network<technology_network>(),
-                blacklist_and<cart_gate_clk_lyt>(
+                blacklist_and(
                     {2, 2},
                     {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
                                                 port_direction(port_direction::cardinal::WEST)},
                                                {port_direction(port_direction::cardinal::SOUTH)})},
-                    blacklist_or<cart_gate_clk_lyt>(
+                    blacklist_or(
                         {2, 2},
                         {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
                                                     port_direction(port_direction::cardinal::WEST)},
                                                    {port_direction(port_direction::cardinal::SOUTH)})},
-                        blacklist_wire<cart_gate_clk_lyt>(
-                            {2, 2},
-                            {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH)},
-                                                       {port_direction(port_direction::cardinal::SOUTH)})},
-                            blacklist<cart_gate_clk_lyt>()))),
+                        blacklist_wire({2, 2},
+                                       {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH)},
+                                                                  {port_direction(port_direction::cardinal::SOUTH)})},
+                                       blacklist()))),
                 twoddwave(crossings(configuration())));
 
             check_eq(blueprints::and_or_network<technology_network>(), lyt);
 
-            CHECK((!lyt.is_and(lyt.get_node({2, 2})) ||
+            /** @brief Object whose type-specific port pattern is blacklisted. */
+            const auto object = lyt.find_object({2, 2});
+            CHECK((!object.has_value() || !lyt.is_and(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
 
-            CHECK((!lyt.is_or(lyt.get_node({2, 2})) ||
+            CHECK((!object.has_value() || !lyt.is_or(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
                      lyt.has_southern_outgoing_signal({2, 2}))));
 
-            CHECK((!lyt.is_wire(lyt.get_node({2, 2})) ||
+            CHECK((!object.has_value() || !lyt.is_wire(*object) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
         }
     }
@@ -789,10 +805,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 
         REQUIRE(layout.has_value());
 
-        if (layout)
-        {
-            CHECK(layout->y() <= 3);
-        }
+        CHECK(layout->height() <= 4);  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks the value.
 
         upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail
 
@@ -832,19 +845,19 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
 
     REQUIRE(layout.has_value());
 
-    if (layout)
-    {
-        // network name
-        CHECK(layout->get_layout_name() == "maj");
+    /** @brief Placed layout whose names are checked. */
+    const auto& result = *layout;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE passed.
 
-        // PI names
-        CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
-        CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
-        CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
+    // network name
+    CHECK(result.get_layout_name() == "maj");
 
-        // PO names
-        CHECK(layout->get_output_name(0) == "f");
-    }
+    // PI names
+    CHECK(result.get_name(result.pi_at(0)) == "a");
+    CHECK(result.get_name(result.pi_at(1)) == "b");
+    CHECK(result.get_name(result.pi_at(2)) == "c");
+
+    // PO names
+    CHECK(result.get_output_name(0) == "f");
 }
 
 TEST_CASE("Exact physical design reports progress", "[exact]")

@@ -4,6 +4,12 @@
 
 Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
+The reader accepts legacy files with maximum-coordinate sizes and version 2 files with size counts.
+Version 2 preserves declared PI/PO order, truth-table input indices, manual obstructions, and
+whitespace in names. Version 2 accepts complete, acyclic, physically valid layouts. Objects are placed before
+their connections are assigned, so file order does not constrain dependency order. A failed read
+leaves an existing destination layout unchanged.
+
 ::::{tab-set}
 :sync-group: language
 
@@ -38,11 +44,7 @@ Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](h
 :sync: python
 
 ```{eval-rst}
-.. autofunction:: mnt.pyfiction.layouts.io.read_cartesian_fgl_layout
-
-.. autofunction:: mnt.pyfiction.layouts.io.read_shifted_cartesian_fgl_layout
-
-.. autofunction:: mnt.pyfiction.layouts.io.read_hexagonal_fgl_layout
+.. autofunction:: mnt.pyfiction.layouts.io.read_fgl_layout
 
 .. autoclass:: mnt.pyfiction.layouts.io.fgl_parsing_error
    :members:
@@ -56,6 +58,12 @@ Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](h
 
 Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
+The writer emits version 2 and stores every object, including complete dangling logic. The writer
+validates all input slots, cycles, physical connections, clocking, and frame membership before
+writing. Empty layouts are supported. FGL represents supported named clocking schemes with sparse
+clock overrides, synchronization delays, and manual obstructions. Names may contain XML whitespace;
+illegal XML control characters are rejected before writing. Editing checkpoints are outside this format's scope.
+
 ::::{tab-set}
 :sync-group: language
 
@@ -64,11 +72,11 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 
 **Header:** `fiction/layouts/io/write_fgl_layout.hpp`
 
-```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
+```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
+```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
 
 ```
 
@@ -147,3 +155,13 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 :::
 
 ::::
+
+Python selects the FGL output representation with a keyword-only registered class. The file
+supplies the layout arrangement. Pass the exact registered class; subclasses are not supported.
+
+```python
+from mnt.pyfiction.layouts import hexagonal_gate_layout
+from mnt.pyfiction.layouts.io import read_fgl_layout
+
+layout = read_fgl_layout("layout.fgl", layout_type=hexagonal_gate_layout)
+```

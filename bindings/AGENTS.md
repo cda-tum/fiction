@@ -20,7 +20,8 @@ module either.
 A new binding:
 
 1. Gets its own `.cpp` file in the directory of its namespace, defining a single
-   `void xxx(nanobind::module_& m)` named after the file.
+   `void register_<name>(nanobind::module_& m)`, where `<name>` matches the file.
+   Internal template helpers use the same `register_` prefix.
 2. Is forward-declared and called in that directory's `register_<path>.cpp`. Every
    directory that holds binding sources has exactly one registry, named after the
    directory (`register_sidb_simulation_engines.cpp`).
@@ -40,8 +41,7 @@ A new binding:
 6. Comes with regenerated stubs: run `nox -s stubs` and commit the `.pyi` changes. CI
    fails when the committed stubs differ from the generated ones. Where stubgen cannot infer a
    type, state it at the binding with `nanobind::sig`, or `nanobind::for_getter` and
-   `nanobind::for_setter` on a property; `pyfiction/progress.hpp` does so for the progress
-   callbacks.
+   `nanobind::for_setter` on a property.
 
 Never:
 

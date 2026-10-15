@@ -19,9 +19,12 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
+
+#include <cstdint>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -250,4 +253,57 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
         CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 2}));
         CHECK(!obstr_lyt.is_obstructed_connection({3, 3}, {2, 3}));
     }
+}
+
+TEST_CASE("Obstruction enumeration visits only manual entries", "[obstruction-layout]")
+{
+    obstructions constraints{};
+    constraints.obstruct_coordinate({-1, 4, 8});
+    constraints.obstruct_coordinate({-1, 4, 8});
+    constraints.obstruct_coordinate({0, 0});
+    constraints.obstruct_connection({-1, 4, 8}, {0, 0});
+    constraints.obstruct_connection({-1, 4, 8}, {0, 0});
+    uint32_t positions{};
+    constraints.foreach_obstructed_coordinate(
+        [&constraints, &positions](const auto& c)
+        {
+            CHECK(constraints.is_obstructed_coordinate(c));
+            ++positions;
+        });
+    uint32_t connections{};
+    constraints.foreach_obstructed_connection(
+        [&constraints, &connections](const auto& source, const auto& target)
+        {
+            CHECK(constraints.is_obstructed_connection(source, target));
+            ++connections;
+        });
+    CHECK(positions == 2);
+    CHECK(connections == 1);
+
+    gate_level_layout<cartesian_layout> layout{{2, 1, 1}, clocking::twoddwave()};
+    const auto                          input = layout.create_pi("a", {0, 0});
+    layout.create_po(input, "f", {1, 0});
+    positions   = 0;
+    connections = 0;
+    layout.foreach_obstructed_coordinate([&positions](const auto&) { ++positions; });
+    layout.foreach_obstructed_connection([&connections](const auto&, const auto&) { ++connections; });
+    CHECK(positions == 0);
+    CHECK(connections == 0);
+    layout.obstruct_coordinate({0, 0});
+    layout.obstruct_connection({0, 0}, {1, 0});
+    layout.foreach_obstructed_coordinate(
+        [&positions](const auto& c)
+        {
+            CHECK(c == layout_base::coordinate{0, 0});
+            ++positions;
+        });
+    layout.foreach_obstructed_connection(
+        [&connections](const auto& source, const auto& target)
+        {
+            CHECK(source == layout_base::coordinate{0, 0});
+            CHECK(target == layout_base::coordinate{1, 0});
+            ++connections;
+        });
+    CHECK(positions == 1);
+    CHECK(connections == 1);
 }

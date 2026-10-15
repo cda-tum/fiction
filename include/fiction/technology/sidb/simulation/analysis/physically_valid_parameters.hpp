@@ -20,9 +20,11 @@
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/domain.hpp"
+#include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
 
 #include <cstdint>
+#include <stdexcept>
 
 namespace fiction::sidb::simulation::analysis
 {
@@ -39,12 +41,18 @@ namespace fiction::sidb::simulation::analysis
  * @return The parameter points where `cd` is physically valid, each with its excited-state number; empty if `cd`
  * does not cover the layout's SiDBs in raster order.
  * @throws std::invalid_argument if a sweep range has non-finite or reversed bounds, a non-positive
- * or non-finite step, or more points than the storage range permits.
+ * or non-finite step, more points than the storage range permits, or the engine is not QuickExact, EXGS, or QuickSim.
  */
 [[nodiscard]] inline domain<logic::parameter_point, uint64_t>
 physically_valid_parameters(const layout& lyt, const charge_distribution& cd,
                             const logic::operational_domain_params& params = {})
 {
+    if (params.operational_params.sim_engine != engine::QUICKEXACT &&
+        params.operational_params.sim_engine != engine::EXGS &&
+        params.operational_params.sim_engine != engine::QUICKSIM)
+    {
+        throw std::invalid_argument("unsupported simulation engine for physical-validity sweeps");
+    }
     if (lyt.sidbs() != cd.sites())
     {
         return {};

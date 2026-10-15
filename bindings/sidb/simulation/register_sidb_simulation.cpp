@@ -16,22 +16,47 @@
 
 #include <nanobind/nanobind.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void engine(nanobind::module_& m);
-void potential_landscape(nanobind::module_& m);
-void result(nanobind::module_& m);
-void is_ground_state(nanobind::module_& m);
-void check_simulation_results_for_equivalence(nanobind::module_& m);
+/**
+ * @brief Binds engine helpers.
+ * @param m Python module.
+ */
+void register_engine(nb::module_& m);
+/**
+ * @brief Binds potential landscape helpers.
+ * @param m Python module.
+ */
+void register_potential_landscape(nb::module_& m);
+/**
+ * @brief Binds result helpers.
+ * @param m Python module.
+ */
+void register_result(nb::module_& m);
+/**
+ * @brief Binds is ground state helpers.
+ * @param m Python module.
+ */
+void register_is_ground_state(nb::module_& m);
+/**
+ * @brief Binds check simulation results for equivalence helpers.
+ * @param m Python module.
+ */
+void register_check_simulation_results_for_equivalence(nb::module_& m);
 
-void register_sidb_simulation(nanobind::module_& m)
+void register_sidb_simulation(nb::module_& m)
 {
-    engine(m);
-    potential_landscape(m);
-    result(m);
-    is_ground_state(m);
-    check_simulation_results_for_equivalence(m);
+    register_engine(m);
+    register_potential_landscape(m);
+    register_result(m);
+    register_is_ground_state(m);
+    register_check_simulation_results_for_equivalence(m);
 }
 
 }  // namespace pyfiction

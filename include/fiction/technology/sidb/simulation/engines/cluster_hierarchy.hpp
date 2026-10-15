@@ -261,7 +261,7 @@ struct cluster_receptor_state
 /**
  * @brief Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static uint64_t get_cluster_size(const cluster_ptr& c) noexcept;
+static inline uint64_t get_cluster_size(const cluster_ptr& c) noexcept;
 /**
  * @brief A projector state pairs the potential projecting cluster with the associated multiset charge configuration.
  */
@@ -362,11 +362,11 @@ static constexpr void take_meet_of_potential_bounds(double& a, const double b) n
 /**
  * @brief Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static uint64_t get_singleton_ix(const cluster_ptr& c) noexcept;
+static inline uint64_t get_singleton_ix(const cluster_ptr& c) noexcept;
 /**
  * @brief Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static uint64_t get_unique_cluster_id(const cluster_ptr& c) noexcept;
+static inline uint64_t get_unique_cluster_id(const cluster_ptr& c) noexcept;
 /**
  * @brief This defines a store in which the bounds on the local electrostatic potential for an SiDB (index) may be
  * stored. For the *Ground State Space* algorithm, this is used to keep track of the respective lower and upper bounds
@@ -1179,7 +1179,7 @@ struct cluster
  * @param c Cluster of which the number of SiDBs it contains is requested.
  * @return The number of SiDBs in the given cluster.
  */
-[[nodiscard]] static uint64_t get_cluster_size(const cluster_ptr& c) noexcept
+[[nodiscard]] static inline uint64_t get_cluster_size(const cluster_ptr& c) noexcept
 {
     return c->sidbs.size();
 }
@@ -1190,7 +1190,7 @@ struct cluster
  * @param c Cluster of which its unique identifier is requested.
  * @return The unique identifier of the given cluster.
  */
-[[nodiscard]] static uint64_t get_unique_cluster_id(const cluster_ptr& c) noexcept
+[[nodiscard]] static inline uint64_t get_unique_cluster_id(const cluster_ptr& c) noexcept
 {
     return c->uid;
 }
@@ -1201,7 +1201,7 @@ struct cluster
  * @param c Singleton cluster of which the single SiDB (index) it contains is requested.
  * @return The SiDB index contained in the given cluster. It is equal to the unique identifier of the cluster.
  */
-[[nodiscard]] static uint64_t get_singleton_ix(const cluster_ptr& c) noexcept
+[[nodiscard]] static inline uint64_t get_singleton_ix(const cluster_ptr& c) noexcept
 {
     assert(get_cluster_size(c) == 1 && "Not a singleton cluster");
     return get_unique_cluster_id(c);

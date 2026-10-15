@@ -10,13 +10,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.topologies import SPECS, canonical
-from mnt.pyfiction import physical_design
-from mnt.pyfiction.physical_design import num_clks, orthogonal, orthogonal_params, orthogonal_stats
+from mnt.pyfiction import layouts
+from mnt.pyfiction.physical_design import num_clks, orthogonal, orthogonal_stats
 
 if TYPE_CHECKING:
     import argparse
@@ -65,12 +65,13 @@ def ortho(session: Session, args: argparse.Namespace) -> Result:
     must not have gates with more than two inputs.
     """
     network = session.as_technology_network(session.networks.current())
-    params = orthogonal_params()
-    params.on_progress = session.report_progress
-    params.number_of_clock_phases = num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR
+    options: dict[str, Any] = {
+        "on_progress": session.report_progress,
+        "number_of_clock_phases": num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR,
+    }
     stats = orthogonal_stats()
-    family, params.layout_arrangement = SPECS[canonical(args.topology)]
-    design = orthogonal if family == "cartesian" else physical_design.orthogonal_hexagonal
-    layout = design(network, params, stats)
+    family, options["layout_arrangement"] = SPECS[canonical(args.topology)]
+    cls = getattr(layouts, f"{family}_gate_layout")
+    layout = orthogonal(network, statistics=stats, layout_type=cls, **options)
     session.gate_layouts.add(layout)
     return _added(session, layout, stats, verbose=args.verbose)

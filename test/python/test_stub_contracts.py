@@ -14,8 +14,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.layouts import cartesian_gate_layout, cartesian_layout, coordinate, stacked_cartesian_layout
-from mnt.pyfiction.physical_design import post_layout_optimization_params, reserve_input_nodes
+from mnt.pyfiction.layouts import (
+    cartesian_gate_layout,
+    cartesian_layout,
+    coordinate,
+    layout_object_id,
+)
+from mnt.pyfiction.physical_design import place, post_layout_optimization
 from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 from mnt.pyfiction.sidb.simulation.logic import (
     bdl_wire,
@@ -39,34 +44,31 @@ def test_coordinate_input_and_output_types() -> None:
     layout.resize((3, 3, 1))
     east = layout.east((0, 0))
     assert east == coordinate(1, 0)
-    stacked = stacked_cartesian_layout((2, 2, 3))
-    above = stacked.above((0, 0, 0))
+    layout.resize((2, 2, 2))
+    above = layout.above((0, 0, 0))
     assert above == coordinate(0, 0, 1)
     if TYPE_CHECKING:
-        assert_type(east, coordinate)
-        assert_type(above, coordinate)
+        assert_type(east, coordinate | None)
+        assert_type(above, coordinate | None)
 
 
-def test_optional_relocation_limit() -> None:
-    """The relocation limit accepts an integer and can be cleared."""
-    params = post_layout_optimization_params()
-    if TYPE_CHECKING:
-        assert_type(params.max_gate_relocations, int | None)
-    params.max_gate_relocations = 7
-    assert params.max_gate_relocations == 7
-    params.max_gate_relocations = None
-    assert params.max_gate_relocations is None
+@pytest.mark.parametrize("limit", [None, 7])
+def test_optional_relocation_limit(limit: int | None) -> None:
+    """Optimization accepts an integer relocation limit or no limit."""
+    layout = cartesian_gate_layout((1, 1), "2DDWave")
+    post_layout_optimization(layout, max_gate_relocations=limit)
+    assert layout.is_empty()
     with pytest.raises(TypeError):
-        params.max_gate_relocations = "not a count"  # ty: ignore[invalid-assignment]
+        post_layout_optimization(layout, max_gate_relocations="not a count")  # ty: ignore[invalid-argument-type]
 
 
-def test_reserved_input_node_mapping(mux21: technology_network) -> None:
-    """Each primary input maps to a reserved layout node."""
+def test_placed_input_mapping(mux21: technology_network) -> None:
+    """Each primary input maps to a placed output port."""
     network = mux21
-    layout = cartesian_gate_layout()
-    mapping = reserve_input_nodes(layout, network)
+    layout = cartesian_gate_layout((network.num_pis(), 1))
+    mapping = {source: place(layout, (index, 0), network, source) for index, source in enumerate(network.pis())}
     if TYPE_CHECKING:
-        assert_type(mapping, dict[int, int])
+        assert_type(mapping, dict[int, layout_object_id])
     assert set(mapping) == set(network.pis())
     assert len(set(mapping.values())) == network.num_pis()
     assert layout.num_pis() == network.num_pis()

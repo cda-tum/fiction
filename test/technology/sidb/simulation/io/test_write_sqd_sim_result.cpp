@@ -407,7 +407,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     CHECK(simulation_stream.str() == sim_result_str);
 }
 
-TEST_CASE("test_write_sqd_sim_result rejects mismatched distribution sites", "[sidb-distribution-sites]")
+TEST_CASE("test_write_sqd_sim_result rejects mismatched distribution sites", "[sqd-sim-result]")
 {
     layout lyt{};
     lyt.assign_sidb({0, 0}, dot_tag::NORMAL);

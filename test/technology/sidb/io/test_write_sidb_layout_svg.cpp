@@ -517,7 +517,7 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
     }
 }
 
-TEST_CASE("test_write_sidb_layout_svg rejects mismatched distribution sites", "[sidb-distribution-sites]")
+TEST_CASE("test_write_sidb_layout_svg rejects mismatched distribution sites", "[write-sidb-layout-svg]")
 {
     layout lyt{};
     lyt.assign_sidb({0, 0}, dot_tag::NORMAL);

@@ -135,14 +135,15 @@ class layout : public layouts::cell_grid<cell_type>
     /**
      * Creates an empty layout.
      *
-     * @param ar Highest cell position; its z-coordinate is ignored because the layout is planar.
+     * @param size Half-open cell sizes; a nonzero layer count selects one layer.
      * @param name Layout name.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain.
      */
-    explicit layout(const aspect_ratio& ar = {}, std::string name = "") :
-            cell_grid{aspect_ratio{ar.x, ar.y, 0}, std::move(name)}
+    explicit layout(const extent& size = {}, std::string name = "") :
+            cell_grid{extent{size.width, size.height, checked(size).layers == 0 ? 0u : 1u}, std::move(name)}
     {}
     /**
-     * Compares two layouts: same dimensions, cells, and names.
+     * Compares two layouts: same extent, cells, and names.
      *
      * @param other Right-hand side layout.
      * @return `true` iff both layouts are identical.

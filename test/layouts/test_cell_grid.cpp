@@ -16,10 +16,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/cartesian_layout.hpp"
+
 #include <fiction/layouts/cell_grid.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/traits.hpp>
 
+#include <concepts>
 #include <cstdint>
 #include <set>
 
@@ -43,7 +46,7 @@ using grid = cell_grid<test_cell>;
 
 TEST_CASE("Cell grid traits", "[cell-grid]")
 {
-    CHECK(is_cartesian_layout_v<grid>);
+    CHECK(std::derived_from<grid, fiction::layouts::cartesian_layout>);
     CHECK(is_cell_grid_v<grid>);
     CHECK(has_get_layout_name_v<grid>);
     CHECK(has_set_layout_name_v<grid>);
@@ -122,7 +125,7 @@ TEST_CASE("Cell traversal stops early", "[cell-grid]")
 
     auto positions = 0u;
     g.foreach_cell_position([&positions](const auto&) { ++positions; });
-    CHECK(positions == 16);
+    CHECK(positions == 9);
 }
 
 TEST_CASE("Cell grid copies are independent", "[cell-grid]")
@@ -139,8 +142,8 @@ TEST_CASE("Cell grid copies are independent", "[cell-grid]")
     copy.assign_cell_name({0, 2}, "a");
 
     CHECK(copy != original);
-    CHECK(original.x() == 5);
-    CHECK(original.z() == 0);
+    CHECK(original.width() == 5);
+    CHECK(original.layers() == 1);
     CHECK(original.get_layout_name() == "original");
     CHECK(original.get_cell_type({0, 2}) == test_cell::NORMAL);
     CHECK(original.get_cell_name({0, 2}).empty());
@@ -149,5 +152,5 @@ TEST_CASE("Cell grid copies are independent", "[cell-grid]")
     assigned = copy;
     CHECK(assigned == copy);
     assigned.resize({1, 1});
-    CHECK(copy.x() == 10);
+    CHECK(copy.width() == 10);
 }

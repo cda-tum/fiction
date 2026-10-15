@@ -16,7 +16,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 
 #include <nanobind/nanobind.h>
@@ -29,26 +31,40 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-namespace detail
-{
+/** @brief Native options constructed for each Python call. */
+using physical_population_stability_options = fiction::sidb::simulation::analysis::physical_population_stability_params;
 
 /**
- * Registers the population stability information and the analysis on `sidb_layout`.
+ * @brief Registers the population stability information and the analysis on `sidb_layout`.
  *
  * @param m The module.
  */
-inline void physical_population_stability_functions(nanobind::module_& m)
+void register_physical_population_stability(nb::module_& m)
 {
-    namespace py = nanobind;
+    nb::enum_<fiction::sidb::simulation::analysis::transition_type>(
+        m, "transition_type", DOC(fiction_sidb_simulation_analysis_transition_type))
+        .value("NEUTRAL_TO_NEGATIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_NEGATIVE,
+               DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_NEGATIVE))
+        .value("NEGATIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::NEGATIVE_TO_NEUTRAL,
+               DOC(fiction_sidb_simulation_analysis_transition_type_NEGATIVE_TO_NEUTRAL))
+        .value("NEUTRAL_TO_POSITIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_POSITIVE,
+               DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_POSITIVE))
+        .value("POSITIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::POSITIVE_TO_NEUTRAL,
+               DOC(fiction_sidb_simulation_analysis_transition_type_POSITIVE_TO_NEUTRAL));
 
     using fiction::sidb::simulation::analysis::population_stability_information;
 
-    py::class_<population_stability_information>(m, "population_stability_information",
+    nb::class_<population_stability_information>(m, "population_stability_information",
                                                  DOC(fiction_sidb_simulation_analysis_population_stability_information))
-        .def(py::init<>(), "Default constructor.")
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("critical_dot", &population_stability_information::critical_dot,
                 DOC(fiction_sidb_simulation_analysis_population_stability_information_critical_dot))
         .def_rw("transition_potentials", &population_stability_information::transition_potentials,
@@ -60,49 +76,45 @@ inline void physical_population_stability_functions(nanobind::module_& m)
         .def_rw("system_energy", &population_stability_information::system_energy,
                 DOC(fiction_sidb_simulation_analysis_population_stability_information_system_energy));
 
-    m.def("physical_population_stability", &fiction::sidb::simulation::analysis::physical_population_stability,
-          py::arg("lyt"),
-          py::arg("params") = fiction::sidb::simulation::analysis::physical_population_stability_params{},
-          DOC(fiction_sidb_simulation_analysis_physical_population_stability));
-}
+    m.def(
+        "physical_population_stability",
+        [](const fiction::sidb::layout& lyt, const decltype(physical_population_stability_options{}.timeout) timeout,
+           const decltype(physical_population_stability_options{}.sim_params.base)      base,
+           const decltype(physical_population_stability_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(physical_population_stability_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(physical_population_stability_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(physical_population_stability_options{}.precision_for_distance_corresponding_to_potential)
+               precision_for_distance_corresponding_to_potential)
+        {
+            physical_population_stability_options params{};
+            params.precision_for_distance_corresponding_to_potential =
+                precision_for_distance_corresponding_to_potential;
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+            params.timeout    = timeout;
+            return fiction::sidb::simulation::analysis::physical_population_stability(lyt, params);
+        },
+        nb::arg("lyt"), nb::kw_only(), nb::arg("timeout") = physical_population_stability_options{}.timeout,
+        nb::arg("base")      = physical_population_stability_options{}.sim_params.base,
+        nb::arg("mu_minus")  = physical_population_stability_options{}.sim_params.mu_minus,
+        nb::arg("epsilon_r") = physical_population_stability_options{}.sim_params.epsilon_r,
+        nb::arg("lambda_tf") = physical_population_stability_options{}.sim_params.lambda_tf,
+        nb::arg("precision_for_distance_corresponding_to_potential") =
+            physical_population_stability_options{}.precision_for_distance_corresponding_to_potential,
+        R"doc(Determine the stability of the SiDB population under the physical model.
+The keyword options select simulation, potential precision, and the execution budget.
+Distance conversion bisects the distance bracket up to floating-point resolution.
 
-}  // namespace detail
+Raises:
+    ValueError: Invalid physical parameters or precision.
 
-void physical_population_stability(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    py::enum_<fiction::sidb::simulation::analysis::transition_type>(
-        m, "transition_type", DOC(fiction_sidb_simulation_analysis_transition_type))
-        .value("NEUTRAL_TO_NEGATIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_NEGATIVE,
-               DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_NEGATIVE))
-        .value("NEGATIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::NEGATIVE_TO_NEUTRAL,
-               DOC(fiction_sidb_simulation_analysis_transition_type_NEGATIVE_TO_NEUTRAL))
-        .value("NEUTRAL_TO_POSITIVE", fiction::sidb::simulation::analysis::transition_type::NEUTRAL_TO_POSITIVE,
-               DOC(fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_POSITIVE))
-        .value("POSITIVE_TO_NEUTRAL", fiction::sidb::simulation::analysis::transition_type::POSITIVE_TO_NEUTRAL,
-               DOC(fiction_sidb_simulation_analysis_transition_type_POSITIVE_TO_NEUTRAL));
-
-    /**
-     * Parameters.
-     */
-    py::class_<fiction::sidb::simulation::analysis::physical_population_stability_params>(
-        m, "physical_population_stability_params",
-        DOC(fiction_sidb_simulation_analysis_physical_population_stability_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("timeout", &fiction::sidb::simulation::analysis::physical_population_stability_params::timeout,
-                DOC(fiction_sidb_simulation_analysis_physical_population_stability_params_timeout))
-        .def_rw("simulation_parameters",
-                &fiction::sidb::simulation::analysis::physical_population_stability_params::sim_params,
-                DOC(fiction_sidb_simulation_analysis_physical_population_stability_params))
-        .def_rw(
-            "precision_for_distance_corresponding_to_potential",
-            &fiction::sidb::simulation::analysis::physical_population_stability_params::
-                precision_for_distance_corresponding_to_potential,
-            DOC(fiction_sidb_simulation_analysis_physical_population_stability_params_precision_for_distance_corresponding_to_potential));
-
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::physical_population_stability_functions(m);
+Args:
+    timeout: Execution budget in milliseconds.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    precision_for_distance_corresponding_to_potential: Decimal places for distance conversion, from 0 to 15.
+)doc");
 }
 
 }  // namespace pyfiction

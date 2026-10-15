@@ -25,13 +25,20 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void minimum_energy(nanobind::module_& m)
+/**
+ * @brief Binds minimum energy helpers.
+ * @param m Python module.
+ */
+void register_minimum_energy(nb::module_& m)
 {
-    namespace py = nanobind;
-
     m.def(
         "minimum_energy",
         [](const std::vector<fiction::sidb::charge_distribution>& charge_distributions) -> double
@@ -39,7 +46,7 @@ void minimum_energy(nanobind::module_& m)
             return fiction::sidb::simulation::analysis::minimum_energy(charge_distributions.cbegin(),
                                                                        charge_distributions.cend());
         },
-        py::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_minimum_energy));
+        nb::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_minimum_energy));
 }
 
 }  // namespace pyfiction

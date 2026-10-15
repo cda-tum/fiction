@@ -10,48 +10,40 @@
 
 from __future__ import annotations
 
+import gc
 import re
 import sys
 import threading
+import weakref
 from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from mnt.pyfiction import layouts, physical_design
 from mnt.pyfiction.fcn.io import write_qll_layout
-from mnt.pyfiction.inml.io import write_qcc_layout, write_qcc_layout_params
+from mnt.pyfiction.inml.io import write_qcc_layout
 from mnt.pyfiction.layouts import arrangement, cartesian_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.layouts.io import write_dot_layout, write_fgl_layout
 from mnt.pyfiction.physical_design import (
     apply_qca_one_library,
     apply_sim7_mol_library,
     apply_topolinano_library,
-    exact_cartesian,
-    exact_params,
-    exact_shifted_cartesian,
+    exact,
     graph_oriented_layout_design,
-    graph_oriented_layout_design_params,
     orthogonal,
     technology_constraints,
 )
 from mnt.pyfiction.qca import io as qca_io
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sidb_layout_svg_params, write_sqd_layout
+from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sqd_layout
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
-from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based, critical_temperature_params
-from mnt.pyfiction.sidb.simulation.engines import clustercomplete, clustercomplete_params
-from mnt.pyfiction.synthesis import (
-    create_not_tt,
-    fanout_substitution,
-    fanout_substitution_params,
-    network_balancing,
-    network_balancing_params,
-)
+from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based
+from mnt.pyfiction.sidb.simulation.engines import clustercomplete
+from mnt.pyfiction.synthesis import create_not_tt, fanout_substitution, network_balancing
 from mnt.pyfiction.verification import (
     critical_path_length_and_throughput,
     eq_type,
     equivalence_checking,
-    gate_level_drv_params,
     gate_level_drvs,
 )
 
@@ -61,47 +53,15 @@ if TYPE_CHECKING:
     from mnt.pyfiction.networks import technology_network
 
 
-def test_long_route_statistics_release_the_gil() -> None:
-    """Deep layout summaries finish while Python display threads can run."""
-    length = 200_000
-    layout = cartesian_gate_layout((length, 0), "2DDWave")
-    signal = layout.create_pi("in", (0, 0))
-    for x in range(1, length):
-        signal = layout.create_buf(signal, (x, 0))
-    layout.create_po(signal, "out", (length, 0))
-    start = threading.Event()
-    refreshed = threading.Event()
-
-    def refresh() -> None:
-        """Run one Python update after the native analysis starts."""
-        start.wait()
-        refreshed.set()
-
-    worker = threading.Thread(target=refresh)
-    interval = sys.getswitchinterval()
-    worker.start()
-    try:
-        # The native call must release the GIL before Python's next scheduled handoff.
-        sys.setswitchinterval(10)
-        start.set()
-        result = critical_path_length_and_throughput(layout)
-        refreshed_during_analysis = refreshed.is_set()
-    finally:
-        sys.setswitchinterval(interval)
-        start.set()
-        worker.join()
-    assert result == (length + 1, 1)
-    assert refreshed_during_analysis
-
-
 @pytest.mark.parametrize("threads", [1, 4])
 def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> None:
     """Solver candidates use tile dimensions and leave no active worker after success."""
-    params = exact_params()
-    params.num_threads = threads
+    options: dict[str, Any] = {
+        "num_threads": threads,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    layout = exact_cartesian(mux21, params)
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    layout = exact(mux21, **options)
     assert layout is not None
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert reports
@@ -119,15 +79,16 @@ def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> N
 @pytest.mark.parametrize("parallel", [False, True])
 def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> None:
     """Stable graphs report expansions, accepted solutions, and their final inactive state."""
-    params = graph_oriented_layout_design_params()
-    params.enable_multithreading = parallel
-    params.return_first = True
-    params.seed = 7
+    options: dict[str, Any] = {
+        "enable_multithreading": parallel,
+        "return_first": True,
+        "seed": 7,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
     counts: list[tuple[str, int, int]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    params.on_progress = lambda *report: counts.append(report)
-    layout = graph_oriented_layout_design(mux21, params)
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    options["on_progress"] = lambda *report: counts.append(report)
+    layout = graph_oriented_layout_design(mux21, **options)
     assert layout is not None
     assert equivalence_checking(mux21, layout) != eq_type.NO
     assert any("; best " in description for _, _, description, _, _, _ in reports)
@@ -155,19 +116,22 @@ def test_counted_native_phases(mux21: technology_network, command: str) -> None:
         return reports.append(report)
 
     if command == "balance":
-        balancing_params = network_balancing_params()
-        balancing_params.on_progress = callback
-        result = network_balancing(mux21, balancing_params)
+        balancing_options: dict[str, Any] = {
+            "on_progress": callback,
+        }
+        result = network_balancing(mux21, **balancing_options)
         assert equivalence_checking(mux21, result) != eq_type.NO
     elif command == "fanouts":
-        substitution_params = fanout_substitution_params()
-        substitution_params.on_progress = callback
-        result = fanout_substitution(mux21, substitution_params)
+        substitution_options: dict[str, Any] = {
+            "on_progress": callback,
+        }
+        result = fanout_substitution(mux21, **substitution_options)
         assert equivalence_checking(mux21, result) != eq_type.NO
     else:
-        drv_params = gate_level_drv_params()
-        drv_params.on_progress = callback
-        gate_level_drvs(orthogonal(mux21), drv_params)
+        drv_options: dict[str, Any] = {
+            "on_progress": callback,
+        }
+        gate_level_drvs(orthogonal(mux21), **drv_options)
     final = {task: (done, total) for task, done, total in reports}
     assert final
     assert all(done == total for done, total in final.values())
@@ -181,10 +145,8 @@ def test_progress_callback_exception_propagates(mux21: technology_network) -> No
         """Raise the original Python exception from inside a native algorithm."""
         raise error
 
-    params = network_balancing_params()
-    params.on_progress = fail
     with pytest.raises(RuntimeError, match="callback failed") as caught:
-        network_balancing(mux21, params)
+        network_balancing(mux21, on_progress=fail)
     assert caught.value is error
 
 
@@ -210,17 +172,11 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
             if kind == "sqd":
                 write_sqd_layout(layout, str(path), **kwargs)
             else:
-                params = write_sidb_layout_svg_params()
-                if callback:
-                    params.on_progress = callback
-                write_sidb_layout_svg(layout, str(path), params)
+                write_sidb_layout_svg(layout, str(path), **kwargs)
         else:
             qca_layout = apply_qca_one_library(gate_layout)
-            params = getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}_params")()
-            if callback:
-                params.on_progress = callback
             getattr(qca_io, f"write_{'qca_layout_svg' if kind == 'svg' else kind + '_layout'}")(
-                qca_layout, str(path), params
+                qca_layout, str(path), **kwargs
             )
     if kind == "sqd":
         assert read_sqd_layout(str(paths[0])) == read_sqd_layout(str(paths[1]))
@@ -238,14 +194,15 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
 def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> None:
     """Serial and stolen compositions contribute to the same aggregate count."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
-    params = clustercomplete_params()
-    params.available_threads = threads
-    params.simulation_parameters.base = 2
+    options: dict[str, Any] = {
+        "available_threads": threads,
+        "base": 2,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
     counts: list[tuple[str, int, int]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    params.on_progress = lambda *report: counts.append(report)
-    result = clustercomplete(layout, params)
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    options["on_progress"] = lambda *report: counts.append(report)
+    result = clustercomplete(layout, **options)
     assert result.charge_distributions
     assert reports
     final = {worker: done for worker, count, description, done, total, active in reports if not active}
@@ -255,22 +212,24 @@ def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> Non
 
 def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) -> None:
     """Candidates rejected by the area bound never appear as active solvers."""
-    params = exact_params()
-    params.upper_bound_area = 1
+    options: dict[str, Any] = {
+        "upper_bound_area": 1,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    assert exact_cartesian(mux21, params) is None
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    assert exact(mux21, **options) is None
     assert not reports
 
 
 def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
     """A timeout leaves no active candidate, whether it interrupts a solver or prevents its start."""
-    params = exact_params()
-    params.num_threads = 4
-    params.timeout = 1
+    options: dict[str, Any] = {
+        "num_threads": 4,
+        "timeout": 1,
+    }
     reports: list[tuple[int, int, str, int, int, bool]] = []
-    params.on_worker_progress = lambda *report: reports.append(report)
-    exact_cartesian(mux21, params)
+    options["on_worker_progress"] = lambda *report: reports.append(report)
+    exact(mux21, **options)
     active = {worker: running for worker, count, description, done, total, running in reports}
     assert not any(active.values())
 
@@ -278,14 +237,15 @@ def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
 def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
     """Temperature analysis keeps outer phases and forwards the active simulation's workers."""
     layout = read_sqd_layout(str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"))
-    params = critical_temperature_params()
-    params.operational_params.sim_engine = sidb_simulation_engine.CLUSTERCOMPLETE
-    params.operational_params.simulation_parameters.base = 2
+    options: dict[str, Any] = {
+        "sim_engine": sidb_simulation_engine.CLUSTERCOMPLETE,
+        "base": 2,
+    }
     workers: list[tuple[int, int, str, int, int, bool]] = []
     phases: list[tuple[str, int, int]] = []
-    params.on_worker_progress = lambda *report: workers.append(report)
-    params.on_progress = lambda *report: phases.append(report)
-    critical_temperature_gate_based(layout, [create_not_tt()], params)
+    options["on_worker_progress"] = lambda *report: workers.append(report)
+    options["on_progress"] = lambda *report: phases.append(report)
+    critical_temperature_gate_based(layout, [create_not_tt()], **options)
     assert workers
     assert phases
     active = {worker: running for worker, count, description, done, total, running in workers}
@@ -332,21 +292,107 @@ def test_failed_mapping_retains_completed_count() -> None:
 
 def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path) -> None:
     """QCC callbacks count rows without changing the serialized layout."""
-    placement = exact_params()
-    placement.scheme = "COLUMNAR3"
-    placement.crossings = True
-    placement.border_io = True
-    placement.technology_specifics = technology_constraints.TOPOLINANO
-    placement.layout_arrangement = arrangement.ODD_COLUMN
-    gate_layout = exact_shifted_cartesian(mux21, placement)
+    placement: dict[str, Any] = {
+        "scheme": "COLUMNAR3",
+        "crossings": True,
+        "border_io": True,
+        "technology_specifics": technology_constraints.TOPOLINANO,
+        "layout_arrangement": arrangement.ODD_COLUMN,
+    }
+    gate_layout = exact(mux21, layout_type=shifted_cartesian_gate_layout, **placement)
     assert gate_layout is not None
     layout = apply_topolinano_library(gate_layout)
     before = tmp_path / "before.qcc"
     after = tmp_path / "after.qcc"
     write_qcc_layout(layout, str(before))
-    params = write_qcc_layout_params()
+    options: dict[str, Any] = {}
     reports: list[tuple[str, int, int]] = []
-    params.on_progress = lambda *report: reports.append(report)
-    write_qcc_layout(layout, str(after), params)
+    options["on_progress"] = lambda *report: reports.append(report)
+    write_qcc_layout(layout, str(after), **options)
     assert before.read_bytes() == after.read_bytes()
     assert reports[-1][1] == reports[-1][2] > 0
+
+
+@pytest.mark.parametrize("kind", ["balance", "exact", "worker", "both"])
+@pytest.mark.parametrize("raises", [False, True])
+def test_progress_callbacks_are_released(mux21: technology_network, kind: str, *, raises: bool) -> None:
+    """Native calls release callback objects after success and callback exceptions."""
+
+    def invoke() -> weakref.ReferenceType[Any]:
+        """Call an algorithm and release its callback.
+
+        Returns:
+            A weak reference to the completed call's callback.
+        """
+
+        class Callback:
+            """Record invocation and optionally raise from a native callback."""
+
+            calls = 0
+
+            def __call__(self, *_report: object) -> None:
+                """Count progress and exercise exception propagation.
+
+                Raises:
+                    RuntimeError: When the test requests a callback exception.
+                """
+                self.calls += 1
+                if raises:
+                    msg = "callback failed"
+                    raise RuntimeError(msg)
+
+        callback = Callback()
+        callback_ref = weakref.ref(callback)
+        options: dict[str, Any] = {}
+        if kind in {"worker", "both"}:
+            options["on_worker_progress"] = callback
+        if kind != "worker":
+            options["on_progress"] = callback
+        algorithm: Any = network_balancing if kind == "balance" else exact
+        if kind != "balance":
+            options["num_threads"] = 2
+        if raises:
+            with pytest.raises(RuntimeError, match="callback failed"):
+                algorithm(mux21, **options)
+        else:
+            assert algorithm(mux21, **options) is not None
+        assert callback.calls > 0
+        return callback_ref
+
+    for _ in range(2):
+        callback_ref = invoke()
+        gc.collect()
+        assert callback_ref() is None
+
+
+def test_long_route_statistics_release_the_gil() -> None:
+    """Deep layout summaries finish while Python display threads can run."""
+    length = 200_000
+    layout = cartesian_gate_layout((length, 0), "2DDWave")
+    signal = layout.create_pi("in", (0, 0))
+    for x in range(1, length):
+        signal = layout.create_buf(signal, (x, 0))
+    layout.create_po(signal, "out", (length, 0))
+    start = threading.Event()
+    refreshed = threading.Event()
+
+    def refresh() -> None:
+        """Run one Python update after the native analysis starts."""
+        start.wait()
+        refreshed.set()
+
+    worker = threading.Thread(target=refresh)
+    interval = sys.getswitchinterval()
+    worker.start()
+    try:
+        # The native call must release the GIL before Python's next scheduled handoff.
+        sys.setswitchinterval(10)
+        start.set()
+        result = critical_path_length_and_throughput(layout)
+        refreshed_during_analysis = refreshed.is_set()
+    finally:
+        sys.setswitchinterval(interval)
+        start.set()
+        worker.join()
+    assert result == (length + 1, 1)
+    assert refreshed_during_analysis

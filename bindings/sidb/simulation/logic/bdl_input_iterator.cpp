@@ -15,6 +15,7 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include "pyfiction/bdl_parameters.hpp"
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
@@ -22,6 +23,7 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -34,52 +36,110 @@
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void bdl_input_iterator(nanobind::module_& m)
-{
-    namespace py = nanobind;
+/** @brief Native options constructed for each Python call. */
+using bdl_input_iterator_options = fiction::sidb::simulation::logic::bdl_input_iterator_params;
 
+/**
+ * @brief Binds bdl input iterator helpers.
+ * @param m Python module.
+ */
+void register_bdl_input_iterator(nb::module_& m)
+{
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_input_iterator;
-    using fiction::sidb::simulation::logic::bdl_input_iterator_params;
+
     using fiction::sidb::simulation::logic::bdl_wire;
 
-    py::enum_<bdl_input_iterator_params::input_bdl_configuration>(m, "input_bdl_configuration")
+    nb::enum_<bdl_input_iterator_options::input_bdl_configuration>(m, "input_bdl_configuration")
         .value(
-            "PERTURBER_ABSENCE_ENCODED", bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED,
+            "PERTURBER_ABSENCE_ENCODED", bdl_input_iterator_options::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED,
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_ABSENCE_ENCODED))
         .value(
             "PERTURBER_DISTANCE_ENCODED",
-            bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED,
+            bdl_input_iterator_options::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED,
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_DISTANCE_ENCODED));
 
-    py::class_<bdl_input_iterator_params>(m, "bdl_input_iterator_params",
-                                          DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("bdl_wire_params", &bdl_input_iterator_params::bdl_wire_params,
-                DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params_bdl_wire_params))
-        .def_rw("input_bdl_config", &bdl_input_iterator_params::input_bdl_config,
-                DOC(fiction_sidb_simulation_logic_bdl_input_iterator_params_input_bdl_config));
+    nb::class_<bdl_input_iterator>(m, "bdl_input_iterator", DOC(fiction_sidb_simulation_logic_bdl_input_iterator))
+        .def(
+            "__init__",
+            [](bdl_input_iterator* self, const layout& lyt,
+               const decltype(bdl_input_iterator_options{}
+                                  .bdl_wire_params.threshold_bdl_interdistance)       threshold_bdl_interdistance,
+               const decltype(bdl_input_iterator_options{}
+                                  .bdl_wire_params.bdl_pairs_params.minimum_distance) minimum_distance,
+               const decltype(bdl_input_iterator_options{}
+                                  .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
+               const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
+            {
+                validate_bdl_pair_distances(minimum_distance, maximum_distance);
+                const bdl_input_iterator_options params{
+                    {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                     .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
+                    input_bdl_config};
+                std::construct_at(self, lyt, params);
+            },
+            nb::arg("lyt"), nb::kw_only(),
+            nb::arg("threshold_bdl_interdistance") =
+                bdl_input_iterator_options{}.bdl_wire_params.threshold_bdl_interdistance,
+            nb::arg("minimum_distance") =
+                bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
+            nb::arg("maximum_distance") =
+                bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
+            nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
+            R"doc(Iterate over SiDB input patterns using the selected BDL encoding.
 
-    py::class_<bdl_input_iterator>(m, "bdl_input_iterator", DOC(fiction_sidb_simulation_logic_bdl_input_iterator))
-        .def(py::init<const layout&, const bdl_input_iterator_params&>(), py::arg("lyt"),
-             py::arg("params") = bdl_input_iterator_params{},
-             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator))
+Args:
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+)doc")
         .def(
             "__iter__", [](bdl_input_iterator& self) -> bdl_input_iterator& { return self; },
-            py::rv_policy::reference_internal)
-        .def(py::init<const layout&, const bdl_input_iterator_params&, const std::vector<bdl_wire>&>(), py::arg("lyt"),
-             py::arg("params"), py::arg("input_wires"),
-             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator_2))
+            nb::rv_policy::reference_internal)
+        .def(
+            "__init__",
+            [](bdl_input_iterator* self, const layout& lyt, const std::vector<bdl_wire>& input_wires,
+               const decltype(bdl_input_iterator_options{}
+                                  .bdl_wire_params.bdl_pairs_params.minimum_distance) minimum_distance,
+               const decltype(bdl_input_iterator_options{}
+                                  .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
+               const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
+            {
+                validate_bdl_pair_distances(minimum_distance, maximum_distance);
+                const bdl_input_iterator_options params{
+                    {.bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
+                    input_bdl_config};
+                std::construct_at(self, lyt, params, input_wires);
+            },
+            nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),
+            nb::arg("minimum_distance") =
+                bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
+            nb::arg("maximum_distance") =
+                bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
+            nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
+            R"doc(Iterate over SiDB input patterns using the selected BDL encoding.
+
+Args:
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+)doc")
         .def(
             "__next__",
             [](bdl_input_iterator& self) -> layout
             {
                 if (self >= (uint64_t{1} << self.num_input_pairs()))
                 {
-                    throw py::stop_iteration();
+                    throw nb::stop_iteration();
                 }
 
                 auto result = *self;
@@ -89,20 +149,20 @@ void bdl_input_iterator(nanobind::module_& m)
             },
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_mul))
         .def(
-            "__eq__", [](const bdl_input_iterator& self, const uint64_t n) { return self == n; }, py::arg("m"),
+            "__eq__", [](const bdl_input_iterator& self, const uint64_t n) { return self == n; }, nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_eq))
         .def(
-            "__ne__", [](const bdl_input_iterator& self, const uint64_t n) { return self != n; }, py::arg("m"))
+            "__ne__", [](const bdl_input_iterator& self, const uint64_t n) { return self != n; }, nb::arg("m"))
         .def(
-            "__lt__", [](const bdl_input_iterator& self, const uint64_t n) { return self < n; }, py::arg("m"))
+            "__lt__", [](const bdl_input_iterator& self, const uint64_t n) { return self < n; }, nb::arg("m"))
         .def(
-            "__le__", [](const bdl_input_iterator& self, const uint64_t n) { return self <= n; }, py::arg("m"))
+            "__le__", [](const bdl_input_iterator& self, const uint64_t n) { return self <= n; }, nb::arg("m"))
         .def(
-            "__gt__", [](const bdl_input_iterator& self, const uint64_t n) { return self > n; }, py::arg("m"))
+            "__gt__", [](const bdl_input_iterator& self, const uint64_t n) { return self > n; }, nb::arg("m"))
         .def(
-            "__ge__", [](const bdl_input_iterator& self, const uint64_t n) { return self >= n; }, py::arg("m"))
+            "__ge__", [](const bdl_input_iterator& self, const uint64_t n) { return self >= n; }, nb::arg("m"))
         .def(
-            "__add__", [](const bdl_input_iterator& self, const int n) { return self + n; }, py::arg("m"),
+            "__add__", [](const bdl_input_iterator& self, const int n) { return self + n; }, nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_add))
         .def(
             "__iadd__",
@@ -111,9 +171,9 @@ void bdl_input_iterator(nanobind::module_& m)
                 self += n;
                 return self;
             },
-            py::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_iadd))
+            nb::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_iadd))
         .def(
-            "__sub__", [](const bdl_input_iterator& self, const int n) { return self - n; }, py::arg("m"),
+            "__sub__", [](const bdl_input_iterator& self, const int n) { return self - n; }, nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_sub))
         .def(
             "__isub__",
@@ -122,9 +182,9 @@ void bdl_input_iterator(nanobind::module_& m)
                 self -= n;
                 return self;
             },
-            py::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_isub))
+            nb::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_isub))
         .def(
-            "__getitem__", [](const bdl_input_iterator& self, const int n) { return self[n]; }, py::arg("m"),
+            "__getitem__", [](const bdl_input_iterator& self, const int n) { return self[n]; }, nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_array))
         .def("num_input_pairs", &bdl_input_iterator::num_input_pairs,
              DOC(fiction_sidb_simulation_logic_bdl_input_iterator_num_input_pairs))
@@ -135,16 +195,67 @@ void bdl_input_iterator(nanobind::module_& m)
             "Returns the layout that represents the current input state, equivalent to dereferencing the iterator.");
 
     m.def(
-        "generate_bdl_input_pattern_layouts", [](const layout& lyt, const bdl_input_iterator_params& params)
-        { return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params); }, py::arg("lyt"),
-        py::arg("params") = bdl_input_iterator_params{},
-        DOC(fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_2));
+        "generate_bdl_input_pattern_layouts",
+        [](const layout&                                                          lyt,
+           const decltype(bdl_input_iterator_options{}
+                              .bdl_wire_params.threshold_bdl_interdistance)       threshold_bdl_interdistance,
+           const decltype(bdl_input_iterator_options{}
+                              .bdl_wire_params.bdl_pairs_params.minimum_distance) minimum_distance,
+           const decltype(bdl_input_iterator_options{}
+                              .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
+           const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
+        {
+            validate_bdl_pair_distances(minimum_distance, maximum_distance);
+            const bdl_input_iterator_options params{
+                {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                 .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
+                input_bdl_config};
+            return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params);
+        },
+        nb::arg("lyt"), nb::kw_only(),
+        nb::arg("threshold_bdl_interdistance") =
+            bdl_input_iterator_options{}.bdl_wire_params.threshold_bdl_interdistance,
+        nb::arg("minimum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
+        R"doc(Return one SiDB layout per input pattern, starting with pattern zero.
+The keyword options select BDL detection and input encoding.
+The overload with input_wires bypasses automatic wire detection.
+
+Args:
+    threshold_bdl_interdistance: Maximum separation between BDL pairs in one wire in nm.
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+)doc");
     m.def(
         "generate_bdl_input_pattern_layouts",
-        [](const layout& lyt, const bdl_input_iterator_params& params, const std::vector<bdl_wire>& input_wires)
-        { return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params, input_wires); },
-        py::arg("lyt"), py::arg("params"), py::arg("input_wires"),
-        DOC(fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts));
+        [](const layout& lyt, const std::vector<bdl_wire>& input_wires,
+           const decltype(bdl_input_iterator_options{}
+                              .bdl_wire_params.bdl_pairs_params.minimum_distance) minimum_distance,
+           const decltype(bdl_input_iterator_options{}
+                              .bdl_wire_params.bdl_pairs_params.maximum_distance) maximum_distance,
+           const decltype(bdl_input_iterator_options{}.input_bdl_config)          input_bdl_config)
+        {
+            validate_bdl_pair_distances(minimum_distance, maximum_distance);
+            const bdl_input_iterator_options params{
+                {.bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
+                input_bdl_config};
+            return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params, input_wires);
+        },
+        nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),
+        nb::arg("minimum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.minimum_distance,
+        nb::arg("maximum_distance") = bdl_input_iterator_options{}.bdl_wire_params.bdl_pairs_params.maximum_distance,
+        nb::arg("input_bdl_config") = bdl_input_iterator_options{}.input_bdl_config,
+        R"doc(Return one SiDB layout per input pattern, starting with pattern zero.
+The keyword options select BDL detection and input encoding.
+The overload with input_wires bypasses automatic wire detection.
+
+Args:
+    minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+    maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+    input_bdl_config: Input encoding: perturber absence or perturber distance.
+)doc");
 }
 
 }  // namespace pyfiction

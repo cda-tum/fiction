@@ -26,33 +26,28 @@
 #include <nanobind/stl/set.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-namespace detail
+/**
+ * @brief Binds occupation probability of excited states helpers.
+ * @param m Python module.
+ */
+void register_occupation_probability_of_excited_states(nb::module_& m)
 {
-
-void occupation_probability_of_excited_states_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def("occupation_probability_gate_based", &fiction::sidb::simulation::analysis::occupation_probability_gate_based,
-          py::arg("energy_and_state_type"), py::arg("temperature"),
+          nb::arg("energy_and_state_type"), nb::arg("temperature"),
           DOC(fiction_sidb_simulation_analysis_occupation_probability_gate_based));
 
     m.def("occupation_probability_non_gate_based",
           &fiction::sidb::simulation::analysis::occupation_probability_non_gate_based,
-          py::arg("calculate_energy_distribution"),
-          py::arg("temperature"));  // TODO DOC(fiction_sidb_simulation_analysis_occupation_probability_non_gate_based)
-}
-
-}  // namespace detail
-
-void occupation_probability_of_excited_states(nanobind::module_& m)
-{
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
-    detail::occupation_probability_of_excited_states_impl(m);
+          nb::arg("calculate_energy_distribution"),
+          nb::arg("temperature"));  // TODO DOC(fiction_sidb_simulation_analysis_occupation_probability_non_gate_based)
 }
 
 }  // namespace pyfiction

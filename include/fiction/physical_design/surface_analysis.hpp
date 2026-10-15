@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -42,13 +43,13 @@ namespace fiction::physical_design
  * with the listed ports. `surface_analysis` produces one from a defective SiDB surface, and `exact_with_blacklist`
  * consumes it.
  *
- * @tparam Lyt Gate-level layout type.
  * @tparam PortType Port type of the gate library.
  */
-template <typename Lyt, typename PortType>
+template <typename PortType>
 using surface_black_list =
-    std::unordered_map<tile<Lyt>, std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn::port_list<PortType>>,
-                                                     kitty::hash<kitty::dynamic_truth_table>>>;
+    std::unordered_map<layouts::layout_base::coordinate,
+                       std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn::port_list<PortType>>,
+                                          kitty::hash<kitty::dynamic_truth_table>>>;
 
 /**
  * @brief Analyzes a defective SiDB surface for a gate-level layout: for every tile and every gate implementation of the
@@ -56,28 +57,27 @@ using surface_black_list =
  * surface, the gate's ports are blacklisted for that tile and function. Placement can then avoid those gates.
  *
  * @tparam GateLibrary SiDB gate library type.
- * @tparam GateLyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param gate_lyt The gate-level layout.
  * @param surface The defective surface.
  * @param charged_defect_spacing_overwrite Overrides the spacing charged defects keep SiDBs at.
  * @param neutral_defect_spacing_overwrite Overrides the spacing neutral defects keep SiDBs at.
  * @return The black list.
  */
-template <typename GateLibrary, typename GateLyt>
+template <typename GateLibrary, typename Geometry>
     requires std::same_as<typename GateLibrary::layout, sidb::layout>
 [[nodiscard]] auto
-surface_analysis(const GateLyt& gate_lyt, const sidb::layout& surface,
+surface_analysis(const fiction::layouts::gate_level_layout<Geometry>& gate_lyt, const sidb::layout& surface,
                  const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
                  const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt)
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(has_get_functional_implementations_v<GateLibrary>,
                   "GateLibrary does not implement the get_functional_implementations function");
     static_assert(has_get_gate_ports_v<GateLibrary>, "GateLibrary does not implement the get_gate_ports function");
 
     using port_type = typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type;
 
-    surface_black_list<GateLyt, port_type> black_list{};
+    surface_black_list<port_type> black_list{};
 
     const auto sidbs_affected_by_defects =
         surface.all_affected_sidbs(charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);

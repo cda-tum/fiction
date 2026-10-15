@@ -24,6 +24,11 @@
 #include <nanobind/nanobind.h>
 #include <pyerrors.h>
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -36,7 +41,7 @@ namespace pyfiction
  */
 inline void register_execution_timeout()
 {
-    nanobind::register_exception_translator(
+    nb::register_exception_translator(
         [](const std::exception_ptr& exception, void* /* unused */)
         {
             try

@@ -16,13 +16,16 @@
 
 #pragma once
 
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 
 #include <phmap.h>
 
 #include <cassert>
+#include <concepts>
+#include <stdexcept>
 
 namespace fiction::physical_design::path_finding
 {
@@ -45,7 +48,14 @@ template <typename Path, typename Lyt>
 class enumerate_all_paths_impl
 {
   public:
-    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const enumerate_all_paths_params& p,
+    /**
+     * @brief Initializes path enumeration.
+     * @param lyt Layout to search.
+     * @param obj Routing endpoints.
+     * @param p Search parameters.
+     * @param extra Additional routing obstructions.
+     */
+    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective obj, const enumerate_all_paths_params p,
                              const layouts::obstructions& extra) :
             layout{lyt},
             search_obstructions{extra},
@@ -58,13 +68,12 @@ class enumerate_all_paths_impl
      *
      * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run() noexcept
+    [[nodiscard]] path_collection<Path> run()
     {
-        assert(objective.source.is_valid() && objective.target.is_valid() &&
-               "Neither source nor target coordinate can be dead");
-
-        assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
-               "Both source and target coordinate have to be within the layout bounds");
+        if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
+        {
+            throw std::invalid_argument("Routing endpoints must lie within the layout extent");
+        }
 
         recursively_enumerate_all_paths(objective.source, objective.target, Path{});
 
@@ -81,7 +90,7 @@ class enumerate_all_paths_impl
     /**
      * The source-target coordinate pair.
      */
-    const routing_objective<Lyt> objective;
+    const routing_objective objective;
     /**
      * Routing parameters.
      */
@@ -89,7 +98,7 @@ class enumerate_all_paths_impl
     /**
      * Set of visited coordinates.
      */
-    phmap::flat_hash_set<coordinate<Lyt>> visited{};
+    phmap::flat_hash_set<fiction::layouts::layout_base::coordinate> visited{};
     /**
      * Collection of all enumerated paths.
      */
@@ -99,7 +108,7 @@ class enumerate_all_paths_impl
      *
      * @param c Coordinate to mark as visited.
      */
-    void mark_visited(const coordinate<Lyt>& c) noexcept
+    void mark_visited(const fiction::layouts::layout_base::coordinate& c)
     {
         visited.insert(c);
     }
@@ -108,7 +117,7 @@ class enumerate_all_paths_impl
      *
      * @param c Coordinate to mark as unvisited.
      */
-    void mark_unvisited(const coordinate<Lyt>& c) noexcept
+    void mark_unvisited(const fiction::layouts::layout_base::coordinate& c)
     {
         visited.erase(c);
     }
@@ -118,7 +127,7 @@ class enumerate_all_paths_impl
      * @param c Coordinate to check.
      * @return `true` if the coordinate has been visited, `false` otherwise.
      */
-    [[nodiscard]] bool is_visited(const coordinate<Lyt>& c) const noexcept
+    [[nodiscard]] bool is_visited(const fiction::layouts::layout_base::coordinate& c) const
     {
         return visited.count(c) > 0;
     }
@@ -131,7 +140,8 @@ class enumerate_all_paths_impl
      * @param tgt Target coordinate.
      * @param p Current path to extend.
      */
-    void recursively_enumerate_all_paths(const coordinate<Lyt>& src, const coordinate<Lyt>& tgt, Path p) noexcept
+    void recursively_enumerate_all_paths(const fiction::layouts::layout_base::coordinate& src,
+                                         const fiction::layouts::layout_base::coordinate& tgt, Path p)
     {
         // mark source coordinate as visited and append it to the path
         mark_visited(src);
@@ -144,7 +154,7 @@ class enumerate_all_paths_impl
         }
         else  // destination is not reached yet
         {
-            const auto explore_successor = [&, this](const auto& adjacent) noexcept
+            const auto explore_successor = [&, this](const auto& adjacent)
             {
                 const auto next = physical_design::detail::routing_successor(layout, src, adjacent, tgt,
                                                                              params.crossings, search_obstructions);
@@ -163,7 +173,9 @@ class enumerate_all_paths_impl
                 return;  // keep looping
             };
 
-            if constexpr (is_gate_level_layout_v<Lyt>)
+            if constexpr (requires {
+                              requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>;
+                          })
             {
                 // recurse for all outgoing clock zones
                 layout.foreach_outgoing_clocked_zone(src, explore_successor);
@@ -204,7 +216,7 @@ class enumerate_all_paths_impl
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
  * using clk_lyt = gate_level_layout<cartesian_layout>;
- * using path = layout_coordinate_path<cartesian_layout>;
+ * using path = layout_coordinate_path;
  * clk_lyt layout = ...;
  * auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
@@ -218,11 +230,11 @@ class enumerate_all_paths_impl
  * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
+[[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective& objective,
                                                         const enumerate_all_paths_params& params       = {},
-                                                        const layouts::obstructions&      obstructions = {}) noexcept
+                                                        const layouts::obstructions&      obstructions = {})
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
 
     return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params, obstructions}.run();
 }

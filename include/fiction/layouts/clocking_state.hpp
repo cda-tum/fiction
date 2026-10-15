@@ -19,9 +19,11 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/layout_base.hpp"
 
+#include <phmap.h>
+
 #include <cstdint>
+#include <functional>
 #include <string_view>
-#include <unordered_map>
 #include <utility>
 
 namespace fiction::layouts::clocking
@@ -43,12 +45,36 @@ class state
     using sync_elem_t = uint8_t;
     /** @brief Creates state with the given scheme. @param s Initial scheme. */
     explicit state(clocking_scheme_t s) : clocking{std::move(s)} {}
+    /** @brief Copies the scheme and synchronization delays independently. */
+    state(const state&) = default;
+    /** @brief Moves the scheme and synchronization delays. */
+    state(state&&) noexcept = default;
     /**
-     * Replaces the stored clocking scheme with the provided one.
+     * @brief Replaces this state with an independent copy. Copy failure preserves this state.
+     * @param other State to copy.
+     * @return This state.
+     * @throws std::bad_alloc If allocation fails.
+     */
+    state& operator=(const state& other)
+    {
+        if (this != &other)
+        {
+            auto copy = other;
+            *this     = std::move(copy);
+        }
+        return *this;
+    }
+    /** @brief Moves the scheme and synchronization delays. @return This state. */
+    state& operator=(state&&) noexcept = default;
+    /** @brief Releases owned clocking state. */
+    ~state() = default;
+    /**
+     * Replaces the stored clocking scheme with the provided one. Copy failure preserves the stored scheme.
      *
      * @param scheme New clocking scheme.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void replace_clocking_scheme(const clocking_scheme_t& scheme) noexcept
+    void replace_clocking_scheme(const clocking_scheme_t& scheme)
     {
         clocking = scheme;
     }
@@ -58,8 +84,9 @@ class state
      *
      * @param cz Clock zone to override.
      * @param cn New clock number for `cz`.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
+    void assign_clock_number(const clock_zone& cz, const clock_number_t cn)
     {
         clocking.override_clock_number(static_cast<int64_t>(cz.x), static_cast<int64_t>(cz.y), cn);
     }
@@ -105,7 +132,8 @@ class state
         return clocking.name() == name;
     }
     /**
-     * Returns a read-only reference to the stored clocking scheme object.
+     * Returns a read-only reference to the stored clocking scheme object. Assignment or moving from the state
+     * replaces the referenced contents; the reference stays attached to the state that supplied it.
      *
      * @return A reference valid for the lifetime of this state.
      */
@@ -158,8 +186,9 @@ class state
      * @param cz Clock zone to turn into a synchronization element.
      * @param se Number of full clock cycles to extend `cz`'s Hold phase by. If this value is 0, `cz` is turned back
      * into a normal clock zone.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se) noexcept
+    void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se)
     {
         if (se == sync_elem_t{0})
         {
@@ -202,12 +231,27 @@ class state
         return static_cast<uint32_t>(synchronization.size());
     }
 
+    /**
+     * Visits zones with a nonzero synchronization delay.
+     * @tparam Fn Callable accepting a clock zone and delay.
+     * @param fn Callback for each synchronization element.
+     */
+    template <typename Fn>
+    void foreach_synchronization_element(
+        Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward): repeated calls use the callback as an lvalue
+    {
+        for (const auto& [zone, delay] : synchronization)
+        {
+            std::invoke(fn, zone, delay);
+        }
+    }
+
   private:
     /**
      * @brief Scheme and manually overridden clock numbers.
      */
     clocking_scheme_t clocking;
     /** @brief Nonzero synchronization delays indexed by coordinate. */
-    std::unordered_map<clock_zone, sync_elem_t> synchronization{};
+    phmap::flat_hash_map<clock_zone, sync_elem_t> synchronization{};
 };
 }  // namespace fiction::layouts::clocking

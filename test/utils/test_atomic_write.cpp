@@ -105,6 +105,11 @@ TEST_CASE("Transactional output preserves symbolic links", "[atomic-write]")
         SKIP("Windows did not grant symbolic-link creation privileges");
     }
 #endif
+    if (link_error == std::errc::function_not_supported)
+    {
+        std::filesystem::remove_all(directory);
+        SKIP("The filesystem runtime does not implement symbolic links");
+    }
     REQUIRE_FALSE(link_error);
     CHECK_THROWS_AS(detail::atomic_write(link.string(),
                                          [](std::ostream& stream)

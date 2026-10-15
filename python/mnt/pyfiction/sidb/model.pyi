@@ -295,24 +295,14 @@ class sidb_simulation_parameters:
 
     def __init__(
         self,
+        *,
         base_number: int = 3,
         mu_minus: float = -0.32,
         relative_permittivity: float = 5.6,
         screening_distance: float = 5.0,
     ) -> None:
         """
-        Default constructor.
-
-        Args:
-            base_number: simulation can be conducted with 2 and 3 charge
-                         states. 2 = (Negative, Neutral), 3 = (Negative,
-                         Neutral, Positive).
-            mu: (µ-) is the energy transition level (0/-) in eV.
-            relative_permittivity: it describes the electric field reduction
-                                   due to polarization.
-            screening_distance: also known as "Thomas-Fermi screening" and it
-                                describes the electric field screening due to
-                                free charges in nm.
+        Store physical model values. All arguments are keyword-only; base_number must be 2 or 3.
         """
 
     @property
@@ -355,28 +345,29 @@ class sidb_simulation_parameters:
     def mu_plus(self) -> float:
         """`mu_plus` (µ+) is the energy transition level (+/0) (unit: eV)."""
 
-def potential_to_distance_conversion(potential: float, params: sidb_simulation_parameters, precision: int) -> float:
+def potential_to_distance_conversion(
+    potential: float,
+    precision: int,
+    *,
+    base: int = 3,
+    mu_minus: float = -0.32,
+    epsilon_r: float = 5.6,
+    lambda_tf: float = 5.0,
+) -> float:
     """
-    The electrostatic potential on hydrogen-passivated silicon is
-    typically modeled using a screened Coulomb potential. This
-    electrostatic potential is commonly employed to determine the
-    electrostatic potential for a given distance (between SiDB and point
-    under consideration) and given physical parameters. However, the
-    function provided here serves the inverse purpose by calculating the
-    distance for a given potential and given physical parameters.
+    Compute the distance corresponding to the potential with the requested precision.
+    The physical model is supplied by the scalar keyword values.
+    Zero potential returns positive infinity; positive infinite potential returns the minimum distance.
+    Precision must be an integer from 0 to 15. The search bisects the distance bracket;
+    floating-point resolution limits the effective precision.
+    Positive infinite screening distance selects the unscreened Coulomb potential.
+
+    Raises:
+        ValueError: Invalid physical parameters, potential, or precision.
 
     Args:
-        params: The physical parameters for a given hydrogen-passivated
-                silicon surface.
-        potential: The electrostatic potential (unit: V) to be converted
-                   to a distance.
-        precision: The precision level for the conversion, specifying the
-                   number of decimal places.
-
-    Returns:
-        The distance (unit: nm) corresponding to the given electrostatic
-        potential.
-
-    Note:
-        Runtime depends exponentially on the provided precision.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
     """

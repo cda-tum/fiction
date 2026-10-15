@@ -16,15 +16,16 @@
 
 #pragma once
 
+#include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/physical_design/generate_edge_intersection_graph.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/graph/graph_coloring.hpp"
 
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -88,7 +89,7 @@ template <typename Lyt>
 class color_routing_impl
 {
   public:
-    color_routing_impl(Lyt& lyt, const std::vector<routing_objective<Lyt>>& obj, const color_routing_params& p,
+    color_routing_impl(Lyt& lyt, const std::vector<routing_objective>& obj, const color_routing_params& p,
                        color_routing_stats& st) :
             layout{lyt},
             objectives{obj},
@@ -113,7 +114,7 @@ class color_routing_impl
             return false;
         }
 
-        const utils::graph::determine_vertex_coloring_params<::fiction::physical_design::edge_intersection_graph<Lyt>>
+        const utils::graph::determine_vertex_coloring_params<::fiction::physical_design::edge_intersection_graph>
             dvc_ps{
                 .engine     = ps.engine,
                 .sat_params = {.sat_engine        = bill::solvers::glucose_41,
@@ -143,7 +144,7 @@ class color_routing_impl
     /**
      * The routing objectives.
      */
-    const std::vector<routing_objective<Lyt>> objectives;
+    const std::vector<routing_objective> objectives;
     /**
      * Parameters.
      */
@@ -167,7 +168,7 @@ class color_routing_impl
      */
     template <typename Graph, typename Color>
     void conduct_routing(const Graph& graph, const utils::graph::vertex_coloring<Graph, Color>& coloring,
-                         const Color& color) noexcept
+                         const Color& color)
     {
         std::size_t num_satisfied_objectives{0};
 
@@ -177,7 +178,9 @@ class color_routing_impl
                                   const auto& [vertex, path] = v_path_pair;
                                   if (coloring.at(vertex) == color)
                                   {
-                                      route_path(layout, path);
+                                      const auto& objective = objectives[pst.epg_stats.objective_indices.at(vertex)];
+                                      route_path(layout, path,
+                                                 {layout.find_object(path.target()).value(), objective.input_index});
                                       ++num_satisfied_objectives;
                                   }
                               });
@@ -218,16 +221,18 @@ class color_routing_impl
  *
  * @tparam Lyt The gate-level layout type to route.
  * @param lyt A gate-level layout to route.
- * @param objectives The routing objectives as source-target pairs to fulfill.
+ * @param objectives The routing objectives as source coordinates and indexed destination inputs to fulfill.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return `true` iff routing was successful, i.e., iff all objectives could be satisfied.
  */
 template <typename Lyt>
-bool color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {},
+bool color_routing(Lyt& lyt, const std::vector<routing_objective>& objectives, color_routing_params ps = {},
                    color_routing_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(
+        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
+        "Lyt is not a gate-level layout");
 
     color_routing_stats st{};
 

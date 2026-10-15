@@ -33,7 +33,7 @@ using namespace fiction::physical_design;
 using namespace fiction::utils::graph;
 
 template <typename Spec, typename Impl>
-void check_color_routing(const Spec& spec, Impl& impl, const std::vector<routing_objective<Impl>>& objectives,
+void check_color_routing(const Spec& spec, Impl& impl, const std::vector<routing_objective>& objectives,
                          color_routing_params ps = {})
 {
     const auto success = color_routing(impl, objectives, ps);
@@ -65,6 +65,53 @@ TEST_CASE("Simple wire connection", "[color-routing]")
         ps.engine = graph_coloring_engine::SAT;
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
+}
+
+TEST_CASE("Color routing preserves destination input indices", "[color-routing]")
+{
+    cart_gate_clk_lyt layout{{2, 2}, clocking::twoddwave()};
+    const auto        a    = layout.create_pi("a", {0, 1});
+    const auto        b    = layout.create_pi("b", {1, 0});
+    const auto        gate = layout.create_lt(a, b, {1, 1});
+    layout.disconnect({gate, 0});
+    layout.disconnect({gate, 1});
+    const std::vector<routing_objective> objectives{{{1, 0}, {1, 1}, 1}, {{0, 1}, {1, 1}, 0}};
+
+    REQUIRE(color_routing(layout, objectives));
+    CHECK(layout.source({gate, 0}) == a);
+    CHECK(layout.source({gate, 1}) == b);
+}
+
+TEST_CASE("Color routing connects repeated sources to distinct inputs", "[color-routing]")
+{
+    cart_gate_clk_lyt layout{{2, 2}, clocking::twoddwave()};
+    const auto        a          = layout.create_pi("a", {0, 0});
+    const auto        gate       = layout.create_lt(a, a, {1, 1});
+    const auto        objectives = extract_routing_objectives(layout);
+    clear_routing(layout);
+
+    color_routing_params ps{};
+    SECTION("Without crossings")
+    {
+        ps.crossings = false;
+    }
+    SECTION("With crossings")
+    {
+        ps.crossings = true;
+    }
+
+    REQUIRE(color_routing(layout, objectives, ps));
+    const auto first_source  = layout.source({gate, 0});
+    const auto second_source = layout.source({gate, 1});
+    REQUIRE(first_source.has_value());
+    REQUIRE(second_source.has_value());
+    CHECK(first_source != second_source);
+    /** @brief Routed object on the first gate input. */
+    const auto first_wire = *first_source;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE passed.
+    /** @brief Routed object on the second gate input. */
+    const auto second_wire = *second_source;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE passed.
+    CHECK(layout.source({first_wire, 0}) == a);
+    CHECK(layout.source({second_wire, 0}) == a);
 }
 
 TEST_CASE("Two paths wire connections", "[color-routing]")
@@ -210,7 +257,7 @@ TEST_CASE("Routing with crossings", "[color-routing]")
 
 TEST_CASE("Routing failure", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{3, 4, 1}, clocking::twoddwave()};
+    cart_gate_clk_lyt layout{{4, 5, 2}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -218,7 +265,7 @@ TEST_CASE("Routing failure", "[color-routing]")
     layout.create_pi("x3", {0, 2});
     layout.create_and(x1, x2, {1, 3});
 
-    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {1, 3}}, {{1, 0}, {1, 3}}};
+    const std::vector<routing_objective> objectives{{{0, 1}, {1, 3}, 0}, {{1, 0}, {1, 3}, 1}};
 
     color_routing_params ps{};
     ps.crossings = true;
@@ -239,7 +286,7 @@ TEST_CASE("Routing failure", "[color-routing]")
 
 TEST_CASE("Routing failure 2", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{3, 4, 1}, clocking::twoddwave()};
+    cart_gate_clk_lyt layout{{4, 5, 2}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -247,7 +294,7 @@ TEST_CASE("Routing failure 2", "[color-routing]")
     layout.create_pi("x3", {0, 3});
     layout.create_and(x1, x2, {1, 3});
 
-    const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {1, 3}}, {{1, 0}, {1, 3}}};
+    const std::vector<routing_objective> objectives{{{0, 1}, {1, 3}, 0}, {{1, 0}, {1, 3}, 1}};
 
     color_routing_params ps{};
     ps.crossings = true;
@@ -268,7 +315,7 @@ TEST_CASE("Routing failure 2", "[color-routing]")
 
 TEST_CASE("Routing failure 3", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{2, 4, 1}, clocking::twoddwave()};
+    cart_gate_clk_lyt layout{{3, 5, 2}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto w1 = layout.create_buf(x1, {0, 1});
@@ -281,9 +328,10 @@ TEST_CASE("Routing failure 3", "[color-routing]")
 
     SECTION("Wires without connections")
     {
-        layout.move_node(layout.get_node(a1), {2, 1});
+        layout.disconnect({a1, 0});
+        layout.disconnect({a1, 1});
 
-        const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {2, 1}}, {{1, 1}, {2, 1}}};
+        const std::vector<routing_objective> objectives{{{0, 1}, {2, 1}, 0}, {{1, 1}, {2, 1}, 1}};
 
         SECTION("k = 3")
         {
@@ -297,9 +345,9 @@ TEST_CASE("Routing failure 3", "[color-routing]")
     }
     SECTION("Goal node behind wire crossing")
     {
-        layout.move_node(layout.get_node(a1), {2, 1}, {w2});
+        layout.disconnect({a1, 0});
 
-        const std::vector<routing_objective<cart_gate_clk_lyt>> objectives{{{0, 1}, {2, 1}}, {{1, 1}, {2, 1}}};
+        const std::vector<routing_objective> objectives{{{0, 1}, {2, 1}, 0}, {{1, 1}, {2, 1}, 1}};
 
         SECTION("k = 3")
         {

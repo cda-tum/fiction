@@ -10,22 +10,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from mnt.pyfiction.networks import simulate_outputs
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.synthesis import (
     decision_criterion,
-    fanout_substitution_params,
     is_balanced,
     is_fanout_substituted,
     network_balancing,
-    network_balancing_params,
     output_order,
     planarization,
-    planarization_params,
     planarization_stats,
     planarization_strategy,
 )
@@ -36,15 +33,14 @@ if TYPE_CHECKING:
     from mnt.pyfiction.networks import technology_network
 
 
-def _unified() -> network_balancing_params:
-    params = network_balancing_params()
-    params.unify_outputs = True
-    params.buffer_constant_outputs = False
-    return params
+UNIFIED: dict[str, Any] = {
+    "unify_outputs": True,
+    "buffer_constant_outputs": False,
+}
 
 
 def _balanced(network: technology_network) -> technology_network:
-    return network_balancing(network, _unified())
+    return network_balancing(network, **UNIFIED)
 
 
 def _equivalent_with_tied_inputs(
@@ -81,7 +77,7 @@ def full_adder(resources_dir: Path) -> technology_network:
     Returns:
         The ``FA.v`` network as a ``technology_network``.
     """
-    return read_technology_network(str(resources_dir / "FA.v"))
+    return read_network(str(resources_dir / "FA.v"))
 
 
 def test_unbalanced_networks_are_rejected(mux21: technology_network) -> None:
@@ -98,18 +94,14 @@ def test_planarization_is_equivalent(
     """Every strategy returns a balanced, fanout-substituted network that computes the same functions."""
     balanced = _balanced(full_adder)
 
-    params = planarization_params()
-    params.duplication.strategy = strategy
-    params.duplication.criterion = criterion
-
     stats = planarization_stats()
-    planar, original_input = planarization(balanced, params, stats)
+    planar, original_input = planarization(balanced, strategy=strategy, criterion=criterion, statistics=stats)
 
     assert planar.num_pis() == len(original_input)
     assert planar.num_pis() > balanced.num_pis()  # the full adder needs virtual inputs
     assert sorted(set(original_input)) == list(range(balanced.num_pis()))
     assert planar.num_pos() == balanced.num_pos()
-    assert is_balanced(planar, _unified())
+    assert is_balanced(planar, **UNIFIED)
     assert is_fanout_substituted(planar)
     assert stats.num_nodes == planar.size()
     assert stats.num_duplications > 0
@@ -132,14 +124,9 @@ def test_fanout_degree(full_adder: technology_network) -> None:
     """Fanout nodes respect the requested degree."""
     balanced = _balanced(full_adder)
 
-    params = planarization_params()
-    params.fanout_degree = 3
+    planar, original_input = planarization(balanced, fanout_degree=3)
 
-    planar, original_input = planarization(balanced, params)
-
-    degree_three = fanout_substitution_params()
-    degree_three.degree = 3
-    assert is_fanout_substituted(planar, degree_three)
+    assert is_fanout_substituted(planar, degree=3)
     assert _equivalent_with_tied_inputs(balanced, planar, original_input)
 
 
@@ -147,12 +134,12 @@ def test_random_output_order_is_equivalent(full_adder: technology_network) -> No
     """A seeded random output order gives a reproducible, equivalent planar network."""
     balanced = _balanced(full_adder)
 
-    params = planarization_params()
-    params.duplication.po_order = output_order.RANDOM_PO_ORDER
-    params.duplication.seed = 7
-
-    planar, original_input = planarization(balanced, params)
-    again, original_input_again = planarization(balanced, params)
+    options: dict[str, Any] = {
+        "po_order": output_order.RANDOM_PO_ORDER,
+        "seed": 7,
+    }
+    planar, original_input = planarization(balanced, **options)
+    again, original_input_again = planarization(balanced, **options)
 
     assert planar.size() == again.size()
     assert original_input == original_input_again
@@ -165,12 +152,13 @@ def test_statistics_and_progress(full_adder: technology_network) -> None:
 
     reports: list[tuple[str, int, int]] = []
 
-    params = planarization_params()
-    params.duplication.strategy = planarization_strategy.HYBRID
-    params.on_progress = lambda task, done, total: reports.append((task, done, total))
-
     stats = planarization_stats()
-    planar, original_input = planarization(balanced, params, stats)
+    planar, original_input = planarization(
+        balanced,
+        strategy=planarization_strategy.HYBRID,
+        on_progress=lambda task, done, total: reports.append((task, done, total)),
+        statistics=stats,
+    )
 
     assert reports
     assert all(done <= total for _, done, total in reports if total > 0)
@@ -184,18 +172,12 @@ def test_invalid_parameters_and_limits(full_adder: technology_network) -> None:
     """Invalid parameters raise ``ValueError`` before any stage runs; an exceeded limit raises ``RuntimeError``."""
     balanced = _balanced(full_adder)
 
-    params = planarization_params()
-    params.fanout_degree = 1
     with pytest.raises(ValueError, match="degree"):
-        planarization(balanced, params)
+        planarization(balanced, fanout_degree=1)
 
-    params = planarization_params()
-    params.duplication.lookahead_budget = 0
     with pytest.raises(ValueError, match="budget"):
-        planarization(balanced, params)
+        planarization(balanced, lookahead_budget=0)
 
     # the full adder needs duplicates, so a limit of one is exceeded
-    params = planarization_params()
-    params.duplication.max_duplications = 1
     with pytest.raises(RuntimeError, match="duplications"):
-        planarization(balanced, params)
+        planarization(balanced, max_duplications=1)

@@ -9,17 +9,19 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 
-from mnt.pyfiction.networks.io import read_technology_network
+from mnt.pyfiction import networks
+from mnt.pyfiction.networks.io import read_network
 
 DIR_PATH = Path(__file__).resolve().parent
 
 
 def test_read_technology_network(resources_dir: Path) -> None:
     """The parsed output remains driven by the OR gate without a synthesized buffer."""
-    network = read_technology_network(str(resources_dir / "mux21.v"))
+    network = read_network(str(resources_dir / "mux21.v"))
 
     assert network.size() == 9
     assert network.nodes() == list(range(9))
@@ -64,11 +66,11 @@ def test_read_technology_network(resources_dir: Path) -> None:
     assert network.fanins(8) == [6, 7]
 
     with pytest.raises(RuntimeError):
-        read_technology_network(str(DIR_PATH / "mux41.v"))
+        read_network(str(DIR_PATH / "mux41.v"))
 
 
 def test_is_gate_functions(resources_dir):
-    network = read_technology_network(str(resources_dir / "mux21.v"))
+    network = read_network(str(resources_dir / "mux21.v"))
 
     for i in network.nodes():
         assert not network.is_maj(i)
@@ -77,7 +79,7 @@ def test_is_gate_functions(resources_dir):
         assert not network.is_nand(i)
         assert not network.is_nor(i)
 
-    network = read_technology_network(str(resources_dir / "FA.v"))
+    network = read_network(str(resources_dir / "FA.v"))
 
     assert network.is_xor(6)
 
@@ -87,3 +89,66 @@ def test_is_gate_functions(resources_dir):
         assert not network.is_xnor(i)
         assert not network.is_nand(i)
         assert not network.is_nor(i)
+
+
+@pytest.mark.parametrize(
+    "cls", [networks.technology_network, networks.aig_network, networks.xag_network, networks.mig_network]
+)
+def test_random_network_selects_output_type(
+    cls: type[networks.technology_network | networks.aig_network | networks.xag_network | networks.mig_network],
+) -> None:
+    """Generate directly in each selected representation with a defined output."""
+    network = networks.random_network(3, 4, 42, network_type=cls)
+    assert type(network) is cls
+    assert networks.get_name(network) == "42"
+    assert network.num_pis() == 3
+    assert networks.simulate_outputs(network)
+
+
+@pytest.mark.parametrize("selector", [None, "aig", int, networks.aig_network()])
+def test_random_network_rejects_invalid_selectors(selector: Any) -> None:
+    """Reject selectors that are not a registered network class."""
+    with pytest.raises(TypeError):
+        networks.random_network(3, 4, 42, network_type=selector)
+
+
+def test_random_network_default_and_validation() -> None:
+    """Default to a technology network and retain generator bounds."""
+    assert type(networks.random_network(3, 4, 42)) is networks.technology_network
+    with pytest.raises(TypeError):
+        cast("Any", networks.random_network)(3, 4, 42, networks.aig_network)
+    for inputs, gates in [(1, 4), (3, 0)]:
+        with pytest.raises(ValueError, match="at least two inputs and one gate"):
+            networks.random_network(inputs, gates, 42)
+
+
+@pytest.mark.parametrize(
+    "name", ["random_aig_network", "random_xag_network", "random_mig_network", "random_tec_network"]
+)
+def test_random_specialization_names_are_removed(name: str) -> None:
+    """Expose one random generator name for every representation."""
+    assert not hasattr(networks, name)
+
+
+@pytest.mark.parametrize(
+    ("generator_name", "network_name"),
+    [("aig", "aig_network"), ("xag", "xag_network"), ("mig", "mig_network"), ("tec", "technology_network")],
+)
+def test_random_network_contract(generator_name: str, network_name: str) -> None:
+    """Generators preserve type, size, seed behavior, and input validation."""
+    network_type = getattr(networks, network_name)
+    network = networks.random_network(inputs=3, gates=5, seed=42, network_type=network_type)
+    assert isinstance(network, getattr(networks, network_name))
+    assert network.num_pis() == 3
+    if generator_name == "tec":
+        # Technology networks materialize complemented edges as NOT gates.
+        assert network.num_gates() >= 5
+    else:
+        assert network.num_gates() == 5
+    assert networks.get_name(network) == "42"
+    assert networks.simulate_outputs(network) == networks.simulate_outputs(
+        networks.random_network(inputs=3, gates=5, seed=42, network_type=network_type)
+    )
+    for inputs, gates in [(0, 5), (1, 5), (3, 0)]:
+        with pytest.raises(ValueError, match="random generation requires at least two inputs and one gate"):
+            networks.random_network(inputs=inputs, gates=gates, seed=42, network_type=network_type)

@@ -23,6 +23,7 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -31,9 +32,10 @@
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/traits.hpp>
 
-#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -58,16 +60,25 @@ static void check_no_explicit_obstructions(const HexLyt& hex_layout)
                 src,
                 [&hex_layout, &src](const auto& tgt)
                 {
-                    for (const auto& t : {tgt, hex_layout.above(tgt)})
+                    for (const auto& t : {std::optional{tgt}, hex_layout.above(tgt)})
                     {
-                        CHECK(hex_layout.is_obstructed_connection(src, t) ==
-                              (hex_layout.is_incoming_signal(t, static_cast<mockturtle::signal<HexLyt>>(src)) ||
-                               hex_layout.is_outgoing_signal(src, static_cast<mockturtle::signal<HexLyt>>(t))));
+                        if (!t)
+                        {
+                            continue;
+                        }
+                        CHECK(hex_layout.is_obstructed_connection(src, *t) ==
+                              (hex_layout.is_incoming_signal(*t, src) || hex_layout.is_outgoing_signal(src, t)));
                     }
                 });
         });
 }
 
+/**
+ * @brief Checks hexagonalization equivalence and terminal extension positions.
+ * @tparam Lyt Source gate-level layout type.
+ * @tparam Ntk Logic network type.
+ * @param ntk Network to place and map.
+ */
 template <typename Lyt, typename Ntk>
 static void check_mapping_equiv(const Ntk& ntk)
 {
@@ -100,9 +111,7 @@ static void check_mapping_equiv(const Ntk& ntk)
 
     hex_layout_bottom_pos.foreach_po(
         [&hex_layout_bottom_pos](const auto& gate)
-        {
-            CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
-        });
+        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == static_cast<int32_t>(hex_layout_bottom_pos.height() - 1)); });
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(layout, params, &stats);
@@ -116,11 +125,16 @@ static void check_mapping_equiv(const Ntk& ntk)
     hex_layout_top_pis_bottom_pos.foreach_po(
         [&hex_layout_top_pis_bottom_pos](const auto& gate)
         {
-            CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y ==
-                  hex_layout_top_pis_bottom_pos.y());
+            CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y ==
+                  static_cast<int32_t>(hex_layout_top_pis_bottom_pos.height() - 1));
         });
 }
 
+/**
+ * @brief Checks hexagonalization equivalence, names, and terminal extension positions.
+ * @tparam Lyt Source gate-level layout type.
+ * @param lyt Layout to map.
+ */
 template <typename Lyt>
 static void check_mapping_equiv_layout(const Lyt& lyt)
 {
@@ -149,9 +163,7 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
 
     hex_layout_bottom_pos.foreach_po(
         [&hex_layout_bottom_pos](const auto& gate)
-        {
-            CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
-        });
+        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == static_cast<int32_t>(hex_layout_bottom_pos.height() - 1)); });
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND;
     const auto hex_layout_top_pis_bottom_pos = hexagonalization<hex_gate_clk_lyt, Lyt>(lyt, params, &stats);
@@ -164,11 +176,16 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
     hex_layout_top_pis_bottom_pos.foreach_po(
         [&hex_layout_top_pis_bottom_pos](const auto& gate)
         {
-            CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y ==
-                  hex_layout_top_pis_bottom_pos.y());
+            CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y ==
+                  static_cast<int32_t>(hex_layout_top_pis_bottom_pos.height() - 1));
         });
 }
 
+/**
+ * @brief Checks equivalence, names, and terminal positions after planar rerouting.
+ * @tparam Lyt Source gate-level layout type.
+ * @param lyt Layout to map.
+ */
 template <typename Lyt>
 static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 {
@@ -195,9 +212,7 @@ static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 
     hex_layout_bottom_pos.foreach_po(
         [&hex_layout_bottom_pos](const auto& gate)
-        {
-            CHECK(hex_layout_bottom_pos.get_tile(hex_layout_bottom_pos.get_node(gate)).y == hex_layout_bottom_pos.y());
-        });
+        { CHECK(hex_layout_bottom_pos.get_tile(gate).y == static_cast<int32_t>(hex_layout_bottom_pos.height() - 1)); });
 
     params.input_pin_extension               = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
     params.output_pin_extension              = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
@@ -212,8 +227,8 @@ static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
     hex_layout_top_pis_bottom_pos.foreach_po(
         [&hex_layout_top_pis_bottom_pos](const auto& gate)
         {
-            CHECK(hex_layout_top_pis_bottom_pos.get_tile(hex_layout_top_pis_bottom_pos.get_node(gate)).y ==
-                  hex_layout_top_pis_bottom_pos.y());
+            CHECK(hex_layout_top_pis_bottom_pos.get_tile(gate).y ==
+                  static_cast<int32_t>(hex_layout_top_pis_bottom_pos.height() - 1));
         });
 }
 
@@ -251,6 +266,52 @@ static void check_mapping_equiv_all()
     check_mapping_equiv_layout_with_planar_rerouting(blueprints::po_extension_corner_case_layout<cart_gate_clk_lyt>());
 }
 
+TEST_CASE("Cartesian to hexagonal")
+{
+    using gate_layout = gate_level_layout<cartesian_layout>;
+    using hex_lyt     = hex_gate_clk_lyt;
+
+    constexpr const auto layout_height = 3;
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 0, 0),
+                                                                layout_height) == layout_base::coordinate(1, 0, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 0, 1),
+                                                                layout_height) == layout_base::coordinate(1, 0, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 0, 0),
+                                                                layout_height) == layout_base::coordinate(2, 1, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 0, 1),
+                                                                layout_height) == layout_base::coordinate(2, 1, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 0, 0),
+                                                                layout_height) == layout_base::coordinate(2, 2, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 0, 1),
+                                                                layout_height) == layout_base::coordinate(2, 2, 1));
+
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 1, 0),
+                                                                layout_height) == layout_base::coordinate(1, 1, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 1, 1),
+                                                                layout_height) == layout_base::coordinate(1, 1, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 1, 0),
+                                                                layout_height) == layout_base::coordinate(1, 2, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 1, 1),
+                                                                layout_height) == layout_base::coordinate(1, 2, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 1, 0),
+                                                                layout_height) == layout_base::coordinate(2, 3, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 1, 1),
+                                                                layout_height) == layout_base::coordinate(2, 3, 1));
+
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 2, 0),
+                                                                layout_height) == layout_base::coordinate(0, 2, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(0, 2, 1),
+                                                                layout_height) == layout_base::coordinate(0, 2, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 2, 0),
+                                                                layout_height) == layout_base::coordinate(1, 3, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(1, 2, 1),
+                                                                layout_height) == layout_base::coordinate(1, 3, 1));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 2, 0),
+                                                                layout_height) == layout_base::coordinate(1, 4, 0));
+    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(fiction::layouts::layout_base::coordinate(2, 2, 1),
+                                                                layout_height) == layout_base::coordinate(1, 4, 1));
+}
+
 TEST_CASE("Layout equivalence", "[hexagonalization]")
 {
     SECTION("Cartesian layouts")
@@ -261,50 +322,27 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
     }
 }
 
-TEST_CASE("Cartesian to hexagonal")
+TEST_CASE("Hexagonalization preserves declared input holes and terminal order", "[hexagonalization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-    using hex_lyt     = hex_gate_clk_lyt;
-
-    constexpr const auto layout_height = 3;
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 0), layout_height) ==
-          layout_base::coordinate(1, 0, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 1), layout_height) ==
-          layout_base::coordinate(1, 0, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 0, 0), layout_height) ==
-          layout_base::coordinate(2, 1, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 0, 1), layout_height) ==
-          layout_base::coordinate(2, 1, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 0, 0), layout_height) ==
-          layout_base::coordinate(2, 2, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 0, 1), layout_height) ==
-          layout_base::coordinate(2, 2, 1));
-
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 1, 0), layout_height) ==
-          layout_base::coordinate(1, 1, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 1, 1), layout_height) ==
-          layout_base::coordinate(1, 1, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 1, 0), layout_height) ==
-          layout_base::coordinate(1, 2, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 1, 1), layout_height) ==
-          layout_base::coordinate(1, 2, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 1, 0), layout_height) ==
-          layout_base::coordinate(2, 3, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 1, 1), layout_height) ==
-          layout_base::coordinate(2, 3, 1));
-
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 2, 0), layout_height) ==
-          layout_base::coordinate(0, 2, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 2, 1), layout_height) ==
-          layout_base::coordinate(0, 2, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 2, 0), layout_height) ==
-          layout_base::coordinate(1, 3, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 2, 1), layout_height) ==
-          layout_base::coordinate(1, 3, 1));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 0), layout_height) ==
-          layout_base::coordinate(1, 4, 0));
-    CHECK(physical_design::detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 1), layout_height) ==
-          layout_base::coordinate(1, 4, 1));
+    cart_gate_clk_lyt layout{{4, 3, 2}, clocking::twoddwave()};
+    const auto        b    = layout.create_pi("b", {0, 1});
+    const auto        a    = layout.create_pi("a", {1, 0});
+    const auto        gate = layout.create_lt(a, b, {1, 1});
+    layout.disconnect({gate, 0});
+    layout.create_po(gate, "f", {3, 1});
+    layout.set_input_order(std::vector{a, b});
+    const auto hex = hexagonalization<hex_gate_clk_lyt>(layout);
+    CHECK(hex.get_input_name(0) == "a");
+    CHECK(hex.get_input_name(1) == "b");
+    CHECK(hex.get_output_name(0) == "f");
+    hex.foreach_gate(
+        [&](const auto id)
+        {
+            CHECK(hex.is_lt(id));
+            CHECK_FALSE(hex.source({id, 0}));
+            REQUIRE(hex.source({id, 1}));
+            CHECK(hex.get_name(*hex.source({id, 1})) == "b");
+        });
 }
 
 TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
@@ -325,8 +363,22 @@ TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
 
     check_eq(ntk, hex_layout);
 
-    CHECK(rec.is_consistent("diagonals"));
-    CHECK(rec.final_count("diagonals") == static_cast<std::size_t>(layout.x() + layout.y() + 1));
+    CHECK(rec.is_consistent("objects"));
+    CHECK(rec.final_count("objects") == layout.size());
     CHECK(rec.is_consistent("input pins"));
     CHECK(rec.is_consistent("output pins"));
+}
+
+TEST_CASE("Hexagonalization preserves the crossing layer", "[hexagonalization]")
+{
+    /** Sparse layout with one input on the crossing layer. */
+    cart_gate_clk_lyt layout{{1, 1, 2}, clocking::twoddwave()};
+    layout.create_pi("a", {0, 0, 1});
+
+    /** Converted geometry retains both layers. */
+    const auto converted = hexagonalization<hex_gate_clk_lyt>(layout);
+
+    CHECK(converted.layers() == 2);
+    REQUIRE(converted.num_pis() == 1);
+    CHECK(converted.get_tile(converted.pi_at(0)).z == 1);
 }

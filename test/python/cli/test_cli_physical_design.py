@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import pytest
@@ -50,8 +51,12 @@ def test_ortho_converts_other_network_types(shell: Shell, resource: Callable[[st
 
 
 def test_gold(mux21_shell: Shell) -> None:
-    mux21_shell.ok("gold -r -e high_efficiency -c wires --seed 1")
+    """Timed GOLD creates a layout that implements the active network."""
+    mux21_shell.ok("gold -r -e high_efficiency -c wires --seed 1 -t 60")
     assert isinstance(mux21_shell.session.gate_layouts.current(), cartesian_gate_layout)
+    assert simulate_outputs(mux21_shell.session.gate_layouts.current()) == simulate_outputs(
+        mux21_shell.session.networks.current()
+    )
     assert "at least 1" in mux21_shell.fails("gold -n 0")
 
 
@@ -62,12 +67,15 @@ def test_hex(mux21_shell: Shell) -> None:
 
 
 def test_optimize(mux21_shell: Shell) -> None:
+    """Timed, relocation-limited optimization preserves the original and circuit function."""
     mux21_shell.ok("ortho")
     original = mux21_shell.session.gate_layouts.current()
     area_before = original.area()
-    mux21_shell.ok("optimize -v; optimize -w")
+    mux21_shell.ok("optimize -v -m 1 -t 10; optimize -w -t 10")
     assert len(mux21_shell.session.gate_layouts) == 3
     assert original.area() == area_before
+    expected = simulate_outputs(mux21_shell.session.networks.current())
+    assert all(simulate_outputs(layout) == expected for layout in mux21_shell.session.gate_layouts.items)
     assert mux21_shell.session.gate_layouts.items[1].area() <= area_before
     assert "must be positive" in mux21_shell.fails("optimize -t 0")
 
@@ -77,16 +85,28 @@ def test_optimize_needs_2ddwave(mux21_shell: Shell) -> None:
     assert "Cartesian layout is needed" in mux21_shell.fails("optimize")
 
 
-@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
-def test_exact(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s 2ddwave -t 60')
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
+def test_exact(shell: Shell, resource: Callable[[str], str], monkeypatch: pytest.MonkeyPatch) -> None:
+    """All-core exact synthesis preserves the input truth table with a finite budget."""
+    monkeypatch.setattr(os, "cpu_count", lambda: 2)
+    shell.ok(f'read "{resource("xor2.v")}"; exact --async-max -x -b -s 2ddwave -t 60')
     layout = shell.session.gate_layouts.current()
     assert isinstance(layout, cartesian_gate_layout)
     assert layout.get_clocking_scheme_name() == "2DDWAVE"
+    assert simulate_outputs(layout) == simulate_outputs(shell.session.networks.current())
     assert "not a clocking scheme" in shell.fails("exact -s nope")
 
 
-@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
+@pytest.mark.parametrize("topology", ["cartesian", "shifted_cartesian", "hexagonal"])
+def test_exact_unknown_clocking_scheme(mux21_shell: Shell, topology: str) -> None:
+    """Unknown schemes produce the CLI's clocking diagnostic for every geometry."""
+    message = mux21_shell.fails(f"exact --topology {topology} -s nope")
+    assert "'nope' is not a clocking scheme" in message
+    assert len(mux21_shell.session.gate_layouts) == 0
+
+
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_exact_topolinano(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("xor2.v")}"; exact -x -b -s columnar --topolinano -t 60')
     assert isinstance(shell.session.gate_layouts.current(), shifted_cartesian_gate_layout)
@@ -110,7 +130,7 @@ def test_direct_hexagonal_ortho_variants(
     assert simulate_outputs(restored) == expected
 
 
-@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_failed_search_preserves_store_and_statistics(mux21_shell: Shell) -> None:
     before = len(mux21_shell.session.gate_layouts)
     output = mux21_shell.fails("exact --fixed-size 1 --timeout 0.0001")
@@ -121,7 +141,7 @@ def test_failed_search_preserves_store_and_statistics(mux21_shell: Shell) -> Non
 
 
 @pytest.mark.parametrize("topology", [name for name in FGL_READERS if name not in {"shifted_cartesian", "hexagonal"}])
-@pytest.mark.skipif(not hasattr(physical_design, "exact_cartesian"), reason="pyfiction was built without Z3")
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_exact_topologies_preserve_function(shell: Shell, tmp_path: Path, topology: str) -> None:
     source = tmp_path / "wire.v"
     source.write_text("module top(a,f);\ninput a;\noutput f;\nassign f = a;\nendmodule\n", encoding="utf-8")

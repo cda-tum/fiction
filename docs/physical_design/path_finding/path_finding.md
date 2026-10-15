@@ -169,9 +169,6 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.path_finding.a_star_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.physical_design.path_finding.a_star
 
 .. autofunction:: mnt.pyfiction.physical_design.path_finding.a_star_distance
@@ -205,9 +202,6 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.path_finding.yen_k_shortest_paths_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.physical_design.path_finding.yen_k_shortest_paths
 ```
 
@@ -239,9 +233,6 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.path_finding.enumerate_all_paths_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.physical_design.path_finding.enumerate_all_paths
 ```
 

@@ -17,21 +17,25 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/simulation/is_ground_state.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
+
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
 
-void is_ground_state(nanobind::module_& m)
+/**
+ * @brief Binds is ground state helpers.
+ * @param m Python module.
+ */
+void register_is_ground_state(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    m.def("is_ground_state",
-          static_cast<bool (*)(const fiction::sidb::simulation::result&, const fiction::sidb::simulation::result&)>(
-              &fiction::sidb::simulation::is_ground_state),
-          py::arg("heuristic_results"), py::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state));
+    m.def("is_ground_state", &fiction::sidb::simulation::is_ground_state, nb::arg("heuristic_results"),
+          nb::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state));
 }
 
 }  // namespace pyfiction

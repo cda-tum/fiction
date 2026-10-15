@@ -15,7 +15,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/networks/name_utils.hpp>
@@ -41,6 +40,11 @@
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner): converts the statistics report
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner): converts callback task names
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
+
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
@@ -116,13 +120,16 @@ std::pair<py_tec_network, std::vector<uint32_t>> flatten(const Planar& planar)
 
 }  // namespace detail
 
-void planarization(nanobind::module_& m)
+/**
+ * @brief Binds the planarization pipeline.
+ * @param m Python module.
+ */
+void register_planarization(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using params = fiction::synthesis::node_duplication_planarization_params;
+    using stats  = fiction::synthesis::planarization_stats;
 
-    py::enum_<params::planarization_strategy>(
+    nb::enum_<params::planarization_strategy>(
         m, "planarization_strategy",
         DOC(fiction_synthesis_node_duplication_planarization_params_planarization_strategy))
         .value("DUPLICATION", params::planarization_strategy::DUPLICATION,
@@ -130,80 +137,35 @@ void planarization(nanobind::module_& m)
         .value("HYBRID", params::planarization_strategy::HYBRID,
                DOC(fiction_synthesis_node_duplication_planarization_params_planarization_strategy_HYBRID));
 
-    py::enum_<params::decision_criterion>(
+    nb::enum_<params::decision_criterion>(
         m, "decision_criterion", DOC(fiction_synthesis_node_duplication_planarization_params_decision_criterion))
         .value("WEIGHTED_CONE", params::decision_criterion::WEIGHTED_CONE,
                DOC(fiction_synthesis_node_duplication_planarization_params_decision_criterion_WEIGHTED_CONE))
         .value("LOOKAHEAD", params::decision_criterion::LOOKAHEAD,
                DOC(fiction_synthesis_node_duplication_planarization_params_decision_criterion_LOOKAHEAD));
 
-    py::enum_<params::output_order>(m, "output_order",
+    nb::enum_<params::output_order>(m, "output_order",
                                     DOC(fiction_synthesis_node_duplication_planarization_params_output_order))
         .value("KEEP_PO_ORDER", params::output_order::KEEP_PO_ORDER,
                DOC(fiction_synthesis_node_duplication_planarization_params_output_order_KEEP_PO_ORDER))
         .value("RANDOM_PO_ORDER", params::output_order::RANDOM_PO_ORDER,
                DOC(fiction_synthesis_node_duplication_planarization_params_output_order_RANDOM_PO_ORDER));
 
-    py::class_<params::duplication_cost_model>(
-        m, "duplication_cost_model",
-        DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("node_weight", &params::duplication_cost_model::node_weight,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_node_weight))
-        .def_rw("buffer_weight", &params::duplication_cost_model::buffer_weight,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_buffer_weight))
-        .def_rw("depth_growth", &params::duplication_cost_model::depth_growth,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_depth_growth));
-
-    py::class_<params>(m, "node_duplication_planarization_params",
-                       DOC(fiction_synthesis_node_duplication_planarization_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("strategy", &params::strategy, DOC(fiction_synthesis_node_duplication_planarization_params_strategy))
-        .def_rw("criterion", &params::criterion, DOC(fiction_synthesis_node_duplication_planarization_params_criterion))
-        .def_rw("xor_gates", &params::xor_gates, DOC(fiction_synthesis_node_duplication_planarization_params_xor_gates))
-        .def_rw("max_swaps", &params::max_swaps, DOC(fiction_synthesis_node_duplication_planarization_params_max_swaps))
-        .def_rw("max_crossings_per_rank", &params::max_crossings_per_rank,
-                DOC(fiction_synthesis_node_duplication_planarization_params_max_crossings_per_rank))
-        .def_rw("duplication_cost", &params::duplication_cost,
-                DOC(fiction_synthesis_node_duplication_planarization_params_duplication_cost))
-        .def_rw("lookahead_budget", &params::lookahead_budget,
-                DOC(fiction_synthesis_node_duplication_planarization_params_lookahead_budget))
-        .def_rw("max_duplications", &params::max_duplications,
-                DOC(fiction_synthesis_node_duplication_planarization_params_max_duplications))
-        .def_rw("po_order", &params::po_order, DOC(fiction_synthesis_node_duplication_planarization_params_po_order))
-        .def_rw("seed", &params::seed, DOC(fiction_synthesis_node_duplication_planarization_params_seed));
-
-    py::class_<fiction::synthesis::planarization_params>(m, "planarization_params",
-                                                         DOC(fiction_synthesis_planarization_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("on_progress", &fiction::synthesis::planarization_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, "Receives completed work and the phase total.")
-        .def_rw("duplication", &fiction::synthesis::planarization_params::duplication,
-                DOC(fiction_synthesis_planarization_params_duplication))
-        .def_rw("fanout_degree", &fiction::synthesis::planarization_params::fanout_degree,
-                DOC(fiction_synthesis_planarization_params_fanout_degree));
-
-    py::class_<fiction::synthesis::planarization_stats>(m, "planarization_stats",
-                                                        DOC(fiction_synthesis_planarization_stats))
-        .def(py::init<>(), "Default constructor.")
-        .def_ro("time_total", &fiction::synthesis::planarization_stats::time_total,
-                DOC(fiction_synthesis_planarization_stats_time_total))
+    nb::class_<stats>(m, "planarization_stats", DOC(fiction_synthesis_planarization_stats))
+        .def(nb::init<>(), "Default constructor.")
+        .def_ro("time_total", &stats::time_total, DOC(fiction_synthesis_planarization_stats_time_total))
         .def_prop_ro(
-            "num_duplications",
-            [](const fiction::synthesis::planarization_stats& st) { return st.duplication.num_duplications; },
+            "num_duplications", [](const stats& st) { return st.duplication.num_duplications; },
             DOC(fiction_synthesis_node_duplication_planarization_stats_num_duplications))
         .def_prop_ro(
-            "num_crossing_levels",
-            [](const fiction::synthesis::planarization_stats& st) { return st.duplication.num_crossing_levels; },
+            "num_crossing_levels", [](const stats& st) { return st.duplication.num_crossing_levels; },
             DOC(fiction_synthesis_node_duplication_planarization_stats_num_crossing_levels))
         .def_prop_ro(
-            "num_crossings",
-            [](const fiction::synthesis::planarization_stats& st) { return st.crossing_gates.num_crossings; },
+            "num_crossings", [](const stats& st) { return st.crossing_gates.num_crossings; },
             DOC(fiction_synthesis_crossing_gate_planarization_stats_num_crossings))
-        .def_ro("num_nodes", &fiction::synthesis::planarization_stats::num_nodes,
-                DOC(fiction_synthesis_planarization_stats_num_nodes))
+        .def_ro("num_nodes", &stats::num_nodes, DOC(fiction_synthesis_planarization_stats_num_nodes))
         .def("__repr__",
-             [](const fiction::synthesis::planarization_stats& st)
+             [](const stats& st)
              {
                  std::ostringstream os{};
                  st.report(os);
@@ -212,9 +174,34 @@ void planarization(nanobind::module_& m)
 
     m.def(
         "planarization",
-        [](const py_tec_network& network, const fiction::synthesis::planarization_params& ps,
-           fiction::synthesis::planarization_stats* pst)
+        [](const py_tec_network& network, const decltype(params{}.on_progress)& on_progress,
+           const decltype(params{}.strategy) strategy, const decltype(params{}.criterion) criterion,
+           const decltype(params{}.xor_gates) xor_gates, const decltype(params{}.max_swaps) max_swaps,
+           const decltype(params{}.max_crossings_per_rank)         max_crossings_per_rank,
+           const decltype(params{}.duplication_cost.node_weight)   node_weight,
+           const decltype(params{}.duplication_cost.buffer_weight) buffer_weight,
+           const decltype(params{}.duplication_cost.depth_growth)  depth_growth,
+           const decltype(params{}.lookahead_budget)               lookahead_budget,
+           const decltype(params{}.max_duplications) max_duplications, const decltype(params{}.po_order) po_order,
+           const decltype(params{}.seed)&                                           seed,
+           const decltype(fiction::synthesis::planarization_params{}.fanout_degree) fanout_degree, stats* statistics)
         {
+            fiction::synthesis::planarization_params ps{};
+            ps.on_progress                                = on_progress;
+            ps.duplication.strategy                       = strategy;
+            ps.duplication.criterion                      = criterion;
+            ps.duplication.xor_gates                      = xor_gates;
+            ps.duplication.max_swaps                      = max_swaps;
+            ps.duplication.max_crossings_per_rank         = max_crossings_per_rank;
+            ps.duplication.duplication_cost.node_weight   = node_weight;
+            ps.duplication.duplication_cost.buffer_weight = buffer_weight;
+            ps.duplication.duplication_cost.depth_growth  = depth_growth;
+            ps.duplication.lookahead_budget               = lookahead_budget;
+            ps.duplication.max_duplications               = max_duplications;
+            ps.duplication.po_order                       = po_order;
+            ps.duplication.seed                           = seed;
+            ps.fanout_degree                              = fanout_degree;
+
             // the pipeline needs a balanced network with unified outputs and ranks; the ranks follow the node order.
             // The result's node order is its rank order, and every input is reported with the index of the original
             // input it stands for, so that virtual inputs can be tied to their real ones.
@@ -223,20 +210,46 @@ void planarization(nanobind::module_& m)
                 throw std::invalid_argument("The network must be balanced with unified outputs; see network_balancing");
             }
 
+            const nb::gil_scoped_release release{};
+
             const fiction::networks::views::mutable_rank_view ranked{network};
 
-            return detail::flatten(fiction::synthesis::planarization(ranked, ps, pst));
+            return detail::flatten(fiction::synthesis::planarization(ranked, ps, statistics));
         },
-        py::arg("network"), py::arg("params") = fiction::synthesis::planarization_params{},
-        py::arg("statistics") = nullptr,
+        nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
+        nb::arg("strategy") = params{}.strategy, nb::arg("criterion") = params{}.criterion,
+        nb::arg("xor_gates") = params{}.xor_gates, nb::arg("max_swaps") = params{}.max_swaps,
+        nb::arg("max_crossings_per_rank") = params{}.max_crossings_per_rank,
+        nb::arg("node_weight")            = params{}.duplication_cost.node_weight,
+        nb::arg("buffer_weight")          = params{}.duplication_cost.buffer_weight,
+        nb::arg("depth_growth")           = params{}.duplication_cost.depth_growth,
+        nb::arg("lookahead_budget")       = params{}.lookahead_budget,
+        nb::arg("max_duplications") = params{}.max_duplications, nb::arg("po_order") = params{}.po_order,
+        nb::arg("seed")          = params{}.seed,
+        nb::arg("fanout_degree") = fiction::synthesis::planarization_params{}.fanout_degree,
+        nb::arg("statistics")    = nullptr,
         R"doc(Planarizes a balanced technology network with unified outputs: node duplication with the chosen
 strategy, crossing gates for the levels the hybrid strategy left crossed, planar fanout substitution, and planar
 rebalancing. See `network_balancing` for the precondition.
 
 Args:
     network: Balanced technology network with unified outputs.
-    params: Parameters of the pipeline.
-    statistics: Optional statistics object that receives the runtimes and node counts.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    strategy: Planarization strategy: duplicate every level, or decide per level (hybrid).
+    criterion: How the hybrid strategy estimates the cost of duplicating a level.
+    xor_gates: Whether the crossing gadgets consist of XOR gates, which are smaller and shallower than the
+        AND-OR-NOT gadgets.
+    max_swaps: Maximum number of adjacent swaps per level that the hybrid strategy tries to reduce crossings.
+    max_crossings_per_rank: Levels with more crossings are always duplicated; the crossing gates reject such ranks.
+    node_weight: Weight of a gate in the duplication cost model of the hybrid strategy.
+    buffer_weight: Weight of a buffer or inverter chain node in the duplication cost model.
+    depth_growth: Growth of the duplication cost per level in the duplication cost model.
+    lookahead_budget: Nodes a lookahead may create before it is cut off; must be positive.
+    max_duplications: Abort once more nodes than this have been duplicated; 0 lifts the limit.
+    po_order: Primary output order used to seed the first level.
+    seed: Seed of the random primary output order; None draws a random seed.
+    fanout_degree: Maximum output degree of the fanout nodes in the result; at least 2.
+    statistics: Statistics object filled by the pipeline; None discards statistics.
 
 Returns:
     A pair of the planar, balanced, fanout-substituted network in rank order and, for every input of that
@@ -245,14 +258,14 @@ Returns:
 
 Raises:
     ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if a gate
-        drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `params.fanout_degree` is
-        below 2, or if the duplication parameters are invalid (a lookahead budget of zero, a negative or
-        non-finite cost weight).
-    RuntimeError: If more than `params.duplication.max_duplications` nodes were duplicated, if a rank has more
-        than `params.duplication.max_crossings_per_rank` crossings, or if a stage cannot keep its contract. Note
-        that `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth
-        of the network.)doc",
-        py::call_guard<py::gil_scoped_release>());
+        drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `fanout_degree` is below 2,
+        or if the duplication options are invalid (a lookahead budget of zero, a negative or non-finite cost
+        weight).
+    RuntimeError: If more than `max_duplications` nodes were duplicated, if a rank has more than
+        `max_crossings_per_rank` crossings, or if a stage cannot keep its contract. Note that
+        `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth of the
+        network.
+)doc");
 }
 
 }  // namespace pyfiction

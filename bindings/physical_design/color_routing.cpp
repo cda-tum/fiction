@@ -14,69 +14,97 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/color_routing.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/utils/graph/graph_coloring.hpp>
 
-#include <utility>
+#include <cstdint>
+#include <tuple>
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/map.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner): Converts an unset path limit to None.
+#include <nanobind/stl/tuple.h>     // NOLINT(misc-include-cleaner): Converts objective triples from Python tuples.
+#include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner): Converts objective collections from Python lists.
+
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
 
+/** @brief Native options constructed for each Python call. */
+using color_routing_options = fiction::physical_design::color_routing_params;
+
 namespace detail
 {
 
+/** @brief Bind routing objectives with explicit destination input indices. @tparam Lyt Gate layout. @param m Python
+ * module. */
 template <typename Lyt>
-void color_routing_impl(nanobind::module_& m)
+void register_color_routing_impl(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     m.def(
         "color_routing",
-        [](Lyt& lyt, const std::vector<std::pair<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>>>& objectives,
-           const fiction::physical_design::color_routing_params& params)
+        [](Lyt&                                                                                lyt,
+           const std::vector<std::tuple<fiction::layouts::layout_base::coordinate,
+                                        fiction::layouts::layout_base::coordinate, uint32_t>>& objectives,
+           const decltype(color_routing_options{}.conduct_partial_routing)                     conduct_partial_routing,
+           const decltype(color_routing_options{}.crossings)                                   crossings,
+           const decltype(color_routing_options{}.path_limit)                                  path_limit,
+           const decltype(color_routing_options{}.engine)                                      engine,
+           const decltype(color_routing_options{}.partial_sat)                                 partial_sat)
         {
-            std::vector<fiction::physical_design::routing_objective<Lyt>> objs{};
+            color_routing_options params{};
+            params.conduct_partial_routing = conduct_partial_routing;
+            params.crossings               = crossings;
+            params.path_limit              = path_limit;
+            params.engine                  = engine;
+            params.partial_sat             = partial_sat;
+
+            std::vector<fiction::physical_design::routing_objective> objs{};
             objs.reserve(objectives.size());
 
             for (const auto& obj : objectives)
             {
-                objs.push_back({obj.first, obj.second});
+                objs.push_back({std::get<0>(obj), std::get<1>(obj), std::get<2>(obj)});
             }
 
             return fiction::physical_design::color_routing(lyt, objs, params);
         },
-        py::arg("layout"), py::arg("objectives"), py::arg("params") = fiction::physical_design::color_routing_params{},
-        DOC(fiction_physical_design_color_routing));
+        nb::arg("layout"), nb::arg("objectives"), nb::kw_only(),
+        nb::arg("conduct_partial_routing") = color_routing_options{}.conduct_partial_routing,
+        nb::arg("crossings")               = color_routing_options{}.crossings,
+        nb::arg("path_limit") = color_routing_options{}.path_limit, nb::arg("engine") = color_routing_options{}.engine,
+        nb::arg("partial_sat") = color_routing_options{}.partial_sat,
+        R"doc(Route the supplied connections in place by coloring their path intersections.
+Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
+
+Args:
+    conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
+    crossings: Allow wires to cross on separate layers.
+    path_limit: Maximum paths considered per objective; None enumerates all paths.
+    engine: The engine to use.
+    partial_sat: Allow partial solutions when the SAT coloring engine is selected.
+)doc");
 }
 
 }  // namespace detail
 
-void color_routing(nanobind::module_& m)
+/** @brief Register color routing. @param m Python module. */
+void register_color_routing(nb::module_& m)
 {
-    namespace py = nanobind;
-
     /**
      * Graph coloring engine selector type.
      */
-    nanobind::enum_<fiction::utils::graph::graph_coloring_engine>(m, "graph_coloring_engine",
-                                                                  DOC(fiction_utils_graph_graph_coloring_engine))
+    nb::enum_<fiction::utils::graph::graph_coloring_engine>(m, "graph_coloring_engine",
+                                                            DOC(fiction_utils_graph_graph_coloring_engine))
         .value("MCS", fiction::utils::graph::graph_coloring_engine::MCS,
                DOC(fiction_utils_graph_graph_coloring_engine_MCS))
         .value("DSATUR", fiction::utils::graph::graph_coloring_engine::DSATUR,
@@ -88,25 +116,11 @@ void color_routing(nanobind::module_& m)
         .value("SAT", fiction::utils::graph::graph_coloring_engine::SAT,
                DOC(fiction_utils_graph_graph_coloring_engine_SAT));
 
-    py::class_<fiction::physical_design::color_routing_params>(m, "color_routing_params",
-                                                               DOC(fiction_physical_design_color_routing_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("conduct_partial_routing", &fiction::physical_design::color_routing_params::conduct_partial_routing,
-                DOC(fiction_physical_design_color_routing_params_conduct_partial_routing))
-        .def_rw("crossings", &fiction::physical_design::color_routing_params::crossings,
-                DOC(fiction_physical_design_color_routing_params_crossings))
-        .def_rw("path_limit", &fiction::physical_design::color_routing_params::path_limit,
-                DOC(fiction_physical_design_color_routing_params_path_limit))
-        .def_rw("engine", &fiction::physical_design::color_routing_params::engine,
-                DOC(fiction_physical_design_color_routing_params_engine))
-        .def_rw("partial_sat", &fiction::physical_design::color_routing_params::partial_sat,
-                DOC(fiction_physical_design_color_routing_params_partial_sat));
-
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::color_routing_impl<py_cartesian_gate_layout>(m);
-    detail::color_routing_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::color_routing_impl<py_hexagonal_gate_layout>(m);
+    detail::register_color_routing_impl<py_cartesian_gate_layout>(m);
+    detail::register_color_routing_impl<py_shifted_cartesian_gate_layout>(m);
+    detail::register_color_routing_impl<py_hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

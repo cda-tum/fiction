@@ -19,12 +19,19 @@ import mnt.pyfiction.layouts
 import mnt.pyfiction.networks
 
 class count_gate_types_stats:
-    """The number of nodes of each gate type in a network or layout."""
+    """
+    Counts logic gates and placed wires, excluding primary terminals and network constants.
+    """
 
     def __init__(self) -> None:
         """Default constructor."""
 
-    def report(self, detailed: bool = False) -> str: ...
+    def report(self, detailed: bool = False) -> str:
+        """
+        Prints gate counts. @param out Output stream. @param detailed Whether
+        to print every gate type.
+        """
+
     @property
     def num_fanout(self) -> int: ...
     @property
@@ -89,10 +96,11 @@ def count_gate_types(ntk_or_lyt: mnt.pyfiction.layouts.hexagonal_gate_layout) ->
     """
     Gives a detailed listing of all gate types present in the provided
     network (or layout). This function can distinguish most gate types
-    available as atomic building blocks and can easily be extended to
-    support more gate types. The given network (or layout) has to
-    implement a function to test whether a node is of the respective gate
-    type.
+    available as atomic building blocks. Primary terminals and network
+    constants do not enter the counts. Placed wires count as fanout
+    objects when they drive multiple inputs, or as buffers otherwise. The
+    given network (or layout) has to implement a function to test whether
+    a node is of the respective gate type.
 
     Args:
         ntk: The network (or layout).
@@ -114,8 +122,11 @@ def critical_path_length_and_throughput(layout: mnt.pyfiction.layouts.hexagonal_
     Computes the critical path length (CP) length and the throughput (TP)
     of a gate-level layout.
 
-    The critical path length is defined as the longest path from any PI to
-    any PO in tiles.
+    The critical path length counts every placed object on the longest
+    path to any PO, including wires and terminals. Traversal follows
+    declared input ports, independent of physical adjacency and clocking
+    legality. Only output dependencies enter the analysis. Explicit placed
+    zero-input functions act as path sources.
 
     The throughput is defined as :math:`\\frac{1}{x}` where :math:`x` is
     the highest path length difference between any sets of paths that lead
@@ -137,94 +148,26 @@ def critical_path_length_and_throughput(layout: mnt.pyfiction.layouts.hexagonal_
     M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
     Springer Nature in 2022.
 
-    The complexity of this function is :math:`\\mathcal{O}(|T|)` where
-    :math:`T` is the set of all occupied tiles in `lyt`.
+    The complexity is :math:`\\mathcal{O}(|V| + |E|)` for objects and
+    connections in the output dependency cones.
 
     Args:
         lyt: The gate-level layout whose CP and TP are desired.
 
     Template Args:
-        Lyt: Gate-level layout type.
+        Geometry: Coordinate geometry of the gate-level layout.
 
     Returns:
         A struct containing the CP and TP.
+
+    Raises:
+        std::invalid_argument: If an output dependency has a disconnected
+                               input or a cycle.
     """
-
-class gate_level_drv_params:
-    """
-    Parameters for design rule violation checking that specify the checks
-    that are to be executed.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives completed work and the phase total."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def unplaced_nodes(self) -> bool:
-        """Check for nodes without locations."""
-
-    @unplaced_nodes.setter
-    def unplaced_nodes(self, arg: bool, /) -> None: ...
-    @property
-    def placed_dead_nodes(self) -> bool:
-        """Check for placed but dead nodes."""
-
-    @placed_dead_nodes.setter
-    def placed_dead_nodes(self, arg: bool, /) -> None: ...
-    @property
-    def non_adjacent_connections(self) -> bool: ...
-    @non_adjacent_connections.setter
-    def non_adjacent_connections(self, arg: bool, /) -> None: ...
-    @property
-    def missing_connections(self) -> bool:
-        """Check for nodes without connections."""
-
-    @missing_connections.setter
-    def missing_connections(self, arg: bool, /) -> None: ...
-    @property
-    def crossing_gates(self) -> bool:
-        """Check for wires that are crossing gates."""
-
-    @crossing_gates.setter
-    def crossing_gates(self, arg: bool, /) -> None: ...
-    @property
-    def clocked_data_flow(self) -> bool:
-        """Check if all node connections obey the clocking scheme data flow."""
-
-    @clocked_data_flow.setter
-    def clocked_data_flow(self, arg: bool, /) -> None: ...
-    @property
-    def has_io(self) -> bool:
-        """Check if the layout has I/Os."""
-
-    @has_io.setter
-    def has_io(self, arg: bool, /) -> None: ...
-    @property
-    def empty_io(self) -> bool:
-        """Check if the I/Os are assigned to empty tiles."""
-
-    @empty_io.setter
-    def empty_io(self, arg: bool, /) -> None: ...
-    @property
-    def io_pins(self) -> bool:
-        """Check if the I/Os are assigned to wire segments."""
-
-    @io_pins.setter
-    def io_pins(self, arg: bool, /) -> None: ...
-    @property
-    def border_io(self) -> bool:
-        """Check if the I/Os are located at the layout's border."""
-
-    @border_io.setter
-    def border_io(self, arg: bool, /) -> None: ...
 
 class gate_level_drv_stats:
+    """Design rule report and issue counts."""
+
     def __init__(self) -> None:
         """Default constructor."""
 
@@ -243,71 +186,90 @@ class gate_level_drv_stats:
 @overload
 def gate_level_drvs(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout,
-    params: gate_level_drv_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    outside_extent: bool = True,
+    non_adjacent_connections: bool = True,
+    missing_connections: bool = True,
+    crossing_gates: bool = True,
+    clocked_data_flow: bool = True,
+    has_io: bool = True,
+    border_io: bool = True,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
     layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
-    params: gate_level_drv_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    outside_extent: bool = True,
+    non_adjacent_connections: bool = True,
+    missing_connections: bool = True,
+    crossing_gates: bool = True,
+    clocked_data_flow: bool = True,
+    has_io: bool = True,
+    border_io: bool = True,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]: ...
 @overload
 def gate_level_drvs(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
-    params: gate_level_drv_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    outside_extent: bool = True,
+    non_adjacent_connections: bool = True,
+    missing_connections: bool = True,
+    crossing_gates: bool = True,
+    clocked_data_flow: bool = True,
+    has_io: bool = True,
+    border_io: bool = True,
     print_report: bool = False,
     statistics: gate_level_drv_stats | None = None,
 ) -> tuple[int, int]:
     """
-    Performs design rule violation (DRV) checking on the given gate-level
-    layout. The implementation of gate_level_layout allows for layouts
-    with structural defects like the connection of non-adjacent tiles or
-    connections that defy the clocking scheme. This function checks for
-    such violations and documents them in the statistics. A brief report
-    can be printed and more in-depth information including with error
-    sites can be obtained from a generated json object.
-
-    Furthermore, this function does not only find and log DRVs but can
-    also warn for instances that are not per se errors but defy best
-    practices of layout generation, e.g., I/Os not being placed at the
-    layout borders.
-
-    For this function to work, `detail::gate_level_drvs_impl` need to be
-    declared as a `friend class` to the layout type that is going to be
-    examined.
+    Count design-rule violations in the gate-level layout.
+    Returns (warnings, drvs); statistics receives their counts.
+    The keyword options select which checks run.
 
     Args:
-        lyt: The gate-level layout that is to be examined for DRVs and
-             warnings.
-        ps: Parameters.
-        pst: Statistics.
-
-    Template Args:
-        Lyt: Gate-level layout type.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        non_adjacent_connections: Check for nodes that are connected to non-adjacent ones.
+        missing_connections: Check for nodes without connections.
+        crossing_gates: Check for wires that are crossing gates.
+        clocked_data_flow: Check if all node connections obey the clocking scheme data flow.
+        has_io: Check if the layout has I/Os.
+        border_io: Check whether primary inputs and outputs lie on the layout border.
+        print_report: Print the design-rule report to Python stdout.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
+        outside_extent: Check that every live object lies within the layout extent.
     """
 
 class eq_type(enum.Enum):
-    """The different equivalence types possible."""
+    """Equivalence classification for logic and layout throughput."""
 
     NO = 0
-    """`Spec` and `Impl` are logically not equivalent OR `Impl` has DRVs."""
+    """
+    `Spec` and `Impl` differ logically, contain required topology defects,
+    or either layout has DRVs.
+    """
 
     WEAK = 1
     """
-    `Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput
-    of :math:`\\frac{1}{x}` with :math:`x > 1`.
+    `Spec` and `Impl` are logically equivalent and have different
+    throughput denominators.
     """
 
     STRONG = 2
     """
-    `Spec` and `Impl` are logically equivalent AND `Impl` has a throughput
-    of :math:`\\frac{1}{1}`.
+    `Spec` and `Impl` are logically equivalent and have equal throughput
+    denominators.
     """
 
 class equivalence_checking_stats:
+    """Physical equivalence result, throughput, and diagnostics."""
+
     def __init__(self) -> None:
         """Default constructor."""
 
@@ -440,9 +402,11 @@ def equivalence_checking(
 ) -> eq_type:
     """
     Performs SAT-based equivalence checking between a specification of
-    type `Spec` and an implementation of type `Impl`. Both `Spec` and
-    `Impl` need to be network types (that is, gate-level layouts can be
-    utilized as well).
+    type `Spec` and an implementation of type `Impl`. Each operand is a
+    logic network or a placed gate-level layout. Layout logic is extracted
+    before SAT checking. Interfaces match by names unique on both sides,
+    then by remaining declared positions. Unequal interface sizes, missing
+    required inputs, and required dependency cycles return `NO`.
 
     This implementation enables the comparison of two logic networks, a
     logic network and a gate-level layout or two gate-level layouts. Since
@@ -455,14 +419,11 @@ def equivalence_checking(
     - `NO` equivalence: Spec and Impl are not logically equivalent or one
       of them is a gate-level layout that contains
     DRVs and, thus, cannot be checked for equivalence.
-    - `WEAK` equivalence: Spec and Impl are logically equivalent but
-      either one of them is a gate-level layout with TP of
-    :math:`\\frac{1}{x}` with :math:`x > 1` or both of them are gate-level
-    layouts with TP of :math:`\\frac{1}{x}` and :math:`\\frac{1}{y}`,
-    respectively, where :math:`x \\neq y`.
-    - `STRONG` equivalence: Spec and Impl are logically equivalent and all
-      involved gate-level layouts have TP of
-    :math:`\\frac{1}{1}`.
+    - `WEAK` equivalence: Spec and Impl are logically equivalent and have
+      different throughput denominators. - `STRONG` equivalence: Spec and
+      Impl are logically equivalent and have equal throughput
+      denominators.
+    Logic networks have throughput denominator one.
 
     This approach was first proposed in \\"Verification for Field-coupled
     Nanocomputing Circuits\\" by M. Walter, R. Wille, F. Sill Torres, D.

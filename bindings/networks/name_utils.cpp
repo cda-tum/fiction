@@ -30,58 +30,51 @@
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 namespace detail
 {
 
+/**
+ * @brief Registers name access for a network or layout type.
+ * @tparam NtkOrLyt Network or layout type.
+ * @param m Python module.
+ */
 template <typename NtkOrLyt>
-void get_name(nanobind::module_& m)
+void register_name_utils(nb::module_& m)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("get_name", &fiction::networks::get_name<NtkOrLyt>, py::arg("ntk_or_lyt"), DOC(fiction_networks_get_name));
-}
-
-template <typename NtkOrLyt>
-void set_name(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("set_name", &fiction::networks::set_name<NtkOrLyt>, py::arg("ntk_or_lyt"), py::arg("name"),
+    m.def("get_name", &fiction::networks::get_name<NtkOrLyt>, nb::arg("ntk_or_lyt"), DOC(fiction_networks_get_name));
+    m.def("set_name", &fiction::networks::set_name<NtkOrLyt>, nb::arg("ntk_or_lyt"), nb::arg("name"),
           DOC(fiction_networks_set_name));
 }
 
 }  // namespace detail
 
-void name_utils(nanobind::module_& m)
+/**
+ * @brief Binds name utils helpers.
+ * @param m Python module.
+ */
+void register_name_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::get_name<py_cartesian_gate_layout>(m);
-    detail::get_name<py_shifted_cartesian_gate_layout>(m);
-    detail::get_name<py_hexagonal_gate_layout>(m);
-    detail::get_name<fiction::qca::layout>(m);
-    detail::get_name<fiction::mol_qca::layout>(m);
-    detail::get_name<fiction::inml::layout>(m);
-    detail::get_name<fiction::sidb::layout>(m);
-    detail::get_name<py_tec_network>(m);
-    detail::get_name<py_aig_network>(m);
-    detail::get_name<py_xag_network>(m);
-    detail::get_name<py_mig_network>(m);
-
-    detail::set_name<py_cartesian_gate_layout>(m);
-    detail::set_name<py_shifted_cartesian_gate_layout>(m);
-    detail::set_name<py_hexagonal_gate_layout>(m);
-    detail::set_name<fiction::qca::layout>(m);
-    detail::set_name<fiction::mol_qca::layout>(m);
-    detail::set_name<fiction::inml::layout>(m);
-    detail::set_name<fiction::sidb::layout>(m);
-    detail::set_name<py_tec_network>(m);
-    detail::set_name<py_aig_network>(m);
-    detail::set_name<py_xag_network>(m);
-    detail::set_name<py_mig_network>(m);
+    detail::register_name_utils<py_cartesian_gate_layout>(m);
+    detail::register_name_utils<py_shifted_cartesian_gate_layout>(m);
+    detail::register_name_utils<py_hexagonal_gate_layout>(m);
+    detail::register_name_utils<fiction::qca::layout>(m);
+    detail::register_name_utils<fiction::mol_qca::layout>(m);
+    detail::register_name_utils<fiction::inml::layout>(m);
+    detail::register_name_utils<fiction::sidb::layout>(m);
+    detail::register_name_utils<py_tec_network>(m);
+    detail::register_name_utils<py_aig_network>(m);
+    detail::register_name_utils<py_xag_network>(m);
+    detail::register_name_utils<py_mig_network>(m);
 }
 
 }  // namespace pyfiction

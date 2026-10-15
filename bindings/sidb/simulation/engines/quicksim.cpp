@@ -15,12 +15,10 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <optional>
 
@@ -31,36 +29,74 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void quicksim(nanobind::module_& m)
+/** @brief Native options constructed for each Python call. */
+using quicksim_options = fiction::sidb::simulation::engines::quicksim_params;
+
+/**
+ * @brief Binds quicksim helpers.
+ * @param m Python module.
+ */
+void register_quicksim(nb::module_& m)
 {
-    namespace py = nanobind;
+    m.def(
+        "quicksim",
+        [](const fiction::sidb::layout& lyt, const decltype(quicksim_options{}.sim_params.base) base,
+           const decltype(quicksim_options{}.sim_params.mu_minus)           mu_minus,
+           const decltype(quicksim_options{}.sim_params.epsilon_r)          epsilon_r,
+           const decltype(quicksim_options{}.sim_params.lambda_tf)          lambda_tf,
+           const decltype(quicksim_options{}.iteration_steps)               iteration_steps,
+           const decltype(quicksim_options{}.alpha)                         alpha,
+           const std::optional<decltype(quicksim_options{}.number_threads)> number_threads,
+           const decltype(quicksim_options{}.timeout)                       timeout,
+           const decltype(quicksim_options{}.on_progress)&                  on_progress,
+           const decltype(quicksim_options{}.on_worker_progress)&           on_worker_progress)
+        {
+            quicksim_options params{};
+            params.sim_params      = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+            params.iteration_steps = iteration_steps;
+            params.alpha           = alpha;
+            if (number_threads)
+            {
+                params.number_threads = *number_threads;
+            }
+            params.timeout            = timeout;
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::engines::quicksim(lyt, params);
+        },
+        nb::arg("lyt"), nb::kw_only(), nb::arg("base") = quicksim_options{}.sim_params.base,
+        nb::arg("mu_minus")        = quicksim_options{}.sim_params.mu_minus,
+        nb::arg("epsilon_r")       = quicksim_options{}.sim_params.epsilon_r,
+        nb::arg("lambda_tf")       = quicksim_options{}.sim_params.lambda_tf,
+        nb::arg("iteration_steps") = quicksim_options{}.iteration_steps, nb::arg("alpha") = quicksim_options{}.alpha,
+        nb::arg("number_threads") = nb::none(), nb::arg("timeout") = quicksim_options{}.timeout,
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        R"doc(Search for low-energy charge distributions with QuickSim.
+The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
+Returns None when the heuristic search finds no physically valid charge distribution.
+Raises ValueError when base is neither 2 nor 3.
 
-    using fiction::sidb::simulation::engines::quicksim_params;
-
-    py::class_<quicksim_params>(m, "quicksim_params", DOC(fiction_sidb_simulation_engines_quicksim_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &quicksim_params::sim_params,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_sim_params))
-        .def_rw("iteration_steps", &quicksim_params::iteration_steps,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_iteration_steps))
-        .def_rw("alpha", &quicksim_params::alpha, DOC(fiction_sidb_simulation_engines_quicksim_params_alpha))
-        .def_rw("number_threads", &quicksim_params::number_threads,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_number_threads))
-        .def_rw("timeout", &quicksim_params::timeout, DOC(fiction_sidb_simulation_engines_quicksim_params_timeout))
-        .def_rw("on_progress", &quicksim_params::on_progress, pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_sidb_simulation_engines_quicksim_params_on_progress))
-        .def_rw("on_worker_progress", &quicksim_params::on_worker_progress, pyfiction::ON_WORKER_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_quicksim_params_on_worker_progress));
-
-    // NOLINTNEXTLINE(misc-const-correctness)
-    std::optional<fiction::sidb::simulation::result> (*const quicksim_pointer)(
-        const fiction::sidb::layout&, const quicksim_params&) = &fiction::sidb::simulation::engines::quicksim;
-
-    m.def("quicksim", quicksim_pointer, py::arg("lyt"), py::arg("params") = quicksim_params{},
-          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_quicksim));
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    iteration_steps: Number of iterations to run the simulation for.
+    alpha: `alpha` parameter for the *QuickSim* algorithm.
+    number_threads: Number of QuickSim workers; None uses the available hardware threads.
+    timeout: Execution budget in milliseconds.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+)doc");
 }
 
 }  // namespace pyfiction

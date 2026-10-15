@@ -15,91 +15,135 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <optional>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner): enables keyword options
+
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
-#include <fiction/technology/sidb/simulation/result.hpp>
 
-#include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/** @brief Namespace alias for nanobind. */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void clustercomplete(nanobind::module_& m)
-{
-    namespace py = nanobind;
+/** @brief Native options constructed for each Python call. */
+using clustercomplete_options = fiction::sidb::simulation::engines::clustercomplete_params;
 
-    using fiction::sidb::simulation::engines::clustercomplete_params;
+/**
+ * @brief Binds clustercomplete helpers.
+ * @param m Python module.
+ */
+void register_clustercomplete(nb::module_& m)
+{
 
     /**
      * Report *Ground State Space* stats.
      */
-    py::enum_<clustercomplete_params::ground_state_space_reporting>(
+    nb::enum_<clustercomplete_options::ground_state_space_reporting>(
         m, "ground_state_space_reporting",
         DOC(fiction_sidb_simulation_engines_clustercomplete_params_ground_state_space_reporting))
-        .value("ON", clustercomplete_params::ground_state_space_reporting::ON,
+        .value("ON", clustercomplete_options::ground_state_space_reporting::ON,
                DOC(fiction_sidb_simulation_engines_clustercomplete_params_ground_state_space_reporting_ON))
-        .value("OFF", clustercomplete_params::ground_state_space_reporting::OFF,
+        .value("OFF", clustercomplete_options::ground_state_space_reporting::OFF,
                DOC(fiction_sidb_simulation_engines_clustercomplete_params_ground_state_space_reporting_OFF));
 
-    /**
-     * ClusterComplete parameters.
-     */
-    py::class_<clustercomplete_params>(m, "clustercomplete_params",
-                                       DOC(fiction_sidb_simulation_engines_clustercomplete_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &clustercomplete_params::sim_params,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_sim_params))
-        .def_rw("local_external_potential", &clustercomplete_params::local_external_potential,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_local_external_potential))
-        .def_rw("global_potential", &clustercomplete_params::global_potential,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_global_potential))
-        .def_rw(
-            "validity_witness_partitioning_max_cluster_size_gss",
-            &clustercomplete_params::validity_witness_partitioning_max_cluster_size_gss,
-            DOC(fiction_sidb_simulation_engines_clustercomplete_params_validity_witness_partitioning_max_cluster_size_gss))
-        .def_rw("num_overlapping_witnesses_limit_gss", &clustercomplete_params::num_overlapping_witnesses_limit_gss,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_num_overlapping_witnesses_limit_gss))
-        .def_rw("available_threads", &clustercomplete_params::available_threads,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_available_threads))
-        .def_rw("report_gss_stats", &clustercomplete_params::report_gss_stats,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_report_gss_stats))
-        .def_rw("on_progress", &clustercomplete_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_simulation_engines_clustercomplete_params_on_progress))
-        .def_rw("on_worker_progress", &clustercomplete_params::on_worker_progress, pyfiction::ON_WORKER_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER,
-                DOC(fiction_sidb_simulation_engines_clustercomplete_params_on_worker_progress));
+    m.def(
+        "clustercomplete",
+        [](const fiction::sidb::layout& lyt, const decltype(clustercomplete_options{}.sim_params.base) base,
+           const decltype(clustercomplete_options{}.sim_params.mu_minus)                      mu_minus,
+           const decltype(clustercomplete_options{}.sim_params.epsilon_r)                     epsilon_r,
+           const decltype(clustercomplete_options{}.sim_params.lambda_tf)                     lambda_tf,
+           const std::optional<decltype(clustercomplete_options{}.local_external_potential)>& local_external_potential,
+           const decltype(clustercomplete_options{}.global_potential)                         global_potential,
+           const decltype(clustercomplete_options{}
+                              .num_overlapping_witnesses_limit_gss) num_overlapping_witnesses_limit_gss,
+           const std::optional<decltype(clustercomplete_options{}.available_threads)> available_threads,
+           const decltype(clustercomplete_options{}.report_gss_stats)                 report_gss_stats,
+           const decltype(clustercomplete_options{}.on_progress)&                     on_progress,
+           const decltype(clustercomplete_options{}.on_worker_progress)&              on_worker_progress,
+           const decltype(clustercomplete_options{}.validity_witness_partitioning_max_cluster_size_gss)
+               validity_witness_partitioning_max_cluster_size_gss)
+        {
+            clustercomplete_options params{};
+            params.validity_witness_partitioning_max_cluster_size_gss =
+                validity_witness_partitioning_max_cluster_size_gss;
+            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+            if (local_external_potential)
+            {
+                params.local_external_potential = *local_external_potential;
+            }
+            params.global_potential                    = global_potential;
+            params.num_overlapping_witnesses_limit_gss = num_overlapping_witnesses_limit_gss;
+            if (available_threads)
+            {
+                params.available_threads = *available_threads;
+            }
+            params.report_gss_stats   = report_gss_stats;
+            params.on_progress        = on_progress;
+            params.on_worker_progress = on_worker_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::simulation::engines::clustercomplete(lyt, params);
+        },
+        nb::arg("lyt"), nb::kw_only(), nb::arg("base") = clustercomplete_options{}.sim_params.base,
+        nb::arg("mu_minus")                            = clustercomplete_options{}.sim_params.mu_minus,
+        nb::arg("epsilon_r")                           = clustercomplete_options{}.sim_params.epsilon_r,
+        nb::arg("lambda_tf")                           = clustercomplete_options{}.sim_params.lambda_tf,
+        nb::arg("local_external_potential")            = nb::none(),
+        nb::arg("global_potential")                    = clustercomplete_options{}.global_potential,
+        nb::arg("num_overlapping_witnesses_limit_gss") = clustercomplete_options{}.num_overlapping_witnesses_limit_gss,
+        nb::arg("available_threads")                   = nb::none(),
+        nb::arg("report_gss_stats")                    = clustercomplete_options{}.report_gss_stats,
+        nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
+        nb::arg("validity_witness_partitioning_max_cluster_size_gss") =
+            clustercomplete_options{}.validity_witness_partitioning_max_cluster_size_gss,
+        R"doc(Simulate the SiDB layout with ClusterComplete.
+The keyword options select physical values, clustering, witness searches, and available threads.
+Raises ValueError when base is neither 2 nor 3.
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    fiction::sidb::simulation::result (*const clustercomplete_pointer)(const fiction::sidb::layout&,
-                                                                       const clustercomplete_params&) =
-        &fiction::sidb::simulation::engines::clustercomplete;
-
-    m.def("clustercomplete", clustercomplete_pointer, py::arg("lyt"), py::arg("params") = clustercomplete_params{},
-          py::call_guard<py::gil_scoped_release>(), DOC(fiction_sidb_simulation_engines_clustercomplete));
+Args:
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    local_external_potential: External electrostatic potential per lattice site in V; None uses an empty map.
+    global_potential: External electrostatic potential applied to every SiDB in V.
+    num_overlapping_witnesses_limit_gss: Maximum overlapping witnesses considered by validity witness partitioning.
+    available_threads: Threads available for ClusterComplete unfolding; None uses the native default.
+    report_gss_stats: Print Ground State Space statistics when ON.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
+    validity_witness_partitioning_max_cluster_size_gss: Maximum cluster size for validity witness partitioning.
+)doc");
 }
 
 }  // namespace pyfiction
 
 #else  // FICTION_ALGLIB_ENABLED
 
-#include <nanobind/nanobind.h>
+/** @brief Namespace alias for nanobind. */
+namespace nb = nanobind;
 
 namespace pyfiction
 {
 
 /**
- * Disable ClusterComplete.
+ * @brief Disable ClusterComplete.
+ * @param m Python module.
  */
-void clustercomplete([[maybe_unused]] nanobind::module_& m) {}
+void register_clustercomplete([[maybe_unused]] nb::module_& m) {}
 
 }  // namespace pyfiction
 

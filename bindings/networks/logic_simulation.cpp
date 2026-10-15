@@ -14,13 +14,17 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include "fiction/layouts/gate_level_layout.hpp"
 #include "pyfiction/types.hpp"
+
+#include <fiction/networks/extract_layout_network.hpp>
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <cassert>
+#include <concepts>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -36,19 +40,24 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 namespace detail
 {
 
+/** @brief Bind ordered truth-table simulation. @tparam NtkOrLyt Network or layout. @param m Module. @param type_name
+ * Argument name. */
 template <typename NtkOrLyt>
-void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
+void register_logic_simulation_impl(nb::module_& m, const std::string& type_name)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
     /**
-     * Simulate outputs in declaration order, including repeated labels.
+     * @brief Simulate outputs in declaration order, including repeated labels.
      */
     const auto outputs = [](const NtkOrLyt& ntk)
     {
@@ -56,8 +65,21 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
         {
             throw std::invalid_argument("simulation requires fewer than 38 inputs");
         }
+        const auto& network = [&]() -> decltype(auto)
+        {
+            if constexpr (requires {
+                              requires std::same_as<typename NtkOrLyt::object_id, fiction::layouts::layout_object_id>;
+                          })
+            {
+                return fiction::networks::extract_layout_network(ntk);
+            }
+            else
+            {
+                return (ntk);
+            }
+        }();
         const auto tables = mockturtle::simulate<py_tt>(
-            ntk, mockturtle::default_simulator<py_tt>{static_cast<unsigned>(ntk.num_pis())});
+            network, mockturtle::default_simulator<py_tt>{static_cast<unsigned>(network.num_pis())});
         std::vector<std::pair<std::string, std::vector<bool>>> result{};
         result.reserve(ntk.num_pos());
         ntk.foreach_po(
@@ -74,11 +96,11 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
             });
         return result;
     };
-    m.def("simulate_outputs", outputs, py::arg(type_name.c_str()),
+    m.def("simulate_outputs", outputs, nb::arg(type_name.c_str()),
           "Return (name, bits) pairs in output declaration order, preserving duplicate labels. "
           "Truth-table storage grows exponentially with the input count; fewer than 38 inputs "
           "is a representation bound, not a memory guarantee.",
-          py::call_guard<py::gil_scoped_release>());
+          nb::call_guard<nb::gil_scoped_release>());
     m.def(
         "simulate",
         [outputs](const NtkOrLyt& ntk)
@@ -90,20 +112,21 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
             }
             return result;
         },
-        py::arg(type_name.c_str()), py::call_guard<py::gil_scoped_release>());
+        nb::arg(type_name.c_str()), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
 
-void logic_simulation(nanobind::module_& m)
+/** @brief Register network and layout simulation. @param m Module. */
+void register_logic_simulation(nb::module_& m)
 {
-    detail::logic_simulation_impl<py_tec_network>(m, "network");
-    detail::logic_simulation_impl<py_aig_network>(m, "network");
-    detail::logic_simulation_impl<py_xag_network>(m, "network");
-    detail::logic_simulation_impl<py_mig_network>(m, "network");
-    detail::logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");
-    detail::logic_simulation_impl<py_shifted_cartesian_gate_layout>(m, "layout");
-    detail::logic_simulation_impl<py_hexagonal_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<py_tec_network>(m, "network");
+    detail::register_logic_simulation_impl<py_aig_network>(m, "network");
+    detail::register_logic_simulation_impl<py_xag_network>(m, "network");
+    detail::register_logic_simulation_impl<py_mig_network>(m, "network");
+    detail::register_logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<py_shifted_cartesian_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<py_hexagonal_gate_layout>(m, "layout");
 }
 
 }  // namespace pyfiction

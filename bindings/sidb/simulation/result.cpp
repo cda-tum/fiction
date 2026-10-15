@@ -35,13 +35,16 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
 namespace detail
 {
-
-namespace py = nanobind;
 
 /**
  * Converts a supported simulation parameter to a Python value.
@@ -50,29 +53,29 @@ namespace py = nanobind;
  * @return The Python value.
  * @throws std::runtime_error if the stored type is unsupported or conversion fails.
  */
-inline py::object convert_any_to_py(const std::any& value)
+inline nb::object convert_any_to_py(const std::any& value)
 {
     try
     {
         if (value.type() == typeid(int))
         {
-            return py::int_(std::any_cast<int>(value));
+            return nb::int_(std::any_cast<int>(value));
         }
         if (value.type() == typeid(double))
         {
-            return py::float_(std::any_cast<double>(value));
+            return nb::float_(std::any_cast<double>(value));
         }
         if (value.type() == typeid(bool))
         {
-            return py::bool_(std::any_cast<bool>(value));
+            return nb::bool_(std::any_cast<bool>(value));
         }
         if (value.type() == typeid(std::string))
         {
-            return py::str(std::any_cast<std::string>(value).c_str());
+            return nb::str(std::any_cast<std::string>(value).c_str());
         }
         if (value.type() == typeid(uint64_t))
         {
-            return py::int_(std::any_cast<uint64_t>(value));
+            return nb::int_(std::any_cast<uint64_t>(value));
         }
     }
     catch (const std::bad_any_cast& e)
@@ -90,9 +93,9 @@ inline py::object convert_any_to_py(const std::any& value)
  * @return Python dictionary.
  * @throws std::runtime_error if a parameter cannot be converted.
  */
-inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
+inline nb::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
 {
-    nanobind::dict result;
+    nb::dict result;
 
     for (const auto& [key, value] : map)
     {
@@ -116,14 +119,12 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
  *
  * @param m Python module.
  */
-void result(nanobind::module_& m)
+void register_result(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::simulation::result;
 
-    py::class_<result>(m, "sidb_simulation_result", DOC(fiction_sidb_simulation_result))
-        .def(py::init<>(), "Default constructor.")
+    nb::class_<result>(m, "sidb_simulation_result", DOC(fiction_sidb_simulation_result))
+        .def(nb::init<>(), "Default constructor.")
         .def_rw("algorithm_name", &result::algorithm_name, DOC(fiction_sidb_simulation_result_algorithm_name))
         .def_rw("simulation_runtime", &result::simulation_runtime,
                 DOC(fiction_sidb_simulation_result_simulation_runtime))
@@ -134,9 +135,9 @@ void result(nanobind::module_& m)
         .def_prop_ro(
             "additional_simulation_parameters",
             [](const result& self) { return detail::convert_map_to_py(self.additional_simulation_parameters); },
-            py::sig("def additional_simulation_parameters(self) -> dict[str, int | float | bool | str]"),
+            nb::sig("def additional_simulation_parameters(self) -> dict[str, int | float | bool | str]"),
             DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
-        .def("charge_state", &result::charge_state, py::arg("distribution"), py::arg("site"),
+        .def("charge_state", &result::charge_state, nb::arg("distribution"), nb::arg("site"),
              DOC(fiction_sidb_simulation_result_charge_state))
         .def("groundstates", &result::groundstates, DOC(fiction_sidb_simulation_result_groundstates))
 

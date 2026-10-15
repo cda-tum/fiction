@@ -844,7 +844,7 @@ TEST_CASE("Edge case with four SiDBs", "[quicksim]")
     }
 }
 
-TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[ExGS]")
+TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[quicksim]")
 {
     layout lyt{};
 

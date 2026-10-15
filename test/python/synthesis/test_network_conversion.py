@@ -10,12 +10,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.networks import simulate_outputs, technology_network
-from mnt.pyfiction.networks.io import read_aig_network, read_mig_network, read_technology_network, read_xag_network
+from mnt.pyfiction.networks import aig_network, mig_network, simulate_outputs, technology_network, xag_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.synthesis import (
     all_supported_standard_functions,
     convert_network,
@@ -25,24 +25,27 @@ from mnt.pyfiction.synthesis import (
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from pathlib import Path
 
 
-@pytest.mark.parametrize("reader", [read_technology_network, read_aig_network, read_xag_network, read_mig_network])
-def test_convert_network_is_equivalent(resources_dir: Path, reader: Callable[[str], Any]) -> None:
-    network = reader(str(resources_dir / "mux21.v"))
+@pytest.mark.parametrize("cls", [technology_network, aig_network, xag_network, mig_network])
+def test_convert_network_is_equivalent(
+    resources_dir: Path, cls: type[technology_network | aig_network | xag_network | mig_network]
+) -> None:
+    network = read_network(str(resources_dir / "mux21.v"), network_type=cls)
     converted = convert_network(network)
     assert isinstance(converted, technology_network)
-    assert equivalence_checking(read_technology_network(str(resources_dir / "mux21.v")), converted) == eq_type.STRONG
+    assert equivalence_checking(read_network(str(resources_dir / "mux21.v")), converted) == eq_type.STRONG
 
 
-@pytest.mark.parametrize("reader", [read_aig_network, read_xag_network, read_mig_network])
-def test_technology_mapping_accepts_every_network_type(resources_dir: Path, reader: Callable[[str], Any]) -> None:
-    network = reader(str(resources_dir / "mux21.v"))
-    params = all_supported_standard_functions()
-    params.lt2 = True
-    mapped = technology_mapping(network, params)
+@pytest.mark.parametrize("cls", [aig_network, xag_network, mig_network])
+def test_technology_mapping_accepts_every_network_type(
+    resources_dir: Path, cls: type[technology_network | aig_network | xag_network | mig_network]
+) -> None:
+    network = read_network(str(resources_dir / "mux21.v"), network_type=cls)
+    options = all_supported_standard_functions()
+    options["lt2"] = True
+    mapped = technology_mapping(network, **options)
     assert isinstance(mapped, technology_network)
     assert equivalence_checking(convert_network(network), mapped) == eq_type.STRONG
 

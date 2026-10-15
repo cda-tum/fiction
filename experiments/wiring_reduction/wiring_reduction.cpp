@@ -32,7 +32,9 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <sstream>
 #include <string>
 
@@ -56,7 +58,9 @@ static Ntk read_ntk(const std::string& name)
     return *nets.front();
 }
 
-int main()  // NOLINT
+/** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     using gate_lyt = gate_level_layout<cartesian_layout>;
 
@@ -103,27 +107,27 @@ int main()  // NOLINT
         auto       gate_level_layout = orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy       = gate_level_layout.clone();
 
-        auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
+        auto num_wires = gate_level_layout.num_wires();
         //  compute critical path and throughput
         const auto cp_tp_stats = critical_path_length_and_throughput(gate_level_layout);
 
         // calculate bounding box
-        const auto bounding_box_before_wiring_reduction = bounding_box_2d(gate_level_layout);
+        const auto bounding_box_before_wiring_reduction = bounding_box(gate_level_layout);
 
-        const auto width_before_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_x_size()) + 1;
-        const auto height_before_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_before_wiring_reduction.get_y_size()) + 1;
+        /** @brief Number of occupied bounding columns before wiring reduction. */
+        const auto width_before_wiring_reduction = bounding_box_before_wiring_reduction.get_x_size();
+        /** @brief Number of occupied bounding rows before wiring reduction. */
+        const auto height_before_wiring_reduction = bounding_box_before_wiring_reduction.get_y_size();
+        /** @brief Occupied bounding area before wiring reduction. */
         const auto area_before_wiring_reduction = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
-        wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
+        wiring_reduction(gate_level_layout, {}, &wiring_reduction_stats);
 
         //  compute critical path and throughput
         const auto cp_tp_stats_after = critical_path_length_and_throughput(gate_level_layout);
 
-        auto num_wires_after =
-            gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
+        auto num_wires_after = gate_level_layout.num_wires();
 
         // check equivalence
         const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
@@ -144,12 +148,13 @@ int main()  // NOLINT
         }
 
         // calculate bounding box
-        const auto bounding_box_after_wiring_reduction = bounding_box_2d(gate_level_layout);
+        const auto bounding_box_after_wiring_reduction = bounding_box(gate_level_layout);
 
-        const auto width_after_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_x_size()) + 1;
-        const auto height_after_wiring_reduction =
-            static_cast<uint64_t>(bounding_box_after_wiring_reduction.get_y_size()) + 1;
+        /** @brief Number of occupied bounding columns after wiring reduction. */
+        const auto width_after_wiring_reduction = bounding_box_after_wiring_reduction.get_x_size();
+        /** @brief Number of occupied bounding rows after wiring reduction. */
+        const auto height_after_wiring_reduction = bounding_box_after_wiring_reduction.get_y_size();
+        /** @brief Occupied bounding area after wiring reduction. */
         const auto area_after_wiring_reduction = width_after_wiring_reduction * height_after_wiring_reduction;
 
         const float improv_wires =
@@ -178,4 +183,11 @@ int main()  // NOLINT
     }
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

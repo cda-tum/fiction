@@ -30,9 +30,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.synthesis.network_balancing_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.synthesis.network_balancing
 
 .. autofunction:: mnt.pyfiction.synthesis.is_balanced
@@ -66,9 +63,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.synthesis.fanout_substitution_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.synthesis.substitution_strategy
    :members:
 
@@ -136,9 +130,6 @@
 .. autoclass:: mnt.pyfiction.synthesis.missing_required_gates_exception
    :members:
 
-.. autoclass:: mnt.pyfiction.synthesis.technology_mapping_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.synthesis.and_or_not
 
 .. autofunction:: mnt.pyfiction.synthesis.and_or_not_maj
@@ -203,12 +194,6 @@ The Python function works on a `technology_network` and reports duplicated input
 virtual inputs; see its docstring below.
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.synthesis.planarization_params
-   :members:
-
-.. autoclass:: mnt.pyfiction.synthesis.node_duplication_planarization_params
-   :members:
-
 .. autoclass:: mnt.pyfiction.synthesis.planarization_strategy
    :members:
 
@@ -216,9 +201,6 @@ virtual inputs; see its docstring below.
    :members:
 
 .. autoclass:: mnt.pyfiction.synthesis.decision_criterion
-   :members:
-
-.. autoclass:: mnt.pyfiction.synthesis.duplication_cost_model
    :members:
 
 .. autoclass:: mnt.pyfiction.synthesis.planarization_stats

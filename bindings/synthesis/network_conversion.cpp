@@ -27,6 +27,11 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/variant.h>  // NOLINT(misc-include-cleaner): converts the source network
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
@@ -70,17 +75,17 @@ using any_network =
  * @return The converted network as a Python object.
  */
 template <typename NtkDest>
-nanobind::object convert_to(const any_network& network)
+nb::object convert_to(const any_network& network)
 {
     return std::visit(
         [](const auto* ntk)
         {
             auto converted = [ntk]()
             {
-                const nanobind::gil_scoped_release release{};
+                const nb::gil_scoped_release release{};
                 return fiction::synthesis::convert_network<NtkDest, std::remove_cvref_t<decltype(*ntk)>>(*ntk);
             }();
-            return nanobind::cast(std::move(converted));
+            return nb::cast(std::move(converted));
         },
         network);
 }
@@ -92,7 +97,7 @@ nanobind::object convert_to(const any_network& network)
  * @param target Target network type.
  * @return The converted network as a Python object.
  */
-inline nanobind::object convert_to_target(const any_network& network, const network_target target)
+inline nb::object convert_to_target(const any_network& network, const network_target target)
 {
     switch (target)
     {
@@ -114,22 +119,20 @@ inline nanobind::object convert_to_target(const any_network& network, const netw
  * @param signature Python signature of the overload.
  */
 template <network_target Target>
-void convert_network_to(nanobind::module_& m, const char* signature)
+void register_convert_network_to(nb::module_& m, const char* signature)
 {
-    namespace py = nanobind;
-
     m.def(
         "convert_network",
-        [](const any_network& network, const network_target target) -> py::object
+        [](const any_network& network, const network_target target) -> nb::object
         {
             if (target != Target)
             {
-                throw py::next_overload();
+                throw nb::next_overload();
             }
 
             return convert_to_target(network, target);
         },
-        py::arg("network"), py::arg("target"), py::sig(signature));
+        nb::arg("network"), nb::arg("target"), nb::sig(signature));
 }
 
 }  // namespace detail
@@ -138,11 +141,9 @@ void convert_network_to(nanobind::module_& m, const char* signature)
  * @brief Register conversion targets and network overloads.
  * @param m Python module.
  */
-void network_conversion(nanobind::module_& m)
+void register_network_conversion(nb::module_& m)
 {
-    namespace py = nanobind;
-
-    py::enum_<detail::network_target>(m, "network_target", "The network types `convert_network` produces.")
+    nb::enum_<detail::network_target>(m, "network_target", "The network types `convert_network` produces.")
         .value("TEC", detail::network_target::TEC, "A technology network.")
         .value("AIG", detail::network_target::AIG, "An AND-inverter graph.")
         .value("XAG", detail::network_target::XAG, "An XOR-AND-inverter graph.")
@@ -150,41 +151,41 @@ void network_conversion(nanobind::module_& m)
 
     m.def(
         "convert_network",
-        [](const detail::any_network& network, const detail::network_target target) -> py::object
+        [](const detail::any_network& network, const detail::network_target target) -> nb::object
         {
             if (target != detail::network_target::TEC)
             {
-                throw py::next_overload();
+                throw nb::next_overload();
             }
 
             return detail::convert_to_target(network, target);
         },
-        py::arg("network"), py::arg("target") = detail::network_target::TEC,
-        py::sig(
+        nb::arg("network"), nb::arg("target") = detail::network_target::TEC,
+        nb::sig(
             "def convert_network(network: mnt.pyfiction.networks.technology_network | "
             "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
             "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.TEC] = "
             "mnt.pyfiction.synthesis.network_target.TEC) "
             "-> mnt.pyfiction.networks.technology_network"),
         DOC(fiction_synthesis_convert_network));
-    detail::convert_network_to<detail::network_target::AIG>(
+    detail::register_convert_network_to<detail::network_target::AIG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
            "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.AIG]) "
            "-> mnt.pyfiction.networks.aig_network");
-    detail::convert_network_to<detail::network_target::XAG>(
+    detail::register_convert_network_to<detail::network_target::XAG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
            "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.XAG]) "
            "-> mnt.pyfiction.networks.xag_network");
-    detail::convert_network_to<detail::network_target::MIG>(
+    detail::register_convert_network_to<detail::network_target::MIG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
            "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.MIG]) "
            "-> mnt.pyfiction.networks.mig_network");
     // a target that is not a literal
-    m.def("convert_network", &detail::convert_to_target, py::arg("network"), py::arg("target"),
-          py::sig("def convert_network(network: mnt.pyfiction.networks.technology_network | "
+    m.def("convert_network", &detail::convert_to_target, nb::arg("network"), nb::arg("target"),
+          nb::sig("def convert_network(network: mnt.pyfiction.networks.technology_network | "
                   "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "
                   "mnt.pyfiction.networks.mig_network, target: mnt.pyfiction.synthesis.network_target) -> "
                   "mnt.pyfiction.networks.technology_network | mnt.pyfiction.networks.aig_network | "

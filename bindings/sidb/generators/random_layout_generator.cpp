@@ -16,7 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
+#include "pyfiction/simulation_parameters.hpp"
 
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -30,63 +30,142 @@
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
 
-void random_layout_generator(nanobind::module_& m)
+/** @brief Native options constructed for each Python call. */
+using generate_random_layout_options = fiction::sidb::generators::generate_random_layout_params;
+
+/**
+ * @brief Binds random layout generator helpers.
+ * @param m Python module.
+ */
+void register_random_layout_generator(nb::module_& m)
 {
-    namespace py = nanobind;
-
     using fiction::sidb::layout;
-    using fiction::sidb::generators::generate_random_layout_params;
 
-    py::enum_<generate_random_layout_params::positive_charges>(
+    nb::enum_<generate_random_layout_options::positive_charges>(
         m, "positive_charges", DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges))
-        .value("ALLOWED", generate_random_layout_params::positive_charges::ALLOWED,
+        .value("ALLOWED", generate_random_layout_options::positive_charges::ALLOWED,
                DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges_ALLOWED))
-        .value("FORBIDDEN", generate_random_layout_params::positive_charges::FORBIDDEN,
+        .value("FORBIDDEN", generate_random_layout_options::positive_charges::FORBIDDEN,
                DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges_FORBIDDEN))
-        .value("MAY_OCCUR", generate_random_layout_params::positive_charges::MAY_OCCUR,
+        .value("MAY_OCCUR", generate_random_layout_options::positive_charges::MAY_OCCUR,
                DOC(fiction_sidb_generators_generate_random_layout_params_positive_charges_MAY_OCCUR));
-
-    /**
-     * Parameters.
-     */
-    py::class_<generate_random_layout_params>(m, "generate_random_sidb_layout_params",
-                                              DOC(fiction_sidb_generators_generate_random_layout_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("coordinate_pair", &generate_random_layout_params::coordinate_pair,
-                DOC(fiction_sidb_generators_generate_random_layout_params_coordinate_pair))
-        .def_rw("number_of_sidbs", &generate_random_layout_params::number_of_sidbs,
-                DOC(fiction_sidb_generators_generate_random_layout_params_number_of_sidbs))
-        .def_rw("positive_sidbs", &generate_random_layout_params::positive_sidbs,
-                DOC(fiction_sidb_generators_generate_random_layout_params_positive_sidbs))
-        .def_rw("simulation_parameters", &generate_random_layout_params::sim_params,
-                DOC(fiction_sidb_generators_generate_random_layout_params_sim_params))
-        .def_rw("maximal_attempts", &generate_random_layout_params::maximal_attempts,
-                DOC(fiction_sidb_generators_generate_random_layout_params_maximal_attempts))
-        .def_rw("number_of_unique_generated_layouts",
-                &generate_random_layout_params::number_of_unique_generated_layouts,
-                DOC(fiction_sidb_generators_generate_random_layout_params_number_of_unique_generated_layouts))
-        .def_rw("maximal_attempts_for_multiple_layouts",
-                &generate_random_layout_params::maximal_attempts_for_multiple_layouts,
-                DOC(fiction_sidb_generators_generate_random_layout_params_maximal_attempts_for_multiple_layouts))
-        .def_rw("on_progress", &generate_random_layout_params::on_progress, pyfiction::ON_PROGRESS_GETTER,
-                pyfiction::CALLBACK_SETTER, DOC(fiction_sidb_generators_generate_random_layout_params_on_progress));
-
     m.def(
         "generate_random_sidb_layout",
-        [](const generate_random_layout_params& params, const std::optional<layout>& skeleton)
-        { return fiction::sidb::generators::generate_random_layout(params, skeleton); }, py::arg("params"),
-        py::arg("lyt_skeleton") = std::nullopt, py::call_guard<py::gil_scoped_release>(),
-        DOC(fiction_sidb_generators_generate_random_layout));
+        [](const std::optional<layout>&                                          skeleton,
+           const decltype(generate_random_layout_options{}.coordinate_pair)      coordinate_pair,
+           const decltype(generate_random_layout_options{}.number_of_sidbs)      number_of_sidbs,
+           const decltype(generate_random_layout_options{}.positive_sidbs)       positive_sidbs,
+           const decltype(generate_random_layout_options{}.sim_params.base)      base,
+           const decltype(generate_random_layout_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(generate_random_layout_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(generate_random_layout_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(generate_random_layout_options{}.maximal_attempts)     maximal_attempts,
+           const decltype(generate_random_layout_options{}.on_progress)&         on_progress)
+        {
+            generate_random_layout_options params{};
+            params.sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+            params.coordinate_pair  = coordinate_pair;
+            params.number_of_sidbs  = number_of_sidbs;
+            params.positive_sidbs   = positive_sidbs;
+            params.maximal_attempts = maximal_attempts;
+            params.on_progress      = on_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::generators::generate_random_layout(params, skeleton);
+        },
+        nb::arg("lyt_skeleton")       = std::nullopt, nb::kw_only(),
+        nb::arg("coordinate_pair")    = generate_random_layout_options{}.coordinate_pair,
+        nb::arg("number_of_sidbs")    = generate_random_layout_options{}.number_of_sidbs,
+        nb::arg("positive_sidbs")     = generate_random_layout_options{}.positive_sidbs,
+        nb::arg("base")               = generate_random_layout_options{}.sim_params.base,
+        nb::arg("mu_minus")           = generate_random_layout_options{}.sim_params.mu_minus,
+        nb::arg("epsilon_r")          = generate_random_layout_options{}.sim_params.epsilon_r,
+        nb::arg("lambda_tf")          = generate_random_layout_options{}.sim_params.lambda_tf,
+        nb::arg("maximal_attempts")   = generate_random_layout_options{}.maximal_attempts,
+        nb::arg("on_progress").none() = nb::none(),
+        R"doc(Generate a random SiDB layout within coordinate_pair, optionally extending lyt_skeleton.
+The keyword options select physical values, charge restrictions, and attempt limits.
+Returns None when the attempt limit does not produce a layout.
+
+Args:
+    coordinate_pair: The area to place SiDBs in, as two opposite corners.
+    number_of_sidbs: Number of SiDBs to place.
+    positive_sidbs: Allow positive charges, forbid positive charges, or require that positive charges may occur.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    maximal_attempts: Maximum number of placement attempts.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+)doc");
 
     m.def(
         "generate_multiple_random_sidb_layouts",
-        [](const generate_random_layout_params& params, const std::optional<layout>& skeleton)
-        { return fiction::sidb::generators::generate_multiple_random_layouts(params, skeleton); }, py::arg("params"),
-        py::arg("lyt_skeleton") = std::nullopt, py::call_guard<py::gil_scoped_release>(),
-        DOC(fiction_sidb_generators_generate_multiple_random_layouts));
+        [](const std::optional<layout>&                                          skeleton,
+           const decltype(generate_random_layout_options{}.coordinate_pair)      coordinate_pair,
+           const decltype(generate_random_layout_options{}.number_of_sidbs)      number_of_sidbs,
+           const decltype(generate_random_layout_options{}.positive_sidbs)       positive_sidbs,
+           const decltype(generate_random_layout_options{}.sim_params.base)      base,
+           const decltype(generate_random_layout_options{}.sim_params.mu_minus)  mu_minus,
+           const decltype(generate_random_layout_options{}.sim_params.epsilon_r) epsilon_r,
+           const decltype(generate_random_layout_options{}.sim_params.lambda_tf) lambda_tf,
+           const decltype(generate_random_layout_options{}.maximal_attempts)     maximal_attempts,
+           const decltype(generate_random_layout_options{}
+                              .number_of_unique_generated_layouts)               number_of_unique_generated_layouts,
+           const decltype(generate_random_layout_options{}
+                              .maximal_attempts_for_multiple_layouts)            maximal_attempts_for_multiple_layouts,
+           const decltype(generate_random_layout_options{}.on_progress)&         on_progress)
+        {
+            generate_random_layout_options params{};
+            params.sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
+            params.coordinate_pair  = coordinate_pair;
+            params.number_of_sidbs  = number_of_sidbs;
+            params.positive_sidbs   = positive_sidbs;
+            params.maximal_attempts = maximal_attempts;
+            params.number_of_unique_generated_layouts    = number_of_unique_generated_layouts;
+            params.maximal_attempts_for_multiple_layouts = maximal_attempts_for_multiple_layouts;
+            params.on_progress                           = on_progress;
+            const nb::gil_scoped_release release{};
+            return fiction::sidb::generators::generate_multiple_random_layouts(params, skeleton);
+        },
+        nb::arg("lyt_skeleton")     = std::nullopt, nb::kw_only(),
+        nb::arg("coordinate_pair")  = generate_random_layout_options{}.coordinate_pair,
+        nb::arg("number_of_sidbs")  = generate_random_layout_options{}.number_of_sidbs,
+        nb::arg("positive_sidbs")   = generate_random_layout_options{}.positive_sidbs,
+        nb::arg("base")             = generate_random_layout_options{}.sim_params.base,
+        nb::arg("mu_minus")         = generate_random_layout_options{}.sim_params.mu_minus,
+        nb::arg("epsilon_r")        = generate_random_layout_options{}.sim_params.epsilon_r,
+        nb::arg("lambda_tf")        = generate_random_layout_options{}.sim_params.lambda_tf,
+        nb::arg("maximal_attempts") = generate_random_layout_options{}.maximal_attempts,
+        nb::arg("number_of_unique_generated_layouts") =
+            generate_random_layout_options{}.number_of_unique_generated_layouts,
+        nb::arg("maximal_attempts_for_multiple_layouts") =
+            generate_random_layout_options{}.maximal_attempts_for_multiple_layouts,
+        nb::arg("on_progress").none() = nb::none(),
+        R"doc(Generate distinct random SiDB layouts, optionally extending lyt_skeleton.
+The keyword options select the area, physical values, requested count, and attempt limits.
+Returns None if no layout is generated; the attempt limit can yield fewer layouts than requested.
+
+Args:
+    coordinate_pair: The area to place SiDBs in, as two opposite corners.
+    number_of_sidbs: Number of SiDBs to place.
+    positive_sidbs: Allow positive charges, forbid positive charges, or require that positive charges may occur.
+    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    mu_minus: Negative-charge transition energy in eV.
+    epsilon_r: Relative permittivity (dimensionless).
+    lambda_tf: Thomas-Fermi screening distance in nm.
+    maximal_attempts: Maximum number of placement attempts.
+    number_of_unique_generated_layouts: Number of unique layouts to generate with `generate_multiple_random_sidb_layouts`.
+    maximal_attempts_for_multiple_layouts: Maximum number of generation attempts for multiple layouts.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+)doc");
 }
 
 }  // namespace pyfiction

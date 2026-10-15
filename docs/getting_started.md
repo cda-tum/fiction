@@ -218,6 +218,30 @@ features that are not (yet) available in _pyfiction_, please open
 an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 :::
 
+### Algorithm Options
+
+Python algorithms accept options as keyword-only arguments. Replace parameter-object construction and
+member assignments with keywords on the algorithm call; omitted options use the C++ defaults.
+Nested options use their leaf names. Circuit design distinguishes `timeout` from `design_gate_timeout`;
+`time_to_solution` distinguishes `timeout` and `on_progress` from `quicksim_timeout` and `quicksim_on_progress`.
+
+```python
+from mnt.pyfiction.sidb.simulation.engines import quickexact
+from mnt.pyfiction.synthesis import and_or_not, technology_mapping
+
+result = quickexact(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
+mapped = technology_mapping(network, **and_or_not())
+```
+
+Gate-set factories return dictionaries typed as `TechnologyMappingOptions`, whose keys match `technology_mapping`.
+
+SiDB computational inputs use the scalar keywords `base`, `mu_minus`, `epsilon_r`, and `lambda_tf`.
+`base` must be 2 or 3, `mu_minus` must be finite, and `epsilon_r` must be positive and finite.
+`lambda_tf` must be positive; positive infinity selects the unscreened model.
+`sidb_simulation_parameters` describes physical model data returned by `result.simulation_parameters`
+and `potential_landscape.params()`. Its keyword-only constructor uses `base_number`, `mu_minus`,
+`relative_permittivity`, and `screening_distance`; algorithms do not accept this object as an option.
+
 ### Virtual Environment Setup
 
 In order to set up a virtual environment on UNIX-like systems, you can use the following commands:
@@ -247,15 +271,15 @@ bindings/
 ├── CMakeLists.txt                                 # one extension module per top-level namespace
 ├── include/pyfiction/                             # shared type aliases, docstrings, helpers
 ├── physical_design/
-│   ├── register_physical_design.cpp               # NB_MODULE(physical_design, m): exact(m), ...
+│   ├── register_physical_design.cpp               # NB_MODULE(physical_design, m): register_exact(m), ...
 │   └── path_finding/
-│       ├── a_star.cpp                             # defines a_star(nanobind::module_&)
-│       └── register_path_finding.cpp              # calls a_star(m), distance(m), ...
+│       ├── a_star.cpp                             # defines register_a_star(nb::module_&)
+│       └── register_path_finding.cpp              # calls register_a_star(m), register_distance(m), ...
 ├── sidb/
-│   ├── register_sidb.cpp                          # NB_MODULE(sidb, m): lattice(m), ...
+│   ├── register_sidb.cpp                          # NB_MODULE(sidb, m): register_lattice(m), ...
 │   └── simulation/engines/
-│       ├── quickexact.cpp                         # defines quickexact(nanobind::module_&)
-│       └── register_sidb_simulation_engines.cpp   # calls quickexact(m), quicksim(m), ...
+│       ├── quickexact.cpp                         # defines register_quickexact(nb::module_&)
+│       └── register_sidb_simulation_engines.cpp   # calls register_quickexact(m), register_quicksim(m), ...
 └── ...
 python/mnt/pyfiction/
 ├── __init__.py                                    # loads the submodules lazily
@@ -270,10 +294,11 @@ Each nested namespace is a submodule of it. For example, import the coordinate t
 `from mnt.pyfiction.layouts import coordinate`. The directories under `bindings/`
 follow the same tree, so a binding sits in the directory of the namespace it wraps: `a_star.cpp` is under `physical_design/path_finding/`.
 
-Each leaf `.cpp` file defines exactly one binding function named after the file (e.g.
-`void a_star(nanobind::module_& m)`) that binds a single class, function, or closely related group thereof. Each
+Binding files declare `namespace nb = nanobind;` after their includes.
+Each leaf `.cpp` file defines public binding helpers with a `register_` prefix (e.g.
+`void register_a_star(nb::module_& m)`) that binds a class, function, or related group. Internal template helpers use the same prefix. Each
 directory that holds binding sources has exactly one `register_<path>.cpp`, named after the directory, that
-forward-declares and calls the binding functions beside it. In a top-level directory, that file holds the
+forward-declares and calls the binding helpers beside it. Module registries use the same prefix. In a top-level directory, that file holds the
 `NB_MODULE` block. The block imports the modules whose types it names in signatures or default arguments, calls the
 binding functions of its directory, and creates each nested submodule with `pyfiction::def_submodule` before calling
 the submodule's registry.

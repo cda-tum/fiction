@@ -33,7 +33,9 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <string>
 #include <utility>
 #include <vector>
@@ -50,7 +52,9 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 
-int main()  // NOLINT
+/** @brief Runs the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
+int main()
+try
 {
     experiments::experiment<std::string, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t, double>
         simulation_exp{"benchmark",
@@ -204,4 +208,11 @@ int main()  // NOLINT
     simulation_exp.table();
 
     return EXIT_SUCCESS;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

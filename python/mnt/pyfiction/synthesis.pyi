@@ -14,6 +14,7 @@ from collections.abc import Callable
 from typing import Literal, overload
 
 import mnt.pyfiction.networks
+from mnt.pyfiction._types import TechnologyMappingOptions as TechnologyMappingOptions
 
 class dynamic_truth_table:
     @overload
@@ -323,327 +324,85 @@ class substitution_strategy(enum.Enum):
     fanout tree.
     """
 
-class fanout_substitution_params:
-    """Parameters for the fanout substitution algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives completed work and the phase total."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def strategy(self) -> substitution_strategy:
-        """
-        Substitution strategy of high-degree fanout networks (depth-first vs.
-        breadth-first).
-        """
-
-    @strategy.setter
-    def strategy(self, arg: substitution_strategy, /) -> None: ...
-    @property
-    def degree(self) -> int:
-        """Maximum output degree of each fan-out node."""
-
-    @degree.setter
-    def degree(self, arg: int, /) -> None: ...
-    @property
-    def threshold(self) -> int:
-        """
-        Maximum number of outputs any gate is allowed to have before
-        substitution applies.
-        """
-
-    @threshold.setter
-    def threshold(self, arg: int, /) -> None: ...
-    @property
-    def seed(self) -> int | None:
-        """
-        Seed used for random substitution, generated randomly if not
-        specified.
-        """
-
-    @seed.setter
-    def seed(self, arg: int | None, /) -> None: ...
-
 def fanout_substitution(
-    network: mnt.pyfiction.networks.technology_network, params: fanout_substitution_params = ...
+    network: mnt.pyfiction.networks.technology_network,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    strategy: substitution_strategy = ...,
+    degree: int = 2,
+    threshold: int = 1,
+    seed: int | None = None,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Substitutes high-output degrees in a logic network with fanout nodes
-    that compute the identity function. For this purpose, `create_buf` is
-    utilized. Therefore, `NtkDest` should support identity nodes. If it
-    does not, no new nodes will in fact be created. In either case, the
-    returned network will be logically equivalent to the input one.
-
-    The process is rather naive with two possible strategies to pick from:
-    breath-first and depth-first. The former creates partially balanced
-    fanout trees while the latter leads to fanout chains. Further
-    parameterization includes thresholds for the maximum number of output
-    each node and fanout is allowed to have.
-
-    The returned network is newly created from scratch because its type
-    `NtkDest` may differ from `NtkSrc`.
+    Insert identity nodes so the network respects the keyword fanout limits.
+    Returns a fresh technology network that is logically equivalent to the input.
 
     Args:
-        ntk_src: The input logic network.
-        ps: Parameters.
-
-    Template Args:
-        NtkDest: Type of the returned logic network.
-        NtkSrc: Type of the input logic network.
-
-    Returns:
-        A fanout-substituted logic network of type `NtkDest` that is
-        logically equivalent to `ntk_src`.
-
-    Note:
-        The physical design algorithms natively provided in fiction do not
-        require their input networks to be fanout-substituted. If that is
-        necessary, they will do it themselves. Providing already
-        substituted networks does however allow for the control over
-        maximum output degrees.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
+        degree: Maximum output degree of each fan-out node. Must be at least two.
+        threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
+        seed: Random seed; None selects a fresh random seed.
     """
 
 def is_fanout_substituted(
-    network: mnt.pyfiction.networks.technology_network, params: fanout_substitution_params = ...
+    network: mnt.pyfiction.networks.technology_network,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    strategy: substitution_strategy = ...,
+    degree: int = 2,
+    threshold: int = 1,
+    seed: int | None = None,
 ) -> bool:
     """
-    Checks if a logic network is properly fanout-substituted with regard
-    to the provided parameters, i.e., if no node exceeds the specified
-    fanout limits.
+    Check whether every network node respects the keyword fanout limits.
 
     Args:
-        ntk: The logic network to check.
-        ps: Parameters.
-
-    Template Args:
-        Ntk: Logic network type.
-
-    Returns:
-        `true` iff `ntk` is properly fanout-substituted with regard to
-        `ps`.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
+        degree: Maximum output degree of each fan-out node. Must be at least two.
+        threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
+        seed: Random seed; None selects a fresh random seed.
     """
-
-class network_balancing_params:
-    """Parameters for the network balancing algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives completed work and the phase total."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def unify_outputs(self) -> bool:
-        """Flag to indicate that all output nodes should be in the same rank."""
-
-    @unify_outputs.setter
-    def unify_outputs(self, arg: bool, /) -> None: ...
-    @property
-    def buffer_constant_outputs(self) -> bool:
-        """
-        Whether primary outputs driven by a constant receive a buffer chain
-        when unifying outputs. Placement flows that do not place constants set
-        this to `false`: such outputs then stay unbuffered, and `is_balanced`
-        ignores them.
-        """
-
-    @buffer_constant_outputs.setter
-    def buffer_constant_outputs(self, arg: bool, /) -> None: ...
 
 def network_balancing(
-    network: mnt.pyfiction.networks.technology_network, params: network_balancing_params = ...
+    network: mnt.pyfiction.networks.technology_network,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    unify_outputs: bool = False,
+    buffer_constant_outputs: bool = True,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Balances a logic network with buffer nodes that compute the identity
-    function. For this purpose, `create_buf` is utilized. Therefore,
-    `NtkDest` should support identity nodes. If it does not, no new nodes
-    will in fact be created. In either case, the returned network will be
-    logically equivalent to the input one.
-
-    The process is rather naive and is not combined with fanout
-    substitution.
-
-    The returned network is newly created from scratch because its type
-    `NtkDest` may differ from `NtkSrc`.
+    Insert identity nodes to balance network paths.
+    Returns a fresh technology network that is logically equivalent to the input.
+    Set unify_outputs to place every output at the same logic depth.
 
     Args:
-        ntk_src: The input logic network.
-        ps: Parameters.
-
-    Template Args:
-        NtkDest: Type of the returned logic network.
-        NtkSrc: Type of the input logic network.
-
-    Returns:
-        A path-balanced logic network of type `NtkDest` that is logically
-        equivalent to `ntk_src`.
-
-    Note:
-        The physical design algorithms natively provided in fiction do not
-        require their input networks to be balanced. If that is necessary,
-        they will do it themselves. Providing already balanced networks
-        may lead to substantial overhead.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        unify_outputs: Flag to indicate that all output nodes should be in the same rank.
+        buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
+            set to False for flows that do not place constants, which then also ignore them in the check.
     """
 
-def is_balanced(network: mnt.pyfiction.networks.technology_network, params: network_balancing_params = ...) -> bool:
+def is_balanced(
+    network: mnt.pyfiction.networks.technology_network,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    unify_outputs: bool = False,
+    buffer_constant_outputs: bool = True,
+) -> bool:
     """
-    Checks if a logic network is properly path-balanced with regard to the
-    provided parameters.
+    Check whether network paths are balanced.
+    Set unify_outputs to require every output at the same logic depth.
 
     Args:
-        ntk: The logic network to check.
-        ps: Parameters.
-
-    Template Args:
-        Ntk: Logic network type.
-
-    Returns:
-        `true` iff `ntk` is properly path-balanced with regard to `ps`.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        unify_outputs: Flag to indicate that all output nodes should be in the same rank.
+        buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
+            set to False for flows that do not place constants, which then also ignore them in the check.
     """
 
 class missing_required_gates_exception(RuntimeError): ...
-
-class technology_mapping_params:
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def decay(self) -> bool:
-        """
-        Enforce the application of at least one constant input to three-input
-        gates.
-        """
-
-    @decay.setter
-    def decay(self, arg: bool, /) -> None: ...
-    @property
-    def inv(self) -> bool:
-        """1-input NOT gate (inverter)."""
-
-    @inv.setter
-    def inv(self, arg: bool, /) -> None: ...
-    @property
-    def and2(self) -> bool:
-        """2-input AND gate."""
-
-    @and2.setter
-    def and2(self, arg: bool, /) -> None: ...
-    @property
-    def nand2(self) -> bool:
-        """2-input NAND gate."""
-
-    @nand2.setter
-    def nand2(self, arg: bool, /) -> None: ...
-    @property
-    def or2(self) -> bool:
-        """2-input OR gate."""
-
-    @or2.setter
-    def or2(self, arg: bool, /) -> None: ...
-    @property
-    def nor2(self) -> bool:
-        """2-input NOR gate."""
-
-    @nor2.setter
-    def nor2(self, arg: bool, /) -> None: ...
-    @property
-    def xor2(self) -> bool:
-        """2-input XOR gate."""
-
-    @xor2.setter
-    def xor2(self, arg: bool, /) -> None: ...
-    @property
-    def xnor2(self) -> bool:
-        """2-input XNOR gate."""
-
-    @xnor2.setter
-    def xnor2(self, arg: bool, /) -> None: ...
-    @property
-    def lt2(self) -> bool:
-        """2-input less-than gate."""
-
-    @lt2.setter
-    def lt2(self, arg: bool, /) -> None: ...
-    @property
-    def gt2(self) -> bool:
-        """2-input greater-than gate."""
-
-    @gt2.setter
-    def gt2(self, arg: bool, /) -> None: ...
-    @property
-    def le2(self) -> bool:
-        """2-input less-or-equal gate."""
-
-    @le2.setter
-    def le2(self, arg: bool, /) -> None: ...
-    @property
-    def ge2(self) -> bool:
-        """2-input greater-or-equal gate."""
-
-    @ge2.setter
-    def ge2(self, arg: bool, /) -> None: ...
-    @property
-    def and3(self) -> bool:
-        """3-input AND gate."""
-
-    @and3.setter
-    def and3(self, arg: bool, /) -> None: ...
-    @property
-    def xor_and(self) -> bool:
-        """3-input XOR-AND gate."""
-
-    @xor_and.setter
-    def xor_and(self, arg: bool, /) -> None: ...
-    @property
-    def or_and(self) -> bool:
-        """3-input OR-AND gate."""
-
-    @or_and.setter
-    def or_and(self, arg: bool, /) -> None: ...
-    @property
-    def onehot(self) -> bool:
-        """3-input ONEHOT gate."""
-
-    @onehot.setter
-    def onehot(self, arg: bool, /) -> None: ...
-    @property
-    def maj3(self) -> bool:
-        """3-input MAJ gate."""
-
-    @maj3.setter
-    def maj3(self, arg: bool, /) -> None: ...
-    @property
-    def gamble(self) -> bool:
-        """3-input GAMBLE gate."""
-
-    @gamble.setter
-    def gamble(self, arg: bool, /) -> None: ...
-    @property
-    def dot(self) -> bool:
-        """3-input DOT gate."""
-
-    @dot.setter
-    def dot(self, arg: bool, /) -> None: ...
-    @property
-    def mux(self) -> bool:
-        """3-input MUX gate (ITE)."""
-
-    @mux.setter
-    def mux(self, arg: bool, /) -> None: ...
-    @property
-    def and_xor(self) -> bool:
-        """3-input AND-XOR gate."""
-
-    @and_xor.setter
-    def and_xor(self, arg: bool, /) -> None: ...
 
 class mapper_stats:
     """Technology mapper results, including failure status."""
@@ -680,100 +439,158 @@ class technology_mapping_stats:
     def mapper_stats(self) -> mnt.pyfiction.synthesis.mapper_stats:
         """Statistics for mockturtle's mapper."""
 
-def and_or_not() -> technology_mapping_params:
-    """
-    Auxiliary function to create technology mapping parameters for AND,
-    OR, and NOT gates.
+def and_or_not() -> TechnologyMappingOptions:
+    """Return boolean mapping keywords for AND, OR, and NOT gates."""
 
-    Returns:
-        Technology mapping parameters.
-    """
+def and_or_not_maj() -> TechnologyMappingOptions:
+    """Return boolean mapping keywords for AND, OR, NOT, and MAJ gates."""
 
-def and_or_not_maj() -> technology_mapping_params:
-    """
-    Auxiliary function to create technology mapping parameters for AND,
-    OR, NOT, and MAJ gates.
+def all_standard_2_input_functions() -> TechnologyMappingOptions:
+    """Return boolean mapping keywords for standard two-input functions."""
 
-    Returns:
-        Technology mapping parameters.
-    """
+def all_standard_3_input_functions() -> TechnologyMappingOptions:
+    """Return boolean mapping keywords for standard three-input functions."""
 
-def all_standard_2_input_functions() -> technology_mapping_params:
-    """
-    Auxiliary function to create technology mapping parameters for AND,
-    OR, NAND, NOR, XOR, XNOR, and NOT gates.
-
-    Returns:
-        Technology mapping parameters.
-    """
-
-def all_standard_3_input_functions() -> technology_mapping_params:
-    """
-    Auxiliary function to create technology mapping parameters for AND3,
-    XOR_AND, OR_AND, ONEHOT, MAJ3, GAMBLE, DOT, MUX, and AND_XOR gates.
-
-    Returns:
-        Technology mapping parameters.
-    """
-
-def all_supported_standard_functions() -> technology_mapping_params:
-    """
-    Auxiliary function to create technology mapping parameters for all
-    supported standard functions.
-
-    Returns:
-        Technology mapping parameters.
-    """
+def all_supported_standard_functions() -> TechnologyMappingOptions:
+    """Return boolean mapping keywords for all supported standard functions."""
 
 @overload
 def technology_mapping(
     network: mnt.pyfiction.networks.technology_network,
-    params: technology_mapping_params = ...,
+    *,
+    decay: bool = False,
+    inv: bool = False,
+    and2: bool = False,
+    nand2: bool = False,
+    or2: bool = False,
+    nor2: bool = False,
+    xor2: bool = False,
+    xnor2: bool = False,
+    lt2: bool = False,
+    gt2: bool = False,
+    le2: bool = False,
+    ge2: bool = False,
+    and3: bool = False,
+    xor_and: bool = False,
+    or_and: bool = False,
+    onehot: bool = False,
+    maj3: bool = False,
+    gamble: bool = False,
+    dot: bool = False,
+    mux: bool = False,
+    and_xor: bool = False,
     stats: technology_mapping_stats | None = None,
 ) -> mnt.pyfiction.networks.technology_network: ...
 @overload
 def technology_mapping(
     network: mnt.pyfiction.networks.aig_network,
-    params: technology_mapping_params = ...,
+    *,
+    decay: bool = False,
+    inv: bool = False,
+    and2: bool = False,
+    nand2: bool = False,
+    or2: bool = False,
+    nor2: bool = False,
+    xor2: bool = False,
+    xnor2: bool = False,
+    lt2: bool = False,
+    gt2: bool = False,
+    le2: bool = False,
+    ge2: bool = False,
+    and3: bool = False,
+    xor_and: bool = False,
+    or_and: bool = False,
+    onehot: bool = False,
+    maj3: bool = False,
+    gamble: bool = False,
+    dot: bool = False,
+    mux: bool = False,
+    and_xor: bool = False,
     stats: technology_mapping_stats | None = None,
 ) -> mnt.pyfiction.networks.technology_network: ...
 @overload
 def technology_mapping(
     network: mnt.pyfiction.networks.xag_network,
-    params: technology_mapping_params = ...,
+    *,
+    decay: bool = False,
+    inv: bool = False,
+    and2: bool = False,
+    nand2: bool = False,
+    or2: bool = False,
+    nor2: bool = False,
+    xor2: bool = False,
+    xnor2: bool = False,
+    lt2: bool = False,
+    gt2: bool = False,
+    le2: bool = False,
+    ge2: bool = False,
+    and3: bool = False,
+    xor_and: bool = False,
+    or_and: bool = False,
+    onehot: bool = False,
+    maj3: bool = False,
+    gamble: bool = False,
+    dot: bool = False,
+    mux: bool = False,
+    and_xor: bool = False,
     stats: technology_mapping_stats | None = None,
 ) -> mnt.pyfiction.networks.technology_network: ...
 @overload
 def technology_mapping(
     network: mnt.pyfiction.networks.mig_network,
-    params: technology_mapping_params = ...,
+    *,
+    decay: bool = False,
+    inv: bool = False,
+    and2: bool = False,
+    nand2: bool = False,
+    or2: bool = False,
+    nor2: bool = False,
+    xor2: bool = False,
+    xnor2: bool = False,
+    lt2: bool = False,
+    gt2: bool = False,
+    le2: bool = False,
+    ge2: bool = False,
+    and3: bool = False,
+    xor_and: bool = False,
+    or_and: bool = False,
+    onehot: bool = False,
+    maj3: bool = False,
+    gamble: bool = False,
+    dot: bool = False,
+    mux: bool = False,
+    and_xor: bool = False,
     stats: technology_mapping_stats | None = None,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Performs technology mapping on the given network. Technology mapping
-    is the process of replacing the gates in a network with gates from a
-    given technology library. This function utilizes `mockturtle::emap` to
-    perform the technology mapping. This function is a wrapper around that
-    interface to provide a more convenient usage.
+    Map the input network to the gates enabled by the boolean keyword options.
+    No gates are enabled by default; missing required gates raise missing_required_gates_exception.
+    Returns a technology network; stats receives mapper statistics when supplied.
+    Gate-set factory dictionaries can be expanded into these keywords.
 
     Args:
-        ntk: Input logic network.
-        params: Technology mapping parameters.
-        pst: Technology mapping statistics.
-
-    Template Args:
-        Ntk: Input logic network type.
-
-    Returns:
-        Mapped network exclusively using gates from the provided library.
-
-    Raises:
-        missing_required_gates_exception: if the technology library does
-                                          not contain required gates for
-                                          the base network type (e.g., AIG
-                                          requires INV and AND; XAG
-                                          requires INV, AND, and XOR; MIG
-                                          requires INV and MAJ).
+        decay: Enforce the application of at least one constant input to three-input gates.
+        inv: 1-input NOT gate (inverter).
+        and2: 2-input AND gate.
+        nand2: 2-input NAND gate.
+        or2: 2-input OR gate.
+        nor2: 2-input NOR gate.
+        xor2: 2-input XOR gate.
+        xnor2: 2-input XNOR gate.
+        lt2: 2-input less-than gate.
+        gt2: 2-input greater-than gate.
+        le2: 2-input less-or-equal gate.
+        ge2: 2-input greater-or-equal gate.
+        and3: 3-input AND gate.
+        xor_and: 3-input XOR-AND gate.
+        or_and: 3-input OR-AND gate.
+        onehot: 3-input ONEHOT gate.
+        maj3: 3-input MAJ gate.
+        gamble: 3-input GAMBLE gate.
+        dot: 3-input DOT gate.
+        mux: 3-input MUX gate (ITE).
+        and_xor: 3-input AND-XOR gate.
+        stats: Statistics object filled by the algorithm; None discards statistics.
     """
 
 class network_target(enum.Enum):
@@ -905,170 +722,6 @@ class output_order(enum.Enum):
     different numbers of duplications.
     """
 
-class duplication_cost_model:
-    """
-    Weights of the duplication cost model of the hybrid strategy's
-    `WEIGHTED_CONE` criterion. The cost of duplicating a node is the
-    weighted size of its transitive fanin, since every duplicate drags its
-    whole cone along. A gate weighs `node_weight` and a chain buffer or
-    inverter weighs `buffer_weight`. The sum is scaled by
-    :math:`\\text{depth\\_growth}^{d}` for a duplication on level :math:`d`,
-    because duplicates on deep levels are duplicated again by the
-    decisions below. The weights are in units of one crossing gadget node.
-    The defaults were determined empirically on the benchmark sets.
-    Weights must be finite and non-negative, the growth finite and
-    positive.
-    """
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def node_weight(self) -> float:
-        """Weight of a gate."""
-
-    @node_weight.setter
-    def node_weight(self, arg: float, /) -> None: ...
-    @property
-    def buffer_weight(self) -> float:
-        """Weight of a buffer or inverter chain node."""
-
-    @buffer_weight.setter
-    def buffer_weight(self, arg: float, /) -> None: ...
-    @property
-    def depth_growth(self) -> float:
-        """
-        Growth of the duplication cost per level on which the duplication
-        happens.
-        """
-
-    @depth_growth.setter
-    def depth_growth(self, arg: float, /) -> None: ...
-
-class node_duplication_planarization_params:
-    """Parameters for the node duplication planarization algorithm."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def strategy(self) -> planarization_strategy:
-        """Planarization strategy."""
-
-    @strategy.setter
-    def strategy(self, arg: planarization_strategy, /) -> None: ...
-    @property
-    def criterion(self) -> decision_criterion:
-        """Decision criterion of the hybrid strategy."""
-
-    @criterion.setter
-    def criterion(self, arg: decision_criterion, /) -> None: ...
-    @property
-    def xor_gates(self) -> bool:
-        """
-        Whether the subsequent `crossing_gate_planarization` builds its
-        gadgets from XOR gates, which are smaller and shallower than the AND-
-        OR-NOT gadgets. Sets the gadget cost of the hybrid strategy.
-        """
-
-    @xor_gates.setter
-    def xor_gates(self, arg: bool, /) -> None: ...
-    @property
-    def max_swaps(self) -> int:
-        """
-        Maximum number of adjacent swaps per level that the hybrid strategy
-        tries after the barycenter ordering to reduce the crossings it costs.
-        `0` keeps the barycenter order.
-        """
-
-    @max_swaps.setter
-    def max_swaps(self, arg: int, /) -> None: ...
-    @property
-    def max_crossings_per_rank(self) -> int:
-        """
-        Levels with more crossings are always duplicated in the hybrid
-        strategy, matching the limit of `crossing_gate_planarization`.
-        """
-
-    @max_crossings_per_rank.setter
-    def max_crossings_per_rank(self, arg: int, /) -> None: ...
-    @property
-    def duplication_cost(self) -> duplication_cost_model:
-        """Duplication cost model of the hybrid strategy."""
-
-    @duplication_cost.setter
-    def duplication_cost(self, arg: duplication_cost_model, /) -> None: ...
-    @property
-    def lookahead_budget(self) -> int:
-        """
-        Nodes a lookahead may create before it is cut off; levels whose both
-        options exceed it fall back to the weighted cone model. Must be
-        positive.
-        """
-
-    @lookahead_budget.setter
-    def lookahead_budget(self, arg: int, /) -> None: ...
-    @property
-    def max_duplications(self) -> int:
-        """
-        Abort with `std::runtime_error` as soon as more nodes than this have
-        been duplicated. Node duplication can grow exponentially with the
-        depth of the network, so the limit is checked at every duplicate. `0`
-        disables the limit, which may exhaust the memory on an adverse
-        network.
-        """
-
-    @max_duplications.setter
-    def max_duplications(self, arg: int, /) -> None: ...
-    @property
-    def po_order(self) -> output_order:
-        """Primary output order used to seed the first level."""
-
-    @po_order.setter
-    def po_order(self, arg: output_order, /) -> None: ...
-    @property
-    def seed(self) -> int | None:
-        """
-        Seed for the random primary output order. A random seed is drawn when
-        none is given.
-        """
-
-    @seed.setter
-    def seed(self, arg: int | None, /) -> None: ...
-
-class planarization_params:
-    """Parameters for the planarization pipeline."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives completed work and the phase total."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-    @property
-    def duplication(self) -> node_duplication_planarization_params:
-        """
-        Parameters of the node duplication stage, including the strategy and
-        the gadget type of the crossing gates. The pipeline defaults to the
-        hybrid strategy, which decides per level between duplicating nodes and
-        keeping the crossings for the crossing gates.
-        """
-
-    @duplication.setter
-    def duplication(self, arg: node_duplication_planarization_params, /) -> None: ...
-    @property
-    def fanout_degree(self) -> int:
-        """
-        Maximum output degree of the fanout nodes in the result. Must be at
-        least 2.
-        """
-
-    @fanout_degree.setter
-    def fanout_degree(self, arg: int, /) -> None: ...
-
 class planarization_stats:
     """Statistics of the planarization pipeline."""
 
@@ -1100,7 +753,21 @@ class planarization_stats:
 
 def planarization(
     network: mnt.pyfiction.networks.technology_network,
-    params: planarization_params = ...,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    strategy: planarization_strategy = ...,
+    criterion: decision_criterion = ...,
+    xor_gates: bool = True,
+    max_swaps: int = 32,
+    max_crossings_per_rank: int = 1000,
+    node_weight: float = 2.0,
+    buffer_weight: float = 0.5,
+    depth_growth: float = 1.02,
+    lookahead_budget: int = 1000000,
+    max_duplications: int = 2000000,
+    po_order: output_order = ...,
+    seed: int | None = None,
+    fanout_degree: int = 2,
     statistics: planarization_stats | None = None,
 ) -> tuple[mnt.pyfiction.networks.technology_network, list[int]]:
     """
@@ -1110,8 +777,22 @@ def planarization(
 
     Args:
         network: Balanced technology network with unified outputs.
-        params: Parameters of the pipeline.
-        statistics: Optional statistics object that receives the runtimes and node counts.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        strategy: Planarization strategy: duplicate every level, or decide per level (hybrid).
+        criterion: How the hybrid strategy estimates the cost of duplicating a level.
+        xor_gates: Whether the crossing gadgets consist of XOR gates, which are smaller and shallower than the
+            AND-OR-NOT gadgets.
+        max_swaps: Maximum number of adjacent swaps per level that the hybrid strategy tries to reduce crossings.
+        max_crossings_per_rank: Levels with more crossings are always duplicated; the crossing gates reject such ranks.
+        node_weight: Weight of a gate in the duplication cost model of the hybrid strategy.
+        buffer_weight: Weight of a buffer or inverter chain node in the duplication cost model.
+        depth_growth: Growth of the duplication cost per level in the duplication cost model.
+        lookahead_budget: Nodes a lookahead may create before it is cut off; must be positive.
+        max_duplications: Abort once more nodes than this have been duplicated; 0 lifts the limit.
+        po_order: Primary output order used to seed the first level.
+        seed: Seed of the random primary output order; None draws a random seed.
+        fanout_degree: Maximum output degree of the fanout nodes in the result; at least 2.
+        statistics: Statistics object filled by the pipeline; None discards statistics.
 
     Returns:
         A pair of the planar, balanced, fanout-substituted network in rank order and, for every input of that
@@ -1120,11 +801,11 @@ def planarization(
 
     Raises:
         ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if a gate
-            drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `params.fanout_degree` is
-            below 2, or if the duplication parameters are invalid (a lookahead budget of zero, a negative or
-            non-finite cost weight).
-        RuntimeError: If more than `params.duplication.max_duplications` nodes were duplicated, if a rank has more
-            than `params.duplication.max_crossings_per_rank` crossings, or if a stage cannot keep its contract. Note
-            that `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth
-            of the network.
+            drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `fanout_degree` is below 2,
+            or if the duplication options are invalid (a lookahead budget of zero, a negative or non-finite cost
+            weight).
+        RuntimeError: If more than `max_duplications` nodes were duplicated, if a rank has more than
+            `max_crossings_per_rank` crossings, or if a stage cannot keep its contract. Note that
+            `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth of the
+            network.
     """

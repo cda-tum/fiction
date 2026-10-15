@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.parsing import positive_int, probability
 from mnt.fiction.cli.registry import Category, command
-from mnt.pyfiction.sidb.simulation.engines import quicksim, quicksim_params
+from mnt.pyfiction.sidb.simulation.engines import quicksim
 
 if TYPE_CHECKING:
     import argparse
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import _active_sidb_layout, _apply_physical, _physical_arguments, _store_result
+from ._common import _active_sidb_layout, _physical_arguments, _physical_options, _store_result
 
 
 def _quicksim_arguments(parser: Parser) -> None:
@@ -43,11 +43,14 @@ def _quicksim_arguments(parser: Parser) -> None:
 def quicksim_command(session: Session, args: argparse.Namespace) -> Result:
     """Simulate the active SiDB layout heuristically with QuickSim, approximating the ground state."""
     layout = _active_sidb_layout(session)
-    params = quicksim_params()
-    params.on_progress = session.report_progress
-    params.on_worker_progress = session.report_worker_progress
-    parameters = _apply_physical(params.simulation_parameters, args)
-    params.iteration_steps = args.iterations
-    params.alpha = args.alpha
+    parameters = _physical_options(args)
+    result = quicksim(
+        layout,
+        on_progress=session.report_progress,
+        on_worker_progress=session.report_worker_progress,
+        iteration_steps=args.iterations,
+        alpha=args.alpha,
+        **parameters,
+    )
     parameters.update(iterations=args.iterations, alpha=args.alpha)
-    return _store_result(session, layout, quicksim(layout, params), parameters)
+    return _store_result(session, layout, result, parameters)

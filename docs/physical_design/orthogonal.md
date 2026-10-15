@@ -31,10 +31,11 @@ to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked
 :::{tab-item} Python
 :sync: python
 
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.orthogonal_params
-   :members:
+Use keyword-only `layout_type` to select `cartesian_gate_layout` (the default) or
+`hexagonal_gate_layout`. Pass the exact registered class; subclasses and shifted Cartesian
+layouts raise `TypeError`. Hexagonal layouts require `layout_arrangement`.
 
+```{eval-rst}
 .. autofunction:: mnt.pyfiction.physical_design.orthogonal
 ```
 

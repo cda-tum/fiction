@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.registry import Category, command
 from mnt.pyfiction.qca import qca_layout
-from mnt.pyfiction.qca.io import write_qca_layout, write_qca_layout_params
+from mnt.pyfiction.qca.io import write_qca_layout
 
 from ._write import output_argument, output_path, require_cell_type, written
 
@@ -49,8 +49,7 @@ def write_qca_command(session: Session, args: argparse.Namespace) -> Result:
     entry = session.cell_layouts.current()
     element = require_cell_type(entry.layout, (qca_layout,), ".qca")
     path = output_path(element, args.file, ".qca")
-    params = write_qca_layout_params()
-    params.on_progress = session.report_progress
-    params.create_inter_layer_via_cells = args.via_layers
-    write_qca_layout(element, str(path), params)
+    write_qca_layout(
+        element, str(path), on_progress=session.report_progress, create_inter_layer_via_cells=args.via_layers
+    )
     return written(session, path)

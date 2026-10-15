@@ -25,7 +25,7 @@ to the layout.
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)
+```{doxygenfunction} fiction::physical_design::color_routing(Lyt& lyt, const std::vector<routing_objective>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)
 
 ```
 
@@ -35,9 +35,6 @@ to the layout.
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.color_routing_params
-   :members:
-
 .. autofunction:: mnt.pyfiction.physical_design.color_routing
 ```
 

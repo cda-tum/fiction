@@ -93,7 +93,7 @@ enum class cell_mode : uint8_t
 };
 
 /**
- * A QCA layout: QCA cells on a Cartesian grid with a ground layer (`z = 0`) and a crossing layer (`z = 1`). Cells carry
+ * A QCA layout: QCA cells on a Cartesian grid with a ground layer (`z = 0`) and crossing layers (`z > 0`). Cells carry
  * a type, a mode, and, for inputs and outputs, a name. Clock zones are tiles of cells, and each clock zone can be a
  * synchronization element that extends its Hold phase. The layout has value semantics; copies are independent.
  */
@@ -123,30 +123,30 @@ class layout : public layouts::cell_grid<cell_type>, public layouts::tile_clocki
     /**
      * Creates an empty layout with open clocking.
      *
-     * @param ar Highest cell position; `ar.z = 1` enables the crossing layer.
+     * @param size Half-open cell sizes; layers beyond the ground layer hold crossing cells.
      * @param name Layout name.
      * @param tile_size_x Clock-zone width in cells.
      * @param tile_size_y Clock-zone height in cells.
-     * @throws std::invalid_argument if either clock-zone dimension is zero.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain or a clock-zone size is zero.
      */
-    explicit layout(const aspect_ratio& ar = {}, std::string name = "", const uint16_t tile_size_x = 1u,
+    explicit layout(const extent& size = {}, std::string name = "", const uint16_t tile_size_x = 1u,
                     const uint16_t tile_size_y = 1u) :
-            cell_grid{ar, std::move(name)},
+            cell_grid{size, std::move(name)},
             tile_clocking{tile_size_x, tile_size_y}
     {}
     /**
      * Creates an empty layout clocked by the given scheme.
      *
-     * @param ar Highest cell position; `ar.z = 1` enables the crossing layer.
+     * @param size Half-open cell sizes; layers beyond the ground layer hold crossing cells.
      * @param scheme Clocking scheme over clock zones.
      * @param name Layout name.
      * @param tile_size_x Clock-zone width in cells.
      * @param tile_size_y Clock-zone height in cells.
-     * @throws std::invalid_argument if either clock-zone dimension is zero.
+     * @throws std::invalid_argument If a size exceeds the coordinate domain or a clock-zone size is zero.
      */
-    layout(const aspect_ratio& ar, const clocking_scheme_t& scheme, std::string name = "",
-           const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
-            layout{ar, std::move(name), tile_size_x, tile_size_y}
+    layout(const extent& size, const clocking_scheme_t& scheme, std::string name = "", const uint16_t tile_size_x = 1u,
+           const uint16_t tile_size_y = 1u) :
+            layout{size, std::move(name), tile_size_x, tile_size_y}
     {
         replace_clocking_scheme(scheme);
     }
@@ -213,8 +213,9 @@ class layout : public layouts::cell_grid<cell_type>, public layouts::tile_clocki
      * @param cz Clock zone.
      * @param se Number of full clock cycles to extend the Hold phase of `cz` by; 0 turns `cz` back into a normal clock
      * zone.
+     * @throws std::bad_alloc If allocation fails.
      */
-    void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se) noexcept
+    void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se)
     {
         clocking.assign_synchronization_element(cz, se);
     }

@@ -35,7 +35,9 @@
 #include <array>
 #include <cctype>
 #include <filesystem>
+#include <fstream>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -45,6 +47,7 @@ namespace fiction::networks::io
 {
 /**
  * Helper class to read directories of mockturtle networks of certain types.
+ * BLIF input permits empty and whitespace-only lines, comments, and continued declarations.
  *
  * @tparam NtkPtr Pointer type to a logic network.
  */
@@ -155,9 +158,33 @@ class network_reader
                 }
                 else
                 {
-                    read<mockturtle::blif_reader<Ntk>,
-                         lorina::return_code(const std::string&, const lorina::blif_reader&,
-                                             lorina::diagnostic_engine*)>(p, lorina::read_blif);
+                    read<mockturtle::blif_reader<Ntk>>(
+                        p,
+                        /** @brief Filter empty BLIF lines while preserving records, comments, and continuations. */
+                        [](const std::string& file, const lorina::blif_reader& reader, lorina::diagnostic_engine* diag)
+                        {
+                            std::ifstream input{file};
+                            if (!input.is_open())
+                            {
+                                if (diag != nullptr)
+                                {
+                                    diag->report(lorina::diag_id::ERR_FILE_OPEN).add_argument(file);
+                                }
+                                return lorina::return_code::parse_error;
+                            }
+                            // Lorina checks string::back before skipping empty BLIF lines.
+                            // Normalization buffers one file; a filtering stream buffer can avoid this copy for large
+                            // inputs.
+                            std::stringstream normalized{};
+                            for (std::string line{}; std::getline(input, line);)
+                            {
+                                if (line.find_first_not_of(" \t\r\f\v") != std::string::npos)
+                                {
+                                    normalized << line << '\n';
+                                }
+                            }
+                            return lorina::read_blif(normalized, reader, diag);
+                        });
                 }
             }
             // parse ...

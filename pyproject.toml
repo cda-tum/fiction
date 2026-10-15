@@ -156,7 +156,7 @@ version = ">=1.10"
 # `**/include` also matched `bindings/include/` and `**.hpp` matched the library
 # itself. `[tool.check-sdist]` below now fails on a pattern that drops a tracked source, so the
 # two rules are style rather than the only defense.
-exclude = [ "/.github", "/benchmarks", "/bib", "/docs", "/experiments", "/test", "**/cmake-build-*", "**/__pycache__" ]
+exclude = [ "/.github", "/benchmarks", "/docs", "/experiments", "/test", "**/cmake-build-*", "**/__pycache__" ]
 
 [tool.scikit-build.wheel]
 # Set the wheel install directory
@@ -185,6 +185,11 @@ cache-keys = [
     { file = "pyproject.toml" },
     { git = { commit = true, tags = true } },
     { file = "bindings/**/*.hpp" },
+    { file = "bindings/**/*.cpp" },
+    { file = "include/fiction/**/*.hpp" },
+    { file = "CMakeLists.txt" },
+    { file = "bindings/CMakeLists.txt" },
+    { file = "cmake/**/*.cmake" },
 ]
 
 [tool.uv.dependency-groups]
@@ -302,7 +307,6 @@ docstring-code-format = true
     "invalid-class-name",
     "line-too-long",
     "overload-with-docstring",
-    "snake-case-type-alias",                 # `stacked_cartesian_layout` aliases the snake_case class `cartesian_layout`
 ]
 # `mnt/__init__.py` registers the Windows DLL search path before any extension is imported, and
 # `mnt/pyfiction/__init__.py` loads the submodules lazily. A re-export-only `__init__` cannot do either
@@ -359,7 +363,6 @@ build-backend = "none"
 git-only = [
     "/.github",
     "/benchmarks",
-    "/bib",
     "/docs",
     "/experiments",
     "/test",
