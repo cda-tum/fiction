@@ -18,28 +18,43 @@
 
 #include "pyfiction/pybind11_mkdoc_docstrings.hpp"  // IWYU pragma: export
 
+#include <initializer_list>
 #include <string>
 #include <string_view>
+#include <utility>
 
 /** @brief Python binding documentation. */
 namespace pyfiction
 {
 
 /**
- * @brief Maps the C++ size parameter to the Python extent keyword in layout documentation.
+ * @brief Maps C++ parameter headings and code references to Python keywords.
  * @param documentation Extracted C++ documentation.
- * @return Documentation with the Python keyword.
+ * @param parameters C++ names paired with their Python names.
+ * @return Documentation with the Python keywords.
  */
-inline std::string extent_doc(const char* documentation)
+inline std::string parameter_doc(const char*                                                          documentation,
+                                 std::initializer_list<std::pair<std::string_view, std::string_view>> parameters)
 {
-    /** C++ parameter heading in the extracted documentation. */
-    constexpr std::string_view parameter{"\n    size:"};
-    /** Documentation owned while the parameter heading is replaced. */
+    /** Documentation owned while parameter names are replaced. */
     std::string result{documentation};
-    /** Position of the C++ parameter heading, when present. */
-    if (const auto position = result.find(parameter); position != std::string::npos)
+    /** Native and Python names of each parameter. */
+    for (const auto& [native_name, python_name] : parameters)
     {
-        result.replace(position, parameter.size(), "\n    extent:");
+        /** Delimiters of parameter headings and inline code references. */
+        for (const auto& [prefix, suffix] : {std::pair{"\n    ", ":"}, std::pair{"`", "`"}})
+        {
+            /** Delimited C++ parameter name. */
+            const std::string native{std::string{prefix} + std::string{native_name} + suffix};
+            /** Delimited Python parameter name. */
+            const std::string python{std::string{prefix} + std::string{python_name} + suffix};
+            /** Next exact parameter reference. */
+            for (auto position = result.find(native); position != std::string::npos;
+                 position      = result.find(native, position + python.size()))
+            {
+                result.replace(position, native.size(), python);
+            }
+        }
     }
     return result;
 }

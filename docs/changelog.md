@@ -761,6 +761,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB reader documentation now lists every overload without ambiguous signatures.
   - API navigation now separates simulation topics and links Python and C++ truth-table types.
   - Python API docs now state writable-member defaults, name Python exceptions, and retain distinct overload descriptions.
+    Parameter names and wrapper return values now match Python signatures.
   - Documentation builds reject warnings and preserve signatures and citations in Markdown exports.
   - Corrected test, benchmark, experiment, and documentation build instructions.
 
