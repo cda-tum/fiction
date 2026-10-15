@@ -401,13 +401,14 @@ class is_operational_impl
 
         simulation::detail::simulation_state state{land, model::charge_state::NEGATIVE};
 
+        const auto output_index = synthesis::evaluate_output(truth_table, input_pattern);
         set_charge_distribution_of_input_pins(state, input_pattern);
-        set_charge_distribution_of_output_pins(state, synthesis::evaluate_output(truth_table, input_pattern));
+        set_charge_distribution_of_output_pins(state, output_index);
 
         if (const auto physical_validity = is_physical_validity_feasible(state); physical_validity.has_value())
         {
-            if (const auto output_index = synthesis::evaluate_output(truth_table, input_pattern); is_io_signal_unstable(
-                    state, truth_table.front().num_bits(), input_pattern, output_index, *physical_validity))
+            if (is_io_signal_unstable(state, truth_table.front().num_bits(), input_pattern, output_index,
+                                      *physical_validity))
             {
                 return layout_invalidity_reason::IO_INSTABILITY;
             }
