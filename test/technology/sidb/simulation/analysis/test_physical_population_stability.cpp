@@ -55,6 +55,16 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
         CHECK_THROWS_AS(physical_population_stability(lyt, params), std::invalid_argument);
     }
 
+    SECTION("Infinite screening distance gives the unscreened Coulomb limit")
+    {
+        const physical_population_stability_params params{
+            .sim_params = simulation_parameters{2, -0.29, 5.6, std::numeric_limits<double>::infinity()}};
+        const auto result = physical_population_stability(lyt, params);
+        REQUIRE(result.size() == 1);
+        CHECK_THAT(result.front().distance_corresponding_to_potential.at(transition_type::NEGATIVE_TO_NEUTRAL),
+                   Catch::Matchers::WithinAbs(0.89, 1e-12));
+    }
+
     SECTION("Zero potential difference corresponds to infinite distance")
     {
         const physical_population_stability_params params{.sim_params = simulation_parameters{2, 0.0}};
