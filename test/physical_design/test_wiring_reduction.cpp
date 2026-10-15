@@ -130,13 +130,11 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 {
     SECTION("Cartesian layouts")
     {
-
         check_layout_equiv_all<cartesian_gate_layout>();
     }
 
     SECTION("Corner Cases")
     {
-
         auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>();
         wiring_reduction_stats stats_corner_case_1{};
         wiring_reduction(layout_corner_case_1, {}, &stats_corner_case_1);
@@ -171,7 +169,6 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
     SECTION("Timeout")
     {
-
         auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         wiring_reduction_stats  stats{};
@@ -184,7 +181,6 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
     SECTION("Timeout exceeded")
     {
-
         auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         wiring_reduction_stats  stats{};

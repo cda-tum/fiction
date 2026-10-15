@@ -51,7 +51,7 @@ namespace fiction::sidb::simulation::analysis
 enum class transition_type : uint8_t
 {
     /**
-     * SiDB is neutrally charged, but is closest to being negatively charged.
+     * Transition from neutral to negative charge.
      */
     NEUTRAL_TO_NEGATIVE,
     /**
@@ -59,7 +59,7 @@ enum class transition_type : uint8_t
      */
     NEGATIVE_TO_NEUTRAL,
     /**
-     * SiDB is neutrally charged, but is closest to being positively charged.
+     * Transition from neutral to positive charge.
      */
     NEUTRAL_TO_POSITIVE,
     /**
@@ -85,7 +85,10 @@ struct population_stability_information
     std::unordered_map<transition_type, std::pair<lattice_site, double>> transition_potentials{};
     /**
      * For each transition type, the distance (unit: nm) an additional SiDB would have to be placed at to induce
-     * the required potential difference. Zero potential difference corresponds to positive infinity.
+     * the required potential difference.
+     * A zero potential difference corresponds to positive infinity.
+     * An absent transition also has infinite distance; its entry in `transition_potentials` has infinite potential.
+     * Distances use the potential magnitude of one elementary charge with all other charge states fixed.
      */
     std::unordered_map<transition_type, double> distance_corresponding_to_potential{};
     /**
@@ -104,7 +107,8 @@ struct physical_population_stability_params
      */
     model::simulation_parameters sim_params{};
     /**
-     * Number of decimal places of the distance corresponding to a potential difference.
+     * Number of decimal places of the distance corresponding to a potential difference, at most
+     * `std::numeric_limits<double>::digits10`.
      */
     uint64_t precision_for_distance_corresponding_to_potential = 2;
     /**
@@ -142,8 +146,6 @@ class physical_population_stability_impl
      * energy.
      *
      * @return The population stability information, one entry per distinct charge distribution.
-     * @throws std::invalid_argument If permittivity is nonpositive or non-finite, screening distance is nonpositive or
-     * NaN, or precision exceeds the decimal precision of `double`.
      */
     [[nodiscard]] std::vector<population_stability_information> run()
     {
@@ -278,8 +280,7 @@ class physical_population_stability_impl
         const auto to_negative = std::abs(-local_potential + params.sim_params.mu_minus);
         const auto to_positive = std::abs(-local_potential + params.sim_params.mu_plus());
 
-        if (to_negative < to_positive &&
-            to_negative < info.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second)
+        if (to_negative < info.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second)
         {
             info.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE) = {c, to_negative};
         }
@@ -315,12 +316,13 @@ class physical_population_stability_impl
  * *QuickExact*), it determines the SiDB closest to each charge transition and the potential change required for
  * it, in ascending order of the distributions' energies. The distance an SiDB would have to be placed at to cause
  * that potential change is reported as well.
+ * Distances describe a single-charge perturbation with all other charge states fixed, without lattice discretization.
  *
  * @param lyt The layout to analyze.
  * @param params Parameters.
  * @return The population stability information, one entry per distinct charge distribution.
- * @throws std::invalid_argument If permittivity is nonpositive or non-finite, screening distance is nonpositive or NaN,
- * or precision exceeds the decimal precision of `double`.
+ * @throws std::invalid_argument If relative permittivity is non-positive or non-finite, screening distance is
+ * non-positive or NaN, or precision exceeds the decimal precision of `double`.
  */
 [[nodiscard]] inline std::vector<population_stability_information>
 physical_population_stability(const layout& lyt, const physical_population_stability_params& params)

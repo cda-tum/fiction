@@ -15,6 +15,9 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <fiction/layouts/gate_layout.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -25,7 +28,6 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
@@ -60,6 +62,7 @@ TEST_CASE("Canonical gate layouts expose their geometry", "[gate-level-layout]")
     STATIC_CHECK_FALSE(std::is_default_constructible_v<hexagonal_gate_layout>);
     STATIC_CHECK_FALSE(std::is_default_constructible_v<shifted_cartesian_gate_layout>);
     gate_layout<> lyt{{2, 2, 1}};
+    STATIC_CHECK(std::is_same_v<decltype(lyt.clone()), cartesian_gate_layout>);
     CHECK(lyt.width() == 2);
     CHECK(lyt.height() == 2);
     CHECK(lyt.layers() == 1);

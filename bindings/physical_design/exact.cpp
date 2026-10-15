@@ -15,8 +15,6 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
-#include <fiction/layouts/gate_layout.hpp>
-
 #include <nanobind/nanobind.h>
 
 #if (FICTION_Z3_SOLVER)
@@ -24,6 +22,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/exact.hpp>
 
 #include <sstream>

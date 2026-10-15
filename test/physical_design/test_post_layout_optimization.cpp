@@ -132,13 +132,11 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 {
     SECTION("Cartesian layouts")
     {
-
         check_layout_equiv_all<cartesian_gate_layout>();
     }
 
     SECTION("Corner cases")
     {
-
         SECTION("optimization_layout_corner_case_outputs_1")
         {
             auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>();
@@ -195,7 +193,6 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Maximum gate relocations")
     {
-
         for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
         {
             auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
@@ -211,7 +208,6 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Optimize POs only")
     {
-
         auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
@@ -224,7 +220,6 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Timeout")
     {
-
         auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
@@ -237,7 +232,6 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Timeout exceeded")
     {
-
         auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
@@ -251,7 +245,6 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Planar optimization with planar layout")
     {
-
         auto layout = blueprints::planar_unoptimized_layout<cartesian_gate_layout>();
 
         post_layout_optimization_stats  stats{};
@@ -265,7 +258,6 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Planar optimization with crossing layout")
     {
-
         auto layout = blueprints::planar_optimization_layout<cartesian_gate_layout>();
 
         post_layout_optimization_stats  stats{};

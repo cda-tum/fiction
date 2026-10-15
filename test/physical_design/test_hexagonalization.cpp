@@ -315,7 +315,6 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 {
     SECTION("Cartesian layouts")
     {
-
         check_mapping_equiv_all<cartesian_gate_layout>();
     }
 }

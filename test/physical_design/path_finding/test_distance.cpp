@@ -197,7 +197,6 @@ TEST_CASE("A* distance", "[distance]")
         }
         SECTION("clocking path distance")
         {
-
             SECTION("2DDWave")
             {
                 const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 5, 2}, clocking::twoddwave()};
@@ -249,7 +248,6 @@ TEST_CASE("A* distance functor", "[distance]")
         }
         SECTION("clocking path distance")
         {
-
             SECTION("2DDWave")
             {
                 const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 5, 2}, clocking::twoddwave()};

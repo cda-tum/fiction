@@ -139,12 +139,10 @@ TEST_CASE("Layout equivalence", "[orthogonal]")
 {
     SECTION("Cartesian layouts")
     {
-
         check_ortho_equiv_all<cartesian_gate_layout>();
     }
     SECTION("Hexagonal layouts")
     {
-
         const auto a =
             GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
