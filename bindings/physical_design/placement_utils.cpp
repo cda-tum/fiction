@@ -17,6 +17,7 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/placement_utils.hpp>
 
 #include <mockturtle/traits.hpp>
@@ -78,9 +79,9 @@ void register_placement_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_place<py_cartesian_gate_layout, py_tec_network>(m);
-    detail::register_place<py_shifted_cartesian_gate_layout, py_tec_network>(m);
-    detail::register_place<py_hexagonal_gate_layout, py_tec_network>(m);
+    detail::register_place<fiction::layouts::cartesian_gate_layout, py_tec_network>(m);
+    detail::register_place<fiction::layouts::shifted_cartesian_gate_layout, py_tec_network>(m);
+    detail::register_place<fiction::layouts::hexagonal_gate_layout, py_tec_network>(m);
 }
 
 }  // namespace pyfiction

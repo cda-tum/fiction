@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <cstddef>
@@ -141,9 +142,9 @@ void register_design_rule_violations(nb::module_& m)
 
         ;
 
-    detail::register_gate_level_drvs_impl<py_cartesian_gate_layout>(m);
-    detail::register_gate_level_drvs_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::register_gate_level_drvs_impl<py_hexagonal_gate_layout>(m);
+    detail::register_gate_level_drvs_impl<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_gate_level_drvs_impl<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_gate_level_drvs_impl<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction
