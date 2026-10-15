@@ -18,6 +18,8 @@ from sphinx.ext.autodoc import AttributeDocumenter, ClassDocumenter, MethodDocum
 from sphinx.util.nodes import find_pending_xref_condition
 from typing_extensions import override
 
+from mnt import pyfiction
+
 if TYPE_CHECKING:
     from docutils import nodes
     from sphinx.application import Sphinx
@@ -163,6 +165,9 @@ def setup(app: Sphinx) -> ExtensionMetadata:
     Returns:
         Parallel-build support for the stateless extension.
     """
+    # Load native modules before Sphinx can execute their .pyi overload declarations as dummy functions.
+    for name in pyfiction.__all__:
+        getattr(pyfiction, name)
     app.connect("config-inited", register_documenters, priority=800)
     app.connect("autodoc-process-docstring", prepare_docstring, priority=400)
     app.connect("doctree-read", qualify_type_references)

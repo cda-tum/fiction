@@ -52,6 +52,7 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
     package.mkdir(parents=True)
     (package.parent / "__init__.py").write_text("", encoding="utf-8")
     (package / "__init__.py").write_text(
+        '__all__ = ["route"]\n\n'
         'def route():\n    """route(layout: int, *, limit: int = 42, kind: type[int] = int) -> int\n'
         "route(layout: str, *, limit: int = 42, kind: type[str] = str) -> str\n\n"
         "Overloaded function.\n\n"
@@ -167,3 +168,34 @@ def test_viewcode_source_index(tmp_path: Path) -> None:
     assert "math.html" not in content
     for target in re.findall(r'href="([^"#]+\.html)"', content):
         assert (index.parent / target).is_file(), target
+
+
+def test_native_binding_overloads(tmp_path: Path) -> None:
+    """Render native overloads and method docstrings instead of executing type stubs."""
+    source = tmp_path / "source"
+    source.mkdir()
+    extension = Path(__file__).resolve().parents[2] / "docs" / "_ext"
+    (source / "conf.py").write_text(
+        f"import sys\nsys.path.insert(0, {str(extension)!r})\n"
+        "extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'nanobind_autodoc']\n"
+        "autodoc_use_legacy_class_based = True\n",
+        encoding="utf-8",
+    )
+    (source / "index.rst").write_text(
+        "Native bindings\n===============\n\n"
+        ".. autofunction:: mnt.pyfiction.verification.count_gate_types\n\n"
+        ".. automethod:: mnt.pyfiction.verification.count_gate_types_stats.report\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "out"
+    result = subprocess.run(
+        [sys.executable, "-m", "sphinx", "-b", "html", "-W", str(source), str(output)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    content = html.unescape((output / "index.html").read_text(encoding="utf-8"))
+    assert "Helper for @overload" not in content
+    assert "ntk_or_lyt" in content
+    assert "Return the gate-count report as a string." in content
