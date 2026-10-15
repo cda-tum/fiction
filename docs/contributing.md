@@ -176,6 +176,16 @@ This document was inspired by and partially adapted from
 - <https://yeoman.io/contributing/pull-request.html>
 - <https://github.com/scikit-build/scikit-build>
 
+## Contract Audits
+
+Use the [SpecAudit method](https://github.com/cda-tum/fiction/blob/main/.agent/AUDITS.md)
+to check whether tests protect intended behavior or constrain incidental choices.
+Start with one concrete concern, inspect the contract and consumers, and support
+behavioral claims with reproducible experiments. Preserve regression coverage,
+numerical accuracy, input validation, and compatibility. Keep optional audit
+records in ignored `.ai/audits/`; apply fixes and publish only within the scope
+the maintainer authorized. The method includes a SiDB text-printer example request.
+
 ## Building the Documentation
 
 Install [uv](https://docs.astral.sh/uv/), Doxygen, and the C++ build prerequisites

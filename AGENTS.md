@@ -248,6 +248,15 @@ Use these commands to validate your work.
 - **Prek**: `prek run -a` (Runs all checks: formatting, linting, static analysis). Run this
   before finishing a task.
 
+## Contract Audits
+
+Use [the SpecAudit method](.agent/AUDITS.md) to investigate tests and the code they
+constrain. Start with a bounded concern and check contracts, callers, and evidence
+before recommending a change. AI authorship and a surviving mutation do not justify
+deleting code or tests. Report findings directly; keep useful records in ignored
+`.ai/audits/`. An audit alone authorizes investigation and a report; apply fixes or
+publish only when the maintainer has authorized that scope.
+
 ## Code Review
 
 Fetch open comments before considering a pull request done:
