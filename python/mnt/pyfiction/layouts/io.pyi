@@ -80,7 +80,7 @@ def write_fgl_layout(
     Raises:
         ValueError: If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme,
             or contains illegal XML text controls.
-        RuntimeError: If the output file cannot be created or written.
+        RuntimeError: If the output file cannot be created, written, closed, or replaced.
     """
 
 class fgl_parsing_error(RuntimeError): ...

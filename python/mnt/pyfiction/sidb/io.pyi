@@ -101,7 +101,26 @@ def write_sidb_layout_svg(
     sidb_border_width: float = 0.3,
     color_background: color_mode = ...,
     lattice_mode: sidb_lattice_mode = ...,
-) -> None: ...
+) -> None:
+    """
+    Write an SVG representation of the SiDB layout to the supplied filename.
+    The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
+
+    Args:
+        layout: Layout to draw.
+        filename: Output file path.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        lattice_point_size: Lattice-point size in SVG units.
+        sidb_size: Size of the SiDB in SVG units.
+        sidb_border_width: SiDB border width in SVG units.
+        color_background: The color mode of the background for the SVG output.
+        lattice_mode: The lattice mode of the SiDB layout.
+
+    Raises:
+        IndexError: SVG padding exceeds the lattice-site coordinate range.
+        RuntimeError: The file cannot be created, written, closed, or replaced.
+    """
+
 @overload
 def write_sidb_layout_svg(
     layout: mnt.pyfiction.sidb.sidb_layout,
@@ -120,12 +139,20 @@ def write_sidb_layout_svg(
     The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 
     Args:
+        layout: Layout to draw.
+        charge_distribution: Charge distribution whose sites match the layout.
+        filename: Output file path.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         lattice_point_size: Lattice-point size in SVG units.
         sidb_size: Size of the SiDB in SVG units.
         sidb_border_width: SiDB border width in SVG units.
         color_background: The color mode of the background for the SVG output.
         lattice_mode: The lattice mode of the SiDB layout.
+
+    Raises:
+        ValueError: The charge distribution sites differ from the layout.
+        IndexError: SVG padding exceeds the lattice-site coordinate range.
+        RuntimeError: The file cannot be created, written, closed, or replaced.
     """
 
 @overload
@@ -138,7 +165,27 @@ def write_sidb_layout_svg_to_string(
     sidb_border_width: float = 0.3,
     color_background: color_mode = ...,
     lattice_mode: sidb_lattice_mode = ...,
-) -> str: ...
+) -> str:
+    """
+    Return an SVG representation of the SiDB layout.
+    The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
+
+    Args:
+        layout: Layout to draw.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        lattice_point_size: Lattice-point size in SVG units.
+        sidb_size: Size of the SiDB in SVG units.
+        sidb_border_width: SiDB border width in SVG units.
+        color_background: The color mode of the background for the SVG output.
+        lattice_mode: The lattice mode of the SiDB layout.
+
+    Returns:
+        SVG text for the layout.
+
+    Raises:
+        IndexError: SVG padding exceeds the lattice-site coordinate range.
+    """
+
 @overload
 def write_sidb_layout_svg_to_string(
     layout: mnt.pyfiction.sidb.sidb_layout,
@@ -156,12 +203,21 @@ def write_sidb_layout_svg_to_string(
     The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 
     Args:
+        layout: Layout to draw.
+        charge_distribution: Charge distribution whose sites match the layout.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         lattice_point_size: Lattice-point size in SVG units.
         sidb_size: Size of the SiDB in SVG units.
         sidb_border_width: SiDB border width in SVG units.
         color_background: The color mode of the background for the SVG output.
         lattice_mode: The lattice mode of the SiDB layout.
+
+    Returns:
+        SVG text for the layout.
+
+    Raises:
+        ValueError: The charge distribution sites differ from the layout.
+        IndexError: SVG padding exceeds the lattice-site coordinate range.
     """
 
 def print_sidb_layout(
