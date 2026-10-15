@@ -7776,6 +7776,14 @@ Template Args:
 
 static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_clear_colors = R"doc(Remove all assigned colors.)doc";
 
+static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_clear_colors_2 =
+R"doc(Assigns the given color to all nodes and preserves edge colors.
+
+Args:
+    clr: Color to assign to the nodes.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_edge_color =
 R"doc(Returns the assigned color of a given edge.
 
