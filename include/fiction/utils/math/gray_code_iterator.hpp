@@ -150,8 +150,11 @@ class gray_code_iterator
 
         return result;
     }
+#if defined(__GNUC__) || defined(__clang__)
+// Signed offsets intentionally use modulo-2^64 arithmetic on the unsigned iteration counter.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     /**
      * Addition assignment operator. Iterator is increased by given number.
      *
@@ -165,7 +168,9 @@ class gray_code_iterator
 
         return *this;
     }
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
     /**
      * Subtraction operator. Computes the Gray code of the current iterator minus the given integer.
      *
@@ -206,8 +211,11 @@ class gray_code_iterator
 
         return result;
     }
+#if defined(__GNUC__) || defined(__clang__)
+// Signed offsets intentionally use modulo-2^64 arithmetic on the unsigned iteration counter.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
     /**
      * Subtraction assignment operator. Sets a previous Gray code.
      *
@@ -222,7 +230,9 @@ class gray_code_iterator
 
         return *this;
     }
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
     /**
      * Assignment operator. Sets the current number to the given integer.
      *
