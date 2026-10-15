@@ -2695,7 +2695,7 @@ std::optional<Lyt> graph_oriented_layout_design(const tec_nt& ntk, graph_oriente
     detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), std::move(ps), st,
                                                      std::move(custom_cost_objective)};
 
-    const auto result = p.run();
+    auto result = p.run();
 
     if (pst)
     {
