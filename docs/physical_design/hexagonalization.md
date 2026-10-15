@@ -28,6 +28,10 @@ $$
 
 **Header:** `fiction/physical_design/hexagonalization.hpp`
 
+```{doxygenclass} fiction::physical_design::hexagonalization_io_pin_routing_error
+:members:
+```
+
 ```{doxygenstruct} fiction::physical_design::hexagonalization_params
 :members:
 ```

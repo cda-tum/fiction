@@ -5,6 +5,8 @@ to disable structural hashing. Furthermore, create_buf is overwritten such that 
 towards the size of the network and compute the identity function. In the same way, a buffer with more than one fanout
 node is considered a fanout node (or splitter in some contexts) that copies an incoming signal to two or more data paths.
 
+## Network Types
+
 ::::{tab-set}
 :sync-group: language
 
@@ -23,6 +25,15 @@ node is considered a fanout node (or splitter in some contexts) that copies an i
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.networks.aig_network
+   :members:
+
+.. autoclass:: mnt.pyfiction.networks.xag_network
+   :members:
+
+.. autoclass:: mnt.pyfiction.networks.mig_network
+   :members:
+
 .. autoclass:: mnt.pyfiction.networks.technology_network
    :members:
 ```

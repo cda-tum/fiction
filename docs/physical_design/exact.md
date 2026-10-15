@@ -13,6 +13,9 @@ network specifications under constraints. This approach finds exact results but 
 
 **Header:** `fiction/physical_design/exact.hpp`
 
+```{doxygenenum} fiction::physical_design::technology_constraints
+```
+
 ```{doxygenstruct} fiction::physical_design::exact_physical_design_params
 :members:
 ```
@@ -35,6 +38,9 @@ network specifications under constraints. This approach finds exact results but 
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.physical_design.technology_constraints
+   :members:
+
 .. autofunction:: mnt.pyfiction.physical_design.exact
 ```
 

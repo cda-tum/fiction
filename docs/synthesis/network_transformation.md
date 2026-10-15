@@ -1,10 +1,35 @@
-# Network Conversion
+# Network Transformation
+
+(network-conversion)=
+
+## Network Conversion
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
 
 **Header:** `fiction/synthesis/network_conversion.hpp`
 
 ```{doxygenfunction} fiction::synthesis::convert_network
-
 ```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.synthesis.network_target
+   :members:
+
+.. autofunction:: mnt.pyfiction.synthesis.convert_network
+```
+
+:::
+
+::::
 
 ## Network Balancing
 
@@ -139,6 +164,9 @@
 .. autofunction:: mnt.pyfiction.synthesis.all_standard_3_input_functions
 
 .. autofunction:: mnt.pyfiction.synthesis.all_supported_standard_functions
+
+.. autoclass:: mnt.pyfiction.synthesis.mapper_stats
+   :members:
 
 .. autoclass:: mnt.pyfiction.synthesis.technology_mapping_stats
    :members:
@@ -288,6 +316,9 @@
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.synthesis.dynamic_truth_table
+   :members:
+
 .. autofunction:: mnt.pyfiction.synthesis.create_id_tt
 
 .. autofunction:: mnt.pyfiction.synthesis.create_not_tt
@@ -344,3 +375,10 @@
 :::
 
 ::::
+
+## Technology Mapping Library
+
+**Header:** `fiction/synthesis/technology_mapping_library.hpp`
+
+```{doxygenfile} synthesis/technology_mapping_library.hpp
+```

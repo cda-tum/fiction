@@ -9,7 +9,9 @@ io/io
 views/views
 ```
 
-## Network Utils
+(network-utils)=
+
+## Network Utilities
 
 ::::{tab-set}
 :sync-group: language
@@ -95,7 +97,9 @@ views/views
 
 ::::
 
-## Name Utils
+(name-utils)=
+
+## Name Utilities
 
 ::::{tab-set}
 :sync-group: language
@@ -155,3 +159,32 @@ views/views
 :::
 
 ::::
+
+## Simulation and Random Generation
+
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.networks.simulate
+
+.. autofunction:: mnt.pyfiction.networks.simulate_outputs
+
+.. autofunction:: mnt.pyfiction.networks.random_network
+
+```
+
+## Interface Matching
+
+**Header:** `fiction/networks/interface_matching.hpp`
+
+```{doxygenstruct} fiction::networks::interface_matching
+:members:
+```
+
+```{doxygenfunction} fiction::networks::match_interfaces
+```
+
+## Layout Network Extraction
+
+**Header:** `fiction/networks/extract_layout_network.hpp`
+
+```{doxygenfunction} fiction::networks::extract_layout_network
+```

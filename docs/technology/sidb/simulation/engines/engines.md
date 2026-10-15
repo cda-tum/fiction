@@ -1,4 +1,6 @@
-# Simulation Engines
+(simulation-engines)=
+
+# Engines
 
 (quicksim)=
 
@@ -33,6 +35,10 @@
 
 ::::
 
+(quickexact)=
+
+(clustercomplete)=
+
 ## Exhaustive Ground State Simulation
 
 ::::{tab-set}
@@ -40,8 +46,6 @@
 
 :::{tab-item} C++
 :sync: cpp
-
-(quickexact)=
 
 **Header:** `fiction/technology/sidb/simulation/engines/quickexact.hpp`
 
@@ -52,8 +56,6 @@
 ```{doxygenfunction} fiction::sidb::simulation::engines::quickexact(const layout& lyt, const quickexact_params& params = {})
 
 ```
-
-(clustercomplete)=
 
 **Header:** `fiction/technology/sidb/simulation/engines/clustercomplete.hpp`
 
@@ -99,6 +101,10 @@
 ## Ground State Space Construction
 
 **Header:** `fiction/technology/sidb/simulation/engines/ground_state_space.hpp`
+
+```{doxygenstruct} fiction::sidb::simulation::engines::ground_state_space_params
+:members:
+```
 
 ```{doxygenstruct} fiction::sidb::simulation::engines::ground_state_space_results
 :members:

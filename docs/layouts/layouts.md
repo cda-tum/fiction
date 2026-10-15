@@ -16,7 +16,9 @@ shifted_cartesian_layout
 io/io
 ```
 
-## Layout Utils
+(layout-utils)=
+
+## Layout Utilities
 
 ::::{tab-set}
 :sync-group: language
@@ -62,3 +64,17 @@ io/io
 :::
 
 ::::
+
+## Type Traits
+
+**Header:** `fiction/traits.hpp`
+
+```{doxygenfile} traits.hpp
+```
+
+## Preset Types
+
+**Header:** `fiction/types.hpp`
+
+```{doxygenfile} types.hpp
+```
