@@ -167,9 +167,9 @@ TEST_CASE("Annealing preserves the declared cost type with overloaded costs", "[
     CHECK((std::same_as<typename decltype(single)::second_type, double>));
     CHECK((std::same_as<typename decltype(multi)::second_type, double>));
     CHECK(single.first == -1);
-    CHECK(single.second == -0.75f);
+    CHECK(single.second == -0.75);
     CHECK(multi.first == -1);
-    CHECK(multi.second == -0.75f);
+    CHECK(multi.second == -0.75);
 }
 
 /**
