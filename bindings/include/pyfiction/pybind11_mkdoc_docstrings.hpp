@@ -15845,8 +15845,10 @@ function provided here serves the inverse purpose by calculating the
 distance for a given potential and given physical parameters.
 
 The distance rounds upward to the requested decimal precision, with a
-minimum of `10^-precision` nm. Zero potential returns positive
-infinity. Positive infinite potential returns the minimum distance.
+minimum of `10^-precision` nm. Floating-point evaluation error can
+exceed the requested decimal precision, especially for extreme
+physical parameters. Zero potential returns positive infinity.
+Positive infinite potential returns the minimum distance.
 
 Args:
     params: The physical parameters for a given hydrogen-passivated
@@ -16866,7 +16868,8 @@ threshold.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_distance_corresponding_to_potential =
 R"doc(For each transition type, the distance (unit: nm) an additional SiDB
 would have to be placed at to induce the required potential
-difference.)doc";
+difference. A zero potential difference corresponds to positive
+infinity.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_system_energy = R"doc(Electrostatic potential energy of the charge distribution (unit: eV).)doc";
 

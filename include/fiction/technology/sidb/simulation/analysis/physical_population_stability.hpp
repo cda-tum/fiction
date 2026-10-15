@@ -87,6 +87,8 @@ struct population_stability_information
      * For each transition type, the distance (unit: nm) an additional SiDB would have to be placed at to induce
      * the required potential difference.
      * A zero potential difference corresponds to positive infinity.
+     * An absent transition also has infinite distance; its entry in `transition_potentials` has infinite potential.
+     * Distances use the potential magnitude of one elementary charge with all other charge states fixed.
      */
     std::unordered_map<transition_type, double> distance_corresponding_to_potential{};
     /**
@@ -314,6 +316,7 @@ class physical_population_stability_impl
  * *QuickExact*), it determines the SiDB closest to each charge transition and the potential change required for
  * it, in ascending order of the distributions' energies. The distance an SiDB would have to be placed at to cause
  * that potential change is reported as well.
+ * Distances describe a single-charge perturbation with all other charge states fixed, without lattice discretization.
  *
  * @param lyt The layout to analyze.
  * @param params Parameters.
