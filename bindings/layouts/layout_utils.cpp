@@ -17,7 +17,7 @@
 
 #include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate tuple input signatures.
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_utils.hpp>

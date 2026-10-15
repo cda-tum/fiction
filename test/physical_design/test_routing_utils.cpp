@@ -23,7 +23,6 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/types.hpp>
 
 #include <algorithm>
 #include <new>

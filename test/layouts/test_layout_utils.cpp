@@ -28,7 +28,6 @@
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/qca/layout.hpp>
-#include <fiction/types.hpp>
 
 #include <array>
 #include <concepts>
