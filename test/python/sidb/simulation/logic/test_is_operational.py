@@ -14,7 +14,10 @@ import pytest
 
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
+from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.logic import (
+    bdl_wire,
     bdl_wire_selection,
     detect_bdl_wires,
     generate_bdl_input_pattern_layouts,
@@ -26,7 +29,7 @@ from mnt.pyfiction.sidb.simulation.logic import (
     operational_input_patterns,
     operational_status,
 )
-from mnt.pyfiction.synthesis import create_and_tt
+from mnt.pyfiction.synthesis import create_and_tt, create_id_tt
 
 
 def test_is_operational():
@@ -73,10 +76,14 @@ def test_is_operational():
     canvas_lyt = sidb_layout()
     canvas_lyt.assign_sidb(lattice_site(4, 2, 1), sidb_dot_tag.LOGIC)
     canvas_lyt.assign_sidb(lattice_site(6, 3, 1), sidb_dot_tag.LOGIC)
-    [op_status, _evaluated_input_combinations] = is_operational(
-        lyt, [create_and_tt()], input_bdl_wires, output_bdl_wires, **options
+    canvas_lyt.assign_sidb(lattice_site(1000, 0, 0), sidb_dot_tag.LOGIC)
+    options.update(
+        mu_minus=-0.28,
+        op_condition=operational_condition.REJECT_KINKS,
+        strategy_to_analyze_operational_status=operational_analysis_strategy.FILTER_ONLY,
     )
-    assert op_status == operational_status.NON_OPERATIONAL
+    with pytest.raises(ValueError, match="canvas SiDB is not part of the layout"):
+        is_operational(lyt, [create_and_tt()], input_bdl_wires, output_bdl_wires, canvas_lyt=canvas_lyt, **options)
 
 
 @pytest.fixture
@@ -230,3 +237,42 @@ def test_and_gate_111_lattice_operational_input_pattern(resources_dir):
     assert len(operational_patterns) == 2
 
     assert operational_patterns == {0, 3}
+
+
+@pytest.mark.parametrize("mixed_variables", [False, True])
+def test_invalid_specification_raises_value_error(
+    and_gate_with_bdl_wires: tuple[sidb_layout, list[bdl_wire], list[bdl_wire]], *, mixed_variables: bool
+) -> None:
+    lyt, input_wires, output_wires = and_gate_with_bdl_wires
+    spec = [create_and_tt(), create_id_tt()] if mixed_variables else []
+    layouts = generate_bdl_input_pattern_layouts(lyt, input_wires)
+    for check in (
+        is_operational,
+        operational_input_patterns,
+        kink_induced_non_operational_input_patterns,
+        is_kink_induced_non_operational,
+    ):
+        with pytest.raises(ValueError, match="variables" if mixed_variables else "empty"):
+            check(lyt, spec)
+    with pytest.raises(ValueError, match="variables" if mixed_variables else "empty"):
+        is_operational(layouts, spec, input_wires, output_wires)
+
+
+def test_quicksim_rejects_charged_defects(
+    and_gate_with_bdl_wires: tuple[sidb_layout, list[bdl_wire], list[bdl_wire]],
+) -> None:
+    lyt, input_wires, output_wires = and_gate_with_bdl_wires
+    lyt.assign_defect(lattice_site(100, 100, 0), sidb_defect(sidb_defect_type.DB, -1))
+    layouts = generate_bdl_input_pattern_layouts(lyt, input_wires)
+    for check in (is_operational, operational_input_patterns):
+        with pytest.raises(ValueError, match="QuickSim does not support charged defects"):
+            check(lyt, [create_and_tt()], sim_engine=sidb_simulation_engine.QUICKSIM, mu_minus=-0.28)
+    with pytest.raises(ValueError, match="QuickSim does not support charged defects"):
+        is_operational(
+            layouts,
+            [create_and_tt()],
+            input_wires,
+            output_wires,
+            sim_engine=sidb_simulation_engine.QUICKSIM,
+            mu_minus=-0.28,
+        )

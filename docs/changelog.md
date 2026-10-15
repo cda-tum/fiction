@@ -607,6 +607,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Operational checks now reject invalid specifications and charged defects with QuickSim across entry points.
+    Empty simulation results no longer count as operational input patterns.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.

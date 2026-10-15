@@ -154,3 +154,12 @@ TEST_CASE("Logic matching propagates invalid lattice basis errors", "[verify-log
     CHECK_THROWS_AS(verify_logic_match(lyt, charge_distribution{lyt}, params, std::vector{create_id_tt()}, 0, {}, {}),
                     std::out_of_range);
 }
+
+TEST_CASE("Logic matching rejects invalid specifications", "[verify-logic-match][invalid-spec]")
+{
+    const auto                lyt = blueprints::siqad_and_gate();
+    const charge_distribution cd{lyt};
+    CHECK_THROWS_AS(verify_logic_match(lyt, cd, {}, {}, 0, {}, {}), std::invalid_argument);
+    CHECK_THROWS_AS(verify_logic_match(lyt, cd, {}, {create_and_tt(), create_id_tt()}, 0, {}, {}),
+                    std::invalid_argument);
+}

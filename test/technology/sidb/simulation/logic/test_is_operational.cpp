@@ -907,3 +907,70 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
         }
     }
 }
+
+TEST_CASE("Operational checks reject invalid specifications", "[is-operational][invalid-spec]")
+{
+    const auto lyt          = blueprints::siqad_and_gate();
+    const auto input_wires  = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    const auto layouts      = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+
+    for (const auto& spec : {std::vector<tt>{}, std::vector<tt>{create_and_tt(), create_id_tt()}})
+    {
+        CHECK_THROWS_AS(is_operational(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(is_operational(lyt, spec, {}, input_wires, output_wires), std::invalid_argument);
+        CHECK_THROWS_AS(is_operational(layouts, spec, {}, input_wires, output_wires), std::invalid_argument);
+        CHECK_THROWS_AS(operational_input_patterns(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(operational_input_patterns(lyt, spec, {}, input_wires, output_wires), std::invalid_argument);
+        CHECK_THROWS_AS(kink_induced_non_operational_input_patterns(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(kink_induced_non_operational_input_patterns(lyt, spec, {}, input_wires, output_wires),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(is_kink_induced_non_operational(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(is_kink_induced_non_operational(lyt, spec, {}, input_wires, output_wires),
+                        std::invalid_argument);
+    }
+}
+
+TEST_CASE("Operational checks reject charged defects with QuickSim", "[is-operational][quicksim-defects]")
+{
+    auto lyt = blueprints::siqad_and_gate();
+    lyt.assign_defect({100, 100, 0}, defect{defect_type::DB, -1});
+    const auto                  input_wires  = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    const auto                  output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    auto                        layouts      = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+    const std::vector<tt>       spec{create_and_tt()};
+    const is_operational_params params{.sim_params = simulation_parameters{2, -0.28}, .sim_engine = engine::QUICKSIM};
+
+    CHECK_THROWS_AS(is_operational(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(is_operational(lyt, spec, params, input_wires, output_wires), std::invalid_argument);
+    CHECK_THROWS_AS(is_operational(layouts, spec, params, input_wires, output_wires), std::invalid_argument);
+    CHECK_THROWS_AS(operational_input_patterns(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(operational_input_patterns(lyt, spec, params, input_wires, output_wires), std::invalid_argument);
+    CHECK_THROWS_AS(kink_induced_non_operational_input_patterns(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(is_kink_induced_non_operational(lyt, spec, params), std::invalid_argument);
+
+    SECTION("A charged defect occurs only in a later supplied layout")
+    {
+        for (auto& pattern : layouts)
+        {
+            pattern.assign_defect({100, 100, 0}, defect{defect_type::NONE});
+        }
+        layouts.back().assign_defect({100, 100, 0}, defect{defect_type::DB, -1});
+        CHECK_THROWS_AS(is_operational(layouts, spec, params, input_wires, output_wires), std::invalid_argument);
+    }
+}
+
+TEST_CASE("An empty simulation result cannot establish an operational pattern", "[is-operational][empty-result]")
+{
+    const auto lyt          = blueprints::siqad_and_gate();
+    const auto input_wires  = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    auto       layouts      = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+    layouts[1]              = layout{};
+    const std::vector<tt>       spec{create_and_tt()};
+    const is_operational_params params{.sim_params = simulation_parameters{2, -0.28}, .sim_engine = engine::QUICKSIM};
+    sidb::simulation::logic::detail::is_operational_impl implementation{layouts,     spec,         params,
+                                                                        input_wires, output_wires, layout{}};
+
+    CHECK_FALSE(sidb::simulation::logic::detail::operational_patterns_of(implementation, 4).contains(1));
+}
