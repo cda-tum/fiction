@@ -812,7 +812,7 @@ class graph_oriented_layout_design_impl
 {
   public:
     /**
-     * Constructor for the graph-oriented layout design algorithm.
+     * Initializes graph-oriented layout design with owned options and a cost callback.
      *
      * @param src The source network to be placed, already converted to a `technology_network`.
      * @param p GOLD parameters transferred into owned invocation storage.
@@ -2654,7 +2654,7 @@ class graph_oriented_layout_design_impl
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @param ntk The network to be placed and routed.
- * @param ps The parameters for the A* priority routing algorithm. Defaults to an empty parameter set.
+ * @param ps Parameters for graph-oriented layout design. Defaults to an empty parameter set.
  * @param pst A pointer to a statistics object to record execution details. Defaults to nullptr.
  * @param custom_cost_objective A custom cost objective that is evaluated at every expansion of the search space graph.
  * Should be a function that can be calculated based on the current partial layout and returns an uint64_t that should
