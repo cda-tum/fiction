@@ -455,13 +455,13 @@ class transition_type(enum.Enum):
     """
 
     NEUTRAL_TO_NEGATIVE = 0
-    """SiDB is neutrally charged, but is closest to being negatively charged."""
+    """Transition from neutral to negative charge."""
 
     NEGATIVE_TO_NEUTRAL = 1
     """SiDB is negatively charged, but is closest to being neutrally charged."""
 
     NEUTRAL_TO_POSITIVE = 2
-    """SiDB is neutrally charged, but is closest to being positively charged."""
+    """Transition from neutral to positive charge."""
 
     POSITIVE_TO_NEUTRAL = 3
     """SiDB is positively charged, but is closest to being neutrally charged."""
@@ -534,7 +534,11 @@ class population_stability_information:
         """
         For each transition type, the distance (unit: nm) an additional SiDB
         would have to be placed at to induce the required potential
-        difference.
+        difference. A zero potential difference corresponds to positive
+        infinity. An absent transition also has infinite distance; its entry
+        in `transition_potentials` has infinite potential. Distances use the
+        potential magnitude of one elementary charge with all other charge
+        states fixed.
         """
 
     @distance_corresponding_to_potential.setter
@@ -555,7 +559,9 @@ def physical_population_stability(
     determines the SiDB closest to each charge transition and the
     potential change required for it, in ascending order of the
     distributions' energies. The distance an SiDB would have to be placed
-    at to cause that potential change is reported as well.
+    at to cause that potential change is reported as well. Distances
+    describe a single-charge perturbation with all other charge states
+    fixed, without lattice discretization.
 
     Args:
         lyt: The layout to analyze.
@@ -566,9 +572,10 @@ def physical_population_stability(
         charge distribution.
 
     Raises:
-        std::invalid_argument: If a potential-to-distance conversion
-                               receives invalid physical parameters or
-                               precision.
+        std::invalid_argument: If relative permittivity is non-positive or
+                               non-finite, screening distance is non-
+                               positive or NaN, or precision exceeds the
+                               decimal precision of `double`.
     """
 
 class physically_valid_parameters_domain:
