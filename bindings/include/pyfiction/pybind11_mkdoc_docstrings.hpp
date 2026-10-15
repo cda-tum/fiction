@@ -3600,8 +3600,17 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_incoming_data_flow =
-R"doc(Returns coordinates of declared sources; optionally filters physical
-clocking and adjacency.
+R"doc(Returns adjacent declared-source coordinates in input-index order.
+
+Args:
+    t: Destination-object coordinate.
+
+Template Args:
+    RespectClocking: Require incoming clocking in addition to
+                     adjacency; enabled by default.
+
+Returns:
+    Source coordinates of the selected connections.
 
 )doc";
 
