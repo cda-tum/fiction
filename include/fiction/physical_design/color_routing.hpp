@@ -62,6 +62,7 @@ struct color_routing_params
     bool partial_sat = false;
 };
 
+/** @brief Statistics for graph-coloring-based routing. */
 struct color_routing_stats
 {
     /**
@@ -85,10 +86,12 @@ struct color_routing_stats
 namespace detail
 {
 
+/** @brief Routes objectives using an edge intersection graph coloring. */
 template <typename Lyt>
 class color_routing_impl
 {
   public:
+    /** @brief Stores the layout, routing objectives, parameters, and statistics. */
     color_routing_impl(Lyt& lyt, const std::vector<routing_objective>& obj, const color_routing_params& p,
                        color_routing_stats& st) :
             layout{lyt},
@@ -97,6 +100,7 @@ class color_routing_impl
             pst{st}
     {}
 
+    /** @brief Runs the color routing algorithm. */
     bool run()
     {
         // measure runtime

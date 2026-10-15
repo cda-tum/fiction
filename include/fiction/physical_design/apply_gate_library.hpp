@@ -96,6 +96,7 @@ template <typename GateLibrary, typename GateLyt>
 namespace detail
 {
 
+/** @brief Maps gate-level tiles to cell-level gate implementations. */
 template <typename GateLibrary, typename GateLyt>
 class apply_gate_library_impl
 {

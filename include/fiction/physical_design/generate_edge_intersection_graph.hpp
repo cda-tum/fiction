@@ -62,6 +62,7 @@ struct generate_edge_intersection_graph_params
     std::optional<uint32_t> path_limit = std::nullopt;
 };
 
+/** @brief Statistics for edge intersection graph generation. */
 struct generate_edge_intersection_graph_stats
 {
     /**
@@ -82,10 +83,10 @@ struct generate_edge_intersection_graph_stats
      * @brief Routing objective index for each vertex ID.
      */
     std::vector<std::size_t> objective_indices{};
-    /**
-     * Stores the size of the generated edge intersection graph.
-     */
-    std::size_t num_vertices, num_edges;
+    /** @brief Number of vertices in the intersection graph. */
+    std::size_t num_vertices;
+    /** @brief Number of edges in the intersection graph. */
+    std::size_t num_edges;
 };
 
 namespace detail

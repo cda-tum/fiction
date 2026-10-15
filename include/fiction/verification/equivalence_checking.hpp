@@ -68,10 +68,12 @@ struct equivalence_checking_stats
      * Stores the equivalence type.
      */
     eq_type eq = eq_type::NO;
-    /**
-     * Throughput values at which weak equivalence manifests.
-     */
-    int64_t tp_spec = 1ll, tp_impl = 1ll, tp_diff = 0ll;
+    /** @brief Specification throughput at which weak equivalence manifests. */
+    int64_t tp_spec = 1ll;
+    /** @brief Implementation throughput at which weak equivalence manifests. */
+    int64_t tp_impl = 1ll;
+    /** @brief Difference between implementation and specification throughput. */
+    int64_t tp_diff = 0ll;
     /**
      * Stores a possible counter example.
      */
@@ -80,10 +82,10 @@ struct equivalence_checking_stats
      * Stores the runtime.
      */
     mockturtle::stopwatch<>::duration runtime{0};
-    /**
-     * Stores DRVs.
-     */
-    fiction::verification::gate_level_drv_stats spec_drv_stats{}, impl_drv_stats{};
+    /** @brief Design rule violations in the specification layout. */
+    fiction::verification::gate_level_drv_stats spec_drv_stats{};
+    /** @brief Design rule violations in the implementation layout. */
+    fiction::verification::gate_level_drv_stats impl_drv_stats{};
 };
 
 namespace detail

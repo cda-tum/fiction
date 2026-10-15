@@ -54,6 +54,7 @@ struct a_star_params
 namespace detail
 {
 
+/** @brief Finds a layout path using A* search. */
 template <typename Path, typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {

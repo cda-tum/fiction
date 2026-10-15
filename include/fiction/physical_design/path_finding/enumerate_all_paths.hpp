@@ -44,6 +44,7 @@ struct enumerate_all_paths_params
 namespace detail
 {
 
+/** @brief Enumerates paths between layout coordinates. */
 template <typename Path, typename Lyt>
 class enumerate_all_paths_impl
 {

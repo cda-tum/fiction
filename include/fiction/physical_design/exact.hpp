@@ -181,9 +181,13 @@ struct exact_physical_design_params
  */
 struct exact_physical_design_stats
 {
+    /** @brief Total algorithm runtime. */
     mockturtle::stopwatch<>::duration time_total{0};
 
-    uint64_t x_size{0ull}, y_size{0ull};
+    /** @brief Layout extent along the x axis. */
+    uint64_t x_size{0ull};
+    /** @brief Layout extent along the y axis. */
+    uint64_t y_size{0ull};
     /** @brief Number of logic gates, excluding primary inputs and outputs. */
     uint64_t num_gates{0ull};
     /** @brief Number of physical wires, excluding primary inputs and outputs. */
@@ -191,8 +195,10 @@ struct exact_physical_design_stats
     /** @brief Number of crossing-layer wires above occupied ground-layer tiles. */
     uint64_t num_crossings{0ull};
 
+    /** @brief Number of examined aspect ratios. */
     uint32_t num_aspect_ratios{0ul};
 
+    /** @brief Writes the collected statistics to the output stream. */
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
@@ -248,6 +254,7 @@ class exact_impl
                             static_cast<uint64_t>(lower_bound)};
     }
 
+    /** @brief Runs the exact algorithm. */
     std::optional<Lyt> run()
     {
         if (ps.num_threads > 1)
@@ -335,6 +342,8 @@ class exact_impl
          * @param ctxp The context that is used in all solvers.
          * @param lyt The empty gate-level layout that is going to contain the created layout.
          * @param ps The parameters to respect in the SMT instance generation process.
+         * @param ntk Topologically ordered input network.
+         * @param sbl Forbidden gate port configurations on layout tiles.
          */
         smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, exact_physical_design_params ps,
                     const surface_black_list<fcn::port_direction>& sbl) noexcept :
@@ -907,6 +916,7 @@ class exact_impl
          *
          * @param n Node to be considered.
          * @return ncl variable from ctx.
+         * @param clk Clock phase of the node.
          */
         [[nodiscard]] z3::expr get_ncl(const mockturtle::node<topology_ntk_t>& n, const unsigned clk)
         {
@@ -917,6 +927,7 @@ class exact_impl
          *
          * @param t Tile to be considered.
          * @return tcl variable from ctx.
+         * @param clk Clock phase of the tile.
          */
         [[nodiscard]] z3::expr get_tcl(const typename Lyt::tile& t, const unsigned clk)
         {
@@ -2794,6 +2805,7 @@ class exact_impl
          *
          * @param t Initial tile to start recursion from (not included in model evaluations).
          * @param e Edge to check for.
+         * @param model Satisfying SMT model containing the routing solution.
          */
         void route(const typename Lyt::tile& t, const mockturtle::edge<topology_ntk_t>& e, const z3::model& model)
         {
