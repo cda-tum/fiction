@@ -246,26 +246,27 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
 {
     const auto fc = networks::fanins(ntk, n);
 
-    // NOLINTBEGIN(*-else-after-return)
+    /** @brief Number of nonconstant inputs to dispatch. */
+    const auto num_fanins = fc.fanin_nodes.size();
 
-    if (const auto num_fanins = fc.fanin_nodes.size(); num_fanins == 0)
+    if (num_fanins == 0)
     {
         return place(lyt, t, ntk, n);
     }
-    else if (num_fanins == 1)
+    if (num_fanins == 1)
     {
         const auto fanin_signal = ntk.make_signal(fc.fanin_nodes[0]);
 
         return place(lyt, t, ntk, n, node2pos[fanin_signal]);
     }
-    else if (num_fanins == 2)
+    if (num_fanins == 2)
     {
         const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
         const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
 
         return place(lyt, t, ntk, n, node2pos[fanin_signal_a], node2pos[fanin_signal_b], fc.constant_fanin);
     }
-    else if (num_fanins == 3)
+    if (num_fanins == 3)
     {
         const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
         const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
@@ -273,8 +274,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
 
         return place(lyt, t, ntk, n, node2pos[fanin_signal_a], node2pos[fanin_signal_b], node2pos[fanin_signal_c]);
     }
-
-    // NOLINTEND(*-else-after-return)
 
     throw std::invalid_argument("Unsupported gate input count");
 }
@@ -384,26 +383,27 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
 {
     const auto fc = networks::fanins(ntk, n);
 
-    // NOLINTBEGIN(*-else-after-return)
+    /** @brief Number of nonconstant inputs to dispatch. */
+    const auto num_fanins = fc.fanin_nodes.size();
 
-    if (const auto num_fanins = fc.fanin_nodes.size(); num_fanins == 0)
+    if (num_fanins == 0)
     {
         return place(lyt, t, ntk, n);
     }
-    else if (num_fanins == 1)
+    if (num_fanins == 1)
     {
         const auto fanin_signal = ntk.make_signal(fc.fanin_nodes[0]);
 
         return place(lyt, t, ntk, n, node2pos[fanin_signal][n]);
     }
-    else if (num_fanins == 2)
+    if (num_fanins == 2)
     {
         const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
         const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
 
         return place(lyt, t, ntk, n, node2pos[fanin_signal_a][n], node2pos[fanin_signal_b][n], fc.constant_fanin);
     }
-    else if (num_fanins == 3)
+    if (num_fanins == 3)
     {
         const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
         const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
@@ -412,8 +412,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
         return place(lyt, t, ntk, n, node2pos[fanin_signal_a][n], node2pos[fanin_signal_b][n],
                      node2pos[fanin_signal_c][n]);
     }
-
-    // NOLINTEND(*-else-after-return)
 
     throw std::invalid_argument("Unsupported gate input count");
 }
