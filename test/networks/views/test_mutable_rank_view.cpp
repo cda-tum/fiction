@@ -272,9 +272,6 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
     ntk.create_po(f2_t);
     ntk.create_po(f3_t);
 
-    network_balancing_params ps;
-    ps.unify_outputs = true;
-
     const auto ntk_r = mutable_rank_view(ntk);
 
     mockturtle::equivalence_checking_stats st;
