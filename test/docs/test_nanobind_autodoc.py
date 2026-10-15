@@ -27,6 +27,13 @@ def test_nanobind_rendering(tmp_path: Path, builder: str, *, literal_signatures:
     extension = Path(__file__).resolve().parents[2] / "docs" / "_ext"
     (source / "conf.py").write_text(
         f"import sys\nsys.path[:0] = [{str(extension)!r}, {str(source)!r}]\n"
+        "import importlib.util\n"
+        f"for name, path in [('mnt', {str(source / 'mnt' / '__init__.py')!r}), "
+        f"('mnt.pyfiction', {str(source / 'mnt' / 'pyfiction' / '__init__.py')!r})]:\n"
+        "    spec = importlib.util.spec_from_file_location(name, path)\n"
+        "    module = importlib.util.module_from_spec(spec)\n"
+        "    sys.modules[name] = module\n"
+        "    spec.loader.exec_module(module)\n"
         "extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_llm.txt', "
         "'nanobind_autodoc', 'llm_markdown']\n"
         "autodoc_use_legacy_class_based = True\n"
