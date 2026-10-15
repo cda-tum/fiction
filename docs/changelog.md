@@ -767,6 +767,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Markdown API documentation now includes inline C++ exception types.
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
