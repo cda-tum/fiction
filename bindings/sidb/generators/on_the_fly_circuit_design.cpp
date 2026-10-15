@@ -18,6 +18,7 @@
 #include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
@@ -68,13 +69,14 @@ void register_on_the_fly_circuit_design(nb::module_& m)
 
     m.def(
         "on_the_fly_sidb_circuit_design",
-        [](const py_hexagonal_gate_layout& layout, const decltype(on_the_fly_circuit_design_options{}.timeout) timeout,
-           const decltype(operational_options{}.timeout)              design_gate_timeout,
-           const decltype(operational_options{}.sim_params.base)      base,
-           const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
-           const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
-           const decltype(operational_options{}.sim_params.lambda_tf) lambda_tf,
-           const decltype(operational_options{}.sim_engine)           sim_engine,
+        [](const fiction::layouts::hexagonal_gate_layout&              layout,
+           const decltype(on_the_fly_circuit_design_options{}.timeout) timeout,
+           const decltype(operational_options{}.timeout)               design_gate_timeout,
+           const decltype(operational_options{}.sim_params.base)       base,
+           const decltype(operational_options{}.sim_params.mu_minus)   mu_minus,
+           const decltype(operational_options{}.sim_params.epsilon_r)  epsilon_r,
+           const decltype(operational_options{}.sim_params.lambda_tf)  lambda_tf,
+           const decltype(operational_options{}.sim_engine)            sim_engine,
            const decltype(operational_options{}.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance)
                                                                                             threshold_bdl_interdistance,
            const decltype(operational_options{}
@@ -141,11 +143,12 @@ void register_on_the_fly_circuit_design(nb::module_& m)
             {
                 return fiction::sidb::generators::on_the_fly_circuit_design(snapshot, params);
             }
-            catch (const fiction::fcn::unsupported_gate_type_exception<py_coordinate>& error)
+            catch (
+                const fiction::fcn::unsupported_gate_type_exception<fiction::layouts::layout_base::coordinate>& error)
             {
                 throw std::invalid_argument{fmt::format("Unsupported gate type at tile {}", error.where())};
             }
-            catch (const fiction::fcn::unsupported_gate_orientation_exception<py_coordinate,
+            catch (const fiction::fcn::unsupported_gate_orientation_exception<fiction::layouts::layout_base::coordinate,
                                                                               fiction::fcn::port_direction>& error)
             {
                 throw std::invalid_argument{fmt::format("Unsupported gate orientation at tile {}", error.where())};

@@ -17,7 +17,11 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/obstructions.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
@@ -104,12 +108,12 @@ void register_k_shortest_paths(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_yen_k_shortest_paths_impl<py_cartesian_gate_layout>(m);
-    detail::register_yen_k_shortest_paths_impl<py_cartesian_layout>(m);
-    detail::register_yen_k_shortest_paths_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::register_yen_k_shortest_paths_impl<py_shifted_cartesian_layout>(m);
-    detail::register_yen_k_shortest_paths_impl<py_hexagonal_gate_layout>(m);
-    detail::register_yen_k_shortest_paths_impl<py_hexagonal_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<fiction::layouts::cartesian_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<fiction::layouts::shifted_cartesian_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<fiction::layouts::hexagonal_gate_layout>(m);
+    detail::register_yen_k_shortest_paths_impl<fiction::layouts::hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

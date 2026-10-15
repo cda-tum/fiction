@@ -18,7 +18,11 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/obstructions.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
@@ -100,12 +104,12 @@ Args:
 void register_a_star(nb::module_& m)
 {
 
-    detail::register_a_star_impl<py_cartesian_gate_layout>(m);
-    detail::register_a_star_impl<py_cartesian_layout>(m);
-    detail::register_a_star_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::register_a_star_impl<py_shifted_cartesian_layout>(m);
-    detail::register_a_star_impl<py_hexagonal_gate_layout>(m);
-    detail::register_a_star_impl<py_hexagonal_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::cartesian_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::shifted_cartesian_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::hexagonal_gate_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction
