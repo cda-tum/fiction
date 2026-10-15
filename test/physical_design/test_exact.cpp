@@ -27,6 +27,7 @@
 #if (FICTION_Z3_SOLVER)
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -879,7 +880,9 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
 
 TEST_CASE("Exact physical design reports progress", "[exact]")
 {
-    const auto ntk = blueprints::and_or_network<technology_network>();
+    /** @brief Selects the ordinary or empty-blacklist entry for the same progress contract. */
+    const bool with_blacklist = GENERATE(false, true);
+    const auto ntk            = blueprints::and_or_network<technology_network>();
 
     auto params = twoddwave(configuration());
 
@@ -901,7 +904,10 @@ TEST_CASE("Exact physical design reports progress", "[exact]")
 
         exact_physical_design_stats stats{};
 
-        const auto layout = exact<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = with_blacklist ? exact_with_blacklist<cartesian_gate_layout>(ntk, {}, params, &stats) :
+                                             exact<cartesian_gate_layout>(ntk, params, &stats);
+
+        CHECK(static_cast<bool>(params.on_progress));
 
         REQUIRE(layout.has_value());
         // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
