@@ -32,13 +32,13 @@ namespace pyfiction
 using simulation_model = fiction::sidb::model::simulation_parameters;
 
 /**
- * @brief Construct physical values after validating the charge-state base.
+ * @brief Construct physical values after validating the charge-state base and screening values.
  * @param base Number of charge states, either 2 or 3.
  * @param mu_minus Negative-charge transition energy in eV.
  * @param epsilon_r Relative permittivity.
  * @param lambda_tf Screening distance in nm.
  * @return Validated native physical simulation values.
- * @throws nb::value_error If base is neither 2 nor 3.
+ * @throws nb::value_error If base is neither 2 nor 3, or a screening value is nonpositive or non-finite.
  */
 inline fiction::sidb::model::simulation_parameters
 make_simulation_parameters(const uint8_t base, const double mu_minus, const double epsilon_r, const double lambda_tf)
@@ -46,6 +46,14 @@ make_simulation_parameters(const uint8_t base, const double mu_minus, const doub
     if (base != 2 && base != 3)
     {
         throw nb::value_error("base must be 2 or 3");
+    }
+    if (!std::isfinite(epsilon_r) || epsilon_r <= 0)
+    {
+        throw nb::value_error("epsilon_r must be positive and finite");
+    }
+    if (!std::isfinite(lambda_tf) || lambda_tf <= 0)
+    {
+        throw nb::value_error("lambda_tf must be positive and finite");
     }
     return fiction::sidb::model::simulation_parameters{base, mu_minus, epsilon_r, lambda_tf};
 }

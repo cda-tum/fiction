@@ -441,6 +441,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Python bindings reject NaN or reversed BDL distance bounds, nonpositive or NaN conversion potentials,
     and conversion precisions that yield a zero or non-finite distance step.
 
+  - Python SiDB inputs reject bases other than 2 or 3 and nonpositive or non-finite screening values.
+
   - **Breaking:** Use `read_network`, `read_fgl_layout`, `random_network`, `exact`, and `orthogonal`
     with keyword `network_type` or `layout_type`. Specialized function names were removed.
 
@@ -582,6 +584,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Algorithms:
+
+  - Potential-to-distance conversion now bisects the distance bracket, so fine precision does not stall the scan.
 
   - `random_coordinate` uses a separate random generator for each thread.
   - Dense distance maps now index every layer and reject coordinates outside the layout frame.

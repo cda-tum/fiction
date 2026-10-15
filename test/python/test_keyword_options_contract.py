@@ -327,6 +327,34 @@ def test_distance_conversion_precision_and_infinite_potential() -> None:
     )
 
 
+def test_distance_conversion_high_precision_completes() -> None:
+    """Fine distance precision completes without a linear scan of the distance grid."""
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "from mnt.pyfiction.sidb.model import potential_to_distance_conversion; "
+                "assert 0.4 < potential_to_distance_conversion(0.5, 20) < 0.5"
+            ),
+        ],
+        check=True,
+        timeout=10,
+        shell=False,
+    )
+
+
+@pytest.mark.parametrize("option", ["epsilon_r", "lambda_tf"])
+@pytest.mark.parametrize("value", [0.0, -1.0, float("nan"), float("inf")])
+def test_physics_rejects_invalid_positive_values(option: str, value: float) -> None:
+    """The physical model rejects nonpositive and non-finite screening values."""
+    _assert_native_rejection(
+        f"potential_to_distance_conversion(0.5, 2, {option}=float({str(value)!r}))",
+        "ValueError",
+        option,
+    )
+
+
 def test_population_stability_rejects_zero_distance_step() -> None:
     """Both native distance-conversion callers reject unusable precision."""
     _assert_native_rejection(
