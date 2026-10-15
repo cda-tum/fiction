@@ -205,11 +205,10 @@ class path_set : public std::set<Path>
  * @return `true` iff `successor` hosts a wire that is crossable from `src`.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& src,
                                      const fiction::layouts::layout_base::coordinate& successor) noexcept
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt must be a coordinate layout type");
-
     assert(lyt.is_adjacent_elevation_of(src, successor));
 
     if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
@@ -379,11 +378,9 @@ void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const Path& path,
  * @throws std::invalid_argument If an intermediate wire chain contains a cycle.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
     const auto intermediate = [&lyt](const auto id) { return lyt.is_wire(id) && !lyt.is_fanout(id); };
     std::vector<routing_objective> objectives{};
     lyt.foreach_object(

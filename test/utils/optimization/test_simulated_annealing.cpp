@@ -28,6 +28,90 @@
 using namespace fiction;
 using namespace fiction::utils::optimization;
 
+/** @brief Signed floating-point cost callable on a named lvalue. */
+struct lvalue_annealing_cost
+{
+    /** @brief Returns the state's signed cost. @param state State to evaluate. @return State value. */
+    double operator()(const int& state) &
+    {
+        return static_cast<double>(state);
+    }
+};
+
+/** @brief Cost callable only as an rvalue, unlike the algorithm's named callable parameters. */
+struct rvalue_annealing_cost
+{
+    /** @brief Returns a signed cost. @param state State to evaluate. @return State value. */
+    double operator()(const int& state) &&
+    {
+        return static_cast<double>(state);
+    }
+};
+
+/** @brief Generated state without a default constructor. */
+struct nondefault_annealing_state
+{
+    /** @brief Requires an explicit initial state value. @param value Initial value. */
+    explicit nondefault_annealing_state([[maybe_unused]] int value) {}
+};
+
+/**
+ * @brief Checks the single-state annealing callable contract.
+ * @tparam Cost Cost callable type.
+ * @tparam Schedule Temperature schedule type.
+ * @tparam Next Next-state callable type.
+ */
+template <typename Cost, typename Schedule, typename Next>
+concept annealable = requires(Cost&& cost, Schedule&& schedule, Next&& next) {
+    simulated_annealing(0, 2.0, 1.0, 1, std::forward<Cost>(cost), std::forward<Schedule>(schedule),
+                        std::forward<Next>(next));
+};
+
+/**
+ * @brief Checks the generated-state annealing callable contract.
+ * @tparam Generator State generator type.
+ * @tparam Cost Cost callable type.
+ * @tparam Schedule Temperature schedule type.
+ * @tparam Next Next-state callable type.
+ */
+template <typename Generator, typename Cost, typename Schedule, typename Next>
+concept multi_annealable = requires(Generator&& generator, Cost&& cost, Schedule&& schedule, Next&& next) {
+    multi_simulated_annealing(2.0, 1.0, 1, 1, std::forward<Generator>(generator), std::forward<Cost>(cost),
+                              std::forward<Schedule>(schedule), std::forward<Next>(next));
+};
+
+TEST_CASE("Annealing accepts signed floating-point costs and actual callable forms", "[sim-anneal]")
+{
+    const auto cost      = [](const auto&) { return 0.0; };
+    const auto schedule  = [](double) { return 1.0; };
+    const auto next      = [](const auto& state) { return state; };
+    const auto generator = [] { return 0; };
+    CHECK((annealable<decltype(cost), decltype(schedule), decltype(next)>));
+    CHECK((annealable<lvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<rvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<int, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
+    CHECK_FALSE((annealable<decltype(cost), decltype(schedule), decltype([](int) { return 0.0; })>));
+    CHECK((multi_annealable<decltype(generator), decltype(cost), decltype(schedule), decltype(next)>));
+    CHECK((multi_annealable<decltype(generator), lvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((multi_annealable<decltype(generator), rvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK_FALSE(
+        (multi_annealable<decltype(generator), decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
+    CHECK_FALSE(
+        (multi_annealable<decltype(generator), decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
+    CHECK_FALSE(
+        (multi_annealable<decltype(generator), decltype(cost), decltype(schedule), decltype([](int) { return 0.0; })>));
+    CHECK_FALSE((multi_annealable<int, decltype(cost), decltype(schedule), decltype(next)>));
+    CHECK_FALSE((multi_annealable<decltype([] { return nondefault_annealing_state{0}; }), decltype(cost),
+                                  decltype(schedule), decltype(next)>));
+
+    const auto result =
+        simulated_annealing(0, 2.0, 1.0, 1, lvalue_annealing_cost{}, schedule, [](int& state) { return state - 1; });
+    CHECK(result.first == -1);
+    CHECK(result.second == -1.0);
+}
+
 /**
  * The 1D Schwefel function is a non-convex function with many local minima. It is used to test optimization algorithms.
  * This definition is taken from: https://www.sfu.ca/~ssurjano/schwef.html

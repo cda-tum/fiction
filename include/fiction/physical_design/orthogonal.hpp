@@ -743,13 +743,10 @@ class orthogonal_impl
  * empty.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 Lyt orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {},
                orthogonal_physical_design_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
     // check for input degree

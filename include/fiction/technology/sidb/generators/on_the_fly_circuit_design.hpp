@@ -180,17 +180,14 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  */
 template <typename GateLyt>
+    requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
+             std::derived_from<GateLyt, layouts::hexagonal_layout> &&
+             (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
 [[nodiscard]] layout on_the_fly_circuit_design_on_defective_surface(
     const mockturtle::names_view<networks::technology_network>& ntk, const GateLyt& lattice_tiling,
     const layout& defective_surface, const on_the_fly_circuit_design_on_defective_surface_params& params = {},
     on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>* stats = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-        "GateLyt is not a gate-level layout");
-    static_assert((std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>),
-                  "GateLyt is not a hexagonal");
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
     deadline             = utils::make_deadline(params.timeout, deadline);
@@ -297,15 +294,12 @@ template <typename GateLyt>
  * is returned. Deadline checks are cooperative and do not interrupt allocation or cell placement.
  */
 template <typename GateLyt>
+    requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
+             std::derived_from<GateLyt, layouts::hexagonal_layout> &&
+             (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
 [[nodiscard]] layout on_the_fly_circuit_design(const GateLyt&                          gate_lyt,
                                                const on_the_fly_circuit_design_params& params = {})
 {
-    static_assert(
-        requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-        "GateLyt is not a gate-level layout");
-    static_assert((std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>),
-                  "GateLyt is not a hexagonal");
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
     deadline             = utils::make_deadline(params.timeout, deadline);

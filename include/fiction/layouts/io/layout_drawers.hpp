@@ -608,13 +608,10 @@ class gate_layout_hexagonal_drawer : public detail::gate_layout_shifted_tile_dra
  * @param on_progress Receives completed drawing work.
  */
 template <class Lyt, class Drawer>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {},
                       utils::progress_callback on_progress = {})
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     std::stringstream nodes{}, edges{}, topology{};
 
     auto tile_attributes = drawer.additional_tile_attributes(lyt);
@@ -663,6 +660,7 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
  * \param filename Filename
  */
 template <class Lyt, class Drawer>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {},
                       utils::progress_callback on_progress = {})
 {
