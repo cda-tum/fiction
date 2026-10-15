@@ -70,6 +70,21 @@ concept all_names_transferable =
         restore_names(src, dest, map);
     };
 
+/** @brief Native layout without an output-name setter. */
+struct layout_without_output_names : cartesian_gate_layout
+{
+    /** @brief Disables output-name assignment. @param index Output index. @param name Output name. */
+    void set_output_name(uint32_t index, const std::string& name) = delete;
+};
+
+/** @brief Checks output-name restoration. @tparam Dest Destination network or layout type. */
+template <typename Dest>
+concept output_names_transferable = requires(const tec_nt& src, Dest& dest) { restore_output_names(src, dest); };
+
+static_assert(output_names_transferable<cartesian_gate_layout>);
+static_assert(output_names_transferable<mockturtle::aig_network>);
+static_assert(!output_names_transferable<layout_without_output_names>);
+
 /**
  * @brief Checks branching name transfers with native layout endpoints.
  * @tparam Dest Destination network or layout type.
