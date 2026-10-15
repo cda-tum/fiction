@@ -18,7 +18,6 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/networks/technology_network.hpp>

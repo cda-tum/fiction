@@ -22,7 +22,6 @@
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
