@@ -137,8 +137,12 @@ TEST_CASE("East-south coloring owns its named traversal", "[orthogonal]")
         ntk.set_name(gate, "conjunction");
         ntk.create_po(gate, "result");
         const mockturtle::fanout_view fanouts{fanout_substitution<tec_nt>(ntk)};
-        const auto                    output = fanouts.get_node(fanouts.po_at(0));
-        return std::pair{physical_design::detail::east_south_edge_coloring(mockturtle::topo_view{fanouts}), output};
+        /**
+         * @brief Output node ID used after the source views are destroyed.
+         */
+        const auto output_node = fanouts.get_node(fanouts.po_at(0));
+        return std::pair{physical_design::detail::east_south_edge_coloring(mockturtle::topo_view{fanouts}),
+                         output_node};
     }();
 
     const auto& ntk = container.color_ntk;
