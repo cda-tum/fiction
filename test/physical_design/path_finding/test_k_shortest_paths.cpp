@@ -139,7 +139,6 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
     }
     SECTION("clocking paths")
     {
-
         SECTION("2DDWave")
         {
             const gate_layout<lyt> layout{gate_layout<lyt>::extent{2, 2, 1}, clocking::twoddwave()};
@@ -368,7 +367,6 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
     }
     SECTION("clocking paths")
     {
-
         SECTION("2DDWave")
         {
             const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::twoddwave()};

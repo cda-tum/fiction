@@ -107,7 +107,7 @@ namespace fiction::layouts
  * Visitors may edit coordinates, names, and capabilities. Object and terminal visitors must not create
  * or remove objects, change terminal order, or replace the layout during traversal. Connection visitors
  * must also preserve the traversed input or sink connections, as specified on each visitor.
- * @tparam CoordinateLayout Coordinate geometry used for placement.
+ * @tparam CoordinateLayout Coordinate geometry used for placement. Defaults to `cartesian_layout`.
  */
 template <typename CoordinateLayout = cartesian_layout>
     requires std::derived_from<CoordinateLayout, layout_base>
@@ -2115,6 +2115,7 @@ class gate_layout : public CoordinateLayout
         functions = std::move(initialized);
     }
 };
+
 /** @brief Gate-level layout on a Cartesian grid. */
 using cartesian_gate_layout = gate_layout<cartesian_layout>;
 /** @brief Gate-level layout on a hexagonal grid with an explicit arrangement. */

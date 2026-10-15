@@ -117,7 +117,6 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
 {
     SECTION("Cartesian layouts")
     {
-
         check_graph_oriented_layout_design_equiv_all<cartesian_gate_layout>();
     }
 }

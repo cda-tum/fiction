@@ -218,8 +218,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
-  - **Breaking:** `cart_gate_clk_lyt`, `hex_gate_clk_lyt`, and `shifted_cart_gate_clk_lyt` leave `types.hpp`;
-    use the canonical gate-layout types from their defining header.
+  - **Breaking:** `types.hpp` drops the three `*_gate_clk_lyt` presets, their pointers, `gate_layout_t`,
+    and transitive layout includes. Include `fiction/layouts/gate_layout.hpp` and use its canonical types.
   - **Breaking:** `gate_level_layout` is now `gate_layout` in `fiction/layouts/gate_layout.hpp`.
     Update C++ includes and template names; Python class names remain unchanged.
   - `bounding_box_2d` is renamed to `bounding_box` in C++ and Python.

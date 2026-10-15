@@ -62,6 +62,7 @@ TEST_CASE("Canonical gate layouts expose their geometry", "[gate-level-layout]")
     STATIC_CHECK_FALSE(std::is_default_constructible_v<hexagonal_gate_layout>);
     STATIC_CHECK_FALSE(std::is_default_constructible_v<shifted_cartesian_gate_layout>);
     gate_layout<> lyt{{2, 2, 1}};
+    STATIC_CHECK(std::is_same_v<decltype(lyt.clone()), cartesian_gate_layout>);
     CHECK(lyt.width() == 2);
     CHECK(lyt.height() == 2);
     CHECK(lyt.layers() == 1);
