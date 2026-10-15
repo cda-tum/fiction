@@ -36,7 +36,6 @@
 
 namespace fiction::physical_design
 {
-
 /**
  * Place 0-input gates.
  *
@@ -52,7 +51,6 @@ template <typename Geometry>
 place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
       const tec_nt& ntk, const tec_nt::node& n)
 {
-
     if (ntk.is_pi(n))
     {
         return lyt.create_pi(ntk.has_name(ntk.make_signal(n)) ? ntk.get_name(ntk.make_signal(n)) : "", t);
@@ -75,7 +73,6 @@ template <typename Geometry>
 place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
       const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a)
 {
-
     if (ntk.is_inv(n))
     {
         return lyt.create_not(a, t);
@@ -98,7 +95,8 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * @param a First incoming signal to the newly placed gate in `lyt`.
  * @param b Second incoming signal to the newly placed gate in `lyt`.
  * @param c Third optional incoming constant value signal to the newly placed gate in `lyt`. Might change the gate
- * function when set, e.g., from a MAJ to an AND if `c == false`.
+ * function when set, e.g., from a MAJ to an AND if `c == false`. If no network fanin is constant, `c` replaces
+ * the third input.
  * @return Output port pointing to the placed gate in `lyt`.
  */
 template <typename Geometry>
@@ -107,7 +105,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
       const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
       const typename fiction::layouts::gate_layout<Geometry>::object_id& b, const std::optional<bool>& c = std::nullopt)
 {
-
     if (ntk.is_and(n))
     {
         return lyt.create_and(a, b, t);
@@ -167,7 +164,7 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
             {
                 throw std::invalid_argument("Constant reduction requires a three-input function");
             }
-            uint8_t constant_index{};
+            uint8_t constant_index{2};
             ntk.foreach_fanin(n,
                               [&](const auto& f, const auto index)
                               {
@@ -216,7 +213,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
       const typename fiction::layouts::gate_layout<Geometry>::object_id& b,
       const typename fiction::layouts::gate_layout<Geometry>::object_id& c)
 {
-
     if (ntk.is_maj(n))
     {
         return lyt.create_maj(a, b, c, t);
@@ -248,7 +244,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
       const tec_nt& ntk, const tec_nt::node& n,
       const mockturtle::node_map<typename fiction::layouts::gate_layout<Geometry>::object_id, tec_nt>& node2pos)
 {
-
     const auto fc = networks::fanins(ntk, n);
 
     // NOLINTBEGIN(*-else-after-return)
@@ -321,19 +316,8 @@ struct branching_signal_container
      */
     [[nodiscard]] layouts::layout_object_id operator[](const tec_nt::node& n) const
     {
-        if (const auto branch = std::ranges::find_if(branches,
-                                                     [&n](const auto& b)
-                                                     {
-                                                         if (b != nullptr)
-                                                         {
-                                                             if (b->ntk_node == n)
-                                                             {
-                                                                 return true;
-                                                             }
-                                                         }
-
-                                                         return false;
-                                                     });
+        if (const auto branch =
+                std::ranges::find_if(branches, [&n](const auto& b) { return b != nullptr && b->ntk_node == n; });
             branch != branches.cend())
         {
             return (*branch)->lyt_signal;
@@ -398,7 +382,6 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
       const tec_nt& ntk, const tec_nt::node& n,
       const mockturtle::node_map<branching_signal_container<fanout_size>, tec_nt>& node2pos)
 {
-
     const auto fc = networks::fanins(ntk, n);
 
     // NOLINTBEGIN(*-else-after-return)

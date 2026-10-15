@@ -332,7 +332,9 @@ class exact_impl
          *
          * @param ctxp The context that is used in all solvers.
          * @param lyt The empty gate-level layout that is going to contain the created layout.
+         * @param ntk Named technology-network traversal that owns the placement map's node IDs.
          * @param ps The parameters to respect in the SMT instance generation process.
+         * @param sbl Gate orientations forbidden at each tile.
          */
         smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, exact_physical_design_params ps,
                     const surface_black_list<fcn::port_direction>& sbl) noexcept :

@@ -43,6 +43,7 @@
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
+#include "fiction/types.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -184,9 +185,9 @@ template <typename GateLyt>
              std::derived_from<GateLyt, layouts::hexagonal_layout> &&
              (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
 [[nodiscard]] layout on_the_fly_circuit_design_on_defective_surface(
-    const mockturtle::names_view<networks::technology_network>& ntk, const GateLyt& lattice_tiling,
-    const layout& defective_surface, const on_the_fly_circuit_design_on_defective_surface_params& params = {},
-    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>* stats = nullptr)
+    const tec_nt& ntk, const GateLyt& lattice_tiling, const layout& defective_surface,
+    const on_the_fly_circuit_design_on_defective_surface_params&   params = {},
+    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>* stats  = nullptr)
 {
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;

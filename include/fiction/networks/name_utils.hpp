@@ -291,7 +291,7 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mocktu
 /**
  * Same as the other restore_signal_names function but this overload uses a `mockturtle::node_map` with a
  * branching_signal_container that is specifically used for networks or layouts that allow branches to be distinct,
- * e.g., by their position on the layout.
+ * e.g., by their position on the layout. Skips branches with no mapped layout object.
  *
  * @tparam NtkDest Target network or gate-level layout type.
  * @tparam fanout_size Maximum fanout size in the network.
@@ -306,18 +306,20 @@ void restore_signal_names(
     const tec_nt& ntk_src, NtkDest& ntk_dest,
     const mockturtle::node_map<physical_design::branching_signal_container<fanout_size>, tec_nt>& old2new)
 {
-    if constexpr ((requires {
+    if constexpr (requires {
                       requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>;
-                  } || mockturtle::has_set_name_v<NtkDest>))
+                  } || mockturtle::has_set_name_v<NtkDest>)
     {
-
         const auto restore_signal_name = [&ntk_src, &ntk_dest, &old2new](const auto& n, const auto& f)
         {
             if (ntk_src.has_name(f))
             {
-                const auto name = ntk_src.get_name(f);
-
-                ntk_dest.set_name((old2new[ntk_src.get_node(f)][n]), name);
+                const auto target = old2new[ntk_src.get_node(f)][n];
+                if (target == layouts::layout_object_id{})
+                {
+                    return;
+                }
+                ntk_dest.set_name(target, ntk_src.get_name(f));
             }
         };
 

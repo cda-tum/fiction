@@ -111,8 +111,12 @@ struct coloring_container
     /** @brief Named traversal with separate node and edge colors. */
     networks::views::out_of_place_edge_color_view<mockturtle::topo_view<mockturtle::fanout_view<tec_nt>>> color_ntk;
 
-    /** @brief Uncolored, eastward, and southward color identifiers. */
-    uint32_t color_null = 0ul, color_east, color_south;
+    /** @brief Identifier for uncolored edges. */
+    uint32_t color_null = 0ul;
+    /** @brief Identifier for eastward edges. */
+    uint32_t color_east;
+    /** @brief Identifier for southward edges. */
+    uint32_t color_south;
 
     /** @brief Returns the other direction color. */
     [[nodiscard]] uint32_t opposite_color(const uint32_t c) const noexcept
@@ -252,10 +256,9 @@ inline uint32_t is_eastern_po_orientation_available(const coloring_container& ct
     return eastern_side_available;
 }
 
-/** @brief Computes the extent required by colored gates and primary outputs. @tparam Lyt Output layout type. */
-template <typename Lyt>
-fiction::layouts::layout_base::extent determine_layout_size(const coloring_container& ctn,
-                                                            const uint32_t            num_multi_output_nodes)
+/** @brief Computes the extent required by colored gates and primary outputs. */
+inline fiction::layouts::layout_base::extent determine_layout_size(const coloring_container& ctn,
+                                                                   const uint32_t            num_multi_output_nodes)
 {
     uint64_t x = 0ull, y = ctn.color_ntk.num_pis() == 0 ? 0 : ctn.color_ntk.num_pis() - 1;
     ctn.color_ntk.foreach_node(
@@ -527,7 +530,7 @@ class orthogonal_impl
 
         // instantiate the layout
         auto layout = layouts::make_gate_level_layout<Lyt>(ps.layout_arrangement,
-                                                           determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
+                                                           determine_layout_size(ctn, num_multi_output_nodes),
                                                            layouts::clocking::twoddwave(ps.number_of_clock_phases));
 
         mockturtle::node_map<typename Lyt::object_id, tec_nt> pi2node{static_cast<const tec_nt&>(ctn.color_ntk)};
