@@ -54,7 +54,7 @@ struct displacement_robustness_domain
 {
     /**
      * The displaced layouts and their operational status.
-     * Defaults to an empty vector.
+     * Empty by default.
      */
     std::vector<std::pair<layout, logic::operational_status>> operational_values{};
 };

@@ -82,7 +82,7 @@ struct population_stability_information
     lattice_site critical_dot{};
     /**
      * For each transition type, the SiDB closest to it and the required potential difference (unit: V).
-     * Defaults to an empty map.
+     * Empty by default.
      */
     std::unordered_map<transition_type, std::pair<lattice_site, double>> transition_potentials{};
     /**
@@ -91,7 +91,7 @@ struct population_stability_information
      * A zero potential difference corresponds to positive infinity.
      * An absent transition also has infinite distance; its entry in `transition_potentials` has infinite potential.
      * Distances use the potential magnitude of one elementary charge with all other charge states fixed.
-     * Defaults to an empty map.
+     * Empty by default.
      */
     std::unordered_map<transition_type, double> distance_corresponding_to_potential{};
     /**

@@ -64,12 +64,12 @@ struct result
     layout lyt{};
     /**
      * @brief Charge distributions determined by the algorithm.
-     * Defaults to an empty vector.
+     * Empty by default.
      */
     std::vector<charge_distribution> charge_distributions{};
     /**
      * @brief Physical parameters used in the simulation.
-     * Defaults to `model::simulation_parameters{}`.
+     * Uses the default physical simulation parameters.
      */
     model::simulation_parameters sim_params{};
     /**
