@@ -68,6 +68,8 @@ modindex_common_prefix = ["mnt.pyfiction."]
 napoleon_numpy_docstring = False
 napoleon_custom_sections = [("Template Args", "params_style")]
 intersphinx_mapping = {
+    "kitty": ("https://libkitty.readthedocs.io/en/stable/", None),
+    "mockturtle": ("https://mockturtle.readthedocs.io/en/stable/", None),
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
