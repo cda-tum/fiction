@@ -19,10 +19,7 @@
 
 #include <fiction/utils/optimization/simulated_annealing.hpp>
 
-#include <fmt/format.h>
-
 #include <algorithm>
-#include <iostream>
 #include <random>
 #include <stdexcept>
 
@@ -301,13 +298,6 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 
         CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Linear single_result: {}; Schwefel(x) = {}", single_result,
-                                 schwefel_function_1d(single_result))
-                  << std::endl;
-        std::cout << fmt::format("Linear multi_result: {}; Schwefel(x) = {}", multi_result,
-                                 schwefel_function_1d(multi_result))
-                  << std::endl;
     }
     SECTION("Geometric temperature schedule")
     {
@@ -324,14 +314,6 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 
         CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Geometric single_result: {}; Schwefel(x) = {}", single_result,
-                                 schwefel_function_1d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Geometric multi_result: {}; Schwefel(x) = {}", multi_result,
-                                 schwefel_function_1d(multi_result))
-                  << std::endl;
     }
 }
 TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-anneal]")
@@ -359,14 +341,6 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
 
         CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Linear single_result: ({}, {}); Drop-Wave(x) = {}", single_result.first,
-                                 single_result.second, drop_wave_function_2d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Linear multi_result: ({}, {}); Drop-Wave(x) = {}", multi_result.first,
-                                 multi_result.second, drop_wave_function_2d(multi_result))
-                  << std::endl;
     }
     SECTION("Geometric temperature schedule")
     {
@@ -383,14 +357,6 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
 
         CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Geometric single_result: ({}, {}); Drop-Wave(x) = {}", single_result.first,
-                                 single_result.second, drop_wave_function_2d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Geometric multi_result: ({}, {}); Drop-Wave(x) = {}", multi_result.first,
-                                 multi_result.second, drop_wave_function_2d(multi_result))
-                  << std::endl;
     }
 }
 
