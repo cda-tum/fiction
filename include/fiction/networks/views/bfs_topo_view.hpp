@@ -40,6 +40,8 @@ namespace fiction::networks::views
  * It follows fanouts and visits each gate after all of its fanins. Gates that do not drive an output are included
  * when reached from those inputs; the traversal does not filter by output dependency cones.
  * Constants precede combinational inputs, which retain their declared order.
+ * This specialization requires a combinational network with `num_cis() == num_pis()`: gate counts and traversal
+ * offsets skip the primary-input count. Sequential networks with register outputs are unsupported.
  *
  * This specialization overrides `foreach_node`, `foreach_gate`, `size`, and `num_gates` and wraps
  * `mockturtle::immutable_view`. It computes the order at construction; the underlying network must remain unchanged
@@ -48,10 +50,17 @@ namespace fiction::networks::views
  * The `sorted = true` specialization inherits `Ntk` without reordering. An existing depth-first traversal stays
  * depth-first. The default `sorted` argument selects this specialization for an already topologically sorted network.
  *
- * Required network functions:
+ * Network operations used by the computed-order specialization (`foreach_fanout` is supplied by
+ * `mockturtle::fanout_view`):
+ * - `size`
  * - `get_constant`
+ * - `get_node`
+ * - `num_pis`
+ * - `foreach_pi` (required by the constructor)
  * - `foreach_ci`
+ * - `foreach_node`
  * - `foreach_fanin`
+ * - `foreach_fanout`
  * - `incr_trav_id`
  * - `set_visited`
  * - `trav_id`

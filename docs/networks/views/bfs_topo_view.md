@@ -7,6 +7,10 @@ and all combinational inputs. The traversal follows fanouts and visits a gate wh
 of its fanins have been visited. It includes input-fed gates that do not drive an output;
 the traversal does not restrict the order to output dependency cones.
 
+The computed-order specialization supports combinational networks only, where
+`num_cis() == num_pis()`. Gate counts and gate traversal skip the primary-input count,
+so sequential networks with register outputs are unsupported.
+
 Constants precede combinational inputs, which retain their declared order. This
 specialization wraps `mockturtle::immutable_view` and computes its order at construction.
 Use it while the underlying network remains unchanged.
