@@ -63,7 +63,7 @@ from mnt.pyfiction.verification import count_gate_types, eq_type, equivalence_ch
 with TemporaryDirectory() as directory:
     source = Path(directory) / "and.v"
     source.write_text(
-        "module top(input a, input b, output f); assign f = a & b; endmodule\n",
+        "module top(a, b, f);\ninput a, b;\noutput f;\nassign f = a & b;\nendmodule\n",
         encoding="utf-8",
     )
     network = read_network(str(source))
