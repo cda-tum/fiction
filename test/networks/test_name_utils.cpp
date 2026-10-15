@@ -20,7 +20,7 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
@@ -37,6 +37,88 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 
+/** @brief Named network missing node traversal required for signal-name transfer. */
+struct incomplete_named_network : mockturtle::names_view<mockturtle::aig_network>
+{
+    /**
+     * @brief Disables node traversal.
+     * @tparam Fn Node callback type.
+     */
+    template <typename Fn>
+    void foreach_node(Fn&&) const = delete;
+};
+
+/**
+ * @brief Checks signal-name transfer and its forwarding wrapper.
+ * @tparam Src Source network type.
+ * @tparam Dest Destination network type.
+ */
+template <typename Src, typename Dest>
+concept signal_names_transferable =
+    requires(const Src& src, Dest& dest, mockturtle::node_map<mockturtle::aig_network::signal, Src>& map) {
+        restore_signal_names(src, dest, map);
+    };
+
+/**
+ * @brief Checks whether the full name-transfer wrapper accepts a source and destination.
+ * @tparam Src Source network type.
+ * @tparam Dest Destination network type.
+ */
+template <typename Src, typename Dest>
+concept all_names_transferable =
+    requires(const Src& src, Dest& dest, mockturtle::node_map<mockturtle::aig_network::signal, Src>& map) {
+        restore_names(src, dest, map);
+    };
+
+/** @brief Native layout without an output-name setter. */
+struct layout_without_output_names : cartesian_gate_layout
+{
+    /** @brief Disables output-name assignment. @param index Output index. @param name Output name. */
+    void set_output_name(uint32_t index, const std::string& name) = delete;
+};
+
+/** @brief Checks output-name restoration. @tparam Dest Destination network or layout type. */
+template <typename Dest>
+concept output_names_transferable = requires(const tec_nt& src, Dest& dest) { restore_output_names(src, dest); };
+
+static_assert(output_names_transferable<cartesian_gate_layout>);
+static_assert(output_names_transferable<mockturtle::aig_network>);
+static_assert(!output_names_transferable<layout_without_output_names>);
+
+/**
+ * @brief Checks branching name transfers with native layout endpoints.
+ * @tparam Dest Destination network or layout type.
+ */
+template <typename Dest>
+concept branching_names_transferable =
+    requires(const tec_nt& src, Dest& dest,
+             const mockturtle::node_map<physical_design::branching_signal_container<>, tec_nt>& map) {
+        restore_signal_names(src, dest, map);
+    };
+
+static_assert(branching_names_transferable<cartesian_gate_layout>);
+static_assert(branching_names_transferable<mockturtle::aig_network>);
+static_assert(!branching_names_transferable<mockturtle::names_view<mockturtle::aig_network>>);
+
+static_assert(!all_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(signal_names_transferable<mockturtle::aig_network, mockturtle::aig_network>);
+static_assert(signal_names_transferable<incomplete_named_network, mockturtle::aig_network>);
+static_assert(!signal_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+
+TEST_CASE("Unnamed network name transfers clear names and remain optional", "[name-utils]")
+{
+    mockturtle::aig_network                         unnamed{};
+    mockturtle::names_view<mockturtle::aig_network> named{};
+    named.set_network_name("old");
+    restore_network_name(unnamed, named);
+    CHECK(named.get_network_name().empty());
+    named.set_network_name("source");
+    restore_names(named, unnamed);
+    CHECK(get_name(unnamed).empty());
+    restore_names(unnamed, named);
+    CHECK(named.get_network_name().empty());
+}
+
 TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bounds", "[name-utils]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
@@ -45,7 +127,7 @@ TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bound
     ntk.create_po(input, "f");
     set_name(ntk, std::string_view{"prefix suffix", 6});
 
-    auto       lyt    = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {2, 1});
+    auto       lyt    = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {2, 1});
     const auto placed = lyt.create_pi("", {0, 0});
     lyt.create_po(placed, "", {1, 0});
     restore_names(ntk, lyt);
@@ -75,7 +157,7 @@ TEMPLATE_TEST_CASE("Signal names transfer from a logic network to placed objects
     const auto sink = ntk.create_buf(internal);
     ntk.create_po(sink, "output");
     /** Native target with separate placed terminals. */
-    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
+    auto lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
     /** Placed primary input. */
     const auto placed_input = lyt.create_pi("", {0, 0});
     /** Placed internal gate. */
@@ -112,7 +194,7 @@ TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unu
     ntk.set_name(driver, "driver");
     ntk.create_po(driver, "output");
     /** Placed target with an independent output terminal name. */
-    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
+    auto lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
     /** Placed connected input. */
     const auto placed_input = lyt.create_pi("", {0, 0});
     /** Placed output driver. */

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -59,12 +59,9 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
      * separate fanout wire instead.
      */
     template <typename GateLyt>
+        requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; }
     [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-
         const auto object = lyt.find_object(t);
         if (!object)
         {

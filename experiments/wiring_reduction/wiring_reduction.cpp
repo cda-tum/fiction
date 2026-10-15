@@ -20,7 +20,7 @@
 
 #include <fiction/layouts/bounding_box.hpp>      // bounding box
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian layout
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>                        // read networks from files
 #include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
 #include <fiction/physical_design/wiring_reduction.hpp>                  // wiring reduction algorithm
@@ -62,8 +62,6 @@ static Ntk read_ntk(const std::string& name)
 int main()
 try
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
-
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint64_t, size_t, size_t, float, uint64_t, uint64_t, float, uint64_t, uint64_t,
                             float, double, double, float, std::string>
@@ -104,15 +102,15 @@ try
         const auto benchmark_network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto       gate_level_layout = orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
-        const auto layout_copy       = gate_level_layout.clone();
+        auto       gate_layout = orthogonal<cartesian_gate_layout>(benchmark_network, {}, &orthogonal_stats);
+        const auto layout_copy = gate_layout.clone();
 
-        auto num_wires = gate_level_layout.num_wires();
+        auto num_wires = gate_layout.num_wires();
         //  compute critical path and throughput
-        const auto cp_tp_stats = critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp_stats = critical_path_length_and_throughput(gate_layout);
 
         // calculate bounding box
-        const auto bounding_box_before_wiring_reduction = bounding_box(gate_level_layout);
+        const auto bounding_box_before_wiring_reduction = bounding_box(gate_layout);
 
         /** @brief Number of occupied bounding columns before wiring reduction. */
         const auto width_before_wiring_reduction = bounding_box_before_wiring_reduction.get_x_size();
@@ -122,15 +120,16 @@ try
         const auto area_before_wiring_reduction = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
-        wiring_reduction(gate_level_layout, {}, &wiring_reduction_stats);
+        wiring_reduction(gate_layout, {}, &wiring_reduction_stats);
 
         //  compute critical path and throughput
-        const auto cp_tp_stats_after = critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp_stats_after = critical_path_length_and_throughput(gate_layout);
 
-        auto num_wires_after = gate_level_layout.num_wires();
+        auto num_wires_after = gate_layout.num_wires();
 
         // check equivalence
-        const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
+        const auto eq_stats =
+            equivalence_checking<cartesian_gate_layout, cartesian_gate_layout>(layout_copy, gate_layout);
 
         std::string eq_result;
 
@@ -148,7 +147,7 @@ try
         }
 
         // calculate bounding box
-        const auto bounding_box_after_wiring_reduction = bounding_box(gate_level_layout);
+        const auto bounding_box_after_wiring_reduction = bounding_box(gate_layout);
 
         /** @brief Number of occupied bounding columns after wiring reduction. */
         const auto width_after_wiring_reduction = bounding_box_after_wiring_reduction.get_x_size();
@@ -173,7 +172,7 @@ try
             benchmark, benchmark_network.num_pis(), benchmark_network.num_pos(), benchmark_network.num_gates(),
             width_before_wiring_reduction, height_before_wiring_reduction, area_before_wiring_reduction,
             width_after_wiring_reduction, height_after_wiring_reduction, area_after_wiring_reduction,
-            gate_level_layout.num_gates(), num_wires, num_wires_after, improv_wires, cp_tp_stats.critical_path_length,
+            gate_layout.num_gates(), num_wires, num_wires_after, improv_wires, cp_tp_stats.critical_path_length,
             cp_tp_stats_after.critical_path_length, improv_critical_path, cp_tp_stats.throughput,
             cp_tp_stats_after.throughput, improv_throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
             mockturtle::to_seconds(wiring_reduction_stats.time_total), improv_area, eq_result);

@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Python bindings for `fiction/layouts/gate_level_layout.hpp`.
+ * @brief Python bindings for `fiction/layouts/gate_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */
@@ -24,9 +24,12 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 
 #include <fmt/format.h>
 
@@ -66,17 +69,17 @@ namespace detail
  * @param topology Name identifying the coordinate geometry.
  */
 template <typename LytBase, typename GateLyt>
-void register_gate_level_layout(nb::module_& m, const std::string& topology)
+void register_gate_layout(nb::module_& m, const std::string& topology)
 {
     // Keep the GIL for constructors, cached counts, local queries, and mutations; a release adds overhead.
     nb::class_<GateLyt, LytBase> cls(m, fmt::format("{}_gate_layout", topology).c_str(),
-                                     DOC(fiction_layouts_gate_level_layout));
+                                     DOC(fiction_layouts_gate_layout));
 
     if constexpr (std::derived_from<GateLyt, fiction::layouts::cartesian_layout>)
     {
-        cls.def(nb::init<>(), DOC(fiction_layouts_gate_level_layout_gate_level_layout))
+        cls.def(nb::init<>(), DOC(fiction_layouts_gate_layout_gate_layout))
             .def(nb::init<const fiction::layouts::layout_base::extent&>(), nb::arg("extent"),
-                 DOC(fiction_layouts_gate_level_layout_gate_level_layout))
+                 DOC(fiction_layouts_gate_layout_gate_layout))
             .def(
                 "__init__",
                 [](nb::pointer_and_handle<GateLyt> self, const fiction::layouts::layout_base::extent& extent,
@@ -92,15 +95,15 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
                 },
                 nb::arg("extent"), nb::arg("clocking_scheme") = "2DDWave", nb::arg("layout_name") = "",
                 fmt::format("{}\n\nRaises:\n    ValueError: The clocking scheme name is unknown.",
-                            DOC(fiction_layouts_gate_level_layout_gate_level_layout_2))
+                            DOC(fiction_layouts_gate_layout_gate_layout_2))
                     .c_str());
     }
     else
     {
         cls.def(nb::init<fiction::layouts::arrangement>(), nb::arg("arrangement"),
-                DOC(fiction_layouts_gate_level_layout_gate_level_layout_3))
+                DOC(fiction_layouts_gate_layout_gate_layout_3))
             .def(nb::init<fiction::layouts::arrangement, const fiction::layouts::layout_base::extent&>(),
-                 nb::arg("arrangement"), nb::arg("extent"), DOC(fiction_layouts_gate_level_layout_gate_level_layout_3))
+                 nb::arg("arrangement"), nb::arg("extent"), DOC(fiction_layouts_gate_layout_gate_layout_3))
             .def(
                 "__init__",
                 [](nb::pointer_and_handle<GateLyt> self, const fiction::layouts::arrangement a,
@@ -124,37 +127,37 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
                 nb::arg("arrangement"), nb::arg("extent"), nb::arg("clocking_scheme") = "2DDWave",
                 nb::arg("layout_name") = "",
                 fmt::format("{}\n\nRaises:\n    ValueError: The clocking scheme name is unknown.",
-                            DOC(fiction_layouts_gate_level_layout_gate_level_layout_4))
+                            DOC(fiction_layouts_gate_layout_gate_layout_4))
                     .c_str());
     }
 
     cls.def("assign_clock_number", &GateLyt::assign_clock_number, nb::arg("cz"), nb::arg("cn"),
-            DOC(fiction_layouts_gate_level_layout_assign_clock_number))
+            DOC(fiction_layouts_gate_layout_assign_clock_number))
         .def("get_clock_number", &GateLyt::get_clock_number, nb::arg("cz"),
-             DOC(fiction_layouts_gate_level_layout_get_clock_number))
-        .def("num_clocks", &GateLyt::num_clocks, DOC(fiction_layouts_gate_level_layout_num_clocks))
+             DOC(fiction_layouts_gate_layout_get_clock_number))
+        .def("num_clocks", &GateLyt::num_clocks, DOC(fiction_layouts_gate_layout_num_clocks))
         .def("is_regularly_clocked", &GateLyt::is_regularly_clocked,
-             DOC(fiction_layouts_gate_level_layout_is_regularly_clocked))
+             DOC(fiction_layouts_gate_layout_is_regularly_clocked))
 
         .def("is_clocking_scheme", &GateLyt::is_clocking_scheme, nb::arg("name"),
-             DOC(fiction_layouts_gate_level_layout_is_clocking_scheme))
+             DOC(fiction_layouts_gate_layout_is_clocking_scheme))
         .def(
             "get_clocking_scheme_name", [](const GateLyt& lyt) { return lyt.get_clocking_scheme().name(); },
             "Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.")
 
         .def("is_incoming_clocked", &GateLyt::is_incoming_clocked, nb::arg("cz1"), nb::arg("cz2"),
-             DOC(fiction_layouts_gate_level_layout_is_incoming_clocked))
+             DOC(fiction_layouts_gate_layout_is_incoming_clocked))
         .def("is_outgoing_clocked", &GateLyt::is_outgoing_clocked, nb::arg("cz1"), nb::arg("cz2"),
-             DOC(fiction_layouts_gate_level_layout_is_outgoing_clocked))
+             DOC(fiction_layouts_gate_layout_is_outgoing_clocked))
 
         .def("incoming_clocked_zones", &GateLyt::incoming_clocked_zones, nb::arg("cz"),
-             DOC(fiction_layouts_gate_level_layout_incoming_clocked_zones))
+             DOC(fiction_layouts_gate_layout_incoming_clocked_zones))
         .def("outgoing_clocked_zones", &GateLyt::outgoing_clocked_zones, nb::arg("cz"),
-             DOC(fiction_layouts_gate_level_layout_outgoing_clocked_zones))
+             DOC(fiction_layouts_gate_layout_outgoing_clocked_zones))
 
-        .def("in_degree", &GateLyt::in_degree, nb::arg("cz"), DOC(fiction_layouts_gate_level_layout_in_degree))
-        .def("out_degree", &GateLyt::out_degree, nb::arg("cz"), DOC(fiction_layouts_gate_level_layout_out_degree))
-        .def("degree", &GateLyt::degree, nb::arg("cz"), DOC(fiction_layouts_gate_level_layout_degree))
+        .def("in_degree", &GateLyt::in_degree, nb::arg("cz"), DOC(fiction_layouts_gate_layout_in_degree))
+        .def("out_degree", &GateLyt::out_degree, nb::arg("cz"), DOC(fiction_layouts_gate_layout_out_degree))
+        .def("degree", &GateLyt::degree, nb::arg("cz"), DOC(fiction_layouts_gate_layout_degree))
 
         .def(
             "replace_clocking_scheme",
@@ -187,17 +190,17 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             "Replaces the clocking scheme by the predefined scheme of the given name. Clock-number overrides are "
             "discarded; synchronization elements are kept. Raises ValueError for an unknown name.")
         .def("obstruct_coordinate", &GateLyt::obstruct_coordinate, nb::arg("c"),
-             DOC(fiction_layouts_gate_level_layout_obstruct_coordinate))
+             DOC(fiction_layouts_gate_layout_obstruct_coordinate))
         .def("obstruct_connection", &GateLyt::obstruct_connection, nb::arg("src"), nb::arg("tgt"),
-             DOC(fiction_layouts_gate_level_layout_obstruct_connection))
+             DOC(fiction_layouts_gate_layout_obstruct_connection))
         .def("clear_obstructed_coordinate", &GateLyt::clear_obstructed_coordinate, nb::arg("c"),
-             DOC(fiction_layouts_gate_level_layout_clear_obstructed_coordinate))
+             DOC(fiction_layouts_gate_layout_clear_obstructed_coordinate))
         .def("clear_obstructed_connection", &GateLyt::clear_obstructed_connection, nb::arg("src"), nb::arg("tgt"),
-             DOC(fiction_layouts_gate_level_layout_clear_obstructed_connection))
+             DOC(fiction_layouts_gate_layout_clear_obstructed_connection))
         .def("clear_obstructed_coordinates", &GateLyt::clear_obstructed_coordinates,
-             DOC(fiction_layouts_gate_level_layout_clear_obstructed_coordinates))
+             DOC(fiction_layouts_gate_layout_clear_obstructed_coordinates))
         .def("clear_obstructed_connections", &GateLyt::clear_obstructed_connections,
-             DOC(fiction_layouts_gate_level_layout_clear_obstructed_connections))
+             DOC(fiction_layouts_gate_layout_clear_obstructed_connections))
         .def(
             "obstructed_coordinates",
             [](const GateLyt& lyt)
@@ -220,42 +223,41 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             "Returns manual directed-connection obstructions in unspecified order, without physical connections.",
             nb::call_guard<nb::gil_scoped_release>())
         .def("is_obstructed_coordinate", &GateLyt::is_obstructed_coordinate, nb::arg("c"),
-             DOC(fiction_layouts_gate_level_layout_is_obstructed_coordinate))
+             DOC(fiction_layouts_gate_layout_is_obstructed_coordinate))
         .def("is_obstructed_connection", &GateLyt::is_obstructed_connection, nb::arg("src"), nb::arg("tgt"),
-             DOC(fiction_layouts_gate_level_layout_is_obstructed_connection))
+             DOC(fiction_layouts_gate_layout_is_obstructed_connection))
 
         .def("create_pi", &GateLyt::create_pi, nb::arg("name"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_pi))
+             DOC(fiction_layouts_gate_layout_create_pi))
         .def("create_po",
              nb::overload_cast<typename GateLyt::object_id, const std::string&,
                                const fiction::layouts::layout_base::coordinate&>(&GateLyt::create_po),
-             nb::arg("s"), nb::arg("name"), nb::arg("t"), DOC(fiction_layouts_gate_level_layout_create_po))
-        .def("is_pi", &GateLyt::is_pi, nb::arg("n"), DOC(fiction_layouts_gate_level_layout_is_pi))
-        .def("is_po", &GateLyt::is_po, nb::arg("n"), DOC(fiction_layouts_gate_level_layout_is_po))
-        .def("is_pi_tile", &GateLyt::is_pi_tile, nb::arg("t"), DOC(fiction_layouts_gate_level_layout_is_pi_tile))
-        .def("is_po_tile", &GateLyt::is_po_tile, nb::arg("t"), DOC(fiction_layouts_gate_level_layout_is_po_tile))
+             nb::arg("s"), nb::arg("name"), nb::arg("t"), DOC(fiction_layouts_gate_layout_create_po))
+        .def("is_pi", &GateLyt::is_pi, nb::arg("n"), DOC(fiction_layouts_gate_layout_is_pi))
+        .def("is_po", &GateLyt::is_po, nb::arg("n"), DOC(fiction_layouts_gate_layout_is_po))
+        .def("is_pi_tile", &GateLyt::is_pi_tile, nb::arg("t"), DOC(fiction_layouts_gate_layout_is_pi_tile))
+        .def("is_po_tile", &GateLyt::is_po_tile, nb::arg("t"), DOC(fiction_layouts_gate_layout_is_po_tile))
 
-        .def("is_inv", &GateLyt::is_inv, DOC(fiction_layouts_gate_level_layout_is_inv))
-        .def("is_and", &GateLyt::is_and, DOC(fiction_layouts_gate_level_layout_is_and))
-        .def("is_nand", &GateLyt::is_nand, DOC(fiction_layouts_gate_level_layout_is_nand))
-        .def("is_or", &GateLyt::is_or, DOC(fiction_layouts_gate_level_layout_is_or))
-        .def("is_nor", &GateLyt::is_nor, DOC(fiction_layouts_gate_level_layout_is_nor))
-        .def("is_xor", &GateLyt::is_xor, DOC(fiction_layouts_gate_level_layout_is_xor))
-        .def("is_xnor", &GateLyt::is_xnor, DOC(fiction_layouts_gate_level_layout_is_xnor))
-        .def("is_lt", &GateLyt::is_lt, DOC(fiction_layouts_gate_level_layout_is_lt))
-        .def("is_le", &GateLyt::is_le, DOC(fiction_layouts_gate_level_layout_is_le))
-        .def("is_gt", &GateLyt::is_gt, DOC(fiction_layouts_gate_level_layout_is_gt))
-        .def("is_ge", &GateLyt::is_ge, DOC(fiction_layouts_gate_level_layout_is_ge))
-        .def("is_maj", &GateLyt::is_maj, DOC(fiction_layouts_gate_level_layout_is_maj))
-        .def("is_fanout", &GateLyt::is_fanout, DOC(fiction_layouts_gate_level_layout_is_fanout))
-        .def("is_buf", &GateLyt::is_buf, DOC(fiction_layouts_gate_level_layout_is_buf))
-        .def("is_wire", &GateLyt::is_wire, DOC(fiction_layouts_gate_level_layout_is_wire))
+        .def("is_inv", &GateLyt::is_inv, DOC(fiction_layouts_gate_layout_is_inv))
+        .def("is_and", &GateLyt::is_and, DOC(fiction_layouts_gate_layout_is_and))
+        .def("is_nand", &GateLyt::is_nand, DOC(fiction_layouts_gate_layout_is_nand))
+        .def("is_or", &GateLyt::is_or, DOC(fiction_layouts_gate_layout_is_or))
+        .def("is_nor", &GateLyt::is_nor, DOC(fiction_layouts_gate_layout_is_nor))
+        .def("is_xor", &GateLyt::is_xor, DOC(fiction_layouts_gate_layout_is_xor))
+        .def("is_xnor", &GateLyt::is_xnor, DOC(fiction_layouts_gate_layout_is_xnor))
+        .def("is_lt", &GateLyt::is_lt, DOC(fiction_layouts_gate_layout_is_lt))
+        .def("is_le", &GateLyt::is_le, DOC(fiction_layouts_gate_layout_is_le))
+        .def("is_gt", &GateLyt::is_gt, DOC(fiction_layouts_gate_layout_is_gt))
+        .def("is_ge", &GateLyt::is_ge, DOC(fiction_layouts_gate_layout_is_ge))
+        .def("is_maj", &GateLyt::is_maj, DOC(fiction_layouts_gate_layout_is_maj))
+        .def("is_fanout", &GateLyt::is_fanout, DOC(fiction_layouts_gate_layout_is_fanout))
+        .def("is_buf", &GateLyt::is_buf, DOC(fiction_layouts_gate_layout_is_buf))
+        .def("is_wire", &GateLyt::is_wire, DOC(fiction_layouts_gate_layout_is_wire))
 
         .def("set_layout_name", &GateLyt::set_layout_name, nb::arg("name"),
-             DOC(fiction_layouts_gate_level_layout_set_layout_name))
-        .def("get_layout_name", &GateLyt::get_layout_name, DOC(fiction_layouts_gate_level_layout_get_layout_name))
-        .def("clone", &GateLyt::clone, DOC(fiction_layouts_gate_level_layout_clone),
-             nb::call_guard<nb::gil_scoped_release>())
+             DOC(fiction_layouts_gate_layout_set_layout_name))
+        .def("get_layout_name", &GateLyt::get_layout_name, DOC(fiction_layouts_gate_layout_get_layout_name))
+        .def("clone", &GateLyt::clone, DOC(fiction_layouts_gate_layout_clone), nb::call_guard<nb::gil_scoped_release>())
         .def("__copy__", &GateLyt::clone, "Returns an independent layout copy, including placed objects and metadata.",
              nb::call_guard<nb::gil_scoped_release>())
         .def(
@@ -263,51 +265,51 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             "Returns an independent layout copy, including placed objects and metadata.",
             nb::call_guard<nb::gil_scoped_release>())
         .def("set_input_name", &GateLyt::set_input_name, nb::arg("index"), nb::arg("name"),
-             DOC(fiction_layouts_gate_level_layout_set_input_name))
+             DOC(fiction_layouts_gate_layout_set_input_name))
         .def("get_input_name", &GateLyt::get_input_name, nb::arg("index"),
-             DOC(fiction_layouts_gate_level_layout_get_input_name))
+             DOC(fiction_layouts_gate_layout_get_input_name))
         .def("set_output_name", &GateLyt::set_output_name, nb::arg("index"), nb::arg("name"),
-             DOC(fiction_layouts_gate_level_layout_set_output_name))
+             DOC(fiction_layouts_gate_layout_set_output_name))
         .def("get_output_name", &GateLyt::get_output_name, nb::arg("index"),
-             DOC(fiction_layouts_gate_level_layout_get_output_name))
+             DOC(fiction_layouts_gate_layout_get_output_name))
         .def("get_name", nb::overload_cast<typename GateLyt::object_id>(&GateLyt::get_name, nb::const_),
-             nb::arg("object"), DOC(fiction_layouts_gate_level_layout_get_name))
+             nb::arg("object"), DOC(fiction_layouts_gate_layout_get_name))
 
         .def("create_buf",
              nb::overload_cast<typename GateLyt::object_id, const fiction::layouts::layout_base::coordinate&>(
                  &GateLyt::create_buf),
-             nb::arg("a"), nb::arg("t"), DOC(fiction_layouts_gate_level_layout_create_buf))
+             nb::arg("a"), nb::arg("t"), DOC(fiction_layouts_gate_layout_create_buf))
         .def("create_not", &GateLyt::create_not, nb::arg("a"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_not))
+             DOC(fiction_layouts_gate_layout_create_not))
         .def("create_and", &GateLyt::create_and, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_and))
+             DOC(fiction_layouts_gate_layout_create_and))
         .def("create_nand", &GateLyt::create_nand, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_nand))
+             DOC(fiction_layouts_gate_layout_create_nand))
         .def("create_or", &GateLyt::create_or, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_or))
+             DOC(fiction_layouts_gate_layout_create_or))
         .def("create_nor", &GateLyt::create_nor, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_nor))
+             DOC(fiction_layouts_gate_layout_create_nor))
         .def("create_xor", &GateLyt::create_xor, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_xor))
+             DOC(fiction_layouts_gate_layout_create_xor))
         .def("create_xnor", &GateLyt::create_xnor, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_xnor))
+             DOC(fiction_layouts_gate_layout_create_xnor))
         .def("create_lt", &GateLyt::create_lt, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_lt))
+             DOC(fiction_layouts_gate_layout_create_lt))
         .def("create_le", &GateLyt::create_le, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_le))
+             DOC(fiction_layouts_gate_layout_create_le))
         .def("create_gt", &GateLyt::create_gt, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_gt))
+             DOC(fiction_layouts_gate_layout_create_gt))
         .def("create_ge", &GateLyt::create_ge, nb::arg("a"), nb::arg("b"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_ge))
+             DOC(fiction_layouts_gate_layout_create_ge))
         .def("create_maj", &GateLyt::create_maj, nb::arg("a"), nb::arg("b"), nb::arg("c"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_create_maj))
+             DOC(fiction_layouts_gate_layout_create_maj))
 
-        .def("num_pis", &GateLyt::num_pis, DOC(fiction_layouts_gate_level_layout_num_pis))
-        .def("num_pos", &GateLyt::num_pos, DOC(fiction_layouts_gate_level_layout_num_pos))
-        .def("num_gates", &GateLyt::num_gates, DOC(fiction_layouts_gate_level_layout_num_gates))
-        .def("num_wires", &GateLyt::num_wires, DOC(fiction_layouts_gate_level_layout_num_wires))
-        .def("num_crossings", &GateLyt::num_crossings, DOC(fiction_layouts_gate_level_layout_num_crossings))
-        .def("is_empty", &GateLyt::is_empty, DOC(fiction_layouts_gate_level_layout_is_empty))
+        .def("num_pis", &GateLyt::num_pis, DOC(fiction_layouts_gate_layout_num_pis))
+        .def("num_pos", &GateLyt::num_pos, DOC(fiction_layouts_gate_layout_num_pos))
+        .def("num_gates", &GateLyt::num_gates, DOC(fiction_layouts_gate_layout_num_gates))
+        .def("num_wires", &GateLyt::num_wires, DOC(fiction_layouts_gate_layout_num_wires))
+        .def("num_crossings", &GateLyt::num_crossings, DOC(fiction_layouts_gate_layout_num_crossings))
+        .def("is_empty", &GateLyt::is_empty, DOC(fiction_layouts_gate_layout_is_empty))
 
         // A truth-table argument implies that synthesis is loaded. Import synthesis only when returning a table;
         // importing it during layouts registration would create a cycle through networks.
@@ -331,40 +333,38 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             nb::sig(
                 "def object_function(self, object: layout_object_id) -> mnt.pyfiction.synthesis.dynamic_truth_table"),
             "Returns the object's truth table.")
-        .def("size", &GateLyt::size, DOC(fiction_layouts_gate_level_layout_size))
-        .def("fanin_size", &GateLyt::fanin_size, nb::arg("object"), DOC(fiction_layouts_gate_level_layout_fanin_size))
-        .def("fanout_size", &GateLyt::fanout_size, nb::arg("object"),
-             DOC(fiction_layouts_gate_level_layout_fanout_size))
-        .def("input_count", &GateLyt::input_count, nb::arg("object"),
-             DOC(fiction_layouts_gate_level_layout_input_count))
-        .def("find_object", &GateLyt::find_object, nb::arg("t"), DOC(fiction_layouts_gate_level_layout_find_object))
-        .def("contains", &GateLyt::contains, nb::arg("object"), DOC(fiction_layouts_gate_level_layout_contains))
-        .def("get_tile", &GateLyt::get_tile, nb::arg("object"), DOC(fiction_layouts_gate_level_layout_get_tile))
-        .def("source", &GateLyt::source, nb::arg("input"), DOC(fiction_layouts_gate_level_layout_source))
+        .def("size", &GateLyt::size, DOC(fiction_layouts_gate_layout_size))
+        .def("fanin_size", &GateLyt::fanin_size, nb::arg("object"), DOC(fiction_layouts_gate_layout_fanin_size))
+        .def("fanout_size", &GateLyt::fanout_size, nb::arg("object"), DOC(fiction_layouts_gate_layout_fanout_size))
+        .def("input_count", &GateLyt::input_count, nb::arg("object"), DOC(fiction_layouts_gate_layout_input_count))
+        .def("find_object", &GateLyt::find_object, nb::arg("t"), DOC(fiction_layouts_gate_layout_find_object))
+        .def("contains", &GateLyt::contains, nb::arg("object"), DOC(fiction_layouts_gate_layout_contains))
+        .def("get_tile", &GateLyt::get_tile, nb::arg("object"), DOC(fiction_layouts_gate_layout_get_tile))
+        .def("source", &GateLyt::source, nb::arg("input"), DOC(fiction_layouts_gate_layout_source))
         .def("connect", &GateLyt::connect, nb::arg("source"), nb::arg("input"),
-             DOC(fiction_layouts_gate_level_layout_connect))
-        .def("disconnect", &GateLyt::disconnect, nb::arg("input"), DOC(fiction_layouts_gate_level_layout_disconnect))
-        .def("remove", &GateLyt::remove, nb::arg("object"), DOC(fiction_layouts_gate_level_layout_remove))
+             DOC(fiction_layouts_gate_layout_connect))
+        .def("disconnect", &GateLyt::disconnect, nb::arg("input"), DOC(fiction_layouts_gate_layout_disconnect))
+        .def("remove", &GateLyt::remove, nb::arg("object"), DOC(fiction_layouts_gate_layout_remove))
         .def("move_object", &GateLyt::move_object, nb::arg("object"), nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_move_object))
-        .def("pi_at", &GateLyt::pi_at, nb::arg("index"), DOC(fiction_layouts_gate_level_layout_pi_at))
-        .def("po_at", &GateLyt::po_at, nb::arg("index"), DOC(fiction_layouts_gate_level_layout_po_at))
+             DOC(fiction_layouts_gate_layout_move_object))
+        .def("pi_at", &GateLyt::pi_at, nb::arg("index"), DOC(fiction_layouts_gate_layout_pi_at))
+        .def("po_at", &GateLyt::po_at, nb::arg("index"), DOC(fiction_layouts_gate_layout_po_at))
         .def(
             "set_input_order", [](GateLyt& lyt, const std::vector<typename GateLyt::object_id>& order)
-            { lyt.set_input_order(order); }, nb::arg("order"), DOC(fiction_layouts_gate_level_layout_set_input_order),
+            { lyt.set_input_order(order); }, nb::arg("order"), DOC(fiction_layouts_gate_layout_set_input_order),
             nb::call_guard<nb::gil_scoped_release>())
         .def(
             "set_output_order", [](GateLyt& lyt, const std::vector<typename GateLyt::object_id>& order)
-            { lyt.set_output_order(order); }, nb::arg("order"), DOC(fiction_layouts_gate_level_layout_set_output_order),
+            { lyt.set_output_order(order); }, nb::arg("order"), DOC(fiction_layouts_gate_layout_set_output_order),
             nb::call_guard<nb::gil_scoped_release>())
         .def("create_po",
              nb::overload_cast<const std::string&, const fiction::layouts::layout_base::coordinate&>(
                  &GateLyt::create_po),
-             nb::arg("name"), nb::arg("t"), DOC(fiction_layouts_gate_level_layout_create_po_2))
+             nb::arg("name"), nb::arg("t"), DOC(fiction_layouts_gate_layout_create_po_2))
         .def("create_buf", nb::overload_cast<const fiction::layouts::layout_base::coordinate&>(&GateLyt::create_buf),
-             nb::arg("t"), DOC(fiction_layouts_gate_level_layout_create_buf_2))
+             nb::arg("t"), DOC(fiction_layouts_gate_layout_create_buf_2))
         .def("set_name", nb::overload_cast<typename GateLyt::object_id, const std::string&>(&GateLyt::set_name),
-             nb::arg("object"), nb::arg("name"), DOC(fiction_layouts_gate_level_layout_set_name))
+             nb::arg("object"), nb::arg("name"), DOC(fiction_layouts_gate_layout_set_name))
         .def(
             "inputs",
             [](const GateLyt& lyt, const typename GateLyt::object_id object)
@@ -395,12 +395,11 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             "object and its input index. If the source drives several inputs of one destination, each input is a "
             "separate sink. Connections need not be physically legal; order is unspecified.",
             nb::call_guard<nb::gil_scoped_release>())
-        .def("clear_tile", &GateLyt::clear_tile, nb::arg("t"), DOC(fiction_layouts_gate_level_layout_clear_tile))
+        .def("clear_tile", &GateLyt::clear_tile, nb::arg("t"), DOC(fiction_layouts_gate_layout_clear_tile))
 
-        .def("is_gate_tile", &GateLyt::is_gate_tile, nb::arg("t"), DOC(fiction_layouts_gate_level_layout_is_gate_tile))
-        .def("is_wire_tile", &GateLyt::is_wire_tile, nb::arg("t"), DOC(fiction_layouts_gate_level_layout_is_wire_tile))
-        .def("is_empty_tile", &GateLyt::is_empty_tile, nb::arg("t"),
-             DOC(fiction_layouts_gate_level_layout_is_empty_tile))
+        .def("is_gate_tile", &GateLyt::is_gate_tile, nb::arg("t"), DOC(fiction_layouts_gate_layout_is_gate_tile))
+        .def("is_wire_tile", &GateLyt::is_wire_tile, nb::arg("t"), DOC(fiction_layouts_gate_layout_is_wire_tile))
+        .def("is_empty_tile", &GateLyt::is_empty_tile, nb::arg("t"), DOC(fiction_layouts_gate_layout_is_empty_tile))
 
         .def(
             "pis",
@@ -458,120 +457,120 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile,
                const std::optional<fiction::layouts::layout_base::coordinate>& source)
             { return layout.template is_incoming_signal<true>(tile, source); },
-            nb::arg("t"), nb::arg("s"), DOC(fiction_layouts_gate_level_layout_is_incoming_signal))
+            nb::arg("t"), nb::arg("s"), DOC(fiction_layouts_gate_layout_is_incoming_signal))
 
         .def(
             "has_no_incoming_signal", [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_no_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_no_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_no_incoming_signal))
 
         .def(
             "has_northern_incoming_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_northern_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_northern_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_northern_incoming_signal))
 
         .def(
             "has_north_eastern_incoming_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_north_eastern_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_north_eastern_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_north_eastern_incoming_signal))
 
         .def(
             "has_eastern_incoming_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_eastern_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_eastern_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_eastern_incoming_signal))
 
         .def(
             "has_south_eastern_incoming_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_south_eastern_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_south_eastern_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_south_eastern_incoming_signal))
 
         .def(
             "has_southern_incoming_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_southern_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_southern_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_southern_incoming_signal))
 
         .def(
             "has_south_western_incoming_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_south_western_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_south_western_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_south_western_incoming_signal))
 
         .def(
             "has_western_incoming_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_western_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_western_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_western_incoming_signal))
 
         .def(
             "has_north_western_incoming_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_north_western_incoming_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_north_western_incoming_signal))
+            DOC(fiction_layouts_gate_layout_has_north_western_incoming_signal))
 
         .def(
             "is_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile,
                const std::optional<fiction::layouts::layout_base::coordinate>& destination)
             { return layout.template is_outgoing_signal<true>(tile, destination); },
-            nb::arg("t"), nb::arg("s"), DOC(fiction_layouts_gate_level_layout_is_outgoing_signal))
+            nb::arg("t"), nb::arg("s"), DOC(fiction_layouts_gate_layout_is_outgoing_signal))
 
         .def(
             "has_no_outgoing_signal", [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_no_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_no_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_no_outgoing_signal))
 
         .def(
             "has_northern_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_northern_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_northern_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_northern_outgoing_signal))
 
         .def(
             "has_north_eastern_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_north_eastern_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_north_eastern_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_north_eastern_outgoing_signal))
 
         .def(
             "has_eastern_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_eastern_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_eastern_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_eastern_outgoing_signal))
 
         .def(
             "has_south_eastern_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_south_eastern_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_south_eastern_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_south_eastern_outgoing_signal))
 
         .def(
             "has_southern_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_southern_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_southern_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_southern_outgoing_signal))
 
         .def(
             "has_south_western_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_south_western_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_south_western_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_south_western_outgoing_signal))
 
         .def(
             "has_western_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_western_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_western_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_western_outgoing_signal))
 
         .def(
             "has_north_western_outgoing_signal",
             [](const GateLyt& layout, const fiction::layouts::layout_base::coordinate& tile)
             { return layout.template has_north_western_outgoing_signal<true>(tile); }, nb::arg("t"),
-            DOC(fiction_layouts_gate_level_layout_has_north_western_outgoing_signal))
+            DOC(fiction_layouts_gate_layout_has_north_western_outgoing_signal))
 
         .def(
             "bounding_box",
@@ -592,18 +591,18 @@ void register_gate_level_layout(nb::module_& m, const std::string& topology)
             "Returns a string representation of the layout.", nb::call_guard<nb::gil_scoped_release>())
 
         .def("assign_synchronization_element", &GateLyt::assign_synchronization_element, nb::arg("coordinate"),
-             nb::arg("delay"), DOC(fiction_layouts_gate_level_layout_assign_synchronization_element))
+             nb::arg("delay"), DOC(fiction_layouts_gate_layout_assign_synchronization_element))
         .def("is_synchronization_element", &GateLyt::is_synchronization_element, nb::arg("coordinate"),
-             DOC(fiction_layouts_gate_level_layout_is_synchronization_element))
+             DOC(fiction_layouts_gate_layout_is_synchronization_element))
         .def("get_synchronization_element", &GateLyt::get_synchronization_element, nb::arg("coordinate"),
-             DOC(fiction_layouts_gate_level_layout_get_synchronization_element))
-        .def("num_se", &GateLyt::num_se, DOC(fiction_layouts_gate_level_layout_num_se));
+             DOC(fiction_layouts_gate_layout_get_synchronization_element))
+        .def("num_se", &GateLyt::num_se, DOC(fiction_layouts_gate_layout_num_se));
 }
 
 }  // namespace detail
 
 /** @brief Register object IDs, ports, and gate layouts. @param m Python module. */
-void register_gate_level_layout(nb::module_& m)
+void register_gate_layout(nb::module_& m)
 {
     /** @brief Layout-local object identity. */
     using object_id = fiction::layouts::layout_object_id;
@@ -630,16 +629,18 @@ void register_gate_level_layout(nb::module_& m)
     /**
      * Gate-level clocked Cartesian layout.
      */
-    detail::register_gate_level_layout<py_cartesian_layout, py_cartesian_gate_layout>(m, "cartesian");
+    detail::register_gate_layout<fiction::layouts::cartesian_layout, fiction::layouts::cartesian_gate_layout>(
+        m, "cartesian");
     /**
      * Gate-level clocked shifted Cartesian layout.
      */
-    detail::register_gate_level_layout<py_shifted_cartesian_layout, py_shifted_cartesian_gate_layout>(
-        m, "shifted_cartesian");
+    detail::register_gate_layout<fiction::layouts::shifted_cartesian_layout,
+                                 fiction::layouts::shifted_cartesian_gate_layout>(m, "shifted_cartesian");
     /**
      * Gate-level clocked hexagonal layout.
      */
-    detail::register_gate_level_layout<py_hexagonal_layout, py_hexagonal_gate_layout>(m, "hexagonal");
+    detail::register_gate_layout<fiction::layouts::hexagonal_layout, fiction::layouts::hexagonal_gate_layout>(
+        m, "hexagonal");
 }
 
 }  // namespace pyfiction

@@ -18,7 +18,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
@@ -81,11 +81,9 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
-
         SECTION("2DDWave")
         {
-            const clk_lyt layout{clk_lyt::extent{2, 2, 1}, clocking::twoddwave()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{2, 2, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (1,1)")  // path of length 3
             {
@@ -121,7 +119,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{clk_lyt::extent{2, 2, 1}, clocking::use()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{2, 2, 1}, clocking::use()};
 
             SECTION("(0,0) to (0,1)")  // path of length 4
             {
@@ -170,11 +168,9 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
-
         SECTION("2DDWave")
         {
-            const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::twoddwave()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
@@ -189,7 +185,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::use()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
@@ -207,14 +203,13 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 
 TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
 
-    const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::use()};
+    const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::use()};
 
     SECTION("Unit cost")
     {
-        const auto path = a_star<clk_lyt>(layout, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
-                                          unit_cost_functor<>());
+        const auto path = a_star<cartesian_gate_layout>(layout, {.source = {0, 0}, .target = {3, 3}},
+                                                        manhattan_distance_functor(), unit_cost_functor<>());
 
         CHECK(path.size() == 7);
         CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -222,8 +217,8 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
     }
     SECTION("Random cost")
     {
-        const auto path = a_star<clk_lyt>(layout, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
-                                          random_cost_functor<>());
+        const auto path = a_star<cartesian_gate_layout>(layout, {.source = {0, 0}, .target = {3, 3}},
+                                                        manhattan_distance_functor(), random_cost_functor<>());
 
         CHECK(path.size() == 7);
         CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -233,8 +228,7 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 
 TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 {
-    using lyt     = cartesian_layout;
-    using clk_lyt = gate_level_layout<lyt>;
+    using lyt = cartesian_layout;
 
     SECTION("Manhattan distance")
     {
@@ -255,12 +249,12 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
         {
             SECTION("RES")
             {
-                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::res()};
+                const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 10, 1}, clocking::res()};
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
-                    const auto path =
-                        a_star<clk_lyt>(layout, {.source = {0, 0}, .target = {9, 9}}, manhattan_distance_functor());
+                    const auto path = a_star<gate_layout<lyt>>(layout, {.source = {0, 0}, .target = {9, 9}},
+                                                               manhattan_distance_functor());
 
                     CHECK(path.size() == 19);
                     CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -269,7 +263,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
             }
             SECTION("ESP")
             {
-                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::esr()};
+                const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 10, 1}, clocking::esr()};
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
@@ -302,12 +296,12 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
         {
             SECTION("RES")
             {
-                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::res()};
+                const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 10, 1}, clocking::res()};
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
-                    const auto path =
-                        a_star<clk_lyt>(layout, {.source = {0, 0}, .target = {9, 9}}, euclidean_distance_functor());
+                    const auto path = a_star<gate_layout<lyt>>(layout, {.source = {0, 0}, .target = {9, 9}},
+                                                               euclidean_distance_functor());
 
                     CHECK(path.size() == 19);
                     CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -316,7 +310,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
             }
             SECTION("ESP")
             {
-                const clk_lyt layout{clk_lyt::extent{10, 10, 1}, clocking::esr()};
+                const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 10, 1}, clocking::esr()};
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
@@ -334,11 +328,10 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
 TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     SECTION("coordinate paths")
     {
-        const gate_lyt layout{gate_lyt::extent{4, 4, 1}};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}};
 
         SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
         {
@@ -371,7 +364,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::twoddwave()};
+            const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
             {
@@ -401,7 +394,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
         }
         SECTION("USE")
         {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::use()};
+            const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
             {
@@ -430,11 +423,10 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
 TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     SECTION("coordinate paths")
     {
-        const gate_lyt layout{gate_lyt::extent{4, 4, 1}};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}};
 
         SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
         {
@@ -464,7 +456,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::twoddwave()};
+            const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
@@ -492,7 +484,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
         }
         SECTION("USE")
         {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::use()};
+            const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
@@ -520,7 +512,6 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
 TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
 
     using dist = manhattan_distance_functor;
     using cost = unit_cost_functor<uint8_t>;
@@ -534,7 +525,8 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{gate_lyt::extent{3, 3, 2}, clocking::twoddwave()};  // create a crossing layer
+                const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 2},
+                                                   clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
@@ -552,7 +544,8 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
             }
             SECTION("USE")
             {
-                const gate_lyt layout{gate_lyt::extent{3, 3, 2}, clocking::use()};  // create a crossing layer
+                const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 2},
+                                                   clocking::use()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
@@ -576,7 +569,8 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{gate_lyt::extent{4, 4, 2}, clocking::twoddwave()};  // create a crossing layer
+                const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 2},
+                                                   clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
                 {
@@ -609,7 +603,8 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{gate_lyt::extent{4, 3, 2}, clocking::twoddwave()};  // create a crossing layer
+                const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 3, 2},
+                                                   clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
                 {
@@ -653,16 +648,14 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
-
         SECTION("2DDWave")
         {
-            const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::twoddwave()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
-                const auto path =
-                    a_star(layout, {.source = {0, 0}, .target = {3, 3}}, a_star_distance_functor<clk_lyt>(layout));
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {3, 3}},
+                                         a_star_distance_functor<gate_layout<lyt>>(layout));
 
                 CHECK(path.size() == 7);
                 CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -671,12 +664,12 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
         }
         SECTION("USE")
         {
-            const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::use()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
-                const auto path =
-                    a_star(layout, {.source = {0, 0}, .target = {3, 3}}, a_star_distance_functor<clk_lyt>(layout));
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {3, 3}},
+                                         a_star_distance_functor<gate_layout<lyt>>(layout));
 
                 CHECK(path.size() == 7);
                 CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});

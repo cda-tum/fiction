@@ -21,11 +21,13 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
-#include <fiction/physical_design/apply_gate_library.hpp>       // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                    // SMT-based physical design of FCN layouts
-#include <fiction/physical_design/surface_analysis.hpp>         // SiDB surface analysis
+#include <fiction/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/surface_analysis.hpp>    // SiDB surface analysis
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>     // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                      // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>         // a pre-defined SiDB gate library
@@ -79,8 +81,6 @@ using namespace fiction::verification;
 int main()
 try
 {
-    using gate_lyt = hex_gate_clk_lyt;
-
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
@@ -140,7 +140,7 @@ try
         read_surface_defects("../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
 
     const auto lattice_tiling =
-        gate_lyt{arrangement::EVEN_ROW, {12, 31}};  // our surface data is 12 x 31 Bestagon tiles
+        hexagonal_gate_layout{arrangement::EVEN_ROW, {12, 31}};  // our surface data is 12 x 31 Bestagon tiles
     const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
@@ -186,14 +186,14 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout =
-            exact_with_blacklist<gate_lyt>(mapped_network, black_list, exact_params, &exact_stats);
+        const auto gate_layout = exact_with_blacklist<hexagonal_gate_layout>(convert_network<tec_nt>(mapped_network),
+                                                                             black_list, exact_params, &exact_stats);
 
-        if (gate_level_layout.has_value())
+        if (gate_layout.has_value())
         {
             // check equivalence
             const auto miter =
-                mockturtle::miter<mockturtle::klut_network>(mapped_network, extract_layout_network(*gate_level_layout));
+                mockturtle::miter<mockturtle::klut_network>(mapped_network, extract_layout_network(*gate_layout));
             if (!miter.has_value())
             {
                 continue;
@@ -206,11 +206,11 @@ try
             }
 
             // compute critical path and throughput
-            const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
+            const auto cp_tp = critical_path_length_and_throughput(*gate_layout);
 
             // apply gate library
             const auto dot_accurate_layout =
-                apply_gate_library_to_defective_surface<bestagon_library>(*gate_level_layout, surface_lattice);
+                apply_gate_library_to_defective_surface<bestagon_library>(*gate_layout, surface_lattice);
 
             // compute area (the bounding box covers SiDBs and defects)
             const auto layout_area = area(dot_accurate_layout);
@@ -221,9 +221,9 @@ try
             // log results
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
                        depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
-                       gate_level_layout->width(), gate_level_layout->height(),
-                       area_of(gate_level_layout->get_extent()), gate_level_layout->num_gates(),
-                       gate_level_layout->num_wires() + gate_level_layout->num_pis() + gate_level_layout->num_pos(),
+                       gate_layout->width(), gate_layout->height(), area_of(gate_layout->get_extent()),
+                       gate_layout->num_gates(),
+                       gate_layout->num_wires() + gate_layout->num_pis() + gate_layout->num_pos(),
                        cp_tp.critical_path_length, cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total),
                        *eq, dot_accurate_layout.num_dots(), layout_area);
         }

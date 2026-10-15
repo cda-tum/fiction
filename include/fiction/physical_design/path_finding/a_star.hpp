@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
@@ -352,7 +352,7 @@ class a_star_impl
 /**
  * The A* path finding algorithm for shortest loop-less paths between a given source and target coordinate in a layout.
  * This function automatically detects whether the given layout implements a clocking interface (see
- * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme.
+ * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme.
  *
  * A* is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a
  * heuristic distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic
@@ -372,8 +372,7 @@ class a_star_impl
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout>;
- * clk_lyt layout = ...;
+ * fiction::layouts::cartesian_gate_layout layout = ...;
  * auto shortest_path = a_star(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
  *

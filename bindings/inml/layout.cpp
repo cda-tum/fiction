@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
 
 #include <nanobind/nanobind.h>
@@ -55,7 +56,7 @@ void register_inml_layout(nb::module_& m)
         .value("FANOUT_COUPLER_MAGNET", magnet_type::FANOUT_COUPLER_MAGNET,
                DOC(fiction_inml_magnet_type_FANOUT_COUPLER_MAGNET));
 
-    nb::class_<layout, py_cartesian_layout> cls(m, "inml_layout", DOC(fiction_inml_layout));
+    nb::class_<layout, fiction::layouts::cartesian_layout> cls(m, "inml_layout", DOC(fiction_inml_layout));
 
     detail::register_clocked_constructors(cls);
     detail::register_cell_grid(cls);

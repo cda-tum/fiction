@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 
 #include <string>
@@ -57,7 +58,7 @@ void register_mol_qca_layout(nb::module_& m)
 
     m.def("mol_qca_clock_number", &fiction::mol_qca::clock_number, nb::arg("ct"), DOC(fiction_mol_qca_clock_number));
 
-    nb::class_<layout, py_cartesian_layout> cls(m, "mol_qca_layout", DOC(fiction_mol_qca_layout));
+    nb::class_<layout, fiction::layouts::cartesian_layout> cls(m, "mol_qca_layout", DOC(fiction_mol_qca_layout));
 
     cls.def(nb::init<>())
         .def(nb::init<const layout::extent&, std::string>(), nb::arg("extent"), nb::arg("layout_name") = "",

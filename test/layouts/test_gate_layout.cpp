@@ -10,11 +10,14 @@
 
 /**
  * @file
- * @brief Tests for `fiction/layouts/gate_level_layout.hpp`.
+ * @brief Tests for `fiction/layouts/gate_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <fiction/layouts/gate_layout.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -25,7 +28,6 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
@@ -50,23 +52,45 @@ using namespace fiction;
 using namespace fiction::test;
 using namespace fiction::layouts;
 
+TEST_CASE("Canonical gate layouts expose their geometry", "[gate-level-layout]")
+{
+    STATIC_CHECK(std::is_same_v<gate_layout<>, cartesian_gate_layout>);
+    STATIC_CHECK(std::is_same_v<cartesian_gate_layout, gate_layout<cartesian_layout>>);
+    STATIC_CHECK(std::is_same_v<hexagonal_gate_layout, gate_layout<hexagonal_layout>>);
+    STATIC_CHECK(std::is_same_v<shifted_cartesian_gate_layout, gate_layout<shifted_cartesian_layout>>);
+    STATIC_CHECK(std::is_default_constructible_v<cartesian_gate_layout>);
+    STATIC_CHECK_FALSE(std::is_default_constructible_v<hexagonal_gate_layout>);
+    STATIC_CHECK_FALSE(std::is_default_constructible_v<shifted_cartesian_gate_layout>);
+    gate_layout<> lyt{{2, 2, 1}};
+    STATIC_CHECK(std::is_same_v<decltype(lyt.clone()), cartesian_gate_layout>);
+    CHECK(lyt.width() == 2);
+    CHECK(lyt.height() == 2);
+    CHECK(lyt.layers() == 1);
+    const auto input = lyt.create_pi("a", {1, 1});
+    CHECK(lyt.get_tile(input) == layout_base::coordinate{1, 1});
+    const auto a =
+        GENERATE(arrangement::EVEN_ROW, arrangement::ODD_ROW, arrangement::EVEN_COLUMN, arrangement::ODD_COLUMN);
+    CHECK(hexagonal_gate_layout{a}.get_arrangement() == a);
+    CHECK(shifted_cartesian_gate_layout{a}.get_arrangement() == a);
+}
+
 TEMPLATE_TEST_CASE("Elementary truth tables retain logical input order", "[gate-level-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    using layout         = gate_level_layout<TestType>;
-    using binary_creator = typename layout::object_id (layout::*)(
-        typename layout::object_id, typename layout::object_id, const typename layout::tile&);
-    const std::array<std::pair<binary_creator, uint64_t>, 10> creators{{{&layout::create_and, 0x8},
-                                                                        {&layout::create_nand, 0x7},
-                                                                        {&layout::create_or, 0xe},
-                                                                        {&layout::create_nor, 0x1},
-                                                                        {&layout::create_lt, 0x2},
-                                                                        {&layout::create_ge, 0xd},
-                                                                        {&layout::create_gt, 0x4},
-                                                                        {&layout::create_le, 0xb},
-                                                                        {&layout::create_xor, 0x6},
-                                                                        {&layout::create_xnor, 0x9}}};
-    auto       lyt = blueprints::make_layout<layout>(arrangement::EVEN_ROW, {16, 4});
+    using binary_creator = typename gate_layout<TestType>::object_id (gate_layout<TestType>::*)(
+        typename gate_layout<TestType>::object_id, typename gate_layout<TestType>::object_id,
+        const typename gate_layout<TestType>::tile&);
+    const std::array<std::pair<binary_creator, uint64_t>, 10> creators{{{&gate_layout<TestType>::create_and, 0x8},
+                                                                        {&gate_layout<TestType>::create_nand, 0x7},
+                                                                        {&gate_layout<TestType>::create_or, 0xe},
+                                                                        {&gate_layout<TestType>::create_nor, 0x1},
+                                                                        {&gate_layout<TestType>::create_lt, 0x2},
+                                                                        {&gate_layout<TestType>::create_ge, 0xd},
+                                                                        {&gate_layout<TestType>::create_gt, 0x4},
+                                                                        {&gate_layout<TestType>::create_le, 0xb},
+                                                                        {&gate_layout<TestType>::create_xor, 0x6},
+                                                                        {&gate_layout<TestType>::create_xnor, 0x9}}};
+    auto       lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {16, 4});
     const auto a   = lyt.create_pi("a", {0, 0});
     const auto b   = lyt.create_pi("b", {1, 0});
     int32_t    x{};
@@ -100,14 +124,13 @@ TEMPLATE_TEST_CASE("Elementary truth tables retain logical input order", "[gate-
 TEMPLATE_TEST_CASE("Connections expose declared ports despite physical violations", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto lyt =
-        blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {1, 1}, clocking::twoddwave());
-    const auto a    = lyt.create_pi("a", {-5, 0});
+    auto lyt     = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {1, 1}, clocking::twoddwave());
+    const auto a = lyt.create_pi("a", {-5, 0});
     const auto gate = lyt.create_buf(a, {99, 0, 3});
     CHECK(lyt.source({gate, 0}) == a);
-    std::vector<typename gate_level_layout<TestType>::input_port> sinks{};
+    std::vector<typename gate_layout<TestType>::input_port> sinks{};
     lyt.foreach_sink(a, [&](const auto port) { sinks.push_back(port); });
-    CHECK(sinks == std::vector{typename gate_level_layout<TestType>::input_port{gate, 0}});
+    CHECK(sinks == std::vector{typename gate_layout<TestType>::input_port{gate, 0}});
     CHECK_THROWS_AS(lyt.connect(a, {gate, 1}), std::out_of_range);
     CHECK(lyt.source({gate, 0}) == a);
     CHECK_FALSE(lyt.find_object({0, 0}).has_value());
@@ -116,7 +139,7 @@ TEMPLATE_TEST_CASE("Connections expose declared ports despite physical violation
 TEMPLATE_TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       lyt  = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {8, 8});
+    auto       lyt  = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {8, 8});
     const auto a    = lyt.create_pi("a", {0, 0});
     const auto b    = lyt.create_pi("b", {1, 0});
     const auto gate = lyt.create_lt(a, b, {1, 1});
@@ -157,7 +180,7 @@ TEMPLATE_TEST_CASE("Object identity survives placement and stale IDs reject reus
 TEMPLATE_TEST_CASE("Physical wire counts exclude terminals through removal and reuse", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       lyt  = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {5, 1});
+    auto       lyt  = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {5, 1});
     const auto pi   = lyt.create_pi("a", {0, 0});
     const auto wire = lyt.create_buf(pi, {1, 0});
     const auto po   = lyt.create_po(wire, "f", {2, 0});
@@ -171,7 +194,7 @@ TEMPLATE_TEST_CASE("Physical wire counts exclude terminals through removal and r
     CHECK_FALSE(lyt.is_wire_tile({2, 0}));
     CHECK(lyt.num_wires() == 1);
     CHECK(lyt.num_gates() == 1);
-    std::vector<typename gate_level_layout<TestType>::object_id> wires{};
+    std::vector<typename gate_layout<TestType>::object_id> wires{};
     lyt.foreach_wire([&](const auto id) { wires.push_back(id); });
     CHECK(wires == std::vector{wire});
 
@@ -193,7 +216,7 @@ TEMPLATE_TEST_CASE("Physical wire counts exclude terminals through removal and r
 TEMPLATE_TEST_CASE("Removing terminals updates declared order and sparse names", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       lyt    = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {5, 5});
+    auto       lyt    = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {5, 5});
     const auto a      = lyt.create_pi("a", {0, 0});
     const auto b      = lyt.create_pi("b", {1, 0});
     const auto c      = lyt.create_pi("c", {2, 0});
@@ -213,7 +236,7 @@ TEMPLATE_TEST_CASE("Removing terminals updates declared order and sparse names",
 TEMPLATE_TEST_CASE("Deletion disconnects self loops and duplicate destination inputs", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       lyt   = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 4});
+    auto       lyt   = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 4});
     const auto input = lyt.create_pi("a", {0, 0});
     const auto gate  = lyt.create_and(input, input, {1, 0});
     CHECK(lyt.fanout_size(input) == 2);
@@ -229,7 +252,7 @@ TEMPLATE_TEST_CASE("Deletion disconnects self loops and duplicate destination in
 TEMPLATE_TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gate-level-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       original = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 4});
+    auto       original = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 4});
     const auto a        = original.create_pi("a", {0, 0});
     const auto b        = original.create_pi("b", {1, 0});
     const auto gate     = original.create_and(a, b, {1, 1});
@@ -263,7 +286,7 @@ TEMPLATE_TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gat
 TEMPLATE_TEST_CASE("Moved layouts leave reusable empty sources", "[gate-level-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       source  = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 4});
+    auto       source  = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 4});
     const auto removed = source.create_pi("removed", {0, 0});
     source.create_pi("kept", {1, 0});
     source.remove(removed);
@@ -284,9 +307,7 @@ TEMPLATE_TEST_CASE("Moved layouts leave reusable empty sources", "[gate-level-la
 
 TEST_CASE("Clock zone assignment", "[gate-level-layout]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
-
-    clk_lyt layout{clk_lyt::extent{2, 2, 1}, clocking::twoddwave()};
+    cartesian_gate_layout layout{cartesian_gate_layout::extent{2, 2, 1}, clocking::twoddwave()};
 
     SECTION("2DDWave Clocking")
     {
@@ -384,9 +405,8 @@ TEST_CASE("Clock zone assignment", "[gate-level-layout]")
 TEMPLATE_TEST_CASE("Clones isolate clock overrides, schemes, and geometry", "[gate-level-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    using clk_lyt = gate_level_layout<TestType>;
-
-    auto original = blueprints::make_layout<clk_lyt>(arrangement::EVEN_ROW, {6, 6, 1}, clocking::twoddwave());
+    auto original =
+        blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {6, 6, 1}, clocking::twoddwave());
     original.assign_clock_number({0, 0}, 3);
     original.assign_synchronization_element({0, 0}, 1);
     original.assign_synchronization_element({1, 0}, 2);
@@ -422,12 +442,9 @@ TEMPLATE_TEST_CASE("Clones isolate clock overrides, schemes, and geometry", "[ga
 
 TEST_CASE("Borrowed clocking schemes observe overrides and isolate clones", "[gate-level-layout]")
 {
-    /** Clocked gate layout under test. */
-    using clk_lyt = gate_level_layout<cartesian_layout>;
-
-    clk_lyt     original{{6, 6, 1}, clocking::twoddwave()};
-    const auto& scheme = original.get_clocking_scheme();
-    CHECK((std::is_same_v<decltype(original.get_clocking_scheme()), const clk_lyt::clocking_scheme_t&>));
+    cartesian_gate_layout original{{6, 6, 1}, clocking::twoddwave()};
+    const auto&           scheme = original.get_clocking_scheme();
+    CHECK((std::is_same_v<decltype(original.get_clocking_scheme()), const cartesian_gate_layout::clocking_scheme_t&>));
     CHECK(noexcept(original.get_clocking_scheme()));
 
     auto copy = original.clone();
@@ -441,24 +458,22 @@ TEST_CASE("Borrowed clocking schemes observe overrides and isolate clones", "[ga
 
 TEST_CASE("Iteration over clocking zones", "[gate-level-layout]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
-
-    const clk_lyt layout{clk_lyt::extent{3, 3, 1}, clocking::twoddwave()};
+    const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
 
     CHECK(layout.incoming_clocked_zones({0, 0}).empty());
     CHECK(layout.outgoing_clocked_zones({2, 2}).empty());
 
     auto v1 = layout.incoming_clocked_zones({1, 1});
-    auto s1 = std::set<clk_lyt::coordinate>{v1.cbegin(), v1.cend()};
-    auto s2 = std::set<clk_lyt::coordinate>{{{1, 0}, {0, 1}}};
+    auto s1 = std::set<cartesian_gate_layout::coordinate>{v1.cbegin(), v1.cend()};
+    auto s2 = std::set<cartesian_gate_layout::coordinate>{{{1, 0}, {0, 1}}};
 
     CHECK(s1 == s2);
 
     layout.foreach_incoming_clocked_zone({1, 1}, [&s2](const auto& cz) { CHECK(s2.count(cz) > 0); });
 
     auto v3 = layout.outgoing_clocked_zones({1, 1});
-    auto s3 = std::set<clk_lyt::coordinate>{v3.cbegin(), v3.cend()};
-    auto s4 = std::set<clk_lyt::coordinate>{{{1, 2}, {2, 1}}};
+    auto s3 = std::set<cartesian_gate_layout::coordinate>{v3.cbegin(), v3.cend()};
+    auto s4 = std::set<cartesian_gate_layout::coordinate>{{{1, 2}, {2, 1}}};
 
     layout.foreach_outgoing_clocked_zone({1, 1}, [&s4](const auto& cz) { CHECK(s4.count(cz) > 0); });
 
@@ -467,59 +482,55 @@ TEST_CASE("Iteration over clocking zones", "[gate-level-layout]")
 
 TEST_CASE("Clocked neighbor degrees", "[gate-level-layout]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
-
     SECTION("2DDWave Clocking")
     {
-        const clk_lyt layout{clk_lyt::extent{3, 3, 1}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
 
-        CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(0));
-        CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));
-        CHECK(layout.in_degree({2, 0}) == static_cast<clk_lyt::degree_t>(1));
-        CHECK(layout.in_degree({1, 1}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.in_degree({0, 0}) == static_cast<cartesian_gate_layout::degree_t>(0));
+        CHECK(layout.in_degree({1, 0}) == static_cast<cartesian_gate_layout::degree_t>(1));
+        CHECK(layout.in_degree({2, 0}) == static_cast<cartesian_gate_layout::degree_t>(1));
+        CHECK(layout.in_degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(2));
 
-        CHECK(layout.out_degree({1, 1}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.out_degree({0, 2}) == static_cast<clk_lyt::degree_t>(1));
-        CHECK(layout.out_degree({1, 2}) == static_cast<clk_lyt::degree_t>(1));
-        CHECK(layout.out_degree({2, 2}) == static_cast<clk_lyt::degree_t>(0));
+        CHECK(layout.out_degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.out_degree({0, 2}) == static_cast<cartesian_gate_layout::degree_t>(1));
+        CHECK(layout.out_degree({1, 2}) == static_cast<cartesian_gate_layout::degree_t>(1));
+        CHECK(layout.out_degree({2, 2}) == static_cast<cartesian_gate_layout::degree_t>(0));
 
-        CHECK(layout.degree({0, 0}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.degree({1, 0}) == static_cast<clk_lyt::degree_t>(3));
-        CHECK(layout.degree({2, 0}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.degree({1, 1}) == static_cast<clk_lyt::degree_t>(4));
-        CHECK(layout.degree({0, 2}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.degree({1, 2}) == static_cast<clk_lyt::degree_t>(3));
-        CHECK(layout.degree({2, 2}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.degree({0, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.degree({1, 0}) == static_cast<cartesian_gate_layout::degree_t>(3));
+        CHECK(layout.degree({2, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(4));
+        CHECK(layout.degree({0, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.degree({1, 2}) == static_cast<cartesian_gate_layout::degree_t>(3));
+        CHECK(layout.degree({2, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
     }
     SECTION("USE Clocking")
     {
-        const clk_lyt layout{clk_lyt::extent{3, 3, 1}, clocking::use()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::use()};
 
-        CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(1));
-        CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));
-        CHECK(layout.in_degree({2, 0}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.in_degree({1, 1}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.in_degree({0, 0}) == static_cast<cartesian_gate_layout::degree_t>(1));
+        CHECK(layout.in_degree({1, 0}) == static_cast<cartesian_gate_layout::degree_t>(1));
+        CHECK(layout.in_degree({2, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.in_degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(2));
 
-        CHECK(layout.out_degree({1, 1}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.out_degree({0, 2}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.out_degree({1, 2}) == static_cast<clk_lyt::degree_t>(1));
-        CHECK(layout.out_degree({2, 2}) == static_cast<clk_lyt::degree_t>(1));
+        CHECK(layout.out_degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.out_degree({0, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.out_degree({1, 2}) == static_cast<cartesian_gate_layout::degree_t>(1));
+        CHECK(layout.out_degree({2, 2}) == static_cast<cartesian_gate_layout::degree_t>(1));
 
-        CHECK(layout.degree({0, 0}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.degree({1, 0}) == static_cast<clk_lyt::degree_t>(3));
-        CHECK(layout.degree({2, 0}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.degree({1, 1}) == static_cast<clk_lyt::degree_t>(4));
-        CHECK(layout.degree({0, 2}) == static_cast<clk_lyt::degree_t>(2));
-        CHECK(layout.degree({1, 2}) == static_cast<clk_lyt::degree_t>(3));
-        CHECK(layout.degree({2, 2}) == static_cast<clk_lyt::degree_t>(2));
+        CHECK(layout.degree({0, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.degree({1, 0}) == static_cast<cartesian_gate_layout::degree_t>(3));
+        CHECK(layout.degree({2, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(4));
+        CHECK(layout.degree({0, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
+        CHECK(layout.degree({1, 2}) == static_cast<cartesian_gate_layout::degree_t>(3));
+        CHECK(layout.degree({2, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
     }
 }
 
 TEST_CASE("Synchronization element layout properties", "[gate-level-layout]")
 {
-    using se_layout = gate_level_layout<cartesian_layout>;
-
-    se_layout layout{se_layout::extent{3, 3, 1}, clocking::twoddwave()};
+    cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
 
     CHECK(layout.num_se() == 0);
     layout.assign_synchronization_element({0, 0}, 0);
@@ -555,30 +566,28 @@ TEST_CASE("Synchronization element layout properties", "[gate-level-layout]")
     CHECK(layout.get_synchronization_element({0, 2}) == 0);
     CHECK(layout.get_synchronization_element({2, 2}) == 0);
 
-    CHECK(layout.in_degree({0, 0}) == static_cast<se_layout::degree_t>(2));
-    CHECK(layout.in_degree({1, 0}) == static_cast<se_layout::degree_t>(3));
-    CHECK(layout.in_degree({2, 0}) == static_cast<se_layout::degree_t>(2));
-    CHECK(layout.in_degree({1, 1}) == static_cast<se_layout::degree_t>(4));
+    CHECK(layout.in_degree({0, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+    CHECK(layout.in_degree({1, 0}) == static_cast<cartesian_gate_layout::degree_t>(3));
+    CHECK(layout.in_degree({2, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+    CHECK(layout.in_degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(4));
 
-    CHECK(layout.out_degree({1, 1}) == static_cast<se_layout::degree_t>(4));
-    CHECK(layout.out_degree({0, 2}) == static_cast<se_layout::degree_t>(2));
-    CHECK(layout.out_degree({1, 2}) == static_cast<se_layout::degree_t>(3));
-    CHECK(layout.out_degree({2, 2}) == static_cast<se_layout::degree_t>(2));
+    CHECK(layout.out_degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(4));
+    CHECK(layout.out_degree({0, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
+    CHECK(layout.out_degree({1, 2}) == static_cast<cartesian_gate_layout::degree_t>(3));
+    CHECK(layout.out_degree({2, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
 
-    CHECK(layout.degree({0, 0}) == static_cast<se_layout::degree_t>(2));
-    CHECK(layout.degree({1, 0}) == static_cast<se_layout::degree_t>(3));
-    CHECK(layout.degree({2, 0}) == static_cast<se_layout::degree_t>(2));
-    CHECK(layout.degree({1, 1}) == static_cast<se_layout::degree_t>(4));
-    CHECK(layout.degree({0, 2}) == static_cast<se_layout::degree_t>(2));
-    CHECK(layout.degree({1, 2}) == static_cast<se_layout::degree_t>(3));
-    CHECK(layout.degree({2, 2}) == static_cast<se_layout::degree_t>(2));
+    CHECK(layout.degree({0, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+    CHECK(layout.degree({1, 0}) == static_cast<cartesian_gate_layout::degree_t>(3));
+    CHECK(layout.degree({2, 0}) == static_cast<cartesian_gate_layout::degree_t>(2));
+    CHECK(layout.degree({1, 1}) == static_cast<cartesian_gate_layout::degree_t>(4));
+    CHECK(layout.degree({0, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
+    CHECK(layout.degree({1, 2}) == static_cast<cartesian_gate_layout::degree_t>(3));
+    CHECK(layout.degree({2, 2}) == static_cast<cartesian_gate_layout::degree_t>(2));
 }
 
 TEST_CASE("Shifted clocking with synchronization elements", "[gate-level-layout]")
 {
-    using se_layout = gate_level_layout<cartesian_layout>;
-
-    se_layout layout{se_layout::extent{3, 3, 1}, clocking::twoddwave()};
+    cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
 
     layout.assign_synchronization_element({1, 1}, 1);
 
@@ -611,9 +620,7 @@ TEST_CASE("Shifted clocking with synchronization elements", "[gate-level-layout]
 
 TEST_CASE("Iteration over synchronization elements", "[gate-level-layout]")
 {
-    using se_layout = gate_level_layout<cartesian_layout>;
-
-    se_layout layout{se_layout::extent{3, 3, 1}, clocking::twoddwave()};
+    cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
 
     layout.assign_synchronization_element({0, 1}, 1);
     layout.assign_synchronization_element({1, 0}, 1);
@@ -624,21 +631,21 @@ TEST_CASE("Iteration over synchronization elements", "[gate-level-layout]")
     CHECK(layout.outgoing_clocked_zones({2, 2}).size() == 2);
 
     const auto v1 = layout.incoming_clocked_zones({1, 1});
-    const auto s1 = std::set<se_layout::coordinate>{v1.cbegin(), v1.cend()};
-    const auto s2 = std::set<se_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
+    const auto s1 = std::set<cartesian_gate_layout::coordinate>{v1.cbegin(), v1.cend()};
+    const auto s2 = std::set<cartesian_gate_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
 
     CHECK(s1 == s2);
 
     const auto v3 = layout.outgoing_clocked_zones({1, 1});
-    const auto s3 = std::set<se_layout::coordinate>{v3.cbegin(), v3.cend()};
-    const auto s4 = std::set<se_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
+    const auto s3 = std::set<cartesian_gate_layout::coordinate>{v3.cbegin(), v3.cend()};
+    const auto s4 = std::set<cartesian_gate_layout::coordinate>{{{1, 0}, {0, 1}, {1, 2}, {2, 1}}};
 
     CHECK(s3 == s4);
 }
 
 TEST_CASE("Sparse clock metadata enumerates assigned zones independently of frame area", "[gate-level-layout]")
 {
-    gate_level_layout<cartesian_layout> lyt{{1'000'000, 1'000'000}};
+    gate_layout<cartesian_layout> lyt{{1'000'000, 1'000'000}};
     lyt.assign_clock_number({999'999, 999'999}, 2);
     lyt.assign_synchronization_element({-1, 4}, 7);
     uint32_t clocks{};
@@ -665,7 +672,7 @@ TEST_CASE("Sparse clock metadata enumerates assigned zones independently of fram
 TEMPLATE_TEST_CASE("Crossings count routing wires rather than identity terminals", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 2, 2});
+    auto lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 2, 2});
     for (int64_t x{}; x < 4; ++x)
     {
         lyt.create_buf({x, 0, 0});
@@ -686,7 +693,7 @@ TEMPLATE_TEST_CASE("Crossings count routing wires rather than identity terminals
 TEMPLATE_TEST_CASE("Crossing counts follow edits on both layers and value copies", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       lyt   = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 2, 2});
+    auto       lyt   = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 2, 2});
     const auto upper = lyt.create_buf({0, 0, 1});
     CHECK(lyt.num_crossings() == 0);
     const auto lower = lyt.create_pi("a", {0, 0, 0});
@@ -718,8 +725,8 @@ TEMPLATE_TEST_CASE("Crossing counts follow edits on both layers and value copies
 TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {6, 6});
-    std::vector<typename gate_level_layout<TestType>::object_id> pis{};
+    auto lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {6, 6});
+    std::vector<typename gate_layout<TestType>::object_id> pis{};
     pis.reserve(5);
     for (uint32_t i = 0; i < 5; ++i)
     {
@@ -743,11 +750,11 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]
     lyt.connect(pis[0], {gate, 3});
     CHECK(lyt.fanout_size(pis[0]) == 2);
     /** @brief Destination input ports driven by the first primary input. */
-    std::set<typename gate_level_layout<TestType>::input_port> sinks{};
+    std::set<typename gate_layout<TestType>::input_port> sinks{};
     lyt.foreach_sink(pis[0], [&](const auto port) { sinks.insert(port); });
-    CHECK((sinks == std::set<typename gate_level_layout<TestType>::input_port>{{gate, 0}, {gate, 3}}));
+    CHECK((sinks == std::set<typename gate_layout<TestType>::input_port>{{gate, 0}, {gate, 3}}));
     /** @brief Destination objects visited once per connected input port. */
-    std::vector<typename gate_level_layout<TestType>::object_id> destinations{};
+    std::vector<typename gate_layout<TestType>::object_id> destinations{};
     lyt.foreach_fanout(pis[0], [&](const auto destination) { destinations.push_back(destination); });
     CHECK((destinations == std::vector{gate, gate}));
     lyt.move_object(pis[0], {2, 1});
@@ -764,9 +771,9 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]
 TEMPLATE_TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",
                    "[gate-level-layout]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto       original = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {8, 8});
-    const auto a        = original.create_pi("a", {0, 0});
-    const auto b        = original.create_pi("b", {1, 0});
+    auto                       original = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {8, 8});
+    const auto                 a        = original.create_pi("a", {0, 0});
+    const auto                 b        = original.create_pi("b", {1, 0});
     kitty::dynamic_truth_table parity{5};
     kitty::create_from_hex_string(parity, "96696996");
     const auto gate = original.create_gate({a}, parity, {2, 2});
@@ -796,7 +803,7 @@ TEMPLATE_TEST_CASE("Object visitors accept move-only lvalues and temporaries", "
                    shifted_cartesian_layout, hexagonal_layout)
 {
     /** @brief Layout with enough live objects to test early termination. */
-    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {3, 1, 1});
+    auto lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {3, 1, 1});
     lyt.create_pi("a", {0, 0});
     lyt.create_pi("b", {1, 0});
     lyt.create_pi("c", {2, 0});
@@ -834,48 +841,46 @@ TEMPLATE_TEST_CASE("Object visitors accept move-only lvalues and temporaries", "
 
 TEST_CASE("Clocked neighbor visitors accept move-only lvalues and temporaries", "[gate-level-layout]")
 {
-    /** @brief Cartesian gate layout used for the neighbor traversal. */
-    using layout = gate_level_layout<cartesian_layout>;
     /** @brief Layout with two incoming and two outgoing neighbors of the center. */
-    const layout lyt{{3, 3, 1}, clocking::twoddwave()};
+    const cartesian_gate_layout lyt{{3, 3, 1}, clocking::twoddwave()};
     /** @brief Collects neighbors through an lvalue-qualified move-only callback. */
     struct visitor
     {
         /** @brief Owns the callback state. */
         std::unique_ptr<uint32_t> calls;
         /** @brief Reports visited neighbors. */
-        std::set<layout::coordinate>& observed;
+        std::set<cartesian_gate_layout::coordinate>& observed;
         /** @brief Records a clocked neighbor. @param coordinate Visited neighbor. */
-        void operator()(const layout::coordinate& coordinate) &
+        void operator()(const cartesian_gate_layout::coordinate& coordinate) &
         {
             ++*calls;
             observed.insert(coordinate);
         }
     };
     /** @brief Incoming neighbors visited through both callback value categories. */
-    std::set<layout::coordinate> incoming{};
+    std::set<cartesian_gate_layout::coordinate> incoming{};
     /** @brief Move-only lvalue callback. */
     visitor incoming_visitor{.calls = std::make_unique<uint32_t>(0), .observed = incoming};
     lyt.foreach_incoming_clocked_zone({1, 1}, incoming_visitor);
-    CHECK(incoming == std::set<layout::coordinate>{{0, 1}, {1, 0}});
+    CHECK(incoming == std::set<cartesian_gate_layout::coordinate>{{0, 1}, {1, 0}});
     incoming.clear();
     lyt.foreach_incoming_clocked_zone({1, 1}, visitor{.calls = std::make_unique<uint32_t>(0), .observed = incoming});
-    CHECK(incoming == std::set<layout::coordinate>{{0, 1}, {1, 0}});
+    CHECK(incoming == std::set<cartesian_gate_layout::coordinate>{{0, 1}, {1, 0}});
     /** @brief Outgoing neighbors visited through both callback value categories. */
-    std::set<layout::coordinate> outgoing{};
+    std::set<cartesian_gate_layout::coordinate> outgoing{};
     /** @brief Move-only lvalue callback. */
     visitor outgoing_visitor{.calls = std::make_unique<uint32_t>(0), .observed = outgoing};
     lyt.foreach_outgoing_clocked_zone({1, 1}, outgoing_visitor);
-    CHECK(outgoing == std::set<layout::coordinate>{{1, 2}, {2, 1}});
+    CHECK(outgoing == std::set<cartesian_gate_layout::coordinate>{{1, 2}, {2, 1}});
     outgoing.clear();
     lyt.foreach_outgoing_clocked_zone({1, 1}, visitor{.calls = std::make_unique<uint32_t>(0), .observed = outgoing});
-    CHECK(outgoing == std::set<layout::coordinate>{{1, 2}, {2, 1}});
+    CHECK(outgoing == std::set<cartesian_gate_layout::coordinate>{{1, 2}, {2, 1}});
 }
 
 TEMPLATE_TEST_CASE("Object iteration preserves sparse membership through reuse and ownership changes",
                    "[gate-level-layout]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto                          lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {});
+    auto                          lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {});
     std::vector<layout_object_id> objects{};
     std::set<layout_object_id>    expected{};
     for (int32_t x{}; x < 130; ++x)
@@ -929,7 +934,7 @@ TEST_CASE("Name presence queries do not allocate", "[gate-level-layout]")
 {
     require_allocation_failure_support();
     /** Layout with long names that cannot use short-string storage. */
-    gate_level_layout<cartesian_layout> layout{{2, 1}};
+    gate_layout<cartesian_layout> layout{{2, 1}};
     /** Named input. */
     const auto input = layout.create_pi(std::string(128, 'a'), {0, 0});
     layout.create_po(input, std::string(128, 'b'), {1, 0});
@@ -951,7 +956,7 @@ TEST_CASE("Name presence queries do not allocate", "[gate-level-layout]")
     CHECK(object_named);
     CHECK(input_named);
     CHECK(output_named);
-    CHECK_THROWS_AS(layout.has_name(gate_level_layout<cartesian_layout>::object_id{999}), std::invalid_argument);
+    CHECK_THROWS_AS(layout.has_name(gate_layout<cartesian_layout>::object_id{999}), std::invalid_argument);
     CHECK_THROWS_AS(layout.has_input_name(1), std::out_of_range);
     CHECK_THROWS_AS(layout.has_output_name(1), std::out_of_range);
     layout.set_name(input, "");
@@ -962,15 +967,14 @@ TEST_CASE("Name presence queries do not allocate", "[gate-level-layout]")
 TEMPLATE_TEST_CASE("Layout moves preserve objects and clocking without allocating", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<gate_level_layout<TestType>>);
-    STATIC_REQUIRE(std::is_nothrow_move_assignable_v<gate_level_layout<TestType>>);
+    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<gate_layout<TestType>>);
+    STATIC_REQUIRE(std::is_nothrow_move_assignable_v<gate_layout<TestType>>);
 
     require_allocation_failure_support();
-    auto source =
-        blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {3, 2}, clocking::twoddwave());
+    auto source = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {3, 2}, clocking::twoddwave());
     const auto input = source.create_pi("input", {0, 0});
     source.assign_synchronization_element({0, 0}, 2);
-    auto destination  = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {});
+    auto destination  = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {});
     allocation_budget = 0;
     auto moved        = std::move(source);
     destination       = std::move(moved);
@@ -997,16 +1001,16 @@ struct throwing_clone_geometry : cartesian_layout
 
 TEST_CASE("Geometry clone failures preserve layout move operands", "[gate-level-layout]")
 {
-    STATIC_REQUIRE_FALSE(std::is_nothrow_move_constructible_v<gate_level_layout<throwing_clone_geometry>>);
-    STATIC_REQUIRE_FALSE(std::is_nothrow_move_assignable_v<gate_level_layout<throwing_clone_geometry>>);
-    gate_level_layout<throwing_clone_geometry> source{{3, 2}};
-    const auto                                 input = source.create_pi("source", {0, 0});
-    gate_level_layout<throwing_clone_geometry> destination{{2, 1}};
-    const auto                                 retained = destination.create_pi("destination", {1, 0});
+    STATIC_REQUIRE_FALSE(std::is_nothrow_move_constructible_v<gate_layout<throwing_clone_geometry>>);
+    STATIC_REQUIRE_FALSE(std::is_nothrow_move_assignable_v<gate_layout<throwing_clone_geometry>>);
+    gate_layout<throwing_clone_geometry> source{{3, 2}};
+    const auto                           input = source.create_pi("source", {0, 0});
+    gate_layout<throwing_clone_geometry> destination{{2, 1}};
+    const auto                           retained = destination.create_pi("destination", {1, 0});
 
     SECTION("Move construction")
     {
-        REQUIRE_THROWS_AS(gate_level_layout<throwing_clone_geometry>{std::move(source)}, std::runtime_error);
+        REQUIRE_THROWS_AS(gate_layout<throwing_clone_geometry>{std::move(source)}, std::runtime_error);
     }
     SECTION("Move assignment")
     {
@@ -1054,15 +1058,13 @@ struct throwing_assignment_geometry : cartesian_layout
 
 TEST_CASE("Geometry assignment failures preserve owned layout state", "[gate-level-layout]")
 {
-    /** @brief Gate layout whose coordinate geometry can fail during assignment. */
-    using layout = gate_level_layout<throwing_assignment_geometry>;
-    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<layout>);
-    STATIC_REQUIRE_FALSE(std::is_nothrow_move_assignable_v<layout>);
-    layout     source{{3, 2}};
-    const auto input = source.create_pi("source", {0, 0});
+    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<gate_layout<throwing_assignment_geometry>>);
+    STATIC_REQUIRE_FALSE(std::is_nothrow_move_assignable_v<gate_layout<throwing_assignment_geometry>>);
+    gate_layout<throwing_assignment_geometry> source{{3, 2}};
+    const auto                                input = source.create_pi("source", {0, 0});
     source.assign_synchronization_element({0, 0}, 2);
-    layout     destination{{2, 1}};
-    const auto retained = destination.create_pi("destination", {1, 0});
+    gate_layout<throwing_assignment_geometry> destination{{2, 1}};
+    const auto                                retained = destination.create_pi("destination", {1, 0});
     destination.assign_synchronization_element({1, 0}, 1);
 
     REQUIRE_THROWS_AS(destination = std::move(source), std::runtime_error);
@@ -1086,9 +1088,9 @@ TEST_CASE("Crossing counts survive failed connection allocation", "[gate-level-l
     for (std::size_t failure{};; ++failure)
     {
         REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
-        gate_level_layout<cartesian_layout> lyt{{2, 2, 2}};
-        const auto                          source = lyt.create_pi("a", {0, 0});
-        bool                                created{};
+        gate_layout<cartesian_layout> lyt{{2, 2, 2}};
+        const auto                    source = lyt.create_pi("a", {0, 0});
+        bool                          created{};
         allocation_budget = failure;
         try
         {
@@ -1121,9 +1123,9 @@ TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-
     for (std::size_t failure = 0;; ++failure)
     {
         REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
-        gate_level_layout<cartesian_layout> lyt{{8, 8}};
-        const auto                          a = lyt.create_pi("a", {0, 0});
-        kitty::dynamic_truth_table          parity{5};
+        gate_layout<cartesian_layout> lyt{{8, 8}};
+        const auto                    a = lyt.create_pi("a", {0, 0});
+        kitty::dynamic_truth_table    parity{5};
         kitty::create_from_hex_string(parity, "96696996");
         lyt.remove(lyt.create_gate({}, parity, {2, 2}));
         if (!reuse)
@@ -1164,15 +1166,14 @@ TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-
 TEST_CASE("Moved-from layouts remain reusable after allocation failure", "[gate-level-layout]")
 {
     require_allocation_failure_support();
-    using layout = gate_level_layout<cartesian_layout>;
     for (std::size_t failure = 0;; ++failure)
     {
         REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
-        layout     source{{4, 4}};
-        const auto original = source.create_pi("original", {0, 0});
+        cartesian_gate_layout source{{4, 4}};
+        const auto            original = source.create_pi("original", {0, 0});
         /** @brief Destination that retains the original object after moving the layout. */
-        const layout destination{std::move(source)};
-        bool         created{};
+        const cartesian_gate_layout destination{std::move(source)};
+        bool                        created{};
         allocation_budget = failure;
         try
         {
@@ -1214,8 +1215,8 @@ TEST_CASE("Failed creation preserves object iteration across storage growth", "[
     for (std::size_t failure{};; ++failure)
     {
         REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
-        gate_level_layout<cartesian_layout> lyt{};
-        std::set<layout_object_id>          expected{};
+        gate_layout<cartesian_layout> lyt{};
+        std::set<layout_object_id>    expected{};
         for (int32_t x{}; x < initial_count; ++x)
         {
             expected.insert(lyt.create_buf({x, 0}));
@@ -1269,7 +1270,7 @@ TEST_CASE("Failed name assignment preserves name presence", "[gate-level-layout]
     {
         REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
         /** Unnamed object with no existing name-map entry. */
-        gate_level_layout<cartesian_layout> layout{{1, 1}};
+        gate_layout<cartesian_layout> layout{{1, 1}};
         /** Input whose name assignment may fail. */
         const auto input = layout.create_pi("", {0, 0});
         /** Whether the name assignment completed. */

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/physical_design/generate_edge_intersection_graph.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/utils/graph/graph_coloring.hpp"
@@ -227,13 +227,10 @@ class color_routing_impl
  * @return `true` iff routing was successful, i.e., iff all objectives could be satisfied.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 bool color_routing(Lyt& lyt, const std::vector<routing_objective>& objectives, color_routing_params ps = {},
                    color_routing_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     color_routing_stats st{};
 
     detail::color_routing_impl<Lyt> p{lyt, objectives, ps, st};

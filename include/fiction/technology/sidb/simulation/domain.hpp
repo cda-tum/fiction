@@ -33,19 +33,17 @@ namespace fiction::sidb::simulation
  * thread-safe access to the stored data. All methods of this class are thread-safe.
  *
  * @tparam Key The type of the key used to identify entries in the domain.
- * @tparam MappedTypes Value types stored in the tuple.
+ * @tparam MappedTypes Nonempty pack of value types stored in the tuple.
  */
 template <typename Key, typename... MappedTypes>
+    requires(sizeof...(MappedTypes) > 0)
 class domain
 {
   public:
     /**
      * Constructs a new `domain` instance.
      */
-    domain()
-    {
-        static_assert(sizeof...(MappedTypes) > 0, "MappedTypes must not be empty");
-    }
+    domain() = default;
     /**
      * Adds a value to the operational domain. This function is thread-safe and uses the `try_emplace` method.
      *

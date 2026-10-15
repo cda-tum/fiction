@@ -121,6 +121,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
+    with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
     throw `std::invalid_argument`.
@@ -218,6 +220,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
     arguments from C++ calls and container declarations.
+  - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
+  - **Breaking:** `types.hpp` drops the three `*_gate_clk_lyt` presets, their pointers, `gate_layout_t`,
+    and transitive layout includes. Include `fiction/layouts/gate_layout.hpp` and use its canonical types.
+  - **Breaking:** `gate_level_layout` is now `gate_layout` in `fiction/layouts/gate_layout.hpp`.
+    Update C++ includes and template names; Python class names remain unchanged.
   - `bounding_box_2d` is renamed to `bounding_box` in C++ and Python.
   - Coordinate aliases and geometry traits are removed; use `layout_base` types and concrete layout arguments.
   - Gate-level layouts now keep large-arity input storage outside the common object record.
@@ -270,6 +277,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Documented all three gate-layout geometries and MSVC Release builds for Python.
   - Python layout docstrings use `extent` for the extent argument.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
@@ -282,6 +290,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Clock-number assignment helpers now declare their gate-layout requirements with C++20 `requires` clauses.
+    Experiment parameters, inputs, and output columns are unchanged.
+  - Physical-design experiments convert mapped networks before placement with unchanged computations.
+  - Gate-layout experiments use canonical types with unchanged computations.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
@@ -408,6 +420,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Template APIs now declare their type and callback requirements with C++20 `requires` clauses.
+    Unsupported arguments fail overload resolution; optional naming operations remain no-ops when unsupported.
   - C++ Python binding helpers now use a `register_` prefix.
   - Python bindings use the `nb` namespace alias for nanobind.
   - The C++ test suite and the experiments now open the namespaces they use, one
@@ -434,6 +448,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     it that carries the toctree
 
 - Python bindings:
+
+  - Gate-layout docstrings document the Cartesian default for the C++ template.
 
   - **Breaking:** More native computation, collection traversal, and file I/O release the GIL across `pyfiction` bindings.
     Callers must synchronize shared native objects; Python object operations and small accessors retain the GIL.
@@ -525,6 +541,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 
+  - **Breaking:** Removed the non-network layout and gate-library capability traits and `cell<Lyt>`.
+    Use local `requires` expressions and `layouts::layout_base::coordinate`; network extension traits remain supported.
   - **Breaking:** Removed layout `volume()` and `volume_of`. Use `area() * layers()` to count coordinates.
   - **Breaking:** Layouts now reject more than two layers. Use one ground layer and an optional crossing layer;
     empty layouts remain supported.
@@ -534,7 +552,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
     `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
     `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
-    and `has_is_empty_v`. Use concrete gate-level layout arguments or `is_cell_grid_v`. The unused `is_offset_coord_v`
+    and `has_is_empty_v`. Use concrete gate-level layout arguments or local grid requirements. The unused `is_offset_coord_v`
     and `has_offset_coord_v` are gone as well.
   - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
     `wiring_reduction_layout`.
@@ -542,8 +560,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and `sidb_technology` with their predicates and `cell_mark` enums; the traits `technology`,
     `has_*_technology_v`, `is_cell_level_layout_v`, and `has_post_layout_optimization_v`; the aliases
     `qca_cell_clk_lyt`, `mol_qca_cell_clk_lyt`, `inml_cell_clk_lyt`, `sidb_cell_clk_lyt`, `sidb_cell_clk_lyt_cube`,
-    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts and
-    `is_cell_grid_v`.
+    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts.
   - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
     types of the other technologies.
 - Dependencies:
@@ -608,6 +625,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Simulated annealing now keeps acceptance random state local to each worker thread.
+  - Multi-state simulated annealing now rejects zero instances with `std::invalid_argument`.
+  - Minimum-energy searches now require forward iterators. Vector and forward-list ranges remain supported.
+  - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
+    changing the other inputs' truth-table order.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.
@@ -669,6 +691,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - Release benchmark builds now skip stripping when no strip tool is available.
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.

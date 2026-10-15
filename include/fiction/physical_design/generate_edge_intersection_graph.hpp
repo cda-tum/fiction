@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/physical_design/path_finding/enumerate_all_paths.hpp"
 #include "fiction/physical_design/path_finding/k_shortest_paths.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
@@ -339,15 +339,12 @@ class generate_edge_intersection_graph_impl
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 edge_intersection_graph generate_edge_intersection_graph(const Lyt&                              lyt,
                                                          const std::vector<routing_objective>&   objectives,
                                                          generate_edge_intersection_graph_params ps  = {},
                                                          generate_edge_intersection_graph_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a clocked layout");
-
     generate_edge_intersection_graph_stats st{};
 
     detail::generate_edge_intersection_graph_impl<Lyt> p{lyt, objectives, ps, st};

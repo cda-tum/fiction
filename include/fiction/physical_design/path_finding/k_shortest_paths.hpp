@@ -229,7 +229,7 @@ class yen_k_shortest_paths_impl
  * This implementation uses the A* algorithm with the Manhattan distance function internally.
  *
  * This function automatically detects whether the given layout implements a clocking interface (see
- * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
+ * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
  * path, each coordinate can occur at maximum once.
  *
@@ -246,8 +246,7 @@ class yen_k_shortest_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout>;
- * clk_lyt layout = ...;
+ * fiction::layouts::cartesian_gate_layout layout = ...;
  * auto k_paths = yen_k_shortest_paths(static_cast<cartesian_layout>(layout), {source, target}, k);
  * @endcode
  *
@@ -264,12 +263,11 @@ class yen_k_shortest_paths_impl
  * `objective.target`.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] path_collection yen_k_shortest_paths(const Lyt& layout, const routing_objective& objective,
                                                    const uint32_t k, const yen_k_shortest_paths_params& params = {},
                                                    const layouts::obstructions& obstructions = {})
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     if (k == 0)
     {
         return {};

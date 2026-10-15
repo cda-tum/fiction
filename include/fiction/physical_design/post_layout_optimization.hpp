@@ -24,7 +24,7 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
@@ -171,7 +171,7 @@ struct fanin_fanout_data
 /** @brief Fits zero-origin geometry to occupied objects. Empty layouts receive empty geometry.
  * @param lyt Layout to resize.
  */
-inline void fit_occupied_geometry(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt)
+inline void fit_occupied_geometry(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt)
 {
     const auto maximum = layouts::bounding_box{lyt}.get_max();
     lyt.resize(maximum ? fiction::layouts::layout_base::extent{static_cast<int64_t>(maximum->x) + 1,
@@ -181,9 +181,9 @@ inline void fit_occupied_geometry(fiction::layouts::gate_level_layout<fiction::l
 /** @brief Moves an output and inserts a wire at its former coordinate, preserving its identity.
  * @param lyt Layout. @param id Output identity. @param target New coordinate.
  */
-inline void extend_output_position(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-                                   const fiction::layouts::layout_object_id                                 id,
-                                   const fiction::layouts::layout_base::coordinate&                         target)
+inline void extend_output_position(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+                                   const fiction::layouts::layout_object_id                           id,
+                                   const fiction::layouts::layout_base::coordinate&                   target)
 {
     const auto old    = lyt.get_tile(id);
     const auto source = lyt.source({id, 0});
@@ -194,7 +194,7 @@ inline void extend_output_position(fiction::layouts::gate_level_layout<fiction::
 /** @brief Shrinks empty final rows and columns while keeping outputs accessible at the border.
  * @param lyt Layout to optimize.
  */
-inline void optimize_output_positions(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt)
+inline void optimize_output_positions(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt)
 {
     if (lyt.is_empty())
     {
@@ -287,8 +287,8 @@ inline void optimize_output_positions(fiction::layouts::gate_level_layout<fictio
  * @return Identity of the object at `t`. @throws std::invalid_argument If `t` is empty.
  */
 [[nodiscard]] inline fiction::layouts::layout_object_id
-object_at(const fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-          const fiction::layouts::layout_base::coordinate&                               t)
+object_at(const fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+          const fiction::layouts::layout_base::coordinate&                         t)
 {
     if (const auto id = lyt.find_object(t))
     {
@@ -299,9 +299,8 @@ object_at(const fiction::layouts::gate_level_layout<fiction::layouts::cartesian_
 /** @brief Extends outputs one tile to the nearest border while preserving their logical inputs.
  * @param lyt Layout. @param moved_gates Relocation count to adjust.
  */
-inline void
-check_and_optimize_po_positions(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-                                uint64_t&                                                                moved_gates)
+inline void check_and_optimize_po_positions(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+                                            uint64_t& moved_gates)
 {
     const auto x_max = static_cast<int32_t>(static_cast<int64_t>(lyt.width()) - 1);
     const auto y_max = static_cast<int32_t>(static_cast<int64_t>(lyt.height()) - 1);
@@ -354,7 +353,7 @@ class post_layout_optimization_impl
 {
   public:
     /** @brief Initializes relocation search. @param lyt Layout. @param p Parameters. @param st Statistics. */
-    post_layout_optimization_impl(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+    post_layout_optimization_impl(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
                                   post_layout_optimization_params p, post_layout_optimization_stats& st) :
             plyt{lyt},
             ps{std::move(p)},
@@ -524,7 +523,7 @@ class post_layout_optimization_impl
     /**
      * 2DDWave-clocked Cartesian gate-level layout to optimize.
      */
-    fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& plyt;
+    fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& plyt;
     /**
      * Post-layout optimization parameters.
      */
@@ -560,8 +559,8 @@ class post_layout_optimization_impl
     /** @brief Moves crossing wires onto empty ground positions; topology follows their identities.
      * @param lyt Layout. @param deleted_coords Positions cleared by rerouting.
      */
-    void fix_wires(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-                   const std::vector<fiction::layouts::layout_base::coordinate>&            deleted_coords)
+    void fix_wires(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+                   const std::vector<fiction::layouts::layout_base::coordinate>&      deleted_coords)
     {
         for (const auto& t : deleted_coords)
         {
@@ -582,8 +581,8 @@ class post_layout_optimization_impl
      * @throws std::invalid_argument If an intermediate wire is disconnected or cyclic.
      */
     [[nodiscard]] static fanin_fanout_data
-    get_fanin_and_fanouts(const fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-                          const fiction::layouts::layout_base::coordinate&                               position)
+    get_fanin_and_fanouts(const fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+                          const fiction::layouts::layout_base::coordinate&                         position)
     {
         fanin_fanout_data data{};
         const auto        gate = object_at(lyt, position);
@@ -653,10 +652,9 @@ class post_layout_optimization_impl
      * @param end_tile The ending coordinate of the path.
      * @return The computed path as a sequence of coordinates in the layout.
      */
-    layout_coordinate_path
-    get_path_and_obstruct(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-                          const fiction::layouts::layout_base::coordinate&                         start_tile,
-                          const fiction::layouts::layout_base::coordinate&                         end_tile)
+    layout_coordinate_path get_path_and_obstruct(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+                                                 const fiction::layouts::layout_base::coordinate& start_tile,
+                                                 const fiction::layouts::layout_base::coordinate& end_tile)
     {
         using dist = physical_design::path_finding::twoddwave_distance_functor;
         using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
@@ -693,7 +691,7 @@ class post_layout_optimization_impl
      * @param current Current gate coordinate. @param data Adjacent routes. @param moved Successful movement flag.
      * @param original Original coordinate. @return Whether another candidate may be tried.
      */
-    bool check_new_position(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+    bool check_new_position(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
                             const fiction::layouts::layout_base::coordinate& candidate, uint64_t& attempts,
                             fiction::layouts::layout_base::coordinate& current, const fanin_fanout_data& data,
                             bool& moved, const fiction::layouts::layout_base::coordinate& original)
@@ -742,10 +740,10 @@ class post_layout_optimization_impl
     /** @brief Moves the gate back and recreates its original routing with ordered input endpoints.
      * @param lyt Layout. @param current Current coordinate. @param original Original coordinate. @param data Routes.
      */
-    void restore_original_wiring(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-                                 const fiction::layouts::layout_base::coordinate&                         current,
-                                 const fiction::layouts::layout_base::coordinate&                         original,
-                                 const fanin_fanout_data&                                                 data)
+    void restore_original_wiring(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+                                 const fiction::layouts::layout_base::coordinate&                   current,
+                                 const fiction::layouts::layout_base::coordinate&                   original,
+                                 const fanin_fanout_data&                                           data)
     {
         lyt.move_object(object_at(lyt, current), original);
         for (std::size_t index{}; index < data.routes.size(); ++index)
@@ -764,8 +762,8 @@ class post_layout_optimization_impl
     /** @brief Relocates a gate toward the origin and reroutes without changing identities or input numbering.
      * @param lyt Layout. @param original Original coordinate. @return Whether the gate moved.
      */
-    bool improve_gate_location(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-                               const fiction::layouts::layout_base::coordinate&                         original)
+    bool improve_gate_location(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+                               const fiction::layouts::layout_base::coordinate&                   original)
     {
         const auto data = get_fanin_and_fanouts(lyt, original);
         int32_t    min_x{}, min_y{};
@@ -876,9 +874,9 @@ class post_layout_optimization_impl
  * @throws std::invalid_argument If clocking or occupied geometry is invalid.
  * @throws std::overflow_error If the extent leaves no room for signed routing coordinates.
  */
-inline void post_layout_optimization(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
-                                     post_layout_optimization_params                                          ps = {},
-                                     post_layout_optimization_stats* pst = nullptr)
+inline void post_layout_optimization(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
+                                     post_layout_optimization_params                                    ps  = {},
+                                     post_layout_optimization_stats*                                    pst = nullptr)
 {
     if (!lyt.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME))
     {

@@ -25,7 +25,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 
 #include <sstream>
@@ -38,9 +38,7 @@ using namespace fiction::qca;
 
 TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    const gate_layout layout{gate_layout::extent{3, 3}, clocking::open(clocking::num_clks::FOUR)};
+    const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3}, clocking::open(clocking::num_clks::FOUR)};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -59,8 +57,8 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print terminal-only gate-level layout", "[print-gate-level-layout]")
 {
-    gate_level_layout<cartesian_layout> layout{{2, 1}};
-    const auto                          input = layout.create_pi("a", {0, 0});
+    gate_layout<cartesian_layout> layout{{2, 1}};
+    const auto                    input = layout.create_pi("a", {0, 0});
     layout.create_po(input, "f", {1, 0});
     std::stringstream print_stream{};
     print_gate_level_layout(print_stream, layout, false, false);
@@ -69,9 +67,7 @@ TEST_CASE("Print terminal-only gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    gate_layout layout{gate_layout::extent{4, 2, 1}, clocking::open(clocking::num_clks::FOUR)};
+    cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 2, 1}, clocking::open(clocking::num_clks::FOUR)};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
@@ -97,12 +93,12 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
     SECTION("Irregular clocking")
     {
-        layout.assign_clock_number({2, 0}, static_cast<typename gate_layout::clock_number_t>(0));
-        layout.assign_clock_number({1, 0}, static_cast<typename gate_layout::clock_number_t>(1));
-        layout.assign_clock_number({0, 0}, static_cast<typename gate_layout::clock_number_t>(2));
-        layout.assign_clock_number({1, 1}, static_cast<typename gate_layout::clock_number_t>(0));
-        layout.assign_clock_number({2, 1}, static_cast<typename gate_layout::clock_number_t>(1));
-        layout.assign_clock_number({3, 1}, static_cast<typename gate_layout::clock_number_t>(2));
+        layout.assign_clock_number({2, 0}, static_cast<typename cartesian_gate_layout::clock_number_t>(0));
+        layout.assign_clock_number({1, 0}, static_cast<typename cartesian_gate_layout::clock_number_t>(1));
+        layout.assign_clock_number({0, 0}, static_cast<typename cartesian_gate_layout::clock_number_t>(2));
+        layout.assign_clock_number({1, 1}, static_cast<typename cartesian_gate_layout::clock_number_t>(0));
+        layout.assign_clock_number({2, 1}, static_cast<typename cartesian_gate_layout::clock_number_t>(1));
+        layout.assign_clock_number({3, 1}, static_cast<typename cartesian_gate_layout::clock_number_t>(2));
 
         constexpr const char* layout_print = "        \n"
                                              "O←&←I ▢ \n"
@@ -120,9 +116,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    gate_layout layout{gate_layout::extent{2, 1, 1}, clocking::open(clocking::num_clks::FOUR)};
+    cartesian_gate_layout layout{cartesian_gate_layout::extent{2, 1, 1}, clocking::open(clocking::num_clks::FOUR)};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     layout.create_po(x1, "f1", {1, 0});
@@ -145,9 +139,7 @@ TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-g
 
 TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    auto layout = blueprints::crossing_layout<gate_layout>();
+    auto layout = blueprints::crossing_layout<cartesian_gate_layout>();
 
     constexpr const char* layout_print = "        \n"
                                          "▢ I I ▢ \n"

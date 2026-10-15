@@ -20,7 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -291,7 +291,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
     const auto create_diagonal_wire_with_n_non_terminating_segments = [](const uint64_t n)
     {
         /** @brief Frame containing every wire segment and terminal. */
-        hex_gate_clk_lyt lyt{arrangement::ODD_ROW, {((n + 1) / 2) + 1, n + 2}};
+        hexagonal_gate_layout lyt{arrangement::ODD_ROW, {((n + 1) / 2) + 1, n + 2}};
 
         /** @brief Output port of the most recent wire segment. */
         auto signal = lyt.create_pi("a", {0, 0});

@@ -1,5 +1,16 @@
 # Physical Design
 
+Physical design consumes `fiction::tec_nt`, a named `technology_network`. Convert other network types before
+placement; the conversion preserves network, primary-input, and primary-output names.
+
+```cpp
+const auto specification = fiction::synthesis::convert_network<fiction::tec_nt>(source);
+const auto layout = fiction::physical_design::orthogonal<fiction::layouts::cartesian_gate_layout>(specification);
+```
+
+`orthogonal` and `exact` normalize fanout for the selected layout and clocking scheme. GOLD removes dangling gates
+while preparing its search networks.
+
 ```{toctree}
 :maxdepth: 1
 
@@ -50,23 +61,23 @@ path_finding/path_finding
 
 **Header:** `fiction/physical_design/placement_utils.hpp`
 
-```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
+```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a)
+```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a, const typename fiction::layouts::gate_level_layout<Geometry>::object_id& b, const std::optional<bool>& c = std::nullopt)
+```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a, const typename fiction::layouts::gate_layout<Geometry>::object_id& b, const std::optional<bool>& c = std::nullopt)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const typename fiction::layouts::gate_level_layout<Geometry>::object_id& a, const typename fiction::layouts::gate_level_layout<Geometry>::object_id& b, const typename fiction::layouts::gate_level_layout<Geometry>::object_id& c)
+```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a, const typename fiction::layouts::gate_layout<Geometry>::object_id& b, const typename fiction::layouts::gate_layout<Geometry>::object_id& c)
 
 ```
 
-```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<typename fiction::layouts::gate_level_layout<Geometry>::object_id, Ntk>& node2pos)
+```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n, const mockturtle::node_map<typename fiction::layouts::gate_layout<Geometry>::object_id, tec_nt>& node2pos)
 
 ```
 
@@ -74,7 +85,7 @@ path_finding/path_finding
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_level_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Ntk, fanout_size>, Ntk>& node2pos)
+```{doxygenfunction} fiction::physical_design::place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n, const mockturtle::node_map<branching_signal_container<fanout_size>, tec_nt>& node2pos)
 
 ```
 

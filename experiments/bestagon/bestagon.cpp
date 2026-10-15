@@ -21,11 +21,13 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
-#include <fiction/networks/technology_network.hpp>           // technology-mapped network type
-#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
+#include <fiction/networks/technology_network.hpp>         // technology-mapped network type
+#include <fiction/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
@@ -72,8 +74,6 @@ using namespace fiction::verification;
 int main()
 try
 {
-    using gate_lyt = hex_gate_clk_lyt;
-
     const std::string layouts_folder = fmt::format("{}/bestagon/layouts", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
@@ -169,13 +169,14 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout = exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
+        const auto gate_layout =
+            exact<hexagonal_gate_layout>(convert_network<tec_nt>(mapped_network), exact_params, &exact_stats);
 
-        if (gate_level_layout.has_value())
+        if (gate_layout.has_value())
         {
             // check equivalence
             const auto miter =
-                mockturtle::miter<technology_network>(mapped_network, extract_layout_network(*gate_level_layout));
+                mockturtle::miter<technology_network>(mapped_network, extract_layout_network(*gate_layout));
             if (!miter.has_value())
             {
                 fmt::print(stderr, "[e] could not construct an equivalence miter for {}\n", benchmark);
@@ -189,14 +190,14 @@ try
             }
 
             // compute critical path and throughput
-            const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
+            const auto cp_tp = critical_path_length_and_throughput(*gate_layout);
 
             // apply gate library
-            const auto cell_level_layout = apply_gate_library<bestagon_library>(*gate_level_layout);
+            const auto cell_level_layout = apply_gate_library<bestagon_library>(*gate_layout);
 
             // the area of the Cartesian cell grid that the Bestagon tiles span
             area_stats area_stats{};
-            area(cartesian_layout{cell_grid_extent<bestagon_library>(*gate_level_layout)}, area_params<layout>{},
+            area(cartesian_layout{cell_grid_extent<bestagon_library>(*gate_layout)}, area_params<layout>{},
                  &area_stats);
 
             // write a SiQAD simulation file
@@ -205,9 +206,9 @@ try
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
                          cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
-                         depth_mapped_network.depth(), gate_level_layout->width(), gate_level_layout->height(),
-                         area_of(gate_level_layout->get_extent()), gate_level_layout->num_gates(),
-                         gate_level_layout->num_wires() + gate_level_layout->num_pis() + gate_level_layout->num_pos(),
+                         depth_mapped_network.depth(), gate_layout->width(), gate_layout->height(),
+                         area_of(gate_layout->get_extent()), gate_layout->num_gates(),
+                         gate_layout->num_wires() + gate_layout->num_pis() + gate_layout->num_pos(),
                          cp_tp.critical_path_length, cp_tp.throughput, mockturtle::to_seconds(exact_stats.time_total),
                          *eq, cell_level_layout.num_dots(), area_stats.area);
         }

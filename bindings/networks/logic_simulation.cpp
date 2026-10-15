@@ -14,9 +14,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "fiction/layouts/gate_level_layout.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 
 #include <fmt/format.h>
@@ -124,9 +124,9 @@ void register_logic_simulation(nb::module_& m)
     detail::register_logic_simulation_impl<py_aig_network>(m, "network");
     detail::register_logic_simulation_impl<py_xag_network>(m, "network");
     detail::register_logic_simulation_impl<py_mig_network>(m, "network");
-    detail::register_logic_simulation_impl<py_cartesian_gate_layout>(m, "layout");
-    detail::register_logic_simulation_impl<py_shifted_cartesian_gate_layout>(m, "layout");
-    detail::register_logic_simulation_impl<py_hexagonal_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<fiction::layouts::cartesian_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<fiction::layouts::shifted_cartesian_gate_layout>(m, "layout");
+    detail::register_logic_simulation_impl<fiction::layouts::hexagonal_gate_layout>(m, "layout");
 }
 
 }  // namespace pyfiction

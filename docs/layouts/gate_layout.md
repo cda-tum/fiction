@@ -1,9 +1,14 @@
 # Gate-level Layout
 
-`gate_level_layout<CoordinateLayout>` places Boolean gates and wires on a coordinate layout.
+`gate_layout<CoordinateLayout>` places Boolean gates and wires on a coordinate layout.
 The layout owns its clocking scheme, synchronization delays, and persistent obstructions.
 Tile operations are available directly. Geometry remains a template argument; clocking
 schemes and obstruction assignments do not change the layout type.
+
+`gate_layout<>` uses Cartesian geometry. The defining header also provides
+`cartesian_gate_layout`, `hexagonal_gate_layout`, and `shifted_cartesian_gate_layout`
+in `fiction::layouts`. Hexagonal and shifted Cartesian layouts require an explicit
+`arrangement`; the aliases preserve the concrete template types.
 
 The layout represents logic placement and routing independently of a cell technology.
 A gate library supplies physical cell implementations and tile dimensions.
@@ -40,9 +45,9 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 :::{tab-item} C++
 :sync: cpp
 
-**Header:** `fiction/layouts/gate_level_layout.hpp`
+**Header:** `fiction/layouts/gate_layout.hpp`
 
-```{doxygenclass} fiction::layouts::gate_level_layout
+```{doxygenclass} fiction::layouts::gate_layout
 :members:
 ```
 
@@ -56,6 +61,9 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
    :members:
 
 .. autoclass:: mnt.pyfiction.layouts.hexagonal_gate_layout
+   :members:
+
+.. autoclass:: mnt.pyfiction.layouts.shifted_cartesian_gate_layout
    :members:
 ```
 
@@ -72,8 +80,7 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 :sync: cpp
 
 ```cpp
-using layout = fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>;
-layout lyt{{4, 4}, fiction::layouts::clocking::twoddwave()};
+fiction::layouts::cartesian_gate_layout lyt{{4, 4}, fiction::layouts::clocking::twoddwave()};
 lyt.assign_synchronization_element({1, 1}, 2);
 lyt.obstruct_coordinate({2, 2});
 const auto input = lyt.create_pi("a", {0, 0});

@@ -20,7 +20,7 @@
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
@@ -154,19 +154,19 @@ namespace detail
 /**
  * Utility function to transform a Cartesian tile into a hexagonal one.
  *
+ * @tparam CartLyt Cartesian source layout type.
+ * @tparam HexLyt Hexagonal destination layout type.
  * @param cartesian_tile Tile on the Cartesian grid.
  * @param cartesian_layout_height Height of the Cartesian layout.
  * @return corresponding tile on the hexagonal grid.
  */
 template <typename CartLyt, typename HexLyt>
+    requires std::derived_from<CartLyt, layouts::cartesian_layout> &&
+             std::derived_from<HexLyt, layouts::hexagonal_layout> &&
+             (!std::derived_from<HexLyt, layouts::shifted_cartesian_layout>)
 [[nodiscard]] fiction::layouts::layout_base::coordinate to_hex(fiction::layouts::layout_base::coordinate cartesian_tile,
                                                                const int32_t cartesian_layout_height)
 {
-    static_assert(std::derived_from<CartLyt, fiction::layouts::cartesian_layout>, "Old tile is not Cartesian");
-    static_assert((std::derived_from<HexLyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<HexLyt, fiction::layouts::shifted_cartesian_layout>),
-                  "New tile is not hexagonal");
-
     // compute new y coordinate as sum of x and y
     const auto y = static_cast<int64_t>(cartesian_tile.x) + cartesian_tile.y;
 
@@ -317,16 +317,14 @@ template <typename CartLyt>
  * @return Signed shift that has to be added to any x-coordinate on the hexagonal layout.
  */
 template <typename HexLyt, typename CartLyt>
+    requires std::derived_from<CartLyt, layouts::cartesian_layout> &&
+             std::derived_from<HexLyt, layouts::hexagonal_layout> &&
+             (!std::derived_from<HexLyt, layouts::shifted_cartesian_layout>)
 [[nodiscard]] int32_t get_offset(const CartLyt& lyt, const int32_t cartesian_layout_width,
                                  const int32_t                                        cartesian_layout_height,
                                  const hexagonalization_params::io_pin_extension_mode input_mode,
                                  const hexagonalization_params::io_pin_extension_mode output_mode)
 {
-    static_assert(std::derived_from<CartLyt, fiction::layouts::cartesian_layout>, "CartLyt is not a Cartesian layout");
-    static_assert((std::derived_from<HexLyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<HexLyt, fiction::layouts::shifted_cartesian_layout>),
-                  "HexLyt is not a hexagonal layout");
-
     int32_t offset{};
     int64_t first_diagonal = std::numeric_limits<int64_t>::max();
     lyt.foreach_object(
@@ -375,6 +373,12 @@ template <typename HexLyt, typename CartLyt>
  * @tparam HexLyt Hexagonal destination layout. @tparam CartLyt Cartesian source layout.
  */
 template <typename HexLyt, typename CartLyt>
+    requires requires {
+        requires std::same_as<typename HexLyt::object_id, layouts::layout_object_id>;
+        requires std::same_as<typename CartLyt::object_id, layouts::layout_object_id>;
+    } && std::derived_from<HexLyt, layouts::hexagonal_layout> &&
+             (!std::derived_from<HexLyt, layouts::shifted_cartesian_layout>) &&
+             std::derived_from<CartLyt, layouts::cartesian_layout>
 class hexagonalization_impl
 {
   public:
@@ -388,19 +392,6 @@ class hexagonalization_impl
     /** @brief Converts objects and reroutes extended interface pins. @return Hexagonal layout. */
     [[nodiscard]] HexLyt run()
     {
-        // static assertions for layout types
-        static_assert(
-            requires { requires std::same_as<typename HexLyt::object_id, fiction::layouts::layout_object_id>; },
-            "HexLyt is not a gate-level layout");
-        static_assert((std::derived_from<HexLyt, fiction::layouts::hexagonal_layout> &&
-                       !std::derived_from<HexLyt, fiction::layouts::shifted_cartesian_layout>),
-                      "HexLyt is not a hexagonal layout");
-        static_assert(
-            requires { requires std::same_as<typename CartLyt::object_id, fiction::layouts::layout_object_id>; },
-            "CartLyt is not a gate-level layout");
-        static_assert(std::derived_from<CartLyt, fiction::layouts::cartesian_layout>,
-                      "CartLyt is not a Cartesian layout");
-
         if (!layout.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME))
         {
             throw std::invalid_argument("Hexagonalization requires 2DDWave clocking");
@@ -892,6 +883,7 @@ class hexagonalization_impl
  * @throws std::overflow_error If the transformed coordinates exceed the signed coordinate range.
  */
 template <typename HexLyt, typename CartLyt>
+    requires requires { typename detail::hexagonalization_impl<HexLyt, CartLyt>; }
 [[nodiscard]] HexLyt hexagonalization(const CartLyt& lyt, const hexagonalization_params& params = {},
                                       hexagonalization_stats* stats = nullptr)
 {

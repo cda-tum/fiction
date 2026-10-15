@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 
@@ -202,11 +202,10 @@ class path_set : public std::set<layout_coordinate_path>
  * @return `true` iff `successor` hosts a wire that is crossable from `src`.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& src,
                                      const fiction::layouts::layout_base::coordinate& successor) noexcept
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt must be a coordinate layout type");
-
     assert(lyt.is_adjacent_elevation_of(src, successor));
 
     if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
@@ -309,12 +308,9 @@ routing_successor(const Lyt& lyt, const fiction::layouts::layout_base::coordinat
  * @throws std::out_of_range If the destination input index is invalid.
  */
 template <typename Geometry>
-void route_path(fiction::layouts::gate_level_layout<Geometry>& lyt, const layout_coordinate_path& path,
-                const typename fiction::layouts::gate_level_layout<Geometry>::input_port destination)
+void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const layout_coordinate_path& path,
+                const typename fiction::layouts::gate_layout<Geometry>::input_port destination)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
-
     if (path.size() < 2 || path.target() != lyt.get_tile(destination.object))
     {
         throw std::invalid_argument("A routing path requires matching occupied endpoints");
@@ -346,8 +342,8 @@ void route_path(fiction::layouts::gate_level_layout<Geometry>& lyt, const layout
         }
         positions.push_back(position);
     }
-    auto                                 incoming = *source;
-    std::vector<typename Lyt::object_id> created{};
+    auto                                                                     incoming = *source;
+    std::vector<typename fiction::layouts::gate_layout<Geometry>::object_id> created{};
     created.reserve(positions.size());
     try
     {
@@ -378,11 +374,9 @@ void route_path(fiction::layouts::gate_level_layout<Geometry>& lyt, const layout
  * @throws std::invalid_argument If an intermediate wire chain contains a cycle.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
     const auto intermediate = [&lyt](const auto id) { return lyt.is_wire(id) && !lyt.is_fanout(id); };
     std::vector<routing_objective> objectives{};
     lyt.foreach_object(
@@ -421,12 +415,9 @@ std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
  * @param lyt Layout to edit.
  */
 template <typename Geometry>
-void clear_routing(fiction::layouts::gate_level_layout<Geometry>& lyt)
+void clear_routing(fiction::layouts::gate_layout<Geometry>& lyt)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
-
-    std::vector<typename Lyt::object_id> wires{};
+    std::vector<typename fiction::layouts::gate_layout<Geometry>::object_id> wires{};
     lyt.foreach_object(
         [&](const auto id)
         {

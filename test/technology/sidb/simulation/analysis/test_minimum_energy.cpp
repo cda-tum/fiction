@@ -27,6 +27,8 @@
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 
 #include <cmath>
+#include <forward_list>
+#include <iterator>
 #include <vector>
 
 using namespace fiction;
@@ -34,6 +36,21 @@ using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
+
+/** @brief Tests minimum-distribution search availability. @tparam Iterator Charge-distribution iterator. */
+template <typename Iterator>
+concept minimum_distribution_range = requires(Iterator first) { minimum_energy_distribution(first, first); };
+
+/** @brief Tests minimum-energy search availability. @tparam Iterator Charge-distribution iterator. */
+template <typename Iterator>
+concept minimum_energy_range = requires(Iterator first) { minimum_energy(first, first); };
+
+static_assert(minimum_distribution_range<std::vector<charge_distribution>::const_iterator>);
+static_assert(minimum_energy_range<std::vector<charge_distribution>::const_iterator>);
+static_assert(minimum_distribution_range<std::forward_list<charge_distribution>::const_iterator>);
+static_assert(minimum_energy_range<std::forward_list<charge_distribution>::const_iterator>);
+static_assert(!minimum_distribution_range<std::istream_iterator<charge_distribution>>);
+static_assert(!minimum_energy_range<std::istream_iterator<charge_distribution>>);
 
 TEST_CASE("Test minimum energy function", "[minimum-energy]")
 {
@@ -87,5 +104,9 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
 
         CHECK_THAT(minimum_energy(all_cds.cbegin(), all_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(minimum_energy_distribution(all_cds.cbegin(), all_cds.cend())->same_charge_states(second));
+
+        const std::forward_list<charge_distribution> forward_cds{all_cds.front(), all_cds.back()};
+        CHECK_THAT(minimum_energy(forward_cds.cbegin(), forward_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK(minimum_energy_distribution(forward_cds.cbegin(), forward_cds.cend())->same_charge_states(second));
     }
 }

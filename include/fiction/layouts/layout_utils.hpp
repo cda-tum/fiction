@@ -21,7 +21,7 @@
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
@@ -94,11 +94,10 @@ template <typename Lyt>
  * @return Number of `c`'s adjacent coordinates.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layout_base>
 [[nodiscard]] uint8_t num_adjacent_coordinates(const Lyt&                                       lyt,
                                                const fiction::layouts::layout_base::coordinate& c) noexcept
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     return static_cast<uint8_t>(lyt.adjacent_coordinates(c).size());
 }
 
@@ -119,14 +118,13 @@ template <typename Lyt>
  * @throws std::overflow_error If the absolute cell is outside the signed 32-bit coordinate range.
  */
 template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coordinate>
+    requires requires { requires std::same_as<typename GateLyt::object_id, layout_object_id>; } &&
+             (std::derived_from<GateLyt, cartesian_layout> || std::derived_from<GateLyt, shifted_cartesian_layout> ||
+              std::derived_from<GateLyt, hexagonal_layout>)
 [[nodiscard]] Coordinate relative_to_absolute_cell_position(const GateLyt&                                   gate_lyt,
                                                             const fiction::layouts::layout_base::coordinate& t,
                                                             const Coordinate&                                relative_c)
 {
-    static_assert(
-        requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-        "GateLyt is not a gate-level layout");
-
     if (relative_c.x < 0 || relative_c.x >= GateSizeX || relative_c.y < 0 || relative_c.y >= GateSizeY)
     {
         throw std::invalid_argument("The relative cell must be within the bounds of a single tile");
@@ -173,11 +171,6 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
             }
         }
     }
-    else
-    {
-        static_assert(std::derived_from<GateLyt, fiction::layouts::cartesian_layout>,
-                      "GateLyt does not have a supported geometry");
-    }
 
     return Coordinate{x + relative_c.x, y + relative_c.y, t.z};
 }
@@ -195,12 +188,11 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
  * @return Adjacent coordinate, or no coordinate when the neighbor lies outside the layout.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layout_base>
 [[nodiscard]] std::optional<fiction::layouts::layout_base::coordinate>
 port_direction_to_coordinate(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& c,
                              const fcn::port_direction& port) noexcept
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     switch (port.dir)
     {
         case fcn::port_direction::cardinal::NORTH:
@@ -256,10 +248,9 @@ port_direction_to_coordinate(const Lyt& lyt, const fiction::layouts::layout_base
  * @throws std::invalid_argument If the normalized extent exceeds the signed coordinate domain.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, cartesian_layout>
 [[nodiscard]] Lyt normalize_layout_coordinates(const Lyt& lyt)
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::cartesian_layout>, "Lyt is not a Cartesian layout");
-
     if (lyt.is_empty())
     {
         return lyt;

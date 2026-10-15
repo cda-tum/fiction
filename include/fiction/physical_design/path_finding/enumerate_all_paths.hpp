@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
@@ -198,7 +198,7 @@ class enumerate_all_paths_impl
 /**
  * Enumerates all possible paths in a layout that start at a given source coordinate and lead to given target
  * coordinate. This function automatically detects whether the given layout implements a clocking interface (see
- * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
+ * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
  * path, each coordinate can occur at maximum once.
  *
@@ -215,8 +215,7 @@ class enumerate_all_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout>;
- * clk_lyt layout = ...;
+ * fiction::layouts::cartesian_gate_layout layout = ...;
  * auto all_paths = enumerate_all_paths(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
  *
@@ -228,12 +227,11 @@ class enumerate_all_paths_impl
  * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] path_collection enumerate_all_paths(const Lyt& layout, const routing_objective& objective,
                                                   const enumerate_all_paths_params& params       = {},
                                                   const layouts::obstructions&      obstructions = {})
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     return detail::enumerate_all_paths_impl<Lyt>{layout, objective, params, obstructions}.run();
 }
 

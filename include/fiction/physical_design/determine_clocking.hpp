@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/utils/stl/hash.hpp"  // NOLINT(misc-include-cleaner): supplies the std::pair hash specialization.
 
@@ -386,13 +386,10 @@ class determine_clocking_impl
  * @throws std::bad_alloc If allocation fails.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 bool determine_clocking(Lyt& lyt, const determine_clocking_params& params = {},
                         determine_clocking_stats* stats = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     determine_clocking_stats             st{};
     detail::determine_clocking_impl<Lyt> p{lyt, params, st};
 

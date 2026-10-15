@@ -19,7 +19,7 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>                // read networks from files
 #include <fiction/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
 #include <fiction/physical_design/post_layout_optimization.hpp>  // post-layout optimization
@@ -61,8 +61,6 @@ Ntk read_ntk(const std::string& name)
 int main()
 try
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
-
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, uint64_t,
                             double, float, std::string>
         optimization_exp{"optimization",
@@ -95,11 +93,11 @@ try
             const auto benchmark_network = read_ntk<tec_nt>(benchmark);
 
             // perform layout generation with an OGD-based heuristic algorithm
-            auto       gate_level_layout = orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
-            const auto layout_copy       = gate_level_layout.clone();
+            auto       gate_layout = orthogonal<cartesian_gate_layout>(benchmark_network, {}, &orthogonal_stats);
+            const auto layout_copy = gate_layout.clone();
 
             // calculate bounding box
-            const auto bounding_box_before_optimization = bounding_box(gate_level_layout);
+            const auto bounding_box_before_optimization = bounding_box(gate_layout);
 
             const auto width_before_optimization  = bounding_box_before_optimization.get_x_size();
             const auto height_before_optimization = bounding_box_before_optimization.get_y_size();
@@ -111,14 +109,14 @@ try
             }
             else
             {
-                max_relocations = gate_level_layout.area();
+                max_relocations = gate_layout.area();
             }
             // perform post-layout optimization
-            post_layout_optimization(gate_level_layout, post_layout_optimization_params,
-                                     &post_layout_optimization_stats);
+            post_layout_optimization(gate_layout, post_layout_optimization_params, &post_layout_optimization_stats);
 
             // check equivalence
-            const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
+            const auto eq_stats =
+                equivalence_checking<cartesian_gate_layout, cartesian_gate_layout>(layout_copy, gate_layout);
 
             std::string eq_result{"NO"};
             if (eq_stats == eq_type::STRONG)
@@ -131,7 +129,7 @@ try
             }
 
             // calculate bounding box
-            const auto bounding_box_after_optimization = bounding_box(gate_level_layout);
+            const auto bounding_box_after_optimization = bounding_box(gate_layout);
 
             const auto width_after_optimization  = bounding_box_after_optimization.get_x_size();
             const auto height_after_optimization = bounding_box_after_optimization.get_y_size();

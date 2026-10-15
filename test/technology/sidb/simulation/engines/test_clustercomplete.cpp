@@ -26,7 +26,7 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/charge_distribution.hpp>
@@ -1445,7 +1445,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
 
 TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]")
 {
-    hex_gate_clk_lyt gate_lyt{arrangement::EVEN_ROW, {3, 3}};
+    hexagonal_gate_layout gate_lyt{arrangement::EVEN_ROW, {3, 3}};
     /** @brief NAND function with two declared input slots. */
     kitty::dynamic_truth_table nand_function{2};
     kitty::create_from_hex_string(nand_function, "7");

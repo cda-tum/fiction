@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
@@ -43,6 +43,7 @@
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
+#include "fiction/types.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -167,9 +168,8 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO 2024
  * (https://ieeexplore.ieee.org/abstract/document/10628962).
  *
- * @tparam Ntk The type of the input network.
  * @tparam GateLyt Gate-level layout type.
- * @param ntk The input network to be mapped onto the defective surface.
+ * @param ntk Named technology network to map onto the defective surface.
  * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param defective_surface The defective surface on which the SiDB circuit is designed.
  * @param params The parameters used for designing the circuit, encapsulated in an
@@ -180,19 +180,15 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @throws utils::timeout_error If a circuit or gate-design timeout expires.
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  */
-template <typename Ntk, typename GateLyt>
+template <typename GateLyt>
+    requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
+             std::derived_from<GateLyt, layouts::hexagonal_layout> &&
+             (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
 [[nodiscard]] layout on_the_fly_circuit_design_on_defective_surface(
-    const Ntk& ntk, const GateLyt& lattice_tiling, const layout& defective_surface,
+    const tec_nt& ntk, const GateLyt& lattice_tiling, const layout& defective_surface,
     const on_the_fly_circuit_design_on_defective_surface_params&   params = {},
     on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>* stats  = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-        "GateLyt is not a gate-level layout");
-    static_assert((std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>),
-                  "GateLyt is not a hexagonal");
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
     deadline             = utils::make_deadline(params.timeout, deadline);
@@ -206,7 +202,7 @@ template <typename Ntk, typename GateLyt>
     {
         const mockturtle::stopwatch stop{st.time_total};
 
-        std::optional<GateLyt> gate_level_layout = std::nullopt;
+        std::optional<GateLyt> gate_layout = std::nullopt;
 
         layout lyt{};
 
@@ -215,7 +211,7 @@ template <typename Ntk, typename GateLyt>
         auto black_list = physical_design::surface_analysis<sidb::skeleton_bestagon_library>(
             lattice_tiling, defective_surface, std::pair<uint16_t, uint16_t>{0, 0});
 
-        while (!gate_level_layout.has_value())
+        while (!gate_layout.has_value())
         {
             auto exact_params = params.exact_design_parameters;
             // the tiling fixes the arrangement of the layout to create
@@ -232,25 +228,24 @@ template <typename Ntk, typename GateLyt>
                     static_cast<unsigned>(std::min<uint64_t>(exact_params.timeout, static_cast<uint64_t>(remaining)));
             }
             // P&R with *exact* and the pre-determined blacklist
-            gate_level_layout =
-                physical_design::exact_with_blacklist<GateLyt>(ntk, black_list, exact_params, &exact_stats);
+            gate_layout = physical_design::exact_with_blacklist<GateLyt>(ntk, black_list, exact_params, &exact_stats);
             st.exact_stats = exact_stats;
 
-            if (gate_level_layout.has_value())
+            if (gate_layout.has_value())
             {
-                st.gate_layout = gate_level_layout;
+                st.gate_layout = gate_layout;
 
                 try
                 {
                     lyt = physical_design::apply_parameterized_gate_library_to_defective_surface<
-                        sidb::on_the_fly_gate_library>(*gate_level_layout, library_params, defective_surface);
+                        sidb::on_the_fly_gate_library>(*gate_layout, library_params, defective_surface);
                 }
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
                 // blacklist and the process is rerun.
                 catch (const sidb::gate_design_exception& e)
                 {
-                    gate_level_layout = std::nullopt;
+                    gate_layout = std::nullopt;
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
                 }
 
@@ -300,15 +295,12 @@ template <typename Ntk, typename GateLyt>
  * is returned. Deadline checks are cooperative and do not interrupt allocation or cell placement.
  */
 template <typename GateLyt>
+    requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
+             std::derived_from<GateLyt, layouts::hexagonal_layout> &&
+             (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
 [[nodiscard]] layout on_the_fly_circuit_design(const GateLyt&                          gate_lyt,
                                                const on_the_fly_circuit_design_params& params = {})
 {
-    static_assert(
-        requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-        "GateLyt is not a gate-level layout");
-    static_assert((std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>),
-                  "GateLyt is not a hexagonal");
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
     deadline             = utils::make_deadline(params.timeout, deadline);

@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/surface_analysis.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -26,7 +27,6 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -91,17 +91,44 @@ static bool contains_tt(const TTMap& m, const kitty::dynamic_truth_table& elem) 
     return m.count(elem) > 0;
 }
 
-TEST_CASE("Dummy gate library traits", "[sidb-surface-analysis]")
+/** @brief SiDB gate library without implementation or port lookup. */
+struct empty_gate_library : gate_library<sidb::layout, 3, 3>
+{};
+
+/** @brief Gate library with an incompatible implementation lookup result. */
+struct wrong_implementations_library : dummy_gate_library
 {
-    REQUIRE(has_get_functional_implementations_v<dummy_gate_library>);
-    REQUIRE(has_get_gate_ports_v<dummy_gate_library>);
-}
+    /** @brief Returns an incompatible implementation result. */
+    static int get_functional_implementations();
+};
+
+/** @brief Gate library with an incompatible port lookup result. */
+struct wrong_ports_library : dummy_gate_library
+{
+    /** @brief Returns an incompatible port result. */
+    static int get_gate_ports();
+};
+
+/**
+ * @brief Checks whether a gate library can analyze a defective SiDB surface.
+ * @tparam Library Gate library to test.
+ */
+template <typename Library>
+concept surface_analyzable = requires(const cartesian_gate_layout& gates, const sidb::layout& surface) {
+    surface_analysis<Library>(gates, surface);
+};
+
+static_assert(surface_analyzable<dummy_gate_library>);
+static_assert(surface_analyzable<bestagon_library>);
+static_assert(!surface_analyzable<empty_gate_library>);
+static_assert(!surface_analyzable<wrong_implementations_library>);
+static_assert(!surface_analyzable<wrong_ports_library>);
 
 TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 {
     /** @brief Four-by-three grid of three-by-three-cell gate tiles. */
-    static const cart_gate_clk_lyt gate_lyt{cart_gate_clk_lyt::extent{4, 3, 1}};
-    static const layout            cell_lyt{};  // makes for 12 x 9 cells
+    static const cartesian_gate_layout gate_lyt{cartesian_gate_layout::extent{4, 3, 1}};
+    static const layout                cell_lyt{};  // makes for 12 x 9 cells
 
     static const port_list<port_position> line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
     static const port_list<port_position> y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
@@ -229,8 +256,8 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analysis]")
 {
     /** @brief Single 60-by-46-cell Bestagon gate tile. */
-    static const hex_gate_clk_lyt gate_lyt{
-        arrangement::EVEN_COLUMN, hex_gate_clk_lyt::extent{1, 1, 1}};  // 1 x 1 tiles of size 60 x 46 cells each
+    static const hexagonal_gate_layout gate_lyt{
+        arrangement::EVEN_COLUMN, hexagonal_gate_layout::extent{1, 1, 1}};  // 1 x 1 tiles of size 60 x 46 cells each
     static const layout cell_lyt{};  // makes for exactly one gate of the Bestagon library
 
     layout defect_layout{cell_lyt};

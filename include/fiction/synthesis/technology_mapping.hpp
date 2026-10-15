@@ -23,6 +23,7 @@
 #include "fiction/types.hpp"
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/emap.hpp>
 #include <mockturtle/io/genlib_reader.hpp>
@@ -634,11 +635,10 @@ class technology_mapping_impl
  *         network type (e.g., AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ).
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk>
 [[nodiscard]] tec_nt technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
                                         technology_mapping_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-
     technology_mapping_stats        st{};
     detail::technology_mapping_impl p{ntk, params, st};
 

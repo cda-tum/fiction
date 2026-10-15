@@ -45,6 +45,30 @@ using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
+/**
+ * @brief Checks whether a network can form a mutable rank view.
+ * @tparam Ntk Network type to test.
+ */
+template <typename Ntk>
+concept rank_viewable = requires { typename mutable_rank_view<Ntk>; };
+
+/** @brief Network that cannot supply the inherited depth view's visited state. */
+struct network_without_visited : mockturtle::aig_network
+{
+    /** @brief Disables visited-state lookup. @param n Node to inspect. */
+    uint32_t visited(const node& n) const = delete;
+};
+
+/** @brief Checks the rank view's inherited depth interface. @tparam Ntk Network to test. */
+template <typename Ntk>
+concept rank_base_viewable = requires { typename static_depth_view<Ntk>; };
+
+static_assert(!rank_base_viewable<network_without_visited>);
+static_assert(!rank_viewable<network_without_visited>);
+static_assert(rank_viewable<technology_network>);
+static_assert(!rank_viewable<int>);
+static_assert(requires(const mutable_rank_view<technology_network>& ntk) { mutable_rank_view{ntk}; });
+
 TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, mockturtle::mig_network,
                    mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
                    mockturtle::cover_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network,

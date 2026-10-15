@@ -18,7 +18,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/generate_edge_intersection_graph.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
@@ -32,12 +32,11 @@ using namespace fiction::physical_design;
 
 TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{2, 2}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
 
         SECTION("Disjoint paths")
         {
@@ -87,7 +86,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{2, 2}, clocking::use()};
+        cartesian_gate_layout layout{{2, 2}, clocking::use()};
 
         SECTION("Disjoint paths")
         {
@@ -140,12 +139,11 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{3, 3}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{{3, 3}, clocking::twoddwave()};
 
         SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
         {
@@ -186,12 +184,11 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{4, 4}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{{4, 4}, clocking::twoddwave()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -209,7 +206,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        const gate_lyt layout{{4, 4}, clocking::use()};
+        const cartesian_gate_layout layout{{4, 4}, clocking::use()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -229,12 +226,11 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{4, 4}, clocking::twoddwave()};
+        cartesian_gate_layout layout{{4, 4}, clocking::twoddwave()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 19 valid paths
         {
@@ -255,7 +251,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
     }
     SECTION("USE")
     {
-        gate_lyt layout{{4, 4}, clocking::use()};
+        cartesian_gate_layout layout{{4, 4}, clocking::use()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 1 valid path
         {
@@ -278,8 +274,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
 
 TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
-    const gate_lyt                       layout{{3, 3, 2}, clocking::twoddwave()};
+    const cartesian_gate_layout          layout{{3, 3, 2}, clocking::twoddwave()};
     const std::vector<routing_objective> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
     for (const auto limit : {1u, 2u})
     {
@@ -291,8 +286,8 @@ TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersectio
 
 TEST_CASE("Candidate labels retain their routing objective", "[generate-edge-intersection-graph]")
 {
-    const gate_level_layout<cartesian_layout> layout{{2, 2}, clocking::twoddwave()};
-    const std::vector<routing_objective>      objectives{{{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}, {{0, 0}, {0, 1}}};
+    const cartesian_gate_layout          layout{{2, 2}, clocking::twoddwave()};
+    const std::vector<routing_objective> objectives{{{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}, {{0, 0}, {0, 1}}};
     for (const auto limited : {false, true})
     {
         generate_edge_intersection_graph_params params{};

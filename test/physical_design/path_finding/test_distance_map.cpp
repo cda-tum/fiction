@@ -18,7 +18,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/path_finding/distance_map.hpp>
@@ -33,15 +33,14 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Distance map", "[distance-map]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
-    using dist    = uint64_t;
+    using dist = uint64_t;
 
     SECTION("2DDWave clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::twoddwave()};
 
-        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+        const auto dist_map = initialize_distance_map(layout, a_star_distance_functor<cartesian_gate_layout>{layout});
         const auto dist_map_func = distance_map_functor<dist>{layout.get_extent(), dist_map};
 
         layout.foreach_coordinate(
@@ -58,9 +57,9 @@ TEST_CASE("Distance map", "[distance-map]")
     SECTION("USE clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::use()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::use()};
 
-        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+        const auto dist_map = initialize_distance_map(layout, a_star_distance_functor<cartesian_gate_layout>{layout});
         const auto dist_map_func = distance_map_functor<dist>{layout.get_extent(), dist_map};
 
         layout.foreach_coordinate(
@@ -77,9 +76,9 @@ TEST_CASE("Distance map", "[distance-map]")
     SECTION("RES clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::res()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::res()};
 
-        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+        const auto dist_map = initialize_distance_map(layout, a_star_distance_functor<cartesian_gate_layout>{layout});
         const auto dist_map_func = distance_map_functor<dist>{layout.get_extent(), dist_map};
 
         layout.foreach_coordinate(
@@ -96,9 +95,9 @@ TEST_CASE("Distance map", "[distance-map]")
     SECTION("CFE clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::cfe()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::cfe()};
 
-        const auto dist_map      = initialize_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+        const auto dist_map = initialize_distance_map(layout, a_star_distance_functor<cartesian_gate_layout>{layout});
         const auto dist_map_func = distance_map_functor<dist>{layout.get_extent(), dist_map};
 
         layout.foreach_coordinate(
@@ -146,15 +145,15 @@ TEST_CASE("Distance maps index every layer and reject coordinates outside the fr
 
 TEST_CASE("Sparse distance map", "[distance-map]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
-    using dist    = uint64_t;
+    using dist = uint64_t;
 
     SECTION("2DDWave clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::twoddwave()};
 
-        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+        const auto dist_map =
+            initialize_sparse_distance_map(layout, a_star_distance_functor<cartesian_gate_layout>{layout});
         const auto dist_map_func = sparse_distance_map_functor<dist>{dist_map};
 
         layout.foreach_coordinate(
@@ -171,9 +170,10 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     SECTION("USE clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::use()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::use()};
 
-        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+        const auto dist_map =
+            initialize_sparse_distance_map(layout, a_star_distance_functor<cartesian_gate_layout>{layout});
         const auto dist_map_func = sparse_distance_map_functor<dist>{dist_map};
 
         layout.foreach_coordinate(
@@ -190,9 +190,10 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     SECTION("RES clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::res()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::res()};
 
-        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+        const auto dist_map =
+            initialize_sparse_distance_map(layout, a_star_distance_functor<cartesian_gate_layout>{layout});
         const auto dist_map_func = sparse_distance_map_functor<dist>{dist_map};
 
         layout.foreach_coordinate(
@@ -209,9 +210,10 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     SECTION("CFE clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::cfe()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::cfe()};
 
-        const auto dist_map      = initialize_sparse_distance_map(layout, a_star_distance_functor<clk_lyt>{layout});
+        const auto dist_map =
+            initialize_sparse_distance_map(layout, a_star_distance_functor<cartesian_gate_layout>{layout});
         const auto dist_map_func = sparse_distance_map_functor<dist>{dist_map};
 
         layout.foreach_coordinate(
@@ -229,15 +231,15 @@ TEST_CASE("Sparse distance map", "[distance-map]")
 
 TEST_CASE("Smart distance cache functor", "[distance-map]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
-    using dist    = uint64_t;
+    using dist = uint64_t;
 
     SECTION("2DDWave clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::twoddwave()};
 
-        const auto dist_map_func = smart_distance_cache_functor<dist>{a_star_distance_functor<clk_lyt>{layout}};
+        const auto dist_map_func =
+            smart_distance_cache_functor<dist>{a_star_distance_functor<cartesian_gate_layout>{layout}};
 
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
@@ -257,9 +259,10 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     SECTION("USE clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::use()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::use()};
 
-        const auto dist_map_func = smart_distance_cache_functor<dist>{a_star_distance_functor<clk_lyt>{layout}};
+        const auto dist_map_func =
+            smart_distance_cache_functor<dist>{a_star_distance_functor<cartesian_gate_layout>{layout}};
 
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
@@ -279,9 +282,10 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     SECTION("RES clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::res()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::res()};
 
-        const auto dist_map_func = smart_distance_cache_functor<dist>{a_star_distance_functor<clk_lyt>{layout}};
+        const auto dist_map_func =
+            smart_distance_cache_functor<dist>{a_star_distance_functor<cartesian_gate_layout>{layout}};
 
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)
@@ -301,9 +305,10 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     SECTION("CFE clocking")
     {
         /** @brief Five-by-five clocked layout with one layer. */
-        const clk_lyt layout{clk_lyt::extent{5, 5, 1}, clocking::cfe()};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{5, 5, 1}, clocking::cfe()};
 
-        const auto dist_map_func = smart_distance_cache_functor<dist>{a_star_distance_functor<clk_lyt>{layout}};
+        const auto dist_map_func =
+            smart_distance_cache_functor<dist>{a_star_distance_functor<cartesian_gate_layout>{layout}};
 
         layout.foreach_coordinate(
             [&layout, &dist_map_func](const auto& c1)

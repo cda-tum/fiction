@@ -20,7 +20,7 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
@@ -454,10 +454,8 @@ class priority_queue
 /**
  * Maps logic-network nodes to typed layout output ports.
  *
- * @tparam Ntk Type of the mockturtle network.
  */
-template <typename Ntk>
-using node_dict_type = mockturtle::node_map<layouts::layout_object_id, Ntk>;
+using node_dict_type = mockturtle::node_map<layouts::layout_object_id, tec_nt>;
 /**
  * This enum class indicates the allowed positions for PIs.
  */
@@ -531,64 +529,71 @@ struct search_space_graph
         graph_oriented_layout_design_params::cost_objective::AREA;
 };
 /**
- * @brief Custom view class derived from mockturtle::topo_view.
- *
- * This class inherits from mockturtle::topo_view and overrides certain functions
- * to provide custom behavior.
+ * @brief Orders named technology-network nodes for GOLD traversal.
+ * @tparam CiToCo Traverse from primary inputs to outputs when true, or from outputs to inputs otherwise.
+ * @tparam Randomize Shuffle traversal choices when true.
  */
-template <typename Ntk, bool CiToCo = false, bool Randomize = false>
-class topo_view : public mockturtle::immutable_view<Ntk>
+template <bool CiToCo = false, bool Randomize = false>
+class topo_view : public mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>
 {
   public:
     /**
      * Node type of the underlying network.
      */
-    using node = Ntk::node;
+    using node = tec_nt::node;
     /**
      * Signal type of the underlying network.
      */
-    using signal = Ntk::signal;
+    using signal = tec_nt::signal;
 
-    explicit topo_view(const Ntk& ntk, const uint32_t seed_val = 42) :
-            mockturtle::immutable_view<Ntk>(ntk),
+    /** @brief Builds the selected traversal with a reproducible shuffle seed. */
+    explicit topo_view(const mockturtle::fanout_view<tec_nt>& ntk, const uint32_t seed_val = 42) :
+            mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>(ntk),
             rng(seed_val)
     {
         update_topo();
     }
 
+    /** @brief Returns the number of nodes in traversal order. */
     [[nodiscard]] uint32_t size() const
     {
         return uint32_t(topo_order.size());
     }
 
+    /** @brief Returns the number of traversed gates. */
     [[nodiscard]] uint32_t num_gates() const
     {
         return size() - offset();
     }
 
+    /** @brief Returns a node's traversal index. */
     [[nodiscard]] uint32_t node_to_index(const node& n) const
     {
         auto it = std::ranges::find(topo_order, n);
         return uint32_t(std::ranges::distance(topo_order.begin(), it));
     }
 
+    /** @brief Returns the node at a traversal index. */
     [[nodiscard]] node index_to_node(const uint32_t idx) const
     {
         return topo_order.at(idx);
     }
 
+    /** @brief Visits all nodes in traversal order. @tparam Fn Node callback type. @param fn Node callback. */
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(topo_order.cbegin(), topo_order.cend(), std::forward<Fn>(fn));
     }
 
+    /** @brief Visits gates in traversal order. @tparam Fn Node callback type. @param fn Node callback. */
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(topo_order.cbegin() + offset(), topo_order.cend(), std::forward<Fn>(fn));
     }
 
+    /** @brief Visits gates in reverse traversal order. @tparam Fn Node callback type. @param fn Node callback. */
     template <typename Fn>
     void foreach_gate_reverse(Fn&& fn) const
     {
@@ -619,8 +624,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         if constexpr (CiToCo)
         {
             std::vector<node> starts{};
-            starts.reserve(Ntk::num_cis());
-            Ntk::foreach_ci([&starts](const auto& n) { starts.push_back(n); });
+            starts.reserve(mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::num_cis());
+            mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::foreach_ci([&starts](const auto& n)
+                                                                                    { starts.push_back(n); });
             if constexpr (Randomize)
             {
                 std::shuffle(starts.begin(), starts.end(), rng);
@@ -633,8 +639,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         else
         {
             std::vector<signal> starts{};
-            starts.reserve(Ntk::num_cos());
-            Ntk::foreach_co([&starts](const auto& f) { starts.push_back(f); });
+            starts.reserve(mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::num_cos());
+            mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::foreach_co([&starts](const auto& f)
+                                                                                    { starts.push_back(f); });
             if constexpr (Randomize)
             {
                 std::shuffle(starts.begin(), starts.end(), rng);
@@ -643,10 +650,12 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             {
                 create_topo_rec(this->get_node(f));
             }
-            Ntk::foreach_pi([this](const auto pi) { create_topo_rec(pi); });
+            mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::foreach_pi([this](const auto pi)
+                                                                                    { create_topo_rec(pi); });
         }
     }
 
+    /** @brief Visits dependencies before appending a node. */
     void create_topo_rec(const node& n)
     {
         if constexpr (CiToCo)
@@ -722,6 +731,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         }
     }
 
+    /** @brief Returns the number of constant and primary-input traversal entries. */
     [[nodiscard]] uint32_t offset() const
     {
         // 1 constant + all PIs + maybe one more constant
@@ -729,19 +739,21 @@ class topo_view : public mockturtle::immutable_view<Ntk>
                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
     }
 
+    /** @brief Traversal order for the selected direction and randomization mode. */
     std::vector<node> topo_order;
-    std::mt19937      rng;
+    /** @brief Reproducible traversal shuffle engine. */
+    std::mt19937 rng;
 };
 
 // convenient aliases for the four variants:
-template <typename Ntk>
-using topo_view_co_to_ci = topo_view<Ntk, false, false>;
-template <typename Ntk>
-using topo_view_ci_to_co = topo_view<Ntk, true, false>;
-template <typename Ntk>
-using topo_view_co_to_ci_random = topo_view<Ntk, false, true>;
-template <typename Ntk>
-using topo_view_ci_to_co_random = topo_view<Ntk, true, true>;
+/** @brief Orders output dependencies before their consumers. */
+using topo_view_co_to_ci = topo_view<false, false>;
+/** @brief Orders nodes from primary inputs toward outputs. */
+using topo_view_ci_to_co = topo_view<true, false>;
+/** @brief Randomizes output-to-input traversal choices. */
+using topo_view_co_to_ci_random = topo_view<false, true>;
+/** @brief Randomizes input-to-output traversal choices. */
+using topo_view_ci_to_co_random = topo_view<true, true>;
 
 /**
  * When checking for possible paths on a layout between two tiles SRC and DEST, one of them could also be the new tile
@@ -775,7 +787,7 @@ struct placement_info
     /**
      * Mapping of logic-network nodes to their current routed output ports.
      */
-    node_dict_type<tec_nt> node2pos;
+    node_dict_type node2pos;
     /**
      * Original placed primary-input identities, independent of routed output ports.
      */
@@ -1769,7 +1781,7 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the single fanin node.
      */
     void route_single_input_node(const fiction::layouts::layout_base::coordinate& position, Lyt& layout,
-                                 node_dict_type<tec_nt>& node2pos, const networks::fanin_container<tec_nt>& fc)
+                                 node_dict_type& node2pos, const networks::fanin_container<tec_nt>& fc)
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = layout.get_tile(node2pos[pre]);
@@ -1796,7 +1808,7 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the double fanin node.
      */
     void route_double_input_node(const fiction::layouts::layout_base::coordinate& position, Lyt& layout,
-                                 node_dict_type<tec_nt>& node2pos, const networks::fanin_container<tec_nt>& fc)
+                                 node_dict_type& node2pos, const networks::fanin_container<tec_nt>& fc)
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -2100,7 +2112,7 @@ class graph_oriented_layout_design_impl
         report_graph(ssg, layout, 0, worker_progress);
 
         mockturtle::node_map<typename Lyt::object_id, tec_nt> pi2node{ssg.network};
-        node_dict_type<tec_nt>                                node2pos{ssg.network};
+        node_dict_type                                        node2pos{ssg.network};
         placement_info                                        place_info{0ul, 0ul, node2pos, pi2node};
 
         coord_vec_type possible_positions{};
@@ -2393,7 +2405,8 @@ class graph_oriented_layout_design_impl
     void initialize_networks_and_nodes_to_place()
     {
         // helper function to prepare nodes to place
-        const auto prepare_nodes_to_place = [](auto& network, auto& nodes_to_place)
+        const auto prepare_nodes_to_place = []<bool CiToCo, bool Randomize>(const topo_view<CiToCo, Randomize>& network,
+                                                                            std::vector<tec_nt::node>& nodes_to_place)
         {
             nodes_to_place.reserve(network.size());
             network.foreach_node(
@@ -2422,9 +2435,11 @@ class graph_oriented_layout_design_impl
         const uint64_t num_possible_pi_locations = 3u;
 
         // helper function to assign networks and nodes
-        const auto assign_networks_and_nodes = [&](uint64_t base_index, auto& breadth_co_to_ci, auto& breadth_ci_to_co,
-                                                   auto& depth_co_to_ci, auto& depth_ci_to_co, auto& breadth_co_nodes,
-                                                   auto& breadth_ci_nodes, auto& depth_co_nodes, auto& depth_ci_nodes)
+        const auto assign_networks_and_nodes =
+            [&](uint64_t base_index, const tec_nt& breadth_co_to_ci, const tec_nt& breadth_ci_to_co,
+                const tec_nt& depth_co_to_ci, const tec_nt& depth_ci_to_co,
+                const std::vector<tec_nt::node>& breadth_co_nodes, const std::vector<tec_nt::node>& breadth_ci_nodes,
+                const std::vector<tec_nt::node>& depth_co_nodes, const std::vector<tec_nt::node>& depth_ci_nodes)
         {
             for (uint64_t i = 0; i < num_possible_pi_locations; ++i)
             {
@@ -2444,11 +2459,10 @@ class graph_oriented_layout_design_impl
         params.strategy = synthesis::fanout_substitution_params::substitution_strategy::BREADTH;
         mockturtle::fanout_view network_substituted_breadth{synthesis::fanout_substitution<tec_nt>(ntk, params)};
 
-        topo_view_co_to_ci<decltype(network_substituted_breadth)> network_breadth_co_to_ci{network_substituted_breadth,
-                                                                                           seed};
+        topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth, seed};
 
         // prepare initial nodes to place
-        std::vector<mockturtle::node<decltype(network_breadth_co_to_ci)>> nodes_to_place_breadth_co_to_ci{};
+        std::vector<tec_nt::node> nodes_to_place_breadth_co_to_ci{};
         prepare_nodes_to_place(network_breadth_co_to_ci, nodes_to_place_breadth_co_to_ci);
 
         // set initial cost
@@ -2465,17 +2479,14 @@ class graph_oriented_layout_design_impl
             params.strategy = synthesis::fanout_substitution_params::substitution_strategy::DEPTH;
             mockturtle::fanout_view network_substituted_depth{synthesis::fanout_substitution<tec_nt>(ntk, params)};
 
-            topo_view_ci_to_co<decltype(network_substituted_breadth)> network_breadth_ci_to_co{
-                network_substituted_breadth, seed};
-            topo_view_co_to_ci<decltype(network_substituted_depth)> network_depth_co_to_ci{network_substituted_depth,
-                                                                                           seed};
-            topo_view_ci_to_co<decltype(network_substituted_depth)> network_depth_ci_to_co{network_substituted_depth,
-                                                                                           seed};
+            topo_view_ci_to_co network_breadth_ci_to_co{network_substituted_breadth, seed};
+            topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth, seed};
+            topo_view_ci_to_co network_depth_ci_to_co{network_substituted_depth, seed};
 
             // prepare nodes to place for additional networks
-            std::vector<mockturtle::node<decltype(network_breadth_ci_to_co)>> nodes_to_place_breadth_ci_to_co{};
-            std::vector<mockturtle::node<decltype(network_depth_co_to_ci)>>   nodes_to_place_depth_co_to_ci{};
-            std::vector<mockturtle::node<decltype(network_depth_ci_to_co)>>   nodes_to_place_depth_ci_to_co{};
+            std::vector<tec_nt::node> nodes_to_place_breadth_ci_to_co{};
+            std::vector<tec_nt::node> nodes_to_place_depth_co_to_ci{};
+            std::vector<tec_nt::node> nodes_to_place_depth_ci_to_co{};
 
             prepare_nodes_to_place(network_breadth_ci_to_co, nodes_to_place_breadth_ci_to_co);
             prepare_nodes_to_place(network_depth_co_to_ci, nodes_to_place_depth_co_to_ci);
@@ -2514,24 +2525,16 @@ class graph_oriented_layout_design_impl
                     mockturtle::fanout_view network_substituted_random{
                         synthesis::fanout_substitution<tec_nt>(ntk, params)};
 
-                    topo_view_co_to_ci_random<decltype(network_substituted_random)> network_breadth_co_to_ci_random{
-                        network_substituted_random, seed};
-                    topo_view_ci_to_co_random<decltype(network_substituted_random)> network_breadth_ci_to_co_random{
-                        network_substituted_random, seed};
-                    topo_view_co_to_ci_random<decltype(network_substituted_random)> network_depth_co_to_ci_random{
-                        network_substituted_random, seed};
-                    topo_view_ci_to_co_random<decltype(network_substituted_random)> network_depth_ci_to_co_random{
-                        network_substituted_random, seed};
+                    topo_view_co_to_ci_random network_breadth_co_to_ci_random{network_substituted_random, seed};
+                    topo_view_ci_to_co_random network_breadth_ci_to_co_random{network_substituted_random, seed};
+                    topo_view_co_to_ci_random network_depth_co_to_ci_random{network_substituted_random, seed};
+                    topo_view_ci_to_co_random network_depth_ci_to_co_random{network_substituted_random, seed};
 
                     // prepare nodes to place for additional networks
-                    std::vector<mockturtle::node<decltype(network_breadth_co_to_ci_random)>>
-                        nodes_to_place_breadth_co_to_ci_random{};
-                    std::vector<mockturtle::node<decltype(network_breadth_ci_to_co_random)>>
-                        nodes_to_place_breadth_ci_to_co_random{};
-                    std::vector<mockturtle::node<decltype(network_depth_co_to_ci_random)>>
-                        nodes_to_place_depth_co_to_ci_random{};
-                    std::vector<mockturtle::node<decltype(network_depth_ci_to_co_random)>>
-                        nodes_to_place_depth_ci_to_co_random{};
+                    std::vector<tec_nt::node> nodes_to_place_breadth_co_to_ci_random{};
+                    std::vector<tec_nt::node> nodes_to_place_breadth_ci_to_co_random{};
+                    std::vector<tec_nt::node> nodes_to_place_depth_co_to_ci_random{};
+                    std::vector<tec_nt::node> nodes_to_place_depth_ci_to_co_random{};
 
                     prepare_nodes_to_place(network_breadth_co_to_ci_random, nodes_to_place_breadth_co_to_ci_random);
                     prepare_nodes_to_place(network_breadth_ci_to_co_random, nodes_to_place_breadth_ci_to_co_random);
@@ -2649,7 +2652,6 @@ class graph_oriented_layout_design_impl
  * and R. Wille in LASCAS 2025 (https://ieeexplore.ieee.org/document/10966234).
  *
  * @tparam Lyt Cartesian gate-level layout type.
- * @tparam Ntk Network type.
  * @param ntk The network to be placed and routed.
  * @param ps The parameters for the A* priority routing algorithm. Defaults to an empty parameter set.
  * @param pst A pointer to a statistics object to record execution details. Defaults to nullptr.
@@ -2661,19 +2663,13 @@ class graph_oriented_layout_design_impl
  * @throws std::invalid_argument If the cost objective is `CUSTOM` and no custom cost objective is provided, or if
  * `ps.tiles_to_skip_between_pis` does not lie in \f$[0, 2^{20}]\f$.
  */
-template <typename Lyt, typename Ntk>
-std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_design_params ps = {},
+template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; } &&
+             std::derived_from<Lyt, layouts::cartesian_layout>
+std::optional<Lyt> graph_oriented_layout_design(const tec_nt& ntk, graph_oriented_layout_design_params ps = {},
                                                 graph_oriented_layout_design_stats* pst                   = nullptr,
                                                 std::function<uint64_t(const Lyt&)> custom_cost_objective = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-    static_assert(std::derived_from<Lyt, fiction::layouts::cartesian_layout>, "Lyt is not a Cartesian layout");
-    static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
-                                                 // therefore, this is the only relevant check here
-
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, 2))
     {

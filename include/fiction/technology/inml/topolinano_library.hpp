@@ -19,7 +19,7 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -62,14 +62,10 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * separate fanout wire instead.
      */
     template <typename GateLyt>
+        requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
+                 std::derived_from<GateLyt, layouts::shifted_cartesian_layout>
     [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-        static_assert(std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>,
-                      "GateLyt must be a shifted Cartesian layout");
-
         if (layouts::is_row_arrangement(lyt.get_arrangement()))
         {
             throw std::invalid_argument("GateLyt must be a column-shifted Cartesian layout");

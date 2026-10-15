@@ -72,11 +72,11 @@ illegal XML control characters are rejected before writing. Editing checkpoints 
 
 **Header:** `fiction/layouts/io/write_fgl_layout.hpp`
 
-```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, std::ostream& os, utils::progress_callback on_progress = {})
+```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const fiction::layouts::gate_layout<Geometry>& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
+```{doxygenfunction} fiction::layouts::io::write_fgl_layout(const fiction::layouts::gate_layout<Geometry>& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
 
 ```
 

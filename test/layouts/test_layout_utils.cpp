@@ -23,6 +23,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/layout_utils.hpp>
@@ -43,6 +44,24 @@ using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
 
+/** @brief Tests coordinate-neighbor API availability. @tparam Lyt Layout type. */
+template <typename Lyt>
+concept adjacent_coordinate_layout =
+    requires(const Lyt& lyt) { num_adjacent_coordinates(lyt, layout_base::coordinate{}); };
+
+/** @brief Tests cell-position conversion availability. @tparam Lyt Gate-level layout type. */
+template <typename Lyt>
+concept relative_position_layout = requires(const Lyt& lyt) {
+    relative_to_absolute_cell_position<3, 3>(lyt, layout_base::coordinate{}, layout_base::coordinate{});
+};
+
+static_assert(adjacent_coordinate_layout<cartesian_layout>);
+static_assert(!adjacent_coordinate_layout<int>);
+static_assert(relative_position_layout<cartesian_gate_layout>);
+static_assert(relative_position_layout<shifted_cartesian_gate_layout>);
+static_assert(relative_position_layout<hexagonal_gate_layout>);
+static_assert(!relative_position_layout<cartesian_layout>);
+
 TEST_CASE("Gate-level layouts are created with the required arrangement", "[layout-utils]")
 {
     const auto a =
@@ -50,20 +69,22 @@ TEST_CASE("Gate-level layouts are created with the required arrangement", "[layo
 
     SECTION("Cartesian layouts ignore the arrangement")
     {
-        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::twoddwave()));
-        CHECK_NOTHROW(make_gate_level_layout<cart_gate_clk_lyt>(a, {3, 3}, clocking::twoddwave()));
+        CHECK_NOTHROW(make_gate_level_layout<cartesian_gate_layout>(std::nullopt, {3, 3}, clocking::twoddwave()));
+        CHECK_NOTHROW(make_gate_level_layout<cartesian_gate_layout>(a, {3, 3}, clocking::twoddwave()));
     }
     SECTION("shifted Cartesian and hexagonal layouts take the arrangement")
     {
-        CHECK(make_gate_level_layout<shifted_cart_gate_clk_lyt>(a, {3, 3}, clocking::twoddwave()).get_arrangement() ==
-              a);
-        CHECK(make_gate_level_layout<hex_gate_clk_lyt>(a, {3, 3}, clocking::row()).get_arrangement() == a);
+        CHECK(
+            make_gate_level_layout<shifted_cartesian_gate_layout>(a, {3, 3}, clocking::twoddwave()).get_arrangement() ==
+            a);
+        CHECK(make_gate_level_layout<hexagonal_gate_layout>(a, {3, 3}, clocking::row()).get_arrangement() == a);
     }
     SECTION("shifted Cartesian and hexagonal layouts reject a missing arrangement")
     {
-        CHECK_THROWS_AS(make_gate_level_layout<shifted_cart_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::twoddwave()),
-                        std::invalid_argument);
-        CHECK_THROWS_AS(make_gate_level_layout<hex_gate_clk_lyt>(std::nullopt, {3, 3}, clocking::row()),
+        CHECK_THROWS_AS(
+            make_gate_level_layout<shifted_cartesian_gate_layout>(std::nullopt, {3, 3}, clocking::twoddwave()),
+            std::invalid_argument);
+        CHECK_THROWS_AS(make_gate_level_layout<hexagonal_gate_layout>(std::nullopt, {3, 3}, clocking::row()),
                         std::invalid_argument);
     }
 }
