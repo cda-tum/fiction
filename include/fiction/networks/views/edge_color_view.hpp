@@ -116,6 +116,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of `pred(color(e))`.
      */
     template <typename Pred>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): preserve lvalue invocation of ref-qualified predicates.
     [[nodiscard]] bool eval_edge_color(const edge& e, Pred&& pred) const
     {
         return pred(edge_color(e));
@@ -130,6 +131,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of `pred(color(a), color(b))`.
      */
     template <typename Pred>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): preserve lvalue invocation of ref-qualified predicates.
     [[nodiscard]] bool eval_edge_color(const edge& a, const edge& b, Pred&& pred) const
     {
         return pred(edge_color(a), edge_color(b));
