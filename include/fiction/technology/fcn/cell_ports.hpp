@@ -61,10 +61,12 @@ struct port_position
     uint16_t y{};
     /**
      * Primary input port.
+     * Defaults to `false`.
      */
     bool pi = false;
     /**
      * Primary output port.
+     * Defaults to `false`.
      */
     bool po = false;
     /**
@@ -160,14 +162,17 @@ struct port_direction
 
     /**
      * Direction.
+     * Defaults to `NORTH` (0).
      */
     uint8_t dir{};
     /**
      * Primary input port.
+     * Defaults to `false`.
      */
     bool pi = false;
     /**
      * Primary output port.
+     * Defaults to `false`.
      */
     bool po = false;
     /**

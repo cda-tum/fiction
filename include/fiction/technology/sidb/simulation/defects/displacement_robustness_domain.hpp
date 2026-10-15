@@ -54,6 +54,7 @@ struct displacement_robustness_domain
 {
     /**
      * The displaced layouts and their operational status.
+     * Defaults to an empty vector.
      */
     std::vector<std::pair<layout, logic::operational_status>> operational_values{};
 };
@@ -133,14 +134,17 @@ struct displacement_robustness_domain_stats
 {
     /**
      * Total runtime.
+     * Defaults to zero.
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
      * Number of operational displaced layouts.
+     * Defaults to 0.
      */
     std::size_t num_operational_sidb_displacements{0};
     /**
      * Number of non-operational displaced layouts.
+     * Defaults to 0.
      */
     std::size_t num_non_operational_sidb_displacements{0};
 };

@@ -81,18 +81,22 @@ struct bdl_wire
 {
     /**
      * The BDL pairs of the wire.
+     * Defaults to an empty vector.
      */
     std::vector<bdl_pair> pairs{};
     /**
      * Port direction of the wire.
+     * Defaults to `fcn::port_direction::NONE`.
      */
     fcn::port_direction port{fcn::port_direction::NONE};
     /**
      * First BDL pair of the wire.
+     * Defaults to `std::nullopt`.
      */
     std::optional<bdl_pair> first_bdl_pair{};
     /**
      * Last BDL pair of the wire.
+     * Defaults to `std::nullopt`.
      */
     std::optional<bdl_pair> last_bdl_pair{};
     /**
