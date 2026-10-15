@@ -138,7 +138,7 @@ class charge_distribution
      * @brief The index of a site in the distribution.
      *
      * @param s Site.
-     * @return Index of `s`, or `std::nullopt` if the distribution covers no SiDB at `s`.
+     * @return Index of `s`, or `std::nullopt` (`None` in Python) if the distribution covers no SiDB at `s`.
      */
     [[nodiscard]] std::optional<std::size_t> index_of(const lattice_site& s) const noexcept
     {

@@ -145,7 +145,7 @@ struct bdl_wire
      * Finds the first BDL pair of the given type.
      *
      * @param t The SiDB type to look for.
-     * @return The first BDL pair of type `t`, or `std::nullopt` if the wire has none.
+     * @return The first BDL pair of type `t`, or `std::nullopt` (`None` in Python) if the wire has none.
      */
     [[nodiscard]] std::optional<bdl_pair> find_bdl_pair_by_type(const dot_tag t) const noexcept
     {
