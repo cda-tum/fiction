@@ -77,10 +77,7 @@ class displacement_robustness_domain:
     def influence_information(
         self,
     ) -> list[tuple[mnt.pyfiction.sidb.sidb_layout, mnt.pyfiction.sidb.simulation.logic.operational_status]]:
-        """
-        The displaced layouts and their operational status. Defaults to an
-        empty vector.
-        """
+        """The displaced layouts and their operational status. Empty by default."""
 
     @influence_information.setter
     def influence_information(

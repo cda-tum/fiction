@@ -406,25 +406,25 @@ class bdl_wire:
 
     @property
     def pairs(self) -> list[bdl_pair]:
-        """The BDL pairs of the wire. Defaults to an empty vector."""
+        """The BDL pairs of the wire. Empty by default."""
 
     @pairs.setter
     def pairs(self, arg: Sequence[bdl_pair], /) -> None: ...
     @property
     def direction(self) -> bdl_wire.port_direction:
-        """Port direction of the wire. Defaults to `fcn::port_direction::NONE`."""
+        """Port direction of the wire. Defaults to `NONE`."""
 
     @direction.setter
     def direction(self, arg: bdl_wire.port_direction, /) -> None: ...
     @property
     def first_bdl_pair(self) -> bdl_pair | None:
-        """First BDL pair of the wire. Defaults to `std::nullopt`."""
+        """First BDL pair of the wire. Unset by default (`None` in Python)."""
 
     @first_bdl_pair.setter
     def first_bdl_pair(self, arg: bdl_pair | None, /) -> None: ...
     @property
     def last_bdl_pair(self) -> bdl_pair | None:
-        """Last BDL pair of the wire. Defaults to `std::nullopt`."""
+        """Last BDL pair of the wire. Unset by default (`None` in Python)."""
 
     @last_bdl_pair.setter
     def last_bdl_pair(self, arg: bdl_pair | None, /) -> None: ...

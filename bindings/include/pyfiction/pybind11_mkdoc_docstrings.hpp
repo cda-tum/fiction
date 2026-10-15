@@ -16951,7 +16951,7 @@ difference. A zero potential difference corresponds to positive
 infinity. An absent transition also has infinite distance; its entry
 in `transition_potentials` has infinite potential. Distances use the
 potential magnitude of one elementary charge with all other charge
-states fixed. Defaults to an empty map.)doc";
+states fixed. Empty by default.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_system_energy =
 R"doc(Electrostatic potential energy of the charge distribution (unit: eV).
@@ -16959,7 +16959,7 @@ Defaults to 0.0.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information_transition_potentials =
 R"doc(For each transition type, the SiDB closest to it and the required
-potential difference (unit: V). Defaults to an empty map.)doc";
+potential difference (unit: V). Empty by default.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_state_type = R"doc(Label to categorize ground and excited states of an SiDB layout.)doc";
 
@@ -17717,9 +17717,7 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustne
 R"doc(The displacement robustness domain of an SiDB gate: every analyzed
 displaced layout together with its operational status.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_operational_values =
-R"doc(The displaced layouts and their operational status. Defaults to an
-empty vector.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_operational_values = R"doc(The displaced layouts and their operational status. Empty by default.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params = R"doc(Parameters of the displacement robustness analysis.)doc";
 
@@ -21782,7 +21780,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire. Defaults to `std::nullopt`.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire. Unset by default (`None` in Python).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_index_distance =
 R"doc(Euclidean distance of two sites in units of lattice indices, ignoring
@@ -21798,7 +21796,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire. Defaults to `std::nullopt`.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire. Unset by default (`None` in Python).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_operator_eq =
 R"doc(Equality operator. Also provides `operator!=` via `= default`.
@@ -21811,9 +21809,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_pairs = R"doc(The BDL pairs of the wire. Defaults to an empty vector.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_pairs = R"doc(The BDL pairs of the wire. Empty by default.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_port = R"doc(Port direction of the wire. Defaults to `fcn::port_direction::NONE`.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_port = R"doc(Port direction of the wire. Defaults to `NONE`.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_wire_selection = R"doc(An enumeration of the selection of different types of wires.)doc";
 
@@ -24362,7 +24360,7 @@ Defaults to an empty string.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_result_charge_distributions =
 R"doc(Charge distributions determined by the algorithm.
 
-Defaults to an empty vector.)doc";
+Empty by default.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_result_charge_state =
 R"doc(The charge state of an SiDB in one of the charge distributions.
@@ -24400,7 +24398,7 @@ Defaults to an empty Si(100)-2x1 layout.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_result_sim_params =
 R"doc(Physical parameters used in the simulation.
 
-Defaults to `model::simulation_parameters{}`.)doc";
+Uses the default physical simulation parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_result_simulation_runtime =
 R"doc(Total simulation runtime in seconds.

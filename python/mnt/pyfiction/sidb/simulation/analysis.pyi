@@ -466,7 +466,7 @@ class population_stability_information:
     def transition_potentials(self) -> dict[transition_type, tuple[mnt.pyfiction.sidb.lattice_site, float]]:
         """
         For each transition type, the SiDB closest to it and the required
-        potential difference (unit: V). Defaults to an empty map.
+        potential difference (unit: V). Empty by default.
         """
 
     @transition_potentials.setter
@@ -482,7 +482,7 @@ class population_stability_information:
         infinity. An absent transition also has infinite distance; its entry
         in `transition_potentials` has infinite potential. Distances use the
         potential magnitude of one elementary charge with all other charge
-        states fixed. Defaults to an empty map.
+        states fixed. Empty by default.
         """
 
     @distance_corresponding_to_potential.setter

@@ -419,7 +419,7 @@ class sidb_simulation_result:
         """
         Charge distributions determined by the algorithm.
 
-        Defaults to an empty vector.
+        Empty by default.
         """
 
     @charge_distributions.setter
@@ -429,7 +429,7 @@ class sidb_simulation_result:
         """
         Physical parameters used in the simulation.
 
-        Defaults to `model::simulation_parameters{}`.
+        Uses the default physical simulation parameters.
         """
 
     @simulation_parameters.setter
