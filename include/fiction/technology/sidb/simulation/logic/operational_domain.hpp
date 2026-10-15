@@ -861,12 +861,8 @@ class operational_domain_impl
         return op_domain;
     }
     /**
-     * Performs contour tracing to determine the operational domain. The algorithm first performs a random sampling of
-     * up to the specified number of samples. It stops random sampling once it finds a single operational point, from
-     * which it moves straight outwards until it encounters the counter of the operational domain. From this point, it
-     * traces the contour until it reaches the initial contour point again. The operational domain will finally only
-     * contain up to `samples` random non-operational points as well as the contour of the found operational domain plus
-     * a one pixel wide border around it.
+     * Samples up to the specified number of random points, then traces the boundary of each sampled operational
+     * island. The domain contains the sampled points, operational boundaries, and their non-operational neighbors.
      *
      * @param samples Maximum number of random samples to be taken before contour tracing.
      * @return The (partial) operational domain of the layout.
@@ -1660,12 +1656,11 @@ class operational_domain_impl
     operational_status is_step_point_operational(const step_point& sp)
     {
         utils::check_deadline(params.operational_params.deadline);
-        if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
+        const auto param_point = to_parameter_point(sp);
+        if (const auto op_value = op_domain.contains(param_point); op_value.has_value())
         {
             return std::get<0>(*op_value);
         }
-
-        const auto param_point = to_parameter_point(sp);
 
         const auto operational = [this, &param_point](const std::optional<double>& ct_value = std::nullopt)
         {
@@ -1750,14 +1745,12 @@ class operational_domain_impl
     operational_status is_step_point_suitable(const charge_distribution& cd, const step_point& sp)
     {
         utils::check_deadline(params.operational_params.deadline);
+        const auto param_point = to_parameter_point(sp);
         // if the point has already been sampled, return the stored operational status
-        if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
+        if (const auto op_value = op_domain.contains(param_point); op_value.has_value())
         {
             return std::get<0>(*op_value);
         }
-
-        // fetch the parameter values of all sweep dimensions
-        const auto param_point = to_parameter_point(sp);
 
         const auto operational = [this, &param_point]()
         {
@@ -1912,34 +1905,6 @@ class operational_domain_impl
         {
             thread.get();
         }
-    }
-    /**
-     * Performs random sampling to find any operational parameter combination. This function is useful if a single
-     * starting point is required within the domain to expand from. This function returns the step in all dimensions
-     * of the first operational point found. If no operational parameter combination can be found within the given
-     * number of samples, the function returns `std::nullopt`.
-     *
-     * This function adds any sampled points to the `op_domain` member variables.
-     *
-     * @param samples Maximum number of samples to take. Works as a timeout.
-     * @return The first operational step point, if any could be found, `std::nullopt` otherwise.
-     */
-    [[maybe_unused]] [[nodiscard]] std::optional<step_point>
-    find_operational_step_point_via_random_sampling(const std::size_t samples)
-    {
-        for (const auto& sample_step_point : generate_random_step_points(samples))
-        {
-            // determine the operational status
-            const auto operational_value = is_step_point_operational(sample_step_point);
-
-            // if the parameter combination is operational, return its step values in all dimensions
-            if (operational_value == operational_status::OPERATIONAL)
-            {
-                return sample_step_point;
-            }
-        }
-
-        return std::nullopt;
     }
     /**
      * Finds a boundary starting point for the contour tracing algorithm. This function starts at the given starting
