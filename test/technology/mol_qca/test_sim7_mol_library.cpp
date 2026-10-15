@@ -19,7 +19,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>

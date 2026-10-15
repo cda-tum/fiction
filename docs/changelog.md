@@ -123,6 +123,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
     with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
+  - Orthogonal edge coloring avoids a redundant traversal copy.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
     throw `std::invalid_argument`.

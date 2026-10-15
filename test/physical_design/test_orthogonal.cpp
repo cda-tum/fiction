@@ -26,7 +26,6 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
@@ -42,11 +41,13 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
+#include <mockturtle/views/topo_view.hpp>
 
 #include <concepts>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -122,6 +123,32 @@ TEST_CASE("East-south coloring", "[orthogonal]")
         fanout_substitution<tec_nt>(blueprints::half_adder_network<mockturtle::mig_network>())});
     check(mockturtle::fanout_view{
         fanout_substitution<tec_nt>(blueprints::full_adder_network<mockturtle::mig_network>())});
+}
+
+TEST_CASE("East-south coloring owns its named traversal", "[orthogonal]")
+{
+    const auto [container, output] = []
+    {
+        tec_nt ntk{};
+        ntk.set_network_name("owned_coloring");
+        const auto a    = ntk.create_pi("left");
+        const auto b    = ntk.create_pi("right");
+        const auto gate = ntk.create_and(a, b);
+        ntk.set_name(gate, "conjunction");
+        ntk.create_po(gate, "result");
+        const mockturtle::fanout_view fanouts{fanout_substitution<tec_nt>(ntk)};
+        const auto                    output = fanouts.get_node(fanouts.po_at(0));
+        return std::pair{physical_design::detail::east_south_edge_coloring(mockturtle::topo_view{fanouts}), output};
+    }();
+
+    const auto& ntk = container.color_ntk;
+    CHECK(physical_design::detail::is_east_south_colored(ntk));
+    CHECK(ntk.get_node(ntk.po_at(0)) == output);
+    CHECK(ntk.get_network_name() == "owned_coloring");
+    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
+    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
+    CHECK(ntk.get_name(ntk.po_at(0)) == "conjunction");
+    CHECK(ntk.get_output_name(0) == "result");
 }
 
 TEST_CASE("Orthogonal physical design of a network without primary inputs", "[orthogonal]")
