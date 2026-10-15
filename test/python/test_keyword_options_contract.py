@@ -449,3 +449,10 @@ def test_distance_conversion_zero_and_unscreened_limit() -> None:
         potential_to_distance_conversion(0.5, 20)
     with pytest.raises(ValueError, match="epsilon_r"):
         potential_to_distance_conversion(0.5, 2, epsilon_r=float("inf"))
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+def test_engine_rejects_nonfinite_transition_energy(value: float) -> None:
+    """Algorithms reject non-finite transition energies before native simulation."""
+    with pytest.raises(ValueError, match="mu_minus"):
+        quickexact(sidb_layout(), mu_minus=value)

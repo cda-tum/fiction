@@ -234,6 +234,8 @@ mapped = technology_mapping(network, **and_or_not())
 ```
 
 SiDB computational inputs use the scalar keywords `base`, `mu_minus`, `epsilon_r`, and `lambda_tf`.
+`base` must be 2 or 3, `mu_minus` must be finite, and `epsilon_r` must be positive and finite.
+`lambda_tf` must be positive; positive infinity selects the unscreened model.
 `sidb_simulation_parameters` describes physical model data returned by `result.simulation_parameters`
 and `potential_landscape.params()`. Its keyword-only constructor uses `base_number`, `mu_minus`,
 `relative_permittivity`, and `screening_distance`; algorithms do not accept this object as an option.

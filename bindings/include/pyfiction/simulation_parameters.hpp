@@ -39,8 +39,8 @@ using simulation_model = fiction::sidb::model::simulation_parameters;
  * @param epsilon_r Relative permittivity.
  * @param lambda_tf Screening distance in nm.
  * @return Validated native physical simulation values.
- * @throws nb::value_error If base is neither 2 nor 3, permittivity is nonpositive or non-finite, or screening distance
- * is nonpositive or NaN.
+ * @throws nb::value_error If base is neither 2 nor 3, transition energy is non-finite, permittivity is nonpositive or
+ * non-finite, or screening distance is nonpositive or NaN.
  */
 inline fiction::sidb::model::simulation_parameters
 make_simulation_parameters(const uint8_t base, const double mu_minus, const double epsilon_r, const double lambda_tf)
@@ -48,6 +48,10 @@ make_simulation_parameters(const uint8_t base, const double mu_minus, const doub
     if (base != 2 && base != 3)
     {
         throw nb::value_error("base must be 2 or 3");
+    }
+    if (!std::isfinite(mu_minus))
+    {
+        throw nb::value_error("mu_minus must be finite");
     }
     if (!std::isfinite(epsilon_r) || epsilon_r <= 0)
     {
