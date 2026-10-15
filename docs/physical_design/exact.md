@@ -41,6 +41,10 @@ network specifications under constraints. This approach finds exact results but 
 .. autoclass:: mnt.pyfiction.physical_design.technology_constraints
    :members:
 
+.. autoclass:: mnt.pyfiction.physical_design.exact_stats
+   :members:
+   :undoc-members:
+
 .. autofunction:: mnt.pyfiction.physical_design.exact
 ```
 

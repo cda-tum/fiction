@@ -45,6 +45,7 @@ gates = design_sidb_gates(skeleton, specification, timeout=5_000)
 
 .. autoclass:: mnt.pyfiction.sidb.generators.termination_condition
    :members:
+   :undoc-members:
 
 .. autofunction:: mnt.pyfiction.sidb.generators.design_sidb_gates
 ```

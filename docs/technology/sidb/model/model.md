@@ -197,6 +197,11 @@ Possible charge states of SiDBs.
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.sidb.model.sidb_charge_state
    :members:
+   :undoc-members:
+
+.. autodata:: mnt.pyfiction.sidb.model.SIDB_CHARGE_STATES_BASE_2
+
+.. autodata:: mnt.pyfiction.sidb.model.SIDB_CHARGE_STATES_BASE_3
 
 .. autofunction:: mnt.pyfiction.sidb.model.sidb_charge_states_for_base_number
 

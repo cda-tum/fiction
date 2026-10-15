@@ -36,6 +36,14 @@ always optimal.
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.physical_design.gold_cost_objective
+   :members:
+   :undoc-members:
+
+.. autoclass:: mnt.pyfiction.physical_design.gold_effort_mode
+   :members:
+   :undoc-members:
+
 .. autoclass:: mnt.pyfiction.physical_design.graph_oriented_layout_design_stats
    :members:
 

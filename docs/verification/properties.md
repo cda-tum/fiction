@@ -58,6 +58,7 @@
 ```{eval-rst}
 .. autoclass:: mnt.pyfiction.verification.count_gate_types_stats
    :members:
+   :undoc-members:
 
 .. autofunction:: mnt.pyfiction.verification.count_gate_types
 ```

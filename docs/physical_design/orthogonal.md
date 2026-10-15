@@ -39,6 +39,10 @@ layouts raise `TypeError`. Hexagonal layouts require `layout_arrangement`.
 .. autoclass:: mnt.pyfiction.physical_design.num_clks
    :members:
 
+.. autoclass:: mnt.pyfiction.physical_design.orthogonal_stats
+   :members:
+   :undoc-members:
+
 .. autofunction:: mnt.pyfiction.physical_design.orthogonal
 ```
 

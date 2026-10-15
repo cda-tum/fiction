@@ -75,6 +75,7 @@ Check design rules, compare circuit behavior, and construct virtual miters.
 
 .. autoclass:: mnt.pyfiction.verification.equivalence_checking_stats
    :members:
+   :undoc-members:
 
 .. autofunction:: mnt.pyfiction.verification.equivalence_checking
 ```
