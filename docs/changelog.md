@@ -450,6 +450,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Physical-validity sweeps omit gate-detection and operational-condition options.
 
+  - Physical-validity sweeps reject engines other than QuickExact, EXGS, and QuickSim.
+
   - **Breaking:** Use `read_network`, `read_fgl_layout`, `random_network`, `exact`, and `orthogonal`
     with keyword `network_type` or `layout_type`. Specialized function names were removed.
 

@@ -112,6 +112,7 @@ void register_physically_valid_parameters(nb::module_& m)
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
         R"doc(Sweep physical parameter values for which the supplied charge distribution is physically valid.
 The keyword options define the sweep, physical model, worker count, and progress callbacks.
+Raises ValueError for engines other than QuickExact, EXGS, and QuickSim.
 
 Args:
     timeout: Execution budget in milliseconds.

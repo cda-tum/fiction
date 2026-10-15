@@ -536,6 +536,7 @@ def physically_valid_parameters(
     """
     Sweep physical parameter values for which the supplied charge distribution is physically valid.
     The keyword options define the sweep, physical model, worker count, and progress callbacks.
+    Raises ValueError for engines other than QuickExact, EXGS, and QuickSim.
 
     Args:
         timeout: Execution budget in milliseconds.

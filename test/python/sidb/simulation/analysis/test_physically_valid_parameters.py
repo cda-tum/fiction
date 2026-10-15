@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Any, cast
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
 from mnt.pyfiction.sidb.simulation.logic import (
     input_bdl_configuration,
@@ -76,6 +77,17 @@ def test_physical_validity_rejects_gate_options(name: str, value: object) -> Non
     layout = sidb_layout()
     with pytest.raises(TypeError):
         cast("Callable[..., Any]", physically_valid_parameters)(layout, charge_distribution(layout), **{name: value})
+
+
+@pytest.mark.skipif(not hasattr(sidb_simulation_engine, "CLUSTERCOMPLETE"), reason="ALGLIB is not available")
+def test_physical_validity_rejects_unsupported_engine() -> None:
+    """Physical-validity sweeps reject engines that cannot count excited states."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(0, 0), sidb_dot_tag.NORMAL)
+    with pytest.raises(ValueError, match="unsupported simulation engine"):
+        physically_valid_parameters(
+            layout, charge_distribution(layout), sim_engine=sidb_simulation_engine.CLUSTERCOMPLETE
+        )
 
 
 def test_progress_callback_completes() -> None:
