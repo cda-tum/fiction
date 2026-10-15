@@ -22,9 +22,9 @@ def write_sqd_sim_result(sim_result: mnt.pyfiction.sidb.simulation.sidb_simulati
         filename: File to write into.
 
     Raises:
-        std::invalid_argument: if a distribution has different sites from
-                               the result layout.
-        std::ofstream::failure: if the file cannot be opened.
+        ValueError: if a distribution has different sites from the result
+                    layout.
+        RuntimeError: if the file cannot be opened.
     """
 
 class sample_writing_mode(enum.Enum):
@@ -132,5 +132,5 @@ def write_location_and_ground_state(
         filename: File to write into.
 
     Raises:
-        std::ofstream::failure: if the file cannot be opened.
+        RuntimeError: if the file cannot be opened.
     """

@@ -90,8 +90,8 @@ def calculate_energy_and_state_type_with_kinks_rejected(
         The energies with their state types.
 
     Raises:
-        std::out_of_range: if logic validation encounters an invalid
-                           lattice basis index.
+        IndexError: if logic validation encounters an invalid lattice
+                    basis index.
     """
 
 def can_positive_charges_occur(
@@ -303,8 +303,8 @@ class energy_distribution:
             state_index: The index of the state to be retrieved.
 
         Returns:
-            Energy state. If the index is out of range, `std::nullopt` is
-            returned instead.
+            Energy state, or `std::nullopt` (`None` in Python) if the index is
+            out of range.
         """
 
     def degeneracy(self, energy: float) -> int | None:
@@ -316,8 +316,8 @@ class energy_distribution:
             energy: The energy value whose degeneracy is requested.
 
         Returns:
-            The degeneracy of the given energy. If the energy value is not
-            found, `std::nullopt` is returned instead.
+            The degeneracy of the given energy, or `std::nullopt` (`None` in
+            Python) if the energy is not found.
         """
 
     def add_energy_state(self, state: energy_state) -> None:
@@ -352,7 +352,7 @@ class energy_distribution:
             The maximum energy value in the energy distribution.
 
         Raises:
-            std::invalid_argument: If the energy distribution is empty.
+            ValueError: If the energy distribution is empty.
         """
 
     def min_energy(self) -> float:
@@ -363,7 +363,7 @@ class energy_distribution:
             The minimum energy value in the energy distribution.
 
         Raises:
-            std::invalid_argument: If the energy distribution is empty.
+            ValueError: If the energy distribution is empty.
         """
 
 def calculate_energy_distribution(

@@ -454,8 +454,8 @@ class bdl_wire:
             t: The SiDB type to look for.
 
         Returns:
-            The first BDL pair of type `t`, or `std::nullopt` if the wire has
-            none.
+            The first BDL pair of type `t`, or `std::nullopt` (`None` in
+            Python) if the wire has none.
         """
 
     def __eq__(self, arg: bdl_wire, /) -> bool:
@@ -999,7 +999,7 @@ class critical_temperature_domain:
             The dimension at the specified index.
 
         Raises:
-            std::out_of_range: if the index is out of range.
+            IndexError: if the index is out of range.
         """
 
     def get_number_of_dimensions(self) -> int:
@@ -1101,7 +1101,7 @@ class operational_domain:
             The dimension at the specified index.
 
         Raises:
-            std::out_of_range: if the index is out of range.
+            IndexError: if the index is out of range.
         """
 
     def get_number_of_dimensions(self) -> int:

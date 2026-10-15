@@ -933,9 +933,9 @@ def route_path(
         Path: Coordinate path type.
 
     Raises:
-        std::invalid_argument: If an endpoint or intermediate placement is
-                               unavailable.
-        std::out_of_range: If the destination input index is invalid.
+        ValueError: If an endpoint or intermediate placement is
+                    unavailable.
+        IndexError: If the destination input index is invalid.
     """
 
 @overload

@@ -237,7 +237,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             size: Tile width in cells.
 
         Raises:
-            std::invalid_argument: if `size` is zero.
+            ValueError: if `size` is zero.
         """
 
     def get_tile_size_y(self) -> int:
@@ -256,7 +256,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             size: Tile height in cells.
 
         Raises:
-            std::invalid_argument: if `size` is zero.
+            ValueError: if `size` is zero.
         """
 
     def get_clock_zone(
@@ -284,7 +284,7 @@ class inml_layout(mnt.pyfiction.layouts.cartesian_layout):
             cn: Clock number.
 
         Raises:
-            std::bad_alloc: If allocation fails.
+            MemoryError: If allocation fails.
         """
 
     def get_clock_number(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> int:

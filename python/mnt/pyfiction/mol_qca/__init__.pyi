@@ -88,7 +88,7 @@ class mol_qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             layout_name: Layout name.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
+            ValueError: If a size exceeds the coordinate domain.
         """
 
     def get_cell_type(

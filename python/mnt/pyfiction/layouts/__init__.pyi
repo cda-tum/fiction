@@ -49,8 +49,7 @@ class coordinate:
             Z: Type of z.
 
         Raises:
-            std::overflow_error: If an axis is outside the signed 32-bit
-                                 range.
+            OverflowError: If an axis is outside the signed 32-bit range.
         """
 
     @overload
@@ -254,8 +253,8 @@ class cartesian_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two.
         """
 
     def coord(self, x: int, y: int, z: int = 0) -> coordinate:
@@ -277,8 +276,7 @@ class cartesian_layout:
             A coordinate in the layout of type `coordinate`.
 
         Raises:
-            std::overflow_error: If an axis is outside the signed 32-bit
-                                 range.
+            OverflowError: If an axis is outside the signed 32-bit range.
 
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
@@ -316,9 +314,9 @@ class cartesian_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two. The dimensions
-                               remain unchanged.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two. The dimensions remain
+                        unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -779,9 +777,13 @@ class cartesian_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
+        Tests whether the geometry contains a coordinate.
+
         Args:
-            c: Coordinate. @return Whether the geometry contains the
-               coordinate.
+            c: Coordinate.
+
+        Returns:
+            Whether the geometry contains the coordinate.
         """
 
     def coordinates(
@@ -882,8 +884,8 @@ class shifted_cartesian_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -913,8 +915,7 @@ class shifted_cartesian_layout:
             A coordinate in the layout of type `coordinate`.
 
         Raises:
-            std::overflow_error: If an axis is outside the signed 32-bit
-                                 range.
+            OverflowError: If an axis is outside the signed 32-bit range.
 
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
@@ -952,9 +953,9 @@ class shifted_cartesian_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two. The dimensions
-                               remain unchanged.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two. The dimensions remain
+                        unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -1415,9 +1416,13 @@ class shifted_cartesian_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
+        Tests whether the geometry contains a coordinate.
+
         Args:
-            c: Coordinate. @return Whether the geometry contains the
-               coordinate.
+            c: Coordinate.
+
+        Returns:
+            Whether the geometry contains the coordinate.
         """
 
     def coordinates(
@@ -1527,8 +1532,8 @@ class hexagonal_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -1558,8 +1563,7 @@ class hexagonal_layout:
             A coordinate in the layout of type `coordinate`.
 
         Raises:
-            std::overflow_error: If an axis is outside the signed 32-bit
-                                 range.
+            OverflowError: If an axis is outside the signed 32-bit range.
 
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
@@ -1597,9 +1601,9 @@ class hexagonal_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two. The dimensions
-                               remain unchanged.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two. The dimensions remain
+                        unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -2060,9 +2064,13 @@ class hexagonal_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
+        Tests whether the geometry contains a coordinate.
+
         Args:
-            c: Coordinate. @return Whether the geometry contains the
-               coordinate.
+            c: Coordinate.
+
+        Returns:
+            Whether the geometry contains the coordinate.
         """
 
     def coordinates(
@@ -2696,8 +2704,16 @@ class cartesian_gate_layout(cartesian_layout):
 
     def get_tile(self, object: layout_object_id) -> coordinate:
         """
-        Returns the object's coordinate. @throws std::invalid_argument If the
-        identity is stale.
+        Returns the object's coordinate.
+
+        Args:
+            object: Object identity.
+
+        Returns:
+            Coordinate of the object.
+
+        Raises:
+            ValueError: If the identity is stale.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -3131,8 +3147,10 @@ class cartesian_gate_layout(cartesian_layout):
 
     def num_se(self) -> int:
         """
-        Counts zones with a nonzero Hold-phase extension. @return
-        Synchronization element count.
+        Counts zones with a nonzero Hold-phase extension.
+
+        Returns:
+            Synchronization element count.
         """
 
 class shifted_cartesian_gate_layout(shifted_cartesian_layout):
@@ -3675,8 +3693,16 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     def get_tile(self, object: layout_object_id) -> coordinate:
         """
-        Returns the object's coordinate. @throws std::invalid_argument If the
-        identity is stale.
+        Returns the object's coordinate.
+
+        Args:
+            object: Object identity.
+
+        Returns:
+            Coordinate of the object.
+
+        Raises:
+            ValueError: If the identity is stale.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -4110,8 +4136,10 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     def num_se(self) -> int:
         """
-        Counts zones with a nonzero Hold-phase extension. @return
-        Synchronization element count.
+        Counts zones with a nonzero Hold-phase extension.
+
+        Returns:
+            Synchronization element count.
         """
 
 class hexagonal_gate_layout(hexagonal_layout):
@@ -4654,8 +4682,16 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     def get_tile(self, object: layout_object_id) -> coordinate:
         """
-        Returns the object's coordinate. @throws std::invalid_argument If the
-        identity is stale.
+        Returns the object's coordinate.
+
+        Args:
+            object: Object identity.
+
+        Returns:
+            Coordinate of the object.
+
+        Raises:
+            ValueError: If the identity is stale.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -5089,8 +5125,10 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     def num_se(self) -> int:
         """
-        Counts zones with a nonzero Hold-phase extension. @return
-        Synchronization element count.
+        Counts zones with a nonzero Hold-phase extension.
+
+        Returns:
+            Synchronization element count.
         """
 
 class obstructions:
@@ -5116,7 +5154,7 @@ class obstructions:
             c: Coordinate to obstruct.
 
         Raises:
-            std::bad_alloc: If allocation fails.
+            MemoryError: If allocation fails.
         """
 
     def obstruct_connection(
@@ -5133,7 +5171,7 @@ class obstructions:
             tgt: Target coordinate.
 
         Raises:
-            std::bad_alloc: If allocation fails.
+            MemoryError: If allocation fails.
 
         Note:
             Coordinates marked this way will not be crossed with wires by path
@@ -5262,8 +5300,8 @@ def normalize_layout_coordinates(lyt: mnt.pyfiction.inml.inml_layout) -> mnt.pyf
         Normalized copy of `lyt`.
 
     Raises:
-        std::invalid_argument: If the normalized extent exceeds the signed
-                               coordinate domain.
+        ValueError: If the normalized extent exceeds the signed coordinate
+                    domain.
     """
 
 def random_coordinate(

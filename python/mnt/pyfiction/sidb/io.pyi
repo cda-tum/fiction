@@ -27,7 +27,7 @@ def write_sqd_layout(
         on_progress: Receives completed dot and defect records.
 
     Raises:
-        std::ofstream::failure: if the file cannot be opened.
+        RuntimeError: if the file cannot be opened.
     """
 
 class sqd_parsing_error(RuntimeError): ...
@@ -47,7 +47,7 @@ def read_sqd_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.sidb.
     Raises:
         sqd_parsing_error: if the file is malformed or a name-only lattice
                            is unknown.
-        std::ifstream::failure: if the file cannot be opened.
+        RuntimeError: if the file cannot be opened.
     """
 
 class unsupported_defect_index_exception(ValueError): ...
@@ -66,7 +66,7 @@ def read_surface_defects(filename: str, layout_name: str = "") -> mnt.pyfiction.
         The layout holding the defects.
 
     Raises:
-        std::ifstream::failure: if the file cannot be opened.
+        RuntimeError: if the file cannot be opened.
     """
 
 class color_mode(enum.Enum):

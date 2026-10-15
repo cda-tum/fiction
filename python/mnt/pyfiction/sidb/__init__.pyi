@@ -46,7 +46,7 @@ class lattice_site:
             z: Basis site, 0 or 1.
 
         Raises:
-            std::out_of_range: if the basis index is not 0 or 1.
+            IndexError: if the basis index is not 0 or 1.
         """
 
     @overload
@@ -116,8 +116,8 @@ class lattice_site:
             Sum of both sites.
 
         Raises:
-            std::out_of_range: if a basis index is invalid or a result
-                               coordinate exceeds the lattice-site range.
+            IndexError: if a basis index is invalid or a result coordinate
+                        exceeds the lattice-site range.
         """
 
     def __sub__(self, arg: lattice_site, /) -> lattice_site:
@@ -133,8 +133,8 @@ class lattice_site:
             Difference of both sites.
 
         Raises:
-            std::out_of_range: if a basis index is invalid or a result
-                               coordinate exceeds the lattice-site range.
+            IndexError: if a basis index is invalid or a result coordinate
+                        exceeds the lattice-site range.
         """
 
     def __hash__(self) -> int: ...
@@ -165,7 +165,7 @@ def site_at_row(x: int, row: int) -> lattice_site:
         The site `(x, floor(row / 2), row mod 2)`.
 
     Raises:
-        std::out_of_range: if the row exceeds the range of lattice sites.
+        IndexError: if the row exceeds the range of lattice sites.
     """
 
 def sites_in_area(first_corner: lattice_site, second_corner: lattice_site) -> list[lattice_site]:
@@ -182,8 +182,7 @@ def sites_in_area(first_corner: lattice_site, second_corner: lattice_site) -> li
         The sites in the rectangle in raster order.
 
     Raises:
-        std::length_error: if the rectangle exceeds the maximum vector
-                           size.
+        ValueError: if the rectangle exceeds the maximum vector size.
     """
 
 class lattice:
@@ -277,7 +276,7 @@ class lattice:
             The `(x, y)` position of `site` (unit: nm).
 
         Raises:
-            std::out_of_range: if the basis index is not 0 or 1.
+            IndexError: if the basis index is not 0 or 1.
         """
 
     def nm_distance(self, source: lattice_site, target: lattice_site) -> float:
@@ -292,7 +291,7 @@ class lattice:
             Distance between `source` and `target` (unit: nm).
 
         Raises:
-            std::out_of_range: if either basis index is not 0 or 1.
+            IndexError: if either basis index is not 0 or 1.
         """
 
     def __eq__(self, arg: lattice, /) -> bool:
@@ -477,7 +476,8 @@ class sidb_layout:
             site: Site.
 
         Returns:
-            Index of `site`, or `std::nullopt` if `site` holds no SiDB.
+            Index of `site`, or `std::nullopt` (`None` in Python) if `site` holds no
+            SiDB.
         """
 
     def num_pis(self) -> int:
@@ -733,8 +733,8 @@ class charge_distribution:
             site: Site.
 
         Returns:
-            Index of `site`, or `std::nullopt` if the distribution covers no SiDB
-            at `site`.
+            Index of `site`, or `std::nullopt` (`None` in Python) if the
+            distribution covers no SiDB at `site`.
         """
 
     def get_charge_state(self, site: lattice_site) -> model.sidb_charge_state:
@@ -780,7 +780,7 @@ class charge_distribution:
             charge_state: Charge state to assign.
 
         Raises:
-            std::out_of_range: if the index is out of range.
+            IndexError: if the index is out of range.
         """
 
     def assign_all_charge_states(self, charge_state: model.sidb_charge_state) -> None:

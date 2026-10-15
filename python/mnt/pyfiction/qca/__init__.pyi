@@ -243,7 +243,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             size: Tile width in cells.
 
         Raises:
-            std::invalid_argument: if `size` is zero.
+            ValueError: if `size` is zero.
         """
 
     def get_tile_size_y(self) -> int:
@@ -262,7 +262,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             size: Tile height in cells.
 
         Raises:
-            std::invalid_argument: if `size` is zero.
+            ValueError: if `size` is zero.
         """
 
     def get_clock_zone(
@@ -290,7 +290,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
             cn: Clock number.
 
         Raises:
-            std::bad_alloc: If allocation fails.
+            MemoryError: If allocation fails.
         """
 
     def get_clock_number(self, c: mnt.pyfiction.layouts.coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
@@ -390,7 +390,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
                 by; 0 turns `cz` back into a normal clock zone.
 
         Raises:
-            std::bad_alloc: If allocation fails.
+            MemoryError: If allocation fails.
         """
 
     def is_synchronization_element(

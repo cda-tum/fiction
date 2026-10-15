@@ -48,6 +48,6 @@ def write_qll_layout(
         Lyt: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
 
     Raises:
-        std::invalid_argument: if an iNML layout has no I/O pins or they
-                               are not routed to the layout's borders.
+        ValueError: if an iNML layout has no I/O pins or they are not
+                    routed to the layout's borders.
     """

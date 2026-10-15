@@ -215,7 +215,7 @@ class potential_landscape:
             Distance (unit: nm).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def chargeless_potential(self, i: int, j: int) -> float:
@@ -231,7 +231,7 @@ class potential_landscape:
             Chargeless potential (unit: V).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def local_external_potential(self, i: int) -> float:
@@ -246,7 +246,7 @@ class potential_landscape:
             External potential (unit: V).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def local_potential_caused_by_defects(self, i: int) -> float:
@@ -260,7 +260,7 @@ class potential_landscape:
             Defect potential (unit: V).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def effective_charge_transition_thresholds(self, i: int) -> list[float]:
@@ -275,7 +275,7 @@ class potential_landscape:
             The four thresholds (unit: V).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def chargeless_potential_at_distance(self, distance: float) -> float:
@@ -303,8 +303,7 @@ class potential_landscape:
             Local internal potential per SiDB (unit: V).
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
     def local_potentials(self, cd: mnt.pyfiction.sidb.charge_distribution) -> list[float]:
@@ -319,8 +318,7 @@ class potential_landscape:
             Local potential per SiDB (unit: V).
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
     def energy(self, cd: mnt.pyfiction.sidb.charge_distribution) -> float:
@@ -334,8 +332,7 @@ class potential_landscape:
             Energy (unit: eV).
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
     def is_physically_valid(self, cd: mnt.pyfiction.sidb.charge_distribution) -> bool:
@@ -349,8 +346,7 @@ class potential_landscape:
             `true` iff both stability criteria hold.
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
     def evaluate(self, cd: mnt.pyfiction.sidb.charge_distribution) -> mnt.pyfiction.sidb.charge_distribution:
@@ -365,8 +361,7 @@ class potential_landscape:
             `cd` with its energy assigned.
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
 class sidb_simulation_result:
@@ -458,7 +453,7 @@ class sidb_simulation_result:
             The charge state, `charge_state::NONE` if `site` holds no SiDB.
 
         Raises:
-            std::out_of_range: if the distribution index is out of range.
+            IndexError: if the distribution index is out of range.
         """
 
     def groundstates(self) -> list[mnt.pyfiction.sidb.charge_distribution]:
