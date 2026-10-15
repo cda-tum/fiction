@@ -588,11 +588,16 @@ void register_gate_layout(nb::module_& m, const std::string& topology)
             "Returns a string representation of the layout.", nb::call_guard<nb::gil_scoped_release>())
 
         .def("assign_synchronization_element", &GateLyt::assign_synchronization_element, nb::arg("coordinate"),
-             nb::arg("delay"), DOC(fiction_layouts_gate_layout_assign_synchronization_element))
+             nb::arg("delay"),
+             parameter_doc(DOC(fiction_layouts_gate_layout_assign_synchronization_element),
+                           {{"cz", "coordinate"}, {"se", "delay"}})
+                 .c_str())
         .def("is_synchronization_element", &GateLyt::is_synchronization_element, nb::arg("coordinate"),
-             DOC(fiction_layouts_gate_layout_is_synchronization_element))
+             parameter_doc(DOC(fiction_layouts_gate_layout_is_synchronization_element), {{"cz", "coordinate"}})
+                 .c_str())
         .def("get_synchronization_element", &GateLyt::get_synchronization_element, nb::arg("coordinate"),
-             DOC(fiction_layouts_gate_layout_get_synchronization_element))
+             parameter_doc(DOC(fiction_layouts_gate_layout_get_synchronization_element), {{"cz", "coordinate"}})
+                 .c_str())
         .def("num_se", &GateLyt::num_se, DOC(fiction_layouts_gate_layout_num_se));
 }
 
