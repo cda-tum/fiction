@@ -19,6 +19,8 @@ from typing import TYPE_CHECKING, NoReturn
 from .errors import CommandError, HelpRequested
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from _typeshed import SupportsWrite
 
 
@@ -296,3 +298,29 @@ def probability(value: str) -> float:
         msg = "must be in (0, 1]"
         raise argparse.ArgumentTypeError(msg)
     return result
+
+
+def existing_file(path: Path, suffixes: tuple[str, ...]) -> Path:
+    """Check that a path is a readable file of an accepted format.
+
+    Args:
+        path: The path the user gave.
+        suffixes: The suffixes the reader accepts.
+
+    Returns:
+        The path itself.
+
+    Raises:
+        CommandError: The path is missing, a directory, or of another format.
+    """
+    if path.is_dir():
+        msg = f"'{path}' is a directory; give one file to read"
+        raise CommandError(msg)
+    if not path.is_file():
+        msg = f"no such file: '{path}'"
+        raise CommandError(msg)
+    if suffixes and path.suffix.lower() not in suffixes:
+        accepted = " or ".join(suffixes)
+        msg = f"'{path.suffix}' is not {accepted}; use 'read' to choose the reader by suffix"
+        raise CommandError(msg)
+    return path

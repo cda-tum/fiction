@@ -16,14 +16,12 @@ from typing import TYPE_CHECKING
 
 from mnt.pyfiction.sidb.io import read_sqd_layout
 
-from .cli.commands.io._common import _existing_file
-from .cli.commands.simulation.opdom import domain_arguments, run_domain
 from .cli.errors import HelpRequested
+from .cli.opdom import domain_arguments, run_domain
 from .cli.opdom_plotting import validate_outputs
-from .cli.parsing import Parser
-from .cli.session import Session
+from .cli.output import CommandOutput
+from .cli.parsing import Parser, existing_file
 from .cli.statistics import json_value
-from .cli.stores import CellEntry
 
 if TYPE_CHECKING:
     import argparse
@@ -51,7 +49,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--log", type=Path, metavar="FILE", help="write JSON statistics")
     parser.add_argument("--quiet", action="store_true", help="suppress progress and notices; retain results and errors")
     domain_arguments(parser, require_spec=True)
-    session = Session()
+    session = CommandOutput()
     started = time.perf_counter()
     entry: dict[str, object] = {"command": "opdom", "args": {}, "status": "error"}
     status = 0
@@ -73,7 +71,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     return status or int(session.close_failed)
 
 
-def _configure_session(session: Session, args: argparse.Namespace, entry: dict[str, object]) -> None:
+def _configure_session(session: CommandOutput, args: argparse.Namespace, entry: dict[str, object]) -> None:
     """Configure output and logging for one invocation.
 
     Args:
@@ -90,20 +88,20 @@ def _configure_session(session: Session, args: argparse.Namespace, entry: dict[s
     entry["args"] = json_value(vars(args))
 
 
-def _run(session: Session, args: argparse.Namespace) -> dict[str, object] | None:
+def _run(session: CommandOutput, args: argparse.Namespace) -> dict[str, object] | None:
     """Load one SQD layout and run shared domain orchestration.
 
     Args:
-        session: Supplies the stores and progress display.
+        session: Supplies the progress display and console output.
         args: SQD input and computation options.
 
     Returns:
         Statistics and output paths for the log.
     """
-    _existing_file(args.input, (".sqd",))
-    session.cell_layouts.add(CellEntry(read_sqd_layout(str(args.input), args.input.stem)))
+    existing_file(args.input, (".sqd",))
+    layout = read_sqd_layout(str(args.input), args.input.stem)
     with session.progress("opdom"):
-        return run_domain(session, args)
+        return run_domain(layout, session, args)
 
 
 if __name__ == "__main__":

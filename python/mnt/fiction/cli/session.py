@@ -10,201 +10,37 @@
 
 from __future__ import annotations
 
-import contextlib
 import datetime
-import json
+import importlib
 import os
 import shutil
 import tempfile
-import threading
 import time
-from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from rich.cells import cell_len
-from rich.console import Console, RenderableType
-from rich.markup import escape
-from rich.progress import (
-    BarColumn,
-    Progress,
-    ProgressColumn,
-    SpinnerColumn,
-    Task,
-    TextColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
-)
-from rich.table import Column
 from rich.text import Text
 
 from mnt.pyfiction.networks import technology_network
 from mnt.pyfiction.synthesis import convert_network
 
 from .errors import CommandError, HelpRequested
+from .output import CommandOutput
 from .parsing import tokenize
 from .registry import REGISTRY
 from .statistics import json_value
 from .stores import CellEntry, GateLayout, Network, Store, describe, element_name, one_line
 
 if TYPE_CHECKING:
+    from rich.console import Console
+
     from mnt.pyfiction.synthesis import dynamic_truth_table
 
     from .registry import Result
 
-STYLES = {
-    "result": "dim cyan",
-    "note": "dim",
-}
-"""The colors the shell sets command output apart from the prompt with; muted, so a long run of
-command output does not read as a wall of color."""
 
-ProgressCallback = Callable[[str, int, int], None]
-"""What an algorithm's ``on_progress`` parameter accepts: the task name, the completed count, and the total."""
-
-WorkerProgressCallback = Callable[[int, int, str, int, int, bool], None]
-"""A worker ID, worker count, description, completed work, total, and active state."""
-
-
-def ignore_worker_progress(worker: int, workers: int, description: str, done: int, total: int, active: bool) -> None:  # ruff: ignore[boolean-type-hint-positional-argument] -- native callbacks pass positional arguments
-    """Discard worker activity when the session has no progress display."""
-
-
-def ignore_progress(task: str, done: int, total: int) -> None:
-    """Discard a progress report; the callback in effect while no command runs.
-
-    Args:
-        task: The name of the task the algorithm works on.
-        done: The number of completed work items.
-        total: The number of work items, or ``0`` if unknown.
-    """
-
-
-class TaskBarColumn(BarColumn):
-    """Render the bar of a task, and nothing for a spinner."""
-
-    def __call__(self, task: Task) -> RenderableType:
-        """Render the bar of a task.
-
-        Args:
-            task: The task to render.
-
-        Returns:
-            The bar, or an empty text for the spinner.
-        """
-        if task.fields.get("spinner"):
-            return Text("")
-        return super().__call__(task)
-
-
-class CountColumn(ProgressColumn):
-    """Render ``done/total`` of a task, only ``done`` while the total is unknown, and nothing for a spinner."""
-
-    def render(self, task: Task) -> Text:  # ruff: ignore[no-self-use] -- rich calls the column's render method
-        """Render the count of a task.
-
-        Args:
-            task: The task to render.
-
-        Returns:
-            The count, right-aligned.
-        """
-        if task.fields.get("spinner"):
-            return Text("")
-        completed = int(task.completed)
-        if task.total is None:
-            return Text(f"{completed}", style="progress.download")
-        return Text(f"{completed}/{int(task.total)}", style="progress.download")
-
-
-class RemainingColumn(TimeRemainingColumn):
-    """Render the time remaining of a task, and nothing while its total is unknown."""
-
-    def render(self, task: Task) -> Text:
-        """Render the time remaining of a task.
-
-        Args:
-            task: The task to render.
-
-        Returns:
-            The estimate, or an empty text without a total.
-        """
-        if task.total is None:
-            return Text("")
-        return super().render(task)
-
-
-class CommandProgress:
-    """Render aggregate counts and candidate status on one command row."""
-
-    def __init__(self, display: Progress, label: str) -> None:
-        """Start the command with an indeterminate spinner."""
-        self.display = display
-        self.label = label
-        self.bar = display.add_task(label, total=None, spinner=True)
-        self.phase = ""
-        self.completed = 0
-        self.total = 0
-        self.candidates: dict[int, str] = {}
-        self.best_solution = ""
-        self.best_cost = float("inf")
-        self.lock = threading.Lock()
-
-    def description(self) -> str:
-        """Return the current phase and the latest active candidate or best accepted solution."""
-        if self.label == "exact":
-            candidate = next(reversed(self.candidates.values()), "")
-            return f"exact: {candidate}" if candidate else "exact"
-        if self.label == "gold":
-            return "gold: expansions" + self.best_solution
-        return self.phase or self.label
-
-    def report(self, phase: str, done: int, total: int) -> None:
-        """Replace phase counts with aggregate algorithm reports, never worker-local counts."""
-        with self.lock:
-            if phase != self.phase or done < self.completed or (total == 0 and self.total != 0):
-                # Rich preserves the old total when reset receives None; replace the single row instead.
-                self.display.remove_task(self.bar)
-                self.bar = self.display.add_task(self.label, total=total or None)
-            self.phase = phase if done or total else ""
-            self.completed, self.total = done, total
-            self.display.update(
-                self.bar,
-                description=escape(self.description()),
-                completed=done,
-                total=total or None,
-                spinner=not (done or total),
-                refresh=True,
-            )
-
-    def report_worker(
-        self,
-        worker: int,
-        _workers: int,
-        description: str,
-        _done: int,
-        _total: int,
-        active: bool,  # ruff: ignore[boolean-type-hint-positional-argument] -- native callback arguments are positional
-    ) -> None:
-        """Use worker reports only for search status; counts come from the aggregate callback."""
-        with self.lock:
-            if self.label == "exact":
-                self.candidates.pop(worker, None)
-                if active:
-                    self.candidates[worker] = description.partition(": ")[2]
-            elif self.label == "gold":
-                _, _, best = description.partition("; best ")
-                if best:
-                    cost = int(best.rsplit(", cost ", 1)[1])
-                    if cost < self.best_cost:
-                        self.best_cost = cost
-                        self.best_solution = "; best " + best
-            else:
-                return
-            self.display.update(self.bar, description=escape(self.description()), spinner=False, refresh=True)
-
-
-class Session:
+class Session(CommandOutput):
     """The state of one shell session.
 
     Attributes:
@@ -234,20 +70,15 @@ class Session:
             errors: The console error messages go to; defaults to standard error, so that
                 ``fiction -c '...' > out`` still shows what went wrong.
         """
-        self.console = console if console is not None else Console(highlight=False)
-        self.errors = errors if errors is not None else Console(highlight=False, stderr=True)
-        self.quiet = False
+        super().__init__(console, log_path, errors)
+        # Register shell commands only when a shell session is requested.
+        importlib.import_module(".commands", __package__)
         self.truth_tables: Store[dynamic_truth_table] = Store("truth table")
         self.networks: Store[Network] = Store("network")
         self.gate_layouts: Store[GateLayout] = Store("gate-level layout")
         self.cell_layouts: Store[CellEntry] = Store("cell-level layout")
         self.running = True
-        self.report_progress: ProgressCallback = ignore_progress
-        self.report_worker_progress: WorkerProgressCallback = ignore_worker_progress
-        self.log_path = log_path
-        self.log: list[dict[str, Any]] = []
         self._source: tuple[str, int] | None = None
-        self.close_failed = False
         self._temp_dir: Path | None = None
         self._temp_index = 0
         self._to_delete: list[Path] = []
@@ -397,22 +228,14 @@ class Session:
             self._source = previous_source
 
     def close(self) -> None:
-        """Write the statistics log and remove the session's temporary files."""
-        try:
-            if self.log_path is not None:
-                with self.log_path.open("w", encoding="utf-8") as file:
-                    json.dump(json_value(self.log), file, indent=2, allow_nan=False)
-                    file.write("\n")
-        except OSError as error:
-            self.close_failed = True
-            self.error(f"cannot write log '{self.log_path}': {error}")
-        finally:
-            for path in self._to_delete:
-                self._remove_viewer_file(path)
-            self._to_delete.clear()
-            if self._temp_dir is not None:
-                shutil.rmtree(self._temp_dir, ignore_errors=True)
-                self._temp_dir = None
+        """Write the log and remove this session's temporary files."""
+        super().close()
+        for path in self._to_delete:
+            self._remove_viewer_file(path)
+        self._to_delete.clear()
+        if self._temp_dir is not None:
+            shutil.rmtree(self._temp_dir, ignore_errors=True)
+            self._temp_dir = None
 
     def _remove_viewer_file(self, path: Path) -> None:
         """Attempt one cleanup without preventing cleanup of other files.
@@ -459,91 +282,10 @@ class Session:
             self._to_delete.append(path)
         return path
 
-    @contextlib.contextmanager
-    def progress(self, label: str) -> Generator[ProgressCallback, None, None]:
-        """Show one row for the command, with aggregate counts and search candidate status.
-
-        The display is transient. Quiet mode and nonterminal output disable the display and
-        discard the reports. While the context is open,
-        :attr:`report_progress` is the callback that feeds the row, so commands hand it to the
-        algorithms they run.
-
-        Args:
-            label: The name of the command, shown next to the spinner.
-
-        Yields:
-            The callback to hand to an ``on_progress`` parameter.
-        """
-        if self.quiet or not self.console.is_terminal:
-            # older rich versions print a newline when a disabled display stops, so start none at all
-            previous = self.report_progress
-            previous_worker = self.report_worker_progress
-            self.report_progress = ignore_progress
-            self.report_worker_progress = ignore_worker_progress
-            try:
-                yield ignore_progress
-            finally:
-                self.report_progress = previous
-                self.report_worker_progress = previous_worker
-            return
-        display = Progress(
-            SpinnerColumn(),
-            TextColumn(
-                "[progress.description]{task.description}", table_column=Column(no_wrap=True, overflow="ellipsis")
-            ),
-            TaskBarColumn(),
-            CountColumn(),
-            TimeElapsedColumn(),
-            RemainingColumn(),
-            console=self.console,
-            transient=True,
-        )
-        previous = self.report_progress
-        previous_worker = self.report_worker_progress
-        try:
-            with display:
-                reporter = CommandProgress(display, label)
-                self.report_progress = reporter.report
-                self.report_worker_progress = reporter.report_worker
-                yield self.report_progress
-        finally:
-            self.report_progress = previous
-            self.report_worker_progress = previous_worker
-
     def error(self, message: str) -> None:
-        """Print an error message.
-
-        Args:
-            message: The message; printed verbatim.
-        """
+        """Print an error with the current script location, when present."""
         context = f"{self._source[0]}:{self._source[1]}: " if self._source else ""
-        self.errors.print(f"[red]error:[/] {escape(context + message)}", highlight=False)
-
-    def info(self, message: str, style: str | None = None) -> None:
-        """Print an informational message, unless the session is quiet.
-
-        Args:
-            message: The message; printed verbatim.
-            style: A key of :data:`STYLES`, to set the message apart from the prompt.
-        """
-        if not self.quiet:
-            self.output(message, style=style)
-
-    def output(self, message: str, style: str | None = None) -> None:
-        """Print an explicitly requested result, including in quiet mode.
-
-        A drawing that carries its own ANSI colors keeps them; ``style`` applies to plain text only,
-        so that a colored layout picture is never repainted in one color.
-
-        Args:
-            message: Plain text or a native ANSI drawing.
-            style: A key of :data:`STYLES`, or ``None`` for the terminal's default.
-        """
-        text = Text.from_ansi(message)
-        if style is not None and "\x1b" not in message:
-            self.console.print(text, highlight=False, style=STYLES[style])
-        else:
-            self.console.print(text, highlight=False)
+        super().error(context + message)
 
     def status_line(self) -> str:
         """Return the store counts, the active element, and its name, within the terminal width.

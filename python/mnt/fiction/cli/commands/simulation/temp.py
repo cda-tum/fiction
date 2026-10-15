@@ -29,7 +29,9 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import ENGINES, _active_sidb_layout, _apply_physical, _engine_argument, _physical_arguments
+from mnt.fiction.cli.simulation import ENGINES, apply_physical, engine_argument, physical_arguments
+
+from ._common import _active_sidb_layout
 
 
 def _temp_arguments(parser: Parser) -> None:
@@ -41,8 +43,8 @@ def _temp_arguments(parser: Parser) -> None:
     parser.add_argument(
         "-g", "--gate-based", action="store_true", help="judge stability against the active truth table"
     )
-    _physical_arguments(parser, base=True)
-    _engine_argument(parser)
+    physical_arguments(parser, base=True)
+    engine_argument(parser)
 
 
 @command(
@@ -67,7 +69,7 @@ def temp(session: Session, args: argparse.Namespace) -> Result:
     params.confidence_level = args.confidence
     params.max_temperature = args.max_temperature
     params.operational_params.sim_engine = ENGINES[args.engine]
-    parameters = _apply_physical(params.operational_params.simulation_parameters, args)
+    parameters = apply_physical(params.operational_params.simulation_parameters, args)
     stats = critical_temperature_stats()
     if args.gate_based:
         if layout.num_pis() == 0 or layout.num_pos() == 0:

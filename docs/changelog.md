@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
+  - Dedicated operational-domain commands now run without loading the interactive shell or its stores.
   - Both `opdom` entry points accept `--algorithm` for all reconstruction methods, with `--samples` for
     random sampling, flood fill, and contour tracing. `--sketch` adds filter-only analysis to any method.
   - Added `fiction-opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or

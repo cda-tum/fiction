@@ -14,8 +14,40 @@ in-process, which is how the test suite drives it.
 
 from __future__ import annotations
 
-from .app import main
+from typing import TYPE_CHECKING
+
 from .errors import CommandError
-from .session import Session
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from .session import Session
 
 __all__ = ["CommandError", "Session", "main"]
+
+
+def main(argv: Sequence[str] | None = None) -> int:  # ruff: ignore[non-empty-init-module] -- retain lazy public entry points
+    """Load and run the command-line entry point.
+
+    Returns:
+        The command's exit status.
+    """
+    from .app import main as run  # ruff: ignore[import-outside-top-level] -- load shell only on invocation
+
+    return run(argv)
+
+
+def __getattr__(name: str) -> type[Session]:
+    """Retain the Session import without loading shell state for other consumers.
+
+    Returns:
+        The shell session class.
+
+    Raises:
+        AttributeError: The requested export does not exist.
+    """
+    if name == "Session":
+        from .session import Session  # ruff: ignore[import-outside-top-level] -- compatibility export
+
+        return Session
+    raise AttributeError(name)

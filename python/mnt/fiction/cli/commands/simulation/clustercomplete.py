@@ -22,13 +22,15 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import _active_sidb_layout, _apply_physical, _physical_arguments, _store_result
+from mnt.fiction.cli.simulation import apply_physical, physical_arguments
+
+from ._common import _active_sidb_layout, _store_result
 
 
 def _clustercomplete_arguments(parser: Parser) -> None:
     # base 3 is what ClusterComplete is for, and what the C++ shell defaulted to
     """Add the command's arguments to the parser."""
-    _physical_arguments(parser, base=True, base_default=3, potential=True)
+    physical_arguments(parser, base=True, base_default=3, potential=True)
     parser.add_argument("-w", "--witness-limit", type=integer, default=6, help="witness partitioning limit")
     parser.add_argument("-o", "--overlap-limit", type=integer, default=6, help="overlapping witnesses limit")
     parser.add_argument("-r", "--report-stats", action="store_true", help="report ground state space statistics")
@@ -54,7 +56,7 @@ def clustercomplete_command(session: Session, args: argparse.Namespace) -> Resul
     params = engines.clustercomplete_params()
     params.on_progress = session.report_progress
     params.on_worker_progress = session.report_worker_progress
-    parameters = _apply_physical(params.simulation_parameters, args)
+    parameters = apply_physical(params.simulation_parameters, args)
     params.global_potential = args.global_potential
     params.validity_witness_partitioning_max_cluster_size_gss = args.witness_limit
     params.num_overlapping_witnesses_limit_gss = args.overlap_limit

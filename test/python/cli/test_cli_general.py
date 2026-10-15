@@ -220,7 +220,7 @@ def test_show_uses_the_shell_association_on_windows(
     The branch is forced here rather than skipped off Windows, so that every run covers it.
     """
     opened: list[Path] = []
-    monkeypatch.setattr("mnt.fiction.cli.drawing.sys", SimpleNamespace(platform="win32"))
+    monkeypatch.setattr("mnt.fiction.cli.output.sys", SimpleNamespace(platform="win32"))
     monkeypatch.setattr("os.startfile", opened.append, raising=False)
     started: list[list[str]] = []
     monkeypatch.setattr("mnt.fiction.cli.drawing.subprocess.Popen", lambda command, **_: started.append(command))

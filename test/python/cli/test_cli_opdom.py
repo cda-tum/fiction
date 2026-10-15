@@ -207,6 +207,43 @@ assert "plotly" not in sys.modules
     assert len(csv.read_text(encoding="utf-8").splitlines()) == 5
 
 
+def test_opdom_without_shell(resource: Callable[[str], str], tmp_path: Path) -> None:
+    """Dedicated help and computation do not require the interactive shell or its stores."""
+    script = """
+import importlib.abc
+import sys
+class NoShell(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == "prompt_toolkit" or fullname in {
+            "mnt.fiction.cli.commands", "mnt.fiction.cli.session"
+        }:
+            raise ModuleNotFoundError(fullname)
+sys.meta_path.insert(0, NoShell())
+from mnt.fiction.opdom import main
+assert main(["--help"]) == 0
+assert main(sys.argv[1:]) == 0
+"""
+    csv = tmp_path / "domain.csv"
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- isolated import boundary
+        [
+            sys.executable,
+            "-c",
+            script,
+            resource("hex_21_inputsdbp_xor_v1.sqd"),
+            "--gate",
+            "xor",
+            "--csv",
+            str(csv),
+            *SMALL_SWEEP,
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert len(csv.read_text(encoding="utf-8").splitlines()) == 5
+
+
 @pytest.mark.parametrize("entry_point", ["shell", "standalone"])
 @pytest.mark.parametrize(
     "method",

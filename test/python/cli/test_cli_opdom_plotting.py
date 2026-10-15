@@ -144,7 +144,7 @@ def test_entry_points_share_results_and_compute_once(
     xor_gate: Shell, resource: Callable[[str], str], tmp_path: Path
 ) -> None:
     """CSV and several plots share one computation and agree with the shell."""
-    command = importlib.import_module("mnt.fiction.cli.commands.simulation.opdom")
+    command = importlib.import_module("mnt.fiction.cli.opdom")
     main = importlib.import_module("mnt.fiction.opdom").main
     sweep = ["--x-min", "5.6", "--x-max", "5.7", "--x-step", "0.1", "--y-min", "5", "--y-max", "5"]
     shell_csv = tmp_path / "shell.csv"
@@ -211,7 +211,7 @@ def test_viewer_failure_preserves_exports(
         msg = "viewer unavailable"
         raise failure(msg)
 
-    monkeypatch.setattr("mnt.fiction.cli.drawing.open_viewer", viewer)
+    monkeypatch.setattr("mnt.fiction.cli.opdom.open_viewer", viewer)
     xor_gate.ok(f'opdom "{csv}" --plot "{png}" --plot "{html}" --show --x-min 5.6 --x-max 5.6 --y-min 5 --y-max 5')
     assert csv.exists()
     assert png.read_bytes().startswith(b"\x89PNG")
