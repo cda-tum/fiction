@@ -572,7 +572,7 @@ def physical_population_stability(
         charge distribution.
 
     Raises:
-        std::invalid_argument: If relative permittivity is non-positive or
+        ValueError: If relative permittivity is non-positive or
                                non-finite, screening distance is non-
                                positive or NaN, or precision exceeds the
                                decimal precision of `double`.

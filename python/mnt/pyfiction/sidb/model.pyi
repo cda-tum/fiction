@@ -386,7 +386,7 @@ def potential_to_distance_conversion(potential: float, params: sidb_simulation_p
         `double` distance can represent the inverse.
 
     Raises:
-        std::invalid_argument: If potential is negative or NaN, relative
+        ValueError: If potential is negative or NaN, relative
                                permittivity is non-positive or non-finite,
                                screening distance is non-positive or NaN,
                                or precision exceeds the decimal precision
