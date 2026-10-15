@@ -384,9 +384,9 @@ using edge_path = std::vector<mockturtle::edge<Ntk>>;
  *
  * Each node without predecessors is considered a terminal and a path is defined as a sequence of edges.
  *
- * @param n Node whose paths are desired.
- * @return A vector of all possible edge paths leading from terminals to `v`.
  * @param ntk Network containing the node.
+ * @param n Node whose paths are desired.
+ * @return A vector of all possible edge paths leading from terminals to `n`.
  */
 template <typename Ntk>
 std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept

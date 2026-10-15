@@ -103,7 +103,7 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a}, 2);
     }
 
-    /** @brief Creates a NOT gate with the supplied signals. */
+    /** @brief Creates a NOT gate with the supplied signal. */
     signal create_not(const signal& a)
     {
         return is_constant(a) ? get_constant(!constant_value(a)) : _create_node({a}, 3);
@@ -113,7 +113,7 @@ class technology_network : public mockturtle::klut_network
 
 #pragma region Create binary functions
 
-    /** @brief Creates a AND gate with the supplied signals. */
+    /** @brief Creates an AND gate with the supplied signals. */
     signal create_and(signal a, signal b)
     {
         return _create_node({a, b}, 4);
@@ -125,7 +125,7 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a, b}, 5);
     }
 
-    /** @brief Creates a OR gate with the supplied signals. */
+    /** @brief Creates an OR gate with the supplied signals. */
     signal create_or(signal a, signal b)
     {
         return _create_node({a, b}, 6);
@@ -137,7 +137,7 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a, b}, 7);
     }
 
-    /** @brief Creates a LT gate with the supplied signals. */
+    /** @brief Creates an LT gate with the supplied signals. */
     signal create_lt(signal a, signal b)
     {
         return _create_node({a, b}, 8);
@@ -155,19 +155,19 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a, b}, 10);
     }
 
-    /** @brief Creates a LE gate with the supplied signals. */
+    /** @brief Creates an LE gate with the supplied signals. */
     signal create_le(signal a, signal b)
     {
         return _create_node({a, b}, 11);
     }
 
-    /** @brief Creates a XOR gate with the supplied signals. */
+    /** @brief Creates an XOR gate with the supplied signals. */
     signal create_xor(signal a, signal b)
     {
         return _create_node({a, b}, 12);
     }
 
-    /** @brief Creates a XNOR gate with the supplied signals. */
+    /** @brief Creates an XNOR gate with the supplied signals. */
     signal create_xnor(signal a, signal b)
     {
         return _create_node({a, b}, 13);
@@ -182,13 +182,13 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a, b, c}, 14);
     }
 
-    /** @brief Creates a ITE gate with the supplied signals. */
+    /** @brief Creates an ITE gate with the supplied signals. */
     signal create_ite(signal a, signal b, signal c)
     {
         return _create_node({a, b, c}, 16);
     }
 
-    /** @brief Creates a XOR3 gate with the supplied signals. */
+    /** @brief Creates an XOR3 gate with the supplied signals. */
     signal create_xor3(signal a, signal b, signal c)
     {
         return _create_node({a, b, c}, 18);

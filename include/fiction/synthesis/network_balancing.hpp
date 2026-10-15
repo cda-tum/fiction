@@ -75,7 +75,7 @@ class network_balancing_impl
             ps{std::move(p)}
     {}
 
-    /** @brief Runs the network balancing algorithm. */
+    /** @brief Returns a network with paths balanced by inserted buffers. */
     NtkDest run()
     {
         // insert num buffers after child in balance_ntk

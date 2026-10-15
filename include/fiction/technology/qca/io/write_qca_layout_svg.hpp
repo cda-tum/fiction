@@ -320,7 +320,7 @@ class write_qca_layout_svg_impl
             ps{std::move(p)}
     {}
 
-    /** @brief Runs the write qca layout svg algorithm. */
+    /** @brief Writes an SVG drawing of the QCA layout to the output stream. */
     void run()
     {
         if (lyt.get_tile_size_x() == 1 && lyt.get_tile_size_y() == 1)

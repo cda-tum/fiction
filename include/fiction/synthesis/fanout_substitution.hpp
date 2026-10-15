@@ -130,7 +130,7 @@ class fanout_substitution_impl
         }
     }
 
-    /** @brief Runs the fanout substitution algorithm. */
+    /** @brief Returns a network with fanouts replaced by fanout trees. */
     NtkDest run()
     {
         // initialize a network copy

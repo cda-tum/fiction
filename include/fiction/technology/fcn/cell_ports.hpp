@@ -252,12 +252,11 @@ struct port_list
 namespace std
 {
 
-// hashing for port_position
-/** @brief Hash support for the specialized FCN type. */
+/** @brief Hashes `fiction::fcn::port_position` values. */
 template <>
 struct hash<fiction::fcn::port_position>
 {
-    /** @brief Returns a hash of the supplied value. */
+    /** @brief Hashes the horizontal and vertical port coordinates. */
     std::size_t operator()(const fiction::fcn::port_position& port) const noexcept
     {
         std::size_t h = port.x ^ port.y;
@@ -266,23 +265,21 @@ struct hash<fiction::fcn::port_position>
         return h;
     }
 };
-// hashing for port_direction
-/** @brief Hash support for the specialized FCN type. */
+/** @brief Hashes `fiction::fcn::port_direction` values. */
 template <>
 struct hash<fiction::fcn::port_direction>
 {
-    /** @brief Returns a hash of the supplied value. */
+    /** @brief Hashes the cardinal port direction. */
     std::size_t operator()(const fiction::fcn::port_direction& port) const noexcept
     {
         return std::hash<std::size_t>{}(static_cast<std::size_t>(port.dir));
     }
 };
-// hashing for port_list
-/** @brief Hash support for the specialized FCN type. */
+/** @brief Hashes `fiction::fcn::port_list` values. */
 template <typename PortType>
 struct hash<fiction::fcn::port_list<PortType>>
 {
-    /** @brief Returns a hash of the supplied value. */
+    /** @brief Hashes the input and output port sets. */
     std::size_t operator()(const fiction::fcn::port_list<PortType>& port_list) const noexcept
     {
         std::size_t h = 0;
@@ -296,8 +293,7 @@ struct hash<fiction::fcn::port_list<PortType>>
 
 namespace fmt
 {
-// make port_position compatible with fmt::format
-/** @brief Formatting support for the specialized FCN port type. */
+/** @brief Formats `fiction::fcn::port_position` values. */
 template <>
 struct formatter<fiction::fcn::port_position>
 {
@@ -315,8 +311,7 @@ struct formatter<fiction::fcn::port_position>
         return format_to(ctx.out(), runtime("({},{})"), p.x, p.y);
     }
 };
-// make port_direction compatible with fmt::format
-/** @brief Formatting support for the specialized FCN port type. */
+/** @brief Formats `fiction::fcn::port_direction` values. */
 template <>
 struct formatter<fiction::fcn::port_direction>
 {
@@ -384,8 +379,7 @@ struct formatter<fiction::fcn::port_direction>
         return format_to(ctx.out(), fmt::runtime(dir));
     }
 };
-// make port_list compatible with fmt::format
-/** @brief Formatting support for the specialized FCN port type. */
+/** @brief Formats `fiction::fcn::port_list` values. */
 template <typename PortType>
 struct formatter<fiction::fcn::port_list<PortType>>
 {

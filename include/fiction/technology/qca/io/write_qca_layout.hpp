@@ -202,7 +202,7 @@ class write_qca_layout_impl
             ps{std::move(p)}
     {}
 
-    /** @brief Runs the write qca layout algorithm. */
+    /** @brief Writes the QCA layout to the output stream in QCADesigner format. */
     void run()
     {
 

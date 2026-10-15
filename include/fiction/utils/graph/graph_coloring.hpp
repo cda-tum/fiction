@@ -724,7 +724,7 @@ class graph_coloring_impl
             pst{st}
     {}
 
-    /** @brief Runs the graph coloring algorithm. */
+    /** @brief Returns a vertex coloring using the selected coloring algorithm. */
     vertex_coloring<Graph, Color> run()
     {
         // measure runtime

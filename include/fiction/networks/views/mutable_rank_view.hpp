@@ -203,7 +203,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
     /**
      * Move constructor for `mutable_rank_view`.
-     *
      */
     mutable_rank_view(mutable_rank_view&&) noexcept = default;
 

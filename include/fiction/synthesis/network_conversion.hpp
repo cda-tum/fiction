@@ -49,7 +49,7 @@ class convert_network_impl<NtkDest, NtkSrc, true>
     /** @brief Stores the source network for conversion. */
     explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
 
-    /** @brief Runs the network conversion algorithm. */
+    /** @brief Returns a copy of the source network in the destination type. */
     NtkDest run()
     {
         return mockturtle::cleanup_dangling<NtkSrc, NtkDest>(ntk, false, false);
@@ -67,7 +67,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
     /** @brief Stores the source network for conversion. */
     explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
 
-    /** @brief Runs the network conversion algorithm. */
+    /** @brief Returns a copy of the source network in the destination type. */
     NtkDest run()
     {
         auto  init     = mockturtle::initialize_copy_network<NtkDest>(ntk);

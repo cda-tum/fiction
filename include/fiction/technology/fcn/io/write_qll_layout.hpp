@@ -126,7 +126,7 @@ class write_qll_layout_impl
             on_progress{std::move(callback)}
     {}
 
-    /** @brief Runs the write qll layout algorithm. */
+    /** @brief Writes the FCN layout to the output stream in QLL format. */
     void run()
     {
         if (std::is_same_v<Lyt, inml::layout> && !has_border_io_pins())

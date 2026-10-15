@@ -175,7 +175,7 @@ class write_mol_qca_layout_svg_impl
             ps{std::move(p)}
     {}
 
-    /** @brief Runs the write mol qca layout svg algorithm. */
+    /** @brief Writes an SVG drawing of the molecular QCA layout to the output stream. */
     void run()
     {
         generate_cell_based_svg();

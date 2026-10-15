@@ -121,7 +121,7 @@ class write_qcc_layout_impl
             ps{std::move(p)}
     {}
 
-    /** @brief Runs the write qcc layout algorithm. */
+    /** @brief Writes the iNML layout to the output stream in QCC format. */
     void run()
     {
         if (!has_border_io_pins())

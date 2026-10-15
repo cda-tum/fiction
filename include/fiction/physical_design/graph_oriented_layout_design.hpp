@@ -1227,8 +1227,8 @@ class graph_oriented_layout_design_impl
      * @param dest The destination tile.
      * @param new_gate_loc Enum indicating if the src or dest have to host a new gate and therefore have to be empty.
      * Defaults to `new_gate_location::NONE`.
-     * @return A path from `src` to `dest` if one exists.
      * @param check_straight_inverter Whether to check for a straight inverter at the destination.
+     * @return A path from `src` to `dest` if one exists.
      */
     [[nodiscard]] layout_coordinate_path check_path(const Lyt&                                       layout,
                                                     const fiction::layouts::layout_base::coordinate& src,

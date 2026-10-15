@@ -254,7 +254,7 @@ class exact_impl
                             static_cast<uint64_t>(lower_bound)};
     }
 
-    /** @brief Runs the exact algorithm. */
+    /** @brief Returns a gate-level layout satisfying the exact design constraints, if found. */
     std::optional<Lyt> run()
     {
         if (ps.num_threads > 1)
@@ -915,8 +915,8 @@ class exact_impl
          * Returns an ncl variable from the stored context representing node n's (pi) clock number.
          *
          * @param n Node to be considered.
-         * @return ncl variable from ctx.
          * @param clk Clock phase of the node.
+         * @return ncl variable from ctx.
          */
         [[nodiscard]] z3::expr get_ncl(const mockturtle::node<topology_ntk_t>& n, const unsigned clk)
         {
@@ -926,8 +926,8 @@ class exact_impl
          * Returns a tcl variable from the stored context representing tile t's clock number.
          *
          * @param t Tile to be considered.
-         * @return tcl variable from ctx.
          * @param clk Clock phase of the tile.
+         * @return tcl variable from ctx.
          */
         [[nodiscard]] z3::expr get_tcl(const typename Lyt::tile& t, const unsigned clk)
         {

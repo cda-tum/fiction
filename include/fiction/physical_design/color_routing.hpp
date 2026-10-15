@@ -100,7 +100,7 @@ class color_routing_impl
             pst{st}
     {}
 
-    /** @brief Runs the color routing algorithm. */
+    /** @brief Routes objectives, allowing incomplete routing when `conduct_partial_routing` is set. */
     bool run()
     {
         // measure runtime

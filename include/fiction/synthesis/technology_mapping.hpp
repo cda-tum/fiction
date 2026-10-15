@@ -313,7 +313,7 @@ class technology_mapping_impl
             stats{st}
     {}
 
-    /** @brief Runs the technology mapping algorithm. */
+    /** @brief Returns the source network mapped to the supplied technology library. */
     [[nodiscard]] tec_nt run() const
     {
         // Validate that the library contains required gates for the base network type
