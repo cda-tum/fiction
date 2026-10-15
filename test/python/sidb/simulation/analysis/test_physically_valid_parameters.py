@@ -11,7 +11,7 @@ from __future__ import annotations
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native deadlock regression
 import sys
 import textwrap
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any
 
 import pytest
 
@@ -24,9 +24,6 @@ from mnt.pyfiction.sidb.simulation.logic import (
     operational_condition,
     parameter_point,
 )
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 
 def test_one_sidb_100_lattice() -> None:
@@ -76,7 +73,8 @@ def test_physical_validity_rejects_gate_options(name: str, value: object) -> Non
     """Physical-validity sweeps expose physical and sweep options without gate detection."""
     layout = sidb_layout()
     with pytest.raises(TypeError):
-        cast("Callable[..., Any]", physically_valid_parameters)(layout, charge_distribution(layout), **{name: value})
+        options: dict[str, Any] = {name: value}
+        physically_valid_parameters(layout, charge_distribution(layout), **options)
 
 
 @pytest.mark.skipif(not hasattr(sidb_simulation_engine, "CLUSTERCOMPLETE"), reason="ALGLIB is not available")
