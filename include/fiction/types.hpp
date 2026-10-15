@@ -44,7 +44,6 @@ namespace fiction
 using tt     = kitty::dynamic_truth_table;
 using tt_ptr = std::shared_ptr<tt>;
 
-// using truth_table_t = std:variant<tt_ptr>;
 using truth_table_t = tt_ptr;
 
 /**
