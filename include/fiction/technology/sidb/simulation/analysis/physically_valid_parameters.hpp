@@ -20,6 +20,7 @@
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/domain.hpp"
+#include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
 
 #include <cstdint>
