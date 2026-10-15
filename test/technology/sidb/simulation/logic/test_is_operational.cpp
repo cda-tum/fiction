@@ -973,4 +973,20 @@ TEST_CASE("An empty simulation result cannot establish an operational pattern", 
                                                                         input_wires, output_wires, layout{}};
 
     CHECK_FALSE(sidb::simulation::logic::detail::operational_patterns_of(implementation, 4).contains(1));
+    CHECK(is_operational(layouts, spec, params, input_wires, output_wires).first ==
+          operational_status::NON_OPERATIONAL);
+}
+
+TEST_CASE("Operational QuickSim simulations reject base three", "[is-operational][quicksim-base]")
+{
+    const auto                  lyt          = blueprints::siqad_and_gate();
+    const auto                  input_wires  = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    const auto                  output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    const auto                  layouts      = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+    const std::vector<tt>       spec{create_and_tt()};
+    const is_operational_params params{.sim_params = simulation_parameters{3, -0.28}, .sim_engine = engine::QUICKSIM};
+
+    CHECK_THROWS_AS(is_operational(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(operational_input_patterns(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(is_operational(layouts, spec, params, input_wires, output_wires), std::invalid_argument);
 }

@@ -276,3 +276,23 @@ def test_quicksim_rejects_charged_defects(
             sim_engine=sidb_simulation_engine.QUICKSIM,
             mu_minus=-0.28,
         )
+
+
+def test_quicksim_rejects_base_three(
+    and_gate_with_bdl_wires: tuple[sidb_layout, list[bdl_wire], list[bdl_wire]],
+) -> None:
+    lyt, input_wires, output_wires = and_gate_with_bdl_wires
+    layouts = generate_bdl_input_pattern_layouts(lyt, input_wires)
+    for check in (is_operational, operational_input_patterns):
+        with pytest.raises(ValueError, match=r"QuickSim.*base"):
+            check(lyt, [create_and_tt()], sim_engine=sidb_simulation_engine.QUICKSIM, base=3, mu_minus=-0.28)
+    with pytest.raises(ValueError, match=r"QuickSim.*base"):
+        is_operational(
+            layouts,
+            [create_and_tt()],
+            input_wires,
+            output_wires,
+            sim_engine=sidb_simulation_engine.QUICKSIM,
+            base=3,
+            mu_minus=-0.28,
+        )

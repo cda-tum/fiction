@@ -961,7 +961,10 @@ class is_operational_impl
 #endif  // FICTION_ALGLIB_ENABLED
         if (parameters.sim_engine == engine::QUICKSIM)
         {
-            assert(parameters.sim_params.base == 2 && "QuickSim does not support base-3 simulation");
+            if (parameters.sim_params.base != 2)
+            {
+                throw std::invalid_argument("QuickSim does not support base-3 operational simulation");
+            }
 
             const engines::quicksim_params qs_params{.sim_params      = parameters.sim_params,
                                                      .iteration_steps = 500,
@@ -1220,14 +1223,15 @@ make_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec
  * input BDL pairs, the ground states are simulated with the configured engine, and the charge states of the output
  * BDL pairs are compared with the expected truth-table entries. If the layout carries logic dots, they form the
  * canvas of the pruning filters that run before any simulation whenever the parameters ask for filtering and reject
- * kinks.
+ * kinks. Charged defects with QuickSim are rejected before topology and filtering checks; a QuickSim simulation
+ * requires base 2.
  *
  * @param lyt The layout to check.
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
  * @return The operational status and the number of simulator invocations.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, or QuickSim encounters charged
- * defects.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::pair<operational_status, std::size_t>
 is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -1251,8 +1255,9 @@ is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>&
  * @param output_bdl_wire The output BDL wires of `lyt`.
  * @param canvas_lyt The canvas; defaults to the logic dots of `lyt`.
  * @return The operational status and the number of simulator invocations.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, or QuickSim encounters charged
- * defects.
+ * @throws std::invalid_argument if filtering with rejected kinks encounters a canvas site absent from the layout.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::pair<operational_status, std::size_t>
 is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -1278,8 +1283,9 @@ is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>&
  * @param output_bdl_wire The output BDL wires.
  * @param canvas_lyt The canvas; defaults to the logic dots of the first layout.
  * @return The operational status and the number of simulator invocations.
+ * @throws std::invalid_argument if filtering with rejected kinks encounters a canvas site absent from the layout.
  * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, the layout count does not
- * match the number of patterns, or QuickSim encounters charged defects.
+ * match the number of patterns, QuickSim encounters charged defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::pair<operational_status, std::size_t>
 is_operational(const std::vector<layout>& input_pattern_layouts, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -1308,8 +1314,8 @@ is_operational(const std::vector<layout>& input_pattern_layouts, const std::vect
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters.
  * @return The operational input patterns.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, or QuickSim encounters charged
- * defects.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::set<uint64_t> operational_input_patterns(const layout&                                  lyt,
                                                                    const std::vector<kitty::dynamic_truth_table>& spec,
@@ -1331,8 +1337,8 @@ is_operational(const std::vector<layout>& input_pattern_layouts, const std::vect
  * @param output_bdl_wire The output BDL wires of `lyt`.
  * @param canvas_lyt The canvas; defaults to none.
  * @return The operational input patterns.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, or QuickSim encounters charged
- * defects.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::set<uint64_t>
 operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -1360,8 +1366,8 @@ operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_t
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
  * @return The kink-induced non-operational input patterns.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, or QuickSim encounters charged
- * defects.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::set<uint64_t>
 kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -1386,8 +1392,8 @@ kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector
  * @param output_bdl_wire The output BDL wires of `lyt`.
  * @param canvas_lyt The canvas; defaults to none.
  * @return The kink-induced non-operational input patterns.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, or QuickSim encounters charged
- * defects.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::set<uint64_t> kink_induced_non_operational_input_patterns(
     const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const is_operational_params& params,
@@ -1418,8 +1424,8 @@ kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector
  * @param spec The Boolean function(s) it has to implement.
  * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
  * @return `true` if the layout is non-operational because of kinks.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, or QuickSim encounters charged
- * defects.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                  lyt,
                                                           const std::vector<kitty::dynamic_truth_table>& spec,
@@ -1447,8 +1453,9 @@ kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector
  * @param output_bdl_wire The output BDL wires of `lyt`.
  * @param canvas_lyt The canvas; defaults to none.
  * @return `true` if the layout is non-operational because of kinks.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, or QuickSim encounters charged
- * defects.
+ * @throws std::invalid_argument if filtering encounters a canvas site absent from the layout.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                  lyt,
                                                           const std::vector<kitty::dynamic_truth_table>& spec,
