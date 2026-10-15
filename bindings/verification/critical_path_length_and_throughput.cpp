@@ -49,7 +49,22 @@ void register_critical_path_length_and_throughput_impl(nb::module_& m)
             return {result.critical_path_length, result.throughput};
         },
         nb::arg("layout"), nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_verification_critical_path_length_and_throughput));
+        R"doc(Return the critical path length and throughput denominator of a gate-level layout.
+The critical path counts every placed object on the longest path to a primary
+output, including wires and terminals. Only output dependencies enter the
+analysis. Traversal follows declared input ports, independent of physical
+adjacency and clocking legality; zero-input functions act as path sources.
+The throughput is one result per returned denominator of full clock cycles.
+
+Args:
+    layout: Gate-level layout to analyze.
+
+Returns:
+    A tuple (critical_path_length, throughput_denominator).
+
+Raises:
+    ValueError: An output dependency has a disconnected input or a cycle.
+)doc");
 }
 
 }  // namespace detail
