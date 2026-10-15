@@ -68,8 +68,6 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 ```
 
-(utility-functions)=
-
 ## Utility Functions
 
 ::::{tab-set}

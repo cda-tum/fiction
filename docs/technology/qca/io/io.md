@@ -57,9 +57,7 @@
 
 ```
 
-```{doxygenclass} fiction::fcn::io::unsupported_cell_type_exception
-
-```
+Unsupported cell types raise {cpp:class}`fiction::fcn::io::unsupported_cell_type_exception`.
 
 :::
 

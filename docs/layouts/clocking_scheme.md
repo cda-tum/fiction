@@ -148,8 +148,6 @@ The {doc}`hexagonal_layout` page documents the `arrangement` type.
 
 ```
 
-(utility-functions)=
-
 ## Utility Functions
 
 ```{doxygenfunction} fiction::layouts::clocking::is_linear

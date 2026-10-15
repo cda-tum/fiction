@@ -504,5 +504,5 @@ assert table.to_hex() == create_maj_tt().to_hex() == "e8"
 
 **Header:** `fiction/synthesis/technology_mapping_library.hpp`
 
-```{doxygenfile} synthesis/technology_mapping_library.hpp
+```{doxygenfile} technology_mapping_library.hpp
 ```
