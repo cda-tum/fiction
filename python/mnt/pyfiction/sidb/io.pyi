@@ -27,7 +27,8 @@ def write_sqd_layout(
         on_progress: Receives completed dot and defect records.
 
     Raises:
-        RuntimeError: if the file cannot be opened.
+        RuntimeError: If creating, writing, closing, or replacing the
+                      output file fails.
     """
 
 class sqd_parsing_error(RuntimeError): ...

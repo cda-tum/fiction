@@ -2172,14 +2172,18 @@ class cartesian_gate_layout(cartesian_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. A sink is a destination input port driven by a source object's
-    output. One destination object may receive the same source at several
-    input indices; each connected input port is a distinct sink. Visitors
-    may edit coordinates, names, and capabilities. Object and terminal
-    visitors must not create or remove objects, change terminal order, or
-    replace the layout during traversal. Connection visitors must also
-    preserve the traversed input or sink connections, as specified on each
-    visitor.
+    state. Operations that require an existing object throw `ValueError`
+    if an identity does not identify a live object in this layout. This
+    includes removed objects, mismatched generations, and out-of-range
+    slots. `contains` tests whether an identity identifies a live object
+    without throwing. A sink is a destination input port driven by a
+    source object's output. One destination object may receive the same
+    source at several input indices; each connected input port is a
+    distinct sink. Visitors may edit coordinates, names, and capabilities.
+    Object and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -2713,7 +2717,8 @@ class cartesian_gate_layout(cartesian_layout):
             Coordinate of the object.
 
         Raises:
-            ValueError: If the identity is stale.
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -2733,8 +2738,11 @@ class cartesian_gate_layout(cartesian_layout):
 
     def remove(self, object: layout_object_id) -> None:
         """
-        Removes an object and disconnects all inputs and sinks. Stale
-        identities reject.
+        Removes an object and disconnects all inputs and sinks.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def move_object(
@@ -3160,14 +3168,18 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. A sink is a destination input port driven by a source object's
-    output. One destination object may receive the same source at several
-    input indices; each connected input port is a distinct sink. Visitors
-    may edit coordinates, names, and capabilities. Object and terminal
-    visitors must not create or remove objects, change terminal order, or
-    replace the layout during traversal. Connection visitors must also
-    preserve the traversed input or sink connections, as specified on each
-    visitor.
+    state. Operations that require an existing object throw `ValueError`
+    if an identity does not identify a live object in this layout. This
+    includes removed objects, mismatched generations, and out-of-range
+    slots. `contains` tests whether an identity identifies a live object
+    without throwing. A sink is a destination input port driven by a
+    source object's output. One destination object may receive the same
+    source at several input indices; each connected input port is a
+    distinct sink. Visitors may edit coordinates, names, and capabilities.
+    Object and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -3702,7 +3714,8 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
             Coordinate of the object.
 
         Raises:
-            ValueError: If the identity is stale.
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -3722,8 +3735,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     def remove(self, object: layout_object_id) -> None:
         """
-        Removes an object and disconnects all inputs and sinks. Stale
-        identities reject.
+        Removes an object and disconnects all inputs and sinks.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def move_object(
@@ -4149,14 +4165,18 @@ class hexagonal_gate_layout(hexagonal_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. A sink is a destination input port driven by a source object's
-    output. One destination object may receive the same source at several
-    input indices; each connected input port is a distinct sink. Visitors
-    may edit coordinates, names, and capabilities. Object and terminal
-    visitors must not create or remove objects, change terminal order, or
-    replace the layout during traversal. Connection visitors must also
-    preserve the traversed input or sink connections, as specified on each
-    visitor.
+    state. Operations that require an existing object throw `ValueError`
+    if an identity does not identify a live object in this layout. This
+    includes removed objects, mismatched generations, and out-of-range
+    slots. `contains` tests whether an identity identifies a live object
+    without throwing. A sink is a destination input port driven by a
+    source object's output. One destination object may receive the same
+    source at several input indices; each connected input port is a
+    distinct sink. Visitors may edit coordinates, names, and capabilities.
+    Object and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement.
@@ -4691,7 +4711,8 @@ class hexagonal_gate_layout(hexagonal_layout):
             Coordinate of the object.
 
         Raises:
-            ValueError: If the identity is stale.
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -4711,8 +4732,11 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     def remove(self, object: layout_object_id) -> None:
         """
-        Removes an object and disconnects all inputs and sinks. Stale
-        identities reject.
+        Removes an object and disconnects all inputs and sinks.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def move_object(

@@ -22,9 +22,10 @@ def write_sqd_sim_result(sim_result: mnt.pyfiction.sidb.simulation.sidb_simulati
         filename: File to write into.
 
     Raises:
+        RuntimeError: If creating, writing, closing, or replacing the
+                      output file fails.
         ValueError: if a distribution has different sites from the result
                     layout.
-        RuntimeError: if the file cannot be opened.
     """
 
 class sample_writing_mode(enum.Enum):
@@ -154,5 +155,6 @@ def write_location_and_ground_state(
         filename: File to write into.
 
     Raises:
-        RuntimeError: if the file cannot be opened.
+        RuntimeError: If creating, writing, closing, or replacing the
+                      output file fails.
     """

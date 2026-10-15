@@ -50,4 +50,6 @@ def write_qll_layout(
     Raises:
         ValueError: if an iNML layout has no I/O pins or they are not
                     routed to the layout's borders.
+        RuntimeError: If creating, writing, closing, or replacing the
+                      output file fails.
     """
