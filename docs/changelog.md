@@ -18,10 +18,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
     Gate mapping, network passes, design-rule checks, and layout writers report counted phases.
+  - Python: `operational_domain.to_numpy()` returns sampled coordinates and operational flags as NumPy arrays.
+    The method rejects mismatched dimensions and reports an installation hint when NumPy is missing.
 
 - CLI:
 
-  - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
+  - `fiction opdom` computes SQD operational domains without loading the shell, with statistics and 2D/3D
+    static or interactive plots. It requires `--csv` or `--plot`; plotting needs `mnt-pyfiction[plot]`.
+  - `fiction repl` explicitly selects the shell; bare `fiction`, shell flags, and piped input retain their behavior.
+    Leading `fiction --help` and `fiction -h` flags show route help even with additional options.
+  - Both `opdom` entry points accept `--algorithm` for all reconstruction methods, with `--samples` for
+    random sampling, flood fill, and contour tracing. Legacy flags remain accepted; `--sketch` adds filter-only analysis.
+  - Operational domain plots validate dependencies and colors before computation and preserve broken-package diagnostics.
+    Viewer failures retain exports and statistics.
+  - `uv tool install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
     completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
@@ -54,6 +64,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Added SiQAD OR gate operational domain plots for all four reconstruction methods.
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
@@ -268,6 +279,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Installation guides now use `uv` for CLI tools and Python environments.
   - Python layout docstrings use `extent` for the extent argument.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
@@ -666,6 +678,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
+  - Direct Python binding builds now request the stable-ABI component on CMake 3.26 and newer.
   - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - `pyfiction` built against such a Z3 finds `libz3` at import time, so Read the Docs renders the Python API again.

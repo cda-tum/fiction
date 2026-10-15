@@ -21,12 +21,14 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import _active_sidb_layout, _physical_arguments, _physical_options, _store_result
+from mnt.fiction.cli.simulation import physical_arguments, physical_options
+
+from ._common import _active_sidb_layout, _store_result
 
 
 def _quickexact_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    _physical_arguments(parser, base=False, potential=True)
+    physical_arguments(parser, base=False, potential=True)
 
 
 @command(
@@ -43,7 +45,7 @@ def quickexact_command(session: Session, args: argparse.Namespace) -> Result:
     The number of charge states per SiDB (2 or 3) is detected automatically.
     """
     layout = _active_sidb_layout(session)
-    parameters = _physical_options(args)
+    parameters = physical_options(args)
     result = quickexact(
         layout, on_progress=session.report_progress, global_potential=args.global_potential, **parameters
     )

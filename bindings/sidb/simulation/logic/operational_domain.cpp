@@ -27,12 +27,15 @@
 #include <fmt/format.h>
 
 #include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <optional>
 #include <tuple>
 #include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 #include <nanobind/operators.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
@@ -48,6 +51,7 @@
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+#include <pyerrors.h>
 
 /**
  * @brief Namespace alias for nanobind.
@@ -62,6 +66,22 @@ using operational_domain_options = fiction::sidb::simulation::logic::operational
 
 namespace detail
 {
+
+/**
+ * Buffers behind the NumPy arrays of `operational_domain.to_numpy`. The operational flags are bytes because
+ * `std::vector<bool>` has no contiguous storage.
+ */
+struct numpy_buffers
+{
+    /**
+     * Row-major (points, dimensions) parameter values.
+     */
+    std::vector<double> coordinates;
+    /**
+     * One flag per point; 1 marks an operational point.
+     */
+    std::vector<std::uint8_t> operational;
+};
 
 /**
  * @brief Registers the operational domain and critical temperature domain algorithms on `sidb_layout`.
@@ -1060,6 +1080,67 @@ void register_operational_domain(nb::module_& m)
                                { items.emplace_back(key, std::get<0>(value)); });
                  return items;
              })
+        .def(
+            "to_numpy",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                try
+                {
+                    static_cast<void>(nb::module_::import_("numpy"));
+                }
+                catch (const nb::python_error& error)
+                {
+                    if (error.matches(PyExc_ModuleNotFoundError) && error.value().attr("name").equal(nb::str("numpy")))
+                    {
+                        throw nb::import_error("operational_domain.to_numpy() requires NumPy; install it with "
+                                               "uv pip install 'mnt-pyfiction[plot]'");
+                    }
+                    throw;
+                }
+
+                using fiction::sidb::simulation::logic::operational_status;
+
+                const auto points     = self.size();
+                const auto dimensions = self.get_number_of_dimensions();
+
+                auto buffers = std::make_unique<detail::numpy_buffers>();
+                buffers->coordinates.reserve(points * dimensions);
+                buffers->operational.reserve(points);
+
+                self.for_each(
+                    [&buffers, dimensions](const auto& key, const auto& value)
+                    {
+                        const auto& parameters = key.get_parameters();
+                        if (parameters.size() != dimensions)
+                        {
+                            throw nb::value_error("point dimensions must match the operational domain");
+                        }
+                        buffers->coordinates.insert(buffers->coordinates.end(), parameters.begin(), parameters.end());
+                        buffers->operational.push_back(std::get<0>(value) == operational_status::OPERATIONAL);
+                    });
+
+                /** @brief Buffer address retained by both returned arrays. */
+                auto* const       data = buffers.get();
+                const nb::capsule owner{data, [](void* p) noexcept
+                                        {
+                                            // the capsule is the owner and runs this when the last array dies
+                                            // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+                                            delete static_cast<detail::numpy_buffers*>(p);
+                                        }};
+
+                std::ignore = buffers.release();
+
+                return std::make_tuple(
+                    nb::ndarray<nb::numpy, double, nb::ndim<2>>{data->coordinates.data(), {points, dimensions}, owner},
+                    nb::ndarray<nb::numpy, bool, nb::ndim<1>>{data->operational.data(), {points}, owner});
+            },
+            "Returns the domain as NumPy arrays: a float64 array of shape (points, dimensions) holding the sampled "
+            "parameter values in dimension order, and a boolean array of length points that is True where the "
+            "point is operational. Point order is unspecified. Requires NumPy; install it with "
+            "uv pip install 'mnt-pyfiction[plot]'.\n\n"
+            "Raises:\n"
+            "    ImportError: NumPy is not installed or cannot be imported.\n"
+            "    ValueError: A point does not match the domain dimension count.")
 
         ;
 
