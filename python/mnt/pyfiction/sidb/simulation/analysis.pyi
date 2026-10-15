@@ -347,6 +347,9 @@ class energy_distribution:
 
         Returns:
             The maximum energy value in the energy distribution.
+
+        Raises:
+            std::invalid_argument: If the energy distribution is empty.
         """
 
     def min_energy(self) -> float:
@@ -355,6 +358,9 @@ class energy_distribution:
 
         Returns:
             The minimum energy value in the energy distribution.
+
+        Raises:
+            std::invalid_argument: If the energy distribution is empty.
         """
 
 def calculate_energy_distribution(

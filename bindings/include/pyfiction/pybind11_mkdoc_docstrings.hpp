@@ -16673,6 +16673,9 @@ R"doc(Returns the maximum energy value in the energy distribution.
 Returns:
     The maximum energy value in the energy distribution.
 
+Raises:
+    std::invalid_argument: If the energy distribution is empty.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution_min_energy =
@@ -16680,6 +16683,9 @@ R"doc(Returns the minimum energy value in the energy distribution.
 
 Returns:
     The minimum energy value in the energy distribution.
+
+Raises:
+    std::invalid_argument: If the energy distribution is empty.
 
 )doc";
 

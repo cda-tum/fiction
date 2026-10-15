@@ -29,6 +29,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -142,18 +143,28 @@ class energy_distribution
      * Returns the maximum energy value in the energy distribution.
      *
      * @return The maximum energy value in the energy distribution.
+     * @throws std::invalid_argument If the energy distribution is empty.
      */
-    [[nodiscard]] double max_energy() const noexcept
+    [[nodiscard]] double max_energy() const
     {
+        if (distribution.empty())
+        {
+            throw std::invalid_argument{"energy distribution is empty"};
+        }
         return distribution.crbegin()->first;
     }
     /**
      * Returns the minimum energy value in the energy distribution.
      *
      * @return The minimum energy value in the energy distribution.
+     * @throws std::invalid_argument If the energy distribution is empty.
      */
-    [[nodiscard]] double min_energy() const noexcept
+    [[nodiscard]] double min_energy() const
     {
+        if (distribution.empty())
+        {
+            throw std::invalid_argument{"energy distribution is empty"};
+        }
         return distribution.cbegin()->first;
     }
     /**

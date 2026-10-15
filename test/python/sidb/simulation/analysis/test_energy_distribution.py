@@ -20,6 +20,17 @@ from mnt.pyfiction.sidb.simulation import potential_landscape
 from mnt.pyfiction.sidb.simulation.analysis import calculate_energy_distribution, energy_distribution, energy_state
 
 
+@pytest.mark.parametrize("query", ["min_energy", "max_energy"])
+def test_empty_energy_distribution_rejects_extrema(query: str) -> None:
+    """Empty distributions reject queries that require an energy state.
+
+    Args:
+        query: Energy extremum to request.
+    """
+    with pytest.raises(ValueError, match="energy distribution is empty"):
+        getattr(energy_distribution(), query)()
+
+
 def test_degeneracy_returns_state_count() -> None:
     """Energy lookup returns the stored state count rather than the energy-level index."""
     distribution = energy_distribution()
