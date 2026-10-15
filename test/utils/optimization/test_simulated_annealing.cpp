@@ -130,9 +130,11 @@ double schwefel_function_1d(const double& x) noexcept
  */
 double schwefel_1d_init_state_generator() noexcept
 {
-    static std::mt19937_64 generator(std::random_device{}());
+    /** @brief Initial-state random engine local to this worker. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
-    static std::uniform_real_distribution<double> distribution(-500.0, 500.0);
+    /** @brief Initial-state draw distribution local to this worker. */
+    static thread_local std::uniform_real_distribution<double> distribution{-500.0, 500.0};
 
     return distribution(generator);
 }
@@ -145,7 +147,8 @@ double schwefel_1d_init_state_generator() noexcept
  */
 double random_next_schwefel(const double& x) noexcept
 {
-    static std::mt19937_64 generator{std::random_device{}()};
+    /** @brief Neighbor-state random engine local to this worker. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
     std::uniform_real_distribution<double> distribution{x - 100, x + 100};
 
@@ -178,9 +181,11 @@ double drop_wave_function_2d(const std::pair<double, double>& x) noexcept
  */
 std::pair<double, double> drop_wave_2d_init_state_generator() noexcept
 {
-    static std::mt19937_64 generator(std::random_device{}());
+    /** @brief Initial-state random engine local to this worker. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
-    static std::uniform_real_distribution<double> distribution(-5.12, 5.12);
+    /** @brief Initial-state draw distribution local to this worker. */
+    static thread_local std::uniform_real_distribution<double> distribution{-5.12, 5.12};
 
     return {distribution(generator), distribution(generator)};
 }
@@ -193,7 +198,8 @@ std::pair<double, double> drop_wave_2d_init_state_generator() noexcept
  */
 std::pair<double, double> random_next_drop_wave(const std::pair<double, double>& x) noexcept
 {
-    static std::mt19937_64 generator{std::random_device{}()};
+    /** @brief Neighbor-state random engine local to this worker. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
     std::uniform_real_distribution<double> distribution_x{x.first - 1, x.first + 1};
     std::uniform_real_distribution<double> distribution_y{x.second - 1, x.second + 1};
@@ -334,4 +340,20 @@ TEST_CASE("Multi-state annealing rejects zero instances", "[sim-anneal]")
     CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 0, schwefel_1d_init_state_generator, schwefel_function_1d,
                                               linear_temperature_schedule, random_next_schwefel),
                     std::invalid_argument);
+}
+
+TEST_CASE("Concurrent annealing preserves a known minimum", "[sim-anneal]")
+{
+    /** @brief Starts each worker at the known minimum. */
+    const auto initial = [] { return 0; };
+    /** @brief Assigns the two states their signed floating-point costs. */
+    const auto cost = [](const int state) { return static_cast<double>(state); };
+    /** @brief Completes one finite-temperature annealing step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** @brief Alternates between the minimum and a worse state, exercising acceptance randomness. */
+    const auto next = [](const int state) { return 1 - state; };
+    /** @brief Best state and cost from eight concurrent workers. */
+    const auto result = multi_simulated_annealing(2.0, 1.0, 256, 8, initial, cost, schedule, next);
+    CHECK(result.first == 0);
+    CHECK(result.second == 0.0);
 }
