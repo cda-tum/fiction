@@ -27,6 +27,7 @@ import pytest
         ("bad_alloc", "MemoryError"),
         ("ifstream::failure", "RuntimeError"),
         ("ofstream::failure", "RuntimeError"),
+        ("ios_base::failure", "RuntimeError"),
     ],
 )
 def test_python_exception_docstrings(cpp_name: str, python_name: str, monkeypatch: pytest.MonkeyPatch) -> None:
