@@ -39,7 +39,10 @@ namespace mockturtle
 template <typename Ntk>
 struct edge
 {
-    const node<Ntk> source, target;
+    /** @brief Source node of the directed edge. */
+    node<Ntk> source;
+    /** @brief Target node of the directed edge. */
+    node<Ntk> target;
     /**
      * Equality operator.
      *
@@ -60,6 +63,7 @@ namespace std
 template <typename Ntk>
 struct hash<mockturtle::edge<Ntk>>
 {
+    /** @brief Returns a hash of the supplied value. */
     std::size_t operator()(const mockturtle::edge<Ntk>& e) const noexcept
     {
         std::size_t h = 0;
@@ -382,6 +386,7 @@ using edge_path = std::vector<mockturtle::edge<Ntk>>;
  *
  * @param n Node whose paths are desired.
  * @return A vector of all possible edge paths leading from terminals to `v`.
+ * @param ntk Network containing the node.
  */
 template <typename Ntk>
 std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept

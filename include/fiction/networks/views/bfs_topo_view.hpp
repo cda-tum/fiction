@@ -71,9 +71,13 @@ template <typename Ntk>
 class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 {
   public:
-    using storage                                 = typename Ntk::storage;
-    using node                                    = typename Ntk::node;
-    using signal                                  = typename Ntk::signal;
+    /** @brief Underlying network storage type. */
+    using storage = typename Ntk::storage;
+    /** @brief Network node type. */
+    using node = typename Ntk::node;
+    /** @brief Network signal type. */
+    using signal = typename Ntk::signal;
+    /** @brief Marks the topological node iteration order. */
     static constexpr bool is_topologically_sorted = true;  // NOLINT(readability-identifier-naming)
 
     /**

@@ -340,11 +340,15 @@ class gray_code_iterator
 // make `gray_code_iterator` compatible with STL iterator categories
 namespace std
 {
+/** @brief Standard iterator traits for the specialized iterator. */
 template <>
 struct iterator_traits<fiction::utils::math::gray_code_iterator>
 {
+    /** @brief Iterator traversal category. */
     using iterator_category = std::random_access_iterator_tag;
-    using value_type        = uint64_t;
-    using difference_type   = int64_t;
+    /** @brief Value produced by dereferencing the iterator. */
+    using value_type = uint64_t;
+    /** @brief Signed type for iterator distances. */
+    using difference_type = int64_t;
 };
 }  // namespace std

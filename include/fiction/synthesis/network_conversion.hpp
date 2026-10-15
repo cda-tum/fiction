@@ -41,12 +41,15 @@ template <typename NtkDest, typename NtkSrc, bool is_same_ntk_type = std::is_sam
 class convert_network_impl
 {};
 
+/** @brief Copies a source network into the destination network type. */
 template <typename NtkDest, typename NtkSrc>
 class convert_network_impl<NtkDest, NtkSrc, true>
 {
   public:
+    /** @brief Stores the source network for conversion. */
     explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
 
+    /** @brief Runs the network conversion algorithm. */
     NtkDest run()
     {
         return mockturtle::cleanup_dangling<NtkSrc, NtkDest>(ntk, false, false);
@@ -56,12 +59,15 @@ class convert_network_impl<NtkDest, NtkSrc, true>
     NtkDest ntk;
 };
 
+/** @brief Copies a source network into the destination network type. */
 template <typename NtkDest, typename NtkSrc>
 class convert_network_impl<NtkDest, NtkSrc, false>
 {
   public:
+    /** @brief Stores the source network for conversion. */
     explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
 
+    /** @brief Runs the network conversion algorithm. */
     NtkDest run()
     {
         auto  init     = mockturtle::initialize_copy_network<NtkDest>(ntk);

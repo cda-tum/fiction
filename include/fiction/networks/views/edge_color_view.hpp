@@ -35,10 +35,15 @@ template <typename Ntk>
 class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<Ntk>
 {
   public:
-    using storage     = typename Ntk::storage;
-    using node        = typename Ntk::node;
-    using signal      = typename Ntk::signal;
-    using edge        = typename mockturtle::edge<out_of_place_edge_color_view<Ntk>>;
+    /** @brief Underlying network storage type. */
+    using storage = typename Ntk::storage;
+    /** @brief Network node type. */
+    using node = typename Ntk::node;
+    /** @brief Network signal type. */
+    using signal = typename Ntk::signal;
+    /** @brief Network edge type. */
+    using edge = typename mockturtle::edge<out_of_place_edge_color_view<Ntk>>;
+    /** @brief Base node-color view type. */
     using parent_view = typename mockturtle::out_of_place_color_view<Ntk>;
 
     /**

@@ -179,6 +179,7 @@ struct determine_vertex_coloring_params
     bool verify_coloring_after_computation = false;
 };
 
+/** @brief Statistics for vertex coloring. */
 template <typename Color = std::size_t>
 struct determine_vertex_coloring_stats
 {
@@ -207,6 +208,7 @@ struct determine_vertex_coloring_stats
 namespace detail
 {
 
+/** @brief Finds vertex colorings with a SAT solver. */
 template <typename Graph, typename Color = std::size_t, bill::solvers SolverType = bill::solvers::ghack>
 class sat_coloring_handler
 {
@@ -218,6 +220,7 @@ class sat_coloring_handler
     using k_instance          = std::pair<std::size_t, solver_instance_ptr>;
 
   public:
+    /** @brief Initializes SAT coloring with the graph, parameters, and statistics. */
     explicit sat_coloring_handler(const Graph& g, const determine_vertex_coloring_sat_params<Graph>& p,
                                   determine_vertex_coloring_stats<Color>& st) :
             graph{g},
@@ -235,6 +238,7 @@ class sat_coloring_handler
               }()}
     {}
 
+    /** @brief Checks whether the graph admits a coloring with k colors. */
     result_instance check_k_coloring(const std::size_t k) const noexcept
     {
         const auto k_color_instance = std::make_shared<solver_instance>(graph, k);
@@ -258,6 +262,7 @@ class sat_coloring_handler
         return {check_sat(k_color_instance), k_color_instance};
     }
 
+    /** @brief Finds a minimum coloring by increasing the color count. */
     std::optional<k_instance> determine_min_coloring_with_linearly_ascending_search() const noexcept
     {
         for (std::size_t k = q; k < graph.size_vertices() + 1; ++k)
@@ -271,6 +276,7 @@ class sat_coloring_handler
         return std::nullopt;
     }
 
+    /** @brief Finds a minimum coloring by decreasing the color count. */
     std::optional<k_instance> determine_min_coloring_with_linearly_descending_search() const noexcept
     {
         k_instance most_recent_sat_instance{};
@@ -290,6 +296,7 @@ class sat_coloring_handler
         return std::nullopt;
     }
 
+    /** @brief Finds a minimum coloring by binary search over color counts. */
     std::optional<k_instance> determine_min_coloring_with_binary_search() const noexcept
     {
         std::optional<k_instance> most_recent_sat_instance{};
@@ -337,6 +344,7 @@ class sat_coloring_handler
         return most_recent_sat_instance;
     }
 
+    /** @brief Returns a minimum vertex coloring when the solver finds one. */
     std::optional<vertex_coloring<Graph, Color>> color() noexcept
     {
         std::optional<k_instance> min_coloring = std::nullopt;
@@ -605,6 +613,7 @@ class sat_coloring_handler
      * minimal, i.e., no vertex is assigned color c unless color c - 1 has been assigned to any vertex of lower index.
      *
      * @param instance Pointer to the solver instance.
+     * @param clique_first_ordering Vertex ordering with clique vertices first.
      */
     void transform_solution_to_lexicographical_minimum(
         const solver_instance_ptr&                         instance,
@@ -702,10 +711,12 @@ class sat_coloring_handler
     }
 };
 
+/** @brief Assigns colors to graph vertices. */
 template <typename Graph, typename Color>
 class graph_coloring_impl
 {
   public:
+    /** @brief Stores the graph, coloring parameters, and statistics. */
     graph_coloring_impl(const Graph& g, const determine_vertex_coloring_params<Graph>& p,
                         determine_vertex_coloring_stats<Color>& st) :
             graph{g},
@@ -713,6 +724,7 @@ class graph_coloring_impl
             pst{st}
     {}
 
+    /** @brief Runs the graph coloring algorithm. */
     vertex_coloring<Graph, Color> run()
     {
         // measure runtime

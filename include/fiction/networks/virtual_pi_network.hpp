@@ -31,7 +31,7 @@
 
 namespace fiction::networks
 {
-/* Network with additional "virtual" PIs.
+/** Network with additional "virtual" PIs.
  *
  * "Virtual" PIs are used to manage the duplication of PIs in the network.
  * Each "real" PI can have an arbitrary number of "virtual" PIs, which are copies of the original "real" PI.
@@ -46,13 +46,18 @@ class virtual_pi_network : public Ntk
 {
   public:
     // name is part of a SFINAE detection idiom used across fiction::traits and cannot be renamed to satisfy
+    /** @brief Marks a network that supports virtual primary inputs. */
     // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_virtual_network_type = true;
 
+    /** @brief Underlying network storage type. */
     using storage = typename Ntk::storage;
-    using node    = typename Ntk::node;
-    using signal  = typename Ntk::signal;
+    /** @brief Network node type. */
+    using node = typename Ntk::node;
+    /** @brief Network signal type. */
+    using signal = typename Ntk::signal;
 
+    /** @brief Stores virtual primary input nodes. */
     struct virtual_storage
     {
         /**
@@ -65,6 +70,7 @@ class virtual_pi_network : public Ntk
         phmap::parallel_flat_hash_map<node, node> map_virtual_to_real_pi{};
     };
 
+    /** @brief Shared virtual primary input storage. */
     using v_strg = std::shared_ptr<virtual_storage>;
 
     /**

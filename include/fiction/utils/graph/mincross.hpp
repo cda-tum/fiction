@@ -102,6 +102,7 @@ template <typename Ntk>
 class mincross_impl
 {
   public:
+    /** @brief Network node type. */
     using node = typename Ntk::node;
 
     /**
