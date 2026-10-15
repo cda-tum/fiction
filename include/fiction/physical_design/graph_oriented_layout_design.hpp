@@ -812,23 +812,23 @@ class graph_oriented_layout_design_impl
 {
   public:
     /**
-     * Constructor for the graph-oriented layout design algorithm.
+     * Initializes graph-oriented layout design with owned options and a cost callback.
      *
      * @param src The source network to be placed, already converted to a `technology_network`.
-     * @param p The parameters for the graph-enhanced layout search algorithm.
+     * @param p GOLD parameters transferred into owned invocation storage.
      * @param st The statistics object to record execution details.
-     * @param custom The custom layout cost function.
+     * @param custom Custom layout cost function transferred into owned storage.
      */
-    graph_oriented_layout_design_impl(const tec_nt& src, const graph_oriented_layout_design_params& p,
-                                      graph_oriented_layout_design_stats&       st,
-                                      const std::function<uint64_t(const Lyt&)> custom) :
+    graph_oriented_layout_design_impl(const tec_nt& src, graph_oriented_layout_design_params&& p,
+                                      graph_oriented_layout_design_stats& st,
+                                      std::function<uint64_t(const Lyt&)> custom) :
             ntk{src},
-            ps{p},
+            ps{std::move(p)},
             pst{st},
-            custom_cost_objective{custom},
+            custom_cost_objective{std::move(custom)},
             timeout{ps.timeout},
             start{std::chrono::high_resolution_clock::now()},
-            seed{p.seed ? *p.seed : std::random_device{}()}
+            seed{ps.seed ? *ps.seed : std::random_device{}()}
     {
         ntk.substitute_po_signals();
         ntk.foreach_po(
@@ -1053,7 +1053,7 @@ class graph_oriented_layout_design_impl
     /** @brief Number of constant outputs; every search graph preserves this source interface. */
     uint32_t constant_output_count{};
     /**
-     * Parameters.
+     * Parameters owned by this invocation.
      */
     graph_oriented_layout_design_params ps;
     /**
@@ -1061,7 +1061,7 @@ class graph_oriented_layout_design_impl
      */
     graph_oriented_layout_design_stats& pst;
     /**
-     * Custom cost objective.
+     * Owned custom cost objective.
      */
     const std::function<uint64_t(const Lyt&)> custom_cost_objective;
     /**
@@ -2654,7 +2654,7 @@ class graph_oriented_layout_design_impl
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @param ntk The network to be placed and routed.
- * @param ps The parameters for the A* priority routing algorithm. Defaults to an empty parameter set.
+ * @param ps Parameters for graph-oriented layout design. Defaults to an empty parameter set.
  * @param pst A pointer to a statistics object to record execution details. Defaults to nullptr.
  * @param custom_cost_objective A custom cost objective that is evaluated at every expansion of the search space graph.
  * Should be a function that can be calculated based on the current partial layout and returns an uint64_t that should
@@ -2689,10 +2689,10 @@ std::optional<Lyt> graph_oriented_layout_design(const tec_nt& ntk, graph_oriente
     }
 
     graph_oriented_layout_design_stats             st{};
-    detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), ps, st,
-                                                     custom_cost_objective};
+    detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), std::move(ps), st,
+                                                     std::move(custom_cost_objective)};
 
-    const auto result = p.run();
+    auto result = p.run();
 
     if (pst)
     {

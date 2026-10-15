@@ -44,6 +44,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
@@ -453,11 +454,13 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
     params.return_first = true;
 
-    // define a custom cost function
+    /** @brief Records callback evaluation without constraining invocation counts. */
+    std::atomic_bool custom_cost_evaluated{false};
+    /** @brief Caller-owned objective reused across calls and copied into a temporary argument. */
     const std::function<uint64_t(const cartesian_gate_layout&)> custom_cost_objective =
-        [](const cartesian_gate_layout& layout) -> uint64_t
+        [&custom_cost_evaluated](const cartesian_gate_layout& layout) -> uint64_t
     {
-        // Example custom logic for calculating cost
+        custom_cost_evaluated = true;
         return (layout.num_wires() * 2) + layout.num_crossings();
     };
 
@@ -465,25 +468,32 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 
     REQUIRE(layout.has_value());
     check_eq(ntk, required_value(layout));
+    CHECK(custom_cost_evaluated.load());
+    CHECK(static_cast<bool>(custom_cost_objective));
 
     // high-effort mode
-    params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+    params.mode           = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+    custom_cost_evaluated = false;
 
     const auto layout_high_effort =
         graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats, custom_cost_objective);
 
     REQUIRE(layout_high_effort.has_value());
     check_eq(ntk, required_value(layout_high_effort));
+    CHECK(custom_cost_evaluated.load());
 
     // maximum-effort mode
-    params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
-    params.seed = 12345;
+    params.mode           = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+    params.seed           = 12345;
+    custom_cost_evaluated = false;
 
-    const auto layout_maximum_effort =
-        graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats, custom_cost_objective);
+    const auto layout_maximum_effort = graph_oriented_layout_design<cartesian_gate_layout>(
+        ntk, params, &stats, std::function<uint64_t(const cartesian_gate_layout&)>{custom_cost_objective});
 
     REQUIRE(layout_maximum_effort.has_value());
     check_eq(ntk, required_value(layout_maximum_effort));
+    CHECK(custom_cost_evaluated.load());
+    CHECK(static_cast<bool>(custom_cost_objective));
 }
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
@@ -623,6 +633,7 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
 
     const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
 
+    CHECK(static_cast<bool>(params.on_progress));
     REQUIRE(layout.has_value());
     check_eq(ntk, *layout);
 

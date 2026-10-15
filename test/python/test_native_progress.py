@@ -78,7 +78,7 @@ def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> N
 
 @pytest.mark.parametrize("parallel", [False, True])
 def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> None:
-    """Stable graphs report expansions, accepted solutions, and their final inactive state."""
+    """Stable graphs report expansions; reusable callbacks leave no native owner after return."""
     options: dict[str, Any] = {
         "enable_multithreading": parallel,
         "return_first": True,
@@ -88,6 +88,10 @@ def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> 
     counts: list[tuple[str, int, int]] = []
     options["on_worker_progress"] = lambda *report: reports.append(report)
     options["on_progress"] = lambda *report: counts.append(report)
+    callback_refs = [weakref.ref(options[name]) for name in ("on_progress", "on_worker_progress")]
+    assert graph_oriented_layout_design(mux21, **options) is not None
+    reports.clear()
+    counts.clear()
     layout = graph_oriented_layout_design(mux21, **options)
     assert layout is not None
     assert equivalence_checking(mux21, layout) != eq_type.NO
@@ -105,6 +109,9 @@ def test_gold_graph_expansions(mux21: technology_network, *, parallel: bool) -> 
     assert not any(active.values())
     assert sum(previous.values()) == next(done for task, done, _ in reversed(counts) if task == "expansions")
     assert max(previous.values()) > 1
+    del options
+    gc.collect()
+    assert all(reference() is None for reference in callback_refs)
 
 
 @pytest.mark.parametrize("command", ["balance", "fanouts", "check"])
