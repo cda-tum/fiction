@@ -38,10 +38,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         Zero on success or help, one on a computation or output failure.
     """
     parser = Parser(
-        "fiction-opdom",
+        "fiction opdom",
         __doc__ or "Operational domain computation.",
         inputs="One SQD gate layout and an explicit logic specification.",
-        example="fiction-opdom gate.sqd --gate xor --plot domain.png --plot domain.html",
+        example="fiction opdom gate.sqd --gate xor --plot domain.png --plot domain.html",
         unavailable=None,
     )
     parser.add_argument("input", type=Path, help="SQD gate layout")

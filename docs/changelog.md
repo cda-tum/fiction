@@ -24,9 +24,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - CLI:
 
   - Dedicated operational-domain commands now run without loading the interactive shell or its stores.
+  - `fiction opdom` runs the dedicated workflow; `fiction repl` explicitly selects the shell.
+    Bare `fiction`, shell flags, and piped input retain their behavior.
   - Both `opdom` entry points accept `--algorithm` for all reconstruction methods, with `--samples` for
     random sampling, flood fill, and contour tracing. `--sketch` adds filter-only analysis to any method.
-  - Added `fiction-opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or
+  - Added `fiction opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or
     interactive plots, including Sketch. Install `mnt-pyfiction[plot]` for plotting support.
   - Operational domain plots validate NumPy and colors before computation. Viewer failures retain exports and statistics.
   - `uv tool install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,

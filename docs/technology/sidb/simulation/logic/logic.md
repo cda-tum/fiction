@@ -63,11 +63,11 @@ These three methods can produce different samples on each run.
 Install `mnt-pyfiction[plot]`, download the gate, and run these commands in Bash in the download directory:
 
 ```bash
-fiction-opdom siqad_or_gate.sqd --gate or --algorithm grid_search \
+fiction opdom siqad_or_gate.sqd --gate or --algorithm grid_search \
     --bdl-wire-distance 1.5 --threads 4 --width 7 --height 5 --dpi 180 \
     --title "SiQAD OR gate: grid search" --plot opdom_siqad_or_grid_search.png
 for algorithm in random_sampling flood_fill contour_tracing; do
-    fiction-opdom siqad_or_gate.sqd --gate or --algorithm "$algorithm" --samples 500 \
+    fiction opdom siqad_or_gate.sqd --gate or --algorithm "$algorithm" --samples 500 \
         --bdl-wire-distance 1.5 --threads 4 --width 7 --height 5 --dpi 180 \
         --title "SiQAD OR gate: ${algorithm//_/ }" --plot "opdom_siqad_or_${algorithm}.png"
 done

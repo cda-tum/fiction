@@ -16,25 +16,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from .app import main
 from .errors import CommandError
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from .session import Session
 
 __all__ = ["CommandError", "Session", "main"]
-
-
-def main(argv: Sequence[str] | None = None) -> int:  # ruff: ignore[non-empty-init-module] -- retain lazy public entry points
-    """Load and run the command-line entry point.
-
-    Returns:
-        The command's exit status.
-    """
-    from .app import main as run  # ruff: ignore[import-outside-top-level] -- load shell only on invocation
-
-    return run(argv)
 
 
 def __getattr__(name: str) -> type[Session]:

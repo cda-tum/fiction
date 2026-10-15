@@ -180,9 +180,10 @@ class NoPlots(importlib.abc.MetaPathFinder):
         if fullname.split(".")[0] in {"matplotlib", "plotly"}:
             raise ModuleNotFoundError(fullname)
 sys.meta_path.insert(0, NoPlots())
-from mnt.fiction.opdom import main
+from mnt.fiction.cli import main
 assert main(["--help"]) == 0
-assert main(sys.argv[1:]) == 0
+assert main(["opdom", "--help"]) == 0
+assert main(["opdom", *sys.argv[1:]]) == 0
 assert "matplotlib" not in sys.modules
 assert "plotly" not in sys.modules
 """
@@ -219,9 +220,10 @@ class NoShell(importlib.abc.MetaPathFinder):
         }:
             raise ModuleNotFoundError(fullname)
 sys.meta_path.insert(0, NoShell())
-from mnt.fiction.opdom import main
+from mnt.fiction.cli import main
 assert main(["--help"]) == 0
-assert main(sys.argv[1:]) == 0
+assert main(["opdom", "--help"]) == 0
+assert main(["opdom", *sys.argv[1:]]) == 0
 """
     csv = tmp_path / "domain.csv"
     result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- isolated import boundary
@@ -333,9 +335,9 @@ def test_missing_plot_dependency_is_reported_before_computation(
 def test_installed_console_command(resource: Callable[[str], str], tmp_path: Path) -> None:
     """The wheel's installed console command runs a real computation."""
 
-    executable = shutil.which("fiction-opdom", path=sysconfig.get_path("scripts"))
+    executable = shutil.which("fiction", path=sysconfig.get_path("scripts"))
     assert executable is not None
-    for command in ([executable], [sys.executable, "-m", "mnt.fiction.opdom"]):
+    for command in ([executable, "opdom"], [sys.executable, "-m", "mnt.fiction.opdom"]):
         help_result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- test executables run without a shell
             [*command, "--help"], capture_output=True, text=True, check=False
         )
@@ -343,7 +345,16 @@ def test_installed_console_command(resource: Callable[[str], str], tmp_path: Pat
         assert "--plot" in help_result.stdout
     csv = tmp_path / "installed.csv"
     result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- test executables run without a shell
-        [executable, resource("hex_21_inputsdbp_xor_v1.sqd"), "--gate", "xor", "--csv", str(csv), *SMALL_SWEEP],
+        [
+            executable,
+            "opdom",
+            resource("hex_21_inputsdbp_xor_v1.sqd"),
+            "--gate",
+            "xor",
+            "--csv",
+            str(csv),
+            *SMALL_SWEEP,
+        ],
         capture_output=True,
         text=True,
         check=False,

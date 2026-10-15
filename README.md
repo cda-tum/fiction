@@ -75,6 +75,9 @@ uv tool install mnt.pyfiction
 fiction
 ```
 
+`fiction repl` explicitly starts the shell. `fiction opdom` computes an operational domain from an SQD
+layout; run `fiction --help` to choose an interface and `fiction opdom --help` for its options.
+
 Type `help` at the prompt for the list of commands, or run a whole flow at once:
 
 ```bash

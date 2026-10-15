@@ -15,7 +15,13 @@ $ uv tool install mnt.pyfiction
 $ fiction
 ```
 
-`python -m mnt.fiction.cli` starts the same shell when the package is installed in that Python environment.
+`fiction repl` starts the same shell explicitly. `fiction opdom INPUT.sqd --gate xor --csv domain.csv`
+runs a dedicated operational-domain computation. `fiction --help` lists these routes; each route accepts
+`--help` for its own options. Put the route before its options.
+
+Bare `fiction` retains the shell's `-c`, `-f`, `-i`, logging, and quiet options. Piped input executes shell
+commands without an interactive prompt. `fiction repl` accepts the same options and input sources.
+`python -m mnt.fiction.cli` provides the same routes when the package is installed in that Python environment.
 The `mnt.pyfiction` distribution contains both the bindings and the `mnt.fiction.cli` module;
 the executable is named `fiction`.
 
@@ -458,25 +464,28 @@ done
 
 ### Dedicated command and plots
 
-Install plotting support once with `uv tool install 'mnt-pyfiction[plot]'`, then run `fiction-opdom`.
+Install plotting support once with `uv tool install 'mnt-pyfiction[plot]'`, then run `fiction opdom`.
 For scripts or notebooks, use `uv pip install 'mnt-pyfiction[plot]'` in an active virtual environment;
 `python -m mnt.fiction.opdom` runs the command in that environment:
 
 ```console
-fiction-opdom gate.sqd --gate xor --plot domain.png --plot domain.html
-fiction-opdom gate.sqd --table 0110 --algorithm flood_fill --samples 100 --plot domain.html
-fiction-opdom gate.sqd --gate xor --algorithm grid_search --sketch --plot sketch.png --plot sketch.html
+fiction opdom gate.sqd --gate xor --plot domain.png --plot domain.html
+fiction opdom gate.sqd --table 0110 --algorithm flood_fill --samples 100 --plot domain.html
+fiction opdom gate.sqd --gate xor --algorithm grid_search --sketch --plot sketch.png --plot sketch.html
 fiction -c 'read gate.sqd; tt -t 0110; opdom domain.csv --plot domain.html'
 ```
 
 The dedicated command requires an SQD file and an explicit specification: `--gate` selects `id`, `not`,
 `and`, `nand`, `or`, `nor`, `xor`, `xnor`, or `maj`; repeated `--table` or `--expression` options specify
-one function per output. The shell's `opdom` command and `fiction-opdom` share argument definitions,
+one function per output. The shell's `opdom` command and `fiction opdom` share argument definitions,
 parameter validation, reconstruction, statistics, and CSV/plot export. The shell uses its active SiDB layout
 and falls back to its active truth table; the dedicated command loads an SQD file and requires an explicit
 specification. Tables use the same binary and hexadecimal conventions as `tt`. Expressions
 use the detected input count, so an expression can leave inputs unused. The shell accepts these options
 as overrides of its active truth table. Every specification must match the detected BDL ports.
+
+The positional arguments differ by context: terminal `fiction opdom INPUT.sqd` reads a layout, while
+shell `opdom OUTPUT.csv` writes a domain for the active layout. Use `--csv FILE` for the dedicated route's CSV output.
 
 Each invocation computes one reconstruction method. Repeat `--plot FILE` to export the same domain
 as PNG, SVG, PDF, or HTML. The dedicated command writes `<input-stem>_opdom.png` in the current directory

@@ -93,7 +93,6 @@ Research = "https://www.cda.cit.tum.de/research/fcn/"
 
 [project.scripts]
 fiction = "mnt.fiction.cli.app:main"
-fiction-opdom = "mnt.fiction.opdom:main"
 
 [dependency-groups]
 dev = [
