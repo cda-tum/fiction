@@ -72,7 +72,7 @@ struct equivalence_checking_stats
     int64_t tp_spec = 1ll;
     /** @brief Implementation throughput at which weak equivalence manifests. */
     int64_t tp_impl = 1ll;
-    /** @brief Difference between implementation and specification throughput. */
+    /** @brief Absolute difference between implementation and specification throughput. */
     int64_t tp_diff = 0ll;
     /**
      * Stores a possible counter example.

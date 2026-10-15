@@ -203,21 +203,33 @@ class technology_network : public mockturtle::klut_network
 
 #pragma region Create nary functions
 
-    /** @brief Creates a MULTI-INPUT AND gate with the supplied signals. */
+    /**
+     * @brief Reduces the supplied signals through a tree of binary AND gates.
+     *
+     * An empty input returns constant `true`; a single input returns that signal.
+     */
     signal create_nary_and(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(true),
                                        [this](auto const& a, auto const& b) { return create_and(a, b); });
     }
 
-    /** @brief Creates a MULTI-INPUT OR gate with the supplied signals. */
+    /**
+     * @brief Reduces the supplied signals through a tree of binary OR gates.
+     *
+     * An empty input returns constant `false`; a single input returns that signal.
+     */
     signal create_nary_or(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(false),
                                        [this](auto const& a, auto const& b) { return create_or(a, b); });
     }
 
-    /** @brief Creates a MULTI-INPUT XOR gate with the supplied signals. */
+    /**
+     * @brief Reduces the supplied signals through a tree of binary XOR gates.
+     *
+     * An empty input returns constant `false`; a single input returns that signal.
+     */
     signal create_nary_xor(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(false),

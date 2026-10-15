@@ -40,9 +40,9 @@ template <typename Ntk>
 struct edge
 {
     /** @brief Source node of the directed edge. */
-    node<Ntk> source;
+    const node<Ntk> source;
     /** @brief Target node of the directed edge. */
-    node<Ntk> target;
+    const node<Ntk> target;
     /**
      * Equality operator.
      *
