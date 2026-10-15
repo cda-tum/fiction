@@ -96,12 +96,18 @@ void register_write_sidb_layout_svg(nb::module_& m)
 The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 
 Args:
+    layout: Layout to draw.
+    filename: Output file path.
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     lattice_point_size: Lattice-point size in SVG units.
     sidb_size: Size of the SiDB in SVG units.
     sidb_border_width: SiDB border width in SVG units.
     color_background: The color mode of the background for the SVG output.
     lattice_mode: The lattice mode of the SiDB layout.
+
+Raises:
+    IndexError: SVG padding exceeds the lattice-site coordinate range.
+    RuntimeError: The file cannot be created, written, closed, or replaced.
 )doc");
 
     m.def(
@@ -137,12 +143,19 @@ Args:
 The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 
 Args:
+    layout: Layout to draw.
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     lattice_point_size: Lattice-point size in SVG units.
     sidb_size: Size of the SiDB in SVG units.
     sidb_border_width: SiDB border width in SVG units.
     color_background: The color mode of the background for the SVG output.
     lattice_mode: The lattice mode of the SiDB layout.
+
+Returns:
+    SVG text for the layout.
+
+Raises:
+    IndexError: SVG padding exceeds the lattice-site coordinate range.
 )doc");
 
     m.def(
@@ -177,12 +190,20 @@ Args:
 The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 
 Args:
+    layout: Layout to draw.
+    charge_distribution: Charge distribution whose sites match the layout.
+    filename: Output file path.
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     lattice_point_size: Lattice-point size in SVG units.
     sidb_size: Size of the SiDB in SVG units.
     sidb_border_width: SiDB border width in SVG units.
     color_background: The color mode of the background for the SVG output.
     lattice_mode: The lattice mode of the SiDB layout.
+
+Raises:
+    ValueError: The charge distribution sites differ from the layout.
+    IndexError: SVG padding exceeds the lattice-site coordinate range.
+    RuntimeError: The file cannot be created, written, closed, or replaced.
 )doc");
 
     m.def(
@@ -218,12 +239,21 @@ Args:
 The keyword options select dot sizes, background coloring, lattice rendering, and progress reporting.
 
 Args:
+    layout: Layout to draw.
+    charge_distribution: Charge distribution whose sites match the layout.
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     lattice_point_size: Lattice-point size in SVG units.
     sidb_size: Size of the SiDB in SVG units.
     sidb_border_width: SiDB border width in SVG units.
     color_background: The color mode of the background for the SVG output.
     lattice_mode: The lattice mode of the SiDB layout.
+
+Returns:
+    SVG text for the layout.
+
+Raises:
+    ValueError: The charge distribution sites differ from the layout.
+    IndexError: SVG padding exceeds the lattice-site coordinate range.
 )doc");
 }
 
