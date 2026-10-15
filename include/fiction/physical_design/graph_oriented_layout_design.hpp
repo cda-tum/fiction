@@ -31,6 +31,7 @@
 #include "fiction/physical_design/post_layout_optimization.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
+#include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -557,7 +558,7 @@ class topo_view : public mockturtle::immutable_view<mockturtle::fanout_view<tec_
     /** @brief Returns the number of nodes in traversal order. */
     [[nodiscard]] uint32_t size() const
     {
-        return uint32_t(topo_order.size());
+        return static_cast<uint32_t>(topo_order.size());
     }
 
     /** @brief Returns the number of traversed gates. */
@@ -570,7 +571,7 @@ class topo_view : public mockturtle::immutable_view<mockturtle::fanout_view<tec_
     [[nodiscard]] uint32_t node_to_index(const node& n) const
     {
         auto it = std::ranges::find(topo_order, n);
-        return uint32_t(std::ranges::distance(topo_order.begin(), it));
+        return static_cast<uint32_t>(std::ranges::distance(topo_order.begin(), it));
     }
 
     /** @brief Returns the node at a traversal index. */

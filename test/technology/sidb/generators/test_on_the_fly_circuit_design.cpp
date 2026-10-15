@@ -38,10 +38,6 @@
 #include <string_view>
 #include <thread>
 
-#if (FICTION_Z3_SOLVER)
-#include <mockturtle/networks/aig.hpp>
-#endif
-
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::sidb;

@@ -42,6 +42,7 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
+#include <mockturtle/views/topo_view.hpp>
 
 #include <concepts>
 #include <optional>
