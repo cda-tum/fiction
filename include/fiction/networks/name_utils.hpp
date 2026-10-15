@@ -216,7 +216,10 @@ template <typename NtkSrc, typename NtkDest, typename Signal>
                 } || mockturtle::has_set_name_v<NtkDest>)) ||
               (mockturtle::has_foreach_node_v<NtkSrc> && mockturtle::has_foreach_fanin_v<NtkSrc> &&
                mockturtle::has_get_node_v<NtkSrc> && mockturtle::has_foreach_po_v<NtkSrc> &&
-               mockturtle::has_make_signal_v<NtkSrc> && mockturtle::has_is_complemented_v<NtkSrc>))
+               mockturtle::has_make_signal_v<NtkSrc> && mockturtle::has_is_complemented_v<NtkSrc> &&
+               requires(NtkDest& dest, const NtkSrc& src, const Signal& target) {
+                   dest.set_name(target, src.get_name(src.get_constant(false)));
+               }))
 void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<Signal, NtkSrc>& old2new)
 {
     if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> && (requires {
@@ -281,7 +284,12 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mocktu
  */
 template <typename NtkDest, uint16_t fanout_size = 2>
     requires(mockturtle::is_network_type_v<NtkDest> ||
-             requires { requires std::same_as<typename NtkDest::object_id, layouts::layout_object_id>; })
+             requires { requires std::same_as<typename NtkDest::object_id, layouts::layout_object_id>; }) &&
+            (!(requires { requires std::same_as<typename NtkDest::object_id, layouts::layout_object_id>; } ||
+               mockturtle::has_set_name_v<NtkDest>) ||
+             requires(NtkDest& dest, const tec_nt& src, const tec_nt::signal& signal) {
+                 dest.set_name(layouts::layout_object_id{}, src.get_name(signal));
+             })
 void restore_signal_names(
     const tec_nt& ntk_src, NtkDest& ntk_dest,
     const mockturtle::node_map<physical_design::branching_signal_container<fanout_size>, tec_nt>& old2new)

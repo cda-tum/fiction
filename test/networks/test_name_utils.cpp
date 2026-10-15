@@ -70,6 +70,21 @@ concept all_names_transferable =
         restore_names(src, dest, map);
     };
 
+/**
+ * @brief Checks branching name transfers with native layout endpoints.
+ * @tparam Dest Destination network or layout type.
+ */
+template <typename Dest>
+concept branching_names_transferable =
+    requires(const tec_nt& src, Dest& dest,
+             const mockturtle::node_map<physical_design::branching_signal_container<>, tec_nt>& map) {
+        restore_signal_names(src, dest, map);
+    };
+
+static_assert(branching_names_transferable<cartesian_gate_layout>);
+static_assert(branching_names_transferable<mockturtle::aig_network>);
+static_assert(!branching_names_transferable<mockturtle::names_view<mockturtle::aig_network>>);
+
 static_assert(!all_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
 static_assert(signal_names_transferable<mockturtle::aig_network, mockturtle::aig_network>);
 static_assert(signal_names_transferable<incomplete_named_network, mockturtle::aig_network>);
