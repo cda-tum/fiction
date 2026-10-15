@@ -127,6 +127,7 @@ class generate_edge_intersection_graph_impl
             objectives,
             [this](const auto& obj)
             {
+                /** @brief Candidate coordinate paths for the current routing objective. */
                 path_collection paths{};
 
                 if (!ps.path_limit.has_value())
@@ -142,6 +143,7 @@ class generate_edge_intersection_graph_impl
                                                                                 *ps.path_limit, {ps.crossings});
                 }
 
+                /** @brief Candidate paths with storage for graph vertex labels. */
                 std::vector<clk_path> obj_paths{std::make_move_iterator(paths.begin()),
                                                 std::make_move_iterator(paths.end())};
 

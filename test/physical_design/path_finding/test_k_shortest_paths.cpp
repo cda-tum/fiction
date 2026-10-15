@@ -52,6 +52,7 @@ TEST_CASE("Yen's algorithm respects a zero path limit", "[k-shortest-paths]")
 
 TEST_CASE("Yen validates routing endpoints when paths are requested", "[k-shortest-paths]")
 {
+    /** @brief Single-tile geometry for endpoint validation. */
     const cartesian_layout layout{{1, 1}};
     CHECK_THROWS_AS(yen_k_shortest_paths(layout, {.source = {2, 0}, .target = {1, 1}}, 1), std::invalid_argument);
     CHECK_THROWS_AS(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 2}}, 1), std::invalid_argument);
@@ -922,16 +923,21 @@ TEST_CASE("Searches share concrete coordinate paths across geometries", "[k-shor
     /** @brief Checks endpoint and membership contracts. @param layout Geometry to search. */
     const auto check_paths = [](const auto& layout)
     {
-        const routing_objective      objective{.source = {0, 0}, .target = {1, 1}};
+        /** @brief Routing endpoints shared by the geometry checks. */
+        const routing_objective objective{.source = {0, 0}, .target = {1, 1}};
+        /** @brief A* path between the test endpoints. */
         const layout_coordinate_path shortest = a_star(layout, objective);
-        const path_collection        all      = enumerate_all_paths(layout, objective);
-        const path_collection        limited  = yen_k_shortest_paths(layout, objective, 10);
+        /** @brief All simple paths between the test endpoints. */
+        const path_collection all = enumerate_all_paths(layout, objective);
+        /** @brief Up to ten Yen paths between the test endpoints. */
+        const path_collection limited = yen_k_shortest_paths(layout, objective, 10);
         REQUIRE_FALSE(shortest.empty());
         REQUIRE_FALSE(all.empty());
         REQUIRE_FALSE(limited.empty());
         CHECK(shortest.source() == objective.source);
         CHECK(shortest.target() == objective.target);
         CHECK(all.contains(shortest));
+        /** @brief Yen path checked against exhaustive enumeration. */
         for (const auto& path : limited)
         {
             CHECK(path.source() == objective.source);
@@ -941,6 +947,7 @@ TEST_CASE("Searches share concrete coordinate paths across geometries", "[k-shor
     };
     SECTION("Cartesian")
     {
+        /** @brief Two-by-two Cartesian geometry for shared-path checks. */
         const cartesian_layout layout{{2, 2}};
         check_paths(layout);
         CHECK(a_star(layout, {{0, 0}, {1, 1}}).size() == 3);

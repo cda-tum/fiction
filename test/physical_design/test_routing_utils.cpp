@@ -302,14 +302,19 @@ TEST_CASE("Routing paths propagate allocation failure", "[routing-utils]")
 
 TEST_CASE("Coordinate path containers preserve endpoints and duplicates", "[routing-utils]")
 {
+    /** @brief Empty path for default endpoint checks. */
     const layout_coordinate_path empty{};
     CHECK(empty.source() == fiction::layouts::layout_base::coordinate{});
     CHECK(empty.target() == fiction::layouts::layout_base::coordinate{});
+    /** @brief Signed-coordinate path for endpoint and membership checks. */
     const layout_coordinate_path path{{{-2, -1}, {-1, -2}}};
     CHECK(path.source() == fiction::layouts::layout_base::coordinate{-2, -1});
     CHECK(path.target() == fiction::layouts::layout_base::coordinate{-1, -2});
+    /** @brief Ordered path storage that retains duplicates. */
     path_collection collection{};
-    path_set        unique{};
+    /** @brief Unique path storage that rejects duplicate values. */
+    path_set unique{};
+    /** @brief Number of duplicate insertions performed. */
     for (auto i = 0; i < 2; ++i)
     {
         collection.add(path);
