@@ -85,7 +85,7 @@ struct population_stability_information
     std::unordered_map<transition_type, std::pair<lattice_site, double>> transition_potentials{};
     /**
      * For each transition type, the distance (unit: nm) an additional SiDB would have to be placed at to induce
-     * the required potential difference.
+     * the required potential difference. Zero potential difference corresponds to positive infinity.
      */
     std::unordered_map<transition_type, double> distance_corresponding_to_potential{};
     /**
@@ -142,9 +142,14 @@ class physical_population_stability_impl
      * energy.
      *
      * @return The population stability information, one entry per distinct charge distribution.
+     * @throws std::invalid_argument If permittivity is nonpositive or non-finite, screening distance is nonpositive or
+     * NaN, or precision exceeds the decimal precision of `double`.
      */
     [[nodiscard]] std::vector<population_stability_information> run()
     {
+        // Validate conversion inputs even when the layout has no charge transitions.
+        static_cast<void>(model::potential_to_distance_conversion(
+            0.0, params.sim_params, params.precision_for_distance_corresponding_to_potential));
         const auto                       deadline = utils::make_deadline(params.timeout, params.deadline);
         const engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params, .deadline = deadline};
 
@@ -314,6 +319,8 @@ class physical_population_stability_impl
  * @param lyt The layout to analyze.
  * @param params Parameters.
  * @return The population stability information, one entry per distinct charge distribution.
+ * @throws std::invalid_argument If permittivity is nonpositive or non-finite, screening distance is nonpositive or NaN,
+ * or precision exceeds the decimal precision of `double`.
  */
 [[nodiscard]] inline std::vector<population_stability_information>
 physical_population_stability(const layout& lyt, const physical_population_stability_params& params)

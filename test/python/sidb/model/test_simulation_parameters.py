@@ -47,7 +47,7 @@ def test_base_assignment_preserves_valid_model(base: int) -> None:
 
 
 @pytest.mark.parametrize("name", ["epsilon_r", "lambda_tf"])
-@pytest.mark.parametrize("value", [0.0, -1.0, float("nan"), float("inf")])
+@pytest.mark.parametrize("value", [0.0, -1.0, float("nan")])
 def test_screening_assignment_preserves_valid_model(name: str, value: float) -> None:
     """Physical-model setters preserve the constructor's screening constraints."""
     params = sidb_simulation_parameters()
@@ -55,3 +55,12 @@ def test_screening_assignment_preserves_valid_model(name: str, value: float) -> 
     with pytest.raises(ValueError, match=name):
         setattr(params, name, value)
     assert getattr(params, name) == previous
+
+
+def test_unscreened_model_assignment() -> None:
+    """Positive infinite screening distance represents the unscreened model."""
+    params = sidb_simulation_parameters()
+    params.lambda_tf = float("inf")
+    assert params.lambda_tf == float("inf")
+    with pytest.raises(ValueError, match="epsilon_r"):
+        params.epsilon_r = float("inf")

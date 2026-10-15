@@ -498,7 +498,7 @@ def physical_population_stability(
     """
     Determine the stability of the SiDB population under the physical model.
     The keyword options select simulation, potential precision, and the execution budget.
-    Raises ValueError for an invalid base or a precision yielding a zero or non-finite distance step.
+    Raises ValueError for invalid physical values or a precision outside 0 to 15.
     Distance conversion bisects the distance bracket up to floating-point resolution.
 
     Args:
@@ -507,7 +507,7 @@ def physical_population_stability(
         mu_minus: Negative-charge transition energy in eV.
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.
-        precision_for_distance_corresponding_to_potential: Decimal places for distance conversion, limited by floating-point resolution.
+        precision_for_distance_corresponding_to_potential: Decimal places for distance conversion, from 0 to 15.
     """
 
 class physically_valid_parameters_domain:

@@ -357,9 +357,10 @@ def potential_to_distance_conversion(
     """
     Compute the distance corresponding to the potential with the requested precision.
     The physical model is supplied by the scalar keyword values.
-    Potential must be positive. Precision must be a non-negative integer yielding a
-    positive finite step. The search bisects the distance bracket; floating-point
-    resolution limits the effective precision. Permittivity and screening distance must be positive and finite.
+    Zero potential returns positive infinity; positive infinite potential returns the minimum distance.
+    Precision must be an integer from 0 to 15. The search bisects the distance bracket;
+    floating-point resolution limits the effective precision. Invalid conversion inputs raise ValueError.
+    Positive infinite screening distance selects the unscreened Coulomb potential.
 
     Args:
         base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
