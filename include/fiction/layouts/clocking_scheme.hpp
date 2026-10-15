@@ -491,7 +491,7 @@ transpose(const std::vector<std::vector<scheme::clock_number>>& cutout)
 
     // clang-format on
 
-    const bool  odd  = a == arrangement::ODD_ROW || a == arrangement::ODD_COLUMN;
+    const bool  odd  = is_odd_arrangement(a);
     const auto& rows = [&]() -> const cutout&
     {
         if (n == num_clks::THREE)
