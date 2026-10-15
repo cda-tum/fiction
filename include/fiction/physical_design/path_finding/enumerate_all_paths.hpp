@@ -188,8 +188,7 @@ class enumerate_all_paths_impl
             }
         }
 
-        // after recursion, remove current coordinate from path and mark it as unvisited to allow it in other paths
-        p.pop_back();
+        // allow the current coordinate in other paths after recursion
         mark_unvisited(src);
     }
 };
