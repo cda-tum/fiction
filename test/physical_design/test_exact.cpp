@@ -904,6 +904,7 @@ TEST_CASE("Exact physical design reports progress", "[exact]")
 
         exact_physical_design_stats stats{};
 
+        /** @brief Placement result from the selected exact entry point. */
         const auto layout = with_blacklist ? exact_with_blacklist<cartesian_gate_layout>(ntk, {}, params, &stats) :
                                              exact<cartesian_gate_layout>(ntk, params, &stats);
 

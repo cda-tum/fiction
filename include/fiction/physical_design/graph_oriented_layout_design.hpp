@@ -2692,10 +2692,12 @@ std::optional<Lyt> graph_oriented_layout_design(const tec_nt& ntk, graph_oriente
         throw std::invalid_argument("tiles_to_skip_between_pis must lie in [0, 2^20]");
     }
 
-    graph_oriented_layout_design_stats             st{};
+    graph_oriented_layout_design_stats st{};
+    /** @brief GOLD invocation state with owned options and an optional custom cost callback. */
     detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), std::move(ps), st,
                                                      std::move(custom_cost_objective)};
 
+    /** @brief Optional layout returned by the GOLD search. */
     auto result = p.run();
 
     if (pst)
