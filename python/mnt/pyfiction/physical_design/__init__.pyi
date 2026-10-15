@@ -454,9 +454,10 @@ def apply_qca_one_library(
 ) -> mnt.pyfiction.qca.qca_layout:
     """
     Apply the selected gate library to produce a cell-level layout.
-    The cell grid spans the gate-level layout. Tile-based clock zones follow the
-    gate-level clocking. Supported synchronization elements apply each gate tile's
-    delay to its entire clock zone, including cells added later. Input and output
+    The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+    follow the gate-level clocking. Supported synchronization elements apply each
+    gate tile's delay to its entire clock zone, including cells added later. molQCA
+    cell types carry the clock phases defined by the gate library. Input and output
     cells retain their object names. The Bestagon library produces an SiDB layout
     on the H-Si(100)-2x1 lattice.
 
@@ -476,9 +477,10 @@ def apply_sim7_mol_library(
 ) -> mnt.pyfiction.mol_qca.mol_qca_layout:
     """
     Apply the selected gate library to produce a cell-level layout.
-    The cell grid spans the gate-level layout. Tile-based clock zones follow the
-    gate-level clocking. Supported synchronization elements apply each gate tile's
-    delay to its entire clock zone, including cells added later. Input and output
+    The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+    follow the gate-level clocking. Supported synchronization elements apply each
+    gate tile's delay to its entire clock zone, including cells added later. molQCA
+    cell types carry the clock phases defined by the gate library. Input and output
     cells retain their object names. The Bestagon library produces an SiDB layout
     on the H-Si(100)-2x1 lattice.
 
@@ -499,9 +501,10 @@ def apply_topolinano_library(
 ) -> mnt.pyfiction.inml.inml_layout:
     """
     Apply the selected gate library to produce a cell-level layout.
-    The cell grid spans the gate-level layout. Tile-based clock zones follow the
-    gate-level clocking. Supported synchronization elements apply each gate tile's
-    delay to its entire clock zone, including cells added later. Input and output
+    The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+    follow the gate-level clocking. Supported synchronization elements apply each
+    gate tile's delay to its entire clock zone, including cells added later. molQCA
+    cell types carry the clock phases defined by the gate library. Input and output
     cells retain their object names. The Bestagon library produces an SiDB layout
     on the H-Si(100)-2x1 lattice.
 
@@ -521,9 +524,10 @@ def apply_bestagon_library(
 ) -> mnt.pyfiction.sidb.sidb_layout:
     """
     Apply the selected gate library to produce a cell-level layout.
-    The cell grid spans the gate-level layout. Tile-based clock zones follow the
-    gate-level clocking. Supported synchronization elements apply each gate tile's
-    delay to its entire clock zone, including cells added later. Input and output
+    The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+    follow the gate-level clocking. Supported synchronization elements apply each
+    gate tile's delay to its entire clock zone, including cells added later. molQCA
+    cell types carry the clock phases defined by the gate library. Input and output
     cells retain their object names. The Bestagon library produces an SiDB layout
     on the H-Si(100)-2x1 lattice.
 
