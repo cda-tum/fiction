@@ -745,6 +745,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
+  - SiDB layout documentation now distinguishes charged defect types from non-zero defect charges.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
   - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.

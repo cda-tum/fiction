@@ -252,6 +252,15 @@ TEST_CASE("Defects", "[layout]")
         CHECK(lyt.get_defect({5, 2, 0}).type == defect_type::NONE);
         CHECK(lyt.get_defect({6, 2, 0}) == charged);
     }
+    SECTION("charged defect types with zero charge also count as neutral")
+    {
+        lyt.assign_defect({5, 2, 0}, defect{defect_type::SI_VACANCY});
+        CHECK(lyt.get_defect({5, 2, 0}).charge == 0);
+        CHECK(lyt.num_charged_defects() == 2);
+        CHECK(lyt.num_neutral_defects() == 2);
+        CHECK(lyt.num_negatively_charged_defects() == 0);
+        CHECK(lyt.num_positively_charged_defects() == 1);
+    }
     SECTION("move using sites borrowed from the layout")
     {
         lyt.move_defect(lyt.defects()[0].first, lyt.defects()[1].first);

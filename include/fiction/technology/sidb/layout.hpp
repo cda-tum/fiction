@@ -489,9 +489,10 @@ class layout
         return count_defects(model::is_negatively_charged_defect);
     }
     /**
-     * Number of charged defects.
+     * Number of defects classified as charged by `model::is_charged_defect_type`. Includes `DB`, `SI_VACANCY`, and
+     * `ARSENIC` even at zero charge; these defects also contribute to `num_neutral_defects`.
      *
-     * @return Number of defects with non-zero charge.
+     * @return Number of defects with non-zero charge or a charged defect type.
      */
     [[nodiscard]] uint64_t num_charged_defects() const noexcept
     {
