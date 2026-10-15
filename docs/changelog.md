@@ -23,18 +23,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
-  - Leading `fiction --help` and `fiction -h` flags show route help even with additional options.
-    Plotting preserves broken dependency diagnostics and uses installation hints only for missing packages.
-  - Dedicated operational-domain commands now run without loading the interactive shell or its stores.
-  - `fiction opdom` now requires an explicit `--csv` or `--plot` destination instead of choosing a PNG filename.
-  - Operational-domain help now emphasizes `--algorithm` and `--samples`; legacy algorithm flags remain accepted.
-  - `fiction opdom` runs the dedicated workflow; `fiction repl` explicitly selects the shell.
-    Bare `fiction`, shell flags, and piped input retain their behavior.
+  - `fiction opdom` computes SQD operational domains without loading the shell, with statistics and 2D/3D
+    static or interactive plots. It requires `--csv` or `--plot`; plotting needs `mnt-pyfiction[plot]`.
+  - `fiction repl` explicitly selects the shell; bare `fiction`, shell flags, and piped input retain their behavior.
+    Leading `fiction --help` and `fiction -h` flags show route help even with additional options.
   - Both `opdom` entry points accept `--algorithm` for all reconstruction methods, with `--samples` for
-    random sampling, flood fill, and contour tracing. `--sketch` adds filter-only analysis to any method.
-  - Added `fiction opdom` and shared `opdom` options for SQD computation, statistics, and 2D/3D static or
-    interactive plots, including Sketch. Install `mnt-pyfiction[plot]` for plotting support.
-  - Operational domain plots validate NumPy and colors before computation. Viewer failures retain exports and statistics.
+    random sampling, flood fill, and contour tracing. Legacy flags remain accepted; `--sketch` adds filter-only analysis.
+  - Operational domain plots validate dependencies and colors before computation and preserve broken-package diagnostics.
+    Viewer failures retain exports and statistics.
   - `uv tool install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
     completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
