@@ -435,6 +435,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate-set factories return keyword dictionaries for `technology_mapping`; nested timeout
     options use `design_gate_timeout` and `quicksim_timeout`.
 
+  - Gate-set factories use `TechnologyMappingOptions` return types, so type checkers accept direct keyword expansion.
+
   - Single-layout generation omits multiple-layout options; non-gate temperature analysis omits gate options.
     Supplied-wire overloads omit `threshold_bdl_interdistance`.
 

@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -43,7 +43,7 @@ def test_technology_mapping_accepts_every_network_type(
     resources_dir: Path, cls: type[technology_network | aig_network | xag_network | mig_network]
 ) -> None:
     network = read_network(str(resources_dir / "mux21.v"), network_type=cls)
-    options: dict[str, Any] = all_supported_standard_functions()
+    options = all_supported_standard_functions()
     options["lt2"] = True
     mapped = technology_mapping(network, **options)
     assert isinstance(mapped, technology_network)

@@ -233,6 +233,8 @@ result = quickexact(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0
 mapped = technology_mapping(network, **and_or_not())
 ```
 
+Gate-set factories return dictionaries typed as `TechnologyMappingOptions`, whose keys match `technology_mapping`.
+
 SiDB computational inputs use the scalar keywords `base`, `mu_minus`, `epsilon_r`, and `lambda_tf`.
 `base` must be 2 or 3, `mu_minus` must be finite, and `epsilon_r` must be positive and finite.
 `lambda_tf` must be positive; positive infinity selects the unscreened model.

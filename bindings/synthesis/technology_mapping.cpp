@@ -190,6 +190,7 @@ Args:
  */
 void register_technology_mapping(nb::module_& m)
 {
+    m.attr("TechnologyMappingOptions") = nb::module_::import_("mnt.pyfiction._types").attr("TechnologyMappingOptions");
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
     nb::exception<fiction::synthesis::missing_required_gates_exception>(
@@ -223,7 +224,8 @@ void register_technology_mapping(nb::module_& m)
             const auto params = fiction::synthesis::and_or_not();
             return detail::technology_mapping_keywords(params);
         },
-        nb::sig("def and_or_not() -> dict[str, bool]"), "Return boolean mapping keywords for AND, OR, and NOT gates.");
+        nb::sig("def and_or_not() -> TechnologyMappingOptions"),
+        "Return boolean mapping keywords for AND, OR, and NOT gates.");
 
     m.def(
         "and_or_not_maj",
@@ -232,7 +234,7 @@ void register_technology_mapping(nb::module_& m)
             const auto params = fiction::synthesis::and_or_not_maj();
             return detail::technology_mapping_keywords(params);
         },
-        nb::sig("def and_or_not_maj() -> dict[str, bool]"),
+        nb::sig("def and_or_not_maj() -> TechnologyMappingOptions"),
         "Return boolean mapping keywords for AND, OR, NOT, and MAJ gates.");
 
     m.def(
@@ -242,7 +244,7 @@ void register_technology_mapping(nb::module_& m)
             const auto params = fiction::synthesis::all_standard_2_input_functions();
             return detail::technology_mapping_keywords(params);
         },
-        nb::sig("def all_standard_2_input_functions() -> dict[str, bool]"),
+        nb::sig("def all_standard_2_input_functions() -> TechnologyMappingOptions"),
         "Return boolean mapping keywords for standard two-input functions.");
 
     m.def(
@@ -252,7 +254,7 @@ void register_technology_mapping(nb::module_& m)
             const auto params = fiction::synthesis::all_standard_3_input_functions();
             return detail::technology_mapping_keywords(params);
         },
-        nb::sig("def all_standard_3_input_functions() -> dict[str, bool]"),
+        nb::sig("def all_standard_3_input_functions() -> TechnologyMappingOptions"),
         "Return boolean mapping keywords for standard three-input functions.");
 
     m.def(
@@ -262,7 +264,7 @@ void register_technology_mapping(nb::module_& m)
             const auto params = fiction::synthesis::all_supported_standard_functions();
             return detail::technology_mapping_keywords(params);
         },
-        nb::sig("def all_supported_standard_functions() -> dict[str, bool]"),
+        nb::sig("def all_supported_standard_functions() -> TechnologyMappingOptions"),
         "Return boolean mapping keywords for all supported standard functions.");
 
     detail::register_technology_mapping_impl<py_tec_network>(m);

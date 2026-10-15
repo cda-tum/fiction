@@ -14,6 +14,7 @@ from collections.abc import Callable
 from typing import Literal, overload
 
 import mnt.pyfiction.networks
+from mnt.pyfiction._types import TechnologyMappingOptions as TechnologyMappingOptions
 
 class dynamic_truth_table:
     @overload
@@ -432,19 +433,19 @@ class technology_mapping_stats:
     def mapper_stats(self) -> mnt.pyfiction.synthesis.mapper_stats:
         """Statistics for mockturtle's mapper."""
 
-def and_or_not() -> dict[str, bool]:
+def and_or_not() -> TechnologyMappingOptions:
     """Return boolean mapping keywords for AND, OR, and NOT gates."""
 
-def and_or_not_maj() -> dict[str, bool]:
+def and_or_not_maj() -> TechnologyMappingOptions:
     """Return boolean mapping keywords for AND, OR, NOT, and MAJ gates."""
 
-def all_standard_2_input_functions() -> dict[str, bool]:
+def all_standard_2_input_functions() -> TechnologyMappingOptions:
     """Return boolean mapping keywords for standard two-input functions."""
 
-def all_standard_3_input_functions() -> dict[str, bool]:
+def all_standard_3_input_functions() -> TechnologyMappingOptions:
     """Return boolean mapping keywords for standard three-input functions."""
 
-def all_supported_standard_functions() -> dict[str, bool]:
+def all_supported_standard_functions() -> TechnologyMappingOptions:
     """Return boolean mapping keywords for all supported standard functions."""
 
 @overload
