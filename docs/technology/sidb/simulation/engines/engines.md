@@ -35,11 +35,11 @@
 
 ::::
 
+## Exhaustive Ground State Simulation
+
 (quickexact)=
 
-(clustercomplete)=
-
-## Exhaustive Ground State Simulation
+### QuickExact
 
 ::::{tab-set}
 :sync-group: language
@@ -57,6 +57,32 @@
 
 ```
 
+:::
+
+:::{tab-item} Python
+:sync: python
+
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb.simulation.engines.automatic_base_number_detection
+   :members:
+
+.. autofunction:: mnt.pyfiction.sidb.simulation.engines.quickexact
+```
+
+:::
+
+::::
+
+(clustercomplete)=
+
+### ClusterComplete
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
 **Header:** `fiction/technology/sidb/simulation/engines/clustercomplete.hpp`
 
 ```{doxygenstruct} fiction::sidb::simulation::engines::clustercomplete_params
@@ -66,6 +92,30 @@
 ```{doxygenfunction} fiction::sidb::simulation::engines::clustercomplete(const layout& lyt, const clustercomplete_params& params = {})
 
 ```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb.simulation.engines.ground_state_space_reporting
+   :members:
+
+.. autofunction:: mnt.pyfiction.sidb.simulation.engines.clustercomplete
+```
+
+:::
+
+::::
+
+### ExGS
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
 
 **Header:** `fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp`
 
@@ -79,16 +129,6 @@
 :sync: python
 
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.engines.automatic_base_number_detection
-   :members:
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.engines.quickexact
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.engines.ground_state_space_reporting
-   :members:
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.engines.clustercomplete
-
 .. autofunction:: mnt.pyfiction.sidb.simulation.engines.exhaustive_ground_state_simulation
 ```
 

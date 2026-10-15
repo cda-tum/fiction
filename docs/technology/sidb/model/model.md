@@ -1,4 +1,6 @@
-# SiDB Model
+(sidb-model)=
+
+# Model
 
 ## Physical Parameters
 

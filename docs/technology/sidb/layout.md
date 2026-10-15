@@ -1,4 +1,6 @@
-# SiDB Layout
+(sidb-layout)=
+
+# Layout
 
 An SiDB layout places SiDBs and surface defects on the lattice sites of one hydrogen-passivated silicon surface. The
 surface is a Bravais lattice with a two-site basis: two lattice vectors `a1` and `a2` plus the two basis sites

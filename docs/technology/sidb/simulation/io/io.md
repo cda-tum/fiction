@@ -1,4 +1,4 @@
-(simulation-i/o)=
+(simulation-io)=
 
 # I/O
 

@@ -47,9 +47,7 @@
 
 ::::
 
-(opdom)=
-
-## Operational Domain Computation
+## Operational Checks
 
 ::::{tab-set}
 :sync-group: language
@@ -102,6 +100,44 @@
 ```{doxygenfunction} fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 
 ```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_status
+   :members:
+
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_condition
+   :members:
+
+.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy
+   :members:
+
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.is_operational
+
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_input_patterns
+
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.is_kink_induced_non_operational
+
+.. autofunction:: mnt.pyfiction.sidb.simulation.logic.kink_induced_non_operational_input_patterns
+```
+
+:::
+
+::::
+
+(opdom)=
+
+## Operational Domain Computation
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
 
 **Header:** `fiction/technology/sidb/simulation/logic/operational_domain.hpp`
 
@@ -189,45 +225,23 @@ flood fill or contour tracing in three dimensions.
 
 ```
 
-**Header:** `fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp`
-
-```{doxygenstruct} fiction::sidb::simulation::logic::operational_domain_ratio_params
-:members:
-```
-
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_ratio(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const parameter_point& pp, const operational_domain_ratio_params& params = {})
-
-```
-
-**Header:** `fiction/technology/sidb/simulation/logic/verify_logic_match.hpp`
-
-```{doxygenfunction} fiction::sidb::simulation::logic::verify_logic_match
-
-```
-
 :::
 
 :::{tab-item} Python
 :sync: python
 
+The same four strategies are available here. Grid search and random sampling accept any number of
+sweep dimensions; flood fill and contour tracing follow the shape of the operational region and
+therefore need at least two. In two dimensions, contour tracing walks the boundary as a closed
+curve; in three or more, where the boundary is a surface, it collects the boundary instead.
+
+Setting `strategy_to_analyze_operational_status` to `FILTER_ONLY` computes the _operational
+domain sketch_, which classifies each parameter point by filtering alone instead of by physical
+simulation. It requires `REJECT_KINKS` and a layout with `LOGIC` dots; without either, the
+call raises `ValueError`. The sketch pairs best with grid search and random sampling — see the
+C++ tab for why combining it with flood fill or contour tracing needs a much higher sample count.
+
 ```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_status
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_condition
-   :members:
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_analysis_strategy
-   :members:
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.logic.is_operational
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_input_patterns
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.logic.is_kink_induced_non_operational
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.logic.kink_induced_non_operational_input_patterns
-
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.sweep_parameter
    :members:
 
@@ -245,20 +259,7 @@ flood fill or contour tracing in three dimensions.
 
 .. autoclass:: mnt.pyfiction.sidb.simulation.logic.operational_domain_stats
    :members:
-```
 
-The same four strategies are available here. Grid search and random sampling accept any number of
-sweep dimensions; flood fill and contour tracing follow the shape of the operational region and
-therefore need at least two. In two dimensions, contour tracing walks the boundary as a closed
-curve; in three or more, where the boundary is a surface, it collects the boundary instead.
-
-Setting `strategy_to_analyze_operational_status` to `FILTER_ONLY` computes the _operational
-domain sketch_, which classifies each parameter point by filtering alone instead of by physical
-simulation. It requires `REJECT_KINKS` and a layout with `LOGIC` dots; without either, the
-call raises `ValueError`. The sketch pairs best with grid search and random sampling — see the
-C++ tab for why combining it with flood fill or contour tracing needs a much higher sample count.
-
-```{eval-rst}
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_grid_search
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_random_sampling
@@ -274,13 +275,50 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_flood_fill
 
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.critical_temperature_domain_contour_tracing
+```
 
+:::
+
+::::
+
+## Operational Domain Ratio
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp`
+
+```{doxygenstruct} fiction::sidb::simulation::logic::operational_domain_ratio_params
+:members:
+```
+
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_ratio(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const parameter_point& pp, const operational_domain_ratio_params& params = {})
+
+```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+```{eval-rst}
 .. autofunction:: mnt.pyfiction.sidb.simulation.logic.operational_domain_ratio
 ```
 
 :::
 
 ::::
+
+## Logic Matching
+
+**Header:** `fiction/technology/sidb/simulation/logic/verify_logic_match.hpp`
+
+```{doxygenfunction} fiction::sidb::simulation::logic::verify_logic_match
+
+```
 
 ## Binary-dot Logic (BDL) Pair Detection
 

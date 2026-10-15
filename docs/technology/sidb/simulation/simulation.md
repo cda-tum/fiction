@@ -1,4 +1,6 @@
-# SiDB Simulation
+(sidb-simulation)=
+
+# Simulation
 
 ```{toctree}
 :maxdepth: 1

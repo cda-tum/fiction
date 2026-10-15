@@ -1,4 +1,6 @@
-# SiDB Generators
+(sidb-generators)=
+
+# Generators
 
 ```{toctree}
 :maxdepth: 1
