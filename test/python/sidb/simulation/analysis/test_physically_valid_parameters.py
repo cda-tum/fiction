@@ -72,8 +72,8 @@ def test_one_sidb_111_lattice() -> None:
 def test_physical_validity_rejects_gate_options(name: str, value: object) -> None:
     """Physical-validity sweeps expose physical and sweep options without gate detection."""
     layout = sidb_layout()
+    options: dict[str, Any] = {name: value}
     with pytest.raises(TypeError):
-        options: dict[str, Any] = {name: value}
         physically_valid_parameters(layout, charge_distribution(layout), **options)
 
 
