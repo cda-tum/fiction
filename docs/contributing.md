@@ -165,6 +165,16 @@ Contributions written with the help of an AI agent are welcome, under two condit
 
 Agent instructions live in `AGENTS.md` at the repository root, with additional files in the subdirectories they apply to. If your tool expects a different file name, create a local symlink — for example `ln -s AGENTS.md CLAUDE.md`. Those names are gitignored, so the repository itself stays tool-neutral.
 
+## Contract Audits
+
+Use the [SpecAudit method](https://github.com/cda-tum/fiction/blob/main/.agent/AUDITS.md)
+to check whether tests protect intended behavior or constrain incidental choices.
+Start with one concrete concern, inspect the contract and consumers, and support
+behavioral claims with reproducible experiments. Preserve regression coverage,
+numerical accuracy, input validation, and compatibility. Keep optional audit
+records in ignored `.ai/audits/`; apply fixes and publish only within the scope
+the maintainer authorized. The method includes a SiDB text-printer example request.
+
 ```{raw} html
 <hr>
 ```
