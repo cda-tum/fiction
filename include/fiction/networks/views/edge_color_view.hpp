@@ -32,6 +32,7 @@ namespace fiction::networks::views
  * @tparam Ntk mockturtle network type.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk>
 class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<Ntk>
 {
   public:
@@ -46,10 +47,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      *
      * @param ntk Network to color.
      */
-    explicit out_of_place_edge_color_view(const Ntk& ntk) : parent_view(ntk)
-    {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    }
+    explicit out_of_place_edge_color_view(const Ntk& ntk) : parent_view(ntk) {}
     /**
      * Remove all assigned colors.
      */

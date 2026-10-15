@@ -23,6 +23,7 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
+#include <fiction/networks/mockturtle_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
 
@@ -44,6 +45,48 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
+
+/**
+ * @brief Checks whether a callback supports filtered element traversal.
+ * @tparam Fn Callback type to test.
+ */
+template <typename Fn>
+concept filtered_callback = requires(int* first, Fn fn) {
+    mockturtle::detail::foreach_element_if_transform<int*, int>(
+        first, first, [](int) { return true; }, [](int value) { return value; }, fn);
+};
+
+static_assert(filtered_callback<decltype([](int) {})>);
+static_assert(filtered_callback<decltype([](int, uint32_t) {})>);
+static_assert(filtered_callback<decltype([](int) { return true; })>);
+static_assert(filtered_callback<decltype([](int, uint32_t) { return true; })>);
+static_assert(!filtered_callback<int>);
+
+TEST_CASE("Filtered traversal transforms elements and stops on false", "[mockturtle]")
+{
+    int              values[]{1, 2, 3, 4, 5, 6};
+    const auto       even   = [](const int value) { return value % 2 == 0; };
+    const auto       triple = [](const int value) { return 3 * value; };
+    std::vector<int> visited{};
+    mockturtle::detail::foreach_element_if_transform<int*, int>(
+        std::begin(values), std::end(values), even, triple, [&visited](const int value) { visited.push_back(value); });
+    CHECK(visited == std::vector<int>{6, 12, 18});
+
+    visited.clear();
+    std::vector<uint32_t> indices{};
+    const auto            stopped = mockturtle::detail::foreach_element_if_transform<int*, int>(
+        std::begin(values), std::end(values), even, triple,
+        [&visited, &indices](const int value, const uint32_t index)
+        {
+            visited.push_back(value);
+            indices.push_back(index);
+            return value < 12;
+        },
+        5);
+    CHECK(stopped == std::begin(values) + 4);
+    CHECK(visited == std::vector<int>{6, 12});
+    CHECK(indices == std::vector<uint32_t>{5, 6});
+}
 
 TEST_CASE("Extracted layout simulation", "[mockturtle]")
 {

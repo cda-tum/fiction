@@ -210,34 +210,23 @@ class convert_network_impl<NtkDest, NtkSrc, false>
  * @note If `NtkDest` and `NtkSrc` are of the same type, this function returns `ntk` cleaned using
  * `mockturtle::cleanup_dangling`.
  *
- * @tparam NtkDest Type of the returned logic network.
- * @tparam NtkSrc Type of the input logic network.
+ * @tparam NtkDest Logic network with constant, input, output, and Boolean gate creation.
+ * @tparam NtkSrc Logic network with node, interface, and fanin traversal.
  * @param ntk The input logic network.
  * @return A logic network of type `NtkDest` that is logically equivalent to `ntk`.
  */
 template <typename NtkDest, typename NtkSrc>
+    requires mockturtle::is_network_type_v<NtkSrc> && mockturtle::is_network_type_v<NtkDest> &&
+             mockturtle::has_get_node_v<NtkSrc> && mockturtle::has_is_complemented_v<NtkSrc> &&
+             mockturtle::has_foreach_pi_v<NtkSrc> && mockturtle::has_foreach_gate_v<NtkSrc> &&
+             mockturtle::has_foreach_po_v<NtkSrc> && mockturtle::has_foreach_fanin_v<NtkSrc> &&
+             mockturtle::has_get_constant_v<NtkSrc> && mockturtle::has_get_constant_v<NtkDest> &&
+             mockturtle::has_create_pi_v<NtkDest> && mockturtle::has_create_po_v<NtkDest> &&
+             mockturtle::has_create_not_v<NtkDest> && mockturtle::has_create_and_v<NtkDest> &&
+             mockturtle::has_create_or_v<NtkDest> && mockturtle::has_create_xor_v<NtkDest> &&
+             mockturtle::has_create_maj_v<NtkDest>
 NtkDest convert_network(const NtkSrc& ntk)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
-
-    static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node function");
-    static_assert(mockturtle::has_is_complemented_v<NtkSrc>, "NtkSrc does not implement the is_complemented function");
-    static_assert(mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi function");
-    static_assert(mockturtle::has_foreach_gate_v<NtkSrc>, "NtkSrc does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po function");
-    static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
-
-    static_assert(mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant function");
-    static_assert(mockturtle::has_get_constant_v<NtkDest>, "NtkDest does not implement the get_constant function");
-
-    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi function");
-    static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po function");
-    static_assert(mockturtle::has_create_not_v<NtkDest>, "NtkDest does not implement the create_not function");
-    static_assert(mockturtle::has_create_and_v<NtkDest>, "NtkDest does not implement the create_and function");
-    static_assert(mockturtle::has_create_or_v<NtkDest>, "NtkDest does not implement the create_or function");
-    static_assert(mockturtle::has_create_xor_v<NtkDest>, "NtkDest does not implement the create_xor function");
-    static_assert(mockturtle::has_create_maj_v<NtkDest>, "NtkDest does not implement the create_maj function");
     // TODO handle ci/ro/etc...
 
     assert(ntk.is_combinational() && "Network has to be combinational");

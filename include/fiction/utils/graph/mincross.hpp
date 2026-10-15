@@ -638,11 +638,9 @@ class mincross_impl
  * @return A copy of the input network with reordered ranks to reduce edge crossings.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_rank_position_v<Ntk>
 Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position function");
-
     assert(fiction::synthesis::is_balanced(ntk) &&
            "Networks have to be balanced for level-by-level crossing minimization");
 

@@ -56,6 +56,9 @@ template <class Ntk, bool has_rank_interface =
                          mockturtle::has_rank_position_v<Ntk> && mockturtle::has_at_rank_position_v<Ntk> &&
                          mockturtle::has_swap_v<Ntk> && mockturtle::has_width_v<Ntk> &&
                          mockturtle::has_foreach_node_in_rank_v<Ntk> && mockturtle::has_foreach_gate_in_rank_v<Ntk>>
+    requires(has_rank_interface || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_node_v<Ntk> &&
+                                    mockturtle::has_get_node_v<Ntk> && mockturtle::has_num_pis_v<Ntk> &&
+                                    mockturtle::has_is_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk>))
 class mutable_rank_view
 {};
 
@@ -97,13 +100,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      */
     explicit mutable_rank_view() : fiction::networks::views::static_depth_view<Ntk>(), ranks{}, max_rank_width{0}
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_num_pis_v<Ntk>, "Ntk does not implement the num_pis method");
-        static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
-        static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
-
         rank_pos.rehash(this->size());
     }
 
@@ -120,13 +116,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
             ranks{this->depth() + 1},
             max_rank_width{0}
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_num_pis_v<Ntk>, "Ntk does not implement the num_pis method");
-        static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
-        static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
-
         rank_pos.rehash(this->size());
 
         init_ranks();
@@ -143,13 +132,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
             ranks{this->depth() + 1},
             max_rank_width{0}
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_num_pis_v<Ntk>, "Ntk does not implement the num_pis method");
-        static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
-        static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
-
         rank_pos.rehash(this->size());
 
         init_ranks(init_ranks_vec);

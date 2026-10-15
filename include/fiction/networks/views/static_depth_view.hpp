@@ -67,6 +67,10 @@ struct depth_view_params
 template <typename Ntk, typename NodeCostFn = mockturtle::unit_cost<Ntk>,
           bool has_depth_interface =
               mockturtle::has_depth_v<Ntk> && mockturtle::has_level_v<Ntk> && mockturtle::has_update_levels_v<Ntk>>
+    requires(has_depth_interface || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> &&
+                                     mockturtle::has_get_node_v<Ntk> && mockturtle::has_is_complemented_v<Ntk> &&
+                                     mockturtle::has_visited_v<Ntk> && mockturtle::has_set_visited_v<Ntk> &&
+                                     mockturtle::has_foreach_po_v<Ntk> && mockturtle::has_foreach_fanin_v<Ntk>))
 class static_depth_view
 {};
 
@@ -112,15 +116,6 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             ps(params),
             cost_fn(node_cost_fn)
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented method");
-        static_assert(mockturtle::has_visited_v<Ntk>, "Ntk does not implement the visited method");
-        static_assert(mockturtle::has_set_visited_v<Ntk>, "Ntk does not implement the set_visited method");
-        static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
-        static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-
         levels.rehash(this->size());
     }
 
@@ -140,15 +135,6 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             ps(params),
             cost_fn(node_cost_fn)
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented method");
-        static_assert(mockturtle::has_visited_v<Ntk>, "Ntk does not implement the visited method");
-        static_assert(mockturtle::has_set_visited_v<Ntk>, "Ntk does not implement the set_visited method");
-        static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
-        static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-
         levels.rehash(this->size());
         update_levels();
     }

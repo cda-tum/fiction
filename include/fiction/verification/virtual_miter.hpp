@@ -77,8 +77,8 @@ Ntk handle_virtual_pis(const Ntk& network)
  * outputs, the method returns `std::nullopt`.
  *
  * @tparam NtkDest The type of the resulting network.
- * @tparam NtkSource1 The type of the first input network.
- * @tparam NtkSource2 The type of the second input network.
+ * @tparam NtkSrc1 Type of the first input network with interface counts.
+ * @tparam NtkSrc2 Type of the second input network with interface counts.
  * @param ntk1_in The first input network.
  * @param ntk2_in The second input network.
  * @return An `optional` containing the virtual miter network if successful, or `std::nullopt` if the networks are
@@ -86,21 +86,14 @@ Ntk handle_virtual_pis(const Ntk& network)
  */
 
 template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
+    requires mockturtle::is_network_type_v<NtkSrc1> && mockturtle::is_network_type_v<NtkSrc2> &&
+             mockturtle::is_network_type_v<NtkDest> && mockturtle::has_num_pis_v<NtkSrc1> &&
+             mockturtle::has_num_pos_v<NtkSrc1> && mockturtle::has_num_pis_v<NtkSrc2> &&
+             mockturtle::has_num_pos_v<NtkSrc2> && mockturtle::has_create_pi_v<NtkDest> &&
+             mockturtle::has_create_po_v<NtkDest> && mockturtle::has_create_xor_v<NtkDest> &&
+             mockturtle::has_create_nary_or_v<NtkDest>
 [[nodiscard]] std::optional<NtkDest> virtual_miter(const NtkSrc1& ntk1_in, const NtkSrc2& ntk2_in) noexcept
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc1>, "NtkSource1 is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkSrc2>, "NtkSource2 is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
-
-    static_assert(mockturtle::has_num_pis_v<NtkSrc1>, "NtkSource1 does not implement the num_pis method");
-    static_assert(mockturtle::has_num_pos_v<NtkSrc1>, "NtkSource1 does not implement the num_pos method");
-    static_assert(mockturtle::has_num_pis_v<NtkSrc2>, "NtkSource2 does not implement the num_pis method");
-    static_assert(mockturtle::has_num_pos_v<NtkSrc2>, "NtkSource2 does not implement the num_pos method");
-    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method");
-    static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po method");
-    static_assert(mockturtle::has_create_xor_v<NtkDest>, "NtkDest does not implement the create_xor method");
-    static_assert(mockturtle::has_create_nary_or_v<NtkDest>, "NtkDest does not implement the create_nary_or method");
-
     // handle (delete and remap) virtual primary inputs
     const NtkSrc1 ntk1 = detail::handle_virtual_pis(ntk1_in);
     const NtkSrc2 ntk2 = detail::handle_virtual_pis(ntk2_in);
