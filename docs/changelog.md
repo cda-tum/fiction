@@ -764,6 +764,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Parameter names and wrapper return values now match Python signatures.
   - API rendering now reads native binding docstrings instead of executing type stubs.
   - API deep links now scroll to targets in an already selected language tab.
+  - File-writer docs now state output failures and Python arguments, returns, and validation errors.
   - Documentation builds reject warnings and preserve signatures and citations in Markdown exports.
   - Corrected test, benchmark, experiment, and documentation build instructions.
 
