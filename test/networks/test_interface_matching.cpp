@@ -15,7 +15,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/interface_matching.hpp>
 
 #include <mockturtle/networks/klut.hpp>
@@ -62,7 +62,7 @@ TEST_CASE("A name duplicated on either side falls back to position", "[interface
 
 TEST_CASE("Interface matching uses unique names before positional remainders", "[interface-matching]")
 {
-    gate_level_layout<cartesian_layout>              lyt{};
+    gate_layout<cartesian_layout>                    lyt{};
     mockturtle::names_view<mockturtle::klut_network> ntk{};
     const std::vector<std::string>                   left{"unique", "dup", "dup", "", "left", "other"};
     const std::vector<std::string>                   right{"dup", "other", "right", "unique", "dup", ""};

@@ -18,7 +18,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
@@ -66,7 +66,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
+        using clk_lyt = gate_layout<lyt>;
 
         SECTION("2DDWave")
         {
@@ -142,7 +142,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
+        using clk_lyt = gate_layout<lyt>;
 
         SECTION("2DDWave")
         {
@@ -171,7 +171,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using gate_lyt = gate_layout<cartesian_layout>;
     using path     = layout_coordinate_path;
 
     SECTION("coordinate paths")
@@ -231,7 +231,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 
 TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using gate_lyt = gate_layout<cartesian_layout>;
     using path     = layout_coordinate_path;
 
     // enable crossings
@@ -350,7 +350,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
 
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruction", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using gate_lyt = gate_layout<cartesian_layout>;
     using path     = layout_coordinate_path;
 
     SECTION("coordinate paths")

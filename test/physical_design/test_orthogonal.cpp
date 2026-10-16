@@ -24,7 +24,7 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -119,7 +119,7 @@ TEST_CASE("East-south coloring", "[orthogonal]")
 
 TEST_CASE("Orthogonal physical design of a network without primary inputs", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     technology_network ntk{};
     ntk.create_po(ntk.get_constant(false));
@@ -134,13 +134,13 @@ TEST_CASE("Layout equivalence", "[orthogonal]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         check_ortho_equiv_all<gate_layout>();
     }
     SECTION("Hexagonal layouts")
     {
-        using gate_layout = gate_level_layout<hexagonal_layout>;
+        using gate_layout = fiction::layouts::gate_layout<hexagonal_layout>;
 
         const auto a =
             GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
@@ -173,7 +173,7 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
     }
     ntk.create_po(output);
 
-    const auto layout = orthogonal<gate_level_layout<cartesian_layout>>(ntk);
+    const auto layout = orthogonal<gate_layout<cartesian_layout>>(ntk);
     check_eq(ntk, layout);
     std::ostringstream    report{};
     gate_level_drv_params params{};
@@ -185,7 +185,7 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
 
 TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     technology_network ntk{};
     const auto         a      = ntk.create_pi();
     const auto         b      = ntk.create_pi();
@@ -202,7 +202,7 @@ TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogo
 
 TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
     maj.set_network_name("maj");
@@ -223,14 +223,14 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 
 TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layouts", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<hexagonal_layout>;
+    using gate_layout = fiction::layouts::gate_layout<hexagonal_layout>;
 
     CHECK_THROWS_AS(orthogonal<gate_layout>(blueprints::and_or_network<technology_network>()), std::invalid_argument);
 }
 
 TEST_CASE("Gate library application", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     const auto check = [](const auto& ntk)
     {
@@ -255,7 +255,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
 TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     const auto ntk = blueprints::mux21_network<technology_network>();
 

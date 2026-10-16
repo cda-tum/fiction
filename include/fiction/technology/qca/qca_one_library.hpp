@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"

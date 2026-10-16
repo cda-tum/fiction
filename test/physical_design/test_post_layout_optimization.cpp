@@ -25,7 +25,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -117,8 +117,8 @@ static void check_layout_equiv_all()
 
 TEST_CASE("Post-layout optimization counts physical wires without terminals", "[post-layout-optimization]")
 {
-    gate_level_layout<cartesian_layout> layout{{2, 1}, clocking::twoddwave()};
-    const auto                          input = layout.create_pi("a", {0, 0});
+    gate_layout<cartesian_layout> layout{{2, 1}, clocking::twoddwave()};
+    const auto                    input = layout.create_pi("a", {0, 0});
     layout.create_po(input, "f", {1, 0});
     post_layout_optimization_stats stats{};
     post_layout_optimization(layout, {}, &stats);
@@ -130,14 +130,14 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         check_layout_equiv_all<gate_layout>();
     }
 
     SECTION("Corner cases")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         SECTION("optimization_layout_corner_case_outputs_1")
         {
@@ -190,7 +190,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Maximum gate relocations")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
         {
@@ -207,7 +207,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Optimize POs only")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -221,7 +221,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Timeout")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -235,7 +235,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Timeout exceeded")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -250,7 +250,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Planar optimization with planar layout")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         auto layout = blueprints::planar_unoptimized_layout<gate_layout>();
 
@@ -265,7 +265,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Planar optimization with crossing layout")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         auto layout = blueprints::planar_optimization_layout<gate_layout>();
 
@@ -288,7 +288,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
 TEST_CASE("Wrong clocking scheme", "[post-layout-optimization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     auto layout    = blueprints::use_and_gate_layout<gate_layout>();
     auto obstr_lyt = gate_layout(layout);
@@ -303,7 +303,7 @@ TEST_CASE("Wrong clocking scheme", "[post-layout-optimization]")
 
 TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     SECTION("Interior primary input")
     {
@@ -340,7 +340,7 @@ TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]
 
 TEST_CASE("Post-layout optimization reports progress", "[post-layout-optimization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();
     auto       layout = orthogonal<gate_layout>(ntk);
@@ -361,12 +361,12 @@ TEST_CASE("Post-layout optimization reports progress", "[post-layout-optimizatio
 
 TEST_CASE("Post-layout optimization edits its caller and preserves terminal identities", "[post-layout-optimization]")
 {
-    gate_level_layout<cartesian_layout> layout{{6, 3}, layouts::clocking::twoddwave()};
-    const auto                          a           = layout.create_pi("a", {0, 0});
-    const auto                          wire        = layout.create_buf(a, {1, 0});
-    const auto                          po          = layout.create_po(wire, "f", {5, 0});
-    const auto                          independent = layout;
-    post_layout_optimization_params     params{};
+    gate_layout<cartesian_layout>   layout{{6, 3}, layouts::clocking::twoddwave()};
+    const auto                      a           = layout.create_pi("a", {0, 0});
+    const auto                      wire        = layout.create_buf(a, {1, 0});
+    const auto                      po          = layout.create_po(wire, "f", {5, 0});
+    const auto                      independent = layout;
+    post_layout_optimization_params params{};
     params.timeout = 0;
     post_layout_optimization_stats stats{};
     post_layout_optimization(layout, params, &stats);
@@ -382,23 +382,23 @@ TEST_CASE("Post-layout optimization edits its caller and preserves terminal iden
 
 TEST_CASE("Post-layout optimization rejects outside objects without mutation", "[post-layout-optimization]")
 {
-    gate_level_layout<cartesian_layout> layout{{4, 4}, layouts::clocking::twoddwave()};
-    const auto                          pi = layout.create_pi("a", {-1, 1});
-    const auto                          po = layout.create_po(pi, "f", {3, 1});
+    gate_layout<cartesian_layout> layout{{4, 4}, layouts::clocking::twoddwave()};
+    const auto                    pi = layout.create_pi("a", {-1, 1});
+    const auto                    po = layout.create_po(pi, "f", {3, 1});
     CHECK_THROWS_AS(post_layout_optimization(layout), std::invalid_argument);
-    CHECK(layout.get_tile(pi) == gate_level_layout<cartesian_layout>::tile{-1, 1});
+    CHECK(layout.get_tile(pi) == gate_layout<cartesian_layout>::tile{-1, 1});
     CHECK(layout.source({po, 0}) == pi);
     CHECK(layout.height() == 4);
 }
 
 TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-layout-optimization]")
 {
-    gate_level_layout<cartesian_layout> layout{{4, 4, 2}, layouts::clocking::twoddwave()};
-    const auto                          a    = layout.create_pi("a", {0, 0});
-    const auto                          b    = layout.create_pi("b", {0, 2});
-    auto                                left = a;
-    for (const gate_level_layout<cartesian_layout>::tile t :
-         {gate_level_layout<cartesian_layout>::tile{1, 0}, {2, 0}, {3, 0}, {3, 1}})
+    gate_layout<cartesian_layout> layout{{4, 4, 2}, layouts::clocking::twoddwave()};
+    const auto                    a    = layout.create_pi("a", {0, 0});
+    const auto                    b    = layout.create_pi("b", {0, 2});
+    auto                          left = a;
+    for (const gate_layout<cartesian_layout>::tile t :
+         {gate_layout<cartesian_layout>::tile{1, 0}, {2, 0}, {3, 0}, {3, 1}})
     {
         left = layout.create_buf(left, t);
     }
@@ -424,7 +424,7 @@ TEST_CASE("Output border extension handles the full signed coordinate domain", "
     /** Largest representable coordinate. */
     constexpr auto maximum = std::numeric_limits<int32_t>::max();
     /** Sparse geometry whose width includes the maximum coordinate. */
-    gate_level_layout<cartesian_layout> layout{{static_cast<uint64_t>(maximum) + 1, 3}};
+    gate_layout<cartesian_layout> layout{{static_cast<uint64_t>(maximum) + 1, 3}};
     /** Input and output adjacent to the eastern border. */
     const auto input  = layout.create_pi("a", {maximum - 2, 1});
     const auto output = layout.create_po(input, "f", {maximum - 1, 1});
