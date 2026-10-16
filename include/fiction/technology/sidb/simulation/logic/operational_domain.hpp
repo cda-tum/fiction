@@ -1402,24 +1402,23 @@ class operational_domain_impl
         {
             op_domain.add_dimension(params.sweep_dimensions.at(d).dimension);
 
-            // generate the step points for the dimension
-            indices.push_back(std::vector<std::size_t>(num_sweep_steps(params.sweep_dimensions.at(d)) + 1));
-            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
+            /** @brief Number of points retained in this sweep dimension. */
+            auto num_points = num_sweep_steps(params.sweep_dimensions.at(d)) + 1;
 
-            // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
-            // ignored in the operational domain calculation
+            // Discard the final step when its coordinate exceeds the upper bound.
             if ((params.sweep_dimensions.at(d).min +
-                 (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
+                 (static_cast<double>(num_points - 1) * params.sweep_dimensions.at(d).step)) -
                     params.sweep_dimensions.at(d).max >
                 fiction::utils::math::ERROR_MARGIN)
             {
-                indices.at(d).pop_back();
+                --num_points;
             }
 
+            // Colliding grids can request excessive storage, so validate before allocating their index grid.
             values.emplace_back();
 
-            // generate the values for the dimension
-            for (const auto i : indices.at(d))
+            /** @brief Index of the coordinate generated for this dimension. */
+            for (std::size_t i = 0; i < num_points; ++i)
             {
                 /** @brief Coordinate generated for this sweep step. */
                 const auto value =
@@ -1438,6 +1437,9 @@ class operational_domain_impl
                 throw std::invalid_argument("Sweep grid point count exceeds the storage range");
             }
             num_parameter_points *= values.at(d).size();
+
+            indices.emplace_back(num_points);
+            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
         }
     }
     /**

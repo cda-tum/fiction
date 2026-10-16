@@ -2208,9 +2208,21 @@ TEST_CASE("Operational-domain sweeps preserve distinct parameter identities", "[
         CHECK_THROWS_AS(critical_temperature_domain_flood_fill(lyt, spec, 0, params), std::invalid_argument);
         CHECK_THROWS_AS(critical_temperature_domain_contour_tracing(lyt, spec, 0, params), std::invalid_argument);
     }
+    SECTION("reject fine ranges before allocating the grid")
+    {
+        params.sweep_dimensions.front().max  = 5.7;
+        params.sweep_dimensions.front().step = 1e-18;
+        CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params), std::invalid_argument);
+    }
     SECTION("accept singleton sweeps with fine steps")
     {
         params.sweep_dimensions.front().max = 5.6;
+        CHECK(operational_domain_grid_search(lyt, spec, params).size() == 1);
+    }
+    SECTION("accept singleton sweeps after trimming the final step")
+    {
+        params.sweep_dimensions.front().max  = 5.64;
+        params.sweep_dimensions.front().step = 0.07;
         CHECK(operational_domain_grid_search(lyt, spec, params).size() == 1);
     }
     SECTION("reject collisions after distinct coordinates")
