@@ -218,13 +218,16 @@ class color_routing_impl
  *
  * This function will return `true` if all objectives could be satisfied or if the partial routing parameter was set. In
  * the case of `true` being returned, all determined paths have been routed in the given layout.
+ * When `ps.path_limit` is zero, no candidate paths are generated and endpoint bounds are not checked.
  *
  * @tparam Lyt The gate-level layout type to route.
  * @param lyt A gate-level layout to route.
  * @param objectives The routing objectives as source coordinates and indexed destination inputs to fulfill.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return `true` iff routing was successful, i.e., iff all objectives could be satisfied.
+ * @return `true` iff all objectives are satisfied or partial routing is enabled.
+ * @throws std::invalid_argument If an objective endpoint lies outside the layout extent when ps.path_limit is absent
+ * or nonzero.
  */
 template <typename Lyt>
     requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
