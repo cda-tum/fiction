@@ -66,15 +66,11 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
      * @throws std::invalid_argument If `lyt` is not pointy-top, i.e., its arrangement shifts columns.
      */
     template <typename GateLyt>
+        requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
+                 std::derived_from<GateLyt, layouts::hexagonal_layout> &&
+                 (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
     [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-        static_assert((std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                       !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>),
-                      "GateLyt must be a hexagonal layout");
-
         const auto p      = skeleton_bestagon_library::determine_port_routing(lyt, t);
         const auto object = lyt.find_object(t);
         if (!object)

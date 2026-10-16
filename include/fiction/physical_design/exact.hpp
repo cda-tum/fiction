@@ -3294,13 +3294,10 @@ class exact_impl
  * `ps.layout_arrangement` is empty.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 std::optional<Lyt> exact(const tec_nt& ntk, const exact_physical_design_params& ps = {},
                          exact_physical_design_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
     auto clocking_scheme =
@@ -3355,14 +3352,11 @@ std::optional<Lyt> exact(const tec_nt& ntk, const exact_physical_design_params& 
  * `ps.layout_arrangement` is empty.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
 std::optional<Lyt> exact_with_blacklist(const tec_nt& ntk, const surface_black_list<fcn::port_direction>& black_list,
                                         exact_physical_design_params ps  = {},
                                         exact_physical_design_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
     auto clocking_scheme =

@@ -34,13 +34,15 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
+/**
+ * @brief Assigns clock zero to every tile in the declared frame.
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout whose clock numbers are cleared.
+ */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layout_object_id>; }
 void remove_clocking(Lyt& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 

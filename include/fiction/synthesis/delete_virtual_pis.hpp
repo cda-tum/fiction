@@ -18,6 +18,7 @@
 #pragma once
 
 #include "fiction/networks/name_utils.hpp"
+#include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -219,21 +220,14 @@ class delete_virtual_pis_impl
  * @return The resulting network after virtual primary inputs are deleted.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+             mockturtle::has_is_complemented_v<Ntk> && mockturtle::has_foreach_pi_v<Ntk> &&
+             mockturtle::has_foreach_gate_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
+             mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_constant_v<Ntk> &&
+             mockturtle::has_create_pi_v<Ntk> && mockturtle::has_create_po_v<Ntk> &&
+             mockturtle::has_create_not_v<Ntk> && fiction::is_virtual_network_type_v<Ntk>
 Ntk delete_virtual_pis(const Ntk& ntk) noexcept
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
-    static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented function");
-    static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi function");
-    static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po function");
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant function");
-    static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi function");
-    static_assert(mockturtle::has_create_po_v<Ntk>, "Ntk does not implement the create_po function");
-    static_assert(mockturtle::has_create_not_v<Ntk>, "Ntk does not implement the create_not function");
-    static_assert(fiction::is_virtual_network_type_v<Ntk>, "Ntk is not a virtual network type");
-
     assert(ntk.is_combinational() && "Network has to be combinational");
 
     // return the network if it does not have virtual PIs

@@ -32,6 +32,7 @@ namespace fiction::networks::views
  * @tparam Ntk mockturtle network type.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk>
 class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<Ntk>
 {
   public:
@@ -46,10 +47,7 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      *
      * @param ntk Network to color.
      */
-    explicit out_of_place_edge_color_view(const Ntk& ntk) : parent_view(ntk)
-    {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    }
+    explicit out_of_place_edge_color_view(const Ntk& ntk) : parent_view(ntk) {}
     /**
      * Remove all assigned colors.
      */
@@ -57,6 +55,15 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
     {
         edge_colors.clear();
         parent_view::clear_colors(0);
+    }
+    /**
+     * @brief Assigns the given color to all nodes and preserves edge colors.
+     *
+     * @param clr Color to assign to the nodes.
+     */
+    void clear_colors(const uint32_t clr) const
+    {
+        parent_view::clear_colors(clr);
     }
     /**
      * Returns the assigned color of a given edge.
@@ -111,6 +118,8 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of `pred(color(e))`.
      */
     template <typename Pred>
+    // Keep the parent color view's lvalue predicate invocation.
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     [[nodiscard]] bool eval_edge_color(const edge& e, Pred&& pred) const
     {
         return pred(edge_color(e));
@@ -125,13 +134,14 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
      * @return Return value of `pred(color(a), color(b))`.
      */
     template <typename Pred>
+    // Keep the parent color view's lvalue predicate invocation.
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     [[nodiscard]] bool eval_edge_color(const edge& a, const edge& b, Pred&& pred) const
     {
         return pred(edge_color(a), edge_color(b));
     }
 
     // make functions from parent_view accessible in this scope
-    using parent_view::clear_colors;
     using parent_view::color;
     using parent_view::current_color;
     using parent_view::eval_color;

@@ -53,12 +53,9 @@ using namespace fiction::physical_design;
  * @param lyt Layout to update.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layout_object_id>; }
 void remove_clocking(Lyt& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     lyt.foreach_object([&lyt](const auto id) { lyt.assign_clock_number(lyt.get_tile(id), 0); });
 }
 
@@ -68,12 +65,9 @@ void remove_clocking(Lyt& lyt)
  * @param lyt Layout to clock and compare.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layout_object_id>; }
 void remove_assign_and_check_clocking(Lyt lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     const auto lyt_clone = lyt.clone();
 
     // for each supported solver

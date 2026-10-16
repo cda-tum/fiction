@@ -20,8 +20,10 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <concepts>
 #include <cstdlib>
 #include <random>
+#include <stdexcept>
 #include <thread>
 #include <type_traits>
 #include <utility>
@@ -66,9 +68,9 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
  * https://codereview.stackexchange.com/questions/70310/simple-simulated-annealing-template-in-c11
  *
  * @tparam State The state type.
- * @tparam CostFunc The cost function type (specifies the cost type via its return value).
- * @tparam TempFunc The temperature schedule function type.
- * @tparam NextFunc The next state function type.
+ * @tparam CostFunc Cost function with a signed result for State, also invocable on const and mutable state lvalues.
+ * @tparam TempFunc Temperature schedule returning double and accepting a mutable temperature lvalue.
+ * @tparam NextFunc Next-state function returning State and accepting a mutable state lvalue.
  * @param init_state The initial state to optimize.
  * @param init_temp The initial temperature.
  * @param final_temp The final temperature.
@@ -81,25 +83,28 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
 // NOLINTBEGIN(cppcoreguidelines-missing-std-forward): the callables are invoked once per annealing
 // cycle, so forwarding them would move from them on the first call
 template <typename State, typename CostFunc, typename TempFunc, typename NextFunc>
+    requires std::invocable<CostFunc, State> && std::invocable<TempFunc, double> && std::invocable<NextFunc, State> &&
+             std::is_signed_v<std::invoke_result_t<CostFunc, State>> &&
+             std::same_as<std::invoke_result_t<TempFunc, double>, double> &&
+             std::same_as<std::invoke_result_t<NextFunc, State>, State> && std::invocable<CostFunc&, const State&> &&
+             std::invocable<CostFunc&, State&> && std::invocable<TempFunc&, double&> &&
+             std::invocable<NextFunc&, State&> &&
+             requires(TempFunc& schedule, double& temperature, const double& bound) {
+                 std::clamp(schedule(temperature), bound, bound);
+             } && std::convertible_to<std::invoke_result_t<NextFunc&, State&>, State>
 std::pair<State, std::invoke_result_t<CostFunc, State>>
 simulated_annealing(const State& init_state, const double init_temp, const double final_temp, const std::size_t cycles,
                     CostFunc&& cost, TempFunc&& schedule, NextFunc&& next) noexcept
 // NOLINTEND(cppcoreguidelines-missing-std-forward)
 {
-    static_assert(std::is_invocable_v<CostFunc, State>, "CostFunc must be invocable with objects of type State");
-    static_assert(std::is_invocable_v<TempFunc, double>, "TempFunc must be invocable with double");
-    static_assert(std::is_invocable_v<NextFunc, State>, "NextFunc must be invocable with objects of type State");
-    static_assert(std::is_signed_v<std::invoke_result_t<CostFunc, State>>, "CostFunc must return a signed value");
-    static_assert(std::is_same_v<std::invoke_result_t<TempFunc, double>, double>, "TempFunc must return a double");
-    static_assert(std::is_same_v<State, std::invoke_result_t<NextFunc, State>>,
-                  "NextFunc must return an object of type State");
-
     assert(std::isfinite(init_temp) && "init_temp must be a finite number");
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
-    static std::mt19937_64 generator{std::random_device{}()};
+    /** @brief Random engine for this thread's acceptance decisions. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
-    static std::uniform_real_distribution<double> random_functor(0, 1);
+    /** @brief Acceptance draw distribution local to this thread. */
+    static thread_local std::uniform_real_distribution<double> random_functor{0.0, 1.0};
 
     auto current_cost  = cost(init_state);
     auto current_state = init_state;
@@ -153,39 +158,46 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * number of random initial states using a provided random state generator. SA as specified above is then run on all
  * these random initial states where the best result of all generated states is finally returned.
  *
- * Each initial state runs in its own thread.
+ * Each initial state runs in its own thread. The provided callables must support concurrent invocation.
  *
  * @note The State type must be default constructible.
  *
- * @tparam RandStateFunc The random state generator function type (specifies the State type via its return value).
- * @tparam CostFunc The cost function type (specifies the cost value via its return value).
- * @tparam TempFunc The temperature schedule function type.
- * @tparam NextFunc The next state function type.
+ * @tparam RandStateFunc Lvalue-invocable generator returning a default-constructible state.
+ * @tparam CostFunc Cost callable accepted by single-state annealing.
+ * @tparam TempFunc Temperature schedule returning double and accepting a mutable temperature lvalue.
+ * @tparam NextFunc Next-state function returning State and accepting a mutable state lvalue.
  * @param init_temp The initial temperature.
  * @param final_temp The final temperature.
  * @param cycles The number of cycles for each temperature value.
- * @param instances The number of random initial states to generate.
+ * @param instances Positive number of random initial states to generate.
  * @param rand_state The random state generator function.
  * @param cost The cost function to minimize.
  * @param schedule The temperature schedule.
  * @param next The next state function that determines an adjacent state given a current one.
  * @return A pair of the overall best optimized state and its cost value.
+ * @throws std::invalid_argument If instances is zero.
  */
 // NOLINTBEGIN(cppcoreguidelines-missing-std-forward): the callables are shared by every annealing
 // instance, so forwarding them would move from them on the first one
 template <typename RandStateFunc, typename CostFunc, typename TempFunc, typename NextFunc>
+    requires std::invocable<RandStateFunc> && std::invocable<CostFunc, std::invoke_result_t<RandStateFunc>> &&
+             std::is_default_constructible_v<std::invoke_result_t<RandStateFunc>> && std::invocable<RandStateFunc&> &&
+             requires(RandStateFunc& rand_state, CostFunc& cost, TempFunc& schedule, NextFunc& next) {
+                 simulated_annealing(rand_state(), 0.0, 0.0, std::size_t{}, cost, schedule, next);
+             }
 std::pair<std::invoke_result_t<RandStateFunc>, std::invoke_result_t<CostFunc, std::invoke_result_t<RandStateFunc>>>
 multi_simulated_annealing(const double init_temp, const double final_temp, const std::size_t cycles,
                           const std::size_t instances, RandStateFunc&& rand_state, CostFunc&& cost, TempFunc&& schedule,
-                          NextFunc&& next) noexcept
+                          NextFunc&& next)
 // NOLINTEND(cppcoreguidelines-missing-std-forward)
 {
+    if (instances == 0)
+    {
+        throw std::invalid_argument("instances must be greater than zero.");
+    }
+
     using state_t = std::invoke_result_t<RandStateFunc>;
     using cost_t  = std::invoke_result_t<CostFunc, state_t>;
-
-    static_assert(std::is_invocable_v<RandStateFunc>, "RandStateFunc must be invocable");
-    static_assert(std::is_invocable_v<CostFunc, state_t>, "CostFunc must be invocable with objects of type State");
-    static_assert(std::is_default_constructible_v<state_t>, "State must be default-constructible");
 
     assert(std::isfinite(init_temp) && "init_temp must be a finite number");
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");

@@ -63,12 +63,9 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
      * @return molQCA gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename GateLyt>
+        requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; }
     [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-
         const auto object = lyt.find_object(t);
         if (!object)
         {

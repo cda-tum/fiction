@@ -20,6 +20,7 @@
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
+#include <fiction/networks/views/static_depth_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/traits.hpp>
@@ -36,6 +37,7 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <vector>
 
@@ -44,6 +46,30 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
+
+/**
+ * @brief Checks whether a network can form a mutable rank view.
+ * @tparam Ntk Network type to test.
+ */
+template <typename Ntk>
+concept rank_viewable = requires { typename mutable_rank_view<Ntk>; };
+
+/** @brief Network that cannot supply the inherited depth view's visited state. */
+struct network_without_visited : mockturtle::aig_network
+{
+    /** @brief Disables visited-state lookup. @param n Node to inspect. */
+    [[nodiscard]] uint32_t visited(const node& n) const = delete;
+};
+
+/** @brief Checks the rank view's inherited depth interface. @tparam Ntk Network to test. */
+template <typename Ntk>
+concept rank_base_viewable = requires { typename static_depth_view<Ntk>; };
+
+static_assert(!rank_base_viewable<network_without_visited>);
+static_assert(!rank_viewable<network_without_visited>);
+static_assert(rank_viewable<technology_network>);
+static_assert(!rank_viewable<int>);
+static_assert(requires(const mutable_rank_view<technology_network>& ntk) { mutable_rank_view{ntk}; });
 
 TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, mockturtle::mig_network,
                    mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
@@ -246,16 +272,18 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
     ntk.create_po(f2_t);
     ntk.create_po(f3_t);
 
-    network_balancing_params ps;
-    ps.unify_outputs = true;
-
     const auto ntk_r = mutable_rank_view(ntk);
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(ntk, ntk_r), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = *maybe_cec_m;
-    CHECK(cec_m == 1);
+    /** Miter comparing the original network with its rank view. */
+    const auto miter = virtual_miter<technology_network>(ntk, ntk_r);
+    if (!miter)
+    {
+        FAIL("Virtual miter construction failed");
+        return;
+    }
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*miter, {}, &st);
+    CHECK(maybe_cec_m == true);
     CHECK(ntk_r.check_validity() == 1);
 }
 
@@ -292,10 +320,15 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
     auto vpi_r = mutable_rank_view(vpi);
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = *maybe_cec_m;
-    CHECK(cec_m == 1);
+    /** Miter comparing the technology network with its virtual-input rank view. */
+    const auto miter = virtual_miter<technology_network>(tec, vpi_r);
+    if (!miter)
+    {
+        FAIL("Virtual miter construction failed");
+        return;
+    }
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*miter, {}, &st);
+    CHECK(maybe_cec_m == true);
     CHECK(vpi_r.check_validity() == 1);
 }
 
@@ -319,17 +352,27 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
     vpi_r.swap(2, 3);
 
     mockturtle::equivalence_checking_stats st;
-    auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    bool cec_m = *maybe_cec_m;
-    CHECK(cec_m == 0);
+    /** Miter whose input order differs from the original network. */
+    const auto swapped_miter = virtual_miter<technology_network>(tec, vpi_r);
+    if (!swapped_miter)
+    {
+        FAIL("Virtual miter construction failed");
+        return;
+    }
+    auto maybe_cec_m = mockturtle::equivalence_checking(*swapped_miter, {}, &st);
+    CHECK(maybe_cec_m == false);
 
     // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in
     // _storage)
     vpi_r.rearrange_pis();
 
-    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    cec_m = *maybe_cec_m;
-    CHECK(cec_m == 1);
+    /** Miter after restoring the original input order. */
+    const auto reordered_miter = virtual_miter<technology_network>(tec, vpi_r);
+    if (!reordered_miter)
+    {
+        FAIL("Virtual miter construction failed");
+        return;
+    }
+    maybe_cec_m = mockturtle::equivalence_checking(*reordered_miter, {}, &st);
+    CHECK(maybe_cec_m == true);
 }

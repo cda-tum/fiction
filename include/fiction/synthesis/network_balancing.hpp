@@ -237,23 +237,14 @@ class is_balanced_impl
  * @return A path-balanced logic network of type `NtkDest` that is logically equivalent to `ntk_src`.
  */
 template <typename NtkDest, typename NtkSrc>
+    requires mockturtle::is_network_type_v<NtkSrc> && mockturtle::is_network_type_v<NtkDest> &&
+             mockturtle::has_get_node_v<NtkSrc> && mockturtle::has_is_complemented_v<NtkSrc> &&
+             mockturtle::has_foreach_gate_v<NtkSrc> && mockturtle::has_foreach_fanin_v<NtkSrc> &&
+             mockturtle::has_foreach_po_v<NtkSrc> && mockturtle::has_create_pi_v<NtkDest> &&
+             mockturtle::has_create_not_v<NtkDest> && mockturtle::has_create_po_v<NtkDest> &&
+             mockturtle::has_create_buf_v<NtkDest> && mockturtle::has_clone_node_v<NtkDest>
 NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {})
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
-
-    static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node function");
-    static_assert(mockturtle::has_is_complemented_v<NtkSrc>, "NtkSrc does not implement the is_complemented function");
-    static_assert(mockturtle::has_foreach_gate_v<NtkSrc>, "NtkSrc does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po function");
-
-    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi function");
-    static_assert(mockturtle::has_create_not_v<NtkDest>, "NtkDest does not implement the create_not function");
-    static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po function");
-    static_assert(mockturtle::has_create_buf_v<NtkDest>, "NtkDest does not implement the create_buf function");
-    static_assert(mockturtle::has_clone_node_v<NtkDest>, "NtkDest does not implement the clone_node function");
-
     detail::network_balancing_impl<NtkDest, NtkSrc> p{ntk_src, ps};
 
     auto result = p.run();
@@ -269,14 +260,11 @@ NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {
  * @return `true` iff `ntk` is properly path-balanced with regard to `ps`.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_gate_v<Ntk> &&
+             mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
+             mockturtle::has_get_node_v<Ntk>
 bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
-    static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po function");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
-
     detail::is_balanced_impl<Ntk> p{ntk, ps};
 
     auto result = p.run();

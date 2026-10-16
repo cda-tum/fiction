@@ -620,8 +620,9 @@ def convert_network(
         ntk: The input logic network.
 
     Template Args:
-        NtkDest: Type of the returned logic network.
-        NtkSrc: Type of the input logic network.
+        NtkDest: Logic network with constant, input, output, and Boolean
+                 gate creation.
+        NtkSrc: Logic network with node, interface, and fanin traversal.
 
     Returns:
         A logic network of type `NtkDest` that is logically equivalent to

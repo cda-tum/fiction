@@ -23,6 +23,7 @@
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -40,6 +41,16 @@
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
+
+/**
+ * @brief Checks whether a source can convert to the named technology network.
+ * @tparam Ntk Source network type.
+ */
+template <typename Ntk>
+concept technology_convertible = requires(const Ntk& ntk) { convert_network<tec_nt>(ntk); };
+
+static_assert(technology_convertible<mockturtle::aig_network>);
+static_assert(!technology_convertible<int>);
 
 template <typename Ntk>
 void to_x(const Ntk& ntk)

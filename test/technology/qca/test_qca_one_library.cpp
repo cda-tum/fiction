@@ -27,7 +27,6 @@
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <cstdint>
@@ -43,8 +42,6 @@ using namespace fiction::qca;
 TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 {
     CHECK(std::is_same_v<qca_one_library::layout, qca::layout>);
-    CHECK(!has_get_functional_implementations_v<qca_one_library>);
-    CHECK(!has_get_gate_ports_v<qca_one_library>);
 }
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")

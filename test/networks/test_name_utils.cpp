@@ -25,17 +25,103 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/physical_design/placement_utils.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <cstdint>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
+
+/** @brief Named network missing node traversal required for signal-name transfer. */
+struct incomplete_named_network : mockturtle::names_view<mockturtle::aig_network>
+{
+    /**
+     * @brief Disables node traversal.
+     * @tparam Fn Node callback type.
+     */
+    template <typename Fn>
+    void foreach_node(Fn&&) const = delete;
+};
+
+/**
+ * @brief Checks signal-name transfer and its forwarding wrapper.
+ * @tparam Src Source network type.
+ * @tparam Dest Destination network type.
+ */
+template <typename Src, typename Dest>
+concept signal_names_transferable =
+    requires(const Src& src, Dest& dest, mockturtle::node_map<mockturtle::aig_network::signal, Src>& map) {
+        restore_signal_names(src, dest, map);
+    };
+
+/**
+ * @brief Checks whether the full name-transfer wrapper accepts a source and destination.
+ * @tparam Src Source network type.
+ * @tparam Dest Destination network type.
+ */
+template <typename Src, typename Dest>
+concept all_names_transferable =
+    requires(const Src& src, Dest& dest, mockturtle::node_map<mockturtle::aig_network::signal, Src>& map) {
+        restore_names(src, dest, map);
+    };
+
+/** @brief Native layout without an output-name setter. */
+struct layout_without_output_names : cartesian_gate_layout
+{
+    /** @brief Disables output-name assignment. @param index Output index. @param name Output name. */
+    void set_output_name(uint32_t index, const std::string& name) = delete;
+};
+
+/** @brief Checks output-name restoration. @tparam Dest Destination network or layout type. */
+template <typename Dest>
+concept output_names_transferable = requires(const tec_nt& src, Dest& dest) { restore_output_names(src, dest); };
+
+static_assert(output_names_transferable<cartesian_gate_layout>);
+static_assert(output_names_transferable<mockturtle::aig_network>);
+static_assert(!output_names_transferable<layout_without_output_names>);
+
+/**
+ * @brief Checks branching name transfers with native layout endpoints.
+ * @tparam Dest Destination network or layout type.
+ */
+template <typename Dest>
+concept branching_names_transferable =
+    requires(const tec_nt& src, Dest& dest,
+             const mockturtle::node_map<physical_design::branching_signal_container<>, tec_nt>& map) {
+        restore_signal_names(src, dest, map);
+    };
+
+static_assert(branching_names_transferable<cartesian_gate_layout>);
+static_assert(branching_names_transferable<mockturtle::aig_network>);
+static_assert(!branching_names_transferable<mockturtle::names_view<mockturtle::aig_network>>);
+
+static_assert(!all_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(signal_names_transferable<mockturtle::aig_network, mockturtle::aig_network>);
+static_assert(signal_names_transferable<incomplete_named_network, mockturtle::aig_network>);
+static_assert(!signal_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+
+TEST_CASE("Unnamed network name transfers clear names and remain optional", "[name-utils]")
+{
+    mockturtle::aig_network                         unnamed{};
+    mockturtle::names_view<mockturtle::aig_network> named{};
+    named.set_network_name("old");
+    restore_network_name(unnamed, named);
+    CHECK(named.get_network_name().empty());
+    named.set_network_name("source");
+    restore_names(named, unnamed);
+    CHECK(get_name(unnamed).empty());
+    restore_names(unnamed, named);
+    CHECK(named.get_network_name().empty());
+}
 
 TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bounds", "[name-utils]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)

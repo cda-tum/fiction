@@ -34,6 +34,17 @@ using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
 
+/**
+ * @brief Checks whether a network can form a depth view.
+ * @tparam Ntk Network type to test.
+ */
+template <typename Ntk>
+concept depth_viewable = requires { typename static_depth_view<Ntk>; };
+
+static_assert(depth_viewable<mockturtle::aig_network>);
+static_assert(!depth_viewable<int>);
+static_assert(requires(const static_depth_view<mockturtle::aig_network>& ntk) { static_depth_view{ntk}; });
+
 template <typename Ntk>
 void test_depth_view()
 {

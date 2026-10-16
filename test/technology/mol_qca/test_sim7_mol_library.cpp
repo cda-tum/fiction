@@ -26,7 +26,6 @@
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/mol_qca/sim7_mol_library.hpp>
-#include <fiction/traits.hpp>
 
 #include <type_traits>
 
@@ -38,8 +37,6 @@ using namespace fiction::mol_qca;
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 {
     CHECK(std::is_same_v<sim7_mol_library::layout, mol_qca::layout>);
-    CHECK(!has_get_functional_implementations_v<sim7_mol_library>);
-    CHECK(!has_get_gate_ports_v<sim7_mol_library>);
 }
 
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")

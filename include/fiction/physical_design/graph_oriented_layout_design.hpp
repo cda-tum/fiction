@@ -2665,15 +2665,12 @@ class graph_oriented_layout_design_impl
  * `ps.tiles_to_skip_between_pis` does not lie in \f$[0, 2^{20}]\f$.
  */
 template <typename Lyt>
+    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; } &&
+             std::derived_from<Lyt, layouts::cartesian_layout>
 std::optional<Lyt> graph_oriented_layout_design(const tec_nt& ntk, graph_oriented_layout_design_params ps = {},
                                                 graph_oriented_layout_design_stats* pst                   = nullptr,
                                                 std::function<uint64_t(const Lyt&)> custom_cost_objective = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-    static_assert(std::derived_from<Lyt, fiction::layouts::cartesian_layout>, "Lyt is not a Cartesian layout");
-
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, 2))
     {

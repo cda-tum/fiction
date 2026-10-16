@@ -27,7 +27,6 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/traits.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 
@@ -91,11 +90,38 @@ static bool contains_tt(const TTMap& m, const kitty::dynamic_truth_table& elem) 
     return m.count(elem) > 0;
 }
 
-TEST_CASE("Dummy gate library traits", "[sidb-surface-analysis]")
+/** @brief SiDB gate library without implementation or port lookup. */
+struct empty_gate_library : gate_library<sidb::layout, 3, 3>
+{};
+
+/** @brief Gate library with an incompatible implementation lookup result. */
+struct wrong_implementations_library : dummy_gate_library
 {
-    REQUIRE(has_get_functional_implementations_v<dummy_gate_library>);
-    REQUIRE(has_get_gate_ports_v<dummy_gate_library>);
-}
+    /** @brief Returns an incompatible implementation result. */
+    static int get_functional_implementations();
+};
+
+/** @brief Gate library with an incompatible port lookup result. */
+struct wrong_ports_library : dummy_gate_library
+{
+    /** @brief Returns an incompatible port result. */
+    static int get_gate_ports();
+};
+
+/**
+ * @brief Checks whether a gate library can analyze a defective SiDB surface.
+ * @tparam Library Gate library to test.
+ */
+template <typename Library>
+concept surface_analyzable = requires(const cartesian_gate_layout& gates, const sidb::layout& surface) {
+    surface_analysis<Library>(gates, surface);
+};
+
+static_assert(surface_analyzable<dummy_gate_library>);
+static_assert(surface_analyzable<bestagon_library>);
+static_assert(!surface_analyzable<empty_gate_library>);
+static_assert(!surface_analyzable<wrong_implementations_library>);
+static_assert(!surface_analyzable<wrong_ports_library>);
 
 TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 {

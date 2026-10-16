@@ -32,6 +32,26 @@ using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
 
+/**
+ * @brief Checks whether a network can form a breadth-first topological view.
+ * @tparam Ntk Network type to test.
+ */
+template <typename Ntk>
+concept bfs_viewable = requires { typename bfs_topo_view<Ntk>; };
+
+/** @brief Sorted pass-through source without traversal methods. */
+struct sorted_pass_through
+{
+    /** @brief Selects the pass-through specialization. */
+    // mockturtle detects this exact marker spelling.
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static constexpr bool is_topologically_sorted = true;
+};
+
+static_assert(bfs_viewable<mockturtle::aig_network>);
+static_assert(!bfs_viewable<int>);
+static_assert(requires(const sorted_pass_through& ntk) { bfs_topo_view{ntk}; });
+
 TEST_CASE("Traits and construction")
 {
     SECTION("AIG")
