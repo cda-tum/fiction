@@ -252,6 +252,10 @@ def a_star_distance(
 
     Returns:
         Minimum path length between `source` and `target` in `layout`.
+
+    Raises:
+        std::invalid_argument: If source or target lies outside the layout
+                               extent.
     """
 
 @overload
@@ -317,7 +321,8 @@ def yen_k_shortest_paths(
     """
     Find up to k shortest loop-free paths from source to target.
     The keyword options select obstructions and crossing constraints.
-    Raises ValueError when source or target lies outside the layout extent.
+    If k is zero, returns an empty list without checking endpoint bounds.
+    Raises ValueError when k is nonzero and source or target lies outside the layout extent.
 
     Args:
         obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
@@ -381,6 +386,7 @@ def enumerate_all_paths(
     """
     Enumerate all loop-free paths from source to target in the layout.
     The keyword options select obstructions and crossing constraints.
+    Raises ValueError when source or target lies outside the layout extent.
 
     Args:
         crossings: Allow wires to cross on separate layers.
