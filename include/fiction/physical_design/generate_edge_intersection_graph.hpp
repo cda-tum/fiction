@@ -117,7 +117,10 @@ class generate_edge_intersection_graph_impl
             pst{st}
     {}
 
-    /** @brief Generate the graph. @return Candidate paths and their intersections. */
+    /**
+     * @brief Builds and transfers the completed intersection graph.
+     * @return Graph of candidate paths and their intersections.
+     */
     edge_intersection_graph run()
     {
         // measure runtime
@@ -173,7 +176,8 @@ class generate_edge_intersection_graph_impl
         pst.num_vertices = graph.size_vertices();
         pst.num_edges    = graph.size_edges();
 
-        return graph;
+        // The one-shot implementation transfers its completed graph.
+        return std::move(graph);
     }
 
   private:
@@ -358,7 +362,8 @@ edge_intersection_graph generate_edge_intersection_graph(const Lyt&             
 
     detail::generate_edge_intersection_graph_impl<Lyt> p{lyt, objectives, ps, st};
 
-    const auto result = p.run();
+    /** @brief Completed intersection graph retained while statistics are copied. */
+    auto result = p.run();
 
     if (pst)
     {
