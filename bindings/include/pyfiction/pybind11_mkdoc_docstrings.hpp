@@ -35,10 +35,9 @@ Template Args:
     Writer: Callable accepting an output stream.
 
 Raises:
-    std::ios_base::failure: If creating, writing, closing, or
-                            replacing the file fails, or the
-                            serialization callback raises
-                            std::filesystem::filesystem_error.
+    RuntimeError: If creating, writing, closing, or replacing the file
+                  fails, or the serialization callback raises
+                  std::filesystem::filesystem_error.
     Any: other exception raised by the serialization callback.
 
 )doc";
@@ -400,7 +399,7 @@ Returns:
     Sorted input cells.
 
 Raises:
-    std::bad_alloc: If allocating the cell list fails.
+    MemoryError: If allocating the cell list fails.
 
 )doc";
 
@@ -413,7 +412,7 @@ Returns:
     Sorted output cells.
 
 Raises:
-    std::bad_alloc: If allocating the cell list fails.
+    MemoryError: If allocating the cell list fails.
 
 )doc";
 
@@ -475,8 +474,8 @@ Template Args:
     Lyt: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
 
 Raises:
-    std::invalid_argument: if an iNML layout has no I/O pins or they
-                           are not routed to the layout's borders.
+    ValueError: if an iNML layout has no I/O pins or they are not
+                routed to the layout's borders.
 
 )doc";
 
@@ -499,8 +498,10 @@ Template Args:
     Lyt: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
 
 Raises:
-    std::invalid_argument: if an iNML layout has no I/O pins or they
-                           are not routed to the layout's borders.
+    ValueError: if an iNML layout has no I/O pins or they are not
+                routed to the layout's borders.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -810,7 +811,7 @@ Returns:
     Sorted input cells.
 
 Raises:
-    std::bad_alloc: If allocating the cell list fails.
+    MemoryError: If allocating the cell list fails.
 
 )doc";
 
@@ -823,7 +824,7 @@ Returns:
     Sorted output cells.
 
 Raises:
-    std::bad_alloc: If allocating the cell list fails.
+    MemoryError: If allocating the cell list fails.
 
 )doc";
 
@@ -857,6 +858,10 @@ Args:
     os: The output stream to write into.
     ps: Parameters.
 
+Raises:
+    ValueError: If the layout has no designated I/O pins or the pins
+                are not routed to its borders.
+
 )doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_2 =
@@ -871,6 +876,12 @@ Args:
     filename: The file name to create and write into. Should
               preferably use the `.qcc` extension.
     ps: Parameters.
+
+Raises:
+    ValueError: If the layout has no designated I/O pins or the pins
+                are not routed to its borders.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -900,8 +911,8 @@ Args:
     tile_size_y: Clock-zone height in magnets.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain or
-                           a clock-zone size is zero.
+    ValueError: If a size exceeds the coordinate domain or a clock-
+                zone size is zero.
 
 )doc";
 
@@ -917,8 +928,8 @@ Args:
     tile_size_y: Clock-zone height in magnets.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain or
-                           a clock-zone size is zero.
+    ValueError: If a size exceeds the coordinate domain or a clock-
+                zone size is zero.
 
 )doc";
 
@@ -1054,7 +1065,7 @@ Returns:
     etc.
 
 Raises:
-    std::invalid_argument: If `lyt` shifts rows instead of columns.
+    ValueError: If `lyt` shifts rows instead of columns.
     fcn::unsupported_gate_type_exception: If a terminal also acts as a
                                           fanout. Connect the terminal
                                           to a separate fanout wire
@@ -1246,8 +1257,8 @@ Args:
     size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain.
-    std::out_of_range: If the layer count exceeds two.
+    ValueError: If a size exceeds the coordinate domain.
+    IndexError: If the layer count exceeds two.
 
 )doc";
 
@@ -1287,8 +1298,7 @@ Returns:
     A coordinate in the layout of type `coordinate`.
 
 Raises:
-    std::overflow_error: If an axis is outside the signed 32-bit
-                         range.
+    OverflowError: If an axis is outside the signed 32-bit range.
 
 Note:
     This function is equivalent to calling `coordinate(x, y, z)`.
@@ -1410,7 +1420,7 @@ Template Args:
         by `mockturtle::foreach_element`.
 
 Raises:
-    std::invalid_argument: If a range bound lies outside layer zero.
+    ValueError: If a range bound lies outside layer zero.
 
 )doc";
 
@@ -1437,7 +1447,7 @@ Returns:
     a default.
 
 Raises:
-    std::invalid_argument: If a range bound lies outside layer zero.
+    ValueError: If a range bound lies outside layer zero.
 
 )doc";
 
@@ -1688,9 +1698,13 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_is_within_bounds =
-R"doc(Args:
-    c: Coordinate. @return Whether the geometry contains the
-       coordinate.
+R"doc(Tests whether the geometry contains a coordinate.
+
+Args:
+    c: Coordinate.
+
+Returns:
+    Whether the geometry contains the coordinate.
 
 )doc";
 
@@ -1764,9 +1778,9 @@ Args:
     size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain.
-    std::out_of_range: If the layer count exceeds two. The dimensions
-                       remain unchanged.
+    ValueError: If a size exceeds the coordinate domain.
+    IndexError: If the layer count exceeds two. The dimensions remain
+                unchanged.
 
 )doc";
 
@@ -1894,7 +1908,7 @@ Args:
     name: Layout name.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain.
+    ValueError: If a size exceeds the coordinate domain.
 
 )doc";
 
@@ -2374,7 +2388,7 @@ Returns:
     This scheme.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -2417,7 +2431,7 @@ Args:
     cn: Clock number to assign. The scheme stores `cn % num_clocks()`.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -2448,10 +2462,9 @@ Args:
     regular: Flag to identify the scheme as regular.
 
 Raises:
-    std::invalid_argument: if `cutout` is empty or not rectangular, if
-                           `num_clocks` is neither 3 nor 4, or if an
-                           entry of `cutout` is not below
-                           `num_clocks`.
+    ValueError: if `cutout` is empty or not rectangular, if
+                `num_clocks` is neither 3 nor 4, or if an entry of
+                `cutout` is not below `num_clocks`.
 
 )doc";
 
@@ -2490,7 +2503,7 @@ Args:
     cn: New clock number for `cz`.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -2503,7 +2516,7 @@ Args:
         this value is 0, `cz` is turned back into a normal clock zone.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -2629,8 +2642,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_state_num_se =
-R"doc(Counts zones with a nonzero Hold-phase extension. @return
-Synchronization element count.
+R"doc(Counts zones with a nonzero Hold-phase extension.
+
+Returns:
+    Synchronization element count.
 
 )doc";
 
@@ -2645,7 +2660,7 @@ Returns:
     This state.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -2659,7 +2674,7 @@ Args:
     scheme: New clocking scheme.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -2729,14 +2744,18 @@ R"doc(Placed FCN objects, ordered ports, clocking, and obstructions.
 Objects have stable identities independent of their coordinates.
 Connections describe declared topology; physical validation checks
 adjacency, clocking, and geometry separately. Copies own independent
-state. A sink is a destination input port driven by a source object's
-output. One destination object may receive the same source at several
-input indices; each connected input port is a distinct sink. Visitors
-may edit coordinates, names, and capabilities. Object and terminal
-visitors must not create or remove objects, change terminal order, or
-replace the layout during traversal. Connection visitors must also
-preserve the traversed input or sink connections, as specified on each
-visitor.
+state. Operations that require an existing object throw `ValueError`
+if an identity does not identify a live object in this layout. This
+includes removed objects, mismatched generations, and out-of-range
+slots. `contains` tests whether an identity identifies a live object
+without throwing. A sink is a destination input port driven by a
+source object's output. One destination object may receive the same
+source at several input indices; each connected input port is a
+distinct sink. Visitors may edit coordinates, names, and capabilities.
+Object and terminal visitors must not create or remove objects, change
+terminal order, or replace the layout during traversal. Connection
+visitors must also preserve the traversed input or sink connections,
+as specified on each visitor.
 
 Template Args:
     CoordinateLayout: Coordinate geometry used for placement.)doc";
@@ -2861,8 +2880,8 @@ Unspecified trailing inputs remain disconnected. Constant functions
 require an explicit placed object.
 
 Raises:
-    std::invalid_argument: If placement is occupied, or children
-                           exceed the function arity.
+    ValueError: If placement is occupied, or children exceed the
+                function arity.
 
 )doc";
 
@@ -3225,8 +3244,17 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_get_tile =
-R"doc(Returns the object's coordinate. @throws std::invalid_argument If the
-identity is stale.
+R"doc(Returns the object's coordinate.
+
+Args:
+    id: Object identity.
+
+Returns:
+    Coordinate of the object.
+
+Raises:
+    ValueError: If the identity does not identify a live object in
+                this layout.
 
 )doc";
 
@@ -3777,8 +3805,10 @@ static const char *mkd_doc_fiction_layouts_gate_layout_num_pis = R"doc(Counts pr
 static const char *mkd_doc_fiction_layouts_gate_layout_num_pos = R"doc(Counts primary outputs.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_num_se =
-R"doc(Counts zones with a nonzero Hold-phase extension. @return
-Synchronization element count.
+R"doc(Counts zones with a nonzero Hold-phase extension.
+
+Returns:
+    Synchronization element count.
 
 )doc";
 
@@ -3913,8 +3943,11 @@ static const char *mkd_doc_fiction_layouts_gate_layout_pi_at = R"doc(Returns a p
 static const char *mkd_doc_fiction_layouts_gate_layout_po_at = R"doc(Returns a primary output in declared interface order.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_remove =
-R"doc(Removes an object and disconnects all inputs and sinks. Stale
-identities reject.
+R"doc(Removes an object and disconnects all inputs and sinks.
+
+Raises:
+    ValueError: If the identity does not identify a live object in
+                this layout.
 
 )doc";
 
@@ -4212,8 +4245,7 @@ Returns:
     A coordinate in the layout of type `coordinate`.
 
 Raises:
-    std::overflow_error: If an axis is outside the signed 32-bit
-                         range.
+    OverflowError: If an axis is outside the signed 32-bit range.
 
 Note:
     This function is equivalent to calling `coordinate(x, y, z)`.
@@ -4393,7 +4425,7 @@ Template Args:
         by `mockturtle::foreach_element`.
 
 Raises:
-    std::invalid_argument: If a range bound lies outside layer zero.
+    ValueError: If a range bound lies outside layer zero.
 
 )doc";
 
@@ -4428,7 +4460,7 @@ Returns:
     a default.
 
 Raises:
-    std::invalid_argument: If a range bound lies outside layer zero.
+    ValueError: If a range bound lies outside layer zero.
 
 )doc";
 
@@ -4462,8 +4494,8 @@ Args:
     size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain.
-    std::out_of_range: If the layer count exceeds two.
+    ValueError: If a size exceeds the coordinate domain.
+    IndexError: If the layer count exceeds two.
 
 )doc";
 
@@ -4754,9 +4786,13 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout_is_within_bounds =
-R"doc(Args:
-    c: Coordinate. @return Whether the geometry contains the
-       coordinate.
+R"doc(Tests whether the geometry contains a coordinate.
+
+Args:
+    c: Coordinate.
+
+Returns:
+    Whether the geometry contains the coordinate.
 
 )doc";
 
@@ -4841,9 +4877,9 @@ Args:
     size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain.
-    std::out_of_range: If the layer count exceeds two. The dimensions
-                       remain unchanged.
+    ValueError: If a size exceeds the coordinate domain.
+    IndexError: If the layer count exceeds two. The dimensions remain
+                unchanged.
 
 )doc";
 
@@ -4980,10 +5016,9 @@ Template Args:
     Lyt: Gate-level layout type.
 
 Raises:
-    std::invalid_argument: If the layout is incomplete, cyclic,
-                           physically invalid, uses an unsupported
-                           scheme, or contains illegal XML text
-                           controls.
+    ValueError: If the layout is incomplete, cyclic, physically
+                invalid, uses an unsupported scheme, or contains
+                illegal XML text controls.
 
 )doc";
 
@@ -4994,8 +5029,7 @@ Args:
     value: Layout or object name.
 
 Raises:
-    std::invalid_argument: If the name contains an illegal control
-                           character.
+    ValueError: If the name contains an illegal control character.
 
 )doc";
 
@@ -5485,6 +5519,10 @@ Args:
     drawer: Drawer that supplies DOT layout attributes.
     on_progress: Receives completed drawing work.
 
+Raises:
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_write_fgl_layout =
@@ -5511,10 +5549,9 @@ Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
 
 Raises:
-    std::invalid_argument: If the layout is incomplete, cyclic,
-                           physically invalid, uses an unsupported
-                           scheme, or contains illegal XML text
-                           controls.
+    ValueError: If the layout is incomplete, cyclic, physically
+                invalid, uses an unsupported scheme, or contains
+                illegal XML text controls.
 
 )doc";
 
@@ -5534,10 +5571,11 @@ Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
 
 Raises:
-    std::invalid_argument: If the layout is incomplete, cyclic,
-                           physically invalid, uses an unsupported
-                           scheme, or contains illegal XML text
-                           controls.
+    ValueError: If the layout is incomplete, cyclic, physically
+                invalid, uses an unsupported scheme, or contains
+                illegal XML text controls.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -5580,8 +5618,8 @@ Returns:
     Checked extent.
 
 Raises:
-    std::invalid_argument: If a size exceeds `INT32_MAX + 1`.
-    std::out_of_range: If the layer count exceeds two.
+    ValueError: If a size exceeds `INT32_MAX + 1`.
+    IndexError: If the layer count exceeds two.
 
 )doc";
 
@@ -5606,8 +5644,7 @@ Returns:
     Signed 32-bit axis.
 
 Raises:
-    std::overflow_error: If `value` is outside the signed 32-bit
-                         range.
+    OverflowError: If `value` is outside the signed 32-bit range.
 
 )doc";
 
@@ -5628,8 +5665,7 @@ Template Args:
     Z: Type of z.
 
 Raises:
-    std::overflow_error: If an axis is outside the signed 32-bit
-                         range.
+    OverflowError: If an axis is outside the signed 32-bit range.
 
 )doc";
 
@@ -5646,8 +5682,7 @@ Template Args:
     Y: Type of y.
 
 Raises:
-    std::overflow_error: If an axis is outside the signed 32-bit
-                         range.
+    OverflowError: If an axis is outside the signed 32-bit range.
 
 )doc";
 
@@ -5669,8 +5704,8 @@ Args:
     start: First coordinate, or the end state.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain.
-    std::out_of_range: If the layer count exceeds two.
+    ValueError: If a size exceeds the coordinate domain.
+    IndexError: If the layer count exceeds two.
 
 )doc";
 
@@ -5803,8 +5838,7 @@ Returns:
     Checked size.
 
 Raises:
-    std::invalid_argument: If the size is negative or exceeds
-                           `INT32_MAX + 1`.
+    ValueError: If the size is negative or exceeds `INT32_MAX + 1`.
 
 )doc";
 
@@ -5824,8 +5858,7 @@ Template Args:
     L: Layer count type.
 
 Raises:
-    std::invalid_argument: If a size is negative or exceeds `INT32_MAX
-                           + 1`.
+    ValueError: If a size is negative or exceeds `INT32_MAX + 1`.
 
 )doc";
 
@@ -5878,8 +5911,8 @@ Returns:
     Empty layout.
 
 Raises:
-    std::invalid_argument: If `Lyt` is a shifted Cartesian or
-                           hexagonal layout and `a` is empty.
+    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
+                and `a` is empty.
 
 )doc";
 
@@ -5902,8 +5935,8 @@ Returns:
     Normalized copy of `lyt`.
 
 Raises:
-    std::invalid_argument: If the normalized extent exceeds the signed
-                           coordinate domain.
+    ValueError: If the normalized extent exceeds the signed coordinate
+                domain.
 
 )doc";
 
@@ -6021,7 +6054,7 @@ Args:
     tgt: Target coordinate.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 Note:
     Coordinates marked this way will not be crossed with wires by path
@@ -6036,7 +6069,7 @@ Args:
     c: Coordinate to obstruct.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -6110,9 +6143,9 @@ Returns:
     Absolute cell position in a layout.
 
 Raises:
-    std::invalid_argument: If the relative cell lies outside the tile.
-    std::overflow_error: If the absolute cell is outside the signed
-                         32-bit coordinate range.
+    ValueError: If the relative cell lies outside the tile.
+    OverflowError: If the absolute cell is outside the signed 32-bit
+                   coordinate range.
 
 )doc";
 
@@ -6127,8 +6160,8 @@ Template Args:
     Lyt: Gate-level layout type.
 
 Raises:
-    std::invalid_argument: If `Lyt` is a shifted Cartesian or
-                           hexagonal layout and `a` is empty.
+    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
+                and `a` is empty.
 
 )doc";
 
@@ -6230,8 +6263,8 @@ Args:
     size: Axis sizes.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain.
-    std::out_of_range: If the layer count exceeds two.
+    ValueError: If a size exceeds the coordinate domain.
+    IndexError: If the layer count exceeds two.
 
 )doc";
 
@@ -6263,7 +6296,7 @@ Args:
     cn: Clock number.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -6315,7 +6348,7 @@ Returns:
     Clocking scheme.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -6382,7 +6415,7 @@ Args:
     scheme: New clocking scheme over clock zones.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -6393,7 +6426,7 @@ Args:
     tile_size_x: Tile width in cells.
 
 Raises:
-    std::invalid_argument: if `tile_size_x` is zero.
+    ValueError: if `tile_size_x` is zero.
 
 )doc";
 
@@ -6404,7 +6437,7 @@ Args:
     tile_size_y: Tile height in cells.
 
 Raises:
-    std::invalid_argument: if `tile_size_y` is zero.
+    ValueError: if `tile_size_y` is zero.
 
 )doc";
 
@@ -6416,7 +6449,7 @@ Args:
     tile_size_y: Tile height in cells.
 
 Raises:
-    std::invalid_argument: if either dimension is zero.
+    ValueError: if either dimension is zero.
 
 )doc";
 
@@ -6535,15 +6568,18 @@ static const char *mkd_doc_fiction_mol_qca_io_write_mol_qca_layout_svg_2 =
 R"doc(Writes an SVG representation of a molQCA layout to a file. Each
 regular cell is colored by its clock phase.
 
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout. May throw an
-`std::ofstream::failure` if it cannot open the file.
-
 Args:
     lyt: The layout to be written.
     filename: The file name to create and write into. Should
               preferably use the `.svg` extension.
     ps: Parameters.
+
+Raises:
+    fcn::io::unsupported_cell_type_exception: If the layout contains
+                                              an unsupported cell
+                                              type.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -6592,7 +6628,7 @@ Args:
     name: Layout name.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain.
+    ValueError: If a size exceeds the coordinate domain.
 
 )doc";
 
@@ -6660,8 +6696,8 @@ Returns:
     1-to-3 fan-out gate matching `p`'s missing outgoing connector.
 
 Raises:
-    std::out_of_range: If `p` does not describe a supported 1-to-3
-                       fan-out orientation.
+    IndexError: If `p` does not describe a supported 1-to-3 fan-out
+                orientation.
 
 )doc";
 
@@ -6766,8 +6802,8 @@ Returns:
     Independent named LUT network.
 
 Raises:
-    std::invalid_argument: If an output dependency has a missing input
-                           or a cycle.
+    ValueError: If an output dependency has a missing input or a
+                cycle.
 
 )doc";
 
@@ -7112,7 +7148,8 @@ Template Args:
     Drawer: DOT drawer type.
 
 Raises:
-    std::ofstream::failure: if the file cannot be opened.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -7138,8 +7175,8 @@ Returns:
     indices.
 
 Raises:
-    std::invalid_argument: If the primary input counts or primary
-                           output counts differ.
+    ValueError: If the primary input counts or primary output counts
+                differ.
 
 )doc";
 
@@ -8193,8 +8230,8 @@ Returns:
     Axis sizes of the grid, including the layer count of `gate_lyt`.
 
 Raises:
-    std::overflow_error: If an extent is outside the signed 32-bit
-                         coordinate range.
+    OverflowError: If an extent is outside the signed 32-bit
+                   coordinate range.
 
 )doc";
 
@@ -8342,10 +8379,11 @@ Args:
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_cell_lyt = R"doc(Produced layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_create_cell_layout =
-R"doc(Creates the empty layout that receives the gates: an SiDB layout on
-the given lattice, or a cell grid spanning the gate-level layout whose
-clock zones are the library's tiles and follow the gate-level
-clocking.
+R"doc(Creates an empty SiDB layout on the given lattice or a cell grid
+spanning the gate-level layout.
+
+Cell grids with tile-based clocking use library tiles as clock zones
+and copy the gate-level clocking scheme.
 
 Args:
     src: Gate-level source layout.
@@ -8626,8 +8664,8 @@ Template Args:
     WiringReductionLyt: Wiring-reduction search layout type.
 
 Raises:
-    std::invalid_argument: If a cut selects a retained object or a
-                           cyclic wire chain.
+    ValueError: If a cut selects a retained object or a cyclic wire
+                chain.
 
 )doc";
 
@@ -9609,7 +9647,7 @@ Args:
                      objective.
 
 Raises:
-    std::bad_alloc: If storage allocation fails.
+    MemoryError: If storage allocation fails.
 
 )doc";
 
@@ -9625,7 +9663,7 @@ Args:
                      objective.
 
 Raises:
-    std::bad_alloc: If storage allocation fails.
+    MemoryError: If storage allocation fails.
 
 )doc";
 
@@ -9659,7 +9697,7 @@ Args:
     objective_index: Index of the routing objective.
 
 Raises:
-    std::bad_alloc: If storage allocation fails.
+    MemoryError: If storage allocation fails.
 
 )doc";
 
@@ -10285,8 +10323,7 @@ R"doc(Returns the object placed at a coordinate. @param lyt Layout. @param t
 Coordinate.
 
 Returns:
-    Identity of the object at `t`. @throws std::invalid_argument If
-    `t` is empty.
+    Identity of the object at `t`. @throws ValueError If `t` is empty.
 
 )doc";
 
@@ -10446,8 +10483,7 @@ Args:
          adjacent to the gate.
 
 Raises:
-    std::invalid_argument: If an intermediate wire is disconnected or
-                           cyclic.
+    ValueError: If an intermediate wire is disconnected or cyclic.
 
 )doc";
 
@@ -11025,9 +11061,9 @@ Returns:
     number assignment.
 
 Raises:
-    std::invalid_argument: If placement or declared connections
-                           violate the required topology.
-    std::bad_alloc: If allocation fails.
+    ValueError: If placement or declared connections violate the
+                required topology.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -11121,9 +11157,8 @@ Returns:
     `std::nullopt`, otherwise.
 
 Raises:
-    std::invalid_argument: If `Lyt` is a shifted Cartesian or
-                           hexagonal layout and
-                           `ps.layout_arrangement` is empty.
+    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
+                and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11243,9 +11278,8 @@ Returns:
     `std::nullopt`, otherwise.
 
 Raises:
-    std::invalid_argument: If `Lyt` is a shifted Cartesian or
-                           hexagonal layout and
-                           `ps.layout_arrangement` is empty.
+    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
+                and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11267,8 +11301,7 @@ Returns:
     Routing objectives that preserve logical input numbering.
 
 Raises:
-    std::invalid_argument: If an intermediate wire chain contains a
-                           cycle.
+    ValueError: If an intermediate wire chain contains a cycle.
 
 )doc";
 
@@ -11379,10 +11412,10 @@ Returns:
 Raises:
     networks::high_degree_fanin_exception: If `ntk` has a node with
                                            more than two fanins.
-    std::invalid_argument: If the cost objective is `CUSTOM` and no
-                           custom cost objective is provided, or if
-                           `ps.tiles_to_skip_between_pis` does not lie
-                           in :math:`[0, 2^{20}]`.
+    ValueError: If the cost objective is `CUSTOM` and no custom cost
+                objective is provided, or if
+                `ps.tiles_to_skip_between_pis` does not lie in
+                :math:`[0, 2^{20}]`.
 
 )doc";
 
@@ -11582,10 +11615,10 @@ Returns:
     Hexagonal representation of the Cartesian layout.
 
 Raises:
-    std::invalid_argument: If clocking or placed geometry does not
-                           satisfy the input contract.
-    std::overflow_error: If the transformed coordinates exceed the
-                         signed coordinate range.
+    ValueError: If clocking or placed geometry does not satisfy the
+                input contract.
+    OverflowError: If the transformed coordinates exceed the signed
+                   coordinate range.
 
 )doc";
 
@@ -11682,7 +11715,7 @@ static const char *mkd_doc_fiction_physical_design_layout_coordinate_path = R"do
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_append =
 R"doc(Appends a coordinate. @param c Coordinate to append. @throws
-std::bad_alloc If storage allocation fails.
+MemoryError If storage allocation fails.
 
 )doc";
 
@@ -11774,9 +11807,8 @@ Returns:
     circuit.
 
 Raises:
-    std::invalid_argument: If `Lyt` is a shifted Cartesian or
-                           hexagonal layout and
-                           `ps.layout_arrangement` is empty.
+    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
+                and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11814,7 +11846,7 @@ Template Args:
     Path: Path type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_collection_add =
-R"doc(Adds a path. @param p Path to add. @throws std::bad_alloc If storage
+R"doc(Adds a path. @param p Path to add. @throws MemoryError If storage
 allocation fails.
 
 )doc";
@@ -11915,7 +11947,8 @@ this function cannot be evaluated in :math:`\mathcal{O}(1)`, but has
 the polynomial complexity of A*.
 
 If no path between `source` and `target` exists in `layout`, the
-returned distance is `std::numeric_limits<uint64_t>::max()`.
+returned distance is 18,446,744,073,709,551,615 (2^64 - 1)
+(`std::numeric_limits<uint64_t>::max()` in C++).
 
 Args:
     layout: The layout in which the distance between `source` and
@@ -12344,7 +12377,7 @@ Returns:
     Coordinate index.
 
 Raises:
-    std::out_of_range: If the coordinate is outside the layout.
+    IndexError: If the coordinate is outside the layout.
 
 )doc";
 
@@ -12678,10 +12711,10 @@ Returns:
     2DDWave distance between `source` and `target`.
 
 Note:
-    To represent :math:`\infty`,
-    `std::numeric_limits<uint32_t>::max()` is returned for distances
-    of infinite length. We are using `uint32_t` to prevent overflows
-    when adding distances in the default `uint64_t` number range.
+    Infinite distances return 4,294,967,295 (2^32 - 1)
+    (`std::numeric_limits<uint32_t>::max()` in C++). This 32-bit
+    sentinel prevents overflows when adding distances in the default
+    64-bit unsigned number range.
 
 )doc";
 
@@ -12793,7 +12826,7 @@ Template Args:
     Path: Path type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_set_add =
-R"doc(Adds a path. @param p Path to add. @throws std::bad_alloc If storage
+R"doc(Adds a path. @param p Path to add. @throws MemoryError If storage
 allocation fails.
 
 )doc";
@@ -12964,10 +12997,9 @@ Args:
     pst: Statistics.
 
 Raises:
-    std::invalid_argument: If clocking or occupied geometry is
-                           invalid.
-    std::overflow_error: If the extent leaves no room for signed
-                         routing coordinates.
+    ValueError: If clocking or occupied geometry is invalid.
+    OverflowError: If the extent leaves no room for signed routing
+                   coordinates.
 
 Note:
     This function requires the gate-level layout to be 2DDWave-
@@ -13057,9 +13089,9 @@ Template Args:
     Path: Coordinate path type.
 
 Raises:
-    std::invalid_argument: If an endpoint or intermediate placement is
-                           unavailable.
-    std::out_of_range: If the destination input index is invalid.
+    ValueError: If an endpoint or intermediate placement is
+                unavailable.
+    IndexError: If the destination input index is invalid.
 
 )doc";
 
@@ -13166,10 +13198,9 @@ Args:
     pst: Statistics.
 
 Raises:
-    std::invalid_argument: If clocking or occupied geometry is
-                           invalid.
-    std::overflow_error: If the extent leaves no room for signed
-                         routing coordinates.
+    ValueError: If clocking or occupied geometry is invalid.
+    OverflowError: If the extent leaves no room for signed routing
+                   coordinates.
 
 )doc";
 
@@ -13367,6 +13398,10 @@ Args:
               preferably use the `.qca` extension.
     ps: Parameters.
 
+Raises:
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_params = R"doc(Parameters for writing QCADesigner layouts.)doc";
@@ -13403,15 +13438,18 @@ far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout. May throw an
-`std::ofstream::failure` if it cannot open the file.
-
 Args:
     lyt: The layout to be written.
     filename: The file name to create and write into. Should
               preferably use the `.svg` extension.
     ps: Parameters.
+
+Raises:
+    fcn::io::unsupported_cell_type_exception: If the layout contains
+                                              an unsupported cell
+                                              type.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -13467,7 +13505,7 @@ Args:
         by; 0 turns `cz` back into a normal clock zone.
 
 Raises:
-    std::bad_alloc: If allocation fails.
+    MemoryError: If allocation fails.
 
 )doc";
 
@@ -13518,8 +13556,8 @@ Args:
     tile_size_y: Clock-zone height in cells.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain or
-                           a clock-zone size is zero.
+    ValueError: If a size exceeds the coordinate domain or a clock-
+                zone size is zero.
 
 )doc";
 
@@ -13535,8 +13573,8 @@ Args:
     tile_size_y: Clock-zone height in cells.
 
 Raises:
-    std::invalid_argument: If a size exceeds the coordinate domain or
-                           a clock-zone size is zero.
+    ValueError: If a size exceeds the coordinate domain or a clock-
+                zone size is zero.
 
 )doc";
 
@@ -13692,8 +13730,8 @@ Returns:
     Bestagon gate representation of `t` including mirroring.
 
 Raises:
-    std::invalid_argument: If `lyt` is not pointy-top, i.e., its
-                           arrangement shifts columns.
+    ValueError: If `lyt` is not pointy-top, i.e., its arrangement
+                shifts columns.
 
 )doc";
 
@@ -13730,7 +13768,7 @@ Args:
     cs: Charge state to assign.
 
 Raises:
-    std::out_of_range: if the index is out of range.
+    IndexError: if the index is out of range.
 
 )doc";
 
@@ -13764,8 +13802,7 @@ Args:
     cs: Charge state of every SiDB.
 
 Raises:
-    std::invalid_argument: if the sites are not distinct and in raster
-                           order.
+    ValueError: if the sites are not distinct and in raster order.
 
 )doc";
 
@@ -13781,8 +13818,8 @@ Args:
             eV).
 
 Raises:
-    std::invalid_argument: if the site and state counts differ or
-                           sites are not distinct and in raster order.
+    ValueError: if the site and state counts differ or sites are not
+                distinct and in raster order.
 
 )doc";
 
@@ -13882,8 +13919,8 @@ Args:
     s: Site.
 
 Returns:
-    Index of `s`, or `std::nullopt` if the distribution covers no SiDB
-    at `s`.
+    Index of `s`, or `std::nullopt` (`None` in Python) if the
+    distribution covers no SiDB at `s`.
 
 )doc";
 
@@ -13968,8 +14005,7 @@ static const char *mkd_doc_fiction_sidb_charge_distribution_validate_sites =
 R"doc(Checks the shared site's ordering and uniqueness.
 
 Raises:
-    std::invalid_argument: if the sites are not distinct and in raster
-                           order.
+    ValueError: if the sites are not distinct and in raster order.
 
 )doc";
 
@@ -14073,8 +14109,8 @@ Returns:
     The designed gates.
 
 Raises:
-    std::invalid_argument: if `spec` is empty or the input wire count
-                           differs from the specification.
+    ValueError: if `spec` is empty or the input wire count differs
+                from the specification.
     utils::timeout_error: if the gate-design deadline is reached.
 
 )doc";
@@ -14174,8 +14210,8 @@ Args:
     st: Statistics.
 
 Raises:
-    std::invalid_argument: if the input wire count differs from the
-                           specification.
+    ValueError: if the input wire count differs from the
+                specification.
 
 )doc";
 
@@ -14364,7 +14400,7 @@ Returns:
     `true` if no gate can be designed on the skeleton.
 
 Raises:
-    std::invalid_argument: if `spec` is empty.
+    ValueError: if `spec` is empty.
 
 )doc";
 
@@ -14396,8 +14432,8 @@ Returns:
     Layout representing the designed SiDB circuit.
 
 Raises:
-    std::invalid_argument: if gate mapping uses a column arrangement
-                           instead of a row arrangement.
+    ValueError: if gate mapping uses a column arrangement instead of a
+                row arrangement.
     fcn::unsupported_gate_type_exception: if any object has an
                                           unsupported function.
     unsuccessful_gate_design_error: if a gate cannot be designed.
@@ -14451,8 +14487,8 @@ Returns:
 
 Raises:
     utils::timeout_error: If a circuit or gate-design timeout expires.
-    std::invalid_argument: If the simulation engine does not support
-                           the requested gate-design timeout.
+    ValueError: If the simulation engine does not support the
+                requested gate-design timeout.
 
 Note:
     A circuit or gate timeout aborts the operation. Only a completed,
@@ -14562,8 +14598,8 @@ Returns:
 
 Raises:
     sqd_parsing_error: if the number has trailing characters.
-    std::invalid_argument: if the text is not an integer.
-    std::out_of_range: if the integer exceeds the int64_t range.
+    ValueError: if the text is not an integer.
+    IndexError: if the integer exceeds the int64_t range.
 
 )doc";
 
@@ -14579,8 +14615,8 @@ Returns:
 Raises:
     sqd_parsing_error: if the number is missing, non-finite, or has
                        trailing characters.
-    std::invalid_argument: if the text is not numeric.
-    std::out_of_range: if the number exceeds the range of a double.
+    ValueError: if the text is not numeric.
+    IndexError: if the number exceeds the range of a double.
 
 )doc";
 
@@ -14605,8 +14641,7 @@ static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_run =
 R"doc(Draws the lattice and SiDBs with padding around the bounding box.
 
 Raises:
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
+    IndexError: if padding exceeds the lattice-site coordinate range.
 
 )doc";
 
@@ -14625,8 +14660,8 @@ Args:
              default SiDB color.
 
 Raises:
-    std::invalid_argument: if the charge distribution sites differ
-                           from the layout.
+    ValueError: if the charge distribution sites differ from the
+                layout.
 
 )doc";
 
@@ -14684,9 +14719,8 @@ Returns:
 Raises:
     sqd_parsing_error: if the geometry is incomplete, the basis count
                        is not two, or a name-only lattice is unknown.
-    std::invalid_argument: if a geometry component is not numeric.
-    std::out_of_range: if a geometry component exceeds the range of a
-                       double.
+    ValueError: if a geometry component is not numeric.
+    IndexError: if a geometry component exceeds the range of a double.
 
 )doc";
 
@@ -14702,8 +14736,8 @@ Returns:
 Raises:
     sqd_parsing_error: if the element or a component is missing or
                        malformed.
-    std::invalid_argument: if a component is not numeric.
-    std::out_of_range: if a component exceeds the range of a double.
+    ValueError: if a component is not numeric.
+    IndexError: if a component exceeds the range of a double.
 
 )doc";
 
@@ -14844,10 +14878,9 @@ Args:
     draw_lattice: Whether to print empty lattice sites as dots.
 
 Raises:
-    std::invalid_argument: if the charge distribution sites differ
-                           from the layout.
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
+    ValueError: if the charge distribution sites differ from the
+                layout.
+    IndexError: if padding exceeds the lattice-site coordinate range.
 
 )doc";
 
@@ -14916,7 +14949,7 @@ Returns:
 Raises:
     sqd_parsing_error: if the file is malformed or a name-only lattice
                        is unknown.
-    std::ifstream::failure: if the file cannot be opened.
+    RuntimeError: if the file cannot be opened.
 
 )doc";
 
@@ -14953,7 +14986,7 @@ Returns:
     The layout holding the defects.
 
 Raises:
-    std::ifstream::failure: if the file cannot be opened.
+    RuntimeError: if the file cannot be opened.
 
 )doc";
 
@@ -14997,8 +15030,7 @@ Args:
     ps: Drawing parameters.
 
 Raises:
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
+    IndexError: if padding exceeds the lattice-site coordinate range.
 
 )doc";
 
@@ -15012,9 +15044,9 @@ Args:
     ps: Drawing parameters.
 
 Raises:
-    std::ofstream::failure: if the file cannot be opened.
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
+    IndexError: if padding exceeds the lattice-site coordinate range.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -15030,8 +15062,9 @@ Args:
     ps: Drawing parameters.
 
 Raises:
-    std::invalid_argument: if the charge distribution sites differ
-                           from the layout.
+    ValueError: if the charge distribution sites differ from the
+                layout.
+    IndexError: if padding exceeds the lattice-site coordinate range.
 
 )doc";
 
@@ -15046,9 +15079,11 @@ Args:
     ps: Drawing parameters.
 
 Raises:
-    std::invalid_argument: if the charge distribution sites differ
-                           from the layout.
-    std::ofstream::failure: if the file cannot be opened.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
+    ValueError: if the charge distribution sites differ from the
+                layout.
+    IndexError: if padding exceeds the lattice-site coordinate range.
 
 )doc";
 
@@ -15103,7 +15138,8 @@ Args:
     on_progress: Receives completed dot and defect records.
 
 Raises:
-    std::ofstream::failure: if the file cannot be opened.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -15139,7 +15175,7 @@ Returns:
     Distance between `source` and `target` (unit: nm).
 
 Raises:
-    std::out_of_range: if either basis index is not 0 or 1.
+    IndexError: if either basis index is not 0 or 1.
 
 )doc";
 
@@ -15153,7 +15189,7 @@ Returns:
     The `(x, y)` position of `s` (unit: nm).
 
 Raises:
-    std::out_of_range: if the basis index is not 0 or 1.
+    IndexError: if the basis index is not 0 or 1.
 
 )doc";
 
@@ -15208,7 +15244,7 @@ Args:
     basis_site: Basis site, 0 or 1.
 
 Raises:
-    std::out_of_range: if the basis index is not 0 or 1.
+    IndexError: if the basis index is not 0 or 1.
 
 )doc";
 
@@ -15233,8 +15269,8 @@ Returns:
     Sum of both sites.
 
 Raises:
-    std::out_of_range: if a basis index is invalid or a result
-                       coordinate exceeds the lattice-site range.
+    IndexError: if a basis index is invalid or a result coordinate
+                exceeds the lattice-site range.
 
 )doc";
 
@@ -15272,8 +15308,8 @@ Returns:
     Difference of both sites.
 
 Raises:
-    std::out_of_range: if a basis index is invalid or a result
-                       coordinate exceeds the lattice-site range.
+    IndexError: if a basis index is invalid or a result coordinate
+                exceeds the lattice-site range.
 
 )doc";
 
@@ -15503,7 +15539,8 @@ Args:
     s: Site.
 
 Returns:
-    Index of `s`, or `std::nullopt` if `s` holds no SiDB.
+    Index of `s`, or `std::nullopt` (`None` in Python) if `s` holds no
+    SiDB.
 
 )doc";
 
@@ -15932,11 +15969,10 @@ Returns:
     `double` distance can represent the inverse.
 
 Raises:
-    std::invalid_argument: If potential is negative or NaN, relative
-                           permittivity is non-positive or non-finite,
-                           screening distance is non-positive or NaN,
-                           or precision exceeds the decimal precision
-                           of `double`.
+    ValueError: If potential is negative or NaN, relative permittivity
+                is non-positive or non-finite, screening distance is
+                non-positive or NaN, or precision exceeds the decimal
+                precision of `double`.
 
 )doc";
 
@@ -16153,7 +16189,7 @@ Returns:
     Bestagon gate representation of `t` including mirroring.
 
 Raises:
-    std::invalid_argument: if `lyt` shifts columns instead of rows.
+    ValueError: if `lyt` shifts columns instead of rows.
     gate_design_exception: if no gate can be designed.
     fcn::unsupported_gate_orientation_exception: if the gate
                                                  orientation is
@@ -16281,8 +16317,8 @@ Returns:
     The energies with their state types.
 
 Raises:
-    std::out_of_range: if logic validation encounters an invalid
-                       lattice basis index.
+    IndexError: if logic validation encounters an invalid lattice
+                basis index.
 
 )doc";
 
@@ -16330,8 +16366,8 @@ Returns:
     otherwise.
 
 Raises:
-    std::out_of_range: if a SiDB or defect site has an invalid lattice
-                       basis index.
+    IndexError: if a SiDB or defect site has an invalid lattice basis
+                index.
 
 )doc";
 
@@ -16391,11 +16427,10 @@ Returns:
     The critical temperature (unit: K).
 
 Raises:
-    std::invalid_argument: if `spec` is empty, if the number of input
-                           pattern layouts does not match the number
-                           of input combinations of `spec`, or if the
-                           number of output BDL pairs does not match
-                           the number of truth tables.
+    ValueError: if `spec` is empty, if the number of input pattern
+                layouts does not match the number of input
+                combinations of `spec`, or if the number of output BDL
+                pairs does not match the number of truth tables.
 
 )doc";
 
@@ -16703,8 +16738,8 @@ Args:
     energy: The energy value whose degeneracy is requested.
 
 Returns:
-    The degeneracy of the given energy. If the energy value is not
-    found, `std::nullopt` is returned instead.
+    The degeneracy of the given energy, or `std::nullopt` (`None` in
+    Python) if the energy is not found.
 
 )doc";
 
@@ -16741,8 +16776,8 @@ Args:
     state_index: The index of the state to be retrieved.
 
 Returns:
-    Energy state. If the index is out of range, `std::nullopt` is
-    returned instead.
+    Energy state, or `std::nullopt` (`None` in Python) if the index is
+    out of range.
 
 )doc";
 
@@ -16753,7 +16788,7 @@ Returns:
     The maximum energy value in the energy distribution.
 
 Raises:
-    std::invalid_argument: If the energy distribution is empty.
+    ValueError: If the energy distribution is empty.
 
 )doc";
 
@@ -16764,7 +16799,7 @@ Returns:
     The minimum energy value in the energy distribution.
 
 Raises:
-    std::invalid_argument: If the energy distribution is empty.
+    ValueError: If the energy distribution is empty.
 
 )doc";
 
@@ -16797,7 +16832,7 @@ Args:
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_minimum_energy =
 R"doc(Computes the minimum energy of a range of charge distributions. If the
-range is empty, infinity is returned to indicate no valid energy value
+range is empty, positive infinity indicates that no valid energy value
 exists.
 
 Args:
@@ -16809,8 +16844,7 @@ Template Args:
 
 Returns:
     Value of the minimum energy found in the input range (unit: eV),
-    or `std::numeric_limits<double>::infinity()` if the range is
-    empty.
+    or positive infinity if the range is empty.
 
 )doc";
 
@@ -16882,10 +16916,9 @@ Returns:
     charge distribution.
 
 Raises:
-    std::invalid_argument: If relative permittivity is non-positive or
-                           non-finite, screening distance is non-
-                           positive or NaN, or precision exceeds the
-                           decimal precision of `double`.
+    ValueError: If relative permittivity is non-positive or non-
+                finite, screening distance is non-positive or NaN, or
+                precision exceeds the decimal precision of `double`.
 
 )doc";
 
@@ -16926,11 +16959,10 @@ Returns:
     SiDBs in raster order.
 
 Raises:
-    std::invalid_argument: if a sweep range has non-finite or reversed
-                           bounds, a non-positive or non-finite step,
-                           more points than the storage range permits,
-                           or the engine is not QuickExact, EXGS, or
-                           QuickSim.
+    ValueError: if a sweep range has non-finite or reversed bounds, a
+                non-positive or non-finite step, more points than the
+                storage range permits, or the engine is not
+                QuickExact, EXGS, or QuickSim.
 
 )doc";
 
@@ -17155,11 +17187,10 @@ Returns:
     The defect influence domain of the layout.
 
 Raises:
-    std::invalid_argument: if `step_size` is zero.
-                           std::invalid_argument: if `spec` is empty.
-                           std::invalid_argument: if
-                           `params.additional_scanning_area` contains
-                           a negative value.
+    ValueError: if `step_size` is zero. ValueError: if `spec` is
+                empty. ValueError: if
+                `params.additional_scanning_area` contains a negative
+                value.
 
 )doc";
 
@@ -17183,10 +17214,9 @@ Returns:
     The defect influence domain of the layout.
 
 Raises:
-    std::invalid_argument: if `step_size` is zero.
-                           std::invalid_argument: if
-                           `params.additional_scanning_area` contains
-                           a negative value.
+    ValueError: if `step_size` is zero. ValueError: if
+                `params.additional_scanning_area` contains a negative
+                value.
 
 )doc";
 
@@ -17274,9 +17304,9 @@ Returns:
     The (partial) defect influence domain of the layout.
 
 Raises:
-    std::invalid_argument: if `spec` is empty. std::invalid_argument:
-                           if `params.additional_scanning_area`
-                           contains a negative value.
+    ValueError: if `spec` is empty. ValueError: if
+                `params.additional_scanning_area` contains a negative
+                value.
 
 )doc";
 
@@ -17323,8 +17353,8 @@ Returns:
     The (partial) defect influence domain of the layout.
 
 Raises:
-    std::invalid_argument: if `params.additional_scanning_area`
-                           contains a negative value.
+    ValueError: if `params.additional_scanning_area` contains a
+                negative value.
 
 )doc";
 
@@ -17346,9 +17376,9 @@ Returns:
     The (partial) defect influence domain of the layout.
 
 Raises:
-    std::invalid_argument: if `spec` is empty. std::invalid_argument:
-                           if `params.additional_scanning_area`
-                           contains a negative value.
+    ValueError: if `spec` is empty. ValueError: if
+                `params.additional_scanning_area` contains a negative
+                value.
 
 )doc";
 
@@ -17372,8 +17402,8 @@ Returns:
     The (partial) defect influence domain of the layout.
 
 Raises:
-    std::invalid_argument: if `params.additional_scanning_area`
-                           contains a negative value.
+    ValueError: if `params.additional_scanning_area` contains a
+                negative value.
 
 )doc";
 
@@ -17678,8 +17708,7 @@ Returns:
     The displacement robustness domain of the SiDB layout.
 
 Raises:
-    std::out_of_range: if a displacement exceeds the lattice-site
-                       range.
+    IndexError: if a displacement exceeds the lattice-site range.
 
 )doc";
 
@@ -17708,8 +17737,7 @@ Returns:
     The probability of fabricating an operational SiDB layout.
 
 Raises:
-    std::out_of_range: if a displacement exceeds the lattice-site
-                       range.
+    IndexError: if a displacement exceeds the lattice-site range.
 
 )doc";
 
@@ -18466,7 +18494,7 @@ Returns:
     Simulation results.
 
 Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
+    IndexError: if a site has an invalid lattice basis index.
 
 )doc";
 
@@ -20712,7 +20740,7 @@ Returns:
     The physically valid charge distributions.
 
 Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
+    IndexError: if a site has an invalid lattice basis index.
     utils::timeout_error: if the shared caller deadline expires. No
                           partial result is returned.
 
@@ -20772,7 +20800,7 @@ Returns:
     for an empty layout.
 
 Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
+    IndexError: if a site has an invalid lattice basis index.
 
 )doc";
 
@@ -20879,7 +20907,7 @@ Returns:
     `lyt`.
 
 Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
+    IndexError: if a site has an invalid lattice basis index.
     utils::timeout_error: if the shared caller deadline expires. No
                           partial result is returned.
 
@@ -20942,7 +20970,7 @@ Returns:
     is zero, the timeout was hit, or no valid distribution was found.
 
 Raises:
-    std::out_of_range: if a site has an invalid lattice basis index.
+    IndexError: if a site has an invalid lattice basis index.
     utils::timeout_error: if the shared caller deadline expires. No
                           partial result is returned.
 
@@ -21058,8 +21086,8 @@ static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writ
 R"doc(Writes the complete SiQAD simulation-result document.
 
 Raises:
-    std::invalid_argument: if a distribution has different sites from
-                           the result layout.
+    ValueError: if a distribution has different sites from the result
+                layout.
 
 )doc";
 
@@ -21119,7 +21147,8 @@ Args:
             positions.
 
 Raises:
-    std::ofstream::failure: if the file cannot be opened.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -21150,7 +21179,8 @@ Args:
     filename: File to write into.
 
 Raises:
-    std::ofstream::failure: if the file cannot be opened.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -21195,11 +21225,10 @@ Template Args:
     OpDomain: The type of the operational domain.
 
 Raises:
-    std::invalid_argument: if the number of dimensions in the
-                           operational domain is 0 or greater than 3.
-                           Three is the number of enumerators of
-                           `sweep_parameter`, so a fourth dimension
-                           could only repeat one of them.
+    ValueError: if the number of dimensions in the operational domain
+                is 0 or greater than 3. Three is the number of
+                enumerators of `sweep_parameter`, so a fourth
+                dimension could only repeat one of them.
 
 )doc";
 
@@ -21243,12 +21272,12 @@ Template Args:
     OpDomain: The type of the operational domain.
 
 Raises:
-    std::ofstream::failure: if the file could not be opened.
-    std::invalid_argument: if the number of dimensions in the
-                           operational domain is 0 or greater than 3.
-                           Three is the number of enumerators of
-                           `sweep_parameter`, so a fourth dimension
-                           could only repeat one of them.
+    ValueError: if the number of dimensions in the operational domain
+                is 0 or greater than 3. Three is the number of
+                enumerators of `sweep_parameter`, so a fourth
+                dimension could only repeat one of them.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
 
 )doc";
 
@@ -21286,8 +21315,8 @@ Args:
     os: Output stream to write into.
 
 Raises:
-    std::invalid_argument: if a distribution has different sites from
-                           the result layout.
+    ValueError: if a distribution has different sites from the result
+                layout.
 
 )doc";
 
@@ -21299,9 +21328,10 @@ Args:
     filename: File to write into.
 
 Raises:
-    std::invalid_argument: if a distribution has different sites from
-                           the result layout.
-    std::ofstream::failure: if the file cannot be opened.
+    RuntimeError: If creating, writing, closing, or replacing the
+                  output file fails.
+    ValueError: if a distribution has different sites from the result
+                layout.
 
 )doc";
 
@@ -21340,8 +21370,7 @@ Args:
         encoding.
 
 Raises:
-    std::invalid_argument: if the layout has more than 63 input BDL
-                           pairs.
+    ValueError: if the layout has more than 63 input BDL pairs.
 
 )doc";
 
@@ -21355,8 +21384,7 @@ Args:
     source_input_wires: The input wires of `source_layout`.
 
 Raises:
-    std::invalid_argument: if the layout has more than 63 input BDL
-                           pairs.
+    ValueError: if the layout has more than 63 input BDL pairs.
 
 )doc";
 
@@ -21775,8 +21803,8 @@ Args:
     t: The SiDB type to look for.
 
 Returns:
-    The first BDL pair of type `t`, or `std::nullopt` if the wire has
-    none.
+    The first BDL pair of type `t`, or `std::nullopt` (`None` in
+    Python) if the wire has none.
 
 )doc";
 
@@ -21892,13 +21920,12 @@ Returns:
     The critical temperature domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid,
-                           or if the operational domain sketch is
-                           requested without rejecting kinks or on a
-                           layout without `LOGIC` dots. Flood fill and
-                           contour tracing additionally require at
-                           least two sweep dimensions; grid search and
-                           random sampling accept any number.
+    ValueError: if the given sweep parameters are invalid, or if the
+                operational domain sketch is requested without
+                rejecting kinks or on a layout without `LOGIC` dots.
+                Flood fill and contour tracing additionally require at
+                least two sweep dimensions; grid search and random
+                sampling accept any number.
 
 )doc";
 
@@ -21953,13 +21980,12 @@ Returns:
     The critical temperature domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid,
-                           or if the operational domain sketch is
-                           requested without rejecting kinks or on a
-                           layout without `LOGIC` dots. Flood fill and
-                           contour tracing additionally require at
-                           least two sweep dimensions; grid search and
-                           random sampling accept any number.
+    ValueError: if the given sweep parameters are invalid, or if the
+                operational domain sketch is requested without
+                rejecting kinks or on a layout without `LOGIC` dots.
+                Flood fill and contour tracing additionally require at
+                least two sweep dimensions; grid search and random
+                sampling accept any number.
 
 )doc";
 
@@ -21973,7 +21999,7 @@ Returns:
     The dimension at the specified index.
 
 Raises:
-    std::out_of_range: if the index is out of range.
+    IndexError: if the index is out of range.
 
 )doc";
 
@@ -22014,11 +22040,10 @@ Returns:
     The critical temperature domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid,
-                           or if the operational domain sketch is
-                           requested without rejecting kinks or on a
-                           layout without `LOGIC` dots. Any number of
-                           sweep dimensions is accepted.
+    ValueError: if the given sweep parameters are invalid, or if the
+                operational domain sketch is requested without
+                rejecting kinks or on a layout without `LOGIC` dots.
+                Any number of sweep dimensions is accepted.
 
 )doc";
 
@@ -22066,11 +22091,10 @@ Returns:
     The critical temperature domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid,
-                           or if the operational domain sketch is
-                           requested without rejecting kinks or on a
-                           layout without `LOGIC` dots. Any number of
-                           sweep dimensions is accepted.
+    ValueError: if the given sweep parameters are invalid, or if the
+                operational domain sketch is requested without
+                rejecting kinks or on a layout without `LOGIC` dots.
+                Any number of sweep dimensions is accepted.
 
 )doc";
 
@@ -22107,8 +22131,7 @@ Returns:
 
 Raises:
     utils::timeout_error: if the deadline expires.
-    std::invalid_argument: if ClusterComplete is selected with a
-                           finite deadline.
+    ValueError: if ClusterComplete is selected with a finite deadline.
 
 )doc";
 
@@ -22427,8 +22450,7 @@ Returns:
     physically valid.
 
 Raises:
-    std::invalid_argument: if a canvas SiDB is absent from the state's
-                           layout.
+    ValueError: if a canvas SiDB is absent from the state's layout.
 
 )doc";
 
@@ -22571,9 +22593,9 @@ Returns:
     The number of steps, excluding the initial point.
 
 Raises:
-    std::invalid_argument: if bounds are non-finite or reversed, the
-                           step is not finite and positive, or the
-                           number of points exceeds the storage range.
+    ValueError: if bounds are non-finite or reversed, the step is not
+                finite and positive, or the number of points exceeds
+                the storage range.
 
 )doc";
 
@@ -22673,10 +22695,10 @@ Returns:
     The (partial) operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if fewer than two dimensions are swept or
-                           the seed is outside the sweep grid.
-    std::bad_alloc: if sampling or a flood-fill worker cannot allocate
-                    storage.
+    ValueError: if fewer than two dimensions are swept or the seed is
+                outside the sweep grid.
+    MemoryError: if sampling or a flood-fill worker cannot allocate
+                 storage.
 
 )doc";
 
@@ -22779,8 +22801,8 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_doma
 R"doc(Builds the indices and values of each validated sweep dimension.
 
 Raises:
-    std::invalid_argument: if a sweep range is invalid or exceeds the
-                           storage range.
+    ValueError: if a sweep range is invalid or exceeds the storage
+                range.
 
 )doc";
 
@@ -23036,9 +23058,8 @@ Returns:
     The first grid point at or above each coordinate of `pp`.
 
 Raises:
-    std::invalid_argument: if the dimension count is wrong or a
-                           coordinate is non-finite or outside the
-                           grid.
+    ValueError: if the dimension count is wrong or a coordinate is
+                non-finite or outside the grid.
 
 )doc";
 
@@ -23067,8 +23088,8 @@ Returns:
     The (partial) operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if an additional seed has the wrong
-                           dimensions or lies outside the sweep grid.
+    ValueError: if an additional seed has the wrong dimensions or lies
+                outside the sweep grid.
 
 )doc";
 
@@ -23147,7 +23168,7 @@ Args:
                     the sweep dimension count error.
 
 Raises:
-    std::invalid_argument: if the parameters are invalid.
+    ValueError: if the parameters are invalid.
 
 )doc";
 
@@ -23224,8 +23245,7 @@ Returns:
     One layout per input pattern.
 
 Raises:
-    std::invalid_argument: if the layout has more than 63 input BDL
-                           pairs.
+    ValueError: if the layout has more than 63 input BDL pairs.
 
 )doc";
 
@@ -23242,8 +23262,7 @@ Returns:
     One layout per input pattern.
 
 Raises:
-    std::invalid_argument: if the layout has more than 63 input BDL
-                           pairs.
+    ValueError: if the layout has more than 63 input BDL pairs.
 
 )doc";
 
@@ -23333,8 +23352,8 @@ Returns:
     The operational status and the number of simulator invocations.
 
 Raises:
-    std::invalid_argument: if `spec` is empty or the number of layouts
-                           does not match the number of patterns.
+    ValueError: if `spec` is empty or the number of layouts does not
+                match the number of patterns.
 
 )doc";
 
@@ -23530,13 +23549,12 @@ Returns:
     The operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid,
-                           or if the operational domain sketch is
-                           requested without rejecting kinks or on a
-                           layout without `LOGIC` dots. Flood fill and
-                           contour tracing additionally require at
-                           least two sweep dimensions; grid search and
-                           random sampling accept any number.
+    ValueError: if the given sweep parameters are invalid, or if the
+                operational domain sketch is requested without
+                rejecting kinks or on a layout without `LOGIC` dots.
+                Flood fill and contour tracing additionally require at
+                least two sweep dimensions; grid search and random
+                sampling accept any number.
 
 )doc";
 
@@ -23588,13 +23606,12 @@ Returns:
     The operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid,
-                           or if the operational domain sketch is
-                           requested without rejecting kinks or on a
-                           layout without `LOGIC` dots. Flood fill and
-                           contour tracing additionally require at
-                           least two sweep dimensions; grid search and
-                           random sampling accept any number.
+    ValueError: if the given sweep parameters are invalid, or if the
+                operational domain sketch is requested without
+                rejecting kinks or on a layout without `LOGIC` dots.
+                Flood fill and contour tracing additionally require at
+                least two sweep dimensions; grid search and random
+                sampling accept any number.
 
 )doc";
 
@@ -23608,7 +23625,7 @@ Returns:
     The dimension at the specified index.
 
 Raises:
-    std::out_of_range: if the index is out of range.
+    IndexError: if the index is out of range.
 
 )doc";
 
@@ -23651,11 +23668,10 @@ Returns:
     The operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid,
-                           or if the operational domain sketch is
-                           requested without rejecting kinks or on a
-                           layout without `LOGIC` dots. Any number of
-                           sweep dimensions is accepted.
+    ValueError: if the given sweep parameters are invalid, or if the
+                operational domain sketch is requested without
+                rejecting kinks or on a layout without `LOGIC` dots.
+                Any number of sweep dimensions is accepted.
 
 )doc";
 
@@ -23734,11 +23750,10 @@ Returns:
     The operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid,
-                           or if the operational domain sketch is
-                           requested without rejecting kinks or on a
-                           layout without `LOGIC` dots. Any number of
-                           sweep dimensions is accepted.
+    ValueError: if the given sweep parameters are invalid, or if the
+                operational domain sketch is requested without
+                rejecting kinks or on a layout without `LOGIC` dots.
+                Any number of sweep dimensions is accepted.
 
 )doc";
 
@@ -23768,10 +23783,9 @@ Returns:
     parameter points in the parameter space.
 
 Raises:
-    std::invalid_argument: if the sweep has fewer than two dimensions,
-                           a range is invalid, or the seed is non-
-                           finite, outside the grid, or has the wrong
-                           dimension count.
+    ValueError: if the sweep has fewer than two dimensions, a range is
+                invalid, or the seed is non-finite, outside the grid,
+                or has the wrong dimension count.
 
 )doc";
 
@@ -23933,8 +23947,8 @@ Returns:
     The operational status.
 
 Raises:
-    std::out_of_range: if validation encounters an invalid lattice
-                       basis index.
+    IndexError: if validation encounters an invalid lattice basis
+                index.
 
 )doc";
 
@@ -23965,7 +23979,7 @@ Returns:
     Chargeless potential (unit: V).
 
 Raises:
-    std::out_of_range: if an SiDB index is out of range.
+    IndexError: if an SiDB index is out of range.
 
 )doc";
 
@@ -24025,7 +24039,7 @@ Returns:
     The four thresholds (unit: V).
 
 Raises:
-    std::out_of_range: if an SiDB index is out of range.
+    IndexError: if an SiDB index is out of range.
 
 )doc";
 
@@ -24045,10 +24059,9 @@ Returns:
     Energy (unit: eV).
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape. std::invalid_argument: if the
-                           potential vector does not contain one value
-                           per SiDB.
+    ValueError: if the distribution sites differ from the landscape.
+                ValueError: if the potential vector does not contain
+                one value per SiDB.
 
 )doc";
 
@@ -24062,8 +24075,7 @@ Returns:
     Energy (unit: eV).
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape.
+    ValueError: if the distribution sites differ from the landscape.
 
 )doc";
 
@@ -24078,8 +24090,7 @@ Returns:
     `cd` with its energy assigned.
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape.
+    ValueError: if the distribution sites differ from the landscape.
 
 )doc";
 
@@ -24103,10 +24114,9 @@ Returns:
     `true` iff no energetically favored hop exists.
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape. std::invalid_argument: if the
-                           potential vector does not contain one value
-                           per SiDB.
+    ValueError: if the distribution sites differ from the landscape.
+                ValueError: if the potential vector does not contain
+                one value per SiDB.
 
 )doc";
 
@@ -24122,10 +24132,9 @@ Returns:
     `true` iff both stability criteria hold.
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape. std::invalid_argument: if the
-                           potential vector does not contain one value
-                           per SiDB.
+    ValueError: if the distribution sites differ from the landscape.
+                ValueError: if the potential vector does not contain
+                one value per SiDB.
 
 )doc";
 
@@ -24139,8 +24148,7 @@ Returns:
     `true` iff both stability criteria hold.
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape.
+    ValueError: if the distribution sites differ from the landscape.
 
 )doc";
 
@@ -24157,10 +24165,9 @@ Returns:
     `true` iff the population stability holds for every SiDB.
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape. std::invalid_argument: if the
-                           potential vector does not contain one value
-                           per SiDB.
+    ValueError: if the distribution sites differ from the landscape.
+                ValueError: if the potential vector does not contain
+                one value per SiDB.
 
 )doc";
 
@@ -24177,7 +24184,7 @@ Returns:
     External potential (unit: V).
 
 Raises:
-    std::out_of_range: if an SiDB index is out of range.
+    IndexError: if an SiDB index is out of range.
 
 )doc";
 
@@ -24197,8 +24204,7 @@ Returns:
     Local internal potential per SiDB (unit: V).
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape.
+    ValueError: if the distribution sites differ from the landscape.
 
 )doc";
 
@@ -24212,7 +24218,7 @@ Returns:
     Defect potential (unit: V).
 
 Raises:
-    std::out_of_range: if an SiDB index is out of range.
+    IndexError: if an SiDB index is out of range.
 
 )doc";
 
@@ -24227,8 +24233,7 @@ Returns:
     Local potential per SiDB (unit: V).
 
 Raises:
-    std::invalid_argument: if the distribution sites differ from the
-                           landscape.
+    ValueError: if the distribution sites differ from the landscape.
 
 )doc";
 
@@ -24243,7 +24248,7 @@ Returns:
     Distance (unit: nm).
 
 Raises:
-    std::out_of_range: if an SiDB index is out of range.
+    IndexError: if an SiDB index is out of range.
 
 )doc";
 
@@ -24280,8 +24285,8 @@ Args:
                                SiDB (unit: V).
 
 Raises:
-    std::out_of_range: if a SiDB or defect site has an invalid lattice
-                       basis index.
+    IndexError: if a SiDB or defect site has an invalid lattice basis
+                index.
 
 )doc";
 
@@ -24307,7 +24312,7 @@ Args:
     cd: Charge distribution.
 
 Raises:
-    std::invalid_argument: if the site lists or cardinalities differ.
+    ValueError: if the site lists or cardinalities differ.
 
 )doc";
 
@@ -24319,8 +24324,8 @@ Args:
     internal_potentials: Local internal potential per SiDB.
 
 Raises:
-    std::invalid_argument: if the sites differ or the potential count
-                           differs from the SiDB count.
+    ValueError: if the sites differ or the potential count differs
+                from the SiDB count.
 
 )doc";
 
@@ -24331,7 +24336,7 @@ Args:
     index: SiDB index.
 
 Raises:
-    std::out_of_range: if the index is out of range.
+    IndexError: if the index is out of range.
 
 )doc";
 
@@ -24373,7 +24378,7 @@ Returns:
     The charge state, `charge_state::NONE` if `s` holds no SiDB.
 
 Raises:
-    std::out_of_range: if the distribution index is out of range.
+    IndexError: if the distribution index is out of range.
 
 )doc";
 
@@ -24418,7 +24423,7 @@ Returns:
     The site `(x, floor(row / 2), row mod 2)`.
 
 Raises:
-    std::out_of_range: if the row exceeds the range of lattice sites.
+    IndexError: if the row exceeds the range of lattice sites.
 
 )doc";
 
@@ -24435,8 +24440,7 @@ Returns:
     The sites in the rectangle in raster order.
 
 Raises:
-    std::length_error: if the rectangle exceeds the maximum vector
-                       size.
+    ValueError: if the rectangle exceeds the maximum vector size.
 
 )doc";
 
@@ -24460,7 +24464,7 @@ Returns:
     Incoming and outgoing port directions of the tile.
 
 Raises:
-    std::invalid_argument: if `lyt` shifts columns instead of rows.
+    ValueError: if `lyt` shifts columns instead of rows.
 
 )doc";
 
@@ -24508,7 +24512,7 @@ Returns:
     The site of `c`.
 
 Raises:
-    std::out_of_range: if the row exceeds the range of lattice sites.
+    IndexError: if the row exceeds the range of lattice sites.
 
 )doc";
 
@@ -25161,8 +25165,8 @@ Returns:
     logically equivalent to `ntk_src`.
 
 Raises:
-    std::invalid_argument: If `ps.degree` is less than two or
-                           `ps.threshold` is zero.
+    ValueError: If `ps.degree` is less than two or `ps.threshold` is
+                zero.
 
 Note:
     The physical design algorithms natively provided in fiction do not
@@ -26115,8 +26119,8 @@ Returns:
     The calculated cost function :math:` \chi(L) `.
 
 Raises:
-    std::invalid_argument: If the sizes of chis and weights vectors
-                           are different.
+    ValueError: If the sizes of chis and weights vectors are
+                different.
 
 )doc";
 
@@ -26135,8 +26139,8 @@ Returns:
     distributing k entities on n positions.
 
 Raises:
-    std::length_error: if the number of combinations exceeds the
-                       vector's capacity.
+    ValueError: if the number of combinations exceeds the vector's
+                capacity.
     timeout_error: if the deadline is reached during enumeration.
 
 )doc";
@@ -27063,8 +27067,11 @@ static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_xor2 
 static const char *mkd_doc_fiction_verification_count_gate_types_stats_num_xor_and = R"doc(Number of xor_and objects.)doc";
 
 static const char *mkd_doc_fiction_verification_count_gate_types_stats_report =
-R"doc(Prints gate counts. @param out Output stream. @param detailed Whether
-to print every gate type.
+R"doc(Prints gate counts.
+
+Args:
+    out: Output stream.
+    detailed: Whether to print every gate type.
 
 )doc";
 
@@ -27119,8 +27126,8 @@ Returns:
     A struct containing the CP and TP.
 
 Raises:
-    std::invalid_argument: If an output dependency has a disconnected
-                           input or a cycle.
+    ValueError: If an output dependency has a disconnected input or a
+                cycle.
 
 )doc";
 
