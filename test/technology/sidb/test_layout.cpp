@@ -332,14 +332,17 @@ TEST_CASE("Layout updates preserve data when allocation fails", "[layout]")
 {
     SECTION("copy assignment")
     {
+        /** @brief Source with allocated name, dots, and defects. */
         layout source{lattice::si_111_1x1(), "source layout with an allocated name"};
         source.assign_sidb({0, 0, 0}, dot_tag::INPUT);
         source.assign_sidb({1, 0, 0}, dot_tag::OUTPUT);
         source.assign_sidb({2, 0, 1});
         source.assign_defect({3, 0, 0}, defect{defect_type::SI_VACANCY});
 
+        /** @brief Populated destination retained when allocation fails. */
         layout original{};
         original.assign_sidb({5, 0, 0}, dot_tag::LOGIC);
+        /** @brief Destination after successful copy assignment. */
         const auto result = check_allocation_failures(original, [&source](layout& lyt) { lyt = source; });
         CHECK(result == source);
         CHECK(result.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
@@ -370,20 +373,25 @@ TEST_CASE("Layout assignment preserves value semantics", "[layout]")
     STATIC_REQUIRE(std::is_nothrow_move_constructible_v<layout>);
     STATIC_REQUIRE(std::is_nothrow_move_assignable_v<layout>);
 
+    /** @brief Reference layout for copy and move checks. */
     layout original{lattice::si_111_1x1(), "named layout"};
     original.assign_sidb({0, 0, 0}, dot_tag::INPUT);
     original.assign_defect({1, 0, 0}, defect{defect_type::SI_VACANCY});
-    auto        copy = original;
+    /** @brief Independent copy used for self-assignment. */
+    auto copy = original;
+    /** @brief Alias that exercises self-assignment. */
     const auto& same = copy;
     copy             = same;
     CHECK(copy == original);
 
+    /** @brief Destination whose storage remains independent of the source. */
     layout assigned{};
     CHECK(&(assigned = copy) == &assigned);
     CHECK(assigned == original);
     copy.assign_sidb({0, 0, 0}, dot_tag::OUTPUT);
     CHECK(assigned.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
 
+    /** @brief Destination that receives the assigned layout's storage. */
     auto moved = std::move(assigned);
     CHECK(moved == original);
     assigned = std::move(moved);
