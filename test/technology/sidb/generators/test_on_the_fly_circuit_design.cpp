@@ -27,6 +27,7 @@
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
 #include <array>
@@ -36,10 +37,6 @@
 #include <stdexcept>
 #include <string_view>
 #include <thread>
-
-#if (FICTION_Z3_SOLVER)
-#include <mockturtle/networks/aig.hpp>
-#endif
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -117,9 +114,9 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
 #if (FICTION_Z3_SOLVER)
 TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-circuit-design]")
 {
-    mockturtle::aig_network network{};
-    const auto              first  = network.create_pi();
-    const auto              second = network.create_pi();
+    tec_nt     network{};
+    const auto first  = network.create_pi();
+    const auto second = network.create_pi();
     network.create_po(network.create_and(first, second));
 
     const hexagonal_gate_layout tiling{arrangement::EVEN_ROW, {3, 3}, clocking::row()};

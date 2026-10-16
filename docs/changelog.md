@@ -122,6 +122,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
+    with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
+  - Orthogonal edge coloring avoids a redundant traversal copy.
+  - GOLD avoids redundant options and callback copies and permits result moves when copy elision does not
+    apply. Blacklist exact placement transfers invocation options into owned storage.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
     throw `std::invalid_argument`.
@@ -287,6 +292,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Physical-design experiments convert mapped networks before placement with unchanged computations.
   - Gate-layout experiments use canonical types with unchanged computations.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
@@ -616,6 +622,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
+    changing the other inputs' truth-table order.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.

@@ -129,15 +129,15 @@ views/views
 
 ```
 
-```{doxygenfunction} fiction::networks::restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<physical_design::branching_signal_container<NtkSrc, fanout_size>, NtkSrc>& old2new) noexcept
+```{doxygenfunction} fiction::networks::restore_signal_names(const tec_nt& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<physical_design::branching_signal_container<fanout_size>, tec_nt>& old2new)
 
 ```
 
-```{doxygenfunction} fiction::networks::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
+```{doxygenfunction} fiction::networks::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 
 ```
 
-```{doxygenfunction} fiction::networks::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new) noexcept
+```{doxygenfunction} fiction::networks::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new)
 
 ```
 

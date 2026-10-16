@@ -19,6 +19,8 @@
 
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -276,39 +278,36 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mocktu
 /**
  * Same as the other restore_signal_names function but this overload uses a `mockturtle::node_map` with a
  * branching_signal_container that is specifically used for networks or layouts that allow branches to be distinct,
- * e.g., by their position on the layout.
+ * e.g., by their position on the layout. Skips branches with no mapped layout object.
  *
- * @tparam NtkSrc Source logic network type.
  * @tparam NtkDest Target network or gate-level layout type.
  * @tparam fanout_size Maximum fanout size in the network.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
  * @param old2new Mapping of signals from `ntk_src` to `ntk_dest` using a branching_signal_container.
  */
-template <typename NtkSrc, typename NtkDest, uint16_t fanout_size = 2>
+template <typename NtkDest, uint16_t fanout_size = 2>
 void restore_signal_names(
-    const NtkSrc& ntk_src, NtkDest& ntk_dest,
-    const mockturtle::node_map<physical_design::branching_signal_container<NtkSrc, fanout_size>, NtkSrc>& old2new)
+    const tec_nt& ntk_src, NtkDest& ntk_dest,
+    const mockturtle::node_map<physical_design::branching_signal_container<fanout_size>, tec_nt>& old2new)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a logic network");
     static_assert(mockturtle::is_network_type_v<NtkDest> ||
                   requires { requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>; });
 
-    if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> && (requires {
+    if constexpr (requires {
                       requires std::same_as<typename NtkDest::object_id, fiction::layouts::layout_object_id>;
-                  } || mockturtle::has_set_name_v<NtkDest>))
+                  } || mockturtle::has_set_name_v<NtkDest>)
     {
-        static_assert(mockturtle::has_foreach_node_v<NtkSrc>, "NtkSrc does not implement the foreach_node function");
-        static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
-        static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node function");
-
         const auto restore_signal_name = [&ntk_src, &ntk_dest, &old2new](const auto& n, const auto& f)
         {
             if (ntk_src.has_name(f))
             {
-                const auto name = ntk_src.get_name(f);
-
-                ntk_dest.set_name((old2new[ntk_src.get_node(f)][n]), name);
+                const auto target = old2new[ntk_src.get_node(f)][n];
+                if (target == layouts::layout_object_id{})
+                {
+                    return;
+                }
+                ntk_dest.set_name(target, ntk_src.get_name(f));
             }
         };
 
@@ -340,7 +339,7 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
  * @tparam NtkSrc Source network type.
  * @tparam NtkDest Target network or gate-level layout type.
  * @tparam T Mapping type to identify signals by. Currently, `mockturtle::signal<NtkDest>` and
- * `branching_signal_container<NtkSrc, fanout_size>` are supported.
+ * `branching_signal_container<fanout_size>` are supported.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
  * @param old2new Mapping of signals from `ntk_src` to `ntk_dest` using a signal identifier.

@@ -29,13 +29,13 @@
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
-#include "fiction/networks/technology_network.hpp"
 #include "fiction/physical_design/aspect_ratio_iterator.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/physical_design/surface_analysis.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
@@ -45,7 +45,6 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 #include <z3++.h>
 #include <z3_api.h>
@@ -224,9 +223,8 @@ class exact_impl
      * @param clocking_scheme Validated clocking scheme for the target layout.
      * @param sbl Gate orientations forbidden at each tile.
      */
-    exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
-               const surface_black_list<fcn::port_direction>& sbl = {}) :
+    exact_impl(tec_nt& src, exact_physical_design_params p, exact_physical_design_stats& st,
+               layouts::clocking::scheme clocking_scheme, const surface_black_list<fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
             progress{ps.on_progress, "aspect ratios"},
@@ -272,8 +270,7 @@ class exact_impl
      * Network type for internal handling. Converting the input network to this type ensures the availability of all
      * necessary member functions.
      */
-    using topology_ntk_t =
-        mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<networks::technology_network>>>;
+    using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<tec_nt>>;
     /**
      * Specification network.
      */
@@ -334,7 +331,9 @@ class exact_impl
          *
          * @param ctxp The context that is used in all solvers.
          * @param lyt The empty gate-level layout that is going to contain the created layout.
+         * @param ntk Named technology-network traversal that owns the placement map's node IDs.
          * @param ps The parameters to respect in the SMT instance generation process.
+         * @param sbl Gate orientations forbidden at each tile.
          */
         smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, exact_physical_design_params ps,
                     const surface_black_list<fcn::port_direction>& sbl) noexcept :
@@ -343,7 +342,7 @@ class exact_impl
                 network{ntk},
                 params{std::move(ps)},
                 black_list{sbl},
-                node2pos{ntk},
+                node2pos{static_cast<const tec_nt&>(ntk)},
                 depth_ntk{ntk},
                 inv_levels{networks::inverse_levels(ntk)}
         {}
@@ -582,14 +581,8 @@ class exact_impl
         /**
          * Maps nodes to tile positions when creating the layout from the SMT model.
          */
-        mockturtle::node_map<branching_signal_container<
-                                 topology_ntk_t, Lyt::max_fanin_size>  // this currently assumes that max_fanin_size is
-                                                                       // equal to the maximum fanout size of a layout
-                                                                       // type. Should the maximum fanout size exceed
-                                                                       // max_fanin_size, this will break
-                             ,
-                             topology_ntk_t>
-            node2pos;
+        // Layout fanout is bounded by max_fanin_size; add a separate bound if layouts permit more branches.
+        mockturtle::node_map<branching_signal_container<Lyt::max_fanin_size>, tec_nt> node2pos;
         /**
          * Mapping of levels to nodes used for symmetry breaking.
          */
@@ -2835,7 +2828,7 @@ class exact_impl
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular clocking
             // must be made
 
-            mockturtle::node_map<typename Lyt::object_id, topology_ntk_t> pis{network};
+            mockturtle::node_map<typename Lyt::object_id, tec_nt> pis{static_cast<const tec_nt&>(network)};
 
             // network is topologically sorted, therefore, foreach_node ensures conflict-free traversal
             network.foreach_node(
@@ -2932,7 +2925,7 @@ class exact_impl
             layout.set_input_order(input_order);
 
             // restore possibly set signal names
-            networks::restore_names(network, layout, node2pos);
+            networks::restore_names(static_cast<const tec_nt&>(network), layout, node2pos);
         }
     };
 
@@ -2996,7 +2989,7 @@ class exact_impl
         Lyt layout = make_layout();
 
         // Network views mutate traversal marks and event subscriptions, so each worker needs its own storage.
-        mockturtle::names_view<networks::technology_network> worker_ntk{*ntk};
+        tec_nt worker_ntk{*ntk};
         static_cast<networks::technology_network&>(worker_ntk) = ntk->clone();
         const topology_ntk_t worker_topology{mockturtle::fanout_view{worker_ntk}};
         smt_handler          handler{ctx, layout, worker_topology, ps, black_list};
@@ -3292,8 +3285,7 @@ class exact_impl
  * specified clocking scheme.
  *
  * @tparam Lyt Desired gate-level layout type.
- * @tparam Ntk Network type that acts as specification.
- * @param ntk The network that is to place and route.
+ * @param ntk Named technology network to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
@@ -3301,16 +3293,13 @@ class exact_impl
  * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and
  * `ps.layout_arrangement` is empty.
  */
-template <typename Lyt, typename Ntk>
-std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps = {},
+template <typename Lyt>
+std::optional<Lyt> exact(const tec_nt& ntk, const exact_physical_design_params& ps = {},
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(
         requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
         "Lyt is not a gate-level layout");
-    static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
-                                                 // therefore, this is the only relevant check here
 
     layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
@@ -3333,9 +3322,8 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
         throw networks::high_degree_fanin_exception();
     }
 
-    mockturtle::names_view<networks::technology_network> intermediate_ntk{
-        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
+    tec_nt intermediate_ntk{synthesis::fanout_substitution<tec_nt>(
+        ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
@@ -3357,8 +3345,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
  * known to be used for a different purpose.
  *
  * @tparam Lyt Desired gate-level layout type.
- * @tparam Ntk Network type that acts as specification.
- * @param ntk The network that is to place and route.
+ * @param ntk Named technology network to place and route.
  * @param black_list The black list of tiles and their gate orientations.
  * @param ps Parameters.
  * @param pst Statistics.
@@ -3367,17 +3354,14 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
  * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and
  * `ps.layout_arrangement` is empty.
  */
-template <typename Lyt, typename Ntk>
-std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<fcn::port_direction>& black_list,
+template <typename Lyt>
+std::optional<Lyt> exact_with_blacklist(const tec_nt& ntk, const surface_black_list<fcn::port_direction>& black_list,
                                         exact_physical_design_params ps  = {},
                                         exact_physical_design_stats* pst = nullptr)
 {
     static_assert(
         requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
         "Lyt is not a gate-level layout");
-    static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
-                                                 // therefore, this is the only relevant check here
 
     layouts::require_arrangement<Lyt>(ps.layout_arrangement);
 
@@ -3400,13 +3384,13 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         throw networks::high_degree_fanin_exception();
     }
 
-    mockturtle::names_view<networks::technology_network> intermediate_ntk{
-        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
+    tec_nt intermediate_ntk{synthesis::fanout_substitution<tec_nt>(
+        ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme), black_list};
+    /** @brief Exact placement state for the specification and tile blacklist. */
+    detail::exact_impl<Lyt> p{intermediate_ntk, std::move(ps), st, std::move(*clocking_scheme), black_list};
 
     auto result = p.run();
 

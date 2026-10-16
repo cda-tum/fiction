@@ -17,9 +17,10 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/gate_layout.hpp>
-#include <fiction/networks/io/network_reader.hpp>            // custom reader for folders of networks
-#include <fiction/physical_design/determine_clocking.hpp>    // SAT-based clock number assignment
-#include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
+#include <fiction/networks/io/network_reader.hpp>          // custom reader for folders of networks
+#include <fiction/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
+#include <fiction/physical_design/orthogonal.hpp>          // scalable heuristic for physical design of FCN layouts
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>  // library for technology mapping
 #include <fiction/types.hpp>                                 // pre-defined types
 #include <fiction/verification/equivalence_checking.hpp>     // SAT-based equivalence checking
@@ -112,7 +113,7 @@ try
         const auto mapped_network = mockturtle::map(network, gate_lib, map_params);
 
         // perform layout generation with an exact SMT-based algorithm
-        const auto original_layout = orthogonal<cartesian_gate_layout>(mapped_network);
+        const auto original_layout = orthogonal<cartesian_gate_layout>(convert_network<tec_nt>(mapped_network));
 
         // obtain layout characteristics
         const auto width  = original_layout.width();
