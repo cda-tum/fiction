@@ -136,6 +136,61 @@ TEMPLATE_TEST_CASE("Connections expose declared ports despite physical violation
     CHECK_FALSE(lyt.find_object({0, 0}).has_value());
 }
 
+TEST_CASE("Connection visitors preserve ports while unrelated storage grows", "[gate-level-layout]")
+{
+    /** @brief Layout edited by the connection visitors. */
+    gate_layout<> lyt{};
+    /** @brief Source connected to the first gate input and a buffer. */
+    const auto a = lyt.create_pi("a", {0, 0});
+    /** @brief Source connected to the final gate input. */
+    const auto b = lyt.create_pi("b", {1, 0});
+    /** @brief Five-input parity function. */
+    kitty::dynamic_truth_table parity{5};
+    kitty::create_from_hex_string(parity, "96696996");
+    /** @brief Gate with disconnected middle inputs. */
+    const auto gate = lyt.create_gate({a}, parity, {2, 0});
+    lyt.connect(b, {gate, 4});
+    /** @brief Second sink driven by the first source. */
+    const auto wire = lyt.create_buf(a, {3, 0});
+
+    /** @brief Declared sources and logical indices recorded by the visitor. */
+    std::vector<std::pair<layout_object_id, uint32_t>> sources{};
+    lyt.foreach_fanin(gate,
+                      [&](const auto source, const auto input)
+                      {
+                          sources.emplace_back(source, input);
+                          /** @brief Column of the unrelated buffer pair. */
+                          for (int32_t x{}; x < 256; ++x)
+                          {
+                              /** @brief Source of an unrelated connection created during traversal. */
+                              const auto unrelated = lyt.create_buf({x, static_cast<int32_t>(input) + 1});
+                              lyt.create_buf(unrelated, {x, static_cast<int32_t>(input) + 10});
+                          }
+                      });
+    CHECK((sources == std::vector<std::pair<layout_object_id, uint32_t>>{{a, 0}, {b, 4}}));
+
+    /** @brief Visited sink membership without an ordering requirement. */
+    std::set<layout_input_port> sinks{};
+    /** @brief Free row for each sink callback to create unrelated objects. */
+    int32_t row{20};
+    lyt.foreach_sink(a,
+                     [&](const auto sink)
+                     {
+                         sinks.insert(sink);
+                         /** @brief Column of the unrelated buffer pair. */
+                         for (int32_t x{}; x < 256; ++x)
+                         {
+                             /** @brief Source of an unrelated connection created during traversal. */
+                             const auto unrelated = lyt.create_buf({x, row});
+                             lyt.create_buf(unrelated, {x, row + 1});
+                         }
+                         row += 2;
+                     });
+    CHECK((sinks == std::set<layout_input_port>{{gate, 0}, {wire, 0}}));
+    CHECK(lyt.source({gate, 0}) == a);
+    CHECK(lyt.source({gate, 4}) == b);
+}
+
 TEMPLATE_TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-level-layout]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
