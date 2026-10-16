@@ -291,7 +291,9 @@ TEST_CASE("Operational-domain ratios reject malformed seeds", "[compute-operatio
 
 TEST_CASE("Operational-domain ratios reject colliding sweep coordinates", "[compute-operational-ratio]")
 {
-    const layout                    lyt{blueprints::siqad_and_gate()};
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief Parameters of the sweep under test. */
     operational_domain_ratio_params params{};
     params.op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
     params.op_domain_params.sweep_dimensions              = {

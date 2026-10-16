@@ -1246,14 +1246,18 @@ TEST_CASE("Domain algorithms share one budget across parameter points", "[operat
 
 TEST_CASE("Random sampling finishes when the whole grid is sampled", "[operational-domain]")
 {
-    const layout              lyt{blueprints::siqad_and_gate()};
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief Parameters of the sweep under test. */
     operational_domain_params params{};
     params.number_of_threads             = 1;
     params.operational_params.sim_params = simulation_parameters{2, -0.32};
     params.operational_params.timeout    = 2000;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1},
                                {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
+    /** @brief Statistics of the parameter sweep. */
     operational_domain_stats stats{};
+    /** @brief Domain returned by the sampling algorithm. */
     const auto domain = operational_domain_random_sampling(lyt, std::vector{create_and_tt()},
                                                            std::numeric_limits<std::size_t>::max(), params, &stats);
     CHECK(domain.size() == 1);
@@ -1264,10 +1268,13 @@ TEST_CASE("Random sampling finishes when the whole grid is sampled", "[operation
 
 TEST_CASE("Operational-domain sweeps reject overflowing grid products", "[operational-domain]")
 {
-    const layout              lyt{blueprints::siqad_and_gate()};
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief Parameters of the sweep under test. */
     operational_domain_params params{};
     params.sweep_dimensions.assign(std::numeric_limits<std::size_t>::digits,
                                    {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.7, .step = 0.1});
+    /** @brief Statistics of the parameter sweep. */
     operational_domain_stats stats{};
     stats.num_total_parameter_points = 42;
     CHECK_THROWS_AS(operational_domain_random_sampling(lyt, std::vector{create_and_tt()}, 0, params, &stats),
@@ -2178,8 +2185,11 @@ TEST_CASE("Operational-domain flood fill requires two dimensions", "[operational
 
 TEST_CASE("Operational-domain sweeps preserve distinct parameter identities", "[operational-domain]")
 {
-    const layout              lyt{blueprints::siqad_and_gate()};
-    const std::vector         spec{create_and_tt()};
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief AND specification for the layout. */
+    const std::vector spec{create_and_tt()};
+    /** @brief Parameters of the sweep under test. */
     operational_domain_params params{};
     params.number_of_threads             = 1;
     params.operational_params.sim_params = simulation_parameters{2, -0.32};
@@ -2217,6 +2227,7 @@ TEST_CASE("Operational-domain sweeps preserve distinct parameter identities", "[
                                            .min       = 5.6000004,
                                            .max       = 5.600001,
                                            .step      = 0.0000006};
+        /** @brief Statistics of the parameter sweep. */
         operational_domain_stats stats{};
         CHECK(operational_domain_grid_search(lyt, spec, params, &stats).size() == 2);
         CHECK(stats.num_total_parameter_points == 2);
@@ -2226,26 +2237,33 @@ TEST_CASE("Operational-domain sweeps preserve distinct parameter identities", "[
 
 TEST_CASE("Contour tracing finishes isolated operational points", "[operational-domain]")
 {
-    const layout              lyt{blueprints::siqad_and_gate()};
-    const std::vector         spec{create_and_tt()};
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief AND specification for the layout. */
+    const std::vector spec{create_and_tt()};
+    /** @brief Parameters of the sweep under test. */
     operational_domain_params params{};
     params.number_of_threads             = 1;
     params.operational_params.sim_params = simulation_parameters{2, -0.32};
     params.operational_params.timeout    = 2000;
     params.sweep_dimensions = {{.dimension = sweep_parameter::MU_MINUS, .min = -1.32, .max = 0.68, .step = 1.0},
                                {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
+    /** @brief Statistics of the exhaustive reference grid. */
     operational_domain_stats reference_stats{};
     REQUIRE(operational_domain_grid_search(lyt, spec, params, &reference_stats).size() == 3);
     REQUIRE(reference_stats.num_operational_parameter_combinations == 1);
 
+    /** @brief Statistics of the parameter sweep. */
     operational_domain_stats stats{};
     SECTION("operational domain")
     {
+        /** @brief Domain returned by the sampling algorithm. */
         const auto domain = operational_domain_contour_tracing(lyt, spec, 1024, params, &stats);
         CHECK(domain.contains(parameter_point{{-0.32, 5.6}}).has_value());
     }
     SECTION("critical temperature domain")
     {
+        /** @brief Domain returned by the sampling algorithm. */
         const auto domain = critical_temperature_domain_contour_tracing(lyt, spec, 1024, params, &stats);
         CHECK(domain.contains(parameter_point{{-0.32, 5.6}}).has_value());
     }

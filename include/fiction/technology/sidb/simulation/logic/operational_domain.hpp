@@ -942,7 +942,8 @@ class operational_domain_impl
 
             auto current_neighborhood = moore_neighborhood_2d(current_contour_point);
 
-            auto        next_point = contour_starting_point;
+            auto next_point = contour_starting_point;
+            /** @brief Counts consecutive non-operational neighbors. */
             std::size_t non_operational_neighbors{0};
 
             if (!current_neighborhood.empty())
@@ -1420,6 +1421,7 @@ class operational_domain_impl
             // generate the values for the dimension
             for (const auto i : indices.at(d))
             {
+                /** @brief Coordinate generated for this sweep step. */
                 const auto value =
                     params.sweep_dimensions.at(d).min + (static_cast<double>(i) * params.sweep_dimensions.at(d).step);
                 if (!values.at(d).empty() &&
@@ -1462,9 +1464,7 @@ class operational_domain_impl
      * The number of dimensions.
      */
     const std::size_t num_dimensions;
-    /**
-     * Number of parameter combinations in the validated sweep grid.
-     */
+    /** @brief Number of parameter combinations in the validated sweep grid. */
     std::size_t num_parameter_points{1};
     /**
      * Dimension steps.
@@ -1666,7 +1666,9 @@ class operational_domain_impl
     operational_status is_step_point_operational(const step_point& sp)
     {
         utils::check_deadline(params.operational_params.deadline);
+        /** @brief Parameter values used for cache lookup and simulation. */
         const auto param_point = to_parameter_point(sp);
+        /** @brief Cached classification of the parameter point. */
         if (const auto op_value = op_domain.contains(param_point); op_value.has_value())
         {
             return std::get<0>(*op_value);
@@ -1755,8 +1757,9 @@ class operational_domain_impl
     operational_status is_step_point_suitable(const charge_distribution& cd, const step_point& sp)
     {
         utils::check_deadline(params.operational_params.deadline);
+        /** @brief Parameter values used for cache lookup and simulation. */
         const auto param_point = to_parameter_point(sp);
-        // if the point has already been sampled, return the stored operational status
+        /** @brief Cached classification of the parameter point. */
         if (const auto op_value = op_domain.contains(param_point); op_value.has_value())
         {
             return std::get<0>(*op_value);
@@ -1834,6 +1837,7 @@ class operational_domain_impl
         // container for the random samples
         phmap::btree_set<step_point> step_point_samples{};
 
+        /** @brief Index of the current random draw. */
         for (std::size_t i = 0; i < samples && step_point_samples.size() < num_parameter_points; ++i)
         {
             utils::check_deadline(params.operational_params.deadline);
