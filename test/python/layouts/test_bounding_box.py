@@ -42,7 +42,7 @@ if TYPE_CHECKING:
         ),
     ],
 )
-def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
+def test_bounding_box_around_an_empty_gate_layout(make_layout):
     layout = make_layout()
     min_coord, max_coord = layout.bounding_box()
     assert min_coord is None

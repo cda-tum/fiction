@@ -19,7 +19,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/path_finding/distance_map.hpp>
@@ -53,7 +53,7 @@ Dist sum_distances(const Lyt& layout, const distance_functor<Dist>& dist_func)
 
 TEST_CASE("Benchmark distance maps", "[benchmark]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
+    using clk_lyt = gate_layout<cartesian_layout>;
     using dist    = uint64_t;
 
     /** @brief Six-by-six frame used by the distance measurements. */
@@ -84,7 +84,7 @@ TEST_CASE("Benchmark distance maps", "[benchmark]")
 
 TEST_CASE("Benchmark smart distance cache", "[benchmark]")
 {
-    using clk_lyt = gate_level_layout<cartesian_layout>;
+    using clk_lyt = gate_layout<cartesian_layout>;
     using dist    = uint64_t;
 
     /** @brief Six-by-six frame used by the distance measurements. */

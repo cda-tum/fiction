@@ -18,7 +18,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
@@ -53,10 +53,10 @@ TEMPLATE_TEST_CASE("Network gate counts exclude inputs and constants", "[count-g
 
 TEST_CASE("Gate counts exclude terminals and classify placed wires", "[count-gate-types]")
 {
-    gate_level_layout<cartesian_layout> lyt{{4, 2}};
-    const auto                          pi   = lyt.create_pi("a", {0, 0});
-    const auto                          wire = lyt.create_buf(pi, {1, 0});
-    const auto                          gate = lyt.create_and(wire, pi, {2, 0});
+    gate_layout<cartesian_layout> lyt{{4, 2}};
+    const auto                    pi   = lyt.create_pi("a", {0, 0});
+    const auto                    wire = lyt.create_buf(pi, {1, 0});
+    const auto                    gate = lyt.create_and(wire, pi, {2, 0});
     lyt.create_po(gate, "result", {3, 0});
     lyt.create_po(wire, "wire", {1, 1});
     count_gate_types_stats stats{};
@@ -97,8 +97,8 @@ TEST_CASE("Technology network gate counts retain ternary classifications", "[cou
 }
 
 TEMPLATE_TEST_CASE("Native gate counts classify supported functions and generic LUTs", "[count-gate-types]",
-                   (gate_level_layout<cartesian_layout>), (gate_level_layout<shifted_cartesian_layout>),
-                   (gate_level_layout<hexagonal_layout>))
+                   (gate_layout<cartesian_layout>), (gate_layout<shifted_cartesian_layout>),
+                   (gate_layout<hexagonal_layout>))
 {
     auto       lyt    = make_gate_level_layout<TestType>(arrangement::ODD_ROW, {18, 2}, clocking::open());
     const auto a      = lyt.create_pi("a", {0, 0});

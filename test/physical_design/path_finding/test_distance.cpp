@@ -22,7 +22,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
@@ -197,7 +197,7 @@ TEST_CASE("A* distance", "[distance]")
         }
         SECTION("clocking path distance")
         {
-            using clk_lyt = gate_level_layout<lyt>;
+            using clk_lyt = gate_layout<lyt>;
 
             SECTION("2DDWave")
             {
@@ -245,7 +245,7 @@ TEST_CASE("A* distance functor", "[distance]")
         }
         SECTION("clocking path distance")
         {
-            using clk_lyt = gate_level_layout<lyt>;
+            using clk_lyt = gate_layout<lyt>;
 
             SECTION("2DDWave")
             {

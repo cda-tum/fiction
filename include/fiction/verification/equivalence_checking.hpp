@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/networks/extract_layout_network.hpp"
 #include "fiction/networks/interface_matching.hpp"
 #include "fiction/verification/critical_path_length_and_throughput.hpp"

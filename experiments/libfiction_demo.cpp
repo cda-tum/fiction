@@ -18,7 +18,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grid layouts
 #include <fiction/layouts/clocking_scheme.hpp>   // clocking schemes
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts
 #include <fiction/networks/io/dot_drawers.hpp>                 // DOT drawers and writer for logic networks
 #include <fiction/physical_design/apply_gate_library.hpp>      // layout conversion to cell-level
@@ -226,7 +226,7 @@ try
     /**************************************************************/
 
     // defining the type of gate-level layout to use (also already pre-defined in fiction/types.hpp as cart_gate_clk_lyt
-    using fcn_gate_level_layout = gate_level_layout<cartesian_layout>;
+    using fcn_gate_level_layout = gate_layout<cartesian_layout>;
 
     std::cout << "[i] orthogonal physical design\n";
 

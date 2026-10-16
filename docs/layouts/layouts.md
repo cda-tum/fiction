@@ -9,7 +9,7 @@ cell_grid
 clocking_scheme
 clocking_state
 coordinates
-gate_level_layout
+gate_layout
 hexagonal_layout
 obstructions
 shifted_cartesian_layout
