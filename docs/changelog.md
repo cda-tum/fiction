@@ -746,6 +746,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
