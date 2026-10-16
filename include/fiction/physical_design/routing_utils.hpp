@@ -33,8 +33,12 @@ namespace fiction::physical_design
 {
 namespace detail
 {
-/** @brief Combines layout occupancy with explicit search constraints.
- * @tparam Lyt Layout type. @param lyt Layout. @param c Position. @param extra Search constraints.
+/**
+ * @brief Combines layout occupancy with explicit search constraints.
+ * @tparam Lyt Layout type.
+ * @param lyt Layout.
+ * @param c Position.
+ * @param extra Search constraints.
  * @return Whether the position is obstructed.
  */
 template <typename Lyt>
@@ -50,8 +54,13 @@ template <typename Lyt>
         return extra.is_obstructed_coordinate(c);
     }
 }
-/** @brief Combines layout connections with explicit search constraints.
- * @tparam Lyt Layout type. @param lyt Layout. @param src Source. @param tgt Target. @param extra Search constraints.
+/**
+ * @brief Combines layout connections with explicit search constraints.
+ * @tparam Lyt Layout type.
+ * @param lyt Layout.
+ * @param src Source.
+ * @param tgt Target.
+ * @param extra Search constraints.
  * @return Whether the directed connection is obstructed.
  */
 template <typename Lyt>
@@ -99,20 +108,29 @@ struct routing_objective
 class layout_coordinate_path : public std::vector<layouts::layout_base::coordinate>
 {
   public:
-    /** @brief Appends a coordinate. @param c Coordinate to append. @throws std::bad_alloc If storage allocation fails.
+    /**
+     * @brief Appends a coordinate.
+     * @param c Coordinate to append.
+     * @throws std::bad_alloc If storage allocation fails.
      */
     void append(const layouts::layout_base::coordinate& c)
     {
         this->push_back(c);
     }
 
-    /** @brief Returns the first coordinate, or the origin for an empty path. @return Source coordinate. */
+    /**
+     * @brief Returns the first coordinate, or the origin for an empty path.
+     * @return Source coordinate.
+     */
     [[nodiscard]] layouts::layout_base::coordinate source() const noexcept
     {
         return this->empty() ? layouts::layout_base::coordinate{} : this->front();
     }
 
-    /** @brief Returns the last coordinate, or the origin for an empty path. @return Target coordinate. */
+    /**
+     * @brief Returns the last coordinate, or the origin for an empty path.
+     * @return Target coordinate.
+     */
     [[nodiscard]] layouts::layout_base::coordinate target() const noexcept
     {
         return this->empty() ? layouts::layout_base::coordinate{} : this->back();
@@ -132,7 +150,11 @@ class layout_coordinate_path : public std::vector<layouts::layout_base::coordina
 class path_collection : public std::vector<layout_coordinate_path>
 {
   public:
-    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
+    /**
+     * @brief Adds a path.
+     * @param p Path to add.
+     * @throws std::bad_alloc If storage allocation fails.
+     */
     void add(const layout_coordinate_path& p)
     {
         this->push_back(p);
@@ -163,7 +185,11 @@ class path_collection : public std::vector<layout_coordinate_path>
 class path_set : public std::set<layout_coordinate_path>
 {
   public:
-    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
+    /**
+     * @brief Adds a path.
+     * @param p Path to add.
+     * @throws std::bad_alloc If storage allocation fails.
+     */
     void add(const layout_coordinate_path& p)
     {
         this->insert(p);

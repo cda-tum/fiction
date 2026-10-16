@@ -442,6 +442,7 @@ template <typename Lyt>
 }
 /**
  * A pre-defined distance functor that uses the A* distance.
+ * Calling this functor throws std::invalid_argument if source or target lies outside the layout extent.
  *
  * @tparam Lyt Coordinate layout type.
  */
@@ -449,7 +450,10 @@ template <typename Lyt>
 class a_star_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    /** @brief Computes distances in the borrowed layout. @param lyt Layout that outlives this functor. */
+    /**
+     * @brief Borrows a layout for distance evaluations.
+     * @param lyt Layout that outlives this functor.
+     */
     explicit a_star_distance_functor(const Lyt& lyt) :
             distance_functor<uint64_t>(
                 [&lyt](const layouts::layout_base::coordinate& source, const layouts::layout_base::coordinate& target)

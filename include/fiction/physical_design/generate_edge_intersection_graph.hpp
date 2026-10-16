@@ -117,7 +117,10 @@ class generate_edge_intersection_graph_impl
             pst{st}
     {}
 
-    /** @brief Generate the graph. @return Candidate paths and their intersections. */
+    /**
+     * @brief Builds and transfers the completed intersection graph.
+     * @return Graph of candidate paths and their intersections.
+     */
     edge_intersection_graph run()
     {
         // measure runtime
@@ -173,7 +176,8 @@ class generate_edge_intersection_graph_impl
         pst.num_vertices = graph.size_vertices();
         pst.num_edges    = graph.size_edges();
 
-        return graph;
+        // The one-shot implementation transfers its completed graph.
+        return std::move(graph);
     }
 
   private:
@@ -335,6 +339,8 @@ class generate_edge_intersection_graph_impl
  * intersections of these paths. An intersection is understood as the non-disjunction of paths, i.e., they share at
  * least one coordinate. To generate the paths for the routing objectives, all possible paths from source to target in
  * the layout are enumerated while taking obstructions into consideration. The given layout must be clocked.
+ * An explicit zero path limit creates no candidate paths and counts each objective as unroutable without checking
+ * endpoint bounds.
  *
  * @tparam Lyt Type of the clocked layout.
  * @param lyt The layout to generate the edge intersection graph for.
@@ -342,6 +348,8 @@ class generate_edge_intersection_graph_impl
  * @param ps Parameters.
  * @param pst Statistics.
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
+ * @throws std::invalid_argument If an objective endpoint lies outside the layout extent when ps.path_limit is absent
+ * or nonzero.
  */
 template <typename Lyt>
     requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
@@ -354,7 +362,8 @@ edge_intersection_graph generate_edge_intersection_graph(const Lyt&             
 
     detail::generate_edge_intersection_graph_impl<Lyt> p{lyt, objectives, ps, st};
 
-    const auto result = p.run();
+    /** @brief Completed intersection graph retained while statistics are copied. */
+    auto result = p.run();
 
     if (pst)
     {

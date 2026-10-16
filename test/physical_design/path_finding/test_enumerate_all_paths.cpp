@@ -24,6 +24,8 @@
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
+#include <stdexcept>
+
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
@@ -402,4 +404,12 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
             }
         }
     }
+}
+
+TEST_CASE("Path enumeration rejects endpoints outside the layout", "[enumerate-all-paths]")
+{
+    /** @brief Two-by-two geometry for endpoint validation. */
+    const cartesian_layout layout{{2, 2}};
+    CHECK_THROWS_AS(enumerate_all_paths(layout, {.source = {2, 0}, .target = {0, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS(enumerate_all_paths(layout, {.source = {0, 0}, .target = {-1, 0}}), std::invalid_argument);
 }

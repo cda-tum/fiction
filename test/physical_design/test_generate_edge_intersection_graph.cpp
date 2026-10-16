@@ -23,6 +23,7 @@
 #include <fiction/physical_design/routing_utils.hpp>
 
 #include <algorithm>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -322,4 +323,25 @@ TEST_CASE("Candidate labels retain their routing objective", "[generate-edge-int
             }
         }
     }
+}
+
+TEST_CASE("Intersection graph endpoint validation respects the path limit", "[generate-edge-intersection-graph]")
+{
+    /** @brief Clocked geometry for endpoint validation. */
+    const cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
+    /** @brief Routing objective with an out-of-bounds target. */
+    const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {2, 0}}};
+    CHECK_THROWS_AS(generate_edge_intersection_graph(layout, objectives), std::invalid_argument);
+    CHECK_THROWS_AS(generate_edge_intersection_graph(layout, objectives, {.path_limit = 1}), std::invalid_argument);
+    /** @brief Statistics for the zero-limit graph. */
+    generate_edge_intersection_graph_stats st{};
+    /** @brief Empty graph returned without endpoint validation. */
+    const auto graph = generate_edge_intersection_graph(layout, objectives, {.path_limit = 0}, &st);
+    CHECK(graph.size_vertices() == 0);
+    CHECK(graph.size_edges() == 0);
+    CHECK(st.number_of_unroutable_objectives == 1);
+    CHECK(st.num_vertices == 0);
+    CHECK(st.num_edges == 0);
+    CHECK(st.cliques.empty());
+    CHECK(st.objective_indices.empty());
 }
