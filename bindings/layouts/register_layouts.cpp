@@ -60,7 +60,7 @@ void register_hexagonal_layout(nb::module_& m);
  * @brief Binds gate level layout helpers.
  * @param m Python module.
  */
-void register_gate_level_layout(nb::module_& m);
+void register_gate_layout(nb::module_& m);
 /**
  * @brief Binds obstructions helpers.
  * @param m Python module.
@@ -97,7 +97,7 @@ NB_MODULE(layouts, m)
     pyfiction::register_cartesian_layout(m);
     pyfiction::register_shifted_cartesian_layout(m);
     pyfiction::register_hexagonal_layout(m);
-    pyfiction::register_gate_level_layout(m);
+    pyfiction::register_gate_layout(m);
     pyfiction::register_obstructions(m);
     pyfiction::register_layout_utils(m);
     auto io = pyfiction::def_submodule(m, "io", "Readers, writers, and drawers of gate-level layouts.");

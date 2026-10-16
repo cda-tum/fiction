@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -545,7 +545,7 @@ class gate_level_drvs_impl
 }  // namespace detail
 
 /**
- * Performs design rule violation (DRV) checking on the given gate-level layout. The implementation of gate_level_layout
+ * Performs design rule violation (DRV) checking on the given gate-level layout. The implementation of gate_layout
  * allows for layouts with structural defects like the connection of non-adjacent tiles or connections that defy the
  * clocking scheme. This function checks for such violations and documents them in the statistics. A brief report can be
  * printed and more in-depth information including with error sites can be obtained from a generated json object.
@@ -563,11 +563,11 @@ class gate_level_drvs_impl
  * @param pst Statistics.
  */
 template <typename Geometry>
-void gate_level_drvs(const fiction::layouts::gate_level_layout<Geometry>& lyt, const gate_level_drv_params& ps = {},
+void gate_level_drvs(const fiction::layouts::gate_layout<Geometry>& lyt, const gate_level_drv_params& ps = {},
                      gate_level_drv_stats* pst = nullptr)
 {
     /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
+    using Lyt = fiction::layouts::gate_layout<Geometry>;
 
     gate_level_drv_stats              st{};
     detail::gate_level_drvs_impl<Lyt> p{lyt, ps, st};

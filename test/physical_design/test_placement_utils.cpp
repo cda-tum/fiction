@@ -16,7 +16,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/placement_utils.hpp>
 
@@ -37,10 +37,10 @@ TEST_CASE("Placement reduces a constant input without changing variable order", 
     kitty::create_from_expression(function, "(a!c)");
     const auto gate = ntk.create_node({a, ntk.get_constant(true), b}, function);
 
-    gate_level_layout<cartesian_layout> lyt{{3, 3}};
-    const auto                          left   = lyt.create_pi("a", {0, 0});
-    const auto                          right  = lyt.create_pi("b", {1, 0});
-    const auto                          placed = place(lyt, {1, 1}, ntk, ntk.get_node(gate), left, right, true);
+    gate_layout<cartesian_layout> lyt{{3, 3}};
+    const auto                    left   = lyt.create_pi("a", {0, 0});
+    const auto                    right  = lyt.create_pi("b", {1, 0});
+    const auto                    placed = place(lyt, {1, 1}, ntk, ntk.get_node(gate), left, right, true);
     CHECK(lyt.input_count(placed) == 2);
     CHECK(lyt.source({placed, 0}) == left);
     CHECK(lyt.source({placed, 1}) == right);

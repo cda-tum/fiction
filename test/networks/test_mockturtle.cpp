@@ -21,7 +21,7 @@
 #include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
@@ -50,7 +50,7 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
     // adapted from mockturtle/test/networks/klut.cpp
 
     /** @brief Placed layout whose logic enters mockturtle through extraction. */
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     const auto and_or_layout   = blueprints::and_or_gate_layout<gate_layout>();
     const auto xor_maj_layout  = blueprints::xor_maj_gate_layout<gate_layout>();

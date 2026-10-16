@@ -30,7 +30,7 @@
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
@@ -219,7 +219,7 @@ void check_parsing_equiv_layout_all()
 
 TEST_CASE("Write empty gate-level layout", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const gate_layout layout{{}, "empty"};
 
     std::stringstream layout_stream{};
@@ -274,7 +274,7 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
 
 TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     gate_layout original{{2, 2, 2}, clocking::open(), "crossing clocks"};
     original.assign_clock_number({1, 1, 1}, 2);
@@ -540,7 +540,7 @@ TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl
 
 TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     check_parsing_equiv_all<gate_layout>();
     check_parsing_equiv_layout_all();

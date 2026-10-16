@@ -24,7 +24,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
@@ -35,7 +35,7 @@ using namespace fiction::layouts;
 TEMPLATE_TEST_CASE("Occupied bounds include outside objects and clear after removal", "[bounding-box]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {1000000000, 1000000000});
+    auto         lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {1000000000, 1000000000});
     bounding_box bounds{lyt};
     CHECK_FALSE(bounds.get_min().has_value());
     CHECK(bounds.get_x_size() == 0);

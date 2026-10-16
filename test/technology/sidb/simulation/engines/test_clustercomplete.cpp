@@ -26,7 +26,7 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/charge_distribution.hpp>

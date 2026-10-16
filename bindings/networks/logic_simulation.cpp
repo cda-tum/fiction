@@ -14,7 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/networks/extract_layout_network.hpp>

@@ -39,7 +39,7 @@
 // fiction: type presets and traits (the two heaviest shared headers)
 // ============================================================================
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
