@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/utils/stl/hash.hpp"  // NOLINT(misc-include-cleaner): supplies the std::pair hash specialization.
 

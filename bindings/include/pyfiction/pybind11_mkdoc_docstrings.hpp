@@ -2724,7 +2724,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout =
+static const char *mkd_doc_fiction_layouts_gate_layout =
 R"doc(Placed FCN objects, ordered ports, clocking, and obstructions.
 
 Objects have stable identities independent of their coordinates.
@@ -2742,7 +2742,7 @@ visitor.
 Template Args:
     CoordinateLayout: Coordinate geometry used for placement.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_adjacent_opposite_tiles =
+static const char *mkd_doc_fiction_layouts_gate_layout_adjacent_opposite_tiles =
 R"doc(Returns pairs of opposite adjacent tiles.
 
 Args:
@@ -2753,7 +2753,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_adjacent_tiles =
+static const char *mkd_doc_fiction_layouts_gate_layout_adjacent_tiles =
 R"doc(Returns adjacent tiles.
 
 Args:
@@ -2764,9 +2764,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_allocate_edge = R"doc(Allocates an edge from the free list or grows storage.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_allocate_edge = R"doc(Allocates an edge from the free list or grows storage.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_clock_number =
+static const char *mkd_doc_fiction_layouts_gate_layout_assign_clock_number =
 R"doc(Overrides the clock number of a tile in the stored scheme. The clock
 number applies to every layer of the tile, so the z-coordinate of `cz`
 is ignored.
@@ -2777,7 +2777,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_assign_synchronization_element =
+static const char *mkd_doc_fiction_layouts_gate_layout_assign_synchronization_element =
 R"doc(Assigns a synchronization element to the provided clock zone.
 
 Args:
@@ -2787,19 +2787,19 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_check_placement =
+static const char *mkd_doc_fiction_layouts_gate_layout_check_placement =
 R"doc(Rejects occupied placement before any object mutation. Coordinates
 outside the extent are valid during editing.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_input = R"doc(Validates an input endpoint and returns its connection index.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_checked_input = R"doc(Validates an input endpoint and returns its connection index.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_object = R"doc(Validates an object identity.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_checked_object = R"doc(Validates an object identity.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_checked_object_2 = R"doc(Validates an object identity.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_checked_object_2 = R"doc(Validates an object identity.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_connection =
+static const char *mkd_doc_fiction_layouts_gate_layout_clear_obstructed_connection =
 R"doc(Clears the obstruction status of the connection from coordinate `src`
 to coordinate `tgt` if the obstruction was manually marked via
 `obstruct_connection`.
@@ -2810,13 +2810,13 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_connections =
+static const char *mkd_doc_fiction_layouts_gate_layout_clear_obstructed_connections =
 R"doc(Clears all obstructed connections that were manually marked via
 `obstruct_connection`.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_coordinate =
+static const char *mkd_doc_fiction_layouts_gate_layout_clear_obstructed_coordinate =
 R"doc(Clears the obstruction status of the given coordinate `c` if the
 obstruction was manually marked via `obstruct_coordinate`.
 
@@ -2825,19 +2825,19 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_obstructed_coordinates =
+static const char *mkd_doc_fiction_layouts_gate_layout_clear_obstructed_coordinates =
 R"doc(Clears all obstructed coordinates that were manually marked via
 `obstruct_coordinate`.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clear_tile = R"doc(Removes the occupant of a coordinate if present.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_clear_tile = R"doc(Removes the occupant of a coordinate if present.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clocking_state = R"doc(Clocking overrides and synchronization.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_clocking_state = R"doc(Clocking overrides and synchronization.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_clone = R"doc(Returns an independent value copy.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_clone = R"doc(Returns an independent value copy.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_connect =
+static const char *mkd_doc_fiction_layouts_gate_layout_connect =
 R"doc(Connects an output to an ordered input, replacing the input's existing
 source.
 
@@ -2846,15 +2846,15 @@ geometry need not be valid during editing.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_contains = R"doc(Returns whether this identity names a live object.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_contains = R"doc(Returns whether this identity names a live object.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_and = R"doc(Creates a AND gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_and = R"doc(Creates a AND gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_buf = R"doc(Creates a wire driven by `a`.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_buf = R"doc(Creates a wire driven by `a`.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_buf_2 = R"doc(Creates a wire with its input disconnected.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_buf_2 = R"doc(Creates a wire with its input disconnected.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_gate =
+static const char *mkd_doc_fiction_layouts_gate_layout_create_gate =
 R"doc(Creates a gate with an ordered truth table and initial input
 connections.
 
@@ -2867,51 +2867,51 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_ge = R"doc(Creates a GE gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_ge = R"doc(Creates a GE gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_gt = R"doc(Creates a GT gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_gt = R"doc(Creates a GT gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_le = R"doc(Creates a LE gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_le = R"doc(Creates a LE gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_lt = R"doc(Creates a LT gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_lt = R"doc(Creates a LT gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_maj = R"doc(Creates a majority gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_maj = R"doc(Creates a majority gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nand = R"doc(Creates a NAND gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_nand = R"doc(Creates a NAND gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_nor = R"doc(Creates a NOR gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_nor = R"doc(Creates a NOR gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_not = R"doc(Creates a NOT gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_not = R"doc(Creates a NOT gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_object = R"doc(Creates a validated object and its initial ordered connections.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_object = R"doc(Creates a validated object and its initial ordered connections.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_or = R"doc(Creates a OR gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_or = R"doc(Creates a OR gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_pi =
+static const char *mkd_doc_fiction_layouts_gate_layout_create_pi =
 R"doc(Creates a primary input at `t`. Occupied coordinates reject without
 mutation.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po = R"doc(Creates a primary output driven by `s` at `t`.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_po = R"doc(Creates a primary output driven by `s` at `t`.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_po_2 = R"doc(Creates a primary output with its input disconnected.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_po_2 = R"doc(Creates a primary output with its input disconnected.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_terminal = R"doc(Creates a named output terminal.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_terminal = R"doc(Creates a named output terminal.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xnor = R"doc(Creates a XNOR gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_xnor = R"doc(Creates a XNOR gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_create_xor = R"doc(Creates a XOR gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_create_xor = R"doc(Creates a XOR gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_crossing_contribution =
+static const char *mkd_doc_fiction_layouts_gate_layout_crossing_contribution =
 R"doc(Returns the crossing formed by this object and the opposite crossing
 layer.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_crossing_count = R"doc(Crossing-layer wires with an occupied ground tile.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_crossing_count = R"doc(Crossing-layer wires with an occupied ground tile.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_degree =
+static const char *mkd_doc_fiction_layouts_gate_layout_degree =
 R"doc(Returns the number of distinct incoming or outgoing neighboring clock
 zones.
 
@@ -2923,29 +2923,29 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_disconnect = R"doc(Disconnects one input without changing the indices of other inputs.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_disconnect = R"doc(Disconnects one input without changing the indices of other inputs.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record =
+static const char *mkd_doc_fiction_layouts_gate_layout_edge_record =
 R"doc(Mutable connection with constant-time removal from the source's sink
 list.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_destination = R"doc(Destination object slot.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_edge_record_destination = R"doc(Destination object slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_input = R"doc(Destination input index.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_edge_record_input = R"doc(Destination input index.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_next = R"doc(Next sink edge, or next free edge when disconnected.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_edge_record_next = R"doc(Next sink edge, or next free edge when disconnected.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_previous = R"doc(Previous sink edge.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_edge_record_previous = R"doc(Previous sink edge.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_edge_record_source = R"doc(Source object slot.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_edge_record_source = R"doc(Source object slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_edges = R"doc(Reusable contiguous connection storage.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_edges = R"doc(Reusable contiguous connection storage.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_ensure_functions = R"doc(Initializes elementary functions when a moved-from layout is reused.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_ensure_functions = R"doc(Initializes elementary functions when a moved-from layout is reused.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_fanin_size = R"doc(Counts connected input slots, irrespective of physical legality.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_fanin_size = R"doc(Counts connected input slots, irrespective of physical legality.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_fanout_size =
+static const char *mkd_doc_fiction_layouts_gate_layout_fanout_size =
 R"doc(Counts destination input ports driven by this object's output.
 
 Each connected input port is a sink, including multiple ports on the
@@ -2953,9 +2953,9 @@ same destination object.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_find_object = R"doc(Finds the object at a coordinate; empty coordinates have no identity.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_find_object = R"doc(Finds the object at a coordinate; empty coordinates have no identity.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_adjacent_opposite_tiles =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_adjacent_opposite_tiles =
 R"doc(Applies a function to each pair of opposite adjacent tiles.
 
 Args:
@@ -2967,7 +2967,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_adjacent_tile =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_adjacent_tile =
 R"doc(Applies a function to each adjacent tile.
 
 Args:
@@ -2979,7 +2979,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_fanin =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_fanin =
 R"doc(Visits declared sources in input-index order. Disconnected inputs
 retain their indices.
 
@@ -2988,13 +2988,13 @@ connections.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_fanout =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_fanout =
 R"doc(Visits destination objects once per connected input port in
 unspecified order.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_gate =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_gate =
 R"doc(Visits logic gates.
 
 Callbacks must not create or remove objects, change terminal order, or
@@ -3002,7 +3002,7 @@ replace the layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_ground_tile =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_ground_tile =
 R"doc(Applies a function to each ground-layer tile in the coordinate range.
 
 Args:
@@ -3015,7 +3015,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_incoming_clocked_zone =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_incoming_clocked_zone =
 R"doc(Applies a function as an lvalue to all incoming clock zones of a given
 one.
 
@@ -3028,7 +3028,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_object =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_object =
 R"doc(Visits live objects. Callbacks may accept an object and enumeration
 index and return false to stop.
 
@@ -3040,7 +3040,7 @@ live object.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_obstructed_connection =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_obstructed_connection =
 R"doc(Visits manual directed-connection obstructions without implicit
 physical connections.
 
@@ -3052,7 +3052,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_obstructed_coordinate =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_obstructed_coordinate =
 R"doc(Visits manual coordinate obstructions without implicit occupancy.
 
 Args:
@@ -3063,7 +3063,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_outgoing_clocked_zone =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_outgoing_clocked_zone =
 R"doc(Applies a function as an lvalue to all outgoing clock zones of a given
 one.
 
@@ -3076,7 +3076,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_pi =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_pi =
 R"doc(Visits primary inputs in declared interface order.
 
 Callbacks must not create or remove objects, change terminal order, or
@@ -3084,7 +3084,7 @@ replace the layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_po =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_po =
 R"doc(Visits primary outputs in declared interface order.
 
 Callbacks must not create or remove objects, change terminal order, or
@@ -3092,7 +3092,7 @@ replace the layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_sink =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_sink =
 R"doc(Visits destination input ports driven by the source object's output.
 
 Each sink is an `input_port` naming a destination object and its
@@ -3114,7 +3114,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_synchronization_element =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_synchronization_element =
 R"doc(Visits zones with a nonzero synchronization delay.
 
 Args:
@@ -3125,9 +3125,9 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_terminal = R"doc(Visits interface objects in their declared order.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_terminal = R"doc(Visits interface objects in their declared order.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_tile =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_tile =
 R"doc(Applies a function to each tile in the coordinate range.
 
 Args:
@@ -3140,7 +3140,7 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_foreach_wire =
+static const char *mkd_doc_fiction_layouts_gate_layout_foreach_wire =
 R"doc(Visits physical wires, excluding primary inputs and outputs.
 
 Callbacks must not create or remove objects, change terminal order, or
@@ -3148,31 +3148,31 @@ replace the layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_free_edge = R"doc(First reusable connection slot.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_free_edge = R"doc(First reusable connection slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_free_object = R"doc(First reusable object slot.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_free_object = R"doc(First reusable object slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_functions =
+static const char *mkd_doc_fiction_layouts_gate_layout_functions =
 R"doc(Deduplicated truth tables stored outside object records and referenced
 by function literals.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout = R"doc(Creates an empty layout with the given geometry and name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_gate_layout = R"doc(Creates an empty layout with the given geometry and name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_2 = R"doc(Creates an empty layout with the given geometry, clocking, and name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_gate_layout_2 = R"doc(Creates an empty layout with the given geometry, clocking, and name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_3 = R"doc(Creates an empty layout with shifted rows or columns.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_gate_layout_3 = R"doc(Creates an empty layout with shifted rows or columns.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_4 = R"doc(Creates an empty layout with shifted rows or columns and clocking.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_gate_layout_4 = R"doc(Creates an empty layout with shifted rows or columns and clocking.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_5 = R"doc(Creates an empty layout with an independent copy of the geometry.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_gate_layout_5 = R"doc(Creates an empty layout with an independent copy of the geometry.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_6 =
+static const char *mkd_doc_fiction_layouts_gate_layout_gate_layout_6 =
 R"doc(Copies geometry, identities, connections, and owned capabilities
 independently.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_gate_level_layout_7 =
+static const char *mkd_doc_fiction_layouts_gate_layout_gate_layout_7 =
 R"doc(Moves owned state and leaves an empty reusable source with its
 original geometry.
 
@@ -3182,7 +3182,7 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clock_number =
+static const char *mkd_doc_fiction_layouts_gate_layout_get_clock_number =
 R"doc(Returns the clock number of a tile. Every layer of a tile has the same
 clock number, so the z-coordinate of `cz` is ignored.
 
@@ -3194,7 +3194,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_clocking_scheme =
+static const char *mkd_doc_fiction_layouts_gate_layout_get_clocking_scheme =
 R"doc(Returns a read-only reference to the stored clocking scheme object.
 Clock overrides and scheme replacements update the referenced object.
 Assignment or moving from the layout replaces the referenced contents;
@@ -3205,15 +3205,15 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_input_name = R"doc(Returns the input name at an interface index.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_get_input_name = R"doc(Returns the input name at an interface index.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_layout_name = R"doc(Returns the layout name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_get_layout_name = R"doc(Returns the layout name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_name = R"doc(Returns an object's name, or an empty string for an unnamed object.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_get_name = R"doc(Returns an object's name, or an empty string for an unnamed object.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_output_name = R"doc(Returns the output name at an interface index.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_get_output_name = R"doc(Returns the output name at an interface index.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_synchronization_element =
+static const char *mkd_doc_fiction_layouts_gate_layout_get_synchronization_element =
 R"doc(Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
 Args:
@@ -3225,13 +3225,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_get_tile =
+static const char *mkd_doc_fiction_layouts_gate_layout_get_tile =
 R"doc(Returns the object's coordinate. @throws std::invalid_argument If the
 identity is stale.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_ground_tiles =
+static const char *mkd_doc_fiction_layouts_gate_layout_ground_tiles =
 R"doc(Returns ground-layer tiles in the coordinate range.
 
 Args:
@@ -3243,7 +3243,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_eastern_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_eastern_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in eastern
 direction.
 
@@ -3259,7 +3259,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_eastern_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_eastern_outgoing_signal =
 R"doc(Checks whether the given tile has an outgoing one in eastern
 direction.
 
@@ -3275,11 +3275,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_input_name = R"doc(Returns whether an input has a name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_has_input_name = R"doc(Returns whether an input has a name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_name = R"doc(Returns whether an object has a name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_has_name = R"doc(Returns whether an object has a name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_no_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_no_incoming_signal =
 R"doc(Checks whether the given tile has no incoming tiles.
 
 Args:
@@ -3294,7 +3294,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_no_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_no_outgoing_signal =
 R"doc(Checks whether the given tile has no outgoing tiles.
 
 Args:
@@ -3309,7 +3309,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_north_eastern_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_north_eastern_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in north-eastern
 direction.
 
@@ -3325,7 +3325,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_north_eastern_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_north_eastern_outgoing_signal =
 R"doc(Checks whether the given tile has an outgoing one in north-eastern
 direction.
 
@@ -3341,7 +3341,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_north_western_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_north_western_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in north-western
 direction.
 
@@ -3357,7 +3357,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_north_western_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_north_western_outgoing_signal =
 R"doc(Checks whether the given tile has an outgoing one in north-western
 direction.
 
@@ -3373,7 +3373,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_northern_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_northern_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in northern
 direction.
 
@@ -3389,7 +3389,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_northern_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_northern_outgoing_signal =
 R"doc(Checks whether the given tile has an outgoing one in northern
 direction.
 
@@ -3405,7 +3405,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_opposite_incoming_and_outgoing_signals =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_opposite_incoming_and_outgoing_signals =
 R"doc(Checks whether incoming and outgoing signals lie on opposite sides of
 `t`.
 
@@ -3424,9 +3424,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_output_name = R"doc(Returns whether an output has a name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_has_output_name = R"doc(Returns whether an output has a name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_south_eastern_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_south_eastern_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in south-eastern
 direction.
 
@@ -3442,7 +3442,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_south_eastern_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_south_eastern_outgoing_signal =
 R"doc(Checks whether the given tile has an outgoing one in south-eastern
 direction.
 
@@ -3458,7 +3458,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_south_western_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_south_western_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in south-western
 direction.
 
@@ -3474,7 +3474,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_south_western_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_south_western_outgoing_signal =
 R"doc(Checks whether the given tile has an outgoing one in south-western
 direction.
 
@@ -3490,7 +3490,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_southern_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_southern_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in southern
 direction.
 
@@ -3506,7 +3506,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_southern_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_southern_outgoing_signal =
 R"doc(Checks whether the given tile has an outgoing one in southern
 direction.
 
@@ -3522,7 +3522,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_western_incoming_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_western_incoming_signal =
 R"doc(Checks whether the given tile has an incoming one in western
 direction.
 
@@ -3538,7 +3538,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_has_western_outgoing_signal =
+static const char *mkd_doc_fiction_layouts_gate_layout_has_western_outgoing_signal =
 R"doc(Checks whether the given tile has an outgoing one in western
 direction.
 
@@ -3554,9 +3554,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_identity = R"doc(Reconstructs a live slot's identity.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_identity = R"doc(Reconstructs a live slot's identity.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_in_degree =
+static const char *mkd_doc_fiction_layouts_gate_layout_in_degree =
 R"doc(Returns the number of incoming clock zones to the given one.
 
 Args:
@@ -3567,7 +3567,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_incoming_clocked_zones =
+static const char *mkd_doc_fiction_layouts_gate_layout_incoming_clocked_zones =
 R"doc(Returns a container with all clock zones that are incoming to the
 given one.
 
@@ -3579,35 +3579,35 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_incoming_data_flow =
+static const char *mkd_doc_fiction_layouts_gate_layout_incoming_data_flow =
 R"doc(Returns coordinates of declared sources; optionally filters physical
 clocking and adjacency.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_initialize_functions =
+static const char *mkd_doc_fiction_layouts_gate_layout_initialize_functions =
 R"doc(Interns the elementary gate functions without allocating layout
 objects.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_count = R"doc(Returns the number of input slots, including disconnected slots.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_input_count = R"doc(Returns the number of input slots, including disconnected slots.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_edges =
+static const char *mkd_doc_fiction_layouts_gate_layout_input_edges =
 R"doc(Returns an object's ordered connection indices, including disconnected
 slots.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_input_edges_2 = R"doc(Returns an object's mutable ordered connection indices.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_input_edges_2 = R"doc(Returns an object's mutable ordered connection indices.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_inputs = R"doc(Declared primary input order.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_inputs = R"doc(Declared primary input order.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_and = R"doc(Returns whether the object computes AND.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_and = R"doc(Returns whether the object computes AND.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_buf = R"doc(Returns whether an object computes the identity function.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_buf = R"doc(Returns whether an object computes the identity function.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_clocking_scheme =
+static const char *mkd_doc_fiction_layouts_gate_layout_is_clocking_scheme =
 R"doc(Compares the stored clocking scheme against the provided name.
 Predefined names are constants in `fiction::layouts::clocking`.
 
@@ -3620,25 +3620,25 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_empty = R"doc(Returns whether the layout has no objects.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_empty = R"doc(Returns whether the layout has no objects.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_empty_tile = R"doc(Returns whether a coordinate has no occupant.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_empty_tile = R"doc(Returns whether a coordinate has no occupant.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_fanout = R"doc(Returns whether an identity object drives more than one input port.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_fanout = R"doc(Returns whether an identity object drives more than one input port.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gate =
+static const char *mkd_doc_fiction_layouts_gate_layout_is_gate =
 R"doc(Returns whether an object is a logic gate rather than a wire or
 terminal.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gate_tile = R"doc(Returns whether the coordinate hosts a gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_gate_tile = R"doc(Returns whether the coordinate hosts a gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_ge = R"doc(Returns whether the object computes GE.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_ge = R"doc(Returns whether the object computes GE.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_gt = R"doc(Returns whether the object computes GT.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_gt = R"doc(Returns whether the object computes GT.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_incoming_clocked =
+static const char *mkd_doc_fiction_layouts_gate_layout_is_incoming_clocked =
 R"doc(Evaluates whether clock zone `cz2` feeds information to clock zone
 `cz1`, i.e., whether `cz2` is clocked with a clock number that is
 lower by 1 modulo `num_clocks()`, or either zone is a synchronization
@@ -3653,21 +3653,21 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_incoming_signal = R"doc(Checks for a physical incoming connection from the given x/y location.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_incoming_signal = R"doc(Checks for a physical incoming connection from the given x/y location.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_inv = R"doc(Returns whether the object computes INV.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_inv = R"doc(Returns whether the object computes INV.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_le = R"doc(Returns whether the object computes LE.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_le = R"doc(Returns whether the object computes LE.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_lt = R"doc(Returns whether the object computes LT.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_lt = R"doc(Returns whether the object computes LT.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_maj = R"doc(Returns whether the object computes MAJ.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_maj = R"doc(Returns whether the object computes MAJ.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_nand = R"doc(Returns whether the object computes NAND.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_nand = R"doc(Returns whether the object computes NAND.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_nor = R"doc(Returns whether the object computes NOR.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_nor = R"doc(Returns whether the object computes NOR.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_obstructed_connection =
+static const char *mkd_doc_fiction_layouts_gate_layout_is_obstructed_connection =
 R"doc(Checks if the given coordinate-coordinate connection is obstructed of
 some sort.
 
@@ -3680,7 +3680,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_obstructed_coordinate =
+static const char *mkd_doc_fiction_layouts_gate_layout_is_obstructed_coordinate =
 R"doc(Checks if the given coordinate is obstructed of some sort.
 
 Args:
@@ -3691,9 +3691,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_or = R"doc(Returns whether the object computes OR.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_or = R"doc(Returns whether the object computes OR.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_outgoing_clocked =
+static const char *mkd_doc_fiction_layouts_gate_layout_is_outgoing_clocked =
 R"doc(Evaluates whether clock zone `cz2` accepts information from clock zone
 `cz1`, i.e., whether `cz2` is clocked with a clock number that is
 higher by 1 modulo `num_clocks()`, or either zone is a synchronization
@@ -3708,17 +3708,17 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_outgoing_signal = R"doc(Checks for a physical outgoing connection to the given x/y location.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_outgoing_signal = R"doc(Checks for a physical outgoing connection to the given x/y location.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_pi = R"doc(Returns whether an object is a primary input.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_pi = R"doc(Returns whether an object is a primary input.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_pi_tile = R"doc(Returns whether the coordinate hosts a pi.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_pi_tile = R"doc(Returns whether the coordinate hosts a pi.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_po = R"doc(Returns whether an object is a primary output.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_po = R"doc(Returns whether an object is a primary output.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_po_tile = R"doc(Returns whether the coordinate hosts a po.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_po_tile = R"doc(Returns whether the coordinate hosts a po.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_regularly_clocked =
+static const char *mkd_doc_fiction_layouts_gate_layout_is_regularly_clocked =
 R"doc(Returns whether the layout is clocked by a regular clocking scheme
 with no overwritten zones.
 
@@ -3728,7 +3728,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_synchronization_element =
+static const char *mkd_doc_fiction_layouts_gate_layout_is_synchronization_element =
 R"doc(Check whether the provided clock zone is a synchronization element.
 
 Args:
@@ -3739,27 +3739,27 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire = R"doc(Returns whether an object is a physical wire rather than a terminal.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_wire = R"doc(Returns whether an object is a physical wire rather than a terminal.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_wire_tile = R"doc(Returns whether the coordinate hosts a wire.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_wire_tile = R"doc(Returns whether the coordinate hosts a wire.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_xnor = R"doc(Returns whether the object computes XNOR.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_xnor = R"doc(Returns whether the object computes XNOR.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_is_xor = R"doc(Returns whether the object computes XOR.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_is_xor = R"doc(Returns whether the object computes XOR.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_layout_name = R"doc(Layout name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_layout_name = R"doc(Layout name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_live_count = R"doc(Live object count.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_live_count = R"doc(Live object count.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_live_object_bits = R"doc(Live object membership, with one bit per retained storage slot.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_live_object_bits = R"doc(Live object membership, with one bit per retained storage slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_move_object = R"doc(Moves an object without changing its identity or connections.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_move_object = R"doc(Moves an object without changing its identity or connections.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_names =
+static const char *mkd_doc_fiction_layouts_gate_layout_names =
 R"doc(Names stored outside object records, with entries only for named
 objects.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_clocks =
+static const char *mkd_doc_fiction_layouts_gate_layout_num_clocks =
 R"doc(Returns the number of clock phases in the layout. Each clock cycle is
 divided into n phases. In QCA, the number of phases is usually 4. In
 iNML it is 3. Clocking schemes support 3 or 4 phases.
@@ -3769,63 +3769,63 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_crossings = R"doc(Counts crossing-layer wires above occupied ground-layer tiles.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_num_crossings = R"doc(Counts crossing-layer wires above occupied ground-layer tiles.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_gates = R"doc(Counts logic gates, excluding wires and terminals.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_num_gates = R"doc(Counts logic gates, excluding wires and terminals.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_pis = R"doc(Counts primary inputs.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_num_pis = R"doc(Counts primary inputs.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_pos = R"doc(Counts primary outputs.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_num_pos = R"doc(Counts primary outputs.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_se =
+static const char *mkd_doc_fiction_layouts_gate_layout_num_se =
 R"doc(Counts zones with a nonzero Hold-phase extension. @return
 Synchronization element count.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_num_wires = R"doc(Counts physical wires, excluding primary inputs and outputs.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_num_wires = R"doc(Counts physical wires, excluding primary inputs and outputs.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_function = R"doc(Returns the truth table in logical input-index order.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_function = R"doc(Returns the truth table in logical input-index order.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind =
+static const char *mkd_doc_fiction_layouts_gate_layout_object_kind =
 R"doc(Object role; removed slots have no coordinate or connections visible
 through the API.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_GATE = R"doc(Logic gate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_kind_GATE = R"doc(Logic gate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_PI = R"doc(Primary input terminal.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_kind_PI = R"doc(Primary input terminal.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_PO = R"doc(Primary output terminal.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_kind_PO = R"doc(Primary output terminal.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_REMOVED = R"doc(Removed object slot.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_kind_REMOVED = R"doc(Removed object slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_kind_WIRE = R"doc(Identity wire.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_kind_WIRE = R"doc(Identity wire.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record =
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record =
 R"doc(Object data used for placement and topology traversal; names and
 truth-table payloads are separate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_first_sink = R"doc(First reverse connection, or next free object when removed.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record_first_sink = R"doc(First reverse connection, or next free object when removed.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_function = R"doc(Interned truth-table literal.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record_function = R"doc(Interned truth-table literal.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_generation = R"doc(Generation checked by object handles.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record_generation = R"doc(Generation checked by object handles.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_input_count = R"doc(Number of input ports, including disconnected ports.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record_input_count = R"doc(Number of input ports, including disconnected ports.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_inputs =
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record_inputs =
 R"doc(Inline input-index to connection mapping sized for built-in gate
 arities, independent of geometry.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_kind = R"doc(Physical role.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record_kind = R"doc(Physical role.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_position = R"doc(Assigned coordinate.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record_position = R"doc(Assigned coordinate.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_object_record_sink_count = R"doc(Number of connected sink input ports.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_object_record_sink_count = R"doc(Number of connected sink input ports.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_objects = R"doc(Reusable object slots.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_objects = R"doc(Reusable object slots.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_obstruct_connection =
+static const char *mkd_doc_fiction_layouts_gate_layout_obstruct_connection =
 R"doc(Marks the connection from coordinate `src` to coordinate `tgt` as
 obstructed.
 
@@ -3839,7 +3839,7 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_obstruct_coordinate =
+static const char *mkd_doc_fiction_layouts_gate_layout_obstruct_coordinate =
 R"doc(Marks the given coordinate as obstructed.
 
 Args:
@@ -3847,13 +3847,13 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_obstruction_state = R"doc(Persistent manual obstructions.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_obstruction_state = R"doc(Persistent manual obstructions.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_occupancy = R"doc(Coordinate lookup independent of identities and connections.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_occupancy = R"doc(Coordinate lookup independent of identities and connections.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_operator_assign = R"doc(Replaces this layout with an independent value copy.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_operator_assign = R"doc(Replaces this layout with an independent value copy.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_operator_assign_2 =
+static const char *mkd_doc_fiction_layouts_gate_layout_operator_assign_2 =
 R"doc(Moves owned state and leaves an empty reusable source.
 
 Note:
@@ -3864,7 +3864,7 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_out_degree =
+static const char *mkd_doc_fiction_layouts_gate_layout_out_degree =
 R"doc(Returns the number of outgoing clock zones from the given one.
 
 Args:
@@ -3875,7 +3875,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_outgoing_clocked_zones =
+static const char *mkd_doc_fiction_layouts_gate_layout_outgoing_clocked_zones =
 R"doc(Returns a container with all clock zones that are outgoing from the
 given one.
 
@@ -3887,7 +3887,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_outgoing_data_flow =
+static const char *mkd_doc_fiction_layouts_gate_layout_outgoing_data_flow =
 R"doc(Returns adjacent destination coordinates once per connected input
 port.
 
@@ -3907,19 +3907,19 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_outputs = R"doc(Declared primary output order.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_outputs = R"doc(Declared primary output order.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_pi_at = R"doc(Returns a primary input in declared interface order.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_pi_at = R"doc(Returns a primary input in declared interface order.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_po_at = R"doc(Returns a primary output in declared interface order.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_po_at = R"doc(Returns a primary output in declared interface order.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_remove =
+static const char *mkd_doc_fiction_layouts_gate_layout_remove =
 R"doc(Removes an object and disconnects all inputs and sinks. Stale
 identities reject.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_replace_clocking_scheme =
+static const char *mkd_doc_fiction_layouts_gate_layout_replace_clocking_scheme =
 R"doc(Replaces the stored clocking scheme with the provided one.
 
 Args:
@@ -3927,39 +3927,39 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_input_name = R"doc(Sets the input name at an interface index.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_set_input_name = R"doc(Sets the input name at an interface index.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_input_order =
+static const char *mkd_doc_fiction_layouts_gate_layout_set_input_order =
 R"doc(Sets the complete input permutation. Invalid orders reject without
 mutation.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_layout_name = R"doc(Sets the layout name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_set_layout_name = R"doc(Sets the layout name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_name = R"doc(Sets an object's name.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_set_name = R"doc(Sets an object's name.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_output_name = R"doc(Sets the output name at an interface index.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_set_output_name = R"doc(Sets the output name at an interface index.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_output_order =
+static const char *mkd_doc_fiction_layouts_gate_layout_set_output_order =
 R"doc(Sets the complete output permutation. Invalid orders reject without
 mutation.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_set_terminal_order = R"doc(Validates a terminal permutation before applying it.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_set_terminal_order = R"doc(Validates a terminal permutation before applying it.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_size = R"doc(Counts live objects.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_size = R"doc(Counts live objects.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_source = R"doc(Returns the declared source of an input, or no source if disconnected.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_source = R"doc(Returns the declared source of an input, or no source if disconnected.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_spilled_inputs =
+static const char *mkd_doc_fiction_layouts_gate_layout_spilled_inputs =
 R"doc(Full input-index to connection mappings for objects whose arity
 exceeds the inline capacity.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_swap_owned_state = R"doc(Swaps owned state without changing geometry.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_swap_owned_state = R"doc(Swaps owned state without changing geometry.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_tiles =
+static const char *mkd_doc_fiction_layouts_gate_layout_tiles =
 R"doc(Returns the tiles in the coordinate range.
 
 Args:
@@ -3971,11 +3971,11 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_unlink_edge = R"doc(Removes a connection from both endpoints and recycles the edge slot.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_unlink_edge = R"doc(Removes a connection from both endpoints and recycles the edge slot.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_visit = R"doc(Visits a value with an optional enumeration index and early stopping.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_visit = R"doc(Visits a value with an optional enumeration index and early stopping.)doc";
 
-static const char *mkd_doc_fiction_layouts_gate_level_layout_wire_count = R"doc(Live physical-wire count.)doc";
+static const char *mkd_doc_fiction_layouts_gate_layout_wire_count = R"doc(Live physical-wire count.)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout =
 R"doc( A layout type that utilizes offset coordinates to represent a
@@ -11768,8 +11768,8 @@ static const char *mkd_doc_fiction_physical_design_path_finding_a_star =
 R"doc(The A* path finding algorithm for shortest loop-less paths between a
 given source and target coordinate in a layout. This function
 automatically detects whether the given layout implements a clocking
-interface (see `gate_level_layout`) and respects the underlying
-information flow imposed by `layout`'s clocking scheme.
+interface (see `gate_layout`) and respects the underlying information
+flow imposed by `layout`'s clocking scheme.
 
 A* is an extension of Dijkstra's algorithm for shortest paths but
 offers better average complexity. It uses a heuristic distance
@@ -11800,7 +11800,7 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_level_layout<cartesian_layout>;
+using clk_lyt = gate_layout<cartesian_layout>;
 using path = layout_coordinate_path;
 clk_lyt layout = ...;
 auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
@@ -12317,9 +12317,9 @@ static const char *mkd_doc_fiction_physical_design_path_finding_enumerate_all_pa
 R"doc(Enumerates all possible paths in a layout that start at a given source
 coordinate and lead to given target coordinate. This function
 automatically detects whether the given layout implements a clocking
-interface (see `gate_level_layout`) and respects the underlying
-information flow imposed by `layout`'s clocking scheme. This algorithm
-does neither generate duplicate nor looping paths, even in a cyclic
+interface (see `gate_layout`) and respects the underlying information
+flow imposed by `layout`'s clocking scheme. This algorithm does
+neither generate duplicate nor looping paths, even in a cyclic
 clocking scheme. That is, along each path, each coordinate can occur
 at maximum once.
 
@@ -12344,7 +12344,7 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_level_layout<cartesian_layout>;
+using clk_lyt = gate_layout<cartesian_layout>;
 using path = layout_coordinate_path;
 clk_lyt layout = ...;
 auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
@@ -12656,8 +12656,8 @@ This implementation uses the A* algorithm with the Manhattan distance
 function internally.
 
 This function automatically detects whether the given layout
-implements a clocking interface (see `gate_level_layout`) and respects
-the underlying information flow imposed by `layout`'s clocking scheme.
+implements a clocking interface (see `gate_layout`) and respects the
+underlying information flow imposed by `layout`'s clocking scheme.
 This algorithm does neither generate duplicate nor looping paths, even
 in a cyclic clocking scheme. That is, along each path, each coordinate
 can occur at maximum once.
@@ -12683,7 +12683,7 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = gate_level_layout<cartesian_layout>;
+using clk_lyt = gate_layout<cartesian_layout>;
 using path = layout_coordinate_path;
 clk_lyt layout = ...;
 auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
@@ -27410,8 +27410,8 @@ static const char *mkd_doc_fiction_verification_gate_level_drv_stats_warnings = 
 
 static const char *mkd_doc_fiction_verification_gate_level_drvs =
 R"doc(Performs design rule violation (DRV) checking on the given gate-level
-layout. The implementation of gate_level_layout allows for layouts
-with structural defects like the connection of non-adjacent tiles or
+layout. The implementation of gate_layout allows for layouts with
+structural defects like the connection of non-adjacent tiles or
 connections that defy the clocking scheme. This function checks for
 such violations and documents them in the statistics. A brief report
 can be printed and more in-depth information including with error

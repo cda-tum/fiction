@@ -22,7 +22,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
@@ -99,7 +99,7 @@ TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     };
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     check(read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -207,7 +207,7 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
         CHECK((primary_output.has_value() && lyt.get_name(*primary_output) == "po0"));
     };
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     check(read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -315,7 +315,7 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
         CHECK((primary_output.has_value() && lyt.get_name(*primary_output) == "po0"));
     };
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     check(read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -394,7 +394,7 @@ TEST_CASE("Legacy FGL maximum layer indices become layer counts", "[read-fgl-lay
 
 TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout]")
 {
-    using sync_layout = gate_level_layout<cartesian_layout>;
+    using sync_layout = gate_layout<cartesian_layout>;
     sync_layout original{{2, 1, 1}};
     original.set_layout_name("A & B < C");
     const auto input = original.create_pi("in<&>", {0, 0, 0});
@@ -502,7 +502,7 @@ TEST_CASE("Parsing error: malformed xml", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -526,7 +526,7 @@ TEST_CASE("Parsing error: unknown clocking scheme", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -550,7 +550,7 @@ TEST_CASE("Parsing error: unknown topology", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -574,7 +574,7 @@ TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<shifted_cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<shifted_cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -598,7 +598,7 @@ TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-fgl-lay
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -622,7 +622,7 @@ TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-fgl-layout]")
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<shifted_cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<shifted_cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -756,7 +756,7 @@ TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -839,7 +839,7 @@ TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-fgl-
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -923,7 +923,7 @@ TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1022,7 +1022,7 @@ TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-fgl
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
@@ -1146,13 +1146,13 @@ TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", 
 
     std::istringstream layout_stream{fgl_layout};
 
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
 TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
 {
-    using sync_layout = gate_level_layout<cartesian_layout>;
+    using sync_layout = gate_layout<cartesian_layout>;
     std::string x{"0"};
     std::string clock{"0"};
     std::string delay{"0"};

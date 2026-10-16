@@ -22,7 +22,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/types.hpp>
@@ -104,7 +104,7 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
 {
     SECTION("Cartesian layout")
     {
-        using gate_lyt = gate_level_layout<cartesian_layout>;
+        using gate_lyt = gate_layout<cartesian_layout>;
 
         check_for_strong_equiv(mockturtle::aig_network{}, gate_lyt{});
         check_for_strong_equiv(mockturtle::mig_network{}, gate_lyt{});
@@ -120,7 +120,7 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
     }
     SECTION("Hexagonal layout")
     {
-        using gate_layout = gate_level_layout<hexagonal_layout>;
+        using gate_layout = fiction::layouts::gate_layout<hexagonal_layout>;
 
         check_for_strong_equiv(mockturtle::aig_network{}, gate_layout{arrangement::EVEN_ROW});
         check_for_strong_equiv(mockturtle::mig_network{}, gate_layout{arrangement::EVEN_ROW});
@@ -215,9 +215,9 @@ TEST_CASE("Physical equivalence extracts placed objects and rejects physical def
     mockturtle::names_view<mockturtle::klut_network> spec{};
     const auto                                       a = spec.create_pi("a");
     spec.create_po(a, "result");
-    gate_level_layout<cartesian_layout> lyt{{1, 2}, clocking::twoddwave()};
-    const auto                          pi = lyt.create_pi("a", {0, 0});
-    const auto                          po = lyt.create_po(pi, "result", {0, 1});
+    gate_layout<cartesian_layout> lyt{{1, 2}, clocking::twoddwave()};
+    const auto                    pi = lyt.create_pi("a", {0, 0});
+    const auto                    po = lyt.create_po(pi, "result", {0, 1});
     CHECK(equivalence_checking(spec, lyt) == eq_type::STRONG);
     lyt.move_object(po, {0, 10});
     CHECK(equivalence_checking(spec, lyt) == eq_type::NO);
@@ -231,9 +231,9 @@ TEST_CASE("Physical equivalence retains wire throughput", "[equiv][placed-object
     const auto                                       a = spec.create_pi("a");
     const auto                                       b = spec.create_pi("b");
     spec.create_po(spec.create_and(a, b), "result");
-    gate_level_layout<cartesian_layout> lyt{{6, 2}, clocking::twoddwave()};
-    auto                                path       = lyt.create_pi("a", {0, 0});
-    const auto                          short_path = lyt.create_pi("b", {3, 1});
+    gate_layout<cartesian_layout> lyt{{6, 2}, clocking::twoddwave()};
+    auto                          path       = lyt.create_pi("a", {0, 0});
+    const auto                    short_path = lyt.create_pi("b", {3, 1});
     for (int64_t x = 1; x <= 4; ++x)
     {
         path = lyt.create_buf(path, {x, 0});
@@ -250,9 +250,9 @@ TEST_CASE("Physical equivalence returns NO for a clocked required cycle", "[equi
 {
     mockturtle::names_view<mockturtle::klut_network> spec{};
     spec.create_po(spec.create_pi("a"), "result");
-    gate_level_layout<cartesian_layout> lyt{{3, 3}};
-    const auto                          pi = lyt.create_pi("a", {0, 1});
-    kitty::dynamic_truth_table          function{2};
+    gate_layout<cartesian_layout> lyt{{3, 3}};
+    const auto                    pi = lyt.create_pi("a", {0, 1});
+    kitty::dynamic_truth_table    function{2};
     kitty::create_from_hex_string(function, "8");
     const auto gate   = lyt.create_gate({pi}, function, {1, 1});
     const auto first  = lyt.create_buf(gate, {2, 1});

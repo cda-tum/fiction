@@ -229,7 +229,7 @@ class yen_k_shortest_paths_impl
  * This implementation uses the A* algorithm with the Manhattan distance function internally.
  *
  * This function automatically detects whether the given layout implements a clocking interface (see
- * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
+ * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
  * path, each coordinate can occur at maximum once.
  *
@@ -246,7 +246,7 @@ class yen_k_shortest_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout>;
+ * using clk_lyt = gate_layout<cartesian_layout>;
  * using path = layout_coordinate_path;
  * clk_lyt layout = ...;
  * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);

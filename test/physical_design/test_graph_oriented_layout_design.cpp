@@ -24,7 +24,7 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -117,7 +117,7 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         check_graph_oriented_layout_design_equiv_all<gate_layout>();
     }
@@ -125,7 +125,7 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
 
 TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     const auto check = [](const auto& ntk)
     {
@@ -145,7 +145,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 
 TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
@@ -315,7 +315,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
 TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
@@ -355,7 +355,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 
 TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -383,7 +383,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 
 TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     const auto ntk = blueprints::clpl<technology_network>();
 
@@ -442,7 +442,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 
 TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -486,7 +486,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     auto maj = blueprints::maj1_network<mockturtle::aig_network>();
     maj.set_network_name("maj");
@@ -515,7 +515,7 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
 
 TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::maj1_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -527,7 +527,7 @@ TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 
 TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats stats{};
@@ -542,7 +542,7 @@ TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout
 
 TEST_CASE("PI spacing outside of its range is rejected", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_params params{};
@@ -561,7 +561,7 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
     /**
      * Cartesian gate layout used to compare seeded PI placement.
      */
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     const auto layouts =
@@ -608,7 +608,7 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
 
 TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layout-design]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
 
     progress_recorder rec{};
@@ -655,7 +655,7 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
-    const auto result            = graph_oriented_layout_design<gate_level_layout<cartesian_layout>>(ntk, params);
+    const auto result            = graph_oriented_layout_design<gate_layout<cartesian_layout>>(ntk, params);
     REQUIRE(result.has_value());
     const auto& layout = required_value(result);
     CHECK(layout.num_pis() == 3);
@@ -679,14 +679,14 @@ TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks 
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
-    const auto empty_result      = graph_oriented_layout_design<gate_level_layout<cartesian_layout>>(empty, params);
+    const auto empty_result      = graph_oriented_layout_design<gate_layout<cartesian_layout>>(empty, params);
     REQUIRE(empty_result.has_value());
     CHECK(required_value(empty_result).is_empty());
     CHECK(required_value(empty_result).area() == 0);
     mockturtle::names_view<technology_network> ntk{};
     ntk.create_po(ntk.get_constant(false), "zero");
     ntk.create_po(ntk.get_constant(true), "one");
-    const auto result = graph_oriented_layout_design<gate_level_layout<cartesian_layout>>(ntk, params);
+    const auto result = graph_oriented_layout_design<gate_layout<cartesian_layout>>(ntk, params);
     REQUIRE(result.has_value());
     CHECK(required_value(result).num_pis() == 0);
     CHECK(required_value(result).num_pos() == 2);
@@ -707,7 +707,7 @@ TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-orient
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
-    const auto result            = graph_oriented_layout_design<gate_level_layout<cartesian_layout>>(ntk, params);
+    const auto result            = graph_oriented_layout_design<gate_layout<cartesian_layout>>(ntk, params);
     REQUIRE(result.has_value());
     CHECK(required_value(result).get_output_name(0) == "input_copy");
     CHECK(required_value(result).get_output_name(1) == "one");
