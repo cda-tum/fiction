@@ -33,8 +33,12 @@ namespace fiction::physical_design
 {
 namespace detail
 {
-/** @brief Combines layout occupancy with explicit search constraints.
- * @tparam Lyt Layout type. @param lyt Layout. @param c Position. @param extra Search constraints.
+/**
+ * @brief Combines layout occupancy with explicit search constraints.
+ * @tparam Lyt Layout type.
+ * @param lyt Layout.
+ * @param c Position.
+ * @param extra Search constraints.
  * @return Whether the position is obstructed.
  */
 template <typename Lyt>
@@ -50,8 +54,13 @@ template <typename Lyt>
         return extra.is_obstructed_coordinate(c);
     }
 }
-/** @brief Combines layout connections with explicit search constraints.
- * @tparam Lyt Layout type. @param lyt Layout. @param src Source. @param tgt Target. @param extra Search constraints.
+/**
+ * @brief Combines layout connections with explicit search constraints.
+ * @tparam Lyt Layout type.
+ * @param lyt Layout.
+ * @param src Source.
+ * @param tgt Target.
+ * @param extra Search constraints.
  * @return Whether the directed connection is obstructed.
  */
 template <typename Lyt>
@@ -99,20 +108,29 @@ struct routing_objective
 class layout_coordinate_path : public std::vector<layouts::layout_base::coordinate>
 {
   public:
-    /** @brief Appends a coordinate. @param c Coordinate to append. @throws std::bad_alloc If storage allocation fails.
+    /**
+     * @brief Appends a coordinate.
+     * @param c Coordinate to append.
+     * @throws std::bad_alloc If storage allocation fails.
      */
     void append(const layouts::layout_base::coordinate& c)
     {
         this->push_back(c);
     }
 
-    /** @brief Returns the first coordinate, or the origin for an empty path. @return Source coordinate. */
+    /**
+     * @brief Returns the first coordinate, or the origin for an empty path.
+     * @return Source coordinate.
+     */
     [[nodiscard]] layouts::layout_base::coordinate source() const noexcept
     {
         return this->empty() ? layouts::layout_base::coordinate{} : this->front();
     }
 
-    /** @brief Returns the last coordinate, or the origin for an empty path. @return Target coordinate. */
+    /**
+     * @brief Returns the last coordinate, or the origin for an empty path.
+     * @return Target coordinate.
+     */
     [[nodiscard]] layouts::layout_base::coordinate target() const noexcept
     {
         return this->empty() ? layouts::layout_base::coordinate{} : this->back();
@@ -128,15 +146,16 @@ class layout_coordinate_path : public std::vector<layouts::layout_base::coordina
 };
 /**
  * An ordered collection of multiple paths in a layout.
- *
- * @tparam Path Path type.
  */
-template <typename Path>
-class path_collection : public std::vector<Path>
+class path_collection : public std::vector<layout_coordinate_path>
 {
   public:
-    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
-    void add(const Path& p)
+    /**
+     * @brief Adds a path.
+     * @param p Path to add.
+     * @throws std::bad_alloc If storage allocation fails.
+     */
+    void add(const layout_coordinate_path& p)
     {
         this->push_back(p);
     }
@@ -147,43 +166,51 @@ class path_collection : public std::vector<Path>
      * @param p Path to search for.
      * @return `true` iff `p` is contained in the collection.
      */
-    [[nodiscard]] bool contains(const Path& p) const noexcept
+    [[nodiscard]] bool contains(const layout_coordinate_path& p) const noexcept
     {
         return std::ranges::find(*this, p) != std::cend(*this);
     }
 
   protected:
-    using base = std::vector<Path>;
+    /** @brief Path storage. */
+    using base = std::vector<layout_coordinate_path>;
 
   public:
-    // make all inherited constructors available
+    /** @brief Inherits path container constructors. */
     using base::base;
 };
 /**
  * A set of multiple paths in a layout.
- *
- * @tparam Path Path type.
  */
-template <typename Path>
-class path_set : public std::set<Path>
+class path_set : public std::set<layout_coordinate_path>
 {
   public:
-    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
-    void add(const Path& p)
+    /**
+     * @brief Adds a path.
+     * @param p Path to add.
+     * @throws std::bad_alloc If storage allocation fails.
+     */
+    void add(const layout_coordinate_path& p)
     {
         this->insert(p);
     }
 
-    [[nodiscard]] bool contains(const Path& p) const noexcept
+    /**
+     * @brief Checks membership.
+     * @param p Path to find.
+     * @return Whether the set contains the path.
+     */
+    [[nodiscard]] bool contains(const layout_coordinate_path& p) const noexcept
     {
-        return this->count(p) > 0;
+        return base::contains(p);
     }
 
   protected:
-    using base = std::set<Path>;
+    /** @brief Unique path storage. */
+    using base = std::set<layout_coordinate_path>;
 
   public:
-    // make all inherited constructors available
+    /** @brief Inherits path container constructors. */
     using base::base;
 };
 
@@ -304,15 +331,14 @@ routing_successor(const Lyt& lyt, const fiction::layouts::layout_base::coordinat
  * Occupied intermediate ground coordinates use their free crossing layer. Endpoints and all intermediate
  * placements are checked before mutation. A failed allocation removes newly created wires.
  * @tparam Geometry Coordinate geometry of the gate-level layout.
- * @tparam Path Coordinate path type.
  * @param lyt Layout to edit.
  * @param path Path containing at least its occupied source and target coordinates.
  * @param destination Ordered destination input.
  * @throws std::invalid_argument If an endpoint or intermediate placement is unavailable.
  * @throws std::out_of_range If the destination input index is invalid.
  */
-template <typename Geometry, typename Path>
-void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const Path& path,
+template <typename Geometry>
+void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const layout_coordinate_path& path,
                 const typename fiction::layouts::gate_layout<Geometry>::input_port destination)
 {
     if (path.size() < 2 || path.target() != lyt.get_tile(destination.object))

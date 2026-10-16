@@ -8207,7 +8207,8 @@ several coloring heuristics are available, from which can be chosen
 This function will return `true` if all objectives could be satisfied
 or if the partial routing parameter was set. In the case of `true`
 being returned, all determined paths have been routed in the given
-layout.
+layout. When `ps.path_limit` is zero, no candidate paths are generated
+and endpoint bounds are not checked.
 
 Args:
     lyt: A gate-level layout to route.
@@ -8220,8 +8221,13 @@ Template Args:
     Lyt: The gate-level layout type to route.
 
 Returns:
-    `true` iff routing was successful, i.e., iff all objectives could
-    be satisfied.
+    `true` iff all objectives are satisfied or partial routing is
+    enabled.
+
+Raises:
+    std::invalid_argument: If an objective endpoint lies outside the
+                           layout extent when ps.path_limit is absent
+                           or nonzero.
 
 )doc";
 
@@ -9612,9 +9618,9 @@ R"doc(Given a collection of paths belonging to the same objective, this
 function assigns them unique labels and generates corresponding nodes
 in the edge intersection graph.
 
-Since each path of the same objective objective belongs to a clique in
-the final graph, this function additionally stores their node IDs in
-the statistics.
+Since each path of the same objective belongs to a clique in the final
+graph, this function additionally stores their node IDs in the
+statistics.
 
 Args:
     objective_paths: Collection of paths belonging to the same
@@ -9635,9 +9641,6 @@ path.
 Args:
     other: The other path.
 
-Template Args:
-    Path: Type of other path.
-
 Returns:
     `true` iff this path contains an interior coordinate of the other
     path.
@@ -9651,9 +9654,6 @@ crossings.
 Args:
     other: The other path.
 
-Template Args:
-    Path: Type of other path.
-
 Returns:
     `true` iff this path and the given one are overlapping, i.e.,
     share at least one coordinate segment of size 2.
@@ -9661,6 +9661,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_label = R"doc(Label to identify the path in the edge intersection graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_labeled_layout_coordinate_path =
+R"doc(Takes ownership of a coordinate path.
+
+Args:
+    path: Path to label.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_layout = R"doc(Reference to the layout.)doc";
 
@@ -9672,7 +9680,13 @@ static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersec
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_pst = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_run = R"doc(Generate the graph. @return Candidate paths and their intersections.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_run =
+R"doc(Builds and transfers the completed intersection graph.
+
+Returns:
+    Graph of candidate paths and their intersections.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_get_offset =
 R"doc(Utility function to calculate the shift that has to be added to any
@@ -10523,9 +10537,14 @@ static const char *mkd_doc_fiction_physical_design_detail_recursively_paint_edge
 static const char *mkd_doc_fiction_physical_design_detail_routing_connection_obstructed =
 R"doc(Combines layout connections with explicit search constraints.
 
+Args:
+    lyt: Layout.
+    src: Source.
+    tgt: Target.
+    extra: Search constraints.
+
 Template Args:
-    Lyt: Layout type. @param lyt Layout. @param src Source. @param tgt
-         Target. @param extra Search constraints.
+    Lyt: Layout type.
 
 Returns:
     Whether the directed connection is obstructed.
@@ -10535,9 +10554,13 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_detail_routing_coordinate_obstructed =
 R"doc(Combines layout occupancy with explicit search constraints.
 
+Args:
+    lyt: Layout.
+    c: Position.
+    extra: Search constraints.
+
 Template Args:
-    Lyt: Layout type. @param lyt Layout. @param c Position. @param
-         extra Search constraints.
+    Lyt: Layout type.
 
 Returns:
     Whether the position is obstructed.
@@ -11247,7 +11270,8 @@ understood as the non-disjunction of paths, i.e., they share at least
 one coordinate. To generate the paths for the routing objectives, all
 possible paths from source to target in the layout are enumerated
 while taking obstructions into consideration. The given layout must be
-clocked.
+clocked. An explicit zero path limit creates no candidate paths and
+counts each objective as unroutable without checking endpoint bounds.
 
 Args:
     lyt: The layout to generate the edge intersection graph for.
@@ -11261,6 +11285,11 @@ Template Args:
 Returns:
     An edge intersection graph of paths satisfying the given routing
     objectives in `lyt`.
+
+Raises:
+    std::invalid_argument: If an objective endpoint lies outside the
+                           layout extent when ps.path_limit is absent
+                           or nonzero.
 
 )doc";
 
@@ -11646,20 +11675,29 @@ Note:
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path = R"doc(A path in a layout defined as an ordered sequence of coordinates.)doc";
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_append =
-R"doc(Appends a coordinate. @param c Coordinate to append. @throws
-std::bad_alloc If storage allocation fails.
+R"doc(Appends a coordinate.
+
+Args:
+    c: Coordinate to append.
+
+Raises:
+    std::bad_alloc: If storage allocation fails.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_source =
-R"doc(Returns the first coordinate, or the origin for an empty path. @return
-Source coordinate.
+R"doc(Returns the first coordinate, or the origin for an empty path.
+
+Returns:
+    Source coordinate.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_target =
-R"doc(Returns the last coordinate, or the origin for an empty path. @return
-Target coordinate.
+R"doc(Returns the last coordinate, or the origin for an empty path.
+
+Returns:
+    Target coordinate.
 
 )doc";
 
@@ -11771,15 +11809,16 @@ static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_st
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_y_size = R"doc()doc";
 
-static const char *mkd_doc_fiction_physical_design_path_collection =
-R"doc(An ordered collection of multiple paths in a layout.
-
-Template Args:
-    Path: Path type.)doc";
+static const char *mkd_doc_fiction_physical_design_path_collection = R"doc(An ordered collection of multiple paths in a layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_collection_add =
-R"doc(Adds a path. @param p Path to add. @throws std::bad_alloc If storage
-allocation fails.
+R"doc(Adds a path.
+
+Args:
+    p: Path to add.
+
+Raises:
+    std::bad_alloc: If storage allocation fails.
 
 )doc";
 
@@ -11830,9 +11869,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
+auto shortest_path = a_star(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
 
@@ -11858,7 +11896,6 @@ Args:
                   the search does not modify them.
 
 Template Args:
-    Path: Type of the returned path.
     Lyt: Type of the layout to perform path finding on.
     Dist: Distance value type to be used in the heuristic estimation
           function.
@@ -11868,6 +11905,10 @@ Template Args:
 Returns:
     The shortest loop-less path in `layout` from `objective.source` to
     `objective.target`.
+
+Raises:
+    std::invalid_argument: If either endpoint lies outside the layout
+                           extent.
 
 )doc";
 
@@ -11894,17 +11935,25 @@ Template Args:
 Returns:
     Minimum path length between `source` and `target` in `layout`.
 
+Raises:
+    std::invalid_argument: If source or target lies outside the layout
+                           extent.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_a_star_distance_functor =
-R"doc(A pre-defined distance functor that uses the A* distance.
+R"doc(A pre-defined distance functor that uses the A* distance. Calling this
+functor throws std::invalid_argument if source or target lies outside
+the layout extent.
 
 Template Args:
     Lyt: Coordinate layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_a_star_distance_functor_a_star_distance_functor =
-R"doc(Computes distances in the borrowed layout. @param lyt Layout that
-outlives this functor.
+R"doc(Borrows a layout for distance evaluations.
+
+Args:
+    lyt: Layout that outlives this functor.
 
 )doc";
 
@@ -11968,7 +12017,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl =
+R"doc(Implements A* search.
+
+Template Args:
+    Lyt: Layout type.
+    Dist: Distance value type.
+    Cost: Step cost value type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_a_star_impl =
 R"doc(Initializes the A* search.
@@ -12124,7 +12179,11 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl =
+R"doc(Implements loop-free path enumeration.
+
+Template Args:
+    Lyt: Layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_collection = R"doc(Collection of all enumerated paths.)doc";
 
@@ -12200,7 +12259,11 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_visited = R"doc(Set of visited coordinates.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl =
+R"doc(Implements Yen's path enumeration.
+
+Template Args:
+    Lyt: Layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_initial_obstructions = R"doc(Caller constraints retained across spur searches.)doc";
 
@@ -12373,9 +12436,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
+auto all_paths = enumerate_all_paths(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
 
@@ -12388,12 +12450,15 @@ Args:
                   the search does not modify them.
 
 Template Args:
-    Path: Type of the returned individual paths.
     Lyt: Type of the layout to perform path finding on.
 
 Returns:
     A collection of all unique paths in `layout` from
     `objective.source` to `objective.target`.
+
+Raises:
+    std::invalid_argument: If either endpoint lies outside the layout
+                           extent.
 
 )doc";
 
@@ -12683,6 +12748,9 @@ the returned path collection will be smaller than :math:`k`.
 This implementation uses the A* algorithm with the Manhattan distance
 function internally.
 
+If k is zero, this function returns an empty collection without
+checking endpoint bounds.
+
 This function automatically detects whether the given layout
 implements a clocking interface (see `gate_layout`) and respects the
 underlying information flow imposed by `layout`'s clocking scheme.
@@ -12711,9 +12779,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
+auto k_paths = yen_k_shortest_paths(static_cast<cartesian_layout>(layout), {source, target}, k);
 ```
 
 
@@ -12734,12 +12801,15 @@ Args:
                   obstructions remain unchanged.
 
 Template Args:
-    Path: Type of the returned individual paths.
     Lyt: Type of the layout to perform path finding on.
 
 Returns:
     A collection of up to :math:`k` shortest loop-less paths in
     `layout` from `objective.source` to `objective.target`.
+
+Raises:
+    std::invalid_argument: If k is nonzero and either endpoint lies
+                           outside the layout extent.
 
 )doc";
 
@@ -12747,19 +12817,29 @@ static const char *mkd_doc_fiction_physical_design_path_finding_yen_k_shortest_p
 
 static const char *mkd_doc_fiction_physical_design_path_finding_yen_k_shortest_paths_params_astar_params = R"doc(Parameters for the internal A* algorithm.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_set =
-R"doc(A set of multiple paths in a layout.
-
-Template Args:
-    Path: Path type.)doc";
+static const char *mkd_doc_fiction_physical_design_path_set = R"doc(A set of multiple paths in a layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_set_add =
-R"doc(Adds a path. @param p Path to add. @throws std::bad_alloc If storage
-allocation fails.
+R"doc(Adds a path.
+
+Args:
+    p: Path to add.
+
+Raises:
+    std::bad_alloc: If storage allocation fails.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_set_contains = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_path_set_contains =
+R"doc(Checks membership.
+
+Args:
+    p: Path to find.
+
+Returns:
+    Whether the set contains the path.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_place =
 R"doc(Place 0-input gates.
@@ -13010,7 +13090,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Path: Coordinate path type.
 
 Raises:
     std::invalid_argument: If an endpoint or intermediate placement is

@@ -122,6 +122,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Path enumeration transfers result and candidate storage without copying coordinate buffers.
+    Completed graph results now transfer their owned storage.
   - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
     with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
   - Orthogonal edge coloring avoids a redundant traversal copy.
@@ -222,6 +224,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
+    arguments from C++ calls and container declarations.
   - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
   - **Breaking:** `types.hpp` drops the three `*_gate_clk_lyt` presets, their pointers, `gate_layout_t`,
     and transitive layout includes. Include `fiction/layouts/gate_layout.hpp` and use its canonical types.

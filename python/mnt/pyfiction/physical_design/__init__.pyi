@@ -680,6 +680,8 @@ def color_routing(
     """
     Route the supplied connections in place by coloring their path intersections.
     Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
+    With path_limit=0, no candidate paths are generated and endpoint bounds are not checked.
+    Raises ValueError for an out-of-extent objective endpoint when path_limit is None or nonzero.
 
     Args:
         conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
@@ -975,7 +977,6 @@ def route_path(
 
     Template Args:
         Geometry: Coordinate geometry of the gate-level layout.
-        Path: Coordinate path type.
 
     Raises:
         std::invalid_argument: If an endpoint or intermediate placement is
