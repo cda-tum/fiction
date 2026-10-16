@@ -24,7 +24,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/hexagonalization.hpp>
@@ -268,7 +268,7 @@ static void check_mapping_equiv_all()
 
 TEST_CASE("Cartesian to hexagonal")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     using hex_lyt     = hex_gate_clk_lyt;
 
     constexpr const auto layout_height = 3;
@@ -316,7 +316,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<cartesian_layout>;
+        using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         check_mapping_equiv_all<gate_layout>();
     }
@@ -347,7 +347,7 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
 
 TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     using hex_lyt     = hex_gate_clk_lyt;
 
     const auto ntk    = blueprints::mux21_network<technology_network>();

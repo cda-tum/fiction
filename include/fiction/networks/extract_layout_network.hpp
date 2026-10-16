@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/views/names_view.hpp>
@@ -42,10 +42,10 @@ namespace fiction::networks
  */
 template <typename Geometry>
 [[nodiscard]] mockturtle::names_view<mockturtle::klut_network>
-extract_layout_network(const fiction::layouts::gate_level_layout<Geometry>& lyt)
+extract_layout_network(const fiction::layouts::gate_layout<Geometry>& lyt)
 {
     /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
+    using Lyt = fiction::layouts::gate_layout<Geometry>;
 
     /** @brief Stable identity of an object in the source layout. */
     using object_id = typename Lyt::object_id;

@@ -22,7 +22,7 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
 #include <fiction/networks/io/dot_drawers.hpp>
@@ -93,7 +93,7 @@ void compare_dot_layout(const Lyt& lyt, const std::string_view& layout_print)
 
 TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     const gate_layout layout{gate_layout::extent{3, 3}};
 
@@ -134,7 +134,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
 {
     SECTION("odd row")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout>;
+        using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::ODD_ROW;
 
         const gate_layout layout{arr, gate_layout::extent{3, 3}};
@@ -184,7 +184,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     }
     SECTION("even row")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout>;
+        using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::EVEN_ROW;
 
         const gate_layout layout{arr, gate_layout::extent{3, 3}};
@@ -235,7 +235,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     }
     SECTION("odd column")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout>;
+        using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::ODD_COLUMN;
 
         const gate_layout layout{arr, gate_layout::extent{3, 3}};
@@ -285,7 +285,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
     }
     SECTION("even column")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout>;
+        using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::EVEN_COLUMN;
 
         const gate_layout layout{arr, gate_layout::extent{3, 3}};
@@ -338,7 +338,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
 
 TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     SECTION("AND-OR Layout")
     {
@@ -483,7 +483,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
 {
     SECTION("odd row")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout>;
+        using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::ODD_ROW;
 
         SECTION("AND-OR Layout")
@@ -601,7 +601,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     }
     SECTION("even row")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout>;
+        using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::EVEN_ROW;
 
         SECTION("AND-OR Layout")
@@ -720,7 +720,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     }
     SECTION("odd column")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout>;
+        using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::ODD_COLUMN;
 
         SECTION("AND-OR Layout")
@@ -849,7 +849,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
     }
     SECTION("even column")
     {
-        using gate_layout  = gate_level_layout<hexagonal_layout>;
+        using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
         constexpr auto arr = arrangement::EVEN_COLUMN;
 
         SECTION("AND-OR Layout")
@@ -980,7 +980,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
 
 TEST_CASE("Draw object identities and constants", "[dot-drawers]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     gate_layout layout{{2, 1}};
     const auto  constant = layout.create_gate({}, kitty::dynamic_truth_table{0}, {0, 0});
     const auto  wire     = layout.create_buf(constant, {1, 0});
@@ -993,7 +993,7 @@ TEST_CASE("Draw object identities and constants", "[dot-drawers]")
 TEST_CASE("Layout DOT labels preserve terminal names", "[dot-drawers]")
 {
     /** Gate layout under test. */
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     gate_layout       layout{{1, 1}};
     const std::string name{"a\"\nb\\c"};
     layout.create_pi(name, {0, 0});
@@ -1011,7 +1011,7 @@ TEST_CASE("Layout DOT labels preserve terminal names", "[dot-drawers]")
 TEST_CASE("Layout DOT identifiers serialize signed coordinate boundaries", "[dot-drawers]")
 {
     /** Gate layout under test. */
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     const gate_layout_cartesian_drawer<gate_layout> drawer{};
     // DOT permits bare identifiers, numerals, quoted strings, and HTML strings.
     const std::regex identifier{
@@ -1044,7 +1044,7 @@ TEST_CASE("Layout DOT identifiers serialize signed coordinate boundaries", "[dot
 TEST_CASE("Layout DOT progress retains areas above the unsigned 32-bit range", "[dot-drawers]")
 {
     /** Gate layout under test. */
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
     /** Interrupts rendering after progress starts to avoid enumerating the large frame. */
     struct interrupted_drawer : gate_layout_cartesian_drawer<gate_layout>
     {

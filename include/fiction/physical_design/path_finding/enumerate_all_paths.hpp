@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
@@ -198,7 +198,7 @@ class enumerate_all_paths_impl
 /**
  * Enumerates all possible paths in a layout that start at a given source coordinate and lead to given target
  * coordinate. This function automatically detects whether the given layout implements a clocking interface (see
- * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
+ * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
  * path, each coordinate can occur at maximum once.
  *
@@ -215,7 +215,7 @@ class enumerate_all_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout>;
+ * using clk_lyt = gate_layout<cartesian_layout>;
  * using path = layout_coordinate_path;
  * clk_lyt layout = ...;
  * auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});

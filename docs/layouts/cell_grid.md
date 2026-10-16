@@ -5,7 +5,7 @@ share two building blocks: `cell_grid`, the storage of their cells, and `tile_cl
 technologies that clock tiles of cells. Neither is a layout of its own. The SiDB layout places dots on lattice sites
 instead and uses neither.
 
-A cell-level layout can be obtained from a `gate_level_layout` by the {ref}`application <apply-gate-library>` of a
+A cell-level layout can be obtained from a `gate_layout` by the {ref}`application <apply-gate-library>` of a
 {ref}`gate library <fcn-gate-libraries>`. Cell-level layouts merely represent structural information of the FCN
 circuit but do not inherently possess any knowledge of their implemented functionality.
 

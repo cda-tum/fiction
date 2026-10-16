@@ -25,7 +25,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
@@ -585,7 +585,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
 
 TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     const auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 
