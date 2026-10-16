@@ -119,7 +119,6 @@ class yen_k_shortest_paths_impl
                     }
                 }
 
-                // the root path excludes the spur coordinate
                 for (const auto& root : root_path)
                 {
                     search_obstructions.obstruct_coordinate(root);
