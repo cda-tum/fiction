@@ -9897,7 +9897,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Number of constant outputs; every search graph preserves this source
 interface.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_custom_cost_objective = R"doc(Custom cost objective.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_custom_cost_objective = R"doc(Owned custom cost objective.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_expand =
 R"doc(Computes possible expansions and their priorities for the current
@@ -10030,14 +10030,16 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
-R"doc(Constructor for the graph-oriented layout design algorithm.
+R"doc(Initializes graph-oriented layout design with owned options and a cost
+callback.
 
 Args:
     src: The source network to be placed, already converted to a
          `technology_network`.
-    p: The parameters for the graph-enhanced layout search algorithm.
+    p: GOLD parameters transferred into owned invocation storage.
     st: The statistics object to record execution details.
-    custom: The custom layout cost function.
+    custom: Custom layout cost function transferred into owned
+            storage.
 
 )doc";
 
@@ -10178,7 +10180,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters owned by this invocation.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_pst = R"doc(Statistics.)doc";
 
@@ -11391,8 +11393,8 @@ Cost Objectives\" by S. Hofmann, M. Walter, and R. Wille in LASCAS
 
 Args:
     ntk: The network to be placed and routed.
-    ps: The parameters for the A* priority routing algorithm. Defaults
-        to an empty parameter set.
+    ps: Parameters for graph-oriented layout design. Defaults to an
+        empty parameter set.
     pst: A pointer to a statistics object to record execution details.
          Defaults to nullptr.
     custom_cost_objective: A custom cost objective that is evaluated
