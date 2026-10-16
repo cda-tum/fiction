@@ -442,6 +442,7 @@ template <typename Lyt>
 }
 /**
  * A pre-defined distance functor that uses the A* distance.
+ * Calling this functor throws std::invalid_argument if source or target lies outside the layout extent.
  *
  * @tparam Lyt Coordinate layout type.
  */

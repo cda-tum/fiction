@@ -28,6 +28,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -719,4 +720,18 @@ TEST_CASE("A* invokes distance and cost functor overrides", "[A*]")
     CHECK(path.size() == 5);
     CHECK(heuristic.calls > 0);
     CHECK(edge_cost.calls > 0);
+}
+
+TEST_CASE("A* distance evaluations reject endpoints outside the layout", "[A*]")
+{
+    /** @brief Two-by-two geometry for endpoint validation. */
+    const cartesian_layout layout{{2, 2}};
+    /** @brief Borrowed-layout distance evaluator constructed before invocation. */
+    const a_star_distance_functor<cartesian_layout> distance{layout};
+    CHECK_THROWS_AS(a_star(layout, {.source = {2, 0}, .target = {0, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS(a_star(layout, {.source = {0, 0}, .target = {-1, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS(a_star_distance(layout, {2, 0}, {0, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(a_star_distance(layout, {0, 0}, {-1, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(distance({2, 0}, {0, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(distance({0, 0}, {-1, 0}), std::invalid_argument);
 }

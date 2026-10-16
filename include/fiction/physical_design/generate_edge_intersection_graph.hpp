@@ -335,6 +335,8 @@ class generate_edge_intersection_graph_impl
  * intersections of these paths. An intersection is understood as the non-disjunction of paths, i.e., they share at
  * least one coordinate. To generate the paths for the routing objectives, all possible paths from source to target in
  * the layout are enumerated while taking obstructions into consideration. The given layout must be clocked.
+ * An explicit zero path limit creates no candidate paths and counts each objective as unroutable without checking
+ * endpoint bounds.
  *
  * @tparam Lyt Type of the clocked layout.
  * @param lyt The layout to generate the edge intersection graph for.
@@ -342,6 +344,8 @@ class generate_edge_intersection_graph_impl
  * @param ps Parameters.
  * @param pst Statistics.
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
+ * @throws std::invalid_argument If an objective endpoint lies outside the layout extent when ps.path_limit is absent
+ * or nonzero.
  */
 template <typename Lyt>
     requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
