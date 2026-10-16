@@ -223,7 +223,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
-  - Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
+  - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
     arguments from C++ calls and container declarations.
   - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
   - **Breaking:** `types.hpp` drops the three `*_gate_clk_lyt` presets, their pointers, `gate_layout_t`,

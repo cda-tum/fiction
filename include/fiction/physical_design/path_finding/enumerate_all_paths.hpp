@@ -45,7 +45,10 @@ struct enumerate_all_paths_params
 namespace detail
 {
 
-/** @brief Implements loop-free path enumeration. @tparam Lyt Layout type. */
+/**
+ * @brief Implements loop-free path enumeration.
+ * @tparam Lyt Layout type.
+ */
 template <typename Lyt>
 class enumerate_all_paths_impl
 {
@@ -227,6 +230,7 @@ class enumerate_all_paths_impl
  * @param params Parameters.
  * @param obstructions Additional coordinate and connection constraints; the search does not modify them.
  * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
+ * @throws std::invalid_argument If either endpoint lies outside the layout extent.
  */
 template <typename Lyt>
     requires std::derived_from<Lyt, layouts::layout_base>

@@ -54,8 +54,12 @@ struct a_star_params
 namespace detail
 {
 
-/** @brief Implements A* search. @tparam Lyt Layout type.
- * @tparam Dist Distance value type. @tparam Cost Step cost value type. */
+/**
+ * @brief Implements A* search.
+ * @tparam Lyt Layout type.
+ * @tparam Dist Distance value type.
+ * @tparam Cost Step cost value type.
+ */
 template <typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {
@@ -392,6 +396,7 @@ class a_star_impl
  * @param params Parameters.
  * @param obstructions Additional coordinate and connection constraints; the search does not modify them.
  * @return The shortest loop-less path in `layout` from `objective.source` to `objective.target`.
+ * @throws std::invalid_argument If either endpoint lies outside the layout extent.
  */
 template <typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
     requires std::derived_from<Lyt, fiction::layouts::layout_base>
@@ -417,6 +422,7 @@ template <typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
  * @param target Target coordinate.
  * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return Minimum path length between `source` and `target` in `layout`.
+ * @throws std::invalid_argument If source or target lies outside the layout extent.
  */
 template <typename Lyt>
     requires std::derived_from<Lyt, fiction::layouts::layout_base>

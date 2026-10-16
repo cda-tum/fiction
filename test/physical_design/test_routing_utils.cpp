@@ -314,7 +314,7 @@ TEST_CASE("Coordinate path containers preserve endpoints and duplicates", "[rout
     path_collection collection{};
     /** @brief Unique path storage that rejects duplicate values. */
     path_set unique{};
-    /** @brief Number of duplicate insertions performed. */
+    /** @brief Index of the repeated path insertion. */
     for (auto i = 0; i < 2; ++i)
     {
         collection.add(path);

@@ -239,7 +239,10 @@ class generate_edge_intersection_graph_impl
          */
         std::size_t label{};
 
-        /** @brief Takes ownership of a coordinate path. @param path Path to label. */
+        /**
+         * @brief Takes ownership of a coordinate path.
+         * @param path Path to label.
+         */
         explicit labeled_layout_coordinate_path(layout_coordinate_path path) : layout_coordinate_path{std::move(path)}
         {}
     };
