@@ -158,7 +158,9 @@ TEST_CASE("Logic matching propagates invalid lattice basis errors", "[verify-log
 
 TEST_CASE("Logic matching rejects invalid specifications", "[verify-logic-match][invalid-spec]")
 {
-    const auto                lyt = blueprints::siqad_and_gate();
+    /** @brief AND layout whose charge distribution is checked. */
+    const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Charge distribution supplied to the logic check. */
     const charge_distribution cd{lyt};
     CHECK_THROWS_AS(verify_logic_match(lyt, cd, {}, {}, 0, {}, {}), std::invalid_argument);
     CHECK_THROWS_AS(verify_logic_match(lyt, cd, {}, {create_and_tt(), create_id_tt()}, 0, {}, {}),
@@ -167,6 +169,7 @@ TEST_CASE("Logic matching rejects invalid specifications", "[verify-logic-match]
 
 TEST_CASE("Logic matching rejects an input pattern outside the specification", "[verify-logic-match][invalid-pattern]")
 {
+    /** @brief AND layout whose charge distribution is checked. */
     const auto lyt = blueprints::siqad_and_gate();
     CHECK_THROWS_AS(verify_logic_match(lyt, charge_distribution{lyt}, {}, {create_and_tt()}, 4, {}, {}),
                     std::out_of_range);

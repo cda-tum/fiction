@@ -32,7 +32,8 @@ from mnt.pyfiction.sidb.simulation.logic import (
 from mnt.pyfiction.synthesis import create_and_tt, create_id_tt
 
 
-def test_is_operational():
+def test_is_operational() -> None:
+    """Operational checks handle layouts, supplied wires, and canvas arguments."""
     lyt = sidb_layout()
 
     lyt.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
@@ -248,6 +249,7 @@ def test_and_gate_111_lattice_operational_input_pattern(resources_dir):
 def test_invalid_specification_raises_value_error(
     and_gate_with_bdl_wires: tuple[sidb_layout, list[bdl_wire], list[bdl_wire]], *, mixed_variables: bool
 ) -> None:
+    """Invalid specifications raise ValueError before simulation."""
     lyt, input_wires, output_wires = and_gate_with_bdl_wires
     spec = [create_and_tt(), create_id_tt()] if mixed_variables else []
     layouts = generate_bdl_input_pattern_layouts(lyt, input_wires)
@@ -266,6 +268,7 @@ def test_invalid_specification_raises_value_error(
 def test_quicksim_rejects_charged_defects(
     and_gate_with_bdl_wires: tuple[sidb_layout, list[bdl_wire], list[bdl_wire]],
 ) -> None:
+    """Operational checks reject charged defects with QuickSim."""
     lyt, input_wires, output_wires = and_gate_with_bdl_wires
     lyt.assign_defect(lattice_site(100, 100, 0), sidb_defect(sidb_defect_type.DB, -1))
     layouts = generate_bdl_input_pattern_layouts(lyt, input_wires)
@@ -286,6 +289,7 @@ def test_quicksim_rejects_charged_defects(
 def test_quicksim_rejects_base_three(
     and_gate_with_bdl_wires: tuple[sidb_layout, list[bdl_wire], list[bdl_wire]],
 ) -> None:
+    """QuickSim operational simulation rejects base three."""
     lyt, input_wires, output_wires = and_gate_with_bdl_wires
     layouts = generate_bdl_input_pattern_layouts(lyt, input_wires)
     for check in (is_operational, operational_input_patterns):

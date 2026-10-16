@@ -400,6 +400,7 @@ class is_operational_impl
 
         simulation::detail::simulation_state state{land, model::charge_state::NEGATIVE};
 
+        /** @brief Expected output bits for the current input pattern. */
         const auto output_index = synthesis::evaluate_output(truth_table, input_pattern);
         set_charge_distribution_of_input_pins(state, input_pattern);
         set_charge_distribution_of_output_pins(state, output_index);
@@ -868,16 +869,22 @@ class is_operational_impl
      */
     const std::vector<layout>* input_pattern_layouts{nullptr};
     /**
-     * Rejects layouts the selected simulation engine cannot simulate.
+     * @brief Rejects layouts the selected simulation engine cannot simulate.
      *
      * @throws std::invalid_argument if QuickSim is selected for a layout with charged defects.
      */
     void check_simulation_engine_support() const
     {
         if (parameters.sim_engine == engine::QUICKSIM &&
-            (input_pattern_layouts != nullptr ? std::ranges::any_of(*input_pattern_layouts, [](const auto& lyt)
-                                                                    { return lyt.num_charged_defects() > 0; }) :
-                                                sidb_layout.num_charged_defects() > 0))
+            (input_pattern_layouts != nullptr ?
+                 std::ranges::any_of(*input_pattern_layouts,
+                                     /**
+                                      * @brief Checks a supplied layout for charged defects.
+                                      * @param lyt Layout to check.
+                                      * @return Whether the layout holds charged defects.
+                                      */
+                                     [](const auto& lyt) { return lyt.num_charged_defects() > 0; }) :
+                 sidb_layout.num_charged_defects() > 0))
         {
             throw std::invalid_argument("QuickSim does not support charged defects");
         }
@@ -1104,7 +1111,7 @@ class is_operational_impl
     return canvas;
 }
 /**
- * Checks that a specification has truth tables with a common variable count.
+ * @brief Checks that a specification has truth tables with a common variable count.
  *
  * @param spec The specification.
  * @throws std::invalid_argument if `spec` is empty or the truth tables have different variable counts.
@@ -1115,8 +1122,15 @@ inline void check_specification(const std::vector<kitty::dynamic_truth_table>& s
     {
         throw std::invalid_argument("spec is empty");
     }
-    if (std::ranges::adjacent_find(spec, [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) !=
-        spec.cend())
+    if (std::ranges::adjacent_find(spec,
+                                   /**
+                                    * @brief Compares the variable counts of adjacent truth tables.
+                                    * @param a First truth table.
+                                    * @param b Second truth table.
+                                    * @return Whether the variable counts differ.
+                                    */
+                                   [](const auto& a, const auto& b)
+                                   { return a.num_vars() != b.num_vars(); }) != spec.cend())
     {
         throw std::invalid_argument("truth tables must have the same number of variables");
     }
