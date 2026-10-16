@@ -343,7 +343,9 @@ TEST_CASE("Layout updates preserve data when allocation fails", "[layout]")
         layout original{};
         original.assign_sidb({5, 0, 0}, dot_tag::LOGIC);
         /** @brief Destination after successful copy assignment. */
-        const auto result = check_allocation_failures(original, [&source](layout& lyt) { lyt = source; });
+        const auto result = check_allocation_failures(
+            original,
+            [&source](/** @brief Destination updated under an allocation budget. */ layout& lyt) { lyt = source; });
         CHECK(result == source);
         CHECK(result.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
         CHECK(result.get_dot_tag({1, 0, 0}) == dot_tag::OUTPUT);
