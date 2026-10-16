@@ -99,7 +99,7 @@ class yen_k_shortest_paths_impl
                 // create a spur, which is the ith coordinate of the latest path
                 const auto spur = latest_path[i];
 
-                // the root path is the path from the source to the spur coordinate
+                /** @brief Prefix before the current spur coordinate. */
                 layout_coordinate_path root_path{latest_path.cbegin(), latest_path.cbegin() + i};
 
                 // for all previous paths

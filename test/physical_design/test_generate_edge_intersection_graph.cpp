@@ -285,16 +285,22 @@ TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersectio
 
 TEST_CASE("Candidate labels retain their routing objective", "[generate-edge-intersection-graph]")
 {
-    const cartesian_gate_layout          layout{{2, 2}, clocking::twoddwave()};
+    /** @brief Clocked geometry for routing-objective label checks. */
+    const cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
+    /** @brief Routing objectives with two routable pairs and one unroutable pair. */
     const std::vector<routing_objective> objectives{{{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}, {{0, 0}, {0, 1}}};
+    /** @brief Whether this run limits path enumeration. */
     for (const auto limited : {false, true})
     {
+        /** @brief Enumeration options for the current graph run. */
         generate_edge_intersection_graph_params params{};
         if (limited)
         {
             params.path_limit = 2;
         }
+        /** @brief Graph statistics used to verify objective labels. */
         generate_edge_intersection_graph_stats st{};
+        /** @brief Intersection graph for the current enumeration mode. */
         const auto graph = generate_edge_intersection_graph(layout, objectives, params, &st);
         CHECK(graph.size_vertices() == 3);
         CHECK(st.number_of_unroutable_objectives == 1);
@@ -303,10 +309,13 @@ TEST_CASE("Candidate labels retain their routing objective", "[generate-edge-int
         CHECK(st.cliques[1].size() == 1);
         CHECK(std::count(st.objective_indices.begin(), st.objective_indices.end(), 0) == 2);
         CHECK(std::count(st.objective_indices.begin(), st.objective_indices.end(), 2) == 1);
+        /** @brief Graph vertex IDs belonging to one routing objective. */
         for (const auto& clique : st.cliques)
         {
+            /** @brief Vertex ID whose objective association is checked. */
             for (const auto id : clique)
             {
+                /** @brief Routing objective associated with the current graph vertex. */
                 const auto& objective = objectives.at(st.objective_indices.at(id));
                 CHECK(graph.at_vertex(id).source() == objective.source);
                 CHECK(graph.at_vertex(id).target() == objective.target);

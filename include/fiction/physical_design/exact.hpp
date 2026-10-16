@@ -3383,7 +3383,8 @@ std::optional<Lyt> exact_with_blacklist(const tec_nt& ntk, const surface_black_l
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme), black_list};
+    /** @brief Exact placement state for the specification and tile blacklist. */
+    detail::exact_impl<Lyt> p{intermediate_ntk, std::move(ps), st, std::move(*clocking_scheme), black_list};
 
     auto result = p.run();
 

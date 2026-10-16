@@ -332,6 +332,7 @@ class a_star_impl
      */
     [[nodiscard]] layout_coordinate_path reconstruct_path() const
     {
+        /** @brief Coordinate path reconstructed from the predecessor map. */
         layout_coordinate_path path{};
 
         // iterate backwards over the found connections and add them to the path
