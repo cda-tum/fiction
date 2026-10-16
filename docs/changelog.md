@@ -272,6 +272,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
   - Python layout docstrings use `extent` for the extent argument.
+  - Clarified that custom clocking scheme names do not register schemes for catalog lookup.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Standardized paper links in the docs and README to DOI URLs and corrected the `ortho`, `equiv`, and Yen references.
