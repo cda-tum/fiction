@@ -48,7 +48,10 @@ struct yen_k_shortest_paths_params
 namespace detail
 {
 
-/** @brief Implements Yen's path enumeration. @tparam Lyt Layout type. */
+/**
+ * @brief Implements Yen's path enumeration.
+ * @tparam Lyt Layout type.
+ */
 template <typename Lyt>
 class yen_k_shortest_paths_impl
 {
@@ -116,7 +119,6 @@ class yen_k_shortest_paths_impl
                     }
                 }
 
-                // the root path excludes the spur coordinate
                 for (const auto& root : root_path)
                 {
                     search_obstructions.obstruct_coordinate(root);
@@ -225,6 +227,8 @@ class yen_k_shortest_paths_impl
  *
  * This implementation uses the A* algorithm with the Manhattan distance function internally.
  *
+ * If k is zero, this function returns an empty collection without checking endpoint bounds.
+ *
  * This function automatically detects whether the given layout implements a clocking interface (see
  * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
@@ -258,6 +262,7 @@ class yen_k_shortest_paths_impl
  * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return A collection of up to \f$k\f$ shortest loop-less paths in `layout` from `objective.source` to
  * `objective.target`.
+ * @throws std::invalid_argument If k is nonzero and either endpoint lies outside the layout extent.
  */
 template <typename Lyt>
     requires std::derived_from<Lyt, layouts::layout_base>

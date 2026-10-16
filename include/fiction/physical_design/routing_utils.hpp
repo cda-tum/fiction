@@ -169,7 +169,11 @@ class path_set : public std::set<layout_coordinate_path>
         this->insert(p);
     }
 
-    /** @brief Checks membership. @param p Path to find. @return Whether the set contains the path. */
+    /**
+     * @brief Checks membership.
+     * @param p Path to find.
+     * @return Whether the set contains the path.
+     */
     [[nodiscard]] bool contains(const layout_coordinate_path& p) const noexcept
     {
         return base::contains(p);

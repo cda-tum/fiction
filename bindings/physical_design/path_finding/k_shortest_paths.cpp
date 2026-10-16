@@ -88,7 +88,8 @@ void register_yen_k_shortest_paths_impl(nb::module_& m)
         nb::arg("obstructions") = nb::none(), nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Find up to k shortest loop-free paths from source to target.
 The keyword options select obstructions and crossing constraints.
-Raises ValueError when source or target lies outside the layout extent.
+If k is zero, returns an empty list without checking endpoint bounds.
+Raises ValueError when k is nonzero and source or target lies outside the layout extent.
 
 Args:
     obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
