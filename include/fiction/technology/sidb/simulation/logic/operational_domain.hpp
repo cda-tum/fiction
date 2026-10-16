@@ -1439,7 +1439,7 @@ class operational_domain_impl
             num_parameter_points *= values.at(d).size();
 
             indices.emplace_back(num_points);
-            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
+            std::iota(indices.at(d).begin(), indices.at(d).end(), std::size_t{0});
         }
     }
     /**

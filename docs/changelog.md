@@ -611,6 +611,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB contour tracing now terminates for isolated operational points.
   - SiDB parameter sweeps now reject colliding coordinates before allocating dimension indices,
     and reject overflowing point counts.
+  - SiDB sweep indices now use the full platform index width on Windows.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.
