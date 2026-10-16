@@ -22,7 +22,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
@@ -49,7 +49,7 @@ TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -94,7 +94,7 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 
 TEST_CASE("Setting up wires", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -145,7 +145,7 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
 
 TEST_CASE("Setting up fanouts", "[qca-one-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     auto layout = blueprints::fanout_layout<gate_layout>();
 
@@ -192,8 +192,8 @@ TEST_CASE("Setting up fanouts", "[qca-one-library]")
 
 TEST_CASE("QCA ONE rejects primary-input fanout", "[qca-one-library]")
 {
-    gate_level_layout<cartesian_layout> lyt{{2, 3}};
-    const auto                          pi = lyt.create_pi("a", {0, 1});
+    gate_layout<cartesian_layout> lyt{{2, 3}};
+    const auto                    pi = lyt.create_pi("a", {0, 1});
     lyt.create_po(pi, "north", {0, 0});
     lyt.create_po(pi, "east", {1, 1});
     lyt.create_po(pi, "south", {0, 2});
@@ -216,7 +216,7 @@ TEST_CASE("QCA ONE rejects primary-input fanout", "[qca-one-library]")
 
 TEST_CASE("QCA ONE rejects an unoccupied tile", "[qca-one-library]")
 {
-    const gate_level_layout<cartesian_layout> layout{{2, 2}};
+    const gate_layout<cartesian_layout> layout{{2, 2}};
     CHECK_THROWS_AS(qca_one_library::set_up_gate(layout, {0, 0}),
                     fcn::unsupported_gate_type_exception<cartesian_layout::coordinate>);
 }

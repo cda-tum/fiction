@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
@@ -64,11 +64,11 @@ inline const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
  * @param clk_color Flag to utilize color escapes for clock zones.
  */
 template <typename Geometry>
-void print_gate_level_layout(std::ostream& os, const fiction::layouts::gate_level_layout<Geometry>& layout,
+void print_gate_level_layout(std::ostream& os, const fiction::layouts::gate_layout<Geometry>& layout,
                              const bool io_color = true, const bool clk_color = false)
 {
     /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
+    using Lyt = fiction::layouts::gate_layout<Geometry>;
 
     // empty layout
     if (layout.is_empty())
@@ -386,8 +386,7 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
  * @param os Output stream. Defaults to `std::cout`.
  */
 template <typename Geometry>
-void print_object_to_tile_assignments(const fiction::layouts::gate_level_layout<Geometry>& lyt,
-                                      std::ostream&                                        os = std::cout)
+void print_object_to_tile_assignments(const fiction::layouts::gate_layout<Geometry>& lyt, std::ostream& os = std::cout)
 {
     os << "\n---- OBJECT TO TILE ----\n";
 
@@ -414,8 +413,7 @@ void print_object_to_tile_assignments(const fiction::layouts::gate_level_layout<
  * @param os Output stream. Defaults to `std::cout`.
  */
 template <typename Geometry>
-void print_tile_to_object_assignments(const fiction::layouts::gate_level_layout<Geometry>& lyt,
-                                      std::ostream&                                        os = std::cout)
+void print_tile_to_object_assignments(const fiction::layouts::gate_layout<Geometry>& lyt, std::ostream& os = std::cout)
 {
     os << "\n---- TILE TO OBJECT ----\n";
 

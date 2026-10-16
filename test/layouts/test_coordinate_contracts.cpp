@@ -23,7 +23,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/layout_utils.hpp>
@@ -184,14 +184,14 @@ TEST_CASE("Layouts support only the ground and crossing layers", "[coordinate-co
         }
     };
     check_layers([](const auto& size) { return cartesian_layout{size}; });
-    check_layers([](const auto& size) { return gate_level_layout<cartesian_layout>{size}; });
+    check_layers([](const auto& size) { return gate_layout<cartesian_layout>{size}; });
     for (const auto a :
          {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
     {
         check_layers([a](const auto& size) { return hexagonal_layout{a, size}; });
         check_layers([a](const auto& size) { return shifted_cartesian_layout{a, size}; });
-        check_layers([a](const auto& size) { return gate_level_layout<hexagonal_layout>{a, size}; });
-        check_layers([a](const auto& size) { return gate_level_layout<shifted_cartesian_layout>{a, size}; });
+        check_layers([a](const auto& size) { return gate_layout<hexagonal_layout>{a, size}; });
+        check_layers([a](const auto& size) { return gate_layout<shifted_cartesian_layout>{a, size}; });
     }
 }
 
@@ -288,7 +288,7 @@ TEMPLATE_TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coor
                    shifted_cartesian_layout, hexagonal_layout)
 {
     /** @brief Gate layout with stable object identities. */
-    using lyt_t = gate_level_layout<TestType>;
+    using lyt_t = gate_layout<TestType>;
     /** Coordinate value used for placement. */
     using tile = fiction::layouts::layout_base::coordinate;
 
@@ -323,9 +323,9 @@ TEMPLATE_TEST_CASE("Gate placement accepts coordinates beyond its frame", "[coor
 TEMPLATE_TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-contracts]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    auto coordinates = blueprints::make_layout<TestType>(arrangement::EVEN_COLUMN, {4, 4, 2});
-    const gate_level_layout<TestType> gates{coordinates};
-    const auto                        original = coordinates.get_extent();
+    auto                        coordinates = blueprints::make_layout<TestType>(arrangement::EVEN_COLUMN, {4, 4, 2});
+    const gate_layout<TestType> gates{coordinates};
+    const auto                  original = coordinates.get_extent();
     coordinates.resize({4, 4, 1});
     CHECK(gates.get_extent() == original);
     auto copy = static_cast<const TestType&>(gates);
@@ -340,7 +340,7 @@ TEMPLATE_TEST_CASE("Gate geometry copies have independent sizes", "[coordinate-c
 TEST_CASE("Cell scaling checks the final signed coordinate", "[coordinate-contracts]")
 {
     using coord = layout_base::coordinate;
-    const gate_level_layout<cartesian_layout> gates{{1073741824, 1}};
+    const gate_layout<cartesian_layout> gates{{1073741824, 1}};
 
     CHECK((relative_to_absolute_cell_position<5, 5>(gates, coord{400000000, 0}, coord{4, 0}) == coord{2000000004, 0}));
     CHECK_THROWS_AS((relative_to_absolute_cell_position<5, 5>(gates, coord{1073741823, 0}, coord{4, 0})),

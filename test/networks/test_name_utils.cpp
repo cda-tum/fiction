@@ -20,7 +20,7 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
@@ -45,7 +45,7 @@ TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bound
     ntk.create_po(input, "f");
     set_name(ntk, std::string_view{"prefix suffix", 6});
 
-    auto       lyt    = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {2, 1});
+    auto       lyt    = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {2, 1});
     const auto placed = lyt.create_pi("", {0, 0});
     lyt.create_po(placed, "", {1, 0});
     restore_names(ntk, lyt);
@@ -75,7 +75,7 @@ TEMPLATE_TEST_CASE("Signal names transfer from a logic network to placed objects
     const auto sink = ntk.create_buf(internal);
     ntk.create_po(sink, "output");
     /** Native target with separate placed terminals. */
-    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
+    auto lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
     /** Placed primary input. */
     const auto placed_input = lyt.create_pi("", {0, 0});
     /** Placed internal gate. */
@@ -112,7 +112,7 @@ TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unu
     ntk.set_name(driver, "driver");
     ntk.create_po(driver, "output");
     /** Placed target with an independent output terminal name. */
-    auto lyt = blueprints::make_layout<gate_level_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
+    auto lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {4, 1});
     /** Placed connected input. */
     const auto placed_input = lyt.create_pi("", {0, 0});
     /** Placed output driver. */

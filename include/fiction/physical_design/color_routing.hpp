@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/physical_design/generate_edge_intersection_graph.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/utils/graph/graph_coloring.hpp"

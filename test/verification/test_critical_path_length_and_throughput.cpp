@@ -20,7 +20,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 
@@ -48,7 +48,7 @@ void check(const Lyt& lyt, const uint64_t length, const uint64_t throughput)
 
 TEST_CASE("Balanced layout", "[throughput]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     check(blueprints::and_or_gate_layout<gate_layout>(), 3, 1);
     check(blueprints::xor_maj_gate_layout<gate_layout>(), 3, 1);
@@ -58,7 +58,7 @@ TEST_CASE("Balanced layout", "[throughput]")
 
     SECTION("Synchronization Elements")
     {
-        using se_gate_layout = gate_level_layout<cartesian_layout>;
+        using se_gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
         check(blueprints::se_gate_layout<se_gate_layout>(), 4, 1);
     }
@@ -66,16 +66,16 @@ TEST_CASE("Balanced layout", "[throughput]")
 
 TEST_CASE("Unbalanced layout", "[throughput]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     check(blueprints::unbalanced_and_layout<gate_layout>(), 6, 2);
 }
 
 TEST_CASE("Timing counts declared wire paths independently of placement", "[throughput][placed-objects]")
 {
-    gate_level_layout<cartesian_layout> lyt{{1, 1}};
-    const auto                          pi   = lyt.create_pi("a", {10, 0});
-    auto                                path = pi;
+    gate_layout<cartesian_layout> lyt{{1, 1}};
+    const auto                    pi   = lyt.create_pi("a", {10, 0});
+    auto                          path = pi;
     for (int64_t x = 11; x < 15; ++x)
     {
         path = lyt.create_buf(path, {x, 0});
@@ -89,11 +89,11 @@ TEST_CASE("Timing counts declared wire paths independently of placement", "[thro
 
 TEST_CASE("Timing rejects required holes and cycles without rejecting dangling objects", "[throughput][placed-objects]")
 {
-    gate_level_layout<cartesian_layout> lyt{{1, 4}};
-    const auto                          pi       = lyt.create_pi("a", {0, 0});
-    const auto                          wire     = lyt.create_buf(pi, {0, 1});
-    const auto                          po       = lyt.create_po(wire, "result", {0, 2});
-    const auto                          dangling = lyt.create_buf({0, 3});
+    gate_layout<cartesian_layout> lyt{{1, 4}};
+    const auto                    pi       = lyt.create_pi("a", {0, 0});
+    const auto                    wire     = lyt.create_buf(pi, {0, 1});
+    const auto                    po       = lyt.create_po(wire, "result", {0, 2});
+    const auto                    dangling = lyt.create_buf({0, 3});
     lyt.connect(dangling, {dangling, 0});
     const auto result = critical_path_length_and_throughput(lyt);
     CHECK(result.critical_path_length == 3);
@@ -106,7 +106,7 @@ TEST_CASE("Timing rejects required holes and cycles without rejecting dangling o
 
 TEST_CASE("Critical path analysis handles long routes", "[throughput]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
+    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
 
     constexpr int64_t length{1'000'000};
     gate_layout       layout{{length + 1, 2}, clocking::twoddwave()};
