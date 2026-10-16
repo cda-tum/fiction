@@ -176,6 +176,8 @@ jobs:
           filter: |
             **/*.py
             **/*.pyi
+            docs/_static/tabs.js
+            test/docs/test_tabs.mjs
             python/**
             bindings/**
             include/fiction/**

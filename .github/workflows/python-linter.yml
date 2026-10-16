@@ -56,6 +56,9 @@ jobs:
           version: "latest"
           enable-cache: false
 
+      - name: Test documentation tabs
+        run: node --test test/docs/test_tabs.mjs
+
       - name: Run ty
         run: uvx prek run ty --all-files
 
