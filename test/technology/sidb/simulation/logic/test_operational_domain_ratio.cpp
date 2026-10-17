@@ -288,3 +288,18 @@ TEST_CASE("Operational-domain ratios reject malformed seeds", "[compute-operatio
     CHECK_THROWS_AS(operational_domain_ratio(layout{}, std::vector<tt>{create_id_tt()}, parameter_point{{5.0}}, params),
                     std::invalid_argument);
 }
+
+TEST_CASE("Operational-domain ratios reject colliding sweep coordinates", "[compute-operational-ratio]")
+{
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief Parameters of the sweep under test. */
+    operational_domain_ratio_params params{};
+    params.op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.op_domain_params.sweep_dimensions              = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
+    CHECK_THROWS_AS(
+        operational_domain_ratio(lyt, std::vector<tt>{create_and_tt()}, parameter_point{{5.6, 5.0}}, params),
+        std::invalid_argument);
+}
