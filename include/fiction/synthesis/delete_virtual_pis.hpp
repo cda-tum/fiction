@@ -33,12 +33,15 @@ namespace fiction::synthesis
 namespace detail
 {
 
+/** @brief Copies a network without virtual primary inputs. */
 template <typename Ntk>
 class delete_virtual_pis_impl
 {
   public:
+    /** @brief Stores the source network and its topological view. */
     explicit delete_virtual_pis_impl(const Ntk& ntk_src) : ntk{ntk_src}, ntk_topo{ntk_src} {}
 
+    /** @brief Returns a network copy without virtual primary inputs. */
     Ntk run()
     {
         auto  init     = initialize_copy_virtual_pi_network(ntk);

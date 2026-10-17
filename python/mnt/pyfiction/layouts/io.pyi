@@ -38,18 +38,17 @@ def write_dot_layout(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:
     """
-    Writes a layout in DOT format into an output stream. Terminal names
-    use quoted DOT strings.
+    Writes a gate-level layout to a DOT file. Terminal names use quoted DOT strings.
 
     Args:
-        lyt: Layout.
-        os: Output stream.
-        drawer: Formats the layout's tiles and topology.
-        on_progress: Receives completed drawing work.
+        layout: Gate-level layout to draw.
+        filename: Output file path.
+        clock_colors: Color tiles by clock number instead of gate type. Defaults to False.
+        indexes: Label tiles with object indices. Defaults to False.
+        on_progress: Receives completed drawing work. Defaults to None.
 
-    Template Args:
-        Lyt: Gate-level layout type.
-        Drawer: DOT drawer type.
+    Raises:
+        RuntimeError: If the output file cannot be created or written.
     """
 
 @overload
@@ -71,25 +70,17 @@ def write_fgl_layout(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> None:
     """
-    Writes a finished layout in FGL version 2 with extent counts and
-    declared interface order.
-
-    This overload uses a file name to create and write into.
+    Writes a finished layout to an FGL version-2 file with extent counts and declared interface order.
 
     Args:
-        lyt: The layout to be written.
-        on_progress: Receives completed serialization work.
-        filename: The file name to create and write into. Should
-                  preferably use the .fgl extension.
-
-    Template Args:
-        Geometry: Coordinate geometry of the gate-level layout.
+        layout: Layout to write.
+        filename: Output file path, preferably with the .fgl extension.
+        on_progress: Receives completed serialization work. Defaults to None.
 
     Raises:
-        std::invalid_argument: If the layout is incomplete, cyclic,
-                               physically invalid, uses an unsupported
-                               scheme, or contains illegal XML text
-                               controls.
+        ValueError: If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme,
+            or contains illegal XML text controls.
+        RuntimeError: If the output file cannot be created, written, closed, or replaced.
     """
 
 class fgl_parsing_error(RuntimeError): ...
@@ -99,16 +90,23 @@ def read_fgl_layout(
     filename: str, layout_name: str = "", *, layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout] = ...
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout:
     """
-    Reads a gate-level layout from an FGL file provided as a file name.
+    Reads a gate-level layout from an FGL file.
 
-    May throw an `fgl_parsing_error` if the FGL file is malformed.
+    Supports legacy maximum-index extents and version-2 extent counts, declared interface order, and manual obstructions.
+    Version 2 requires a complete, acyclic, physically valid layout.
 
     Args:
-        filename: The file name to open and read from.
-        name: The name to give to the generated layout.
+        filename: Input file path.
+        layout_name: Initial layout name, overridden by a name stored in the file. Defaults to an empty string.
+        layout_type: Registered gate layout class. Defaults to cartesian_gate_layout.
 
-    Template Args:
-        Lyt: The layout type to be created from an input.
+    Returns:
+        A new layout of the selected layout_type.
+
+    Raises:
+        fgl_parsing_error: If the FGL file is malformed or incompatible with the selected layout type.
+        RuntimeError: If the file cannot be opened.
+        TypeError: If layout_type is not a registered gate layout class.
     """
 
 @overload

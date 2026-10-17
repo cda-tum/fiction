@@ -1,0 +1,42 @@
+# Graphviz (DOT) Drawers
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/networks/io/dot_drawers.hpp`
+
+```{doxygenclass} fiction::networks::io::technology_dot_drawer
+:members:
+```
+
+```{doxygenclass} fiction::networks::io::color_view_drawer
+:members:
+```
+
+```{doxygenclass} fiction::networks::io::edge_color_view_drawer
+:members:
+```
+
+```{doxygenfunction} fiction::networks::io::write_dot_network(const Ntk& ntk, std::ostream& os, const Drawer& drawer = {})
+
+```
+
+```{doxygenfunction} fiction::networks::io::write_dot_network(const Ntk& ntk, const std::string_view& filename, const Drawer& drawer = {})
+
+```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.networks.io.write_dot_network
+```
+
+:::
+
+::::

@@ -81,7 +81,12 @@ struct count_gate_types_stats
     /** @brief Number of other objects. */
     uint64_t num_other{};
 
-    /** @brief Prints gate counts. @param out Output stream. @param detailed Whether to print every gate type. */
+    /**
+     * @brief Prints gate counts.
+     *
+     * @param out Output stream.
+     * @param detailed Whether to print every gate type.
+     */
     void report(std::ostream& out = std::cout, const bool detailed = false) const
     {
         out << fmt::format("[i] AND2   = {}\n", num_and2);

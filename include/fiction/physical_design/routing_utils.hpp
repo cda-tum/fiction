@@ -153,6 +153,7 @@ class path_collection : public std::vector<Path>
     }
 
   protected:
+    /** @brief Underlying path container type. */
     using base = std::vector<Path>;
 
   public:
@@ -174,12 +175,14 @@ class path_set : public std::set<Path>
         this->insert(p);
     }
 
+    /** @brief Returns whether the set contains the supplied path. */
     [[nodiscard]] bool contains(const Path& p) const noexcept
     {
         return this->count(p) > 0;
     }
 
   protected:
+    /** @brief Underlying path container type. */
     using base = std::set<Path>;
 
   public:
@@ -195,7 +198,7 @@ class path_set : public std::set<Path>
  * the wire segment coming from `src` were also horizontal and ran from west to east, the cross-over would be
  * prohibited.
  *
- * @Note This function can be called on layout types other than gate-level layouts, but will then always return
+ * @note This function can be called on layout types other than gate-level layouts, but will then always return
  * `false`. This is helpful for general routing in, e.g., clocked layouts.
  *
  * @tparam Lyt Layout type.

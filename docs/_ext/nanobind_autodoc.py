@@ -13,10 +13,15 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
+from sphinx import addnodes
 from sphinx.ext.autodoc import AttributeDocumenter, ClassDocumenter, MethodDocumenter, ModuleDocumenter
+from sphinx.util.nodes import find_pending_xref_condition
 from typing_extensions import override
 
+from mnt import pyfiction
+
 if TYPE_CHECKING:
+    from docutils import nodes
     from sphinx.application import Sphinx
     from sphinx.config import Config
     from sphinx.ext.autodoc import Documenter, Options
@@ -81,6 +86,8 @@ def prepare_docstring(_app: Sphinx, _what: str, name: str, _obj: object, _option
     if not name.startswith("mnt.pyfiction."):
         return
     result = []
+    overloaded = "Overloaded function." in lines
+    callable_name = "__init__" if type(_obj).__name__ == "nb_type" else name.rsplit(".", 1)[-1]
     in_code = False
     bullet_indent = None
     text = re.sub(
@@ -98,7 +105,11 @@ def prepare_docstring(_app: Sphinx, _what: str, name: str, _obj: object, _option
         elif in_code:
             result.append(f"    {line}")
         else:
-            formatted = line
+            formatted = (
+                re.sub(r"^(\d+)\. (?:``)?" + re.escape(callable_name) + r"\(.*$", r"**Overload \1**", line)
+                if overloaded
+                else line
+            )
             bullet = re.match(r"\s*(?:[-*]|\d+[.)]) ", formatted)
             if bullet:
                 bullet_indent = len(bullet[0])
@@ -110,6 +121,36 @@ def prepare_docstring(_app: Sphinx, _what: str, name: str, _obj: object, _option
                 formatted = " " * bullet_indent + formatted.lstrip()
             result.append(formatted)
     lines[:] = result
+
+
+def qualify_type_references(_app: Sphinx, doctree: nodes.document) -> None:
+    """Keep Python's built-in type distinct from binding properties named type."""
+    for signature in doctree.findall(addnodes.desc_signature):
+        if not (signature.get("module") or "").startswith("mnt.pyfiction"):
+            continue
+        for reference in signature.findall(addnodes.pending_xref):
+            if (
+                reference.get("refdomain") == "py"
+                and reference.get("reftype") == "class"
+                and reference.get("reftarget") == "type"
+            ):
+                if content := find_pending_xref_condition(reference, "resolved"):
+                    reference[:] = content.children
+                reference["intersphinx"] = True
+                reference["inventory"] = "python"
+
+
+def remove_unavailable_sources(app: Sphinx) -> tuple[()]:
+    """Keep the source index limited to modules with available source pages.
+
+    Returns:
+        No additional HTML pages.
+    """
+    modules = getattr(app.env, "_viewcode_modules", {})
+    for name, entry in list(modules.items()):
+        if entry is False:
+            del modules[name]
+    return ()
 
 
 def register_documenters(app: Sphinx, _config: Config) -> None:
@@ -124,6 +165,11 @@ def setup(app: Sphinx) -> ExtensionMetadata:
     Returns:
         Parallel-build support for the stateless extension.
     """
+    # Load native modules before Sphinx can execute their .pyi overload declarations as dummy functions.
+    for name in pyfiction.__all__:
+        getattr(pyfiction, name)
     app.connect("config-inited", register_documenters, priority=800)
     app.connect("autodoc-process-docstring", prepare_docstring, priority=400)
+    app.connect("doctree-read", qualify_type_references)
+    app.connect("html-collect-pages", remove_unavailable_sources, priority=400)
     return {"parallel_read_safe": True, "parallel_write_safe": True}

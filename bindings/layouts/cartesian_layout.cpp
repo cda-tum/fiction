@@ -60,9 +60,10 @@ void register_cartesian_layout(nb::module_& m, const char* name)
      */
     // Keep the GIL for constant-time geometry access and mutation; releasing it costs more than these operations.
     nb::class_<Lyt>(m, name, CARTESIAN_LAYOUT_DOC)
-        .def(nb::init<>(), extent_doc(DOC(fiction_layouts_cartesian_layout_cartesian_layout)).c_str())
+        .def(nb::init<>(),
+             parameter_doc(DOC(fiction_layouts_cartesian_layout_cartesian_layout), {{"size", "extent"}}).c_str())
         .def(nb::init<const typename Lyt::extent&>(), nb::arg("extent"),
-             extent_doc(DOC(fiction_layouts_cartesian_layout_cartesian_layout)).c_str())
+             parameter_doc(DOC(fiction_layouts_cartesian_layout_cartesian_layout), {{"size", "extent"}}).c_str())
         .def(
             "coord", [](const Lyt& layout, const int64_t x, const int64_t y, const int64_t z)
             { return layout.coord(coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, nb::arg("x"),
@@ -75,7 +76,7 @@ void register_cartesian_layout(nb::module_& m, const char* name)
         .def("contains_coordinate", &Lyt::contains_coordinate, nb::arg("c"), "Tests the half-open geometry bounds.")
         .def("area", &Lyt::area, DOC(fiction_layouts_cartesian_layout_area))
         .def("resize", &Lyt::resize, nb::arg("extent"),
-             extent_doc(DOC(fiction_layouts_cartesian_layout_resize)).c_str())
+             parameter_doc(DOC(fiction_layouts_cartesian_layout_resize), {{"size", "extent"}}).c_str())
 
         .def("north", &Lyt::north, nb::arg("c"), DOC(fiction_layouts_cartesian_layout_north))
         .def("north_east", &Lyt::north_east, nb::arg("c"), DOC(fiction_layouts_cartesian_layout_north_east))

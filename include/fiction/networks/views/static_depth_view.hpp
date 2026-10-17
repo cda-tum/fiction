@@ -81,6 +81,7 @@ template <typename Ntk, typename NodeCostFn>
 class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
 {
   public:
+    /** @brief Wraps a network that already supplies depth information. */
     explicit static_depth_view(Ntk const& ntk, [[maybe_unused]] depth_view_params const& params = {}) : Ntk(ntk) {}
 };
 
@@ -95,9 +96,12 @@ template <typename Ntk, typename NodeCostFn>
 class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
 {
   public:
+    /** @brief Underlying network storage type. */
     using storage = typename Ntk::storage;
-    using node    = typename Ntk::node;
-    using signal  = typename Ntk::signal;
+    /** @brief Network node type. */
+    using node = typename Ntk::node;
+    /** @brief Network signal type. */
+    using signal = typename Ntk::signal;
 
     /**
      * Default constructor for `fiction::static_depth_view`.
@@ -314,7 +318,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
         compute_levels();
     }
 
-    /*
+    /**
      * Add a node to the `static_depth_view` and update its level and the depth.
      *
      * @param n Node added to the `static_depth_view`.

@@ -1,8 +1,10 @@
 (on_the_fly_design)=
 
-# On-the-fly SiDB Circuit Design
+# On-the-Fly SiDB Circuit Design
 
-## Placed and routed layouts
+(placed-and-routed-layouts)=
+
+## Placed and Routed Layouts
 
 The circuit designer implements each tile of a hexagonal gate-level layout with SiDBs.
 The input must be placed and routed with port orientations supported by the Bestagon skeletons.
@@ -23,6 +25,10 @@ or `design_gate_timeout` in Python for a shorter per-gate limit. Both use millis
 :sync: cpp
 
 **Header:** `fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp`
+
+```{doxygenclass} fiction::sidb::generators::unsuccessful_gate_design_error
+:members:
+```
 
 ```{doxygenstruct} fiction::sidb::generators::on_the_fly_circuit_design_params
 :members:
@@ -76,7 +82,9 @@ write_sqd_layout(circuit, "and.sqd")
 
 ::::
 
-## Defective surfaces
+(defective-surfaces)=
+
+## Defective Surfaces
 
 The C++ interface for defective surfaces requires Z3. It excludes gate-tile combinations whose
 skeletons overlap neutral defects, then uses `exact` for placement and routing. The gate designer
@@ -86,6 +94,10 @@ If gate design fails, the algorithm blacklists the failing gate-tile-port combin
 placement and routing. It raises `unsuccessful_pr_error` when no placement is possible.
 
 **Header:** `fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp`
+
+```{doxygenclass} fiction::sidb::generators::unsuccessful_pr_error
+:members:
+```
 
 ```{doxygenstruct} fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface_params
 :members:

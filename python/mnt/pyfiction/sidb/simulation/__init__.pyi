@@ -99,7 +99,7 @@ def sidb_simulation_engine_name(engine: heuristic_sidb_simulation_engine) -> str
     Returns the name of the given simulation engine.
 
     Args:
-        eng: An SiDB simulation engine.
+        engine: An SiDB simulation engine.
 
     Template Args:
         EngineType: The type of the SiDB simulation engine
@@ -189,11 +189,10 @@ class potential_landscape:
 
     def sites(self) -> list[mnt.pyfiction.sidb.lattice_site]:
         """
-        The SiDB sites in raster order, shared with the charge distributions
-        built over this landscape.
+        Returns a copy of the SiDB sites in raster order.
 
         Returns:
-            The shared site list.
+            A Python list of lattice sites. Changing the list does not change the landscape.
         """
 
     def defects(self) -> list[tuple[mnt.pyfiction.sidb.lattice_site, mnt.pyfiction.sidb.model.sidb_defect]]:
@@ -216,7 +215,7 @@ class potential_landscape:
             Distance (unit: nm).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def chargeless_potential(self, i: int, j: int) -> float:
@@ -232,7 +231,7 @@ class potential_landscape:
             Chargeless potential (unit: V).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def local_external_potential(self, i: int) -> float:
@@ -247,7 +246,7 @@ class potential_landscape:
             External potential (unit: V).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def local_potential_caused_by_defects(self, i: int) -> float:
@@ -261,7 +260,7 @@ class potential_landscape:
             Defect potential (unit: V).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def effective_charge_transition_thresholds(self, i: int) -> list[float]:
@@ -276,7 +275,7 @@ class potential_landscape:
             The four thresholds (unit: V).
 
         Raises:
-            std::out_of_range: if an SiDB index is out of range.
+            IndexError: if an SiDB index is out of range.
         """
 
     def chargeless_potential_at_distance(self, distance: float) -> float:
@@ -304,8 +303,7 @@ class potential_landscape:
             Local internal potential per SiDB (unit: V).
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
     def local_potentials(self, cd: mnt.pyfiction.sidb.charge_distribution) -> list[float]:
@@ -320,8 +318,7 @@ class potential_landscape:
             Local potential per SiDB (unit: V).
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
     def energy(self, cd: mnt.pyfiction.sidb.charge_distribution) -> float:
@@ -335,8 +332,7 @@ class potential_landscape:
             Energy (unit: eV).
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
     def is_physically_valid(self, cd: mnt.pyfiction.sidb.charge_distribution) -> bool:
@@ -350,8 +346,7 @@ class potential_landscape:
             `true` iff both stability criteria hold.
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
     def evaluate(self, cd: mnt.pyfiction.sidb.charge_distribution) -> mnt.pyfiction.sidb.charge_distribution:
@@ -366,8 +361,7 @@ class potential_landscape:
             `cd` with its energy assigned.
 
         Raises:
-            std::invalid_argument: if the distribution sites differ from the
-                                   landscape.
+            ValueError: if the distribution sites differ from the landscape.
         """
 
 class sidb_simulation_result:
@@ -386,31 +380,51 @@ class sidb_simulation_result:
 
     @property
     def algorithm_name(self) -> str:
-        """Name of the algorithm used to determine the charge distributions."""
+        """
+        Name of the algorithm used to determine the charge distributions.
+
+        Defaults to an empty string.
+        """
 
     @algorithm_name.setter
     def algorithm_name(self, arg: str, /) -> None: ...
     @property
     def simulation_runtime(self) -> datetime.timedelta:
-        """Total simulation runtime in seconds."""
+        """
+        Total simulation runtime in seconds.
+
+        Defaults to zero seconds.
+        """
 
     @simulation_runtime.setter
     def simulation_runtime(self, arg: datetime.timedelta, /) -> None: ...
     @property
     def layout(self) -> mnt.pyfiction.sidb.sidb_layout:
-        """The simulated layout."""
+        """
+        The simulated layout.
+
+        Defaults to an empty Si(100)-2x1 layout.
+        """
 
     @layout.setter
     def layout(self, arg: mnt.pyfiction.sidb.sidb_layout, /) -> None: ...
     @property
     def charge_distributions(self) -> list[mnt.pyfiction.sidb.charge_distribution]:
-        """Charge distributions determined by the algorithm."""
+        """
+        Charge distributions determined by the algorithm.
+
+        Empty by default.
+        """
 
     @charge_distributions.setter
     def charge_distributions(self, arg: Sequence[mnt.pyfiction.sidb.charge_distribution], /) -> None: ...
     @property
     def simulation_parameters(self) -> mnt.pyfiction.sidb.model.sidb_simulation_parameters:
-        """Physical parameters used in the simulation."""
+        """
+        Physical parameters used in the simulation.
+
+        Uses the default physical simulation parameters.
+        """
 
     @simulation_parameters.setter
     def simulation_parameters(self, arg: mnt.pyfiction.sidb.model.sidb_simulation_parameters, /) -> None: ...
@@ -433,13 +447,13 @@ class sidb_simulation_result:
 
         Args:
             distribution: Index into `charge_distributions`.
-            s: Site of the SiDB.
+            site: Site of the SiDB.
 
         Returns:
-            The charge state, `charge_state::NONE` if `s` holds no SiDB.
+            The charge state, `charge_state::NONE` if `site` holds no SiDB.
 
         Raises:
-            std::out_of_range: if the distribution index is out of range.
+            IndexError: if the distribution index is out of range.
         """
 
     def groundstates(self) -> list[mnt.pyfiction.sidb.charge_distribution]:
@@ -463,7 +477,7 @@ def is_ground_state(heuristic_results: sidb_simulation_result, exhaustive_result
 
     Args:
         heuristic_results: Result of a heuristic simulation.
-        exact_results: Result of an exact simulation of the same layout.
+        exhaustive_results: Result of an exact simulation of the same layout.
 
     Returns:
         `true` iff the heuristic result contains every ground state of the

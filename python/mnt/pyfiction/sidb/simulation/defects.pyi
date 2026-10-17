@@ -47,19 +47,19 @@ class displacement_robustness_domain_stats:
 
     @property
     def time_total(self) -> datetime.timedelta:
-        """Total runtime."""
+        """Total runtime. Defaults to zero."""
 
     @time_total.setter
     def time_total(self, arg: datetime.timedelta, /) -> None: ...
     @property
     def num_operational_sidb_displacements(self) -> int:
-        """Number of operational displaced layouts."""
+        """Number of operational displaced layouts. Defaults to 0."""
 
     @num_operational_sidb_displacements.setter
     def num_operational_sidb_displacements(self, arg: int, /) -> None: ...
     @property
     def num_non_operational_sidb_displacements(self) -> int:
-        """Number of non-operational displaced layouts."""
+        """Number of non-operational displaced layouts. Defaults to 0."""
 
     @num_non_operational_sidb_displacements.setter
     def num_non_operational_sidb_displacements(self, arg: int, /) -> None: ...
@@ -77,7 +77,7 @@ class displacement_robustness_domain:
     def influence_information(
         self,
     ) -> list[tuple[mnt.pyfiction.sidb.sidb_layout, mnt.pyfiction.sidb.simulation.logic.operational_status]]:
-        """The displaced layouts and their operational status."""
+        """The displaced layouts and their operational status. Empty by default."""
 
     @influence_information.setter
     def influence_information(

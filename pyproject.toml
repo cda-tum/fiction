@@ -284,6 +284,14 @@ docstring-code-format = true
     "magic-value-comparison",     # a test suite compares against the numbers it expects
     "T20",
 ]
+# Documentation tests run trusted Sphinx commands and inspect rendered output.
+"test/docs/**" = [
+    "assert",
+    "implicit-namespace-package",
+    "magic-value-comparison",
+    "subprocess-without-shell-equals-true",
+    "suspicious-subprocess-import",
+]
 # `docs/conf.py` is run by path, not imported as a module, so an `__init__.py` would be wrong
 "docs/**" = [ "A", "implicit-namespace-package", "T20" ]
 "noxfile.py" = [ "banned-api", "T20" ]

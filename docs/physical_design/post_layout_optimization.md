@@ -2,12 +2,14 @@
 
 (post_layout_opt)=
 
-# Optimizing 2DDWave-clocked Cartesian Layouts
+# Optimizing 2DDWave-Clocked Cartesian Layouts
 
-This algorithm aims to decrease the overall layout area of a given 2DDWave-clocked Cartesian layout that has been
-generated using either heuristic methods or machine learning techniques. It achieves this objective by strategically
-repositioning gates within the layout, removing excess wiring using the `wiring_reduction` algorithm (cf. {ref}`wiring_reduction`), and effectively
-relocating outputs to more favorable positions.
+Optimizes a 2DDWave-clocked Cartesian gate-level layout in place. By default, the algorithm moves
+gates toward the upper left, reroutes connections, removes excess wiring with
+{ref}`wiring_reduction`, and relocates outputs to the layout border.
+
+All placed objects must lie inside the layout frame. The heuristic can stop at its
+timeout and does not guarantee a minimum-area layout.
 
 ::::{tab-set}
 :sync-group: language
