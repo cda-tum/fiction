@@ -79,6 +79,10 @@ views/views
 
 ```
 
+```{doxygenfunction} fiction::networks::initialize_copy_network_with_virtual_pis
+
+```
+
 :::
 
 :::{tab-item} Python

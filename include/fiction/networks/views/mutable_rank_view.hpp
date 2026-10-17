@@ -26,6 +26,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -114,6 +115,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * interface methods.
      *
      * @param ntk A reference to the network object.
+     * @throws std::invalid_argument If the network has a gate that no output reaches (see `init_ranks`).
      */
     explicit mutable_rank_view(const Ntk& ntk) :
             fiction::networks::views::static_depth_view<Ntk>{ntk},
@@ -222,12 +224,21 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      *
      * @param n Node to get the rank position of.
      * @return Rank position of node `n`.
+     * @throws std::out_of_range If `n` has no rank, which is the case for a node added after the last `update_ranks`.
      */
-    uint32_t rank_position(const node& n) const noexcept
+    uint32_t rank_position(const node& n) const
     {
         assert(!this->is_constant(n) && "node must not be constant");
 
-        return rank_pos.at(n);
+        // thrown explicitly: the map's own `at` does not throw on every toolchain
+        const auto it = rank_pos.find(n);
+
+        if (it == rank_pos.end())
+        {
+            throw std::out_of_range("node has no rank");
+        }
+
+        return it->second;
     }
 
     /**
@@ -481,7 +492,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         pis.reserve(this->num_pis());
 
         fiction::networks::views::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
-        std::ranges::sort(pis, [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
+        std::ranges::sort(pis,
+                          [this](auto const& n1, auto const& n2) { return rank_position(n1) < rank_position(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
 
@@ -534,7 +546,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         pis.reserve(this->num_pis());
 
         fiction::networks::views::static_depth_view<Ntk>::foreach_ci([&pis](auto const& pi) { pis.push_back(pi); });
-        std::ranges::sort(pis, [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
+        std::ranges::sort(pis,
+                          [this](auto const& n1, auto const& n2) { return rank_position(n1) < rank_position(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
     /**
@@ -608,20 +621,34 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Initializes the ranks for the given network. It traverses the nodes in the network using a depth-first search and
-     * inserts each non-constant node into the rank.
+     * Initializes the ranks for the given network. It traverses the nodes in the network in index order and inserts
+     * each non-constant node into the rank of its level, so that every non-constant node, including an input that
+     * drives nothing, has a rank afterwards.
      *
-     * This function is noexcept.
+     * A gate that no output reaches has no level and would have no rank either. Such a network is rejected: the view
+     * keeps the invariant that every non-constant node is ranked, and callers remove dead gates beforehand with
+     * `mockturtle::cleanup_dangling`.
+     *
+     * @throws std::invalid_argument If the network has a gate that no output reaches.
      */
-    void init_ranks() noexcept
+    void init_ranks()
     {
         fiction::networks::views::static_depth_view<Ntk>::foreach_node(
             [this](auto const& n)
             {
-                if (!this->is_constant(n))
+                if (this->is_constant(n))
                 {
-                    insert_in_rank(n);
+                    return;
                 }
+
+                if (!this->has_level(n))
+                {
+                    throw std::invalid_argument(
+                        "mutable_rank_view: the network has a gate that no output reaches; remove dangling gates "
+                        "first, e.g., with mockturtle::cleanup_dangling");
+                }
+
+                insert_in_rank(n);
             });
     }
 

@@ -249,3 +249,39 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[delete-virtual-pis]", m
         }
     }
 }
+
+TEST_CASE("Primary outputs driven by virtual PIs are mapped to the real PI", "[delete-virtual-pis]")
+{
+    virtual_pi_network<technology_network> vpi{};
+
+    const auto a   = vpi.create_pi();
+    const auto b   = vpi.create_pi();
+    const auto a_v = vpi.create_virtual_pi(a);
+    const auto f1  = vpi.create_and(a, b);
+    vpi.create_po(f1);
+    vpi.create_po(a_v);
+
+    const auto non_vpi = delete_virtual_pis(vpi);
+
+    CHECK(non_vpi.num_pis() == 2);
+    CHECK(non_vpi.num_pos() == 2);
+    CHECK(non_vpi.size() == vpi.size() - vpi.num_virtual_pis());
+
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x2));
+    tec.create_po(x1);
+
+    const auto maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi);
+    REQUIRE(maybe_miter.has_value());
+
+    if (maybe_miter.has_value())  // the optional-access check does not model REQUIRE
+    {
+        mockturtle::equivalence_checking_stats st{};
+        const auto                             cec = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
+        REQUIRE(cec.has_value());
+        CHECK(cec.value_or(false));
+    }
+}

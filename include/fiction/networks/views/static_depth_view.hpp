@@ -82,6 +82,22 @@ class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
 {
   public:
     explicit static_depth_view(Ntk const& ntk, [[maybe_unused]] depth_view_params const& params = {}) : Ntk(ntk) {}
+
+    /**
+     * @return Whether a level is stored for the node: the wrapped network's answer if it offers `has_level`, otherwise
+     * `true`, since a network with a depth interface keeps levels for every node.
+     */
+    [[nodiscard]] bool has_level([[maybe_unused]] typename Ntk::node const& n) const
+    {
+        if constexpr (has_has_level_v<Ntk>)
+        {
+            return Ntk::has_level(n);
+        }
+        else
+        {
+            return true;
+        }
+    }
 };
 
 /**
@@ -277,6 +293,16 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
+     * @return Whether a level is stored for the node. Every combinational input has one. A gate has none if no output
+     * reaches it (a dangling gate) or if it was added after the last call to `update_levels` without `on_add` being
+     * called for it.
+     */
+    [[nodiscard]] bool has_level(node const& n) const
+    {
+        return levels.contains(n);
+    }
+
+    /**
      * @return If a node is on the critical path.
      */
     bool is_on_critical_path(node const& n) const
@@ -412,6 +438,10 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                     ntk_depth = std::max(ntk_depth, clevel);
                 });
         }
+
+        // an input that drives nothing is not reached from any output but is still part of the interface and sits on
+        // level 0 by definition; give it a level so that rank views and drawers can place it
+        this->foreach_ci([&](auto const& n) { compute_levels(n); });
 
         this->foreach_po(
             [&](auto const& f)

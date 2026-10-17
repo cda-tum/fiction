@@ -505,6 +505,48 @@ template <class Ntk>
 inline constexpr bool has_is_virtual_pi_v = has_is_virtual_pi<Ntk>::value;
 #pragma endregion
 
+#pragma region has_foreach_pi_unranked
+/**
+ * Whether `Ntk` offers `foreach_pi_unranked`, which visits the primary inputs in creation order regardless of their
+ * rank, as `networks::views::mutable_rank_view` does.
+ */
+template <class Ntk, class = void>
+struct has_foreach_pi_unranked : std::false_type
+{};
+
+template <class Ntk>
+struct has_foreach_pi_unranked<Ntk, std::void_t<decltype(std::declval<Ntk>().foreach_pi_unranked(
+                                        std::declval<void (*)(mockturtle::node<Ntk>)>()))>> : std::true_type
+{};
+
+/**
+ * Whether `Ntk` offers `foreach_pi_unranked`.
+ */
+template <class Ntk>
+inline constexpr bool has_foreach_pi_unranked_v = has_foreach_pi_unranked<Ntk>::value;
+#pragma endregion
+
+#pragma region has_has_level
+/**
+ * Whether `Ntk` offers `has_level`, which tells whether a level is stored for a node, as
+ * `networks::views::static_depth_view` does for nodes that are reachable from an output.
+ */
+template <class Ntk, class = void>
+struct has_has_level : std::false_type
+{};
+
+template <class Ntk>
+struct has_has_level<Ntk, std::void_t<decltype(std::declval<Ntk>().has_level(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+/**
+ * Whether `Ntk` offers `has_level`.
+ */
+template <class Ntk>
+inline constexpr bool has_has_level_v = has_has_level<Ntk>::value;
+#pragma endregion
+
 #pragma region has_is_real_pi
 template <class Ntk, class = void>
 struct has_is_real_pi : std::false_type
