@@ -15,8 +15,8 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 
 #include <cstdint>
@@ -57,9 +57,9 @@ void register_critical_path_length_and_throughput_impl(nb::module_& m)
 /** @brief Registers layout timing analysis. @param m Python module. */
 void register_critical_path_length_and_throughput(nb::module_& m)
 {
-    detail::register_critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
-    detail::register_critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::register_critical_path_length_and_throughput_impl<py_hexagonal_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_critical_path_length_and_throughput_impl<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

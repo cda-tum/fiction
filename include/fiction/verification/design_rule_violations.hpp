@@ -566,11 +566,8 @@ template <typename Geometry>
 void gate_level_drvs(const fiction::layouts::gate_layout<Geometry>& lyt, const gate_level_drv_params& ps = {},
                      gate_level_drv_stats* pst = nullptr)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_layout<Geometry>;
-
-    gate_level_drv_stats              st{};
-    detail::gate_level_drvs_impl<Lyt> p{lyt, ps, st};
+    gate_level_drv_stats                                                  st{};
+    detail::gate_level_drvs_impl<fiction::layouts::gate_layout<Geometry>> p{lyt, ps, st};
 
     p.run();
 

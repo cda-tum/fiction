@@ -14,13 +14,13 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/utils/progress.hpp>
 
 #include <concepts>
@@ -125,9 +125,9 @@ void register_write_dot_layout(nb::module_& m)
  */
 void register_layout_drawers(nb::module_& m)
 {
-    detail::register_write_dot_layout<py_cartesian_gate_layout>(m);
-    detail::register_write_dot_layout<py_shifted_cartesian_gate_layout>(m);
-    detail::register_write_dot_layout<py_hexagonal_gate_layout>(m);
+    detail::register_write_dot_layout<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_write_dot_layout<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_write_dot_layout<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

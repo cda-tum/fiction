@@ -16,8 +16,9 @@
 
 #include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate tuple input signatures.
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
 #include <algorithm>
@@ -96,9 +97,9 @@ void register_routing_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_routing_utils<py_cartesian_gate_layout>(m);
-    detail::register_routing_utils<py_shifted_cartesian_gate_layout>(m);
-    detail::register_routing_utils<py_hexagonal_gate_layout>(m);
+    detail::register_routing_utils<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_routing_utils<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_routing_utils<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

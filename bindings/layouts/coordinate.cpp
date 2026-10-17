@@ -47,7 +47,8 @@ namespace
  * @param value Python integer.
  * @throws std::overflow_error If `value` does not fit a coordinate axis.
  */
-void set_axis(py_coordinate& self, int32_t py_coordinate::* axis, const int64_t value)
+void set_axis(fiction::layouts::layout_base::coordinate& self,
+              int32_t fiction::layouts::layout_base::coordinate::* axis, const int64_t value)
 {
     self.*axis = coordinate_axis(value);
 }
@@ -61,18 +62,19 @@ void set_axis(py_coordinate& self, int32_t py_coordinate::* axis, const int64_t 
 void register_coordinate(nb::module_& m)
 {
     // Keep the GIL: tuple constructors access Python objects; the remaining value operations are too short to release.
-    nb::class_<py_coordinate>(m, "coordinate", DOC(fiction_layouts_layout_base_coordinate))
+    nb::class_<fiction::layouts::layout_base::coordinate>(m, "coordinate", DOC(fiction_layouts_layout_base_coordinate))
         .def(nb::init<>(), DOC(fiction_layouts_layout_base_coordinate_coordinate))
         .def(
             "__init__",
-            [](nb::pointer_and_handle<py_coordinate> self, const int64_t x, const int64_t y, const int64_t z)
-            { std::construct_at(self.p, coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, nb::arg("x"),
-            nb::arg("y"), nb::arg("z") = 0, DOC(fiction_layouts_layout_base_coordinate_coordinate_2))
-        .def(nb::init<const py_coordinate>(), nb::arg("c"),
+            [](nb::pointer_and_handle<fiction::layouts::layout_base::coordinate> self, const int64_t x, const int64_t y,
+               const int64_t z)
+            { std::construct_at(self.p, coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); },
+            nb::arg("x"), nb::arg("y"), nb::arg("z") = 0, DOC(fiction_layouts_layout_base_coordinate_coordinate_2))
+        .def(nb::init<const fiction::layouts::layout_base::coordinate>(), nb::arg("c"),
              nb::sig("def __init__(self, c: mnt.pyfiction.layouts.coordinate) -> None"))
         .def(
             "__init__",
-            [](nb::pointer_and_handle<py_coordinate> self, const nb::tuple& t)
+            [](nb::pointer_and_handle<fiction::layouts::layout_base::coordinate> self, const nb::tuple& t)
             {
                 const auto size = t.size();
 
@@ -96,16 +98,19 @@ void register_coordinate(nb::module_& m)
             nb::sig("def __init__(self, tuple_repr: tuple[int, int] | tuple[int, int, int]) -> None"))
 
         .def_prop_rw(
-            "x", [](const py_coordinate& self) -> int32_t { return self.x; },
-            [](py_coordinate& self, const int64_t value) { set_axis(self, &py_coordinate::x, value); },
+            "x", [](const fiction::layouts::layout_base::coordinate& self) -> int32_t { return self.x; },
+            [](fiction::layouts::layout_base::coordinate& self, const int64_t value)
+            { set_axis(self, &fiction::layouts::layout_base::coordinate::x, value); },
             DOC(fiction_layouts_layout_base_coordinate_x))
         .def_prop_rw(
-            "y", [](const py_coordinate& self) -> int32_t { return self.y; },
-            [](py_coordinate& self, const int64_t value) { set_axis(self, &py_coordinate::y, value); },
+            "y", [](const fiction::layouts::layout_base::coordinate& self) -> int32_t { return self.y; },
+            [](fiction::layouts::layout_base::coordinate& self, const int64_t value)
+            { set_axis(self, &fiction::layouts::layout_base::coordinate::y, value); },
             DOC(fiction_layouts_layout_base_coordinate_y))
         .def_prop_rw(
-            "z", [](const py_coordinate& self) -> int32_t { return self.z; },
-            [](py_coordinate& self, const int64_t value) { set_axis(self, &py_coordinate::z, value); },
+            "z", [](const fiction::layouts::layout_base::coordinate& self) -> int32_t { return self.z; },
+            [](fiction::layouts::layout_base::coordinate& self, const int64_t value)
+            { set_axis(self, &fiction::layouts::layout_base::coordinate::z, value); },
             DOC(fiction_layouts_layout_base_coordinate_z))
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
@@ -117,27 +122,30 @@ void register_coordinate(nb::module_& m)
         .def(nb::self >= nb::self, nb::arg("other"), DOC(fiction_layouts_layout_base_coordinate_operator_ge))
         // NOLINTEND(misc-redundant-expression)
 
-        .def("__repr__", &py_coordinate::str, DOC(fiction_layouts_layout_base_coordinate_str))
+        .def("__repr__", &fiction::layouts::layout_base::coordinate::str,
+             DOC(fiction_layouts_layout_base_coordinate_str))
         .def(
-            "__hash__", [](const py_coordinate& self) { return std::hash<py_coordinate>{}(self); },
+            "__hash__", [](const fiction::layouts::layout_base::coordinate& self)
+            { return std::hash<fiction::layouts::layout_base::coordinate>{}(self); },
             "Returns a hash value of the coordinate.")
 
         ;
 
-    nb::implicitly_convertible<nb::tuple, py_coordinate>();
+    nb::implicitly_convertible<nb::tuple, fiction::layouts::layout_base::coordinate>();
 
-    nb::class_<py_extent>(m, "extent", "Nonnegative width, height, and layer counts of a zero-origin layout.")
+    nb::class_<fiction::layouts::layout_base::extent>(
+        m, "extent", "Nonnegative width, height, and layer counts of a zero-origin layout.")
         .def(nb::init<>(), "Creates an empty extent.")
         .def(
             "__init__",
-            [](nb::pointer_and_handle<py_extent> self, const int64_t width, const int64_t height, const int64_t layers)
-            { std::construct_at(self.p, width, height, layers); }, nb::arg("width"), nb::arg("height"),
-            nb::arg("layers") = 1,
+            [](nb::pointer_and_handle<fiction::layouts::layout_base::extent> self, const int64_t width,
+               const int64_t height, const int64_t layers) { std::construct_at(self.p, width, height, layers); },
+            nb::arg("width"), nb::arg("height"), nb::arg("layers") = 1,
             "Creates checked sizes. Two axes describe one layer. Each size lies between zero and 2147483648.")
-        .def(nb::init<const py_extent&>(), nb::arg("extent"))
+        .def(nb::init<const fiction::layouts::layout_base::extent&>(), nb::arg("extent"))
         .def(
             "__init__",
-            [](nb::pointer_and_handle<py_extent> self, const nb::tuple& extent)
+            [](nb::pointer_and_handle<fiction::layouts::layout_base::extent> self, const nb::tuple& extent)
             {
                 if (extent.size() != 2 && extent.size() != 3)
                 {
@@ -148,18 +156,21 @@ void register_coordinate(nb::module_& m)
             },
             nb::arg("extent"), nb::sig("def __init__(self, extent: tuple[int, int] | tuple[int, int, int]) -> None"))
         .def_prop_rw(
-            "width", [](const py_extent& self) { return self.width; }, [](py_extent& self, const int64_t value)
-            { self.width = py_extent{value, 0}.width; }, "Checked width in coordinates.")
+            "width", [](const fiction::layouts::layout_base::extent& self) { return self.width; },
+            [](fiction::layouts::layout_base::extent& self, const int64_t value)
+            { self.width = fiction::layouts::layout_base::extent{value, 0}.width; }, "Checked width in coordinates.")
         .def_prop_rw(
-            "height", [](const py_extent& self) { return self.height; }, [](py_extent& self, const int64_t value)
-            { self.height = py_extent{0, value}.height; }, "Checked height in coordinates.")
+            "height", [](const fiction::layouts::layout_base::extent& self) { return self.height; },
+            [](fiction::layouts::layout_base::extent& self, const int64_t value)
+            { self.height = fiction::layouts::layout_base::extent{0, value}.height; }, "Checked height in coordinates.")
         .def_prop_rw(
-            "layers", [](const py_extent& self) { return self.layers; }, [](py_extent& self, const int64_t value)
-            { self.layers = py_extent{0, 0, value}.layers; }, "Checked number of layers.")
-        .def("__eq__", &py_extent::operator==, nb::arg("other"), nb::is_operator())
+            "layers", [](const fiction::layouts::layout_base::extent& self) { return self.layers; },
+            [](fiction::layouts::layout_base::extent& self, const int64_t value)
+            { self.layers = fiction::layouts::layout_base::extent{0, 0, value}.layers; }, "Checked number of layers.")
+        .def("__eq__", &fiction::layouts::layout_base::extent::operator==, nb::arg("other"), nb::is_operator())
         .attr("__hash__") = nb::none();
 
-    nb::implicitly_convertible<nb::tuple, py_extent>();
+    nb::implicitly_convertible<nb::tuple, fiction::layouts::layout_base::extent>();
 }
 
 /**

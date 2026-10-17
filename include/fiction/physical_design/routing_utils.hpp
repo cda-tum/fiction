@@ -316,9 +316,6 @@ template <typename Geometry, typename Path>
 void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const Path& path,
                 const typename fiction::layouts::gate_layout<Geometry>::input_port destination)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_layout<Geometry>;
-
     if (path.size() < 2 || path.target() != lyt.get_tile(destination.object))
     {
         throw std::invalid_argument("A routing path requires matching occupied endpoints");
@@ -350,8 +347,8 @@ void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const Path& path,
         }
         positions.push_back(position);
     }
-    auto                                 incoming = *source;
-    std::vector<typename Lyt::object_id> created{};
+    auto                                                                     incoming = *source;
+    std::vector<typename fiction::layouts::gate_layout<Geometry>::object_id> created{};
     created.reserve(positions.size());
     try
     {
@@ -427,10 +424,7 @@ std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
 template <typename Geometry>
 void clear_routing(fiction::layouts::gate_layout<Geometry>& lyt)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_layout<Geometry>;
-
-    std::vector<typename Lyt::object_id> wires{};
+    std::vector<typename fiction::layouts::gate_layout<Geometry>::object_id> wires{};
     lyt.foreach_object(
         [&](const auto id)
         {
