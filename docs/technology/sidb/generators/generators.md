@@ -2,63 +2,15 @@
 
 # Generators
 
+SiDB generators construct random layouts, design gates from truth tables,
+and build circuits with gates designed during placement and routing.
+Feasibility checks can reject gate skeletons before a search.
+
 ```{toctree}
 :maxdepth: 1
 
 design_gates
 on_the_fly_circuit_design
-```
-
-## Random SiDB Layout Generator
-
-::::{tab-set}
-:sync-group: language
-
-:::{tab-item} C++
-:sync: cpp
-
-**Header:** `fiction/technology/sidb/generators/random_layout_generator.hpp`
-
-```{doxygenstruct} fiction::sidb::generators::generate_random_layout_params
-:members:
-```
-
-```{doxygenfunction} fiction::sidb::generators::generate_random_layout(const generate_random_layout_params& params, const std::optional<layout>& skeleton = std::nullopt)
-
-```
-
-```{doxygenfunction} fiction::sidb::generators::generate_multiple_random_layouts(const generate_random_layout_params& params, const std::optional<layout>& skeleton = std::nullopt)
-
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.generators.positive_charges
-   :members:
-
-.. autofunction:: mnt.pyfiction.sidb.generators.generate_random_sidb_layout
-
-.. autofunction:: mnt.pyfiction.sidb.generators.generate_multiple_random_sidb_layouts
-```
-
-:::
-
-::::
-
-(is-sidb-gate-design-deemed-impossible)=
-
-## Gate Design Feasibility
-
-**Header:** `fiction/technology/sidb/generators/is_gate_design_impossible.hpp`
-
-```{doxygenstruct} fiction::sidb::generators::is_gate_design_impossible_params
-:members:
-```
-
-```{doxygenfunction} fiction::sidb::generators::is_gate_design_impossible(const layout& skeleton_with_defects, const std::vector<kitty::dynamic_truth_table>& spec, const is_gate_design_impossible_params& params = {})
-
+random_layout_generator
+is_gate_design_impossible
 ```

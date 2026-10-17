@@ -2,10 +2,10 @@
 
 # I/O
 
-## CSV Writer
+Write tabular results as comma-separated values.
 
-**Header:** `fiction/utils/io/csv_writer.hpp`
+```{toctree}
+:maxdepth: 1
 
-```{doxygenclass} fiction::utils::io::csv_writer
-:members:
+csv_writer
 ```
