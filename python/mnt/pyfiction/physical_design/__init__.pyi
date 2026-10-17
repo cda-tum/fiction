@@ -8,7 +8,7 @@
 
 """Placement and routing of logic networks into gate-level layouts."""
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Callable, Sequence
 from typing import overload
@@ -37,7 +37,7 @@ class exact_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta: ...
+    def time_total(self) -> dt.timedelta: ...
     @property
     def x_size(self) -> int: ...
     @property
@@ -210,7 +210,7 @@ class orthogonal_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta: ...
+    def time_total(self) -> dt.timedelta: ...
     @property
     def x_size(self) -> int: ...
     @property
@@ -367,7 +367,7 @@ class graph_oriented_layout_design_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of the graph-oriented layout design process."""
 
     @property
@@ -716,7 +716,7 @@ class hexagonalization_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of the hexagonalization process."""
 
     @property
@@ -770,7 +770,7 @@ class post_layout_optimization_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of the post-layout optimization process."""
 
     @property
@@ -841,7 +841,7 @@ class wiring_reduction_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of the wiring reduction process."""
 
     @property

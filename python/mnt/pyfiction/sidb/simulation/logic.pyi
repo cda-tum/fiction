@@ -8,7 +8,7 @@
 
 """Operational analysis of SiDB logic."""
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Callable, Iterator, Sequence
 from typing import overload
@@ -1178,7 +1178,7 @@ class operational_domain_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """The total runtime of the operational domain computation."""
 
     @property
