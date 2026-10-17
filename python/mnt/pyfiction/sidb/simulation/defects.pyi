@@ -8,7 +8,7 @@
 
 """Influence of atomic defects on SiDB layouts."""
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Callable, Sequence
 from collections.abc import Set as AbstractSet
@@ -46,11 +46,11 @@ class displacement_robustness_domain_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Total runtime."""
 
     @time_total.setter
-    def time_total(self, arg: datetime.timedelta, /) -> None: ...
+    def time_total(self, arg: dt.timedelta, /) -> None: ...
     @property
     def num_operational_sidb_displacements(self) -> int:
         """Number of operational displaced layouts."""
