@@ -713,6 +713,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
+  - SiDB layout copy assignment now preserves the destination when allocation fails.
   - Clocking-state moves now avoid synchronization-map allocations on Windows.
   - Gate-layout name-presence queries now report empty names consistently after failed assignment.
   - Gate-layout name-presence queries now avoid copying names and allocating memory.
@@ -747,6 +748,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
+  - SiDB layout documentation now distinguishes charged defect types from non-zero defect charges.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
   - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.
