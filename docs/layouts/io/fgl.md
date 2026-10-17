@@ -51,3 +51,13 @@ leaves an existing destination layout unchanged.
 :::
 
 ::::
+
+Python selects the FGL output representation with a keyword-only registered class. The file
+supplies the layout arrangement. Pass the exact registered class; subclasses are not supported.
+
+```python
+from mnt.pyfiction.layouts import hexagonal_gate_layout
+from mnt.pyfiction.layouts.io import read_fgl_layout
+
+layout = read_fgl_layout("layout.fgl", layout_type=hexagonal_gate_layout)
+```

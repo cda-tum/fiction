@@ -42,5 +42,3 @@
 :::
 
 ::::
-
-(band_bending_resilience)=
