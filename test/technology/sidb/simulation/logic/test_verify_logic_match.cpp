@@ -51,9 +51,10 @@ TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
 
     const quickexact_params params{.sim_params = simulation_parameters{2, -0.32}};
 
-    SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
+    // The fan-out has one Boolean input, encoded by patterns 0 and 1.
+    SECTION("Input zero")
     {
-        bii = 2;
+        bii = 0;
 
         const auto simulation_results = quickexact(*bii, params);
 
@@ -61,11 +62,11 @@ TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
 
         REQUIRE(!gs.empty());
 
-        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2,
+        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 0,
                                  input_wires, output_wires) == operational_status::OPERATIONAL);
     }
 
-    SECTION("Index is 1, which means that the left input is set to zero and the right input is set to one.")
+    SECTION("Input one")
     {
         bii = 1;
 
@@ -82,7 +83,7 @@ TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
         }
         SECTION("Wrong input index")
         {
-            CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2,
+            CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 0,
                                      input_wires, output_wires) == operational_status::NON_OPERATIONAL);
         }
     }
@@ -102,7 +103,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
     const quickexact_params params{.sim_params = simulation_parameters{2, -0.32}};
 
-    SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
+    SECTION("Left input one and right input zero")
     {
         bii = 2;
 
@@ -116,7 +117,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
                                  input_wires, output_wires) == operational_status::OPERATIONAL);
     }
 
-    SECTION("Index is 1, which means that the left input is set to zero and the right input is set to one.")
+    SECTION("Left input zero and right input one")
     {
         bii = 1;
 
@@ -152,5 +153,24 @@ TEST_CASE("Logic matching propagates invalid lattice basis errors", "[verify-log
     params.sim_params.base = 2;
 
     CHECK_THROWS_AS(verify_logic_match(lyt, charge_distribution{lyt}, params, std::vector{create_id_tt()}, 0, {}, {}),
+                    std::out_of_range);
+}
+
+TEST_CASE("Logic matching rejects invalid specifications", "[verify-logic-match][invalid-spec]")
+{
+    /** @brief AND layout whose charge distribution is checked. */
+    const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Charge distribution supplied to the logic check. */
+    const charge_distribution cd{lyt};
+    CHECK_THROWS_AS(verify_logic_match(lyt, cd, {}, {}, 0, {}, {}), std::invalid_argument);
+    CHECK_THROWS_AS(verify_logic_match(lyt, cd, {}, {create_and_tt(), create_id_tt()}, 0, {}, {}),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Logic matching rejects an input pattern outside the specification", "[verify-logic-match][invalid-pattern]")
+{
+    /** @brief AND layout whose charge distribution is checked. */
+    const auto lyt = blueprints::siqad_and_gate();
+    CHECK_THROWS_AS(verify_logic_match(lyt, charge_distribution{lyt}, {}, {create_and_tt()}, 4, {}, {}),
                     std::out_of_range);
 }

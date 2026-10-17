@@ -90,8 +90,11 @@ def calculate_energy_and_state_type_with_kinks_rejected(
         The energies with their state types.
 
     Raises:
-        std::out_of_range: if logic validation encounters an invalid
-                           lattice basis index.
+        std::invalid_argument: if logic validation encounters an empty
+                               specification or mixed variable counts.
+        std::out_of_range: if logic validation encounters an input pattern
+                           outside the specification or an invalid lattice
+                           basis index.
     """
 
 def can_positive_charges_occur(

@@ -16214,8 +16214,11 @@ Returns:
     The energies with their state types.
 
 Raises:
-    std::out_of_range: if logic validation encounters an invalid
-                       lattice basis index.
+    std::invalid_argument: if logic validation encounters an empty
+                           specification or mixed variable counts.
+    std::out_of_range: if logic validation encounters an input pattern
+                       outside the specification or an invalid lattice
+                       basis index.
 
 )doc";
 
@@ -20858,10 +20861,11 @@ K. Walus, and R. Wille in IEEE NANO 2023
 (https://ieeexplore.ieee.org/document/10231266). It grows candidate
 charge distributions from the SiDBs that have to be negative by
 repeatedly charging the neutral SiDB farthest from every negative one,
-keeping the physically valid intermediate states. Every worker thread
-owns one simulation state and shares the layout's potential landscape.
-Charged surface defects are not supported: a layout that holds any
-yields `std::nullopt`.
+keeping the physically valid intermediate states. The search uses
+negative and neutral charge states regardless of `ps.sim_params.base`.
+Every worker thread owns one simulation state and shares the layout's
+potential landscape. Charged surface defects are not supported: a
+layout that holds any yields `std::nullopt`.
 
 Args:
     lyt: Layout to simulate.
@@ -22024,6 +22028,23 @@ Args:
     lyt: The layout.
     spec: The specification.
 
+Raises:
+    std::invalid_argument: if `spec` is empty or truth-table variable
+                           counts differ.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_check_specification =
+R"doc(Checks that a specification has truth tables with a common variable
+count.
+
+Args:
+    spec: The specification.
+
+Raises:
+    std::invalid_argument: if `spec` is empty or the truth tables have
+                           different variable counts.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_checked_parameters =
@@ -22187,6 +22208,15 @@ Args:
 
 Returns:
     `true` if a kink exists.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_check_simulation_engine_support =
+R"doc(Rejects layouts the selected simulation engine cannot simulate.
+
+Raises:
+    std::invalid_argument: if QuickSim is selected for a layout with
+                           charged defects.
 
 )doc";
 
@@ -23041,7 +23071,8 @@ R"doc(Reports each top-level parameter worker without exposing nested
 simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_patterns_of =
-R"doc(The input patterns that are not operational for the given reasons.
+R"doc(Collects the input patterns whose simulation results satisfy the
+operational check.
 
 Args:
     p: The implementation object.
@@ -23190,6 +23221,12 @@ Args:
 Returns:
     `true` if the layout is non-operational because of kinks.
 
+Raises:
+    std::invalid_argument: if `spec` is empty, truth-table variable
+                           counts differ, QuickSim encounters charged
+                           defects, or a QuickSim simulation requests
+                           base 3.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_kink_induced_non_operational_2 =
@@ -23208,6 +23245,14 @@ Args:
 Returns:
     `true` if the layout is non-operational because of kinks.
 
+Raises:
+    std::invalid_argument: if filtering encounters a canvas site
+                           absent from the layout.
+                           std::invalid_argument: if `spec` is empty,
+                           truth-table variable counts differ,
+                           QuickSim encounters charged defects, or a
+                           QuickSim simulation requests base 3.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational =
@@ -23217,7 +23262,9 @@ the ground states are simulated with the configured engine, and the
 charge states of the output BDL pairs are compared with the expected
 truth-table entries. If the layout carries logic dots, they form the
 canvas of the pruning filters that run before any simulation whenever
-the parameters ask for filtering and reject kinks.
+the parameters ask for filtering and reject kinks. Charged defects
+with QuickSim are rejected before topology and filtering checks; a
+QuickSim simulation requires base 2.
 
 Args:
     lyt: The layout to check.
@@ -23226,6 +23273,12 @@ Args:
 
 Returns:
     The operational status and the number of simulator invocations.
+
+Raises:
+    std::invalid_argument: if `spec` is empty, truth-table variable
+                           counts differ, QuickSim encounters charged
+                           defects, or a QuickSim simulation requests
+                           base 3.
 
 )doc";
 
@@ -23243,6 +23296,14 @@ Args:
 
 Returns:
     The operational status and the number of simulator invocations.
+
+Raises:
+    std::invalid_argument: if filtering with rejected kinks encounters
+                           a canvas site absent from the layout.
+                           std::invalid_argument: if `spec` is empty,
+                           truth-table variable counts differ,
+                           QuickSim encounters charged defects, or a
+                           QuickSim simulation requests base 3.
 
 )doc";
 
@@ -23264,8 +23325,14 @@ Returns:
     The operational status and the number of simulator invocations.
 
 Raises:
-    std::invalid_argument: if `spec` is empty or the number of layouts
-                           does not match the number of patterns.
+    std::invalid_argument: if filtering with rejected kinks encounters
+                           a canvas site absent from the layout.
+                           std::invalid_argument: if `spec` is empty,
+                           truth-table variable counts differ, the
+                           layout count does not match the number of
+                           patterns, QuickSim encounters charged
+                           defects, or a QuickSim simulation requests
+                           base 3.
 
 )doc";
 
@@ -23371,6 +23438,12 @@ Args:
 Returns:
     The kink-induced non-operational input patterns.
 
+Raises:
+    std::invalid_argument: if `spec` is empty, truth-table variable
+                           counts differ, QuickSim encounters charged
+                           defects, or a QuickSim simulation requests
+                           base 3.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns_2 =
@@ -23388,6 +23461,12 @@ Args:
 
 Returns:
     The kink-induced non-operational input patterns.
+
+Raises:
+    std::invalid_argument: if `spec` is empty, truth-table variable
+                           counts differ, QuickSim encounters charged
+                           defects, or a QuickSim simulation requests
+                           base 3.
 
 )doc";
 
@@ -23754,6 +23833,12 @@ Args:
 Returns:
     The operational input patterns.
 
+Raises:
+    std::invalid_argument: if `spec` is empty, truth-table variable
+                           counts differ, QuickSim encounters charged
+                           defects, or a QuickSim simulation requests
+                           base 3.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_input_patterns_2 =
@@ -23770,6 +23855,12 @@ Args:
 
 Returns:
     The operational input patterns.
+
+Raises:
+    std::invalid_argument: if `spec` is empty, truth-table variable
+                           counts differ, QuickSim encounters charged
+                           defects, or a QuickSim simulation requests
+                           base 3.
 
 )doc";
 
@@ -23864,8 +23955,10 @@ Returns:
     The operational status.
 
 Raises:
-    std::out_of_range: if validation encounters an invalid lattice
-                       basis index.
+    std::invalid_argument: if `spec` is empty or truth-table variable
+                           counts differ.
+    std::out_of_range: if `input_pattern` exceeds the specification or
+                       a lattice basis index is invalid.
 
 )doc";
 
