@@ -66,9 +66,10 @@ void register_coordinate(nb::module_& m)
         .def(nb::init<>(), DOC(fiction_layouts_layout_base_coordinate_coordinate))
         .def(
             "__init__",
-            [](nb::pointer_and_handle<fiction::layouts::layout_base::coordinate> self, const int64_t x, const int64_t y, const int64_t z)
-            { std::construct_at(self.p, coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); }, nb::arg("x"),
-            nb::arg("y"), nb::arg("z") = 0,
+            [](nb::pointer_and_handle<fiction::layouts::layout_base::coordinate> self, const int64_t x, const int64_t y,
+               const int64_t z)
+            { std::construct_at(self.p, coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); },
+            nb::arg("x"), nb::arg("y"), nb::arg("z") = 0,
             parameter_doc(DOC(fiction_layouts_layout_base_coordinate_coordinate_2),
                           {{"coordinate_x", "x"}, {"coordinate_y", "y"}, {"coordinate_z", "z"}})
                 .c_str())

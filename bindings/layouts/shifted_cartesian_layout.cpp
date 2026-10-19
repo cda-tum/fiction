@@ -97,7 +97,8 @@ void register_shifted_cartesian_layout(nb::module_& m, const char* name)
         .def(
             "area", [](const Lyt& lyt) { return lyt.area(); }, DOC(fiction_layouts_cartesian_layout_area))
         .def(
-            "resize", [](Lyt& lyt, const fiction::layouts::layout_base::extent& extent) { lyt.resize(extent); }, nb::arg("extent"),
+            "resize", [](Lyt& lyt, const fiction::layouts::layout_base::extent& extent) { lyt.resize(extent); },
+            nb::arg("extent"),
             parameter_doc(DOC(fiction_layouts_cartesian_layout_resize), {{"size", "extent"}}).c_str())
         .def(
             "north", [](const Lyt& lyt, const fiction::layouts::layout_base::coordinate& c) { return lyt.north(c); },
