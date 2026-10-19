@@ -2186,7 +2186,8 @@ class cartesian_gate_layout(cartesian_layout):
     as specified on each visitor.
 
     Template Args:
-        CoordinateLayout: Coordinate geometry used for placement.
+        CoordinateLayout: Coordinate geometry used for placement. Defaults
+                          to `cartesian_layout`.
     """
 
     @overload
@@ -3182,7 +3183,8 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     as specified on each visitor.
 
     Template Args:
-        CoordinateLayout: Coordinate geometry used for placement.
+        CoordinateLayout: Coordinate geometry used for placement. Defaults
+                          to `cartesian_layout`.
     """
 
     @overload
@@ -4179,7 +4181,8 @@ class hexagonal_gate_layout(hexagonal_layout):
     as specified on each visitor.
 
     Template Args:
-        CoordinateLayout: Coordinate geometry used for placement.
+        CoordinateLayout: Coordinate geometry used for placement. Defaults
+                          to `cartesian_layout`.
     """
 
     @overload

@@ -10,7 +10,6 @@ The returned path includes both endpoints.
 :sync: cpp
 
 ```cpp
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
@@ -18,8 +17,7 @@ The returned path includes both endpoints.
 
 int main()
 {
-    using layout = fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>;
-    layout lyt{{5, 5}, fiction::layouts::clocking::twoddwave()};
+    fiction::layouts::cartesian_gate_layout lyt{{5, 5}, fiction::layouts::clocking::twoddwave()};
     const auto path = fiction::physical_design::path_finding::a_star<
         fiction::physical_design::layout_coordinate_path>(lyt, {{0, 0}, {2, 2}});
     assert(path.size() == 5);

@@ -325,10 +325,8 @@ template <typename GateLibrary, typename Geometry>
 [[nodiscard]] typename GateLibrary::layout apply_gate_library(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                               utils::progress_callback on_progress = {})
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using GateLyt = fiction::layouts::gate_layout<Geometry>;
-
-    detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, std::move(on_progress)};
+    detail::apply_gate_library_impl<GateLibrary, fiction::layouts::gate_layout<Geometry>> p{lyt,
+                                                                                            std::move(on_progress)};
 
     return p.run_static_gate_library();
 }
@@ -347,12 +345,12 @@ template <typename GateLibrary, typename Geometry>
 [[nodiscard]] sidb::layout apply_gate_library_to_defective_surface(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                                    const sidb::layout& defect_surface)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using GateLyt = fiction::layouts::gate_layout<Geometry>;
-
     static_assert(std::is_same_v<typename GateLibrary::layout, sidb::layout>, "GateLibrary must produce SiDB layouts");
 
-    detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, {}, defect_surface.get_lattice()};
+    detail::apply_gate_library_impl<GateLibrary, fiction::layouts::gate_layout<Geometry>> p{
+        lyt,
+        {},
+        defect_surface.get_lattice()};
 
     auto result = p.run_static_gate_library();
 
@@ -378,10 +376,7 @@ template <typename GateLibrary, typename Geometry, typename Params>
 [[nodiscard]] typename GateLibrary::layout
 apply_parameterized_gate_library(const fiction::layouts::gate_layout<Geometry>& lyt, const Params& params)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using GateLyt = fiction::layouts::gate_layout<Geometry>;
-
-    detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt};
+    detail::apply_gate_library_impl<GateLibrary, fiction::layouts::gate_layout<Geometry>> p{lyt};
 
     return p.template run_parameterized_gate_library<Params>(params);
 }
@@ -404,12 +399,12 @@ template <typename GateLibrary, typename Geometry, typename Params>
 apply_parameterized_gate_library_to_defective_surface(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                       const Params& params, const sidb::layout& defect_surface)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using GateLyt = fiction::layouts::gate_layout<Geometry>;
-
     static_assert(std::is_same_v<typename GateLibrary::layout, sidb::layout>, "GateLibrary must produce SiDB layouts");
 
-    detail::apply_gate_library_impl<GateLibrary, GateLyt> p{lyt, {}, defect_surface.get_lattice()};
+    detail::apply_gate_library_impl<GateLibrary, fiction::layouts::gate_layout<Geometry>> p{
+        lyt,
+        {},
+        defect_surface.get_lattice()};
 
     auto result = p.template run_parameterized_gate_library<Params>(params, defect_surface);
 

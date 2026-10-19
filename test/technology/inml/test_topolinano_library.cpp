@@ -23,12 +23,12 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <sstream>
@@ -51,7 +51,7 @@ TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")
 {
     const auto layout =
-        blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::ODD_COLUMN);
+        blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cartesian_gate_layout>(arrangement::ODD_COLUMN);
 
     // clang-format off
 
@@ -144,8 +144,8 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
 
 TEST_CASE("ToPoliNano rejects primary-input fanout", "[inml-topolinano-library]")
 {
-    shifted_cart_gate_clk_lyt lyt{arrangement::ODD_COLUMN, {2, 2}, clocking::columnar(clocking::num_clks::THREE)};
-    const auto                pi = lyt.create_pi("a", {0, 1});
+    shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {2, 2}, clocking::columnar(clocking::num_clks::THREE)};
+    const auto                    pi = lyt.create_pi("a", {0, 1});
     lyt.create_po(pi, "north", {1, 0});
     lyt.create_po(pi, "south", {1, 1});
 
@@ -163,10 +163,10 @@ TEST_CASE("ToPoliNano rejects primary-input fanout", "[inml-topolinano-library]"
 
 TEST_CASE("ToPoliNano rejects row-shifted layouts", "[inml-topolinano-library]")
 {
-    const auto                a = GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW);
-    shifted_cart_gate_clk_lyt lyt{a, {2, 2}};
-    const auto                x = lyt.create_pi("x", {0, 0});
-    const auto                y = lyt.create_pi("y", {1, 0});
+    const auto                    a = GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW);
+    shifted_cartesian_gate_layout lyt{a, {2, 2}};
+    const auto                    x = lyt.create_pi("x", {0, 0});
+    const auto                    y = lyt.create_pi("y", {1, 0});
     lyt.create_and(x, y, {1, 1});
 
     CHECK_THROWS_AS(topolinano_library::set_up_gate(lyt, {1, 1}), std::invalid_argument);

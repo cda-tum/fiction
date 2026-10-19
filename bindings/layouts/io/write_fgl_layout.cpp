@@ -15,8 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/types.hpp"
-
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/utils/progress.hpp>
 
@@ -66,9 +65,9 @@ Raises:
 /** @brief Register FGL writers for supported layout topologies. @param m Layout I/O module. */
 void register_write_fgl_layout(nb::module_& m)
 {
-    detail::register_write_fgl_layout<py_cartesian_gate_layout>(m);
-    detail::register_write_fgl_layout<py_shifted_cartesian_gate_layout>(m);
-    detail::register_write_fgl_layout<py_hexagonal_gate_layout>(m);
+    detail::register_write_fgl_layout<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_write_fgl_layout<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_write_fgl_layout<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

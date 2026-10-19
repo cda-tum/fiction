@@ -19,6 +19,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 
 #include <cstdint>
@@ -142,7 +143,8 @@ void register_cartesian_layout(nb::module_& m, const char* name)
 
         .def(
             "coordinates",
-            [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
+            [](const Lyt& lyt, const std::optional<fiction::layouts::layout_base::coordinate> start,
+               const std::optional<fiction::layouts::layout_base::coordinate> stop)
             {
                 std::vector<fiction::layouts::layout_base::coordinate> coords{};
                 if (!start && !stop)
@@ -158,7 +160,8 @@ void register_cartesian_layout(nb::module_& m, const char* name)
             nb::call_guard<nb::gil_scoped_release>())
         .def(
             "ground_coordinates",
-            [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
+            [](const Lyt& lyt, const std::optional<fiction::layouts::layout_base::coordinate> start,
+               const std::optional<fiction::layouts::layout_base::coordinate> stop)
             {
                 std::vector<fiction::layouts::layout_base::coordinate> coords{};
                 if (!start && !stop)
@@ -204,7 +207,7 @@ void register_cartesian_layout(nb::module_& m, const char* name)
  */
 void register_cartesian_layout(nb::module_& m)
 {
-    detail::register_cartesian_layout<py_cartesian_layout>(m, "cartesian_layout");
+    detail::register_cartesian_layout<fiction::layouts::cartesian_layout>(m, "cartesian_layout");
 }
 
 }  // namespace pyfiction

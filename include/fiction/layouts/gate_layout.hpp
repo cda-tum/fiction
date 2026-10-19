@@ -19,10 +19,13 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/clocking_state.hpp"
+#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
+#include "fiction/layouts/shifted_cartesian_layout.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -107,9 +110,9 @@ namespace fiction::layouts
  * Visitors may edit coordinates, names, and capabilities. Object and terminal visitors must not create
  * or remove objects, change terminal order, or replace the layout during traversal. Connection visitors
  * must also preserve the traversed input or sink connections, as specified on each visitor.
- * @tparam CoordinateLayout Coordinate geometry used for placement.
+ * @tparam CoordinateLayout Coordinate geometry used for placement. Defaults to `cartesian_layout`.
  */
-template <typename CoordinateLayout>
+template <typename CoordinateLayout = cartesian_layout>
     requires std::derived_from<CoordinateLayout, layout_base>
 class gate_layout : public CoordinateLayout
 {
@@ -2128,4 +2131,12 @@ class gate_layout : public CoordinateLayout
         functions = std::move(initialized);
     }
 };
+
+/** @brief Gate-level layout on a Cartesian grid. */
+using cartesian_gate_layout = gate_layout<cartesian_layout>;
+/** @brief Gate-level layout on a hexagonal grid with an explicit arrangement. */
+using hexagonal_gate_layout = gate_layout<hexagonal_layout>;
+/** @brief Gate-level layout on a shifted Cartesian grid with an explicit arrangement. */
+using shifted_cartesian_gate_layout = gate_layout<shifted_cartesian_layout>;
+
 }  // namespace fiction::layouts

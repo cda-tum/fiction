@@ -25,9 +25,7 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 
@@ -102,33 +100,27 @@ void remove_assign_and_check_clocking(Lyt lyt)
 
 TEST_CASE("Determine clock numbers for an empty layout", "[determine-clocking]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    gate_layout layout{{5, 5}};
+    cartesian_gate_layout layout{{5, 5}};
 
     CHECK(determine_clocking(layout) == true);
 }
 
 TEST_CASE("Determine clock numbers for simple layouts", "[determine-clocking]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    remove_assign_and_check_clocking(blueprints::straight_wire_gate_layout<gate_layout>());
-    remove_assign_and_check_clocking(blueprints::and_not_gate_layout<gate_layout>());
-    remove_assign_and_check_clocking(blueprints::or_not_gate_layout<gate_layout>());
-    remove_assign_and_check_clocking(blueprints::use_and_gate_layout<gate_layout>());
-    remove_assign_and_check_clocking(blueprints::res_maj_gate_layout<gate_layout>());
-    remove_assign_and_check_clocking(blueprints::crossing_layout<gate_layout>());
-    remove_assign_and_check_clocking(blueprints::fanout_layout<gate_layout>());
-    remove_assign_and_check_clocking(blueprints::unbalanced_and_layout<gate_layout>());
+    remove_assign_and_check_clocking(blueprints::straight_wire_gate_layout<cartesian_gate_layout>());
+    remove_assign_and_check_clocking(blueprints::and_not_gate_layout<cartesian_gate_layout>());
+    remove_assign_and_check_clocking(blueprints::or_not_gate_layout<cartesian_gate_layout>());
+    remove_assign_and_check_clocking(blueprints::use_and_gate_layout<cartesian_gate_layout>());
+    remove_assign_and_check_clocking(blueprints::res_maj_gate_layout<cartesian_gate_layout>());
+    remove_assign_and_check_clocking(blueprints::crossing_layout<cartesian_gate_layout>());
+    remove_assign_and_check_clocking(blueprints::fanout_layout<cartesian_gate_layout>());
+    remove_assign_and_check_clocking(blueprints::unbalanced_and_layout<cartesian_gate_layout>());
 }
 
 TEST_CASE("Determine clock numbers for a 3-phase layout", "[determine-clocking]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>(),
-                                                             {.number_of_clock_phases = clocking::num_clks::THREE}));
+    remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
+        blueprints::maj1_network<mockturtle::aig_network>(), {.number_of_clock_phases = clocking::num_clks::THREE}));
 }
 
 TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[determine-clocking]")
@@ -137,46 +129,43 @@ TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[deter
     {
         SECTION("odd column")
         {
-            using gate_layout  = fiction::layouts::gate_layout<shifted_cartesian_layout>;
             constexpr auto arr = arrangement::ODD_COLUMN;
 
-            remove_assign_and_check_clocking(blueprints::shifted_cart_and_or_inv_gate_layout<gate_layout>(arr));
+            remove_assign_and_check_clocking(
+                blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cartesian_gate_layout>(arr));
         }
         SECTION("even row")
         {
-            using gate_layout  = fiction::layouts::gate_layout<shifted_cartesian_layout>;
             constexpr auto arr = arrangement::EVEN_ROW;
 
-            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>(arr));
+            remove_assign_and_check_clocking(
+                blueprints::row_clocked_and_xor_gate_layout<shifted_cartesian_gate_layout>(arr));
         }
     }
     SECTION("hexagonal")
     {
         SECTION("even row")
         {
-            using gate_layout  = fiction::layouts::gate_layout<hexagonal_layout>;
             constexpr auto arr = arrangement::EVEN_ROW;
 
-            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>(arr));
+            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<hexagonal_gate_layout>(arr));
         }
     }
 }
 
 TEST_CASE("Determine clock numbers for complex layouts", "[determine-clocking]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>()));
-    remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj4_network<mockturtle::aig_network>()));
     remove_assign_and_check_clocking(
-        orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>()));
+        orthogonal<cartesian_gate_layout>(blueprints::maj1_network<mockturtle::aig_network>()));
+    remove_assign_and_check_clocking(
+        orthogonal<cartesian_gate_layout>(blueprints::maj4_network<mockturtle::aig_network>()));
+    remove_assign_and_check_clocking(
+        orthogonal<cartesian_gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>()));
 }
 
 TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-clocking]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    auto lyt = blueprints::unclockable_gate_layout<gate_layout>();
+    auto lyt = blueprints::unclockable_gate_layout<cartesian_gate_layout>();
 
     const auto scheme = lyt.get_clocking_scheme();
     CHECK(determine_clocking(lyt) == false);
@@ -185,9 +174,8 @@ TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-cloc
 
 TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[determine-clocking]")
 {
-    using layout = gate_layout<cartesian_layout>;
-    layout     lyt{{4, 4}, clocking::twoddwave()};
-    const auto original_scheme = lyt.get_clocking_scheme();
+    cartesian_gate_layout lyt{{4, 4}, clocking::twoddwave()};
+    const auto            original_scheme = lyt.get_clocking_scheme();
     SECTION("Missing input outside output dependencies")
     {
         lyt.create_buf({1, 1});
@@ -215,8 +203,7 @@ TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[
 
 TEST_CASE("Clock determination uses explicit constants and logical input ports", "[determine-clocking]")
 {
-    using layout = gate_layout<cartesian_layout>;
-    layout lyt{{3, 1}, clocking::open()};
+    cartesian_gate_layout lyt{{3, 1}, clocking::open()};
     SECTION("Placed constant without PIs")
     {
         const auto constant = lyt.create_gate({}, kitty::dynamic_truth_table{0}, {0, 0});
@@ -239,8 +226,7 @@ TEST_CASE("Clock determination uses explicit constants and logical input ports",
 
 TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[determine-clocking]")
 {
-    using layout = gate_layout<cartesian_layout>;
-    layout lyt{{3, 1, 2}, clocking::open()};
+    cartesian_gate_layout lyt{{3, 1, 2}, clocking::open()};
     SECTION("Floating crossing wire")
     {
         const auto pi   = lyt.create_pi("a", {0, 0});
@@ -270,11 +256,10 @@ TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[d
 TEST_CASE("Clock determination commits complete clocking values", "[determine-clocking]")
 {
     require_allocation_failure_support();
-    using layout = gate_layout<cartesian_layout>;
-    layout     original{{3, 1}, clocking::open()};
-    const auto pi   = original.create_pi("a", {0, 0});
-    const auto wire = original.create_buf(pi, {1, 0});
-    const auto po   = original.create_po(wire, "out", {2, 0});
+    cartesian_gate_layout original{{3, 1}, clocking::open()};
+    const auto            pi   = original.create_pi("a", {0, 0});
+    const auto            wire = original.create_buf(pi, {1, 0});
+    const auto            po   = original.create_po(wire, "out", {2, 0});
     original.assign_clock_number({9, 9}, 2);
     original.assign_synchronization_element({1, 0}, 2);
     const auto original_scheme = original.get_clocking_scheme();

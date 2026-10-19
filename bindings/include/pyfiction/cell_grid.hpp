@@ -18,9 +18,10 @@
 #pragma once
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate/extent tuple input signatures.
 
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 
@@ -57,7 +58,7 @@ namespace pyfiction::detail
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_cell_grid(nb::class_<Lyt, fiction::layouts::cartesian_layout>& cls)
 {
     using cell = typename Lyt::cell;
 
@@ -140,7 +141,7 @@ void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void register_tile_clocking(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_tile_clocking(nb::class_<Lyt, fiction::layouts::cartesian_layout>& cls)
 {
     // Keep the GIL for short clocking lookups and updates; a release adds overhead.
     cls.def("get_tile_size_x", &Lyt::get_tile_size_x, DOC(fiction_layouts_tile_clocking_get_tile_size_x))
@@ -187,7 +188,7 @@ void register_tile_clocking(nb::class_<Lyt, py_cartesian_layout>& cls)
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void register_clocked_constructors(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_clocked_constructors(nb::class_<Lyt, fiction::layouts::cartesian_layout>& cls)
 {
     // Keep the GIL for construction and clocking validation; these create no cells.
     cls.def(nb::init<>())

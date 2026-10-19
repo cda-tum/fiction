@@ -21,8 +21,8 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/types.hpp>
 
 #include <algorithm>
 #include <new>
@@ -30,6 +30,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
 using namespace fiction::test;
 using namespace fiction::physical_design;
 
@@ -73,14 +74,14 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
 {
     SECTION("Simple wire connection")
     {
-        const auto layout     = blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>();
+        const auto layout     = blueprints::straight_wire_gate_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 1}, .target = {2, 1}}});
     }
     SECTION("Two paths wire connections")
     {
-        const auto layout     = blueprints::unbalanced_and_layout<cart_gate_clk_lyt>();
+        const auto layout     = blueprints::unbalanced_and_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 2}, .target = {2, 0}},
@@ -89,7 +90,7 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
     }
     SECTION("Three paths wire connections")
     {
-        const auto layout     = blueprints::three_wire_paths_gate_layout<cart_gate_clk_lyt>();
+        const auto layout     = blueprints::three_wire_paths_gate_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 0}, .target = {4, 0}},
@@ -98,7 +99,7 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
     }
     SECTION("Direct gate connections")
     {
-        const auto layout     = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
+        const auto layout     = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {1, 1}, .target = {2, 1}},
@@ -111,7 +112,7 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
     }
     SECTION("Two incoming gate wires")
     {
-        const auto layout     = blueprints::use_and_gate_layout<cart_gate_clk_lyt>();
+        const auto layout     = blueprints::use_and_gate_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 1}, .target = {1, 2}},
@@ -124,7 +125,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
 {
     SECTION("Simple wire connection")
     {
-        auto layout = blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>();
+        auto layout = blueprints::straight_wire_gate_layout<cartesian_gate_layout>();
 
         clear_routing(layout);
 
@@ -134,7 +135,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
     }
     SECTION("Direct gate connections")
     {
-        auto layout = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
+        auto layout = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
 
         clear_routing(layout);
 
@@ -148,7 +149,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
     }
     SECTION("Crossings")
     {
-        auto layout = blueprints::crossing_layout<cart_gate_clk_lyt>();
+        auto layout = blueprints::crossing_layout<cartesian_gate_layout>();
 
         clear_routing(layout);
 
@@ -167,7 +168,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
     }
     SECTION("Fan-outs")
     {
-        auto layout = blueprints::fanout_layout<cart_gate_clk_lyt>();
+        auto layout = blueprints::fanout_layout<cartesian_gate_layout>();
 
         clear_routing(layout);
 
@@ -184,10 +185,10 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
 TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[routing-utils]")
 {
-    cart_gate_clk_lyt layout{{5, 3, 2}, layouts::clocking::twoddwave()};
-    const auto        a    = layout.create_pi("a", {0, 0});
-    const auto        b    = layout.create_pi("b", {0, 1});
-    const auto        gate = layout.create_lt(a, b, {4, 1});
+    cartesian_gate_layout layout{{5, 3, 2}, layouts::clocking::twoddwave()};
+    const auto            a    = layout.create_pi("a", {0, 0});
+    const auto            b    = layout.create_pi("b", {0, 1});
+    const auto            gate = layout.create_lt(a, b, {4, 1});
     clear_routing(layout);
     const layout_coordinate_path second{{0, 1}, {1, 1}, {4, 1}};
     const layout_coordinate_path first{{0, 0}, {1, 0}, {4, 1}};
@@ -207,11 +208,11 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
 
 TEST_CASE("Routing preserves duplicate destination ports and retained identities", "[routing-utils]")
 {
-    cart_gate_clk_lyt layout{{6, 4, 2}, layouts::clocking::twoddwave()};
-    const auto        a          = layout.create_pi("a", {0, 0});
-    const auto        gate       = layout.create_lt(a, a, {4, 2});
-    const auto        po         = layout.create_po(gate, "f", {5, 2});
-    const auto        objectives = extract_routing_objectives(layout);
+    cartesian_gate_layout layout{{6, 4, 2}, layouts::clocking::twoddwave()};
+    const auto            a          = layout.create_pi("a", {0, 0});
+    const auto            gate       = layout.create_lt(a, a, {4, 2});
+    const auto            po         = layout.create_po(gate, "f", {5, 2});
+    const auto            objectives = extract_routing_objectives(layout);
     CHECK(std::ranges::find(objectives, routing_objective{{0, 0}, {4, 2}, 0}) != objectives.end());
     CHECK(std::ranges::find(objectives, routing_objective{{0, 0}, {4, 2}, 1}) != objectives.end());
     CHECK((routing_objective{{0, 0}, {4, 2}, 0} != routing_objective{{0, 0}, {4, 2}, 1}));
@@ -240,7 +241,7 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
 
 TEST_CASE("Invalid routing endpoints reject before creating wires", "[routing-utils]")
 {
-    cart_gate_clk_lyt            layout{{5, 3, 2}};
+    cartesian_gate_layout        layout{{5, 3, 2}};
     const auto                   a    = layout.create_pi("a", {0, 0});
     const auto                   b    = layout.create_pi("b", {0, 1});
     const auto                   gate = layout.create_lt(a, b, {4, 0});

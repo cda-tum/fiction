@@ -16,6 +16,7 @@
 
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/verification/count_gate_types.hpp>
 
 #include <sstream>
@@ -116,9 +117,9 @@ Returns:
     detail::register_count_gate_types<py_aig_network>(m);
     detail::register_count_gate_types<py_xag_network>(m);
     detail::register_count_gate_types<py_mig_network>(m);
-    detail::register_count_gate_types<py_cartesian_gate_layout>(m);
-    detail::register_count_gate_types<py_shifted_cartesian_gate_layout>(m);
-    detail::register_count_gate_types<py_hexagonal_gate_layout>(m);
+    detail::register_count_gate_types<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_count_gate_types<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_count_gate_types<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction
