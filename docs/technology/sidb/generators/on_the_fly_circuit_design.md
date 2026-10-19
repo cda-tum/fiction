@@ -87,8 +87,9 @@ write_sqd_layout(circuit, "and.sqd")
 ## Defective Surfaces
 
 The C++ interface for defective surfaces requires Z3 and a named technology network (`fiction::tec_nt`).
-Convert other network types with `fiction::synthesis::convert_network<fiction::tec_nt>` before circuit design. It excludes gate-tile combinations whose
-skeletons overlap neutral defects, then uses `exact` for placement and routing. The gate designer
+Convert other network types with `fiction::synthesis::convert_network<fiction::tec_nt>` before circuit design.
+The circuit designer excludes gate-tile combinations whose skeletons overlap neutral defects,
+then uses `exact` for placement and routing. The gate designer
 implements the placed tiles while accounting for the surface's defects.
 
 If gate design fails, the algorithm blacklists the failing gate-tile-port combination and retries
