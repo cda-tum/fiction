@@ -124,6 +124,11 @@ struct node_duplication_planarization_params
         double depth_growth = 1.02;
     };
     /**
+     * Planarization strategy. This is the first member, so that `planarization_params` can select the hybrid
+     * strategy with a plain default initializer.
+     */
+    planarization_strategy strategy = planarization_strategy::DUPLICATION;
+    /**
      * Receives completed work and the phase total.
      */
     utils::progress_callback on_progress{};
@@ -135,10 +140,6 @@ struct node_duplication_planarization_params
      * Seed for the random primary output order. A random seed is drawn when none is given.
      */
     std::optional<uint32_t> seed = std::nullopt;
-    /**
-     * Planarization strategy.
-     */
-    planarization_strategy strategy = planarization_strategy::DUPLICATION;
     /**
      * Maximum number of adjacent swaps per level that the hybrid strategy tries after the barycenter ordering to
      * reduce the crossings it costs. `0` keeps the barycenter order.

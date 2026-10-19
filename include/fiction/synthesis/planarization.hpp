@@ -53,7 +53,7 @@ struct planarization_params
      * crossings for the crossing gates.
      */
     node_duplication_planarization_params duplication{
-        .strategy = node_duplication_planarization_params::planarization_strategy::HYBRID};
+        node_duplication_planarization_params::planarization_strategy::HYBRID};
     /**
      * Maximum output degree of the fanout nodes in the result. Must be at least 2.
      */

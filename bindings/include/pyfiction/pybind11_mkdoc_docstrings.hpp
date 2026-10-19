@@ -26652,7 +26652,10 @@ static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_para
 R"doc(Seed for the random primary output order. A random seed is drawn when
 none is given.)doc";
 
-static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_strategy = R"doc(Planarization strategy.)doc";
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_strategy =
+R"doc(Planarization strategy. This is the first member, so that
+`planarization_params` can select the hybrid strategy with a plain
+default initializer.)doc";
 
 static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_xor_gates =
 R"doc(Whether the subsequent `crossing_gate_planarization` builds its
