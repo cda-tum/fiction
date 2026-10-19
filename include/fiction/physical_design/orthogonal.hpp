@@ -524,6 +524,7 @@ class orthogonal_impl
         // compute a coloring
         const auto ctn = east_south_edge_coloring(ntk);
 
+        // Use source node IDs and include nodes outside the topological traversal when sizing the map.
         mockturtle::node_map<typename Lyt::object_id, tec_nt> node2pos{static_cast<const tec_nt&>(ctn.color_ntk)};
 
         // find multi-output nodes
