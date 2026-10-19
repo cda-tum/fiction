@@ -220,6 +220,7 @@ class delete_virtual_pis_impl
  * corresponding real PIs. This ensures compatibility for equivalence checking between networks with and without virtual
  * inputs, as the miter requires networks to have an identical number of primary inputs. If the network does not contain
  * any virtual PIs, it is returned unchanged.
+ * If virtual PIs are removed from a ranked network, call `update_ranks` on the result before querying its ranks.
  *
  * @tparam Ntk The type of network.
  * @param ntk The input network.
