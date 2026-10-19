@@ -203,15 +203,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             return *this;
         }
 
-        // update the base class
-        this->_storage = other._storage;
-        this->_events  = other._events;
-
-        // update the virtual storage
-        if constexpr (has_is_virtual_pi_v<Ntk>)
-        {
-            this->v_storage = other.v_storage;
-        }
+        Ntk::operator=(other);
 
         // copy
         ps        = other.ps;
@@ -230,7 +222,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      *
      * @param other The other `fiction::static_depth_view` object to be moved.
      */
-    static_depth_view(static_depth_view&& other) noexcept :
+    static_depth_view(static_depth_view&& other) :
             Ntk(std::move(other)),
             ps(other.ps),  // trivially copyable
             levels(std::move(other.levels)),
@@ -246,7 +238,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * @param other The source `fiction::static_depth_view` object whose contents are being moved.
      * @return A reference to the current object, enabling chain assignments.
      */
-    static_depth_view& operator=(static_depth_view&& other) noexcept
+    static_depth_view& operator=(static_depth_view&& other)
     {
         // Check for self-assignment
         if (this == &other)
@@ -254,15 +246,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             return *this;
         }
 
-        // move the base class
-        this->_storage = std::move(other._storage);
-        this->_events  = std::move(other._events);
-
-        // move the virtual storage
-        if constexpr (has_is_virtual_pi_v<Ntk>)
-        {
-            this->v_storage = std::move(other.v_storage);
-        }
+        Ntk::operator=(std::move(other));
 
         // move
         ps        = other.ps;  // trivially copyable
@@ -357,7 +341,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
         this->foreach_fanin(n,
                             [&](auto const& f)
                             {
-                                auto clevel = levels[f];
+                                auto clevel = levels[this->get_node(f)];
                                 if (ps.count_complements && this->is_complemented(f))
                                 {
                                     ++clevel;

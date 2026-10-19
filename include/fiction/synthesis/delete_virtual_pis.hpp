@@ -194,7 +194,7 @@ class delete_virtual_pis_impl
                     if (src.is_real_pi(n))
                     {
                         old2new[n] = dest.create_pi();
-                        dest.on_add(old2new[n]);
+                        dest.on_add(dest.get_node(old2new[n]));
                     }
                 });
         }
@@ -206,10 +206,6 @@ class delete_virtual_pis_impl
                     if (src.is_real_pi(n))
                     {
                         old2new[n] = dest.create_pi();
-                        if constexpr (mockturtle::has_rank_position_v<Ntk>)
-                        {
-                            dest.on_add(old2new[n]);
-                        }
                     }
                 });
         }

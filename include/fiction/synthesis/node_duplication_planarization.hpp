@@ -410,7 +410,8 @@ class node_duplication_planarization_impl
     }
     /**
      * Decides for the hybrid strategy whether the level just computed keeps its crossings instead of its duplicates.
-     * If so, the level is replaced by its original rank order and the statistics count the kept crossings.
+     * If so, the level uses the source nodes reordered to reduce crossings, and the statistics count the kept
+     * crossings.
      *
      * @param next_level Level below the current one as the duplication computed it; replaced if crossings are kept.
      * @param copies_on_level Number of duplicates in `next_level`.
@@ -809,10 +810,10 @@ class node_duplication_planarization_impl
         // signal in `dest` for every source id and copy id
         std::vector<signal_t> old2new(ntk.size() + copy_origin.size());
 
-        old2new[ntk.get_constant(false)] = dest.get_constant(false);
+        old2new[ntk.get_node(ntk.get_constant(false))] = dest.get_constant(false);
         if (ntk.get_node(ntk.get_constant(true)) != ntk.get_node(ntk.get_constant(false)))
         {
-            old2new[ntk.get_constant(true)] = dest.get_constant(true);
+            old2new[ntk.get_node(ntk.get_constant(true))] = dest.get_constant(true);
         }
 
         ntk.foreach_pi_unranked([&old2new, &dest](const auto& n) { old2new[n] = dest.create_pi(); });

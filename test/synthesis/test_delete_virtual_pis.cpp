@@ -37,6 +37,26 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 
+TEST_CASE("Delete virtual PIs from a ranked AIG", "[delete-virtual-pis]")
+{
+    virtual_pi_network<mockturtle::aig_network> source{};
+    const auto                                  real = source.create_pi();
+    const auto                                  copy = source.create_virtual_pi(real);
+    source.create_po(source.create_and(real, copy));
+
+    const mutable_rank_view ranked{source};
+    auto                    result = delete_virtual_pis(ranked);
+    result.update_ranks();
+
+    CHECK(result.num_pis() == 1);
+    CHECK(result.num_virtual_pis() == 0);
+    mockturtle::aig_network expected{};
+    expected.create_po(expected.create_pi());
+    const auto miter = mockturtle::miter<mockturtle::aig_network>(expected, result);
+    REQUIRE(miter.has_value());
+    CHECK(mockturtle::equivalence_checking(*miter).value_or(false));
+}
+
 TEST_CASE("Check name conservation", "[delete-virtual-pis]")
 {
     virtual_pi_network<mockturtle::names_view<technology_network>> vpi{};

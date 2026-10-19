@@ -28,12 +28,42 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/cost_functions.hpp>
 #include <mockturtle/views/depth_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <memory>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
+
+TEST_CASE("Depth view assignment preserves network names", "[static-depth-view]")
+{
+    static_depth_view<mockturtle::names_view<technology_network>> source{};
+    const auto                                                    input = source.create_pi();
+    source.create_po(input);
+    source.set_network_name("source");
+    source.set_name(input, "input");
+    source.set_output_name(0, "output");
+    source.update_levels();
+
+    decltype(source) dest{};
+    SECTION("Copy assignment")
+    {
+        dest = source;
+    }
+    SECTION("Move assignment")
+    {
+        dest = std::move(source);
+    }
+
+    CHECK(dest.get_network_name() == "source");
+    CHECK(dest.get_name(dest.pi_at(0)) == "input");
+    CHECK(dest.get_output_name(0) == "output");
+    CHECK(dest.num_pis() == 1);
+    CHECK(dest.num_pos() == 1);
+    CHECK(dest.depth() == 0);
+}
 
 template <typename Ntk>
 void test_depth_view()

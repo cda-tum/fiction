@@ -698,6 +698,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `convert_network` keeps the inverters of a technology network when the target network
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
   - `synthesis::delete_virtual_pis` maps outputs driven by a virtual primary input to the real one
+  - `synthesis::delete_virtual_pis` now supports ranked AIGs whose signals differ from nodes.
   - `verification::virtual_miter` pairs primary inputs by creation order, so ranked networks whose inputs are
     reordered or unused compare correctly
   - `networks::views::static_depth_view` gives every combinational input a level, so an input that drives nothing
@@ -750,6 +751,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
+  - Depth and rank view assignment now preserves wrapped network names and metadata.
   - Clocking-state moves now avoid synchronization-map allocations on Windows.
   - Gate-layout name-presence queries now report empty names consistently after failed assignment.
   - Gate-layout name-presence queries now avoid copying names and allocating memory.

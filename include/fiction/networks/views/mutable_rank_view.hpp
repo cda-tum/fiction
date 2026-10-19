@@ -191,10 +191,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         // call assignment operator of `static_depth_view`
         static_depth_view<Ntk>::operator=(other);
 
-        /* update the base class */
-        this->_storage = other._storage;
-        this->_events  = other._events;
-
         /* copy */
         rank_pos       = other.rank_pos;
         ranks          = other.ranks;
@@ -206,7 +202,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     /**
      * Move constructor for `mutable_rank_view`.
      */
-    mutable_rank_view(mutable_rank_view&&) noexcept = default;
+    mutable_rank_view(mutable_rank_view&&) = default;
 
     /**
      * Move assignment operator for `mutable_rank_view`.
@@ -214,7 +210,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      *
      * @return A reference to this object after assignment.
      */
-    mutable_rank_view& operator=(mutable_rank_view&&) noexcept = default;
+    mutable_rank_view& operator=(mutable_rank_view&&) = default;
 
     /**
      * Destructor for `mutable_rank_view`.
@@ -565,6 +561,10 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
     /**
      * Update the ranks in the `mutable_rank_view`.
+     *
+     * If rebuilding throws, call `update_ranks` successfully before querying ranks.
+     *
+     * @throws std::invalid_argument If the network has a gate that no output reaches.
      */
     void update_ranks()
     {
