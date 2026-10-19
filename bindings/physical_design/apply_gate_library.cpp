@@ -16,8 +16,8 @@
  */
 
 #include "fiction/layouts/layout_base.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
@@ -129,11 +129,14 @@ Raises:
  */
 void register_apply_gate_library(nb::module_& m)
 {
-    detail::register_apply_gate_library<fiction::qca::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
-    detail::register_apply_gate_library<fiction::mol_qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");
-    detail::register_apply_gate_library<fiction::inml::topolinano_library, py_shifted_cartesian_gate_layout>(
-        m, "topolinano");
-    detail::register_apply_gate_library<fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
+    detail::register_apply_gate_library<fiction::qca::qca_one_library, fiction::layouts::cartesian_gate_layout>(
+        m, "qca_one");
+    detail::register_apply_gate_library<fiction::mol_qca::sim7_mol_library, fiction::layouts::cartesian_gate_layout>(
+        m, "sim7_mol");
+    detail::register_apply_gate_library<fiction::inml::topolinano_library,
+                                        fiction::layouts::shifted_cartesian_gate_layout>(m, "topolinano");
+    detail::register_apply_gate_library<fiction::sidb::bestagon_library, fiction::layouts::hexagonal_gate_layout>(
+        m, "bestagon");
 }
 
 }  // namespace pyfiction

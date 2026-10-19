@@ -20,9 +20,9 @@
 #include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/color_routing.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/graph/graph_coloring.hpp>
 
 #include <vector>
@@ -45,8 +45,8 @@ void check_color_routing(const Spec& spec, Impl& impl, const std::vector<routing
 
 TEST_CASE("Simple wire connection", "[color-routing]")
 {
-    auto spec_layout = blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>();
-    auto impl_layout = blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>();
+    auto spec_layout = blueprints::straight_wire_gate_layout<cartesian_gate_layout>();
+    auto impl_layout = blueprints::straight_wire_gate_layout<cartesian_gate_layout>();
 
     const auto objectives = extract_routing_objectives(impl_layout);
 
@@ -69,10 +69,10 @@ TEST_CASE("Simple wire connection", "[color-routing]")
 
 TEST_CASE("Color routing preserves destination input indices", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{2, 2}, clocking::twoddwave()};
-    const auto        a    = layout.create_pi("a", {0, 1});
-    const auto        b    = layout.create_pi("b", {1, 0});
-    const auto        gate = layout.create_lt(a, b, {1, 1});
+    cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
+    const auto            a    = layout.create_pi("a", {0, 1});
+    const auto            b    = layout.create_pi("b", {1, 0});
+    const auto            gate = layout.create_lt(a, b, {1, 1});
     layout.disconnect({gate, 0});
     layout.disconnect({gate, 1});
     const std::vector<routing_objective> objectives{{{1, 0}, {1, 1}, 1}, {{0, 1}, {1, 1}, 0}};
@@ -84,10 +84,10 @@ TEST_CASE("Color routing preserves destination input indices", "[color-routing]"
 
 TEST_CASE("Color routing connects repeated sources to distinct inputs", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{2, 2}, clocking::twoddwave()};
-    const auto        a          = layout.create_pi("a", {0, 0});
-    const auto        gate       = layout.create_lt(a, a, {1, 1});
-    const auto        objectives = extract_routing_objectives(layout);
+    cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
+    const auto            a          = layout.create_pi("a", {0, 0});
+    const auto            gate       = layout.create_lt(a, a, {1, 1});
+    const auto            objectives = extract_routing_objectives(layout);
     clear_routing(layout);
 
     color_routing_params ps{};
@@ -116,8 +116,8 @@ TEST_CASE("Color routing connects repeated sources to distinct inputs", "[color-
 
 TEST_CASE("Two paths wire connections", "[color-routing]")
 {
-    auto spec_layout = blueprints::unbalanced_and_layout<cart_gate_clk_lyt>();
-    auto impl_layout = blueprints::unbalanced_and_layout<cart_gate_clk_lyt>();
+    auto spec_layout = blueprints::unbalanced_and_layout<cartesian_gate_layout>();
+    auto impl_layout = blueprints::unbalanced_and_layout<cartesian_gate_layout>();
 
     const auto objectives = extract_routing_objectives(impl_layout);
 
@@ -140,8 +140,8 @@ TEST_CASE("Two paths wire connections", "[color-routing]")
 
 TEST_CASE("Three paths wire connections", "[color-routing]")
 {
-    auto spec_layout = blueprints::three_wire_paths_gate_layout<cart_gate_clk_lyt>();
-    auto impl_layout = blueprints::three_wire_paths_gate_layout<cart_gate_clk_lyt>();
+    auto spec_layout = blueprints::three_wire_paths_gate_layout<cartesian_gate_layout>();
+    auto impl_layout = blueprints::three_wire_paths_gate_layout<cartesian_gate_layout>();
 
     const auto objectives = extract_routing_objectives(impl_layout);
 
@@ -164,8 +164,8 @@ TEST_CASE("Three paths wire connections", "[color-routing]")
 
 TEST_CASE("Direct gate connections", "[color-routing]")
 {
-    auto spec_layout = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
-    auto impl_layout = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
+    auto spec_layout = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
+    auto impl_layout = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
 
     const auto objectives = extract_routing_objectives(impl_layout);
 
@@ -188,8 +188,8 @@ TEST_CASE("Direct gate connections", "[color-routing]")
 
 TEST_CASE("Partial routing", "[color-routing]")
 {
-    auto spec_layout = blueprints::use_and_gate_layout<cart_gate_clk_lyt>();
-    auto impl_layout = blueprints::use_and_gate_layout<cart_gate_clk_lyt>();
+    auto spec_layout = blueprints::use_and_gate_layout<cartesian_gate_layout>();
+    auto impl_layout = blueprints::use_and_gate_layout<cartesian_gate_layout>();
 
     auto objectives = extract_routing_objectives(impl_layout);
     objectives.push_back({{0, 3}, {3, 0}});  // additional unsatisfiable objective
@@ -214,8 +214,8 @@ TEST_CASE("Partial routing", "[color-routing]")
 
 TEST_CASE("Routing with crossings", "[color-routing]")
 {
-    auto spec_layout = blueprints::crossing_layout<cart_gate_clk_lyt>();
-    auto impl_layout = blueprints::crossing_layout<cart_gate_clk_lyt>();
+    auto spec_layout = blueprints::crossing_layout<cartesian_gate_layout>();
+    auto impl_layout = blueprints::crossing_layout<cartesian_gate_layout>();
 
     auto objectives = extract_routing_objectives(impl_layout);
 
@@ -257,7 +257,7 @@ TEST_CASE("Routing with crossings", "[color-routing]")
 
 TEST_CASE("Routing failure", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{4, 5, 2}, clocking::twoddwave()};
+    cartesian_gate_layout layout{{4, 5, 2}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -286,7 +286,7 @@ TEST_CASE("Routing failure", "[color-routing]")
 
 TEST_CASE("Routing failure 2", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{4, 5, 2}, clocking::twoddwave()};
+    cartesian_gate_layout layout{{4, 5, 2}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});
@@ -315,7 +315,7 @@ TEST_CASE("Routing failure 2", "[color-routing]")
 
 TEST_CASE("Routing failure 3", "[color-routing]")
 {
-    cart_gate_clk_lyt layout{{3, 5, 2}, clocking::twoddwave()};
+    cartesian_gate_layout layout{{3, 5, 2}, clocking::twoddwave()};
 
     const auto x1 = layout.create_pi("x1", {0, 0});
     const auto w1 = layout.create_buf(x1, {0, 1});

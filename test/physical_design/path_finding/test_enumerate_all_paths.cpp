@@ -66,11 +66,9 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_layout<lyt>;
-
         SECTION("2DDWave")
         {
-            const clk_lyt layout{clk_lyt::extent{2, 2, 1}, clocking::twoddwave()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{2, 2, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (1,1)")  // two valid paths
             {
@@ -100,7 +98,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{clk_lyt::extent{2, 2, 1}, clocking::use()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{2, 2, 1}, clocking::use()};
 
             SECTION("(0,0) to (0,1)")  // one valid path
             {
@@ -142,11 +140,9 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_layout<lyt>;
-
         SECTION("2DDWave")
         {
-            const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::twoddwave()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
             {
@@ -157,7 +153,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::use()};
+            const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
             {
@@ -171,12 +167,11 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_layout<cartesian_layout>;
-    using path     = layout_coordinate_path;
+    using path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
-        const gate_lyt layout{gate_lyt::extent{4, 4, 1}};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}};
 
         SECTION("(0,0) to (3,3) with coordinate obstruction")  // 108 valid paths
         {
@@ -196,7 +191,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::twoddwave()};
+            const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // 19 valid paths
             {
@@ -212,7 +207,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
         }
         SECTION("USE")
         {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::use()};
+            const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // 1 valid path
             {
@@ -231,8 +226,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 
 TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_layout<cartesian_layout>;
-    using path     = layout_coordinate_path;
+    using path = layout_coordinate_path;
 
     // enable crossings
     const enumerate_all_paths_params params{true};
@@ -243,7 +237,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{gate_lyt::extent{3, 3, 2}, clocking::twoddwave()};  // create a crossing layer
+                const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 2},
+                                                   clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
@@ -263,7 +258,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
             }
             SECTION("USE")
             {
-                const gate_lyt layout{gate_lyt::extent{3, 3, 2}, clocking::use()};  // create a crossing layer
+                const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 2},
+                                                   clocking::use()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
@@ -289,7 +285,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{gate_lyt::extent{4, 4, 2}, clocking::twoddwave()};  // create a crossing layer
+                const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 2},
+                                                   clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
                 {
@@ -322,7 +319,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{gate_lyt::extent{4, 3, 2}, clocking::twoddwave()};  // create a crossing layer
+                const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 3, 2},
+                                                   clocking::twoddwave()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
                 {
@@ -350,12 +348,11 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
 
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruction", "[enumerate-all-paths]")
 {
-    using gate_lyt = gate_layout<cartesian_layout>;
-    using path     = layout_coordinate_path;
+    using path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
-        const gate_lyt layout{gate_lyt::extent{4, 4, 1}};
+        const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}};
 
         SECTION("(0,0) to (3,3) with connection obstruction")  // 108 valid paths
         {
@@ -375,7 +372,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::twoddwave()};
+            const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::twoddwave()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // 19 valid paths
             {
@@ -393,7 +390,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
         }
         SECTION("USE")
         {
-            const gate_lyt layout{gate_lyt::extent{4, 4, 1}, clocking::use()};
+            const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::use()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // 1 valid path
             {

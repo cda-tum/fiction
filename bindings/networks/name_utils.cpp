@@ -17,6 +17,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
@@ -65,9 +66,9 @@ void register_name_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_name_utils<py_cartesian_gate_layout>(m);
-    detail::register_name_utils<py_shifted_cartesian_gate_layout>(m);
-    detail::register_name_utils<py_hexagonal_gate_layout>(m);
+    detail::register_name_utils<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_name_utils<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_name_utils<fiction::layouts::hexagonal_gate_layout>(m);
     detail::register_name_utils<fiction::qca::layout>(m);
     detail::register_name_utils<fiction::mol_qca::layout>(m);
     detail::register_name_utils<fiction::inml::layout>(m);

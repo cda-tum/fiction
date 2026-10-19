@@ -1,5 +1,8 @@
 # Preset Types
 
+Network and truth-table presets instantiate the library algorithms.
+Gate-layout types are documented in {doc}`gate_layout`.
+
 **Header:** `fiction/types.hpp`
 
 ```{doxygentypedef} fiction::tt
@@ -36,27 +39,6 @@
 ```
 
 ```{doxygentypedef} fiction::logic_network_t
-```
-
-```{doxygentypedef} fiction::cart_gate_clk_lyt
-```
-
-```{doxygentypedef} fiction::cart_gate_clk_lyt_ptr
-```
-
-```{doxygentypedef} fiction::shifted_cart_gate_clk_lyt
-```
-
-```{doxygentypedef} fiction::shifted_cart_gate_clk_lyt_ptr
-```
-
-```{doxygentypedef} fiction::hex_gate_clk_lyt
-```
-
-```{doxygentypedef} fiction::hex_gate_clk_lyt_ptr
-```
-
-```{doxygentypedef} fiction::gate_layout_t
 ```
 
 ```{doxygenvariable} fiction::aig_name

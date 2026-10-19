@@ -20,7 +20,6 @@
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/post_layout_optimization.hpp>
@@ -33,10 +32,8 @@ using namespace fiction::physical_design;
 
 TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
     const auto ntk    = blueprints::parity_network<mockturtle::aig_network>();
-    const auto layout = orthogonal<gate_layout>(ntk);
+    const auto layout = orthogonal<cartesian_gate_layout>(ntk);
 
     post_layout_optimization_params full_optimization_params{};
 

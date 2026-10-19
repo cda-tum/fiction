@@ -22,6 +22,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/exact.hpp>
 
 #include <sstream>
@@ -112,7 +113,7 @@ void register_exact(nb::module_& m, const char* signature)
         const nb::gil_scoped_release release{};
         return fiction::physical_design::exact<Lyt, py_tec_network>(network, parameters, statistics);
     };
-    if constexpr (std::is_same_v<Lyt, py_cartesian_gate_layout>)
+    if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {
         m.def("exact", design, nb::arg("network"), nb::kw_only(), nb::arg("layout_type") = nb::type<Lyt>(),
               nb::arg("statistics") = nullptr, nb::arg("scheme") = exact_physical_design_options{}.scheme,
@@ -226,7 +227,7 @@ void register_exact(nb::module_& m)
         .def_ro("num_aspect_ratios", &fiction::physical_design::exact_physical_design_stats::num_aspect_ratios,
                 DOC(fiction_physical_design_exact_physical_design_stats_num_aspect_ratios));
 
-    detail::register_exact<py_cartesian_gate_layout>(
+    detail::register_exact<fiction::layouts::cartesian_gate_layout>(
         m,
         "def exact(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
         "type[mnt.pyfiction.layouts.cartesian_gate_layout] = mnt.pyfiction.layouts.cartesian_gate_layout, statistics: "
@@ -237,7 +238,7 @@ void register_exact(nb::module_& m)
         "bool = ..., timeout: int = ..., technology_specifics: technology_constraints = ..., on_progress: "
         "Callable[[str, int, int], None] | None = ..., on_worker_progress: Callable[[int, int, str, int, int, bool], "
         "None] | None = ...) -> mnt.pyfiction.layouts.cartesian_gate_layout | None");
-    detail::register_exact<py_shifted_cartesian_gate_layout>(
+    detail::register_exact<fiction::layouts::shifted_cartesian_gate_layout>(
         m, "def exact(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
            "type[mnt.pyfiction.layouts.shifted_cartesian_gate_layout], statistics: exact_stats | None = None, scheme: "
            "str = ..., layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ..., upper_bound_area: int = "
@@ -247,7 +248,7 @@ void register_exact(nb::module_& m)
            "timeout: int = ..., technology_specifics: technology_constraints = ..., on_progress: Callable[[str, int, "
            "int], None] | None = ..., on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = "
            "...) -> mnt.pyfiction.layouts.shifted_cartesian_gate_layout | None");
-    detail::register_exact<py_hexagonal_gate_layout>(
+    detail::register_exact<fiction::layouts::hexagonal_gate_layout>(
         m, "def exact(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
            "type[mnt.pyfiction.layouts.hexagonal_gate_layout], statistics: exact_stats | None = None, scheme: str = "
            "..., layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ..., upper_bound_area: int = ..., "

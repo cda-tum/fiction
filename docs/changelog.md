@@ -220,6 +220,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
+  - **Breaking:** `types.hpp` drops the three `*_gate_clk_lyt` presets, their pointers, `gate_layout_t`,
+    and transitive layout includes. Include `fiction/layouts/gate_layout.hpp` and use its canonical types.
   - **Breaking:** `gate_level_layout` is now `gate_layout` in `fiction/layouts/gate_layout.hpp`.
     Update C++ includes and template names; Python class names remain unchanged.
   - `bounding_box_2d` is renamed to `bounding_box` in C++ and Python.
@@ -274,6 +277,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Documented all three gate-layout geometries and MSVC Release builds for Python.
   - Python layout docstrings use `extent` for the extent argument.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
@@ -286,7 +290,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
-  - Gate-layout experiments use the `gate_layout` C++ type; computations remain unchanged.
+  - Gate-layout experiments use canonical types with unchanged computations.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
@@ -439,6 +443,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     it that carries the toctree
 
 - Python bindings:
+
+  - Gate-layout docstrings document the Cartesian default for the C++ template.
 
   - **Breaking:** More native computation, collection traversal, and file I/O release the GIL across `pyfiction` bindings.
     Callers must synchronize shared native objects; Python object operations and small accessors retain the GIL.
@@ -674,6 +680,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - Release benchmark builds now skip stripping when no strip tool is available.
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.

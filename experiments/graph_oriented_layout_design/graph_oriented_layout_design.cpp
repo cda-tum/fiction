@@ -18,7 +18,6 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>  // calculate area of generated layouts
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>  // read networks from files
 #include <fiction/networks/technology_network.hpp>
@@ -61,8 +60,6 @@ Ntk read_ntk(const std::string& name)
 int main()
 try
 {
-    using gate_lyt = gate_layout<cartesian_layout>;
-
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, double, std::string>
         graph_oriented_layout_design_exp{"graph_oriented_layout_design_exp",
@@ -92,8 +89,8 @@ try
     {
         auto network = read_ntk<tec_nt>(benchmark);
 
-        auto gate_layout = graph_oriented_layout_design<gate_lyt, tec_nt>(network, graph_oriented_layout_design_params,
-                                                                          &graph_oriented_layout_design_stats);
+        auto gate_layout = graph_oriented_layout_design<cartesian_gate_layout, tec_nt>(
+            network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
 
         if (gate_layout.has_value())
         {
@@ -101,7 +98,8 @@ try
             const auto cp_tp = critical_path_length_and_throughput(*gate_layout);
 
             // check equivalence
-            const auto eq_stats = equivalence_checking<technology_network, gate_lyt>(network, *gate_layout);
+            const auto eq_stats =
+                equivalence_checking<technology_network, cartesian_gate_layout>(network, *gate_layout);
 
             std::string eq_result{"NO"};
             if (eq_stats == eq_type::STRONG)
