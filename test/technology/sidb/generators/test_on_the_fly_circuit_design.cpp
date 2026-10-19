@@ -29,6 +29,10 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
+#if (FICTION_Z3_SOLVER)
+#include <fiction/types.hpp>
+#endif
+
 #include <array>
 #include <chrono>
 #include <cstdint>
