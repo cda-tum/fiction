@@ -26083,6 +26083,17 @@ Args:
 
 static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_ps = R"doc(Parameters.)doc";
 
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_reject_constant_gates =
+R"doc(Rejects gates whose fanins are all constants. The sweep reaches a gate
+only along edges that start at the primary inputs, so such a gate has
+no level to be placed on; constant propagation folds it before
+rebalancing.
+
+Raises:
+    std::invalid_argument: If a gate has only constant fanins.
+
+)doc";
+
 static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_remove_buffer_chains =
 R"doc(Copies every node of the source network except chain buffers into
 `stripped`. A chain buffer maps to the signal of its fanin, so that
@@ -26102,6 +26113,9 @@ R"doc(Runs the algorithm.
 Returns:
     Balanced copy of the source network without redundant buffers,
     with the same rank order.
+
+Raises:
+    std::invalid_argument: If a gate has only constant fanins.
 
 )doc";
 
@@ -26639,6 +26653,8 @@ Returns:
     buffers.
 
 Raises:
+    std::invalid_argument: If a gate has only constant fanins; such a
+                           gate cannot be reached from the inputs.
     std::runtime_error: If the input is not planar.
 
 )doc";

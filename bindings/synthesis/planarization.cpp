@@ -129,6 +129,9 @@ void register_planarization(nb::module_& m)
     using params = fiction::synthesis::node_duplication_planarization_params;
     using stats  = fiction::synthesis::planarization_stats;
 
+    // the keyword defaults are those of the pipeline, which differ from the duplication stage's own (strategy)
+    const auto defaults = fiction::synthesis::planarization_params{};
+
     nb::enum_<params::planarization_strategy>(
         m, "planarization_strategy",
         DOC(fiction_synthesis_node_duplication_planarization_params_planarization_strategy))
@@ -217,17 +220,16 @@ void register_planarization(nb::module_& m)
             return detail::flatten(fiction::synthesis::planarization(ranked, ps, statistics));
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
-        nb::arg("strategy") = params{}.strategy, nb::arg("criterion") = params{}.criterion,
-        nb::arg("xor_gates") = params{}.xor_gates, nb::arg("max_swaps") = params{}.max_swaps,
-        nb::arg("max_crossings_per_rank") = params{}.max_crossings_per_rank,
-        nb::arg("node_weight")            = params{}.duplication_cost.node_weight,
-        nb::arg("buffer_weight")          = params{}.duplication_cost.buffer_weight,
-        nb::arg("depth_growth")           = params{}.duplication_cost.depth_growth,
-        nb::arg("lookahead_budget")       = params{}.lookahead_budget,
-        nb::arg("max_duplications") = params{}.max_duplications, nb::arg("po_order") = params{}.po_order,
-        nb::arg("seed")          = params{}.seed,
-        nb::arg("fanout_degree") = fiction::synthesis::planarization_params{}.fanout_degree,
-        nb::arg("statistics")    = nullptr,
+        nb::arg("strategy") = defaults.duplication.strategy, nb::arg("criterion") = defaults.duplication.criterion,
+        nb::arg("xor_gates") = defaults.duplication.xor_gates, nb::arg("max_swaps") = defaults.duplication.max_swaps,
+        nb::arg("max_crossings_per_rank") = defaults.duplication.max_crossings_per_rank,
+        nb::arg("node_weight")            = defaults.duplication.duplication_cost.node_weight,
+        nb::arg("buffer_weight")          = defaults.duplication.duplication_cost.buffer_weight,
+        nb::arg("depth_growth")           = defaults.duplication.duplication_cost.depth_growth,
+        nb::arg("lookahead_budget")       = defaults.duplication.lookahead_budget,
+        nb::arg("max_duplications")       = defaults.duplication.max_duplications,
+        nb::arg("po_order") = defaults.duplication.po_order, nb::arg("seed") = defaults.duplication.seed,
+        nb::arg("fanout_degree") = defaults.fanout_degree, nb::arg("statistics") = nullptr,
         R"doc(Planarizes a balanced technology network with unified outputs: node duplication with the chosen
 strategy, crossing gates for the levels the hybrid strategy left crossed, planar fanout substitution, and planar
 rebalancing. See `network_balancing` for the precondition.

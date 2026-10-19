@@ -77,9 +77,12 @@ class planar_rebalancing_impl
      * Runs the algorithm.
      *
      * @return Balanced copy of the source network without redundant buffers, with the same rank order.
+     * @throws std::invalid_argument If a gate has only constant fanins.
      */
     [[nodiscard]] Ntk run()
     {
+        reject_constant_gates();
+
         utils::progress_reporter progress{ps.on_progress, "rebalancing", 3};
 
         auto  init     = networks::initialize_copy_network_with_virtual_pis(ntk);
@@ -515,6 +518,24 @@ class planar_rebalancing_impl
         return count;
     }
     /**
+     * Rejects gates whose fanins are all constants. The sweep reaches a gate only along edges that start at the
+     * primary inputs, so such a gate has no level to be placed on; constant propagation folds it before rebalancing.
+     *
+     * @throws std::invalid_argument If a gate has only constant fanins.
+     */
+    void reject_constant_gates() const
+    {
+        ntk.foreach_gate(
+            [this](const auto& n)
+            {
+                if (non_constant_fanins(ntk, n) == 0)
+                {
+                    throw std::invalid_argument(
+                        "A gate has only constant fanins; propagate constants before planar rebalancing");
+                }
+            });
+    }
+    /**
      * Source network.
      */
     const Ntk& ntk;
@@ -547,6 +568,7 @@ class planar_rebalancing_impl
  * @param ntk Ranked, planar input network.
  * @param ps Parameters.
  * @return A balanced, planar network with unified outputs and no redundant buffers.
+ * @throws std::invalid_argument If a gate has only constant fanins; such a gate cannot be reached from the inputs.
  * @throws std::runtime_error If the input is not planar.
  */
 template <typename Ntk>

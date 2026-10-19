@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+from itertools import starmap
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -68,6 +69,46 @@ def _equivalent_with_tied_inputs(
                 return False
 
     return True
+
+
+def _parity_verilog() -> str:
+    """The 16-input parity tree of the C++ blueprints as Verilog.
+
+    Pairs of signals are combined by an XNOR built from AND and NOT gates, the root by an XOR built from AND, NOT
+    and OR gates; the hybrid strategy keeps crossings on this network where pure duplication copies whole levels.
+
+    Returns:
+        Verilog source of the network with inputs ``pi00`` to ``pi15`` and output ``po0``.
+    """
+    inputs = [f"pi{i:02d}" for i in range(16)]
+    wires: list[str] = []
+    assigns: list[str] = []
+
+    def xnor(x: str, y: str) -> str:
+        a, b, c = (f"n{len(wires) + k}" for k in range(3))
+        wires.extend((a, b, c))
+        assigns.extend((f"assign {a} = {x} & ~{y};", f"assign {b} = ~{x} & {y};", f"assign {c} = ~{a} & ~{b};"))
+        return c
+
+    def tree(pairs: list[tuple[str, str]]) -> str:
+        # the blueprint pairs inputs from the highest index down and combines neighbouring pairs
+        signals = list(starmap(xnor, pairs))
+        while len(signals) > 1:
+            signals = [xnor(signals[i], signals[i + 1]) for i in range(0, len(signals), 2)]
+        return signals[0]
+
+    pairs = [(inputs[i], inputs[i + 1]) for i in range(14, -1, -2)]
+    left = tree(pairs[:4])
+    right = tree(pairs[4:])
+    wires.extend(("n_left", "n_right"))
+    assigns.extend((f"assign n_left = {left} & ~{right};", f"assign n_right = ~{left} & {right};"))
+
+    return (
+        f"module top({', '.join(inputs)}, po0);\n"
+        f"input {', '.join(inputs)};\n"
+        "output po0;\n"
+        f"wire {', '.join(wires)};\n" + "\n".join(assigns) + "\nassign po0 = n_left | n_right;\nendmodule\n"
+    )
 
 
 @pytest.fixture
@@ -181,3 +222,17 @@ def test_invalid_parameters_and_limits(full_adder: technology_network) -> None:
     # the full adder needs duplicates, so a limit of one is exceeded
     with pytest.raises(RuntimeError, match="duplications"):
         planarization(balanced, max_duplications=1)
+
+
+def test_default_strategy_is_hybrid(tmp_path: Path) -> None:
+    """The keyword defaults are the pipeline's: the default call plans like ``HYBRID``, not like ``DUPLICATION``."""
+    path = tmp_path / "parity.v"
+    path.write_text(_parity_verilog(), encoding="utf-8")
+    balanced = _balanced(read_network(str(path)))
+
+    by_default, _ = planarization(balanced)
+    hybrid, _ = planarization(balanced, strategy=planarization_strategy.HYBRID)
+    duplicated, _ = planarization(balanced, strategy=planarization_strategy.DUPLICATION)
+
+    assert by_default.size() == hybrid.size()
+    assert by_default.size() < duplicated.size()

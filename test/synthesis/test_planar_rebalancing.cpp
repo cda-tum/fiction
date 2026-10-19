@@ -204,6 +204,24 @@ TEST_CASE("Gates with constant fanins", "[planar-rebalancing]")
     check_contract(tec, rebalanced);
 }
 
+TEST_CASE("Gates driven only by constants are rejected", "[planar-rebalancing]")
+{
+    technology_network tec{};
+
+    SECTION("an AND gate of two constants drives an output")
+    {
+        tec.create_po(tec.create_and(tec.get_constant(true), tec.get_constant(true)));
+    }
+
+    SECTION("an AND gate of two constants feeds a gate that an input reaches")
+    {
+        const auto x1 = tec.create_pi();
+        tec.create_po(tec.create_or(x1, tec.create_and(tec.get_constant(true), tec.get_constant(true))));
+    }
+
+    CHECK_THROWS_AS(planar_rebalancing(rank(tec)), std::invalid_argument);
+}
+
 TEST_CASE("Constant outputs", "[planar-rebalancing]")
 {
     technology_network tec{};
