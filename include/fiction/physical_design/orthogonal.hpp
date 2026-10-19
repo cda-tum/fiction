@@ -771,7 +771,7 @@ Lyt orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {},
     }
 
     orthogonal_physical_design_stats st{};
-    detail::orthogonal_impl<Lyt>     p{synthesis::fanout_substitution<tec_nt>(ntk), ps, st};
+    detail::orthogonal_impl<Lyt>     p{synthesis::fanout_substitution<tec_nt>(ntk), std::move(ps), st};
 
     auto result = p.run();
 

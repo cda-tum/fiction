@@ -454,7 +454,6 @@ class priority_queue
 };
 /**
  * Maps logic-network nodes to typed layout output ports.
- *
  */
 using node_dict_type = mockturtle::node_map<layouts::layout_object_id, tec_nt>;
 /**

@@ -127,7 +127,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
     with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
-  - Orthogonal edge coloring avoids a redundant traversal copy.
+  - Orthogonal edge coloring avoids a redundant traversal copy, and placement transfers invocation options into owned storage.
   - GOLD avoids redundant options and callback copies and permits result moves when copy elision does not
     apply. Blacklist exact placement transfers invocation options into owned storage.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
@@ -135,8 +135,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     throw `std::invalid_argument`.
   - Population stability now validates conversion parameters before simulation and returns infinity for zero potential differences.
   - Population stability now records neutral-to-negative margins even when the neutral-to-positive transition is closer.
-  - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
-    with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
   - Geometric distances accept coordinate pairs directly and use fixed `uint64_t` or `double` results.
     Squared Euclidean distance is `noexcept` and requires a result within the `uint64_t` range.
     Euclidean distance is a runtime `noexcept` function.
