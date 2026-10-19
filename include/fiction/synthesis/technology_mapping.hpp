@@ -35,6 +35,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace fiction::synthesis
@@ -375,7 +376,7 @@ class technology_mapping_impl
         // Check for AIG network (requires AND and INV)
         if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
         {
-            network_type = aig_name;
+            network_type = "AIG";
             if (!params.inv)
             {
                 missing_gates.emplace_back("INV");
@@ -388,7 +389,7 @@ class technology_mapping_impl
         // Check for XAG network (requires AND, XOR, and INV)
         else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::xag_network>)
         {
-            network_type = xag_name;
+            network_type = "XAG";
             if (!params.inv)
             {
                 missing_gates.emplace_back("INV");
@@ -405,7 +406,7 @@ class technology_mapping_impl
         // Check for MIG network (requires MAJ and INV)
         else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::mig_network>)
         {
-            network_type = mig_name;
+            network_type = "MIG";
             if (!params.inv)
             {
                 missing_gates.emplace_back("INV");

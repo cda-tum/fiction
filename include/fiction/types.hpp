@@ -28,7 +28,6 @@
 
 #include <memory>
 #include <type_traits>
-#include <variant>
 
 namespace fiction
 {
@@ -52,52 +51,14 @@ using truth_table_t = tt_ptr;
 using aig_nt  = mockturtle::names_view<mockturtle::aig_network>;
 using aig_ptr = std::shared_ptr<aig_nt>;
 
-inline constexpr auto aig_name = "AIG";
-
 using xag_nt  = mockturtle::names_view<mockturtle::xag_network>;
 using xag_ptr = std::shared_ptr<xag_nt>;
-
-inline constexpr auto xag_name = "XAG";
 
 using mig_nt  = mockturtle::names_view<mockturtle::mig_network>;
 using mig_ptr = std::shared_ptr<mig_nt>;
 
-inline constexpr auto mig_name = "MIG";
-
 using tec_nt  = mockturtle::names_view<fiction::networks::technology_network>;
 using tec_ptr = std::shared_ptr<tec_nt>;
-
-inline constexpr auto tec_name = "TEC";
-
-using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
-
-template <class Ntk>
-constexpr const char* get_ntk_type_name()
-{
-    if constexpr (std::is_same_v<std::decay_t<Ntk>, aig_nt>)
-    {
-        return aig_name;
-    }
-    else if constexpr (std::is_same_v<std::decay_t<Ntk>, xag_nt>)
-    {
-        return xag_name;
-    }
-    else if constexpr (std::is_same_v<std::decay_t<Ntk>, mig_nt>)
-    {
-        return mig_name;
-    }
-    else if constexpr (std::is_same_v<std::decay_t<Ntk>, tec_nt>)
-    {
-        return tec_name;
-    }
-    else
-    {
-        return "?";
-    }
-}
-
-template <class Ntk>
-inline constexpr auto ntk_type_name = get_ntk_type_name<Ntk>();
 
 /**
  * Every `*_ptr` alias points at the type its name says (`aig_ptr` at `aig_nt`, and so on). The

@@ -37,24 +37,3 @@ Gate-layout types are documented in {doc}`gate_layout`.
 
 ```{doxygentypedef} fiction::tec_ptr
 ```
-
-```{doxygentypedef} fiction::logic_network_t
-```
-
-```{doxygenvariable} fiction::aig_name
-```
-
-```{doxygenvariable} fiction::xag_name
-```
-
-```{doxygenvariable} fiction::mig_name
-```
-
-```{doxygenvariable} fiction::tec_name
-```
-
-```{doxygenvariable} fiction::ntk_type_name
-```
-
-```{doxygenfunction} fiction::get_ntk_type_name
-```
