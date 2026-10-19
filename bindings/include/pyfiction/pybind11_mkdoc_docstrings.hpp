@@ -8617,14 +8617,18 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_connect_and_place =
-R"doc(Routes ordered inputs to a placed two-input gate. @tparam Lyt Output
-layout type.
+R"doc(Routes ordered inputs to a placed two-input gate.
+
+Template Args:
+    Lyt: Output layout type.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_2 =
-R"doc(Routes one input to a placed unary gate. @tparam Lyt Output layout
-type.
+R"doc(Routes one input to a placed unary gate.
+
+Template Args:
+    Lyt: Output layout type.
 
 )doc";
 
@@ -9351,7 +9355,10 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_node2pos = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_node2pos =
+R"doc(Maps nodes to tile positions when creating the layout from the SMT
+model. Layout fanout is bounded by max_fanin_size; add a separate
+bound if layouts permit more branches.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_optimize =
 R"doc(Creates and returns a z3::optimize if optimization criteria were set
@@ -10781,20 +10788,35 @@ Template Args:
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_create_topo_rec = R"doc(Visits dependencies before appending a node.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate =
-R"doc(Visits gates in traversal order. @tparam Fn Node callback type. @param
-fn Node callback.
+R"doc(Visits gates in traversal order.
+
+Args:
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate_reverse =
-R"doc(Visits gates in reverse traversal order. @tparam Fn Node callback
-type. @param fn Node callback.
+R"doc(Visits gates in reverse traversal order.
+
+Args:
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_node =
-R"doc(Visits all nodes in traversal order. @tparam Fn Node callback type.
-@param fn Node callback.
+R"doc(Visits all nodes in traversal order.
+
+Args:
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
 
 )doc";
 
