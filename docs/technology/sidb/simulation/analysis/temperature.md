@@ -18,11 +18,11 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_gate_based(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const critical_temperature_params& params = {}, critical_temperature_stats* pst = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_gate_based(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const critical_temperature_params& params = {}, critical_temperature_stats* pst = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_gate_based(const std::vector<layout>& input_pattern_layouts, const std::vector<kitty::dynamic_truth_table>& spec, const critical_temperature_params& params, const std::vector<logic::bdl_pair>& output_bdl_pairs, const std::vector<logic::bdl_wire>& input_bdl_wires, const std::vector<logic::bdl_wire>& output_bdl_wires, critical_temperature_stats* pst = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_gate_based(const std::vector<layout>& input_pattern_layouts, const std::vector<fiction::synthesis::truth_table>& spec, const critical_temperature_params& params, const std::vector<logic::bdl_pair>& output_bdl_pairs, const std::vector<logic::bdl_wire>& input_bdl_wires, const std::vector<logic::bdl_wire>& output_bdl_wires, critical_temperature_stats* pst = nullptr)
 
 ```
 

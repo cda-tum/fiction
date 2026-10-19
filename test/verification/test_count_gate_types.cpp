@@ -23,10 +23,10 @@
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/types.hpp>
 #include <fiction/verification/count_gate_types.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/xag.hpp>
 
@@ -35,6 +35,7 @@
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
+using namespace fiction::synthesis;
 using namespace fiction::verification;
 
 TEMPLATE_TEST_CASE("Network gate counts exclude inputs and constants", "[count-gate-types]", technology_network,
@@ -78,7 +79,7 @@ TEST_CASE("Technology network gate counts retain ternary classifications", "[cou
     ntk.create_dot(a, b, c);
     for (const auto* hex : {"80", "28", "a8", "16", "81", "6a"})
     {
-        kitty::dynamic_truth_table function{3};
+        truth_table function{3};
         kitty::create_from_hex_string(function, hex);
         ntk.create_node({a, b, c}, function);
     }
@@ -119,7 +120,7 @@ TEMPLATE_TEST_CASE("Native gate counts classify supported functions and generic 
     lyt.create_le(a, b, {14, 0});
     lyt.create_ge(a, b, {15, 0});
     lyt.create_maj(a, b, c, {16, 0});
-    kitty::dynamic_truth_table and3{3};
+    truth_table and3{3};
     kitty::create_from_hex_string(and3, "80");
     lyt.create_gate({a, b, c}, and3, {17, 0});
 

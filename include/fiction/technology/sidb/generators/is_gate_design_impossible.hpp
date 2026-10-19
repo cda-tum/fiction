@@ -26,8 +26,7 @@
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
-
-#include <kitty/dynamic_truth_table.hpp>
+#include "fiction/types.hpp"
 
 #include <cassert>
 #include <cstddef>
@@ -63,8 +62,8 @@ struct is_gate_design_impossible_params
  * @throws std::invalid_argument if `spec` is empty.
  */
 [[nodiscard]] inline bool is_gate_design_impossible(const layout& skeleton_with_defects,
-                                                    const std::vector<kitty::dynamic_truth_table>& spec,
-                                                    const is_gate_design_impossible_params&        params = {})
+                                                    const std::vector<fiction::synthesis::truth_table>& spec,
+                                                    const is_gate_design_impossible_params&             params = {})
 {
     if (spec.empty())
     {

@@ -102,11 +102,12 @@ try
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
+    static const std::array<std::pair<std::string, std::vector<truth_table>>, 5> gates = {
+        std::make_pair("and", std::vector<truth_table>{create_and_tt()}),
+        std::make_pair("nand", std::vector<truth_table>{create_nand_tt()}),
+        std::make_pair("xnor", std::vector<truth_table>{create_xnor_tt()}),
+        std::make_pair("xor", std::vector<truth_table>{create_xor_tt()}),
+        std::make_pair("or", std::vector<truth_table>{create_or_tt()})};
 
     // total number of samples
     static std::size_t total_samples_gs = 0;

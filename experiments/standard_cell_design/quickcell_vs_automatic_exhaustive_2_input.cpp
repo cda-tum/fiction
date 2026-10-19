@@ -73,22 +73,22 @@ try
                        "#Lp3/N [%]",                           // double
                        "t_pruning [s]"};                       // double
 
-    const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 15>{
-        {{std::vector<tt>{create_not_tt()}, "inv"},
-         {std::vector<tt>{create_id_tt()}, "wire"},
-         {std::vector<tt>{create_and_tt()}, "and"},
-         {std::vector<tt>{create_nand_tt()}, "nand"},
-         {std::vector<tt>{create_or_tt()}, "or"},
-         {std::vector<tt>{create_nor_tt()}, "nor"},
-         {std::vector<tt>{create_xor_tt()}, "xor"},
-         {std::vector<tt>{create_xnor_tt()}, "xnor"},
-         {std::vector<tt>{create_lt_tt()}, "lt"},
-         {std::vector<tt>{create_gt_tt()}, "gt"},
-         {std::vector<tt>{create_le_tt()}, "le"},
-         {std::vector<tt>{create_ge_tt()}, "ge"},
-         {std::vector<tt>{create_crossing_wire_tt()}, "cx"},
-         {std::vector<tt>{create_half_adder_tt()}, "ha"},
-         {std::vector<tt>{create_double_wire_tt()}, "hourglass"}}};
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<truth_table>, std::string>, 15>{
+        {{std::vector<truth_table>{create_not_tt()}, "inv"},
+         {std::vector<truth_table>{create_id_tt()}, "wire"},
+         {std::vector<truth_table>{create_and_tt()}, "and"},
+         {std::vector<truth_table>{create_nand_tt()}, "nand"},
+         {std::vector<truth_table>{create_or_tt()}, "or"},
+         {std::vector<truth_table>{create_nor_tt()}, "nor"},
+         {std::vector<truth_table>{create_xor_tt()}, "xor"},
+         {std::vector<truth_table>{create_xnor_tt()}, "xnor"},
+         {std::vector<truth_table>{create_lt_tt()}, "lt"},
+         {std::vector<truth_table>{create_gt_tt()}, "gt"},
+         {std::vector<truth_table>{create_le_tt()}, "le"},
+         {std::vector<truth_table>{create_ge_tt()}, "ge"},
+         {std::vector<truth_table>{create_crossing_wire_tt()}, "cx"},
+         {std::vector<truth_table>{create_half_adder_tt()}, "ha"},
+         {std::vector<truth_table>{create_double_wire_tt()}, "hourglass"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 

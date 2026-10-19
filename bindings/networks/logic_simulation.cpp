@@ -14,10 +14,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/types.hpp"
-
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
+#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
@@ -78,8 +77,9 @@ void register_logic_simulation_impl(nb::module_& m, const std::string& type_name
                 return (ntk);
             }
         }();
-        const auto tables = mockturtle::simulate<py_tt>(
-            network, mockturtle::default_simulator<py_tt>{static_cast<unsigned>(network.num_pis())});
+        const auto tables = mockturtle::simulate<fiction::synthesis::truth_table>(
+            network,
+            mockturtle::default_simulator<fiction::synthesis::truth_table>{static_cast<unsigned>(network.num_pis())});
         std::vector<std::pair<std::string, std::vector<bool>>> result{};
         result.reserve(ntk.num_pos());
         ntk.foreach_po(
@@ -120,10 +120,10 @@ void register_logic_simulation_impl(nb::module_& m, const std::string& type_name
 /** @brief Register network and layout simulation. @param m Module. */
 void register_logic_simulation(nb::module_& m)
 {
-    detail::register_logic_simulation_impl<py_tec_network>(m, "network");
-    detail::register_logic_simulation_impl<py_aig_network>(m, "network");
-    detail::register_logic_simulation_impl<py_xag_network>(m, "network");
-    detail::register_logic_simulation_impl<py_mig_network>(m, "network");
+    detail::register_logic_simulation_impl<fiction::networks::named_technology_network>(m, "network");
+    detail::register_logic_simulation_impl<fiction::networks::named_aig_network>(m, "network");
+    detail::register_logic_simulation_impl<fiction::networks::named_xag_network>(m, "network");
+    detail::register_logic_simulation_impl<fiction::networks::named_mig_network>(m, "network");
     detail::register_logic_simulation_impl<fiction::layouts::cartesian_gate_layout>(m, "layout");
     detail::register_logic_simulation_impl<fiction::layouts::shifted_cartesian_gate_layout>(m, "layout");
     detail::register_logic_simulation_impl<fiction::layouts::hexagonal_gate_layout>(m, "layout");

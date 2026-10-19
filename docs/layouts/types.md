@@ -5,35 +5,17 @@ Gate-layout types are documented in {doc}`gate_layout`.
 
 **Header:** `fiction/types.hpp`
 
-```{doxygentypedef} fiction::tt
+```{doxygentypedef} fiction::networks::named_aig_network
 ```
 
-```{doxygentypedef} fiction::tt_ptr
+```{doxygentypedef} fiction::networks::named_xag_network
 ```
 
-```{doxygentypedef} fiction::truth_table_t
+```{doxygentypedef} fiction::networks::named_mig_network
 ```
 
-```{doxygentypedef} fiction::aig_nt
+```{doxygentypedef} fiction::networks::named_technology_network
 ```
 
-```{doxygentypedef} fiction::aig_ptr
-```
-
-```{doxygentypedef} fiction::xag_nt
-```
-
-```{doxygentypedef} fiction::xag_ptr
-```
-
-```{doxygentypedef} fiction::mig_nt
-```
-
-```{doxygentypedef} fiction::mig_ptr
-```
-
-```{doxygentypedef} fiction::tec_nt
-```
-
-```{doxygentypedef} fiction::tec_ptr
+```{doxygentypedef} fiction::synthesis::truth_table
 ```

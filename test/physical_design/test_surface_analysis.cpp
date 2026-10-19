@@ -28,8 +28,7 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/traits.hpp>
-
-#include <kitty/dynamic_truth_table.hpp>
+#include <fiction/types.hpp>
 
 using namespace fiction;
 using namespace fiction::fcn;
@@ -86,7 +85,7 @@ class dummy_gate_library : public gate_library<sidb::layout, 3, 3>
 };
 
 template <typename TTMap>
-static bool contains_tt(const TTMap& m, const kitty::dynamic_truth_table& elem) noexcept
+static bool contains_tt(const TTMap& m, const truth_table& elem) noexcept
 {
     return m.count(elem) > 0;
 }

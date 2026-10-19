@@ -36,9 +36,9 @@
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 
 #include <array>
@@ -58,6 +58,7 @@ using namespace fiction::layouts;
 using namespace fiction::layouts::io;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
+using namespace fiction::synthesis;
 
 /**
  * @brief Compares serialized placement, functions, ports, and interfaces.
@@ -340,7 +341,7 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     const auto            po    = layout.create_po(gate, "f", {2, 1, 0});
     layout.set_output_order(std::array{po, other});
     layout.set_input_order(std::array{a, b});
-    kitty::dynamic_truth_table constant{0};
+    truth_table constant{0};
     kitty::create_from_hex_string(constant, "1");
     layout.create_gate({}, constant, {0, 0, 0});
     std::stringstream stream{};

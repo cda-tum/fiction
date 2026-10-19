@@ -86,10 +86,10 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         op_domain_params.sweep_dimensions[0].max = 5.6;
         op_domain_params.sweep_dimensions[1].max = 5.1;
         const operational_domain_ratio_params params{op_domain_params};
-        const auto                            off_grid =
-            operational_domain_ratio(lat, std::vector<tt>{create_id_tt()}, parameter_point{{5.55, 5.05}}, params);
-        const auto on_grid =
-            operational_domain_ratio(lat, std::vector<tt>{create_id_tt()}, parameter_point{{5.6, 5.1}}, params);
+        const auto off_grid = operational_domain_ratio(lat, std::vector<truth_table>{create_id_tt()},
+                                                       parameter_point{{5.55, 5.05}}, params);
+        const auto on_grid  = operational_domain_ratio(lat, std::vector<truth_table>{create_id_tt()},
+                                                       parameter_point{{5.6, 5.1}}, params);
         CHECK_THAT(off_grid, Catch::Matchers::WithinAbs(on_grid, ERROR_MARGIN));
     }
 
@@ -104,7 +104,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
         const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lat, std::vector<tt>{create_id_tt()},
+        const auto op_domain_ratio = operational_domain_ratio(lat, std::vector<truth_table>{create_id_tt()},
                                                               parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size (1.0)
@@ -125,7 +125,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
         const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lat, std::vector<tt>{create_id_tt()},
+        const auto op_domain_ratio = operational_domain_ratio(lat, std::vector<truth_table>{create_id_tt()},
                                                               parameter_point({4.25, 4.25}), op_ratio_params);
 
         CHECK_THAT(op_domain_ratio - (80.0 / 256.0), Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
@@ -164,15 +164,15 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     operational_domain_ratio_params op_ratio_params{op_domain_params};
 
     // pruning and simulation to determine the operational status of the layout
-    const auto op_domain_ratio_pruning_and_simulation =
-        operational_domain_ratio(lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0}), op_ratio_params);
+    const auto op_domain_ratio_pruning_and_simulation = operational_domain_ratio(
+        lyt, std::vector<truth_table>{create_nand_tt()}, parameter_point({5.6, 5.0}), op_ratio_params);
 
     // only pruning to determine the operational status of the layout
     op_ratio_params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
         is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-    const auto op_domain_ratio_only_pruning =
-        operational_domain_ratio(lyt, std::vector<tt>{create_nand_tt()}, parameter_point({5.6, 5.0}), op_ratio_params);
+    const auto op_domain_ratio_only_pruning = operational_domain_ratio(lyt, std::vector<truth_table>{create_nand_tt()},
+                                                                       parameter_point({5.6, 5.0}), op_ratio_params);
 
     CHECK_THAT(op_domain_ratio_pruning_and_simulation, Catch::Matchers::WithinAbs(0.11918914799573235, ERROR_MARGIN));
 
@@ -214,7 +214,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 
         const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{create_and_tt()},
+        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<truth_table>{create_and_tt()},
                                                               parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
@@ -228,7 +228,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 
         const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{create_and_tt()},
+        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<truth_table>{create_and_tt()},
                                                               parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
@@ -245,7 +245,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 
         const operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{create_and_tt()},
+        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<truth_table>{create_and_tt()},
                                                               parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
@@ -259,8 +259,9 @@ TEST_CASE("Operational-domain ratios reject invalid sweep steps", "[compute-oper
     operational_domain_ratio_params params{};
     params.op_domain_params.sweep_dimensions = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.1, .step = 0.0}};
-    CHECK_THROWS_AS(operational_domain_ratio(layout{}, std::vector<tt>{create_id_tt()}, parameter_point{{5.0}}, params),
-                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        operational_domain_ratio(layout{}, std::vector<truth_table>{create_id_tt()}, parameter_point{{5.0}}, params),
+        std::invalid_argument);
 }
 
 TEST_CASE("Operational-domain ratios reject malformed seeds", "[compute-operational-ratio]")
@@ -281,10 +282,11 @@ TEST_CASE("Operational-domain ratios reject malformed seeds", "[compute-operatio
                                                              {5.0, 6.1}})
     {
         CHECK_THROWS_AS(
-            operational_domain_ratio(layout{}, std::vector<tt>{create_id_tt()}, parameter_point{seed}, params),
+            operational_domain_ratio(layout{}, std::vector<truth_table>{create_id_tt()}, parameter_point{seed}, params),
             std::invalid_argument);
     }
     params.op_domain_params.sweep_dimensions.resize(1);
-    CHECK_THROWS_AS(operational_domain_ratio(layout{}, std::vector<tt>{create_id_tt()}, parameter_point{{5.0}}, params),
-                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        operational_domain_ratio(layout{}, std::vector<truth_table>{create_id_tt()}, parameter_point{{5.0}}, params),
+        std::invalid_argument);
 }

@@ -30,10 +30,10 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 
 #include <array>
 #include <chrono>
@@ -97,8 +97,8 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
 
 TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports", "[parameterized-gate-library]")
 {
-    kitty::dynamic_truth_table ge{2};
-    kitty::dynamic_truth_table le{2};
+    truth_table ge{2};
+    truth_table le{2};
     kitty::create_from_binary_string(ge, "1101");
     kitty::create_from_binary_string(le, "1011");
     const std::array functions{

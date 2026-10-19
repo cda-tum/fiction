@@ -23,11 +23,11 @@
 #include <fiction/networks/views/bfs_topo_view.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/graph/mincross.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <vector>
 
@@ -141,7 +141,7 @@ TEST_CASE("Majority", "[mincross]")
 
 TEST_CASE("Adder", "[mincross]")
 {
-    auto tec = blueprints::full_adder_network<mockturtle::names_view<technology_network>>();
+    auto tec = blueprints::full_adder_network<named_technology_network>();
 
     auto tec_b = network_balancing<technology_network>(tec);
 

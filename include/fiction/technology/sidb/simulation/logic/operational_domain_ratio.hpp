@@ -19,8 +19,7 @@
 
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
-
-#include <kitty/dynamic_truth_table.hpp>
+#include "fiction/types.hpp"
 
 #include <vector>
 
@@ -56,10 +55,10 @@ struct operational_domain_ratio_params
  * @throws std::invalid_argument if the sweep has fewer than two dimensions, a range is invalid, or the seed is
  * non-finite, outside the grid, or has the wrong dimension count.
  */
-[[nodiscard]] inline double operational_domain_ratio(const layout&                                  lyt,
-                                                     const std::vector<kitty::dynamic_truth_table>& spec,
-                                                     const parameter_point&                         pp,
-                                                     const operational_domain_ratio_params&         params = {})
+[[nodiscard]] inline double operational_domain_ratio(const layout&                                       lyt,
+                                                     const std::vector<fiction::synthesis::truth_table>& spec,
+                                                     const parameter_point&                              pp,
+                                                     const operational_domain_ratio_params&              params = {})
 {
     operational_domain_stats stats{};
 

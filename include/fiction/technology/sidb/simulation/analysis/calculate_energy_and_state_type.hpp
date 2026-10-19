@@ -26,10 +26,10 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/logic/verify_logic_match.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <kitty/bit_operations.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -76,7 +76,7 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
  */
 [[nodiscard]] inline energy_and_state_type calculate_energy_and_state_type_with_kinks_accepted(
     const energy_distribution& energy_dist, const std::vector<charge_distribution>& valid_charge_distributions,
-    const std::vector<logic::bdl_pair>& output_bdl_pairs, const std::vector<kitty::dynamic_truth_table>& spec,
+    const std::vector<logic::bdl_pair>& output_bdl_pairs, const std::vector<fiction::synthesis::truth_table>& spec,
     const uint64_t input_index)
 {
     assert(!output_bdl_pairs.empty() && "No output dot provided.");
@@ -131,8 +131,8 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
  */
 [[nodiscard]] inline energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
     const layout& lyt, const energy_distribution& energy_dist,
-    const std::vector<charge_distribution>&        valid_charge_distributions,
-    const std::vector<kitty::dynamic_truth_table>& spec, const uint64_t input_index,
+    const std::vector<charge_distribution>&             valid_charge_distributions,
+    const std::vector<fiction::synthesis::truth_table>& spec, const uint64_t input_index,
     const std::vector<logic::bdl_wire>& input_bdl_wires, const std::vector<logic::bdl_wire>& output_bdl_wires)
 {
     energy_and_state_type est{};

@@ -72,18 +72,18 @@ try
             "t_pruning [s]"             // double
     };
 
-    const auto truth_tables_and_names =
-        std::array<std::pair<std::vector<tt>, std::string>, 11>{{{std::vector<tt>{create_and3_tt()}, "and3"},
-                                                                 {std::vector<tt>{create_xor_and_tt()}, "xor_and"},
-                                                                 {std::vector<tt>{create_or_and_tt()}, "or_and"},
-                                                                 {std::vector<tt>{create_onehot_tt()}, "onehot"},
-                                                                 {std::vector<tt>{create_maj_tt()}, "maj"},
-                                                                 {std::vector<tt>{create_gamble_tt()}, "gamble"},
-                                                                 {std::vector<tt>{create_dot_tt()}, "dot"},
-                                                                 {std::vector<tt>{create_ite_tt()}, "ite"},
-                                                                 {std::vector<tt>{create_and_xor_tt()}, "and_xor"},
-                                                                 {std::vector<tt>{create_xor3_tt()}, "xor3"},
-                                                                 {std::vector<tt>{create_ite_tt()}, "21_mux"}}};
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<truth_table>, std::string>, 11>{
+        {{std::vector<truth_table>{create_and3_tt()}, "and3"},
+         {std::vector<truth_table>{create_xor_and_tt()}, "xor_and"},
+         {std::vector<truth_table>{create_or_and_tt()}, "or_and"},
+         {std::vector<truth_table>{create_onehot_tt()}, "onehot"},
+         {std::vector<truth_table>{create_maj_tt()}, "maj"},
+         {std::vector<truth_table>{create_gamble_tt()}, "gamble"},
+         {std::vector<truth_table>{create_dot_tt()}, "dot"},
+         {std::vector<truth_table>{create_ite_tt()}, "ite"},
+         {std::vector<truth_table>{create_and_xor_tt()}, "and_xor"},
+         {std::vector<truth_table>{create_xor3_tt()}, "xor3"},
+         {std::vector<truth_table>{create_ite_tt()}, "21_mux"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input/", EXPERIMENTS_PATH);
 

@@ -15,10 +15,11 @@
  */
 
 #include "fiction/layouts/layout_base.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate and extent tuple signatures.
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/placement_utils.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/traits.hpp>
 
@@ -79,9 +80,10 @@ void register_placement_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_place<fiction::layouts::cartesian_gate_layout, py_tec_network>(m);
-    detail::register_place<fiction::layouts::shifted_cartesian_gate_layout, py_tec_network>(m);
-    detail::register_place<fiction::layouts::hexagonal_gate_layout, py_tec_network>(m);
+    detail::register_place<fiction::layouts::cartesian_gate_layout, fiction::networks::named_technology_network>(m);
+    detail::register_place<fiction::layouts::shifted_cartesian_gate_layout,
+                           fiction::networks::named_technology_network>(m);
+    detail::register_place<fiction::layouts::hexagonal_gate_layout, fiction::networks::named_technology_network>(m);
 }
 
 }  // namespace pyfiction

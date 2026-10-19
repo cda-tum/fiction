@@ -26,48 +26,37 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <memory>
-#include <type_traits>
-
-namespace fiction
+namespace fiction::synthesis
 {
-/**
- * This file provides preset types that can be used as parameter types to run fiction's algorithms. They are furthermore
- * utilized in fiction's CLI. Naturally, this selection is neither complete nor final and can be extended at any time by
- * custom types.
- */
 
 /**
- * Truth tables.
+ * @brief Dynamic truth table for Boolean functions.
  */
-using tt     = kitty::dynamic_truth_table;
-using tt_ptr = std::shared_ptr<tt>;
+using truth_table = kitty::dynamic_truth_table;
 
-using truth_table_t = tt_ptr;
+}  // namespace fiction::synthesis
+
+namespace fiction::networks
+{
 
 /**
- * Logic networks.
+ * @brief AND-inverter graph with network, signal, and output names.
  */
-using aig_nt  = mockturtle::names_view<mockturtle::aig_network>;
-using aig_ptr = std::shared_ptr<aig_nt>;
-
-using xag_nt  = mockturtle::names_view<mockturtle::xag_network>;
-using xag_ptr = std::shared_ptr<xag_nt>;
-
-using mig_nt  = mockturtle::names_view<mockturtle::mig_network>;
-using mig_ptr = std::shared_ptr<mig_nt>;
-
-using tec_nt  = mockturtle::names_view<fiction::networks::technology_network>;
-using tec_ptr = std::shared_ptr<tec_nt>;
+using named_aig_network = mockturtle::names_view<mockturtle::aig_network>;
 
 /**
- * Every `*_ptr` alias points at the type its name says (`aig_ptr` at `aig_nt`, and so on). The
- * aliases above are written by hand, so this pins each pair.
+ * @brief XOR-AND-inverter graph with network, signal, and output names.
  */
-static_assert(std::is_same_v<tt_ptr::element_type, tt>);
-static_assert(std::is_same_v<aig_ptr::element_type, aig_nt>);
-static_assert(std::is_same_v<xag_ptr::element_type, xag_nt>);
-static_assert(std::is_same_v<mig_ptr::element_type, mig_nt>);
-static_assert(std::is_same_v<tec_ptr::element_type, tec_nt>);
+using named_xag_network = mockturtle::names_view<mockturtle::xag_network>;
 
-}  // namespace fiction
+/**
+ * @brief Majority-inverter graph with network, signal, and output names.
+ */
+using named_mig_network = mockturtle::names_view<mockturtle::mig_network>;
+
+/**
+ * @brief Technology network with network, signal, and output names.
+ */
+using named_technology_network = mockturtle::names_view<technology_network>;
+
+}  // namespace fiction::networks

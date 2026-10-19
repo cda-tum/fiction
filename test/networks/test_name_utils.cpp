@@ -25,10 +25,9 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/types.hpp>
 
-#include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/node_map.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <stdexcept>
 #include <string_view>
@@ -40,8 +39,8 @@ using namespace fiction::networks;
 TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bounds", "[name-utils]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    mockturtle::names_view<technology_network> ntk{};
-    const auto                                 input = ntk.create_pi("a");
+    named_technology_network ntk{};
+    const auto               input = ntk.create_pi("a");
     ntk.create_po(input, "f");
     set_name(ntk, std::string_view{"prefix suffix", 6});
 
@@ -53,7 +52,7 @@ TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bound
     CHECK(lyt.get_input_name(0) == "a");
     CHECK(lyt.get_output_name(0) == "f");
 
-    mockturtle::names_view<technology_network> copied{};
+    named_technology_network copied{};
     copied.create_po(copied.create_pi());
     restore_names(lyt, copied);
     CHECK(copied.get_network_name() == "prefix");
@@ -65,7 +64,7 @@ TEMPLATE_TEST_CASE("Signal names transfer from a logic network to placed objects
                    shifted_cartesian_layout, hexagonal_layout)
 {
     /** Named logic source with an internal signal and a declared output. */
-    mockturtle::names_view<technology_network> ntk{};
+    named_technology_network ntk{};
     /** Named primary input signal. */
     const auto input = ntk.create_pi("input");
     /** Named internal signal. */
@@ -101,7 +100,7 @@ TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unu
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
     /** Logic source with a named output driver and unused inputs. */
-    mockturtle::names_view<technology_network> ntk{};
+    named_technology_network ntk{};
     /** Connected primary input. */
     const auto input = ntk.create_pi("input");
     /** Unused input with a target mapping. */
@@ -144,7 +143,7 @@ TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unu
 TEST_CASE("Signal name restoration retains used complemented names", "[name-utils]")
 {
     /** Source with a separately named complemented signal. */
-    mockturtle::names_view<mockturtle::aig_network> source{};
+    named_aig_network source{};
     /** Source input whose complement carries a name. */
     const auto input = source.create_pi();
     /** Named complemented source signal. */
@@ -159,7 +158,7 @@ TEST_CASE("Signal name restoration retains used complemented names", "[name-util
         source.create_po(inverted);
     }
     /** Target network receiving the mapped signal name. */
-    mockturtle::names_view<mockturtle::aig_network> target{};
+    named_aig_network target{};
     /** Mapped target signal. */
     const auto mapped = target.create_pi();
     /** Source-node mapping to target signals. */

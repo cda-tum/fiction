@@ -62,35 +62,35 @@ and the flood fill visits every point anyway, at a higher per-point cost than a 
 grid search with the sketch, and raise the sample count substantially before combining the sketch with
 flood fill or contour tracing in three dimensions.
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_grid_search(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_random_sampling(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_flood_fill(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_contour_tracing(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 

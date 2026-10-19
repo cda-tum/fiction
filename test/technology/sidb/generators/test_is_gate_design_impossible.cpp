@@ -35,7 +35,7 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Reject an empty gate specification", "[is-gate-design-impossible]")
 {
-    CHECK_THROWS_AS(is_gate_design_impossible(layout{}, std::vector<tt>{}), std::invalid_argument);
+    CHECK_THROWS_AS(is_gate_design_impossible(layout{}, std::vector<truth_table>{}), std::invalid_argument);
 }
 
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-design-impossible]")
@@ -63,7 +63,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-d
     SECTION("without defect")
     {
         CHECK(!is_gate_design_impossible(
-            lyt, std::vector<tt>{create_and_tt()},
+            lyt, std::vector<truth_table>{create_and_tt()},
             is_gate_design_impossible_params{.sim_params = simulation_parameters{2, -0.28}}));
     }
 
@@ -72,7 +72,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-d
         lyt.assign_defect({12, 6, 0}, defect{defect_type::SI_VACANCY, -1, 10, 5});
         lyt.assign_defect({11, 6, 0}, defect{defect_type::SI_VACANCY, -1, 10, 5});
         CHECK(
-            is_gate_design_impossible(lyt, std::vector<tt>{create_and_tt()},
+            is_gate_design_impossible(lyt, std::vector<truth_table>{create_and_tt()},
                                       is_gate_design_impossible_params{.sim_params = simulation_parameters{2, -0.28}}));
     }
 }

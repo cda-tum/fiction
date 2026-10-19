@@ -24,10 +24,10 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/types.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -39,6 +39,7 @@
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
+using namespace fiction::synthesis;
 using namespace fiction::verification;
 
 template <typename Spec, typename Impl>
@@ -246,7 +247,7 @@ TEST_CASE("Physical equivalence returns NO for a clocked required cycle", "[equi
     spec.create_po(spec.create_pi("a"), "result");
     gate_layout<cartesian_layout> lyt{{3, 3}};
     const auto                    pi = lyt.create_pi("a", {0, 1});
-    kitty::dynamic_truth_table    function{2};
+    truth_table                   function{2};
     kitty::create_from_hex_string(function, "8");
     const auto gate   = lyt.create_gate({pi}, function, {1, 1});
     const auto first  = lyt.create_buf(gate, {2, 1});

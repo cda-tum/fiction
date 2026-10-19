@@ -315,14 +315,14 @@ class technology_mapping_impl
     {}
 
     /** @brief Returns the source network mapped to the supplied technology library. */
-    [[nodiscard]] tec_nt run() const
+    [[nodiscard]] fiction::networks::named_technology_network run() const
     {
         // Validate that the library contains required gates for the base network type
         validate_required_gates();
 
         const auto gate_library = set_up_gates();
 
-        tec_nt mapped_ntk{};
+        fiction::networks::named_technology_network mapped_ntk{};
 
         if (params.maj3 || params.dot || params.and3 || params.xor_and || params.or_and || params.onehot ||
             params.gamble || params.mux || params.and_xor)
@@ -582,7 +582,8 @@ class technology_mapping_impl
      * @return Mapped network.
      */
     template <unsigned NumInp>
-    [[nodiscard]] tec_nt perform_mapping(const std::vector<mockturtle::gate>& gates) const
+    [[nodiscard]] fiction::networks::named_technology_network
+    perform_mapping(const std::vector<mockturtle::gate>& gates) const
     {
         mockturtle::tech_library<NumInp> lib{gates};
 
@@ -606,17 +607,17 @@ class technology_mapping_impl
             });
         if (stats.mapper_stats.mapping_error)
         {
-            return tec_nt{};
+            return fiction::networks::named_technology_network{};
         }
 
         const auto mapped_ntk = mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
 
-        tec_nt converted_ntk{};
+        fiction::networks::named_technology_network converted_ntk{};
 
         if (!stats.mapper_stats.mapping_error)
         {
             // convert network
-            converted_ntk = convert_network<tec_nt>(mapped_ntk);
+            converted_ntk = convert_network<fiction::networks::named_technology_network>(mapped_ntk);
             networks::restore_names(ntk, converted_ntk);
         }
 
@@ -640,8 +641,9 @@ class technology_mapping_impl
  *         network type (e.g., AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ).
  */
 template <typename Ntk>
-[[nodiscard]] tec_nt technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
-                                        technology_mapping_stats* pst = nullptr)
+[[nodiscard]] fiction::networks::named_technology_network
+technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
+                   technology_mapping_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 

@@ -23,15 +23,14 @@
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <array>
 #include <string>
@@ -103,10 +102,10 @@ TEST_CASE("Simple network conversion", "[network-conversion]")
 
 TEST_CASE("Name conservation after network conversion", "[network-conversion]")
 {
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    auto maj = blueprints::maj1_network<named_mig_network>();
     maj.set_network_name("maj");
 
-    const auto converted_maj = convert_network<mockturtle::names_view<technology_network>>(maj);
+    const auto converted_maj = convert_network<named_technology_network>(maj);
 
     // network name
     CHECK(converted_maj.get_network_name() == "maj");
@@ -228,15 +227,15 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
     {
         for (auto function = 0u; function < (1u << (1u << variables)); ++function)
         {
-            mockturtle::names_view<technology_network> source{};
-            std::vector<technology_network::signal>    inputs{};
+            named_technology_network                source{};
+            std::vector<technology_network::signal> inputs{};
             inputs.reserve(variables);
             for (auto index = 0u; index < variables; ++index)
             {
                 inputs.push_back(source.create_pi(std::string(1, static_cast<char>('a' + index))));
             }
-            kitty::dynamic_truth_table expected{variables};
-            const std::array           words{function};
+            truth_table      expected{variables};
+            const std::array words{function};
             kitty::create_from_words(expected, words.begin(), words.end());
             const auto output = source.create_node(inputs, expected);
             source.create_po(output, "f");
@@ -249,17 +248,17 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
                 CHECK(converted.get_output_name(0) == "f");
                 CHECK(converted.get_output_name(1) == "g");
                 CHECK(converted.get_output_name(2) == "one");
-                const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
-                    converted, mockturtle::default_simulator<kitty::dynamic_truth_table>{variables});
+                const auto actual =
+                    mockturtle::simulate<truth_table>(converted, mockturtle::default_simulator<truth_table>{variables});
                 REQUIRE(actual.size() == 3u);
                 CHECK(actual[0] == expected);
                 CHECK(actual[1] == ~expected);
                 CHECK(kitty::is_const0(~actual[2]));
             };
-            verify(convert_network<mockturtle::names_view<technology_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::aig_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::xag_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::mig_network>>(source));
+            verify(convert_network<named_technology_network>(source));
+            verify(convert_network<named_aig_network>(source));
+            verify(convert_network<named_xag_network>(source));
+            verify(convert_network<named_mig_network>(source));
         }
     }
 }

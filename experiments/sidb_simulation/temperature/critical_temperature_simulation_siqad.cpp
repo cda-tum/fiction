@@ -53,11 +53,12 @@ try
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
+    static const std::array<std::pair<std::string, std::vector<truth_table>>, 5> gates = {
+        std::make_pair("and", std::vector<truth_table>{create_and_tt()}),
+        std::make_pair("nand", std::vector<truth_table>{create_nand_tt()}),
+        std::make_pair("xnor", std::vector<truth_table>{create_xnor_tt()}),
+        std::make_pair("xor", std::vector<truth_table>{create_xor_tt()}),
+        std::make_pair("or", std::vector<truth_table>{create_or_tt()})};
 
     const simulation_parameters sim_params{2, -0.28};
     critical_temperature_params ct_params{.operational_params = {.sim_params = sim_params}};

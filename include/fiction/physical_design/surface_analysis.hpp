@@ -24,8 +24,8 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
 
 #include <concepts>
@@ -48,8 +48,8 @@ namespace fiction::physical_design
 template <typename PortType>
 using surface_black_list =
     std::unordered_map<layouts::layout_base::coordinate,
-                       std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn::port_list<PortType>>,
-                                          kitty::hash<kitty::dynamic_truth_table>>>;
+                       std::unordered_map<fiction::synthesis::truth_table, std::vector<fcn::port_list<PortType>>,
+                                          kitty::hash<fiction::synthesis::truth_table>>>;
 
 /**
  * @brief Analyzes a defective SiDB surface for a gate-level layout: for every tile and every gate implementation of the

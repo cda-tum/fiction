@@ -88,21 +88,21 @@ try
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
-    const auto truth_tables_and_names =
-        std::array<std::pair<std::vector<tt>, std::string>, 14>{{{std::vector<tt>{create_id_tt()}, "wire"},
-                                                                 {std::vector<tt>{create_id_tt()}, "wire_diag"},
-                                                                 {std::vector<tt>{create_not_tt()}, "inv"},
-                                                                 {std::vector<tt>{create_not_tt()}, "inv_diag"},
-                                                                 {std::vector<tt>{create_and_tt()}, "and"},
-                                                                 {std::vector<tt>{create_nand_tt()}, "nand"},
-                                                                 {std::vector<tt>{create_or_tt()}, "or"},
-                                                                 {std::vector<tt>{create_nor_tt()}, "nor"},
-                                                                 {std::vector<tt>{create_xor_tt()}, "xor"},
-                                                                 {std::vector<tt>{create_xnor_tt()}, "xnor"},
-                                                                 {create_fan_out_tt(), "fo2"},
-                                                                 {create_crossing_wire_tt(), "cx"},
-                                                                 {create_half_adder_tt(), "ha"},
-                                                                 {create_double_wire_tt(), "hourglass"}}};
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<truth_table>, std::string>, 14>{
+        {{std::vector<truth_table>{create_id_tt()}, "wire"},
+         {std::vector<truth_table>{create_id_tt()}, "wire_diag"},
+         {std::vector<truth_table>{create_not_tt()}, "inv"},
+         {std::vector<truth_table>{create_not_tt()}, "inv_diag"},
+         {std::vector<truth_table>{create_and_tt()}, "and"},
+         {std::vector<truth_table>{create_nand_tt()}, "nand"},
+         {std::vector<truth_table>{create_or_tt()}, "or"},
+         {std::vector<truth_table>{create_nor_tt()}, "nor"},
+         {std::vector<truth_table>{create_xor_tt()}, "xor"},
+         {std::vector<truth_table>{create_xnor_tt()}, "xnor"},
+         {create_fan_out_tt(), "fo2"},
+         {create_crossing_wire_tt(), "cx"},
+         {create_half_adder_tt(), "ha"},
+         {create_double_wire_tt(), "hourglass"}}};
 
     double mean_ratio_num_op_sketch_to_num_op_grid_search = 0.0;
     double total_runtime_grid_search                      = 0.0;

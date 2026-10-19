@@ -31,13 +31,12 @@
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
+#include <fiction/types.hpp>
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <algorithm>
 #include <array>
@@ -57,6 +56,7 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
+using namespace fiction::synthesis;
 
 /**
  * @brief Accesses an optional after a Catch2 assertion established that it contains a value.
@@ -136,7 +136,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
         CHECK_NOTHROW(apply_gate_library<qca_one_library>(required_value(layout)));
     };
 
-    check(blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>());
+    check(blueprints::maj1_network<named_aig_network>());
 }
 
 TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
@@ -626,10 +626,10 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
 
 TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[graph-oriented-layout-design]")
 {
-    mockturtle::names_view<technology_network> ntk{};
-    const auto                                 unused = ntk.create_pi("unused");
-    const auto                                 a      = ntk.create_pi("a");
-    const auto                                 b      = ntk.create_pi("b");
+    named_technology_network ntk{};
+    const auto               unused = ntk.create_pi("unused");
+    const auto               a      = ntk.create_pi("a");
+    const auto               b      = ntk.create_pi("b");
     ntk.create_po(ntk.create_lt(b, a), "less");
     ntk.set_network_name("ordered");
     static_cast<void>(unused);
@@ -646,18 +646,17 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     CHECK(layout.get_name(layout.pi_at(2)) == "b");
     CHECK(layout.get_output_name(0) == "less");
     CHECK(layout.get_layout_name() == "ordered");
-    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{3};
-    const auto                                                      extracted = extract_layout_network(layout);
-    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extracted, simulator) ==
-          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
+    const mockturtle::default_simulator<truth_table> simulator{3};
+    const auto                                       extracted = extract_layout_network(layout);
+    CHECK(mockturtle::simulate<truth_table>(extracted, simulator) == mockturtle::simulate<truth_table>(ntk, simulator));
     layout.foreach_object([&](const auto id) { CHECK(layout.is_within_bounds(layout.get_tile(id))); });
 }
 
 TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty",
           "[graph-oriented-layout-design]")
 {
-    mockturtle::names_view<technology_network> empty{};
-    graph_oriented_layout_design_params        params{};
+    named_technology_network            empty{};
+    graph_oriented_layout_design_params params{};
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
@@ -665,7 +664,7 @@ TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks 
     REQUIRE(empty_result.has_value());
     CHECK(required_value(empty_result).is_empty());
     CHECK(required_value(empty_result).area() == 0);
-    mockturtle::names_view<technology_network> ntk{};
+    named_technology_network ntk{};
     ntk.create_po(ntk.get_constant(false), "zero");
     ntk.create_po(ntk.get_constant(true), "one");
     const auto result = graph_oriented_layout_design<gate_layout<cartesian_layout>>(ntk, params);
@@ -673,15 +672,15 @@ TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks 
     CHECK(required_value(result).num_pis() == 0);
     CHECK(required_value(result).num_pos() == 2);
     CHECK(required_value(result).num_gates() == 2);
-    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{0};
-    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extract_layout_network(required_value(result)), simulator) ==
-          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
+    const mockturtle::default_simulator<truth_table> simulator{0};
+    CHECK(mockturtle::simulate<truth_table>(extract_layout_network(required_value(result)), simulator) ==
+          mockturtle::simulate<truth_table>(ntk, simulator));
 }
 
 TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-oriented-layout-design]")
 {
-    mockturtle::names_view<technology_network> ntk{};
-    const auto                                 input = ntk.create_pi("input");
+    named_technology_network ntk{};
+    const auto               input = ntk.create_pi("input");
     ntk.create_po(input, "input_copy");
     ntk.create_po(ntk.get_constant(true), "one");
     ntk.create_po(ntk.get_constant(false), "zero");
@@ -694,7 +693,7 @@ TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-orient
     CHECK(required_value(result).get_output_name(0) == "input_copy");
     CHECK(required_value(result).get_output_name(1) == "one");
     CHECK(required_value(result).get_output_name(2) == "zero");
-    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{1};
-    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extract_layout_network(required_value(result)), simulator) ==
-          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
+    const mockturtle::default_simulator<truth_table> simulator{1};
+    CHECK(mockturtle::simulate<truth_table>(extract_layout_network(required_value(result)), simulator) ==
+          mockturtle::simulate<truth_table>(ntk, simulator));
 }

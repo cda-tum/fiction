@@ -26,10 +26,10 @@
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/progress.hpp"
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -183,8 +183,8 @@ class defect_influence_impl
      * @return The defect influence domain.
      */
     [[nodiscard]] defect_influence_domain
-    grid_search(const std::size_t                                             step_size,
-                const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
+    grid_search(const std::size_t                                                  step_size,
+                const std::optional<std::vector<fiction::synthesis::truth_table>>& spec = std::nullopt)
     {
         if (step_size == 0)
         {
@@ -218,8 +218,8 @@ class defect_influence_impl
      * @return The defect influence domain.
      */
     [[nodiscard]] defect_influence_domain
-    random_sampling(const std::size_t                                             samples,
-                    const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
+    random_sampling(const std::size_t                                                  samples,
+                    const std::optional<std::vector<fiction::synthesis::truth_table>>& spec = std::nullopt)
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -247,8 +247,8 @@ class defect_influence_impl
      * @return The defect influence domain.
      */
     [[nodiscard]] defect_influence_domain
-    quicktrace(const std::size_t                                             samples,
-               const std::optional<std::vector<kitty::dynamic_truth_table>>& spec = std::nullopt)
+    quicktrace(const std::size_t                                                  samples,
+               const std::optional<std::vector<fiction::synthesis::truth_table>>& spec = std::nullopt)
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -459,7 +459,7 @@ class defect_influence_impl
      * @return The position, or `std::nullopt` if the defect is influential there.
      */
     [[nodiscard]] std::optional<lattice_site> find_non_influential_defect_position_at_left_side(
-        const std::optional<std::vector<kitty::dynamic_truth_table>>& spec)
+        const std::optional<std::vector<fiction::synthesis::truth_table>>& spec)
     {
         std::uniform_int_distribution<int64_t> dist{nw_row, se_row};
 
@@ -479,8 +479,9 @@ class defect_influence_impl
      * @param defect_cell The defect position.
      * @return The verdict.
      */
-    defect_influence_status is_defect_influential(const std::optional<std::vector<kitty::dynamic_truth_table>>& spec,
-                                                  const lattice_site& defect_cell)
+    defect_influence_status
+    is_defect_influential(const std::optional<std::vector<fiction::synthesis::truth_table>>& spec,
+                          const lattice_site&                                                defect_cell)
     {
         utils::check_deadline(params.operational_params.deadline);
         ++num_evaluated_defect_positions;
@@ -612,8 +613,8 @@ class defect_influence_impl
      * @return The last non-influential position before the influential region, or `std::nullopt` if none is hit.
      */
     [[nodiscard]] std::optional<lattice_site> find_last_non_influential_defect_position_moving_right(
-        const std::optional<std::vector<kitty::dynamic_truth_table>>& spec,
-        const lattice_site&                                           starting_defect_position)
+        const std::optional<std::vector<fiction::synthesis::truth_table>>& spec,
+        const lattice_site&                                                starting_defect_position)
     {
         const auto row = row_of(starting_defect_position);
 
@@ -751,7 +752,7 @@ class defect_influence_impl
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 [[nodiscard]] inline defect_influence_domain
-defect_influence_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+defect_influence_grid_search(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                              const defect_influence_params& params = {}, const std::size_t step_size = 1,
                              defect_influence_stats* stats = nullptr)
 {
@@ -818,7 +819,7 @@ defect_influence_grid_search(const layout& lyt, const std::vector<kitty::dynamic
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 [[nodiscard]] inline defect_influence_domain
-defect_influence_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+defect_influence_random_sampling(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                                  const std::size_t samples, const defect_influence_params& params = {},
                                  defect_influence_stats* stats = nullptr)
 {
@@ -907,7 +908,7 @@ defect_influence_random_sampling(const layout& lyt, const std::size_t samples,
  * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 [[nodiscard]] inline defect_influence_domain
-defect_influence_quicktrace(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+defect_influence_quicktrace(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                             const std::size_t samples, const defect_influence_params& params = {},
                             defect_influence_stats* stats = nullptr)
 {

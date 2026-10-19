@@ -14,9 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/types.hpp"
-
 #include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/atomic_write.hpp>
 
 #include <mockturtle/io/write_aiger.hpp>
@@ -58,7 +57,7 @@ void register_network_writers(nb::module_& m)
             mockturtle::write_verilog_params params{};
             params.module_name = "top";
 
-            if constexpr (std::is_same_v<Ntk, py_tec_network>)
+            if constexpr (std::is_same_v<Ntk, fiction::networks::named_technology_network>)
             {
                 // gate-level Verilog has no buffers or fan-out nodes, so a technology network is written as
                 // an equivalent XAG
@@ -66,7 +65,8 @@ void register_network_writers(nb::module_& m)
                     filename,
                     [&](std::ostream& os)
                     {
-                        mockturtle::write_verilog(fiction::synthesis::convert_network<py_xag_network>(ntk), os, params);
+                        mockturtle::write_verilog(
+                            fiction::synthesis::convert_network<fiction::networks::named_xag_network>(ntk), os, params);
                     });
             }
             else
@@ -97,14 +97,14 @@ void register_network_writers(nb::module_& m)
  */
 void register_network_writers(nb::module_& m)
 {
-    detail::register_network_writers<py_tec_network>(m);
-    detail::register_network_writers<py_aig_network>(m);
-    detail::register_network_writers<py_xag_network>(m);
-    detail::register_network_writers<py_mig_network>(m);
+    detail::register_network_writers<fiction::networks::named_technology_network>(m);
+    detail::register_network_writers<fiction::networks::named_aig_network>(m);
+    detail::register_network_writers<fiction::networks::named_xag_network>(m);
+    detail::register_network_writers<fiction::networks::named_mig_network>(m);
 
     // AIGER encodes AND gates and inverted edges; other network types require conversion to an AIG.
     m.def(
-        "write_aiger", [](const py_aig_network& ntk, const std::string& filename)
+        "write_aiger", [](const fiction::networks::named_aig_network& ntk, const std::string& filename)
         { fiction::detail::atomic_write(filename, [&](std::ostream& os) { mockturtle::write_aiger(ntk, os); }); },
         nb::arg("network"), nb::arg("filename"),
         "Writes the AIG as a binary AIGER file, including its input, output, and network names. A file that "

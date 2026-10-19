@@ -24,13 +24,11 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/depth_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
 #include <limits>
@@ -93,10 +91,10 @@ TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
 
 TEST_CASE("Name conservation after fanout substitution", "[fanout-substitution]")
 {
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    auto maj = blueprints::maj1_network<named_mig_network>();
     maj.set_network_name("maj");
 
-    const auto substituted_maj = fanout_substitution<mockturtle::names_view<technology_network>>(maj);
+    const auto substituted_maj = fanout_substitution<named_technology_network>(maj);
 
     // network name
     CHECK(substituted_maj.get_network_name() == "maj");
@@ -149,11 +147,11 @@ TEST_CASE("Consistent fanout substitution after balancing", "[fanout-substitutio
 
 TEST_CASE("Repeated inputs respect fanout degrees below the source threshold", "[fanout-substitution]")
 {
-    using strategy                    = fanout_substitution_params::substitution_strategy;
-    const auto                 choice = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
-    technology_network         original{};
-    const auto                 a = original.create_pi();
-    kitty::dynamic_truth_table parity{5};
+    using strategy            = fanout_substitution_params::substitution_strategy;
+    const auto         choice = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
+    technology_network original{};
+    const auto         a = original.create_pi();
+    truth_table        parity{5};
     kitty::create_from_hex_string(parity, "96696996");
     original.create_po(original.create_node({a, a, a, a, a}, parity));
     const fanout_substitution_params ps{.strategy = choice, .degree = 2, .threshold = 3, .seed = 42};

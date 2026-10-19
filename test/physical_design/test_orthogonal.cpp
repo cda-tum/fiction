@@ -31,12 +31,12 @@
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
+#include <fiction/types.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/fanout_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <optional>
 #include <sstream>
@@ -194,7 +194,7 @@ TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogo
 
 TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 {
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
+    auto maj = blueprints::maj1_network<named_aig_network>();
     maj.set_network_name("maj");
 
     const auto layout = orthogonal<cartesian_gate_layout>(maj);

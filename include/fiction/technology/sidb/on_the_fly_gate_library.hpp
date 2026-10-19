@@ -33,7 +33,6 @@
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
 #include "fiction/types.hpp"
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <phmap.h>
 
 #include <algorithm>
@@ -65,8 +64,9 @@ class gate_design_exception : public std::exception
      * @param spec The truth table associated with the error.
      * @param portlist The port list associated with the error.
      */
-    explicit gate_design_exception(const fiction::layouts::layout_base::coordinate& ti, kitty::dynamic_truth_table spec,
-                                   const fcn::port_list<fcn::port_direction>& portlist) :
+    explicit gate_design_exception(const fiction::layouts::layout_base::coordinate& ti,
+                                   fiction::synthesis::truth_table                  spec,
+                                   const fcn::port_list<fcn::port_direction>&       portlist) :
             std::exception(),
             error_tile{ti},
             truth_table{std::move(spec)},
@@ -86,7 +86,7 @@ class gate_design_exception : public std::exception
      *
      * @return A copy of the Boolean specification.
      */
-    [[nodiscard]] kitty::dynamic_truth_table which_truth_table() const
+    [[nodiscard]] fiction::synthesis::truth_table which_truth_table() const
     {
         return truth_table;
     }
@@ -108,7 +108,7 @@ class gate_design_exception : public std::exception
     /**
      * The truth table associated with the error.
      */
-    const kitty::dynamic_truth_table truth_table{};
+    const fiction::synthesis::truth_table truth_table{};
     /**
      * The port list associated with the error.
      */
@@ -339,10 +339,12 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                         const auto skeleton_with_defects =
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
-                        return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate<GateLyt>(skeleton_with_defects,
+                                                    std::vector<fiction::synthesis::truth_table>{f}, params, p, t);
                     }
 
-                    return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton, std::vector<fiction::synthesis::truth_table>{f}, params, p,
+                                                t);
                 }
                 return EMPTY_GATE;
             }
@@ -357,10 +359,11 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                         add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                    return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    return design_gate<GateLyt>(skeleton_with_defects, std::vector<fiction::synthesis::truth_table>{f},
+                                                params, p, t);
                 }
 
-                return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+                return design_gate<GateLyt>(skeleton, std::vector<fiction::synthesis::truth_table>{f}, params, p, t);
             }
 
             const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
@@ -371,10 +374,11 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                     add_defect_to_skeleton(defect_surface.value(), skeleton, params.influence_radius_charged_defects,
                                            center_cell, absolute_cell);
 
-                return design_gate<GateLyt>(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                return design_gate<GateLyt>(skeleton_with_defects, std::vector<fiction::synthesis::truth_table>{f},
+                                            params, p, t);
             }
 
-            return design_gate<GateLyt>(skeleton, std::vector<tt>{f}, params, p, t);
+            return design_gate<GateLyt>(skeleton, std::vector<fiction::synthesis::truth_table>{f}, params, p, t);
         }
 
         catch (const std::out_of_range&)
@@ -396,8 +400,8 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      */
     [[nodiscard]] static bool
     is_predefined_bestagon_gate_applicable(const layout& bestagon_lyt, const layout& skeleton_with_defects,
-                                           const std::vector<kitty::dynamic_truth_table>& truth_table,
-                                           const on_the_fly_gate_library_params&          parameters)
+                                           const std::vector<fiction::synthesis::truth_table>& truth_table,
+                                           const on_the_fly_gate_library_params&               parameters)
     {
         const auto sidbs_affected_by_defects =
             skeleton_with_defects.all_affected_sidbs(std::pair<uint16_t, uint16_t>{});
@@ -494,10 +498,10 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      * @throws gate_design_exception if no gate can be designed.
      */
     template <typename GateLyt>
-    [[nodiscard]] static gate design_gate(const layout& skeleton, const std::vector<kitty::dynamic_truth_table>& spec,
-                                          const on_the_fly_gate_library_params&            parameters,
-                                          const fcn::port_list<fcn::port_direction>&       p,
-                                          const fiction::layouts::layout_base::coordinate& tile)
+    [[nodiscard]] static gate
+    design_gate(const layout& skeleton, const std::vector<fiction::synthesis::truth_table>& spec,
+                const on_the_fly_gate_library_params& parameters, const fcn::port_list<fcn::port_direction>& p,
+                const fiction::layouts::layout_base::coordinate& tile)
     {
         const auto params = sidb::generators::is_gate_design_impossible_params{
             .sim_params          = parameters.design_gate_params.operational_params.sim_params,

@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -45,6 +46,7 @@
 
 using namespace fiction;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::synthesis;
@@ -100,7 +102,7 @@ try
     const mockturtle::map_params map_params{};
 
     // instantiate a network reader
-    network_reader<aig_ptr> reader{network_folder, std::cout};
+    network_reader<std::shared_ptr<named_aig_network>> reader{network_folder, std::cout};
 
     for (const auto& benchmark : reader.get_networks(true))  // for each benchmark sorted by size (ascending)
     {

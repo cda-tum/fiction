@@ -39,12 +39,12 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -268,7 +268,7 @@ class is_operational_impl
      * @param spec The Boolean function(s) to implement.
      * @param params Parameters.
      */
-    is_operational_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+    is_operational_impl(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                         const is_operational_params& params) :
             sidb_layout{lyt},
             truth_table{spec},
@@ -292,7 +292,7 @@ class is_operational_impl
      * @param initialize_bii Whether to set up the input iterator. `verify_logic_match` passes `false` since it
      * checks a given charge distribution.
      */
-    is_operational_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+    is_operational_impl(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                         const is_operational_params& params, const std::vector<bdl_wire>& input_wires,
                         const std::vector<bdl_wire>& output_wires, const bool initialize_bii = true) :
             sidb_layout{lyt},
@@ -315,7 +315,7 @@ class is_operational_impl
      * @param output_wires The output BDL wires of `lyt`.
      * @param c_lyt The canvas: the SiDBs of `lyt` whose charge states the pruning filters enumerate.
      */
-    is_operational_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+    is_operational_impl(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                         const is_operational_params& params, const std::vector<bdl_wire>& input_wires,
                         const std::vector<bdl_wire>& output_wires, layout c_lyt) :
             sidb_layout{lyt},
@@ -336,7 +336,7 @@ class is_operational_impl
      * @param params Parameters.
      * @param c_lyt The canvas.
      */
-    is_operational_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+    is_operational_impl(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                         const is_operational_params& params, layout c_lyt) :
             sidb_layout{lyt},
             truth_table{spec},
@@ -360,8 +360,8 @@ class is_operational_impl
      * @param output_wires The output BDL wires.
      * @param c_lyt The canvas.
      */
-    is_operational_impl(const std::vector<layout>&                     input_pattern_lyts,
-                        const std::vector<kitty::dynamic_truth_table>& spec, const is_operational_params& params,
+    is_operational_impl(const std::vector<layout>&                          input_pattern_lyts,
+                        const std::vector<fiction::synthesis::truth_table>& spec, const is_operational_params& params,
                         const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires,
                         layout c_lyt) :
             truth_table{spec},
@@ -827,7 +827,7 @@ class is_operational_impl
     /**
      * The Boolean function(s) to implement.
      */
-    const std::vector<kitty::dynamic_truth_table>& truth_table;
+    const std::vector<fiction::synthesis::truth_table>& truth_table;
     /**
      * Parameters.
      */
@@ -1092,8 +1092,8 @@ class is_operational_impl
  * @param lyt The layout.
  * @param spec The specification.
  */
-inline void check_arguments([[maybe_unused]] const layout&                                  lyt,
-                            [[maybe_unused]] const std::vector<kitty::dynamic_truth_table>& spec) noexcept
+inline void check_arguments([[maybe_unused]] const layout&                                       lyt,
+                            [[maybe_unused]] const std::vector<fiction::synthesis::truth_table>& spec) noexcept
 {
     assert(lyt.num_pis() > 0 && "lyt needs input dots");
     assert(lyt.num_pos() > 0 && "lyt needs output dots");
@@ -1115,8 +1115,8 @@ inline void check_arguments([[maybe_unused]] const layout&                      
  * @return The implementation object.
  */
 [[nodiscard]] inline is_operational_impl
-make_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const is_operational_params& params,
-          const std::optional<std::vector<bdl_wire>>& input_wires,
+make_impl(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+          const is_operational_params& params, const std::optional<std::vector<bdl_wire>>& input_wires,
           const std::optional<std::vector<bdl_wire>>& output_wires, const std::optional<layout>& canvas_lyt)
 {
     const auto canvas = canvas_lyt.has_value() ? *canvas_lyt : canvas_of(lyt);
@@ -1198,7 +1198,7 @@ make_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec
  * @return The operational status and the number of simulator invocations.
  */
 [[nodiscard]] inline std::pair<operational_status, std::size_t>
-is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+is_operational(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
@@ -1221,7 +1221,7 @@ is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>&
  * @return The operational status and the number of simulator invocations.
  */
 [[nodiscard]] inline std::pair<operational_status, std::size_t>
-is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+is_operational(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire,
                const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 {
@@ -1247,9 +1247,10 @@ is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>&
  * @throws std::invalid_argument if `spec` is empty or the number of layouts does not match the number of patterns.
  */
 [[nodiscard]] inline std::pair<operational_status, std::size_t>
-is_operational(const std::vector<layout>& input_pattern_layouts, const std::vector<kitty::dynamic_truth_table>& spec,
-               const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire,
-               const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
+is_operational(const std::vector<layout>&                          input_pattern_layouts,
+               const std::vector<fiction::synthesis::truth_table>& spec, const is_operational_params& params,
+               const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
+               const std::optional<layout>& canvas_lyt = std::nullopt)
 {
     // this overload indexes a caller-supplied container, so a wrong size is an out-of-bounds read rather than a
     // wrong answer. It is also reachable from `pyfiction` with an arbitrary list, so the checks survive `NDEBUG`
@@ -1283,9 +1284,9 @@ is_operational(const std::vector<layout>& input_pattern_layouts, const std::vect
  * @param params Parameters.
  * @return The operational input patterns.
  */
-[[nodiscard]] inline std::set<uint64_t> operational_input_patterns(const layout&                                  lyt,
-                                                                   const std::vector<kitty::dynamic_truth_table>& spec,
-                                                                   const is_operational_params& params = {})
+[[nodiscard]] inline std::set<uint64_t>
+operational_input_patterns(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+                           const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
@@ -1305,7 +1306,7 @@ is_operational(const std::vector<layout>& input_pattern_layouts, const std::vect
  * @return The operational input patterns.
  */
 [[nodiscard]] inline std::set<uint64_t>
-operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+operational_input_patterns(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                            const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire,
                            const std::vector<bdl_wire>& output_bdl_wire,
                            const std::optional<layout>& canvas_lyt = std::nullopt)
@@ -1332,7 +1333,7 @@ operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_t
  * @return The kink-induced non-operational input patterns.
  */
 [[nodiscard]] inline std::set<uint64_t>
-kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                                             const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
@@ -1356,7 +1357,7 @@ kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector
  * @return The kink-induced non-operational input patterns.
  */
 [[nodiscard]] inline std::set<uint64_t> kink_induced_non_operational_input_patterns(
-    const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const is_operational_params& params,
+    const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const is_operational_params& params,
     const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire,
     const std::optional<layout>& canvas_lyt = std::nullopt)
 {
@@ -1385,9 +1386,9 @@ kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector
  * @param params Parameters; kinks are rejected regardless of `params.op_condition`.
  * @return `true` if the layout is non-operational because of kinks.
  */
-[[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                  lyt,
-                                                          const std::vector<kitty::dynamic_truth_table>& spec,
-                                                          const is_operational_params&                   params = {})
+[[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                       lyt,
+                                                          const std::vector<fiction::synthesis::truth_table>& spec,
+                                                          const is_operational_params& params = {})
 {
     detail::check_arguments(lyt, spec);
 
@@ -1412,10 +1413,10 @@ kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector
  * @param canvas_lyt The canvas; defaults to none.
  * @return `true` if the layout is non-operational because of kinks.
  */
-[[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                  lyt,
-                                                          const std::vector<kitty::dynamic_truth_table>& spec,
-                                                          const is_operational_params&                   params,
-                                                          const std::vector<bdl_wire>&                   input_bdl_wire,
+[[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                       lyt,
+                                                          const std::vector<fiction::synthesis::truth_table>& spec,
+                                                          const is_operational_params&                        params,
+                                                          const std::vector<bdl_wire>& input_bdl_wire,
                                                           const std::vector<bdl_wire>& output_bdl_wire,
                                                           const std::optional<layout>& canvas_lyt = std::nullopt)
 {

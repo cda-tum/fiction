@@ -28,16 +28,15 @@
 #include "fiction/networks/views/edge_color_view.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/fanout_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
@@ -461,7 +460,7 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
             {
                 const auto y = layout.height();
                 layout.resize({std::max(layout.width(), uint32_t{2}), static_cast<uint64_t>(y) + 1, layout.layers()});
-                kitty::dynamic_truth_table function{0};
+                fiction::synthesis::truth_table function{0};
                 if (ctn.color_ntk.constant_value(po))
                 {
                     kitty::set_bit(function, 0);
@@ -497,8 +496,8 @@ class orthogonal_impl
      * @param p The parameters for the orthogonal physical design algorithm.
      * @param st The statistics object to record execution details.
      */
-    orthogonal_impl(const mockturtle::names_view<networks::technology_network>& src,
-                    orthogonal_physical_design_params p, orthogonal_physical_design_stats& st) :
+    orthogonal_impl(const fiction::networks::named_technology_network& src, orthogonal_physical_design_params p,
+                    orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{src}},
             ps{std::move(p)},
             pst{st}
@@ -707,7 +706,7 @@ class orthogonal_impl
     }
 
   private:
-    mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<networks::technology_network>>> ntk;
+    mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>> ntk;
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;
@@ -772,8 +771,8 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
     }
 
     orthogonal_physical_design_stats st{};
-    detail::orthogonal_impl<Lyt>     p{
-        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(ntk), ps, st};
+    detail::orthogonal_impl<Lyt> p{synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk), ps,
+                                   st};
 
     auto result = p.run();
 

@@ -36,7 +36,6 @@
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -499,11 +498,11 @@ struct search_space_graph
     /**
      * The network associated with this search space graph.
      */
-    tec_nt network;
+    fiction::networks::named_technology_network network;
     /**
      * Topological list of nodes to be placed in the layout.
      */
-    std::vector<mockturtle::node<tec_nt>> nodes_to_place;
+    std::vector<mockturtle::node<fiction::networks::named_technology_network>> nodes_to_place;
     /**
      * Enum indicating if primary inputs (PIs) can be placed at the top or left.
      */
@@ -785,11 +784,11 @@ struct placement_info
     /**
      * Mapping of logic-network nodes to their current routed output ports.
      */
-    node_dict_type<tec_nt> node2pos;
+    node_dict_type<fiction::networks::named_technology_network> node2pos;
     /**
      * Original placed primary-input identities, independent of routed output ports.
      */
-    mockturtle::node_map<layouts::layout_object_id, tec_nt> pi2node;
+    mockturtle::node_map<layouts::layout_object_id, fiction::networks::named_technology_network> pi2node;
     /** @brief Whether space for constant outputs has been reserved in this rebuilt candidate. */
     bool constant_output_margin{};
 };
@@ -816,9 +815,10 @@ class graph_oriented_layout_design_impl
      * @param st The statistics object to record execution details.
      * @param custom The custom layout cost function.
      */
-    graph_oriented_layout_design_impl(const tec_nt& src, const graph_oriented_layout_design_params& p,
-                                      graph_oriented_layout_design_stats&       st,
-                                      const std::function<uint64_t(const Lyt&)> custom) :
+    graph_oriented_layout_design_impl(const fiction::networks::named_technology_network& src,
+                                      const graph_oriented_layout_design_params&         p,
+                                      graph_oriented_layout_design_stats&                st,
+                                      const std::function<uint64_t(const Lyt&)>          custom) :
             ntk{src},
             ps{p},
             pst{st},
@@ -1046,7 +1046,7 @@ class graph_oriented_layout_design_impl
     /**
      * The network to be placed and routed.
      */
-    tec_nt ntk;
+    fiction::networks::named_technology_network ntk;
     /** @brief Number of constant outputs; every search graph preserves this source interface. */
     uint32_t constant_output_count{};
     /**
@@ -1428,8 +1428,9 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the PO nodes.
      * @return A vector of tiles representing the possible positions for POs.
      */
-    [[nodiscard]] coord_vec_type get_possible_positions_pos(const Lyt& layout, const placement_info& place_info,
-                                                            const networks::fanin_container<tec_nt>& fc)
+    [[nodiscard]] coord_vec_type
+    get_possible_positions_pos(const Lyt& layout, const placement_info& place_info,
+                               const networks::fanin_container<fiction::networks::named_technology_network>& fc)
     {
         coord_vec_type possible_positions{};
 
@@ -1476,8 +1477,9 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the single fanin node.
      * @return A vector of tiles representing the possible positions for a single fan-in node.
      */
-    [[nodiscard]] coord_vec_type get_possible_positions_single_fanin(Lyt& layout, const placement_info& place_info,
-                                                                     const networks::fanin_container<tec_nt>& fc)
+    [[nodiscard]] coord_vec_type get_possible_positions_single_fanin(
+        Lyt& layout, const placement_info& place_info,
+        const networks::fanin_container<fiction::networks::named_technology_network>& fc)
     {
         coord_vec_type possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1542,8 +1544,9 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the double fanin node.
      * @return A vector of tiles representing the possible positions for a double fan-in node.
      */
-    [[nodiscard]] coord_vec_type get_possible_positions_double_fanin(Lyt& layout, const placement_info& place_info,
-                                                                     const networks::fanin_container<tec_nt>& fc)
+    [[nodiscard]] coord_vec_type get_possible_positions_double_fanin(
+        Lyt& layout, const placement_info& place_info,
+        const networks::fanin_container<fiction::networks::named_technology_network>& fc)
     {
         coord_vec_type possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1780,7 +1783,8 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the single fanin node.
      */
     void route_single_input_node(const fiction::layouts::layout_base::coordinate& position, Lyt& layout,
-                                 node_dict_type<tec_nt>& node2pos, const networks::fanin_container<tec_nt>& fc)
+                                 node_dict_type<fiction::networks::named_technology_network>&                  node2pos,
+                                 const networks::fanin_container<fiction::networks::named_technology_network>& fc)
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = layout.get_tile(node2pos[pre]);
@@ -1807,7 +1811,8 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the double fanin node.
      */
     void route_double_input_node(const fiction::layouts::layout_base::coordinate& position, Lyt& layout,
-                                 node_dict_type<tec_nt>& node2pos, const networks::fanin_container<tec_nt>& fc)
+                                 node_dict_type<fiction::networks::named_technology_network>&                  node2pos,
+                                 const networks::fanin_container<fiction::networks::named_technology_network>& fc)
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -1878,7 +1883,7 @@ class graph_oriented_layout_design_impl
             {
                 throw std::invalid_argument("A zero-input GOLD node must be a constant output");
             }
-            kitty::dynamic_truth_table function{0};
+            fiction::synthesis::truth_table function{0};
             if (*fc.constant_fanin)
             {
                 kitty::set_bit(function, 0);
@@ -2110,9 +2115,9 @@ class graph_oriented_layout_design_impl
         auto layout = initialize_layout(min_layout_width);
         report_graph(ssg, layout, 0, worker_progress);
 
-        mockturtle::node_map<typename Lyt::object_id, tec_nt> pi2node{ssg.network};
-        node_dict_type<tec_nt>                                node2pos{ssg.network};
-        placement_info                                        place_info{0ul, 0ul, node2pos, pi2node};
+        mockturtle::node_map<typename Lyt::object_id, fiction::networks::named_technology_network> pi2node{ssg.network};
+        node_dict_type<fiction::networks::named_technology_network> node2pos{ssg.network};
+        placement_info                                              place_info{0ul, 0ul, node2pos, pi2node};
 
         coord_vec_type possible_positions{};
         possible_positions.reserve(2 * ps.num_vertex_expansions);
@@ -2453,7 +2458,8 @@ class graph_oriented_layout_design_impl
 
         synthesis::fanout_substitution_params params{};
         params.strategy = synthesis::fanout_substitution_params::substitution_strategy::BREADTH;
-        mockturtle::fanout_view network_substituted_breadth{synthesis::fanout_substitution<tec_nt>(ntk, params)};
+        mockturtle::fanout_view network_substituted_breadth{
+            synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
 
         topo_view_co_to_ci<decltype(network_substituted_breadth)> network_breadth_co_to_ci{network_substituted_breadth,
                                                                                            seed};
@@ -2474,7 +2480,8 @@ class graph_oriented_layout_design_impl
         if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY)
         {
             params.strategy = synthesis::fanout_substitution_params::substitution_strategy::DEPTH;
-            mockturtle::fanout_view network_substituted_depth{synthesis::fanout_substitution<tec_nt>(ntk, params)};
+            mockturtle::fanout_view network_substituted_depth{
+                synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
 
             topo_view_ci_to_co<decltype(network_substituted_breadth)> network_breadth_ci_to_co{
                 network_substituted_breadth, seed};
@@ -2523,7 +2530,7 @@ class graph_oriented_layout_design_impl
                     params.strategy = synthesis::fanout_substitution_params::substitution_strategy::RANDOM;
                     params.seed     = seed;
                     mockturtle::fanout_view network_substituted_random{
-                        synthesis::fanout_substitution<tec_nt>(ntk, params)};
+                        synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
 
                     topo_view_co_to_ci_random<decltype(network_substituted_random)> network_breadth_co_to_ci_random{
                         network_substituted_random, seed};
@@ -2703,8 +2710,8 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
     }
 
     graph_oriented_layout_design_stats             st{};
-    detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), ps, st,
-                                                     custom_cost_objective};
+    detail::graph_oriented_layout_design_impl<Lyt> p{
+        synthesis::convert_network<fiction::networks::named_technology_network>(ntk), ps, st, custom_cost_objective};
 
     const auto result = p.run();
 

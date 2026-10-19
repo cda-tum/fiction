@@ -21,12 +21,12 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fiction/utils/progress.hpp"
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -169,7 +169,7 @@ class displacement_robustness_domain_impl
      * @param st Statistics.
      */
     // NOLINTBEGIN(modernize-pass-by-value): Passing the large stored snapshot by value adds a copy.
-    displacement_robustness_domain_impl(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+    displacement_robustness_domain_impl(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                                         const displacement_robustness_domain_params& ps,
                                         displacement_robustness_domain_stats&        st) :
             layout_to_analyze{lyt},
@@ -360,7 +360,7 @@ class displacement_robustness_domain_impl
     /**
      * The Boolean function(s).
      */
-    const std::vector<kitty::dynamic_truth_table> truth_table;
+    const std::vector<fiction::synthesis::truth_table> truth_table;
     /**
      * Seed source.
      */
@@ -523,7 +523,7 @@ class displacement_robustness_domain_impl
  * @throws std::out_of_range if a displacement exceeds the lattice-site range.
  */
 [[nodiscard]] inline displacement_robustness_domain
-determine_displacement_robustness_domain(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+determine_displacement_robustness_domain(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
                                          const displacement_robustness_domain_params& params = {},
                                          displacement_robustness_domain_stats*        stats  = nullptr)
 {
@@ -558,7 +558,7 @@ determine_displacement_robustness_domain(const layout& lyt, const std::vector<ki
  * @throws std::out_of_range if a displacement exceeds the lattice-site range.
  */
 [[nodiscard]] inline double determine_probability_of_fabricating_operational_gate(
-    const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+    const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
     const displacement_robustness_domain_params& params = {}, const double fabrication_error_rate = 1.0)
 {
     displacement_robustness_domain_stats        st{};

@@ -24,10 +24,10 @@
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
@@ -65,18 +65,18 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 2-output function.
  */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i2o()
+[[nodiscard]] inline std::vector<truth_table> create_truth_tables_3i2o()
 {
     static constexpr const char* truth_table_string1 = "11100100";
     static constexpr const char* truth_table_string2 = "11100100";
 
-    kitty::dynamic_truth_table table1{3};
-    kitty::dynamic_truth_table table2{3};
+    truth_table table1{3};
+    truth_table table2{3};
 
     kitty::create_from_binary_string(table1, truth_table_string1);
     kitty::create_from_binary_string(table2, truth_table_string2);
 
-    return std::vector<kitty::dynamic_truth_table>{table1, table2};
+    return std::vector<truth_table>{table1, table2};
 }
 
 /**
@@ -90,21 +90,21 @@ namespace
  *
  * @return Vector of truth tables, each representing an output of the 3-input, 3-output function.
  */
-[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_truth_tables_3i3o()
+[[nodiscard]] inline std::vector<truth_table> create_truth_tables_3i3o()
 {
     static constexpr const char* truth_table_string1 = "11100100";
     static constexpr const char* truth_table_string2 = "11100100";
     static constexpr const char* truth_table_string3 = "11100100";
 
-    kitty::dynamic_truth_table table1{3};
-    kitty::dynamic_truth_table table2{3};
-    kitty::dynamic_truth_table table3{3};
+    truth_table table1{3};
+    truth_table table2{3};
+    truth_table table3{3};
 
     kitty::create_from_binary_string(table1, truth_table_string1);
     kitty::create_from_binary_string(table2, truth_table_string2);
     kitty::create_from_binary_string(table3, truth_table_string3);
 
-    return std::vector<kitty::dynamic_truth_table>{table1, table2, table3};
+    return std::vector<truth_table>{table1, table2, table3};
 }
 
 }  // end anonymous namespace
@@ -163,7 +163,7 @@ try
     three_three.assign_sidb({36, 11}, dot_tag::LOGIC);
     three_three.assign_sidb({40, 7}, dot_tag::LOGIC);
 
-    const std::vector<std::pair<layout, std::vector<kitty::dynamic_truth_table>>> layout_truth_table{
+    const std::vector<std::pair<layout, std::vector<truth_table>>> layout_truth_table{
         {two_one, {create_or_tt()}},
         {two_two, create_crossing_wire_tt()},
         {three_one, {create_gamble_tt()}},

@@ -26,9 +26,9 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/types.hpp"
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/truth_table_cache.hpp>
 #include <phmap.h>
 
@@ -358,7 +358,7 @@ class gate_layout : public CoordinateLayout
      * Unspecified trailing inputs remain disconnected. Constant functions require an explicit placed object.
      * @throws std::invalid_argument If placement is occupied, or children exceed the function arity.
      */
-    object_id create_gate(const std::vector<object_id>& children, const kitty::dynamic_truth_table& function,
+    object_id create_gate(const std::vector<object_id>& children, const fiction::synthesis::truth_table& function,
                           const tile& t)
     {
         check_placement(t);
@@ -399,7 +399,7 @@ class gate_layout : public CoordinateLayout
         return checked_object(id).position;
     }
     /** @brief Returns the truth table in logical input-index order. */
-    [[nodiscard]] kitty::dynamic_truth_table object_function(const object_id id) const
+    [[nodiscard]] fiction::synthesis::truth_table object_function(const object_id id) const
     {
         return functions[checked_object(id).function];
     }
@@ -1798,7 +1798,7 @@ class gate_layout : public CoordinateLayout
     /** @brief Coordinate lookup independent of identities and connections. */
     phmap::flat_hash_map<tile, uint32_t> occupancy{};
     /** @brief Deduplicated truth tables stored outside object records and referenced by function literals. */
-    mockturtle::truth_table_cache<kitty::dynamic_truth_table> functions{0};
+    mockturtle::truth_table_cache<fiction::synthesis::truth_table> functions{0};
     /** @brief Names stored outside object records, with entries only for named objects. */
     phmap::flat_hash_map<object_id, std::string> names{};
     /** @brief Declared primary input order. */
@@ -2117,12 +2117,12 @@ class gate_layout : public CoordinateLayout
     void initialize_functions()
     {
         /** @brief Complete elementary cache, committed after all allocations succeed. */
-        mockturtle::truth_table_cache<kitty::dynamic_truth_table> initialized{16};
-        initialized.insert(kitty::dynamic_truth_table{0});
+        mockturtle::truth_table_cache<fiction::synthesis::truth_table> initialized{16};
+        initialized.insert(fiction::synthesis::truth_table{0});
         for (const auto [literal, arity] : std::array<std::pair<uint64_t, uint32_t>, 7>{
                  {{0x1, 1}, {0x8, 2}, {0xe, 2}, {0x2, 2}, {0xb, 2}, {0x6, 2}, {0xe8, 3}}})
         {
-            kitty::dynamic_truth_table table{arity};
+            fiction::synthesis::truth_table table{arity};
             /** @brief One truth-table word consumed by the gate-function constructor. */
             const std::array words{literal};
             kitty::create_from_words(table, words.cbegin(), words.cend());

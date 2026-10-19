@@ -16,11 +16,11 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/types.hpp>
 
 #include <sstream>
 #include <type_traits>
@@ -61,7 +61,7 @@ void register_orthogonal(nb::module_& m, const char* signature)
 {
     /** @brief Compute orthogonal physical design for the selected layout representation. */
     const auto design =
-        [](const py_tec_network& network, const nb::handle layout_type,
+        [](const fiction::networks::named_technology_network& network, const nb::handle layout_type,
            fiction::physical_design::orthogonal_physical_design_stats*                 statistics,
            const decltype(orthogonal_physical_design_options{}.number_of_clock_phases) number_of_clock_phases,
            const decltype(orthogonal_physical_design_options{}.layout_arrangement)     layout_arrangement,
@@ -77,7 +77,8 @@ void register_orthogonal(nb::module_& m, const char* signature)
         parameters.layout_arrangement     = layout_arrangement;
         parameters.on_progress            = on_progress;
         const nb::gil_scoped_release release{};
-        return fiction::physical_design::orthogonal<Lyt, py_tec_network>(network, parameters, statistics);
+        return fiction::physical_design::orthogonal<Lyt, fiction::networks::named_technology_network>(
+            network, parameters, statistics);
     };
     if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {
@@ -162,7 +163,8 @@ void register_orthogonal(nb::module_& m)
     // Keep the GIL while rejecting an unsupported Python layout type.
     m.def(
         "orthogonal",
-        [](const py_tec_network&, const nb::handle, fiction::physical_design::orthogonal_physical_design_stats*,
+        [](const fiction::networks::named_technology_network&, const nb::handle,
+           fiction::physical_design::orthogonal_physical_design_stats*,
            const decltype(orthogonal_physical_design_options{}.number_of_clock_phases),
            const decltype(orthogonal_physical_design_options{}.layout_arrangement),
            const decltype(orthogonal_physical_design_options{}.on_progress)&) -> nb::object

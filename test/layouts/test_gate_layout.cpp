@@ -31,10 +31,10 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 
 #include <array>
 #include <cstddef>
@@ -49,6 +49,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::synthesis;
 using namespace fiction::test;
 using namespace fiction::layouts;
 
@@ -96,8 +97,8 @@ TEMPLATE_TEST_CASE("Elementary truth tables retain logical input order", "[gate-
     int32_t    x{};
     for (const auto [create, literal] : creators)
     {
-        const auto                 gate = (lyt.*create)(a, b, {x++, 1});
-        kitty::dynamic_truth_table expected{2};
+        const auto  gate = (lyt.*create)(a, b, {x++, 1});
+        truth_table expected{2};
         /** @brief The truth-table word supplied to the constructor. */
         const std::array words{literal};
         kitty::create_from_words(expected, words.cbegin(), words.cend());
@@ -111,7 +112,7 @@ TEMPLATE_TEST_CASE("Elementary truth tables retain logical input order", "[gate-
     CHECK(lyt.is_buf(wire));
     CHECK(lyt.is_inv(inv));
     CHECK(lyt.is_maj(maj));
-    kitty::dynamic_truth_table identity{1};
+    truth_table identity{1};
     kitty::create_nth_var(identity, 0);
     const auto generic_wire = lyt.create_gate({a}, identity, {3, 2});
     CHECK(lyt.is_wire(generic_wire));
@@ -680,7 +681,7 @@ TEMPLATE_TEST_CASE("Crossings count routing wires rather than identity terminals
     const auto pi = lyt.create_pi("a", {0, 0, 1});
     const auto po = lyt.create_po("f", {1, 0, 1});
     lyt.create_buf({2, 0, 1});
-    kitty::dynamic_truth_table identity{1};
+    truth_table identity{1};
     kitty::create_from_hex_string(identity, "2");
     const auto gate = lyt.create_gate({}, identity, {3, 0, 1});
     CHECK_FALSE(lyt.is_wire(pi));
@@ -732,7 +733,7 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]
     {
         pis.push_back(lyt.create_pi("pi" + std::to_string(i), {static_cast<int64_t>(i), 0}));
     }
-    kitty::dynamic_truth_table parity{5};
+    truth_table parity{5};
     kitty::create_from_hex_string(parity, "96696996");
     const auto gate = lyt.create_gate(pis, parity, {2, 2});
     CHECK(lyt.input_count(gate) == 5);
@@ -771,10 +772,10 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]
 TEMPLATE_TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",
                    "[gate-level-layout]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto                       original = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {8, 8});
-    const auto                 a        = original.create_pi("a", {0, 0});
-    const auto                 b        = original.create_pi("b", {1, 0});
-    kitty::dynamic_truth_table parity{5};
+    auto        original = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {8, 8});
+    const auto  a        = original.create_pi("a", {0, 0});
+    const auto  b        = original.create_pi("b", {1, 0});
+    truth_table parity{5};
     kitty::create_from_hex_string(parity, "96696996");
     const auto gate = original.create_gate({a}, parity, {2, 2});
     original.connect(b, {gate, 4});
@@ -1125,7 +1126,7 @@ TEST_CASE("Failed large-arity creation leaves no object or connections", "[gate-
         REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
         gate_layout<cartesian_layout> lyt{{8, 8}};
         const auto                    a = lyt.create_pi("a", {0, 0});
-        kitty::dynamic_truth_table    parity{5};
+        truth_table                   parity{5};
         kitty::create_from_hex_string(parity, "96696996");
         lyt.remove(lyt.create_gate({}, parity, {2, 2}));
         if (!reuse)

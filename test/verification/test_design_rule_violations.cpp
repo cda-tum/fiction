@@ -21,16 +21,17 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/types.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 
 #include <cstddef>
 #include <sstream>
 
 using namespace fiction;
 using namespace fiction::layouts;
+using namespace fiction::synthesis;
 using namespace fiction::verification;
 
 /** @brief Checks design rules without printing. @tparam Lyt Layout type. @param lyt Layout. @return DRV statistics. */
@@ -109,9 +110,9 @@ TEST_CASE("DRVs", "[drv]")
 
 TEST_CASE("DRVs inspect declared input holes", "[drv][placed-objects]")
 {
-    cartesian_gate_layout      lyt{{1, 3}, clocking::twoddwave()};
-    const auto                 pi = lyt.create_pi("a", {0, 0});
-    kitty::dynamic_truth_table function{2};
+    cartesian_gate_layout lyt{{1, 3}, clocking::twoddwave()};
+    const auto            pi = lyt.create_pi("a", {0, 0});
+    truth_table           function{2};
     kitty::create_from_hex_string(function, "8");
     const auto gate = lyt.create_gate({pi}, function, {0, 1});
     lyt.disconnect({gate, 0});

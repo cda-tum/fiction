@@ -12,7 +12,7 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_ratio(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const parameter_point& pp, const operational_domain_ratio_params& params = {})
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_ratio(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const parameter_point& pp, const operational_domain_ratio_params& params = {})
 
 ```
 

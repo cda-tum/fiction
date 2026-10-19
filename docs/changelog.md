@@ -220,6 +220,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Network presets replace `*_nt` with `networks::named_aig_network`,
+    `named_xag_network`, `named_mig_network`, and `named_technology_network`.
+    `synthesis::truth_table` replaces `fiction::tt`; Python names stay unchanged.
   - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
   - **Breaking:** `types.hpp` drops the three `*_gate_clk_lyt` presets, their pointers, `gate_layout_t`,
     and transitive layout includes. Include `fiction/layouts/gate_layout.hpp` and use its canonical types.
@@ -290,6 +293,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Experiments use canonical network and truth-table types without changing their computations.
   - Gate-layout experiments use canonical types with unchanged computations.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
@@ -533,7 +537,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** `reserve_input_nodes` is gone. Place each primary input with `place` or `create_pi` when its coordinate is known.
 - Code quality:
 
-  - Removed unused network variants and type-name metadata from `fiction/types.hpp`.
+  - **Breaking:** Removed preset pointer aliases, `truth_table_t`, `logic_network_t`, `*_name`,
+    `get_ntk_type_name`, and `ntk_type_name`. Use `std::shared_ptr<T>` for shared ownership.
 
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:

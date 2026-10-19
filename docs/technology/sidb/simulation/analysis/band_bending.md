@@ -10,6 +10,6 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::band_bending_resilience(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const band_bending_resilience_params& params = {}, const std::optional<transition_type> transition_type = std::nullopt)
+```{doxygenfunction} fiction::sidb::simulation::analysis::band_bending_resilience(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const band_bending_resilience_params& params = {}, const std::optional<transition_type> transition_type = std::nullopt)
 
 ```

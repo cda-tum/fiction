@@ -41,12 +41,12 @@
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
+#include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <chrono>
 #include <cstdint>
@@ -830,7 +830,7 @@ TEST_CASE("Exact physical design timeout", "[exact]")
 
 TEST_CASE("Name conservation after exact physical design", "[exact]")
 {
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    auto maj = blueprints::maj1_network<named_mig_network>();
     maj.set_network_name("maj");
 
     auto params = res(configuration());

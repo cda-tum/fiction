@@ -36,6 +36,7 @@
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
@@ -45,7 +46,6 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 #include <z3++.h>
 #include <z3_api.h>
@@ -230,7 +230,7 @@ class exact_impl
      * @param clocking_scheme Validated clocking scheme for the target layout.
      * @param sbl Gate orientations forbidden at each tile.
      */
-    exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
+    exact_impl(fiction::networks::named_technology_network& src, exact_physical_design_params p,
                exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
                const surface_black_list<fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
@@ -279,8 +279,7 @@ class exact_impl
      * Network type for internal handling. Converting the input network to this type ensures the availability of all
      * necessary member functions.
      */
-    using topology_ntk_t =
-        mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<networks::technology_network>>>;
+    using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>;
     /**
      * Specification network.
      */
@@ -3008,7 +3007,7 @@ class exact_impl
         Lyt layout = make_layout();
 
         // Network views mutate traversal marks and event subscriptions, so each worker needs its own storage.
-        mockturtle::names_view<networks::technology_network> worker_ntk{*ntk};
+        fiction::networks::named_technology_network worker_ntk{*ntk};
         static_cast<networks::technology_network&>(worker_ntk) = ntk->clone();
         const topology_ntk_t worker_topology{mockturtle::fanout_view{worker_ntk}};
         smt_handler          handler{ctx, layout, worker_topology, ps, black_list};
@@ -3345,8 +3344,8 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
         throw networks::high_degree_fanin_exception();
     }
 
-    mockturtle::names_view<networks::technology_network> intermediate_ntk{
-        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
+    fiction::networks::named_technology_network intermediate_ntk{
+        synthesis::fanout_substitution<fiction::networks::named_technology_network>(
             ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
@@ -3412,8 +3411,8 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         throw networks::high_degree_fanin_exception();
     }
 
-    mockturtle::names_view<networks::technology_network> intermediate_ntk{
-        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
+    fiction::networks::named_technology_network intermediate_ntk{
+        synthesis::fanout_substitution<fiction::networks::named_technology_network>(
             ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};

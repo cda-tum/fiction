@@ -16,11 +16,11 @@
  */
 
 #include "pyfiction/operational_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
+#include <fiction/types.hpp>
 
 #include <optional>
 #include <vector>
@@ -60,7 +60,7 @@ void register_operational_domain_ratio(nb::module_& m)
 
     m.def(
         "operational_domain_ratio",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const parameter_point& pp,
+        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const parameter_point& pp,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,

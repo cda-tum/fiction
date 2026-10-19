@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -24,7 +25,6 @@
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <array>
@@ -32,21 +32,25 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <random>
 #include <sstream>
 #include <string>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::networks::io;
+using namespace fiction::synthesis;
 
-TEST_CASE("Read Verilog", "[network-reader]")
+TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_xag_network, named_mig_network,
+                   named_technology_network)
 {
     /** @brief Shared Verilog benchmark resolved from the test resource root. */
     const auto mux21_file_name = (std::filesystem::path{TEST_PATH} / "../benchmarks/TOY/mux21.v").string();
 
     std::ostringstream os{};
 
-    network_reader<aig_ptr> reader{mux21_file_name, os};
+    network_reader<std::shared_ptr<TestType>> reader{mux21_file_name, os};
 
     // no error messages
     REQUIRE(os.str().empty());
@@ -60,7 +64,7 @@ TEST_CASE("Read Verilog", "[network-reader]")
 
     SECTION("Equality")
     {
-        check_eq(mux21, blueprints::mux21_network<aig_nt>());
+        check_eq(mux21, blueprints::mux21_network<TestType>());
     }
     SECTION("Name conservation")
     {
@@ -68,9 +72,10 @@ TEST_CASE("Read Verilog", "[network-reader]")
         CHECK(mux21.get_network_name() == "mux21");
 
         // PI names
-        CHECK(mux21.get_name(mux21.make_signal(1)) == "in0");  // first PI
-        CHECK(mux21.get_name(mux21.make_signal(2)) == "in1");  // second PI
-        CHECK(mux21.get_name(mux21.make_signal(3)) == "in2");  // third PI
+        for (uint32_t i = 0; i < mux21.num_pis(); ++i)
+        {
+            CHECK(mux21.get_name(mux21.make_signal(mux21.pi_at(i))) == "in" + std::to_string(i));
+        }
 
         // PO names
         CHECK(mux21.get_output_name(0) == "out");
@@ -94,8 +99,8 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
              << whitespace << "\n# between cover rows\n10 1\n.names a b \\\n lut\n01 1\n.names a copy\n1 1\n.end\n"
              << whitespace << '\n';
     }
-    std::ostringstream      diagnostics{};
-    network_reader<tec_ptr> reader{path.string(), diagnostics};
+    std::ostringstream                                        diagnostics{};
+    network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
     std::filesystem::remove(path);
     REQUIRE(diagnostics.str().empty());
     REQUIRE(reader.get_networks().size() == 1);
@@ -105,13 +110,12 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
     network.foreach_pi(
         [&](const auto pi, const auto index)
         { CHECK(network.get_name(network.make_signal(pi)) == std::array{"a", "b", "unused"}.at(index)); });
-    const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
-        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{3});
+    const auto       actual = mockturtle::simulate<truth_table>(network, mockturtle::default_simulator<truth_table>{3});
     const std::array functions{"00", "ff", "55", "66", "44", "aa"};
     const std::array names{"zero", "one", "inverted", "xor", "lut", "copy"};
     for (std::size_t index{}; index < functions.size(); ++index)
     {
-        kitty::dynamic_truth_table expected{3};
+        truth_table expected{3};
         kitty::create_from_hex_string(expected, functions.at(index));
         CHECK(actual.at(index) == expected);
         CHECK(network.get_output_name(static_cast<uint32_t>(index)) == names.at(index));
@@ -126,8 +130,8 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
         std::ofstream file{path};
         file << "\n.model invalid\n \t\n.unsupported declaration\n\n.end\n";
     }
-    std::ostringstream      diagnostics{};
-    network_reader<tec_ptr> reader{path.string(), diagnostics};
+    std::ostringstream                                        diagnostics{};
+    network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
     std::filesystem::remove(path);
     CHECK(reader.get_networks().empty());
     CHECK(diagnostics.str().find("parsing error in " + path.string()) != std::string::npos);

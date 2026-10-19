@@ -23,6 +23,7 @@
 #include <fiction/networks/views/static_depth_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/synthesis/delete_virtual_pis.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
@@ -30,7 +31,6 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -39,7 +39,7 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Check name conservation", "[delete-virtual-pis]")
 {
-    virtual_pi_network<mockturtle::names_view<technology_network>> vpi{};
+    virtual_pi_network<named_technology_network> vpi{};
 
     const auto a  = vpi.create_pi();
     const auto b  = vpi.create_pi();
