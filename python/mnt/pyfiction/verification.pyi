@@ -10,7 +10,7 @@
 Design rule, equivalence, and performance checks of gate-level layouts.
 """
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Callable
 from typing import overload
@@ -268,7 +268,7 @@ class equivalence_checking_stats:
         """Stores a possible counter example."""
 
     @property
-    def runtime(self) -> datetime.timedelta:
+    def runtime(self) -> dt.timedelta:
         """Stores the runtime."""
 
     @property

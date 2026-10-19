@@ -8,7 +8,7 @@
 
 """SiDB simulation engines, results, and their analysis."""
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Mapping, Sequence
 from typing import overload
@@ -389,7 +389,7 @@ class sidb_simulation_result:
     @algorithm_name.setter
     def algorithm_name(self, arg: str, /) -> None: ...
     @property
-    def simulation_runtime(self) -> datetime.timedelta:
+    def simulation_runtime(self) -> dt.timedelta:
         """
         Total simulation runtime in seconds.
 
@@ -397,7 +397,7 @@ class sidb_simulation_result:
         """
 
     @simulation_runtime.setter
-    def simulation_runtime(self, arg: datetime.timedelta, /) -> None: ...
+    def simulation_runtime(self, arg: dt.timedelta, /) -> None: ...
     @property
     def layout(self) -> mnt.pyfiction.sidb.sidb_layout:
         """

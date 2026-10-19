@@ -8,7 +8,7 @@
 
 """Truth tables and logic network transformations."""
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Callable
 from typing import Literal, overload
@@ -414,9 +414,9 @@ class mapper_stats:
     @property
     def multioutput_gates(self) -> int: ...
     @property
-    def time_multioutput(self) -> datetime.timedelta: ...
+    def time_multioutput(self) -> dt.timedelta: ...
     @property
-    def time_total(self) -> datetime.timedelta: ...
+    def time_total(self) -> dt.timedelta: ...
     @property
     def round_stats(self) -> list[str]: ...
 
