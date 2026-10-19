@@ -54,6 +54,7 @@ TEST_CASE("Delete virtual PIs from a ranked AIG", "[delete-virtual-pis]")
     expected.create_po(expected.create_pi());
     const auto miter = mockturtle::miter<mockturtle::aig_network>(expected, result);
     REQUIRE(miter.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the value.
     CHECK(mockturtle::equivalence_checking(*miter).value_or(false));
 }
 

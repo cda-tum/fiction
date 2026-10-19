@@ -222,7 +222,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      *
      * @param other The other `fiction::static_depth_view` object to be moved.
      */
-    static_depth_view(static_depth_view&& other) :
+    static_depth_view(static_depth_view&& other) noexcept :
             Ntk(std::move(other)),
             ps(other.ps),  // trivially copyable
             levels(std::move(other.levels)),
@@ -238,7 +238,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * @param other The source `fiction::static_depth_view` object whose contents are being moved.
      * @return A reference to the current object, enabling chain assignments.
      */
-    static_depth_view& operator=(static_depth_view&& other)
+    static_depth_view& operator=(static_depth_view&& other) noexcept
     {
         // Check for self-assignment
         if (this == &other)
@@ -246,14 +246,14 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             return *this;
         }
 
-        Ntk::operator=(std::move(other));
-
-        // move
+        // move the members before the base, since moving the base leaves `other` in an unspecified state
         ps        = other.ps;  // trivially copyable
         levels    = std::move(other.levels);
         crit_path = std::move(other.crit_path);
         ntk_depth = other.ntk_depth;
         cost_fn   = std::move(other.cost_fn);
+
+        Ntk::operator=(std::move(other));
 
         // Return the current object
         return *this;
