@@ -24,7 +24,6 @@
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
-#include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"

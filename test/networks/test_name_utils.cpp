@@ -24,7 +24,6 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
-#include <fiction/networks/technology_network.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/node_map.hpp>
