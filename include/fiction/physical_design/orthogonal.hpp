@@ -73,11 +73,16 @@ struct orthogonal_physical_design_params
     utils::progress_callback on_progress{};
 };
 
+/** @brief Statistics for orthogonal physical design. */
 struct orthogonal_physical_design_stats
 {
+    /** @brief Total algorithm runtime. */
     mockturtle::stopwatch<>::duration time_total{0};
 
-    uint64_t x_size{0ull}, y_size{0ull};
+    /** @brief Layout extent along the x axis. */
+    uint64_t x_size{0ull};
+    /** @brief Layout extent along the y axis. */
+    uint64_t y_size{0ull};
     /** @brief Number of logic gates, excluding primary inputs and outputs. */
     uint64_t num_gates{0ull};
     /** @brief Number of physical wires, excluding primary inputs and outputs. */
@@ -85,6 +90,7 @@ struct orthogonal_physical_design_stats
     /** @brief Number of crossing-layer wires above occupied ground-layer tiles. */
     uint64_t num_crossings{0ull};
 
+    /** @brief Writes the collected statistics to the output stream. */
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
@@ -98,19 +104,28 @@ struct orthogonal_physical_design_stats
 namespace detail
 {
 
+/** @brief Stores edge colors for eastward and southward routing. */
 template <typename Ntk>
 struct coloring_container
 {
+    /** @brief Initializes the network and its routing direction colors. */
     explicit coloring_container(const Ntk& ntk) :
             color_ntk{ntk},
             color_east{color_ntk.new_color()},
             color_south{color_ntk.new_color()}
     {}
 
+    /** @brief Network with routing colors assigned to edges. */
     networks::views::out_of_place_edge_color_view<Ntk> color_ntk;
 
-    uint32_t color_null = 0ul, color_east, color_south;
+    /** @brief Color for unassigned edges. */
+    uint32_t color_null = 0ul;
+    /** @brief Color for eastward edges. */
+    uint32_t color_east;
+    /** @brief Color for southward edges. */
+    uint32_t color_south;
 
+    /** @brief Returns the other routing direction color. */
     [[nodiscard]] uint32_t opposite_color(const uint32_t c) const noexcept
     {
         return c == color_east ? color_south : color_east;

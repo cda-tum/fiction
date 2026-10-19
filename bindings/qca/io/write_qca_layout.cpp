@@ -61,8 +61,13 @@ void register_write_qca_layout(nb::module_& m)
 create_inter_layer_via_cells controls via cells; on_progress reports writing progress.
 
 Args:
+    layout: Layout to write.
+    filename: Output file path.
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     create_inter_layer_via_cells: Create via cells in between each layer.
+
+Raises:
+    RuntimeError: The file cannot be created, written, closed, or replaced.
 )doc");
 }
 

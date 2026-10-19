@@ -279,7 +279,7 @@ def charge_configuration_to_string(cc: Sequence[sidb_charge_state]) -> str:
     (`"-101..."`).
 
     Args:
-        charge_distribution: A vector of SiDBs charge states.
+        cc: A vector of SiDBs charge states.
 
     Returns:
         A string representation of the charge states.

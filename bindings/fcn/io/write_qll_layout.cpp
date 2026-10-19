@@ -57,7 +57,8 @@ void register_write_qll_layout(nb::module_& m)
           nb::overload_cast<const Lyt&, const std::string_view&, fiction::utils::progress_callback>(
               &fiction::fcn::io::write_qll_layout<Lyt>),
           nb::arg("layout"), nb::arg("filename"), nb::arg("on_progress").none() = nb::none(),
-          DOC(fiction_fcn_io_write_qll_layout), nb::call_guard<nb::gil_scoped_release>());
+          parameter_doc(DOC(fiction_fcn_io_write_qll_layout_2), {{"lyt", "layout"}}).c_str(),
+          nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail

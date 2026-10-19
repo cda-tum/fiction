@@ -531,10 +531,7 @@ struct search_space_graph
         graph_oriented_layout_design_params::cost_objective::AREA;
 };
 /**
- * @brief Custom view class derived from mockturtle::topo_view.
- *
- * This class inherits from mockturtle::topo_view and overrides certain functions
- * to provide custom behavior.
+ * @brief Immutable network view with optional randomized topological traversal.
  */
 template <typename Ntk, bool CiToCo = false, bool Randomize = false>
 class topo_view : public mockturtle::immutable_view<Ntk>
@@ -549,6 +546,12 @@ class topo_view : public mockturtle::immutable_view<Ntk>
      */
     using signal = Ntk::signal;
 
+    /**
+     * @brief Builds a topological order, randomized only when `Randomize` is true.
+     *
+     * @param ntk Network to traverse.
+     * @param seed_val Random seed; ignored when `Randomize` is false, the default.
+     */
     explicit topo_view(const Ntk& ntk, const uint32_t seed_val = 42) :
             mockturtle::immutable_view<Ntk>(ntk),
             rng(seed_val)
@@ -556,39 +559,46 @@ class topo_view : public mockturtle::immutable_view<Ntk>
         update_topo();
     }
 
+    /** @brief Returns the number of nodes in the view. */
     [[nodiscard]] uint32_t size() const
     {
         return uint32_t(topo_order.size());
     }
 
+    /** @brief Returns the number of non-input, non-constant nodes. */
     [[nodiscard]] uint32_t num_gates() const
     {
         return size() - offset();
     }
 
+    /** @brief Returns the node position in the topological order. */
     [[nodiscard]] uint32_t node_to_index(const node& n) const
     {
         auto it = std::ranges::find(topo_order, n);
         return uint32_t(std::ranges::distance(topo_order.begin(), it));
     }
 
+    /** @brief Returns the node at the supplied topological position. */
     [[nodiscard]] node index_to_node(const uint32_t idx) const
     {
         return topo_order.at(idx);
     }
 
+    /** @brief Calls the supplied function for each node in topological order. */
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(topo_order.cbegin(), topo_order.cend(), std::forward<Fn>(fn));
     }
 
+    /** @brief Calls the supplied function for each gate in topological order. */
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(topo_order.cbegin() + offset(), topo_order.cend(), std::forward<Fn>(fn));
     }
 
+    /** @brief Calls the supplied function for each gate in reverse topological order. */
     template <typename Fn>
     void foreach_gate_reverse(Fn&& fn) const
     {
@@ -1219,6 +1229,7 @@ class graph_oriented_layout_design_impl
      * @param dest The destination tile.
      * @param new_gate_loc Enum indicating if the src or dest have to host a new gate and therefore have to be empty.
      * Defaults to `new_gate_location::NONE`.
+     * @param check_straight_inverter Whether to check for a straight inverter at the destination.
      * @return A path from `src` to `dest` if one exists.
      */
     [[nodiscard]] layout_coordinate_path check_path(const Lyt&                                       layout,

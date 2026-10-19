@@ -140,7 +140,7 @@ void register_result(nb::module_& m)
             nb::sig("def additional_simulation_parameters(self) -> dict[str, int | float | bool | str]"),
             DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
         .def("charge_state", &result::charge_state, nb::arg("distribution"), nb::arg("site"),
-             DOC(fiction_sidb_simulation_result_charge_state))
+             parameter_doc(DOC(fiction_sidb_simulation_result_charge_state), {{"s", "site"}}).c_str())
         .def("groundstates", &result::groundstates, nb::call_guard<nb::gil_scoped_release>(),
              DOC(fiction_sidb_simulation_result_groundstates))
 

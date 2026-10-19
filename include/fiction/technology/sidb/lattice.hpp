@@ -46,10 +46,12 @@ struct lattice_site
 {
     /**
      * Steps along the first lattice vector.
+     * Defaults to 0.
      */
     int32_t x{0};
     /**
      * Steps along the second lattice vector.
+     * Defaults to 0.
      */
     int32_t y{0};
     /**
@@ -273,18 +275,22 @@ struct lattice
     using vector = std::pair<double, double>;
     /**
      * Name of the reconstruction as SiQAD spells it in SQD files, e.g., `"Si(100) 2x1"`.
+     * Defaults to an empty string.
      */
     std::string name{};
     /**
      * First lattice vector (unit: Å).
+     * Defaults to `(0, 0)`.
      */
     vector a1{};
     /**
      * Second lattice vector (unit: Å).
+     * Defaults to `(0, 0)`.
      */
     vector a2{};
     /**
      * The two basis sites of the unit cell (unit: Å). The first one is the origin.
+     * Both sites default to `(0, 0)`.
      */
     std::array<vector, 2> basis{};
     /**

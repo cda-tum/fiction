@@ -32,7 +32,7 @@
 namespace fiction::networks::views
 {
 /**
- * @class mutable_rank_view. Extends the mockturtle::rank_view
+ * @brief Extends the network rank interface with mutable ranks.
  *
  * Provides a view with node ranks for given networks. It adds functionalities to modify ranks. Most importantly, the
  * new `init_ranks()` function allows an array of nodes to be provided, which sets the levels and ranks of the nodes in
@@ -70,6 +70,7 @@ template <class Ntk>
 class mutable_rank_view<Ntk, true> : public fiction::networks::views::static_depth_view<Ntk>
 {
   public:
+    /** @brief Constructs a rank view of the supplied network. */
     explicit mutable_rank_view(const Ntk& ntk) : fiction::networks::views::static_depth_view<Ntk>(ntk) {}
 };
 
@@ -84,11 +85,15 @@ template <class Ntk>
 class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_depth_view<Ntk>
 {
   public:
+    /** @brief Marks the topological node iteration order. */
     // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_topologically_sorted = true;
-    using storage                                 = typename Ntk::storage;
-    using node                                    = typename Ntk::node;
-    using signal                                  = typename Ntk::signal;
+    /** @brief Underlying network storage type. */
+    using storage = typename Ntk::storage;
+    /** @brief Network node type. */
+    using node = typename Ntk::node;
+    /** @brief Network signal type. */
+    using signal = typename Ntk::signal;
 
     /**
      * Default constructor for `mutable_rank_view`.
@@ -136,7 +141,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Constructs an `mutable_rank_view` from an existing network and a specific initial rank configuration.
      *
      * @param ntk Reference to the network.
-     * @param ranks A vector of vectors specifying initial ranks for the nodes within the network.
+     * @param init_ranks_vec A vector of vectors specifying initial ranks for the nodes within the network.
      */
     explicit mutable_rank_view(const Ntk& ntk, const std::vector<std::vector<node>>& init_ranks_vec) :
             fiction::networks::views::static_depth_view<Ntk>{ntk},
@@ -198,8 +203,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
     /**
      * Move constructor for `mutable_rank_view`.
-     *
-     * @param other The `mutable_rank_view` object to move from.
      */
     mutable_rank_view(mutable_rank_view&&) noexcept = default;
 
@@ -207,7 +210,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Move assignment operator for `mutable_rank_view`.
      * Transfers ownership of resources from another `mutable_rank_view` object.
      *
-     * @param other The `mutable_rank_view` object to move from.
      * @return A reference to this object after assignment.
      */
     mutable_rank_view& operator=(mutable_rank_view&&) noexcept = default;
@@ -561,7 +563,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         init_ranks();
     }
 
-    /*
+    /**
      * Add a node to the `mutable_rank_view` and update its rank.
      *
      * @param n Node added to the `mutable_rank_view`.

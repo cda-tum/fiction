@@ -36,6 +36,13 @@ Use keyword-only `layout_type` to select `cartesian_gate_layout` (the default) o
 layouts raise `TypeError`. Hexagonal layouts require `layout_arrangement`.
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.physical_design.num_clks
+   :members:
+
+.. autoclass:: mnt.pyfiction.physical_design.orthogonal_stats
+   :members:
+   :undoc-members:
+
 .. autofunction:: mnt.pyfiction.physical_design.orthogonal
 ```
 

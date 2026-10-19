@@ -611,25 +611,19 @@ def convert_network(
     target: Literal[network_target.TEC] = ...,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Converts a logic network into an equivalent one of another type.
-    Thereby, this function is very similar to
-    `mockturtle::cleanup_dangling`. However, it supports real buffer nodes
-    used for fanouts and path balancing in fiction.
+    Convert a logic network to the selected network type.
+    Real buffer nodes used for fanouts and path balancing are supported. Converting
+    to the input network's type returns a copy with dangling nodes removed.
 
     Args:
-        ntk: The input logic network.
-
-    Template Args:
-        NtkDest: Type of the returned logic network.
-        NtkSrc: Type of the input logic network.
+        network: Input logic network.
+        target: Network type to produce: TEC, AIG, XAG, or MIG. Defaults to network_target.TEC.
 
     Returns:
-        A logic network of type `NtkDest` that is logically equivalent to
-        `ntk`.
+        A logically equivalent network of the selected type.
 
-    Note:
-        If `NtkDest` and `NtkSrc` are of the same type, this function
-        returns `ntk` cleaned using `mockturtle::cleanup_dangling`.
+    Raises:
+        ValueError: A gate has neither a supported implementation nor a truth table.
     """
 
 @overload

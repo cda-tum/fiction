@@ -48,6 +48,7 @@ struct yen_k_shortest_paths_params
 namespace detail
 {
 
+/** @brief Finds the k shortest paths with Yen's algorithm. */
 template <typename Path, typename Lyt>
 class yen_k_shortest_paths_impl
 {
