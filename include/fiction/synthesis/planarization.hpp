@@ -52,6 +52,7 @@ struct planarization_params
      * The pipeline defaults to the hybrid strategy, which decides per level between duplicating nodes and keeping the
      * crossings for the crossing gates.
      */
+    // NOLINTNEXTLINE(modernize-use-designated-initializers): Sphinx cannot render designated initializers
     node_duplication_planarization_params duplication{
         node_duplication_planarization_params::planarization_strategy::HYBRID};
     /**
