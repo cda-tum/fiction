@@ -61,6 +61,15 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 :members:
 ```
 
+```{doxygentypedef} fiction::layouts::cartesian_gate_layout
+```
+
+```{doxygentypedef} fiction::layouts::hexagonal_gate_layout
+```
+
+```{doxygentypedef} fiction::layouts::shifted_cartesian_gate_layout
+```
+
 :::
 
 :::{tab-item} Python
@@ -71,9 +80,6 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
    :members:
 
 .. autoclass:: mnt.pyfiction.layouts.layout_input_port
-   :members:
-
-.. autoclass:: mnt.pyfiction.layouts.shifted_cartesian_gate_layout
    :members:
 
 .. autoclass:: mnt.pyfiction.layouts.cartesian_gate_layout
