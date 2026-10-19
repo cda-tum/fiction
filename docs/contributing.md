@@ -27,13 +27,10 @@ You can contribute in several ways:
 
 ## First Contributions
 
-Ready to contribute? Check out the [documentation](https://fiction.readthedocs.io/en/latest/) to set up _fiction_ for local development and learn about the style guidelines and conventions used throughout the project.
+Start with {doc}`getting_started` to set up _fiction_ for local development.
 See {doc}`tooling` for the tools and configuration files used in development.
 
-We value contributions from people with all levels of experience.
-In particular if this is your first PR not everything has to be perfect.
-We will guide you through the PR process.
-Nevertheless, please try to follow the guidelines below as well as you can to help make the PR process quick and smooth.
+Follow the guidelines below when preparing a pull request.
 
 ## Core Guidelines
 
