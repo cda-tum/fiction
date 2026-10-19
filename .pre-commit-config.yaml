@@ -81,7 +81,7 @@ repos:
 
   # Handle unwanted unicode characters
   - repo: https://github.com/sirosen/texthooks
-    rev: 0.7.1
+    rev: 1.0.0
     hooks:
       - id: fix-ligatures
         priority: 4
@@ -141,14 +141,14 @@ repos:
 
   # Format pyproject.toml
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.30.2
+    rev: v2.30.3
     hooks:
       - id: pyproject-fmt
         priority: 6
 
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.23
+    rev: 0.13.1
     hooks:
       - id: uv-lock
         priority: 0
@@ -192,7 +192,7 @@ repos:
   # shell imports without compiling the extension, and the `docs` group resolves the imports of
   # `docs/conf.py` and its Sphinx extension
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.86
+    rev: v0.0.88
     hooks:
       - id: ty
         args: [--no-install-project, --group, docs]
@@ -200,7 +200,7 @@ repos:
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.9.9
+    rev: v3.9.10
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
@@ -223,7 +223,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.10.06
+    rev: 2026.10.12
     hooks:
       - id: validate-pyproject
         priority: 0
