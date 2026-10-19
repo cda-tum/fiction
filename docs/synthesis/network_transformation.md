@@ -12,7 +12,6 @@ Map the network to the supplied gate set, place it, and compare the resulting la
 :sync: cpp
 
 ```cpp
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -31,8 +30,7 @@ int main()
     network.create_po(network.create_and(a, b));
     const auto aig = fiction::synthesis::convert_network<mockturtle::aig_network>(network);
     const auto mapped = fiction::synthesis::technology_mapping(aig, fiction::synthesis::and_or_not());
-    using layout = fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>;
-    const auto placed = fiction::physical_design::orthogonal<layout>(mapped);
+    const auto placed = fiction::physical_design::orthogonal<fiction::layouts::cartesian_gate_layout>(mapped);
     assert(fiction::verification::equivalence_checking(network, placed) == fiction::verification::eq_type::STRONG);
     fiction::verification::count_gate_types_stats counts{};
     fiction::verification::count_gate_types(placed, &counts);
