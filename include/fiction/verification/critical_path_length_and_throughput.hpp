@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 
 #include <phmap.h>
 
@@ -173,7 +173,7 @@ class critical_path_length_and_throughput_impl
  * @throws std::invalid_argument If an output dependency has a disconnected input or a cycle.
  */
 template <typename Geometry>
-cp_and_tp critical_path_length_and_throughput(const fiction::layouts::gate_level_layout<Geometry>& lyt)
+cp_and_tp critical_path_length_and_throughput(const fiction::layouts::gate_layout<Geometry>& lyt)
 {
 
     detail::critical_path_length_and_throughput_impl p{lyt};

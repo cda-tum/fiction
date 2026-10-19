@@ -18,7 +18,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/generate_edge_intersection_graph.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
@@ -31,7 +31,7 @@ using namespace fiction::physical_design;
 
 TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using gate_lyt = gate_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
@@ -139,7 +139,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using gate_lyt = gate_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
@@ -185,7 +185,7 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using gate_lyt = gate_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
@@ -228,7 +228,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using gate_lyt = gate_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
@@ -277,7 +277,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
 
 TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
+    using gate_lyt = gate_layout<cartesian_layout>;
     const gate_lyt                       layout{{3, 3, 2}, clocking::twoddwave()};
     const std::vector<routing_objective> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
     for (const auto limit : {1u, 2u})

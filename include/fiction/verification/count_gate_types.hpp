@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>

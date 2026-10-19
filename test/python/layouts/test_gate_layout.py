@@ -119,7 +119,7 @@ def test_unknown_clocking_scheme_rejects_construction(make_layout: Callable[[], 
         ),
     ],
 )
-def test_gate_level_layout_inheritance(make_layout: Callable[[], GateLayout]) -> None:
+def test_gate_layout_inheritance(make_layout: Callable[[], GateLayout]) -> None:
     """Expose clocked geometry through the placed layout."""
     layout = make_layout()
     assert layout.incoming_clocked_zones((0, 0)) == []
@@ -162,7 +162,7 @@ def test_placed_constant_function() -> None:
     assert layout.wires() == []
 
 
-def test_gate_level_layout_gate_types() -> None:
+def test_gate_layout_gate_types() -> None:
     """Classify placed gates and identity objects for every topology."""
     layouts: list[cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout] = [
         cartesian_gate_layout((3, 9, 1), "2DDWave", "Layout"),
@@ -268,7 +268,7 @@ def test_gate_level_layout_gate_types() -> None:
         ),
     ],
 )
-def test_gate_level_layout_iteration(make_layout: Callable[[], GateLayout]) -> None:
+def test_gate_layout_iteration(make_layout: Callable[[], GateLayout]) -> None:
     """Iterate declared objects without depending on allocation indices."""
     layout = make_layout()
     assert layout.is_empty()

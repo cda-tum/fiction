@@ -132,6 +132,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Tooling:
 
+  - Added contract audit guidance for tests and the code they constrain.
   - Added EditorConfig settings that match the repository's formatters.
   - Prek formats `pyproject.toml` with `pyproject-fmt`.
   - Added `nox -s cpp_lint` for local Clang-Tidy checks. Nox uses `cmake` as the sole CMake executable.
@@ -236,6 +237,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** `gate_level_layout` is now `gate_layout` in `fiction/layouts/gate_layout.hpp`.
+    Update C++ includes and template names; Python class names remain unchanged.
   - `bounding_box_2d` is renamed to `bounding_box` in C++ and Python.
   - Coordinate aliases and geometry traits are removed; use `layout_base` types and concrete layout arguments.
   - Gate-level layouts now keep large-arity input storage outside the common object record.
@@ -300,6 +303,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Gate-layout experiments use the `gate_layout` C++ type; computations remain unchanged.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.

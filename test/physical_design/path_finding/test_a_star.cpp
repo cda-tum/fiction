@@ -18,7 +18,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
@@ -82,7 +82,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
+        using clk_lyt = gate_layout<lyt>;
 
         SECTION("2DDWave")
         {
@@ -172,7 +172,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
+        using clk_lyt = gate_layout<lyt>;
 
         SECTION("2DDWave")
         {
@@ -209,7 +209,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 
 TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 {
-    using clk_lyt    = gate_level_layout<cartesian_layout>;
+    using clk_lyt    = gate_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path;
 
     const clk_lyt layout{clk_lyt::extent{4, 4, 1}, clocking::use()};
@@ -237,7 +237,7 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 {
     using lyt        = cartesian_layout;
-    using clk_lyt    = gate_level_layout<lyt>;
+    using clk_lyt    = gate_layout<lyt>;
     using coord_path = layout_coordinate_path;
 
     SECTION("Manhattan distance")
@@ -340,7 +340,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
 TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout>;
+    using gate_lyt   = gate_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
@@ -440,7 +440,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
 TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout>;
+    using gate_lyt   = gate_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
@@ -534,7 +534,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
 TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 {
-    using gate_lyt   = gate_level_layout<cartesian_layout>;
+    using gate_lyt   = gate_layout<cartesian_layout>;
     using coord_path = layout_coordinate_path;
 
     using dist = manhattan_distance_functor;
@@ -671,7 +671,7 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = gate_level_layout<lyt>;
+        using clk_lyt = gate_layout<lyt>;
 
         SECTION("2DDWave")
         {

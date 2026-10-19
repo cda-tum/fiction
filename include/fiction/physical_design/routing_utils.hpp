@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 
@@ -313,11 +313,11 @@ routing_successor(const Lyt& lyt, const fiction::layouts::layout_base::coordinat
  * @throws std::out_of_range If the destination input index is invalid.
  */
 template <typename Geometry, typename Path>
-void route_path(fiction::layouts::gate_level_layout<Geometry>& lyt, const Path& path,
-                const typename fiction::layouts::gate_level_layout<Geometry>::input_port destination)
+void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const Path& path,
+                const typename fiction::layouts::gate_layout<Geometry>::input_port destination)
 {
     /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
+    using Lyt = fiction::layouts::gate_layout<Geometry>;
 
     if (path.size() < 2 || path.target() != lyt.get_tile(destination.object))
     {
@@ -425,10 +425,10 @@ std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
  * @param lyt Layout to edit.
  */
 template <typename Geometry>
-void clear_routing(fiction::layouts::gate_level_layout<Geometry>& lyt)
+void clear_routing(fiction::layouts::gate_layout<Geometry>& lyt)
 {
     /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
+    using Lyt = fiction::layouts::gate_layout<Geometry>;
 
     std::vector<typename Lyt::object_id> wires{};
     lyt.foreach_object(
