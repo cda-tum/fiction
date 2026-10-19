@@ -579,21 +579,33 @@ class topo_view : public mockturtle::immutable_view<mockturtle::fanout_view<tec_
         return topo_order.at(idx);
     }
 
-    /** @brief Visits all nodes in traversal order. @tparam Fn Node callback type. @param fn Node callback. */
+    /**
+     * @brief Visits all nodes in traversal order.
+     * @tparam Fn Node callback type.
+     * @param fn Node callback.
+     */
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(topo_order.cbegin(), topo_order.cend(), std::forward<Fn>(fn));
     }
 
-    /** @brief Visits gates in traversal order. @tparam Fn Node callback type. @param fn Node callback. */
+    /**
+     * @brief Visits gates in traversal order.
+     * @tparam Fn Node callback type.
+     * @param fn Node callback.
+     */
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(topo_order.cbegin() + offset(), topo_order.cend(), std::forward<Fn>(fn));
     }
 
-    /** @brief Visits gates in reverse traversal order. @tparam Fn Node callback type. @param fn Node callback. */
+    /**
+     * @brief Visits gates in reverse traversal order.
+     * @tparam Fn Node callback type.
+     * @param fn Node callback.
+     */
     template <typename Fn>
     void foreach_gate_reverse(Fn&& fn) const
     {

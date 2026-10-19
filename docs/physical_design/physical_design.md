@@ -6,6 +6,7 @@ layout transformations and optimization refine the resulting designs.
 
 Physical design consumes `fiction::tec_nt`, a named `technology_network`. Convert other network types before
 placement; the conversion preserves network, primary-input, and primary-output names.
+A bare `technology_network` also converts implicitly to `tec_nt` with empty names.
 
 ```cpp
 const auto specification = fiction::synthesis::convert_network<fiction::tec_nt>(source);

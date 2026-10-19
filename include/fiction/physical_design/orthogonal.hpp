@@ -360,7 +360,10 @@ typename Lyt::object_id wire_south(Lyt& lyt, const fiction::layouts::layout_base
     return a;
 }
 
-/** @brief Routes ordered inputs to a placed two-input gate. @tparam Lyt Output layout type. */
+/**
+ * @brief Routes ordered inputs to a placed two-input gate.
+ * @tparam Lyt Output layout type.
+ */
 template <typename Lyt>
 typename Lyt::object_id
 connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const tec_nt& ntk,
@@ -377,7 +380,10 @@ connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, 
     return reversed ? place(lyt, t, ntk, n, west, north, c) : place(lyt, t, ntk, n, north, west, c);
 }
 
-/** @brief Routes one input to a placed unary gate. @tparam Lyt Output layout type. */
+/**
+ * @brief Routes one input to a placed unary gate.
+ * @tparam Lyt Output layout type.
+ */
 template <typename Lyt>
 typename Lyt::object_id connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
                                           const tec_nt& ntk, const tec_nt::node& n,

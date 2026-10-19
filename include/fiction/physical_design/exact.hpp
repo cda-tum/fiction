@@ -587,8 +587,8 @@ class exact_impl
         const surface_black_list<fcn::port_direction>& black_list;
         /**
          * Maps nodes to tile positions when creating the layout from the SMT model.
+         * Layout fanout is bounded by max_fanin_size; add a separate bound if layouts permit more branches.
          */
-        // Layout fanout is bounded by max_fanin_size; add a separate bound if layouts permit more branches.
         mockturtle::node_map<branching_signal_container<Lyt::max_fanin_size>, tec_nt> node2pos;
         /**
          * Mapping of levels to nodes used for symmetry breaking.
