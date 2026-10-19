@@ -64,6 +64,7 @@ std::vector<uint32_t> get_po_levels(const Ntk& ntk)
     return po_levels;
 }
 
+/** @brief Balances network paths by inserting buffers. */
 template <typename NtkDest, typename NtkSrc>
 class network_balancing_impl
 {
@@ -80,6 +81,7 @@ class network_balancing_impl
             ps{std::move(p)}
     {}
 
+    /** @brief Returns a network with paths balanced by inserted buffers. */
     NtkDest run()
     {
         // insert num buffers after child in balance_ntk
@@ -161,6 +163,7 @@ class network_balancing_impl
     const network_balancing_params ps;
 };
 
+/** @brief Checks whether network paths have balanced depths. */
 template <typename Ntk>
 class is_balanced_impl
 {
@@ -172,6 +175,7 @@ class is_balanced_impl
      */
     is_balanced_impl(const Ntk& src, network_balancing_params p) : ntk{src}, ntk_depth{src}, ps{std::move(p)} {}
 
+    /** @brief Returns whether all network paths have balanced depths. */
     bool run()
     {
         ntk.foreach_gate(

@@ -17,7 +17,6 @@
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/io/layout_drawers.hpp>
@@ -113,7 +112,19 @@ void register_write_dot_layout(nb::module_& m)
             }
         },
         nb::arg("layout"), nb::arg("filename"), nb::arg("clock_colors") = false, nb::arg("indexes") = false,
-        nb::arg("on_progress").none() = nb::none(), DOC(fiction_layouts_io_write_dot_layout),
+        nb::arg("on_progress").none() = nb::none(),
+        R"doc(Writes a gate-level layout to a DOT file. Terminal names use quoted DOT strings.
+
+Args:
+    layout: Gate-level layout to draw.
+    filename: Output file path.
+    clock_colors: Color tiles by clock number instead of gate type. Defaults to False.
+    indexes: Label tiles with object indices. Defaults to False.
+    on_progress: Receives completed drawing work. Defaults to None.
+
+Raises:
+    RuntimeError: If the output file cannot be created or written.
+)doc",
         nb::call_guard<nb::gil_scoped_release>());
 }
 

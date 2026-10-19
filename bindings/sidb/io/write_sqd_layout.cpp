@@ -47,7 +47,8 @@ void register_write_sqd_layout(nb::module_& m)
            const fiction::utils::progress_callback& on_progress)
         { fiction::sidb::io::write_sqd_layout(lyt, filename, on_progress); },
         nb::arg("layout"), nb::arg("filename"), nb::arg("on_progress").none() = nb::none(),
-        DOC(fiction_sidb_io_write_sqd_layout_2), nb::call_guard<nb::gil_scoped_release>());
+        parameter_doc(DOC(fiction_sidb_io_write_sqd_layout_2), {{"lyt", "layout"}}).c_str(),
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace pyfiction

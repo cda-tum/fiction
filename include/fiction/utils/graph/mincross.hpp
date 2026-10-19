@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/synthesis/network_balancing.hpp"
+#include "fiction/synthesis/network_balancing.hpp"  // NOLINT(misc-include-cleaner): is_balanced is used in debug assertions.
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/fanout_view.hpp>
@@ -102,6 +102,7 @@ template <typename Ntk>
 class mincross_impl
 {
   public:
+    /** @brief Network node type. */
     using node = typename Ntk::node;
 
     /**

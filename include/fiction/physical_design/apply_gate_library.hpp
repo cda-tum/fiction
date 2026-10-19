@@ -96,6 +96,7 @@ template <typename GateLibrary, typename GateLyt>
 namespace detail
 {
 
+/** @brief Maps gate-level tiles to cell-level gate implementations. */
 template <typename GateLibrary, typename GateLyt>
 class apply_gate_library_impl
 {
@@ -177,8 +178,9 @@ class apply_gate_library_impl
     /** @brief Receives completed gate mappings. */
     utils::progress_callback on_progress;
     /**
-     * @brief Creates the empty layout that receives the gates: an SiDB layout on the given lattice, or a cell grid
-     * spanning the gate-level layout whose clock zones are the library's tiles and follow the gate-level clocking.
+     * @brief Creates an empty SiDB layout on the given lattice or a cell grid spanning the gate-level layout.
+     *
+     * Cell grids with tile-based clocking use library tiles as clock zones and copy the gate-level clocking scheme.
      * @param src Gate-level source layout.
      * @param lat Lattice of an SiDB layout.
      * @return Empty layout.

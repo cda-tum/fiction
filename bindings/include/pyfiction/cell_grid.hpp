@@ -145,10 +145,10 @@ void register_tile_clocking(nb::class_<Lyt, py_cartesian_layout>& cls)
     // Keep the GIL for short clocking lookups and updates; a release adds overhead.
     cls.def("get_tile_size_x", &Lyt::get_tile_size_x, DOC(fiction_layouts_tile_clocking_get_tile_size_x))
         .def("set_tile_size_x", &Lyt::set_tile_size_x, nb::arg("size"),
-             DOC(fiction_layouts_tile_clocking_set_tile_size_x))
+             parameter_doc(DOC(fiction_layouts_tile_clocking_set_tile_size_x), {{"tile_size_x", "size"}}).c_str())
         .def("get_tile_size_y", &Lyt::get_tile_size_y, DOC(fiction_layouts_tile_clocking_get_tile_size_y))
         .def("set_tile_size_y", &Lyt::set_tile_size_y, nb::arg("size"),
-             DOC(fiction_layouts_tile_clocking_set_tile_size_y))
+             parameter_doc(DOC(fiction_layouts_tile_clocking_set_tile_size_y), {{"tile_size_y", "size"}}).c_str())
         .def("get_clock_zone", &Lyt::get_clock_zone, nb::arg("c"), DOC(fiction_layouts_tile_clocking_get_clock_zone))
         .def("assign_clock_number", &Lyt::assign_clock_number, nb::arg("cz"), nb::arg("cn"),
              DOC(fiction_layouts_tile_clocking_assign_clock_number))

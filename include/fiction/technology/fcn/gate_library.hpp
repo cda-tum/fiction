@@ -42,8 +42,10 @@ template <typename CoordinateType>
 class unsupported_gate_type_exception : public std::exception
 {
   public:
+    /** @brief Records the coordinate of an unsupported gate. */
     explicit unsupported_gate_type_exception(const CoordinateType& c) noexcept : std::exception(), coord{c} {}
 
+    /** @brief Returns the coordinate of the unsupported gate. */
     [[nodiscard]] CoordinateType where() const noexcept
     {
         return coord;
@@ -66,6 +68,7 @@ template <typename CoordinateType, typename PortType>
 class unsupported_gate_orientation_exception : public std::exception
 {
   public:
+    /** @brief Records a gate coordinate and unsupported port orientation. */
     unsupported_gate_orientation_exception(const CoordinateType& c, const port_list<PortType>& p) noexcept :
             std::exception(),
             coord{c},

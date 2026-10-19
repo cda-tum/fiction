@@ -51,7 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - `networks::initialize_copy_network_with_virtual_pis` copies the constants and inputs of a network, virtual
-    inputs included, and `networks::barycenters` computes the mean fanin positions of ranked nodes
+    inputs included
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores tagged dots and defects without templates
   - `sidb::charge_distribution` assigns one charge state per SiDB and carries its energy;
@@ -71,6 +71,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
+  - Added missing public API entries and short C++/Python examples for design and simulation.
+  - API module pages provide overviews and link to dedicated API subpages.
+  - Added a development tooling reference and a funding footer with institutional logos.
 
 - Experiments:
 
@@ -785,6 +788,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Removed duplicate bounding-box entries and corrected the critical-temperature overload reference.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
   - SiDB reader documentation now lists every overload without ambiguous signatures.
+  - API navigation now separates simulation topics and links Python and C++ truth-table types.
+  - Python API docs now state writable-member defaults, name Python exceptions, and retain distinct overload descriptions.
+    Parameter names and wrapper return values now match Python signatures.
+  - API rendering now reads native binding docstrings instead of executing type stubs.
+  - API deep links now scroll to targets in an already selected language tab.
+  - File-writer docs now state output failures and Python arguments, returns, and validation errors.
+  - Documentation builds reject warnings and preserve signatures and citations in Markdown exports.
+  - Corrected test, benchmark, experiment, and documentation build instructions.
 
 - Experiments:
   - Layout experiments now reject failed GENLIB and Verilog reads in Release builds.

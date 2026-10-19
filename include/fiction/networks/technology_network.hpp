@@ -58,11 +58,13 @@ class technology_network : public mockturtle::klut_network
         add_additional_functions();
     }
 
+    /** @brief Constructs a network sharing the supplied LUT storage. */
     explicit technology_network(std::shared_ptr<mockturtle::klut_storage> s) : mockturtle::klut_network(std::move(s))
     {
         add_additional_functions();
     }
 
+    /** @brief Returns a network with independent storage. */
     [[nodiscard]] technology_network clone() const
     {
         return technology_network{std::make_shared<mockturtle::klut_storage>(*_storage)};
@@ -101,6 +103,7 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a}, 2);
     }
 
+    /** @brief Creates a NOT gate with the supplied signal. */
     signal create_not(const signal& a)
     {
         return is_constant(a) ? get_constant(!constant_value(a)) : _create_node({a}, 3);
@@ -110,51 +113,61 @@ class technology_network : public mockturtle::klut_network
 
 #pragma region Create binary functions
 
+    /** @brief Creates an AND gate with the supplied signals. */
     signal create_and(signal a, signal b)
     {
         return _create_node({a, b}, 4);
     }
 
+    /** @brief Creates a NAND gate with the supplied signals. */
     signal create_nand(signal a, signal b)
     {
         return _create_node({a, b}, 5);
     }
 
+    /** @brief Creates an OR gate with the supplied signals. */
     signal create_or(signal a, signal b)
     {
         return _create_node({a, b}, 6);
     }
 
+    /** @brief Creates a NOR gate with the supplied signals. */
     signal create_nor(signal a, signal b)
     {
         return _create_node({a, b}, 7);
     }
 
+    /** @brief Creates an LT gate with the supplied signals. */
     signal create_lt(signal a, signal b)
     {
         return _create_node({a, b}, 8);
     }
 
+    /** @brief Creates a GE gate with the supplied signals. */
     signal create_ge(signal a, signal b)
     {
         return _create_node({a, b}, 9);
     }
 
+    /** @brief Creates a GT gate with the supplied signals. */
     signal create_gt(signal a, signal b)
     {
         return _create_node({a, b}, 10);
     }
 
+    /** @brief Creates an LE gate with the supplied signals. */
     signal create_le(signal a, signal b)
     {
         return _create_node({a, b}, 11);
     }
 
+    /** @brief Creates an XOR gate with the supplied signals. */
     signal create_xor(signal a, signal b)
     {
         return _create_node({a, b}, 12);
     }
 
+    /** @brief Creates an XNOR gate with the supplied signals. */
     signal create_xnor(signal a, signal b)
     {
         return _create_node({a, b}, 13);
@@ -163,21 +176,25 @@ class technology_network : public mockturtle::klut_network
 
 #pragma region Create ternary functions
 
+    /** @brief Creates a MAJ gate with the supplied signals. */
     signal create_maj(signal a, signal b, signal c)
     {
         return _create_node({a, b, c}, 14);
     }
 
+    /** @brief Creates an ITE gate with the supplied signals. */
     signal create_ite(signal a, signal b, signal c)
     {
         return _create_node({a, b, c}, 16);
     }
 
+    /** @brief Creates an XOR3 gate with the supplied signals. */
     signal create_xor3(signal a, signal b, signal c)
     {
         return _create_node({a, b, c}, 18);
     }
 
+    /** @brief Creates a DOT gate with the supplied signals. */
     signal create_dot(signal a, signal b, signal c)
     {
         return _create_node({a, b, c}, 20);
@@ -186,18 +203,33 @@ class technology_network : public mockturtle::klut_network
 
 #pragma region Create nary functions
 
+    /**
+     * @brief Reduces the supplied signals through a tree of binary AND gates.
+     *
+     * An empty input returns constant `true`; a single input returns that signal.
+     */
     signal create_nary_and(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(true),
                                        [this](auto const& a, auto const& b) { return create_and(a, b); });
     }
 
+    /**
+     * @brief Reduces the supplied signals through a tree of binary OR gates.
+     *
+     * An empty input returns constant `false`; a single input returns that signal.
+     */
     signal create_nary_or(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(false),
                                        [this](auto const& a, auto const& b) { return create_or(a, b); });
     }
 
+    /**
+     * @brief Reduces the supplied signals through a tree of binary XOR gates.
+     *
+     * An empty input returns constant `false`; a single input returns that signal.
+     */
     signal create_nary_xor(const std::vector<signal>& fs)
     {
         return mockturtle::tree_reduce(fs.begin(), fs.end(), get_constant(false),
@@ -241,6 +273,7 @@ class technology_network : public mockturtle::klut_network
         return _create_node(children, _storage->data.cache.insert(function));
     }
 
+    /** @brief Copies a node function with the supplied children. */
     signal clone_node(const klut_network& other, const node& source, const std::vector<signal>& children)
     {
         assert(!children.empty());
@@ -285,101 +318,121 @@ class technology_network : public mockturtle::klut_network
         return _storage->nodes[n].data[1].h1 == 3;
     }
 
+    /** @brief Returns whether the node implements the AND function. */
     [[nodiscard]] bool is_and(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 4;
     }
 
+    /** @brief Returns whether the node implements the NAND function. */
     [[nodiscard]] bool is_nand(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 5;
     }
 
+    /** @brief Returns whether the node implements the OR function. */
     [[nodiscard]] bool is_or(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 6;
     }
 
+    /** @brief Returns whether the node implements the NOR function. */
     [[nodiscard]] bool is_nor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 7;
     }
 
+    /** @brief Returns whether the node implements the LT function. */
     [[nodiscard]] bool is_lt(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 8;
     }
 
+    /** @brief Returns whether the node implements the GE function. */
     [[nodiscard]] bool is_ge(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 9;
     }
 
+    /** @brief Returns whether the node implements the GT function. */
     [[nodiscard]] bool is_gt(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 10;
     }
 
+    /** @brief Returns whether the node implements the LE function. */
     [[nodiscard]] bool is_le(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 11;
     }
 
+    /** @brief Returns whether the node implements the XOR function. */
     [[nodiscard]] bool is_xor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 12;
     }
 
+    /** @brief Returns whether the node implements the XNOR function. */
     [[nodiscard]] bool is_xnor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 13;
     }
 
+    /** @brief Returns whether the node implements the MAJ function. */
     [[nodiscard]] bool is_maj(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 14;
     }
 
+    /** @brief Returns whether the node implements the ITE function. */
     [[nodiscard]] bool is_ite(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 16;
     }
 
+    /** @brief Returns whether the node implements the XOR3 function. */
     [[nodiscard]] bool is_xor3(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 18;
     }
 
+    /** @brief Returns whether the node implements the DOT function. */
     [[nodiscard]] bool is_dot(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 20;
     }
 
+    /** @brief Returns whether the node implements the AND3 function. */
     [[nodiscard]] bool is_and3(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 22;
     }
 
+    /** @brief Returns whether the node implements the XOR AND function. */
     [[nodiscard]] bool is_xor_and(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 24;
     }
 
+    /** @brief Returns whether the node implements the OR AND function. */
     [[nodiscard]] bool is_or_and(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 26;
     }
 
+    /** @brief Returns whether the node implements the ONEHOT function. */
     [[nodiscard]] bool is_onehot(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 28;
     }
 
+    /** @brief Returns whether the node implements the GAMBLE function. */
     [[nodiscard]] bool is_gamble(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 31;  // 31 since gamble is not normal
     }
 
+    /** @brief Returns whether the node implements the AND XOR function. */
     [[nodiscard]] bool is_and_xor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 32;

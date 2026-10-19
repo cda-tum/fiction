@@ -267,9 +267,9 @@ inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, std
  * Writes a simulation result as a SiQAD simulation result file.
  *
  * @param sim_result Result to write.
- * @throws std::invalid_argument if a distribution has different sites from the result layout.
  * @param filename File to write into.
- * @throws std::ofstream::failure if the file cannot be opened.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
+ * @throws std::invalid_argument if a distribution has different sites from the result layout.
  */
 inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, const std::string_view& filename)
 {
