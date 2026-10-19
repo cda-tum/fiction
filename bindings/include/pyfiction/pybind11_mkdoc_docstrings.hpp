@@ -24947,7 +24947,9 @@ signals connected to the virtual PIs back to their corresponding real
 PIs. This ensures compatibility for equivalence checking between
 networks with and without virtual inputs, as the miter requires
 networks to have an identical number of primary inputs. If the network
-does not contain any virtual PIs, it is returned unchanged.
+does not contain any virtual PIs, it is returned unchanged. If virtual
+PIs are removed from a ranked network, call `update_ranks` on the
+result before querying its ranks.
 
 Args:
     ntk: The input network.
@@ -25655,9 +25657,9 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_keep_crossings =
 R"doc(Decides for the hybrid strategy whether the level just computed keeps
-its crossings instead of its duplicates. If so, the level is replaced
-by its original rank order and the statistics count the kept
-crossings.
+its crossings instead of its duplicates. If so, the level uses the
+source nodes reordered to reduce crossings, and the statistics count
+the kept crossings.
 
 Args:
     next_level: Level below the current one as the duplication
