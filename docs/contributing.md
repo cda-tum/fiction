@@ -28,6 +28,7 @@ You can contribute in several ways:
 ## First Contributions
 
 Ready to contribute? Check out the [documentation](https://fiction.readthedocs.io/en/latest/) to set up _fiction_ for local development and learn about the style guidelines and conventions used throughout the project.
+See {doc}`tooling` for the tools and configuration files used in development.
 
 We value contributions from people with all levels of experience.
 In particular if this is your first PR not everything has to be perfect.
@@ -113,6 +114,8 @@ CI combines reports from the supported Python versions and platforms under Codec
 `python` flag. The `cpp` flag measures C++ headers. Each flag has its own project and
 patch status; Python project coverage is compared with the measured base revision.
 
+(code-review)=
+
 ## Code Review
 
 Two automated reviewers comment on every pull request, and they carry different weight.
@@ -186,6 +189,8 @@ This document was inspired by and partially adapted from
 - <https://yeoman.io/contributing/pull-request.html>
 - <https://github.com/scikit-build/scikit-build>
 
+(building-documentation)=
+
 ## Building the Documentation
 
 Install [uv](https://docs.astral.sh/uv/), Doxygen, and the C++ build prerequisites
@@ -209,6 +214,8 @@ are passed to Sphinx. Read the Docs uses the same non-interactive build.
 The docs dependency group requires Python 3.12 or newer. `uv.lock` records the
 versions used by local and hosted builds. HTML builds also produce `llms.txt`,
 `llms-full.txt`, and a Markdown copy of each page alongside its HTML file.
+
+(citing-publications)=
 
 ### Citing Publications
 

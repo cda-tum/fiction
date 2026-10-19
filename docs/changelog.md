@@ -60,6 +60,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
   - Added missing public API entries and short C++/Python examples for design and simulation.
   - API module pages provide overviews and link to dedicated API subpages.
+  - Added a development tooling reference and a funding footer with institutional logos.
 
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
