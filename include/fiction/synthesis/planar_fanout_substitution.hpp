@@ -24,11 +24,10 @@
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
-#include <mockturtle/views/fanout_view.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
-#include <queue>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -73,7 +72,6 @@ class planar_fanout_substitution_impl
      */
     planar_fanout_substitution_impl(const Ntk& src, const planar_fanout_substitution_params& p) :
             ntk{src},
-            fanout_ntk{src},
             available_fanouts{src},
             ps{p}
     {}
@@ -201,7 +199,7 @@ class planar_fanout_substitution_impl
     {
         if constexpr (has_is_fanout_v<Ntk>)
         {
-            return ntk.is_fanout(n) && fanout_ntk.fanout_size(n) <= ps.degree;
+            return ntk.is_fanout(n) && ntk.fanout_size(n) <= ps.degree;
         }
         else
         {
@@ -223,7 +221,7 @@ class planar_fanout_substitution_impl
                                  {
                                      if (!ntk.is_constant(n) && !is_proper_fanout(n))
                                      {
-                                         depth = std::max(depth, tree_depth(fanout_ntk.fanout_size(n)));
+                                         depth = std::max(depth, tree_depth(ntk.fanout_size(n)));
                                      }
                                  });
 
@@ -275,7 +273,7 @@ class planar_fanout_substitution_impl
     void substitute(Ntk& dest, const mockturtle::node<Ntk> n,
                     mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new, const uint32_t pad)
     {
-        const auto fanouts = fanout_ntk.fanout_size(n);
+        const auto fanouts = ntk.fanout_size(n);
 
         // a node that drives nothing, such as an unused primary input, gets no chain that nothing would consume
         if (fanouts == 0 && !ntk.is_po(n))
@@ -306,37 +304,35 @@ class planar_fanout_substitution_impl
      */
     void generate_fanout_tree(Ntk& dest, const mockturtle::node<Ntk> n, const mockturtle::signal<Ntk> root)
     {
-        const auto fanouts   = fanout_ntk.fanout_size(n);
+        const auto fanouts   = ntk.fanout_size(n);
         const auto num_nodes = num_fanout_nodes(fanouts);
         const auto depth     = tree_depth(fanouts);
 
         // free outputs as (signal, level below n)
-        std::queue<std::pair<mockturtle::signal<Ntk>, uint32_t>> slots{};
-        slots.emplace(root, 0);
+        std::vector<std::pair<mockturtle::signal<Ntk>, uint32_t>> slots{{root, 0}};
+        std::size_t                                               next_slot = 0;
 
         // a tree of one node needs no more outputs than the node has consumers, whatever the degree allows
         const auto outputs_per_node = std::min(static_cast<uint64_t>(ps.degree), static_cast<uint64_t>(fanouts));
 
         for (uint64_t i = 0; i < num_nodes; ++i)
         {
-            const auto [sig, level] = slots.front();
-            slots.pop();
+            const auto [sig, level] = slots[next_slot++];
 
             const auto buf = dest.create_buf(sig);
 
             for (uint64_t d = 0; d < outputs_per_node; ++d)
             {
-                slots.emplace(buf, level + 1);
+                slots.emplace_back(buf, level + 1);
             }
         }
 
         std::vector<mockturtle::signal<Ntk>> ends{};
         ends.reserve(fanouts);
 
-        for (uint32_t i = 0; i < fanouts && !slots.empty(); ++i)
+        for (uint32_t i = 0; i < fanouts && next_slot < slots.size(); ++i)
         {
-            const auto [sig, level] = slots.front();
-            slots.pop();
+            const auto [sig, level] = slots[next_slot++];
 
             ends.push_back(networks::buffer_chain(dest, sig, depth - level));
         }
@@ -345,11 +341,9 @@ class planar_fanout_substitution_impl
         std::stable_sort(ends.begin(), ends.end(),
                          [&dest](const auto& a, const auto& b) { return dest.get_node(a) < dest.get_node(b); });
 
+        // `take_fanout` pops from the back, so the outputs are stored in reverse planar order
         auto& outputs = available_fanouts[n];
-        for (const auto& sig : ends)
-        {
-            outputs.push(sig);
-        }
+        outputs.assign(ends.rbegin(), ends.rend());
     }
     /**
      * @brief Returns the signal a consumer of `n` connects to.
@@ -376,8 +370,8 @@ class planar_fanout_substitution_impl
             return child;
         }
 
-        const auto sig = outputs.front();
-        outputs.pop();
+        const auto sig = outputs.back();
+        outputs.pop_back();
 
         return sig;
     }
@@ -386,13 +380,10 @@ class planar_fanout_substitution_impl
      */
     const Ntk& ntk;
     /**
-     * @brief Fanout view of the source network.
+     * @brief Free outputs of the fanout tree per source node, each padded to the depth of the tree, in reverse planar
+     * order.
      */
-    const mockturtle::fanout_view<Ntk> fanout_ntk;
-    /**
-     * @brief Free outputs of the fanout tree per source node, each padded to the depth of the tree.
-     */
-    mockturtle::node_map<std::queue<mockturtle::signal<Ntk>>, Ntk> available_fanouts;
+    mockturtle::node_map<std::vector<mockturtle::signal<Ntk>>, Ntk> available_fanouts;
     /**
      * @brief Parameters.
      */

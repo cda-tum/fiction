@@ -28,7 +28,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -255,9 +254,9 @@ class planar_rebalancing_impl
         return result;
     }
     /**
-     * @brief Consumers of every stripped node in rank order, derived from the source network.
+     * @brief Consumers of every stripped node in rank order, derived from the source network, indexed by node.
      */
-    using consumer_map = std::unordered_map<mockturtle::node<Ntk>, std::vector<mockturtle::node<Ntk>>>;
+    using consumer_map = std::vector<std::vector<mockturtle::node<Ntk>>>;
     /**
      * @brief Map from stripped nodes to signals of the network under construction.
      */
@@ -271,7 +270,7 @@ class planar_rebalancing_impl
      */
     [[nodiscard]] consumer_map stripped_consumers(const Ntk& stripped, const signal_map& old2new) const
     {
-        consumer_map consumers{};
+        consumer_map consumers(stripped.size());
 
         ntk.foreach_node(
             [this, &stripped, &old2new, &consumers](const auto& n)
@@ -287,7 +286,7 @@ class planar_rebalancing_impl
                     cs.push_back(stripped.get_node(old2new[c]));
                 }
 
-                consumers.emplace(stripped.get_node(old2new[n]), std::move(cs));
+                consumers[stripped.get_node(old2new[n])] = std::move(cs);
             });
 
         return consumers;
@@ -306,15 +305,8 @@ class planar_rebalancing_impl
     static void append_out_edges(const mockturtle::node<Ntk> n, const Ntk& stripped, const consumer_map& consumers,
                                  const uint32_t po_level, std::vector<edge>& level_edges)
     {
-        const auto it = consumers.find(n);
-
-        // a primary input that drives nothing has no edges
-        if (it == consumers.end())
-        {
-            return;
-        }
-
-        for (const auto& c : it->second)
+        // a primary input that drives nothing has no consumers and no edges
+        for (const auto& c : consumers[n])
         {
             if (c == n)
             {
