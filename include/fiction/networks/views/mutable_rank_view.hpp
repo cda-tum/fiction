@@ -26,6 +26,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -109,8 +110,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         static_assert(mockturtle::has_num_pis_v<Ntk>, "Ntk does not implement the num_pis method");
         static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
         static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
-
-        rank_pos.rehash(this->size());
     }
 
     /**
@@ -134,7 +133,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
         static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
 
-        rank_pos.rehash(this->size());
+        rank_pos.assign(this->size(), no_rank);
 
         init_ranks();
     }
@@ -157,7 +156,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
         static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
 
-        rank_pos.rehash(this->size());
+        rank_pos.assign(this->size(), no_rank);
 
         init_ranks(init_ranks_vec);
     }
@@ -228,22 +227,21 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     {
         assert(!this->is_constant(n) && "node must not be constant");
 
-        // thrown explicitly: the map's own `at` does not throw on every toolchain
-        const auto it = rank_pos.find(n);
+        const auto pos = position_of(n);
 
-        if (it == rank_pos.end())
+        if (pos == no_rank)
         {
             throw std::out_of_range("node has no rank");
         }
 
-        return it->second;
+        return pos;
     }
 
     /**
      * Verifies the validity of ranks and rank positions within the `mutable_rank_view` context.
      * The view is valid, if the level of each node stored in the `ranks` array corresponds to the
      * `static_depth_view::level()` and if the ranks saved in the `ranks` array are equivalent to the ranks in the
-     * `rank_pos` hashmap.
+     * `rank_pos` array.
      *
      * @return A boolean indicating whether the ranks and rank positions are valid (true) or not (false).
      */
@@ -261,7 +259,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
                     return false;
                 }
                 // Check if the rank_pos is not in ascending order
-                if (rank_pos.at(n) != expected_rank_pos)
+                if (position_of(n) != expected_rank_pos)
                 {
                     return false;
                 }
@@ -295,14 +293,13 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
         for (auto it = nodes.cbegin(); permutation && it != nodes.cend(); ++it)
         {
-            const auto pos = rank_pos.find(*it);
+            const auto pos = position_of(*it);
 
-            permutation =
-                pos != rank_pos.end() && pos->second < rank.size() && rank[pos->second] == *it && !listed[pos->second];
+            permutation = pos < rank.size() && rank[pos] == *it && !listed[pos];
 
             if (permutation)
             {
-                listed[pos->second] = true;
+                listed[pos] = true;
             }
         }
 
@@ -313,7 +310,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
         // assign new ranks
         rank = nodes;
-        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
+        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { position_slot(n) = i++; });
     }
 
     /**
@@ -406,8 +403,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     {
         assert(this->level(n1) == this->level(n2) && "nodes must be in the same rank");
 
-        auto& pos1 = rank_pos[n1];
-        auto& pos2 = rank_pos[n2];
+        auto& pos1 = position_slot(n1);
+        auto& pos2 = position_slot(n2);
 
         std::swap(ranks[this->level(n1)][pos1], ranks[this->level(n2)][pos2]);
         std::swap(pos1, pos2);
@@ -429,7 +426,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         auto& rank = ranks[level];
 
         std::ranges::sort(rank, cmp);
-        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
+        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { position_slot(n) = i++; });
     }
 
     /**
@@ -597,8 +594,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     {
         this->update_levels();
         max_rank_width = 0;
-        rank_pos.clear();
-        rank_pos.rehash(this->size());
+        rank_pos.assign(this->size(), no_rank);
         ranks.clear();
         ranks.resize(this->depth() + 1);
         init_ranks();
@@ -618,16 +614,18 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
             // add sufficient ranks to store the new node
             ranks.insert(ranks.end(), this->level(n) - ranks.size() + 1, {});
         }
-        rank_pos.rehash(this->size());
-
         insert_in_rank(n);
     }
 
   private:
     /**
-     * Hashmap assigning ranks to nodes.
+     * Marks a node without a rank position.
      */
-    phmap::flat_hash_map<node, uint32_t> rank_pos;
+    static constexpr uint32_t no_rank = std::numeric_limits<uint32_t>::max();
+    /**
+     * @brief Rank position per node index; `no_rank` for a node without one.
+     */
+    std::vector<uint32_t> rank_pos;
     /**
      * The nodes stored in an rank array.
      */
@@ -638,14 +636,43 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     uint32_t max_rank_width;
 
     /**
+     * @brief Rank position of a node, `no_rank` if it has none.
+     *
+     * @param n Node to look up.
+     * @return Position of `n` within its rank.
+     */
+    [[nodiscard]] uint32_t position_of(const node& n) const noexcept
+    {
+        const auto i = static_cast<std::size_t>(this->node_to_index(n));
+
+        return i < rank_pos.size() ? rank_pos[i] : no_rank;
+    }
+    /**
+     * @brief Rank position slot of a node; grows the storage for a node added after the last update.
+     *
+     * @param n Node to look up.
+     * @return Reference to the position of `n`.
+     */
+    uint32_t& position_slot(const node& n)
+    {
+        const auto i = static_cast<std::size_t>(this->node_to_index(n));
+
+        if (i >= rank_pos.size())
+        {
+            rank_pos.resize(i + 1, no_rank);
+        }
+
+        return rank_pos[i];
+    }
+    /**
      * Inserts a node into the rank and updates the rank position, ranks, and max rank width accordingly.
      *
      * @param n The node to insert into the rank.
      */
     void insert_in_rank(const node& n)
     {
-        auto& rank  = ranks[this->level(n)];
-        rank_pos[n] = static_cast<uint32_t>(rank.size());
+        auto& rank       = ranks[this->level(n)];
+        position_slot(n) = static_cast<uint32_t>(rank.size());
         rank.push_back(n);
         max_rank_width = std::max(max_rank_width, static_cast<uint32_t>(rank.size()));
     }
@@ -692,8 +719,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     void insert_in_rank(const node& n, std::size_t rank_level)
     {
         assert(rank_level < ranks.size());
-        auto& rank  = ranks[rank_level];
-        rank_pos[n] = static_cast<uint32_t>(rank.size());
+        auto& rank       = ranks[rank_level];
+        position_slot(n) = static_cast<uint32_t>(rank.size());
         rank.push_back(n);
         max_rank_width = std::max(max_rank_width, static_cast<uint32_t>(rank.size()));
     }

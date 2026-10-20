@@ -183,6 +183,46 @@ TEST_CASE("Compute critical path information", "[static-depth-view]")
     CHECK(depth_aig.is_on_critical_path(aig.get_node(f)));
 }
 
+TEST_CASE("The critical path follows the levels after an update and survives a copy", "[static-depth-view]")
+{
+    static_depth_view<technology_network> tec_d;
+
+    const auto x1 = tec_d.create_pi();
+    const auto x2 = tec_d.create_pi();
+    const auto x3 = tec_d.create_pi();
+    const auto g1 = tec_d.create_and(x1, x2);
+    tec_d.create_po(g1);
+    tec_d.update_levels();
+
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(g1)));
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(x1)));
+    CHECK(!tec_d.is_on_critical_path(tec_d.get_node(x3)));
+
+    // a deeper output extends the critical path; the input that joins late stays off it
+    const auto g2 = tec_d.create_not(tec_d.create_and(g1, x3));
+    tec_d.create_po(g2);
+    tec_d.update_levels();
+
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(g2)));
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(g1)));
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(x1)));
+    CHECK(!tec_d.is_on_critical_path(tec_d.get_node(x3)));
+
+    // a copy keeps the answers, whether the path was computed before the copy or not
+    const auto computed_copy = tec_d;
+
+    tec_d.update_levels();
+
+    const auto pending_copy = tec_d;
+
+    for (const auto& copy : {computed_copy, pending_copy})
+    {
+        CHECK(copy.is_on_critical_path(copy.get_node(g2)));
+        CHECK(copy.is_on_critical_path(copy.get_node(x1)));
+        CHECK(!copy.is_on_critical_path(copy.get_node(x3)));
+    }
+}
+
 TEST_CASE("Compute levels during node construction", "[static-depth-view]")
 {
     static_depth_view<mockturtle::xag_network> dxag;
