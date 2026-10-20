@@ -17,6 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -24,10 +25,8 @@
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/utils/graph/mincross.hpp>
-#include <fiction/verification/virtual_miter.hpp>
 
 #include <mockturtle/algorithms/cleanup.hpp>
-#include <mockturtle/algorithms/equivalence_checking.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -42,7 +41,6 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::utils::graph;
-using namespace fiction::verification;
 
 namespace
 {
@@ -61,40 +59,6 @@ mutable_rank_view<technology_network> rank(const Ntk& ntk)
 }
 
 /**
- * Counts the crossings of a ranked network without reordering it.
- */
-template <typename Ntk>
-uint64_t count_crossings(const Ntk& ntk)
-{
-    mincross_params ps{};
-    ps.optimize = false;
-    mincross_stats st{};
-
-    mincross(ntk, ps, &st);
-
-    return st.num_crossings;
-}
-
-/**
- * Checks that the network computes the same functions as the original, virtual primary inputs included.
- */
-template <typename Spec, typename Impl>
-void check_equivalent(const Spec& spec, const Impl& impl)
-{
-    const auto miter = virtual_miter<technology_network>(spec, impl);
-    REQUIRE(miter.has_value());
-
-    if (miter.has_value())  // the optional-access check does not model REQUIRE
-    {
-        mockturtle::equivalence_checking_stats st{};
-        const auto                             cec = mockturtle::equivalence_checking(*miter, {}, &st);
-
-        REQUIRE(cec.has_value());
-        CHECK(cec.value_or(false));
-    }
-}
-
-/**
  * Checks the contract: balanced with unified outputs, crossing-free, equivalent.
  */
 template <typename Spec, typename Impl>
@@ -102,7 +66,7 @@ void check_contract(const Spec& spec, const Impl& impl)
 {
     CHECK(is_balanced(impl, {.unify_outputs = true, .buffer_constant_outputs = false}));
     CHECK(count_crossings(impl) == 0);
-    check_equivalent(spec, impl);
+    check_virtual_eq(spec, impl);
 }
 
 /**
@@ -161,7 +125,7 @@ TEST_CASE("Dangling gates are rejected by the rank view", "[crossing-gate-planar
 
     CHECK(result.size() == tec.size() - 1);
     CHECK(is_balanced(result));
-    check_equivalent(tec, result);
+    check_virtual_eq(tec, result);
 }
 
 TEST_CASE("Primary inputs without fanout are kept", "[crossing-gate-planarization]")
@@ -182,10 +146,10 @@ TEST_CASE("Primary inputs without fanout are kept", "[crossing-gate-planarizatio
     CHECK(result.num_pis() == 3);
     CHECK(result.size() == tec.size());
     CHECK(is_balanced(result));
-    check_equivalent(tec, result);
+    check_virtual_eq(tec, result);
 }
 
-TEST_CASE("A single crossing becomes one gadget", "[crossing-gate-planarization]")
+TEST_CASE("A single crossing becomes one crossing gate", "[crossing-gate-planarization]")
 {
     const auto tec    = single_crossing_network();
     const auto ranked = rank(tec);
@@ -221,7 +185,7 @@ TEST_CASE("A single crossing becomes one gadget", "[crossing-gate-planarization]
     }
 }
 
-TEST_CASE("Planar networks are copied without gadgets", "[crossing-gate-planarization]")
+TEST_CASE("Planar networks are copied without crossing gates", "[crossing-gate-planarization]")
 {
     const auto ntk    = blueprints::full_adder_network<technology_network>();
     const auto planar = node_duplication_planarization(rank(ntk));
@@ -265,7 +229,7 @@ TEST_CASE("Ranks with too many crossings are rejected", "[crossing-gate-planariz
     REQUIRE(count_crossings(ranked) > 1);
 
     crossing_gate_planarization_params ps{};
-    ps.max_crossings_per_rank = 0;
+    ps.max_crossings_per_level = 0;
 
     CHECK_THROWS_AS(crossing_gate_planarization(ranked, ps), std::runtime_error);
 }

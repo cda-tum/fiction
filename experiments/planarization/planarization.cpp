@@ -42,6 +42,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <exception>
 #include <span>
 #include <sstream>
@@ -72,13 +74,6 @@ constexpr uint32_t MAX_NODES_FOR_SAT = 50000;
  */
 constexpr uint32_t SIMULATION_PATTERNS = 4096;
 /**
- * Planarizations that duplicate more nodes than this are aborted and reported as failures, since pure node
- * duplication can grow exponentially with the depth of the network. This is also the default limit of the
- * planarization parameters.
- */
-constexpr uint64_t MAX_DUPLICATIONS = 2000000;
-
-/**
  * Reads the first network of a benchmark file.
  *
  * @param name Benchmark name relative to `benchmarks/`, without extension.
@@ -90,21 +85,6 @@ tec_nt read_network(const std::string& name)
     network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
 
     return *reader.get_networks().front();
-}
-
-/**
- * Counts the crossings of a ranked network without reordering it.
- */
-template <typename Ntk>
-uint64_t count_crossings(const Ntk& ntk)
-{
-    mincross_params ps{};
-    ps.optimize = false;
-    mincross_stats st{};
-
-    mincross(ntk, ps, &st);
-
-    return st.num_crossings;
 }
 
 /**
@@ -205,7 +185,8 @@ equivalence_result is_equivalent(const Spec& spec, const Impl& impl)
 
 }  // namespace
 
-int main(const int argc, const char** argv)  // NOLINT
+int main(const int argc, const char** argv)
+try
 {
     // an optional first argument restricts the run to benchmarks whose name contains it
     const std::span<const char*> args{argv, static_cast<std::size_t>(argc)};
@@ -241,7 +222,7 @@ int main(const int argc, const char** argv)  // NOLINT
                           "hybrid duplications",
                           "crossing levels",
                           "kept crossings",
-                          "gadget crossings",
+                          "resolved crossings",
                           "pipeline nodes",
                           "hybrid time (s)",
                           "hybrid ok",
@@ -286,7 +267,6 @@ int main(const int argc, const char** argv)  // NOLINT
 
             fmt::print("[i]   planarizing\n");
             node_duplication_planarization_params d_ps{};
-            d_ps.max_duplications = MAX_DUPLICATIONS;
 
             node_duplication_planarization_stats st{};
             const auto                           planar = node_duplication_planarization(ranked, d_ps, &st);
@@ -303,7 +283,7 @@ int main(const int argc, const char** argv)  // NOLINT
             const auto bal             = is_balanced(planar, b_ps);
             const auto crossings_after = count_crossings(planar);
 
-            // the paper's post-processing: fanout trees plus minimal buffering, both rank- and planarity-preserving
+            // the paper's post-processing: fanout trees plus shared buffering, both rank- and planarity-preserving
             fmt::print("[i]   substituting fanouts and rebalancing\n");
             mockturtle::stopwatch<>::duration pipeline_time{};
             uint32_t                          substituted_nodes = 0;
@@ -321,7 +301,7 @@ int main(const int argc, const char** argv)  // NOLINT
                 pipeline_eq = is_equivalent(ntk, rebalanced);
             }
 
-            // the paper's hybrid is the pipeline's default: per-level choice, crossing gates with XOR gadgets, then
+            // the paper's hybrid is the pipeline's default: per-level choice, crossing gates built from XOR gates, then
             // the same post-processing; run through the entry point so that the numbers belong to its defaults
             fmt::print("[i]   planarization pipeline\n");
             mockturtle::stopwatch<>::duration hybrid_time{};
@@ -375,5 +355,12 @@ int main(const int argc, const char** argv)  // NOLINT
 
     fmt::print("[i] {} of {} benchmarks failed\n", failures, benchmarks.size());
 
-    return failures == 0 ? 0 : 1;
+    return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }

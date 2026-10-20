@@ -276,11 +276,11 @@ an output-name dictionary, so duplicate names overwrite earlier entries.
 
 ## Planarization
 
-A ranked logic network is planar if its edges can be drawn between adjacent ranks without crossings. The
+A ranked logic network is planar if its edges can be drawn between adjacent levels without crossings. The
 planarization pipeline removes the crossings of a balanced, ranked network by duplicating nodes, by crossing gates
 that swap two signals, or by a per-level choice between the two {cite:p}`nano_2026_3`, then restores
-fanout nodes and the minimum buffering while keeping ranks and planarity. The stages below are also available on
-their own.
+fanout nodes and rebalances the network with shared buffers while keeping ranks and planarity. The stages below are
+also available on their own.
 
 `planarization` runs the whole pipeline: node duplication with the chosen strategy, crossing gates for the levels the
 hybrid strategy left crossed, planar fanout substitution, and planar rebalancing. The pipeline defaults to the hybrid

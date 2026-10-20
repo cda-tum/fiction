@@ -120,7 +120,7 @@ leaves_by_creation_order(const Ntk& ntk, const std::vector<mockturtle::signal<Nt
  */
 
 template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
-[[nodiscard]] std::optional<NtkDest> virtual_miter(const NtkSrc1& ntk1_in, const NtkSrc2& ntk2_in) noexcept
+[[nodiscard]] std::optional<NtkDest> virtual_miter(const NtkSrc1& ntk1_in, const NtkSrc2& ntk2_in)
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc1>, "NtkSource1 is not a network type");
     static_assert(mockturtle::is_network_type_v<NtkSrc2>, "NtkSource2 is not a network type");

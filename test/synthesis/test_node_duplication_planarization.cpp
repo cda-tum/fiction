@@ -17,6 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -27,9 +28,7 @@
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/utils/graph/mincross.hpp>
-#include <fiction/verification/virtual_miter.hpp>
 
-#include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
@@ -51,7 +50,6 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::utils::graph;
-using namespace fiction::verification;
 
 namespace
 {
@@ -83,47 +81,13 @@ mutable_rank_view<technology_network> rank_without_substitution(const Ntk& ntk)
 }
 
 /**
- * Counts the crossings of a ranked network without reordering it.
- */
-template <typename Ntk>
-uint64_t count_crossings(const Ntk& ntk)
-{
-    mincross_params ps{};
-    ps.optimize = false;
-    mincross_stats st{};
-
-    mincross(ntk, ps, &st);
-
-    return st.num_crossings;
-}
-
-/**
- * Checks that the network computes the same functions as the original, virtual primary inputs included.
- */
-template <typename Spec, typename Impl>
-void check_equivalent(const Spec& spec, const Impl& impl)
-{
-    const auto miter = virtual_miter<technology_network>(spec, impl);
-    REQUIRE(miter.has_value());
-
-    if (miter.has_value())  // the optional-access check does not model REQUIRE
-    {
-        mockturtle::equivalence_checking_stats st{};
-        const auto                             cec = mockturtle::equivalence_checking(*miter, {}, &st);
-
-        REQUIRE(cec.has_value());
-        CHECK(cec.value_or(false));
-    }
-}
-
-/**
  * Checks that the planarized network is crossing-free and computes the same functions as the original.
  */
 template <typename Spec, typename Impl>
 void check_planar_and_equivalent(const Spec& spec, const Impl& impl)
 {
     CHECK(count_crossings(impl) == 0);
-    check_equivalent(spec, impl);
+    check_virtual_eq(spec, impl);
 }
 
 }  // namespace
@@ -372,7 +336,7 @@ TEST_CASE("Networks with virtual primary inputs are rejected", "[node-duplicatio
     // deleting the virtual inputs gives a plain network equivalent to the original
     const auto flat = delete_virtual_pis(planar);
     CHECK(flat.num_pis() == ntk.num_pis());
-    check_equivalent(ntk, flat);
+    check_virtual_eq(ntk, flat);
 }
 
 TEST_CASE("Statistics report the number of duplications", "[node-duplication-planarization]")
@@ -391,7 +355,7 @@ TEST_CASE("Statistics report the number of duplications", "[node-duplication-pla
     CHECK(os.str().find("duplications") != std::string::npos);
 }
 
-TEST_CASE("Hybrid strategy keeps crossings only where gadgets are cheaper", "[node-duplication-planarization]")
+TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper", "[node-duplication-planarization]")
 {
     for (const auto& ntk : {blueprints::full_adder_network<technology_network>(),
                             blueprints::parity_network<technology_network>(), blueprints::clpl<technology_network>()})
@@ -408,7 +372,7 @@ TEST_CASE("Hybrid strategy keeps crossings only where gadgets are cheaper", "[no
             const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
 
             // the hybrid result is equivalent and balanced, and crossing-free iff no level kept its crossings
-            check_equivalent(ntk, hybrid);
+            check_virtual_eq(ntk, hybrid);
             CHECK(is_balanced(hybrid, {.unify_outputs = true, .buffer_constant_outputs = false}));
             CHECK((count_crossings(hybrid) == 0) == (st.num_crossing_levels == 0));
             CHECK((st.num_crossings == 0) == (st.num_crossing_levels == 0));
@@ -436,8 +400,8 @@ TEST_CASE("Hybrid strategy with an infinite crossing cost duplicates everything"
     const auto                           duplicated = node_duplication_planarization(ranked, {}, &dup_st);
 
     node_duplication_planarization_params ps{};
-    ps.strategy               = node_duplication_planarization_params::planarization_strategy::HYBRID;
-    ps.max_crossings_per_rank = 0;
+    ps.strategy                = node_duplication_planarization_params::planarization_strategy::HYBRID;
+    ps.max_crossings_per_level = 0;
 
     node_duplication_planarization_stats st{};
     const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -461,7 +425,7 @@ TEST_CASE("Hybrid strategy with a prohibitive duplication cost keeps crossings",
     node_duplication_planarization_stats st{};
     const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
 
-    check_equivalent(ntk, hybrid);
+    check_virtual_eq(ntk, hybrid);
     CHECK(st.num_crossing_levels > 0);
     CHECK(st.num_crossings > 0);
     CHECK(count_crossings(hybrid) == st.num_crossings);
@@ -746,7 +710,7 @@ TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")
         node_duplication_planarization_stats st{};
         const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
 
-        check_equivalent(ntk, hybrid);
+        check_virtual_eq(ntk, hybrid);
         CHECK((count_crossings(hybrid) == 0) == (st.num_crossing_levels == 0));
 
         crossing_gate_planarization_params cg_ps{};
@@ -808,7 +772,7 @@ TEST_CASE("Hybrid strategy falls back to the cone model when the lookahead budge
     node_duplication_planarization_stats st{};
     const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
 
-    check_equivalent(ntk, hybrid);
+    check_virtual_eq(ntk, hybrid);
     CHECK((count_crossings(hybrid) == 0) == (st.num_crossing_levels == 0));
 
     ps.criterion = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE;

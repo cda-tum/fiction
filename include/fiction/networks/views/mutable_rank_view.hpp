@@ -276,18 +276,40 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      *
      * @param level Level at which to replace nodes.
      * @param nodes The new node order to be set at the given level.
+     * @throws std::out_of_range If the network has no such level.
+     * @throws std::invalid_argument If `nodes` is not a permutation of the nodes in the level.
      */
     void set_ranks(const uint32_t level, const std::vector<node>& nodes)
     {
+        if (level >= ranks.size())
+        {
+            throw std::out_of_range("mutable_rank_view: the network has no such level");
+        }
+
         auto& rank = ranks[level];
 
-        // check that the `rank` contains all nodes from `nodes`
-        assert(rank.size() == nodes.size());
-        auto sort_rank  = rank;
-        auto sort_nodes = nodes;
-        std::ranges::sort(sort_rank);
-        std::ranges::sort(sort_nodes);
-        assert(sort_rank == sort_nodes);
+        // `nodes` is a permutation of `rank` iff it has the size of `rank` and lists distinct members of it
+        bool permutation = nodes.size() == rank.size();
+
+        std::vector<bool> listed(rank.size(), false);
+
+        for (auto it = nodes.cbegin(); permutation && it != nodes.cend(); ++it)
+        {
+            const auto pos = rank_pos.find(*it);
+
+            permutation =
+                pos != rank_pos.end() && pos->second < rank.size() && rank[pos->second] == *it && !listed[pos->second];
+
+            if (permutation)
+            {
+                listed[pos->second] = true;
+            }
+        }
+
+        if (!permutation)
+        {
+            throw std::invalid_argument("mutable_rank_view: the nodes are not a permutation of the nodes in the level");
+        }
 
         // assign new ranks
         rank = nodes;
@@ -298,10 +320,14 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Sets the associated rank positions for all nodes in the network.
      *
      * @param new_ranks A vector of vectors specifying the new node order for each level.
+     * @throws std::invalid_argument If `new_ranks` does not hold one permutation of the nodes per level.
      */
     void set_all_ranks(const std::vector<std::vector<node>>& new_ranks)
     {
-        assert(new_ranks.size() == ranks.size());
+        if (new_ranks.size() != ranks.size())
+        {
+            throw std::invalid_argument("mutable_rank_view: the number of levels differs from the network's");
+        }
 
         for (uint32_t level = 0; level < new_ranks.size(); ++level)
         {
@@ -560,15 +586,15 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Update the ranks in the `mutable_rank_view`.
-     *
-     * If rebuilding throws, call `update_ranks` successfully before querying ranks.
+     * Recomputes levels and ranks. Ranks start in node index order per level. After an exception the view holds no
+     * valid ranks until `update_ranks` succeeds.
      *
      * @throws std::invalid_argument If the network has a gate that no output reaches.
      */
     void update_ranks()
     {
         this->update_levels();
+        max_rank_width = 0;
         rank_pos.clear();
         rank_pos.rehash(this->size());
         ranks.clear();

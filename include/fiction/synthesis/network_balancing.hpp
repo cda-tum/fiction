@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/networks/network_utils.hpp"
 #include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -84,15 +85,6 @@ class network_balancing_impl
     /** @brief Returns a network with paths balanced by inserted buffers. */
     NtkDest run()
     {
-        // insert num buffers after child in balance_ntk
-        const auto insert_buf_chain = [](auto& balance_ntk, const auto& num, auto& child)
-        {
-            for (auto i = 0u; i < num; ++i)
-            {
-                child = balance_ntk.create_buf(child);
-            }
-        };
-
         // initialize a network copy
         auto init = mockturtle::initialize_copy_network<NtkDest>(ntk_topo);
 
@@ -101,13 +93,13 @@ class network_balancing_impl
 
         utils::progress_reporter progress{ps.on_progress, "balancing gates", ntk_topo.num_gates()};
         ntk_topo.foreach_gate(
-            [this, &balanced, &old2new, &insert_buf_chain, &progress](const auto& n)
+            [this, &balanced, &old2new, &progress](const auto& n)
             {
                 // gather children, but substitute fanins by buf where applicable
                 std::vector<typename mockturtle::topo_view<NtkDest>::signal> children{};
 
                 ntk_topo.foreach_fanin(n,
-                                       [this, &n, &balanced, &old2new, &children, &insert_buf_chain](const auto& f)
+                                       [this, &n, &balanced, &old2new, &children](const auto& f)
                                        {
                                            const auto fn = ntk_topo.get_node(f);
 
@@ -117,7 +109,7 @@ class network_balancing_impl
                                            if (!ntk_topo.is_constant(fn))
                                            {
                                                const auto level_diff = ntk_depth.level(n) - ntk_depth.level(fn) - 1;
-                                               insert_buf_chain(balanced, level_diff, child);
+                                               child = networks::buffer_chain(balanced, child, level_diff);
                                            }
 
                                            children.push_back(child);
@@ -134,7 +126,7 @@ class network_balancing_impl
 
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(
-            [this, &old2new, &balanced, &po_levels, &max_po_level, &insert_buf_chain](const auto& po, auto i)
+            [this, &old2new, &balanced, &po_levels, &max_po_level](const auto& po, auto i)
             {
                 const auto tgt_signal = old2new[ntk_topo.get_node(po)];
 
@@ -142,7 +134,7 @@ class network_balancing_impl
 
                 if (ps.unify_outputs && (ps.buffer_constant_outputs || !ntk_topo.is_constant(ntk_topo.get_node(po))))
                 {
-                    insert_buf_chain(balanced, max_po_level - po_levels[i], tgt_po);
+                    tgt_po = networks::buffer_chain(balanced, tgt_po, max_po_level - po_levels[i]);
                 }
 
                 balanced.create_po(tgt_po);

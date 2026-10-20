@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 #include <unordered_map>
 #include <vector>
 
@@ -658,6 +659,77 @@ Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nul
     }
 
     return result;
+}
+
+/**
+ * Counts the edge crossings between every pair of adjacent ranks of a ranked, balanced network in its current rank
+ * order. In contrast to `mincross` with `optimize = false`, the network is neither copied nor reordered.
+ *
+ * @tparam Ntk A ranked network type.
+ * @param ntk The balanced network whose crossings are counted.
+ * @return The number of crossings.
+ * @throws std::invalid_argument If an edge does not connect adjacent ranks, i.e., if `ntk` is not balanced.
+ */
+template <typename Ntk>
+[[nodiscard]] uint64_t count_crossings(const Ntk& ntk)
+{
+    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position function");
+    static_assert(mockturtle::has_level_v<Ntk>, "Ntk does not implement the level function");
+
+    uint64_t crossings = 0;
+
+    for (uint32_t r = 0; r < ntk.depth(); ++r)
+    {
+        // positions in rank `r + 1` that every node of rank `r` drives, one entry per edge
+        std::vector<std::vector<uint32_t>> targets(ntk.rank_width(r));
+
+        ntk.foreach_node_in_rank(r + 1,
+                                 [&ntk, &targets, r](const auto& t)
+                                 {
+                                     ntk.foreach_fanin(t,
+                                                       [&ntk, &targets, r, pos = ntk.rank_position(t)](const auto& f)
+                                                       {
+                                                           const auto s = ntk.get_node(f);
+
+                                                           if (ntk.is_constant(s))
+                                                           {
+                                                               return;
+                                                           }
+
+                                                           if (ntk.level(s) != r)
+                                                           {
+                                                               throw std::invalid_argument(
+                                                                   "An edge does not connect adjacent ranks");
+                                                           }
+
+                                                           targets[ntk.rank_position(s)].push_back(pos);
+                                                       });
+                                 });
+
+        // sweep the sources from left to right; an edge that ends left of an earlier edge's end crosses it
+        std::vector<uint64_t> swept(ntk.rank_width(r + 1) + 1, 0);
+        uint64_t              max_pos = 0;
+
+        for (const auto& edges : targets)
+        {
+            for (const auto pos : edges)
+            {
+                for (auto k = pos + 1; k <= max_pos; ++k)
+                {
+                    crossings += swept[k];
+                }
+            }
+
+            for (const auto pos : edges)
+            {
+                max_pos = std::max<uint64_t>(max_pos, pos);
+                ++swept[pos];
+            }
+        }
+    }
+
+    return crossings;
 }
 
 }  // namespace fiction::utils::graph

@@ -17,6 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -25,10 +26,8 @@
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planarization.hpp>
 #include <fiction/utils/graph/mincross.hpp>
-#include <fiction/verification/virtual_miter.hpp>
 
 #include <mockturtle/algorithms/cleanup.hpp>
-#include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
@@ -48,7 +47,6 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::utils::graph;
-using namespace fiction::verification;
 
 namespace
 {
@@ -67,40 +65,6 @@ mutable_rank_view<technology_network> rank(const Ntk& ntk)
 }
 
 /**
- * Counts the crossings of a ranked network without reordering it.
- */
-template <typename Ntk>
-uint64_t count_crossings(const Ntk& ntk)
-{
-    mincross_params ps{};
-    ps.optimize = false;
-    mincross_stats st{};
-
-    mincross(ntk, ps, &st);
-
-    return st.num_crossings;
-}
-
-/**
- * Checks that the network computes the same functions as the original, virtual primary inputs included.
- */
-template <typename Spec, typename Impl>
-void check_equivalent(const Spec& spec, const Impl& impl)
-{
-    const auto miter = virtual_miter<technology_network>(spec, impl);
-    REQUIRE(miter.has_value());
-
-    if (miter.has_value())  // the optional-access check does not model REQUIRE
-    {
-        mockturtle::equivalence_checking_stats st{};
-        const auto                             cec = mockturtle::equivalence_checking(*miter, {}, &st);
-
-        REQUIRE(cec.has_value());
-        CHECK(cec.value_or(false));
-    }
-}
-
-/**
  * Checks the contract of the pipeline: planar, balanced with unified outputs, fanout-substituted, no dangling nodes,
  * equivalent.
  */
@@ -111,7 +75,7 @@ void check_contract(const Spec& spec, const Impl& impl, const uint32_t degree = 
     CHECK(is_balanced(impl, {.unify_outputs = true, .buffer_constant_outputs = false}));
     CHECK(is_fanout_substituted(impl, {.degree = degree}));
     CHECK(mockturtle::cleanup_dangling(impl).size() == impl.size());
-    check_equivalent(spec, impl);
+    check_virtual_eq(spec, impl);
 }
 
 }  // namespace
@@ -244,7 +208,7 @@ TEST_CASE("Statistics report the runtime and progress reaches every stage", "[pl
     CHECK(!tasks.empty());
 }
 
-TEST_CASE("Kept crossings run through the crossing gates for both gadget types", "[planarization]")
+TEST_CASE("Kept crossings run through the crossing gates for both crossing gate types", "[planarization]")
 {
     const auto ntk    = blueprints::parity_network<technology_network>();
     const auto ranked = rank(ntk);
@@ -283,7 +247,7 @@ TEST_CASE("The lookahead budget fallback and the crossing limit are honored", "[
     SECTION("a crossing limit of zero duplicates every level")
     {
         planarization_params ps{};
-        ps.duplication.max_crossings_per_rank = 0;
+        ps.duplication.max_crossings_per_level = 0;
 
         planarization_stats st{};
         const auto          result = planarization(ranked, ps, &st);

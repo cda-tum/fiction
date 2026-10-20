@@ -203,7 +203,6 @@ def test_statistics_and_progress(full_adder: technology_network) -> None:
 
     assert reports
     assert all(done <= total for _, done, total in reports if total > 0)
-    assert stats.num_crossing_levels >= 0
     assert (stats.num_crossings > 0) == (stats.num_crossing_levels > 0)
     assert "crossing levels" in repr(stats)
     assert _equivalent_with_tied_inputs(balanced, planar, original_input)

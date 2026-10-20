@@ -87,19 +87,19 @@ class planar_fanout_substitution_impl
         auto& dest    = init.first;
         auto& old2new = init.second;
 
-        // rank 0 of the result keeps the input order of the primary inputs
-        std::vector<mockturtle::node<Ntk>> rank0{};
-        rank0.reserve(ntk.rank_width(0));
+        // level 0 of the result keeps the order of the primary inputs
+        std::vector<mockturtle::node<Ntk>> input_order{};
+        input_order.reserve(ntk.rank_width(0));
         for (const auto& pi : ntk.get_ranks(0))
         {
-            rank0.push_back(dest.get_node(old2new[pi]));
+            input_order.push_back(dest.get_node(old2new[pi]));
         }
 
         utils::progress_reporter progress{ps.on_progress, "substituting fanouts", ntk.depth() + 1};
 
         for (uint32_t r = 0; r <= ntk.depth(); ++r)
         {
-            // every node of the rank is pushed down by the depth of the deepest fanout tree in the rank
+            // every node of the level is pushed down by the depth of the deepest fanout tree in the level
             const auto pad = max_tree_depth(r);
 
             ntk.foreach_node_in_rank(r,
@@ -133,9 +133,9 @@ class planar_fanout_substitution_impl
         networks::restore_names(ntk, dest, old2new);
 
         dest.update_ranks();
-        dest.set_ranks(0, rank0);
+        dest.set_ranks(0, input_order);
 
-        return dest;
+        return std::move(dest);
     }
 
   private:
@@ -206,10 +206,10 @@ class planar_fanout_substitution_impl
         }
     }
     /**
-     * Depth of the deepest fanout tree any node of a rank needs.
+     * Depth of the deepest fanout tree any node of a level needs.
      *
-     * @param r Rank.
-     * @return Maximum tree depth in the rank.
+     * @param r Level.
+     * @return Maximum tree depth in the level.
      */
     [[nodiscard]] uint32_t max_tree_depth(const uint32_t r) const
     {
@@ -265,7 +265,7 @@ class planar_fanout_substitution_impl
      * @param dest Destination network.
      * @param n Source node.
      * @param old2new Map from source nodes to destination signals; updated for `n`.
-     * @param pad Depth every node of the rank is pushed down by.
+     * @param pad Depth every node of the level is pushed down by.
      */
     void substitute(Ntk& dest, const mockturtle::node<Ntk> n,
                     mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new, const uint32_t pad)
@@ -280,31 +280,13 @@ class planar_fanout_substitution_impl
 
         if (fanouts > 1 && !is_proper_fanout(n))
         {
-            old2new[n] = buffer_chain(dest, old2new[n], pad - tree_depth(fanouts));
+            old2new[n] = networks::buffer_chain(dest, old2new[n], pad - tree_depth(fanouts));
             generate_fanout_tree(dest, n, old2new[n]);
         }
         else
         {
-            old2new[n] = buffer_chain(dest, old2new[n], pad);
+            old2new[n] = networks::buffer_chain(dest, old2new[n], pad);
         }
-    }
-    /**
-     * Appends a chain of buffers to a signal.
-     *
-     * @param dest Destination network.
-     * @param sig Signal to buffer.
-     * @param length Number of buffers.
-     * @return The end of the chain.
-     */
-    [[nodiscard]] static mockturtle::signal<Ntk> buffer_chain(Ntk& dest, mockturtle::signal<Ntk> sig,
-                                                              const uint32_t length)
-    {
-        for (uint32_t i = 0; i < length; ++i)
-        {
-            sig = dest.create_buf(sig);
-        }
-
-        return sig;
     }
     /**
      * Builds the breadth-first fanout tree of a node. Exactly as many outputs as the node has consumers are kept, in
@@ -350,7 +332,7 @@ class planar_fanout_substitution_impl
             const auto [sig, level] = slots.front();
             slots.pop();
 
-            ends.push_back(buffer_chain(dest, sig, depth - level));
+            ends.push_back(networks::buffer_chain(dest, sig, depth - level));
         }
 
         // nodes of the deepest level were created from left to right, so their ids give the planar order
@@ -414,9 +396,9 @@ class planar_fanout_substitution_impl
 
 /**
  * Substitutes high-output degrees in a ranked logic network with trees of fanout nodes while keeping the ranks and
- * the planarity of the network. Every node of a rank is pushed down by the depth of the deepest fanout tree in that
- * rank, with buffers for nodes that need no tree or a shallower one, so that all edges keep running between adjacent
- * ranks and the rank order stays the one of the input. The result is balanced if the input is.
+ * the planarity of the network. Every node of a level is pushed down by the depth of the deepest fanout tree in that
+ * level, with buffers for nodes that need no tree or a shallower one, so that all edges keep running between adjacent
+ * levels and the rank order stays the one of the input. The result is balanced if the input is.
  *
  * Virtual primary inputs of the input are kept.
  *

@@ -249,6 +249,75 @@ TEST_CASE("Check modify ranks", "[mutable-rank-view]")
     CHECK(vpi_r.check_validity() == 1);
 }
 
+TEST_CASE("Rank assignments that do not fit the network are rejected", "[mutable-rank-view]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto g1 = tec.create_and(x1, x2);
+    const auto g2 = tec.create_or(x1, x2);
+    tec.create_po(g1);
+    tec.create_po(g2);
+
+    auto ranked = mutable_rank_view(tec);
+
+    const auto n1 = tec.get_node(g1);
+    const auto n2 = tec.get_node(g2);
+
+    const auto before = ranked.get_all_ranks();
+
+    SECTION("a level beyond the depth")
+    {
+        CHECK_THROWS_AS(ranked.set_ranks(ranked.depth() + 1, {n1, n2}), std::out_of_range);
+    }
+    SECTION("too few nodes")
+    {
+        CHECK_THROWS_AS(ranked.set_ranks(1, {n1}), std::invalid_argument);
+    }
+    SECTION("a repeated node")
+    {
+        CHECK_THROWS_AS(ranked.set_ranks(1, {n1, n1}), std::invalid_argument);
+    }
+    SECTION("a node of another level")
+    {
+        CHECK_THROWS_AS(ranked.set_ranks(1, {n1, tec.get_node(x1)}), std::invalid_argument);
+    }
+    SECTION("a wrong number of levels")
+    {
+        CHECK_THROWS_AS(ranked.set_all_ranks({before.front()}), std::invalid_argument);
+    }
+
+    // a rejected assignment leaves the ranks as they were
+    CHECK(ranked.get_all_ranks() == before);
+}
+
+TEST_CASE("Updating ranks resets the width", "[mutable-rank-view]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto x3 = tec.create_pi();
+    const auto g1 = tec.create_and(x1, x2);
+    const auto g2 = tec.create_and(x2, x3);
+    tec.create_po(g1);
+    tec.create_po(g2);
+
+    // an initial rank configuration that puts every node in the first rank is as wide as the network
+    std::vector<std::vector<technology_network::node>> initial{
+        {tec.get_node(x1), tec.get_node(x2), tec.get_node(x3), tec.get_node(g1), tec.get_node(g2)},
+        {}};
+
+    auto ranked = mutable_rank_view(tec, initial);
+    REQUIRE(ranked.width() == 5);
+
+    ranked.update_ranks();
+
+    CHECK(ranked.width() == 3);
+    CHECK(ranked.check_validity());
+}
+
 TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturtle::aig_network,
                    mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
                    mockturtle::buffered_aig_network, mockturtle::buffered_mig_network, mockturtle::crossed_klut_network,
@@ -370,7 +439,7 @@ TEST_CASE("Dangling gates are rejected", "[mutable-rank-view]")
     tec.create_po(a1);
 
     // a gate that drives no primary output has no level, so it cannot be ranked
-    const auto dangling = tec.create_or(x1, x2);
+    tec.create_or(x1, x2);
 
     CHECK_THROWS_AS(mutable_rank_view<technology_network>{tec}, std::invalid_argument);
 
@@ -383,7 +452,6 @@ TEST_CASE("Dangling gates are rejected", "[mutable-rank-view]")
     CHECK(ranked.rank_width(0) == 2);
     CHECK(ranked.rank_width(1) == 1);
     CHECK(ranked.size() == tec.size() - 1);
-    CHECK(!tec.is_constant(tec.get_node(dangling)));
 }
 
 TEST_CASE("Primary inputs without fanout are ranked", "[mutable-rank-view]")

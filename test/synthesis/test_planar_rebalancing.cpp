@@ -17,6 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -26,10 +27,8 @@
 #include <fiction/synthesis/planar_fanout_substitution.hpp>
 #include <fiction/synthesis/planar_rebalancing.hpp>
 #include <fiction/utils/graph/mincross.hpp>
-#include <fiction/verification/virtual_miter.hpp>
 
 #include <mockturtle/algorithms/cleanup.hpp>
-#include <mockturtle/algorithms/equivalence_checking.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -42,7 +41,6 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::utils::graph;
-using namespace fiction::verification;
 
 namespace
 {
@@ -58,21 +56,6 @@ mutable_rank_view<technology_network> rank(const Ntk& ntk)
     ps.buffer_constant_outputs = false;
 
     return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
-}
-
-/**
- * Counts the crossings of a ranked network without reordering it.
- */
-template <typename Ntk>
-uint64_t count_crossings(const Ntk& ntk)
-{
-    mincross_params ps{};
-    ps.optimize = false;
-    mincross_stats st{};
-
-    mincross(ntk, ps, &st);
-
-    return st.num_crossings;
 }
 
 /**
@@ -95,25 +78,6 @@ uint32_t count_chain_buffers(const Ntk& ntk)
 }
 
 /**
- * Checks that the network computes the same functions as the original, virtual primary inputs included.
- */
-template <typename Spec, typename Impl>
-void check_equivalent(const Spec& spec, const Impl& impl)
-{
-    const auto miter = virtual_miter<technology_network>(spec, impl);
-    REQUIRE(miter.has_value());
-
-    if (miter.has_value())  // the optional-access check does not model REQUIRE
-    {
-        mockturtle::equivalence_checking_stats st{};
-        const auto                             cec = mockturtle::equivalence_checking(*miter, {}, &st);
-
-        REQUIRE(cec.has_value());
-        CHECK(cec.value_or(false));
-    }
-}
-
-/**
  * Checks the full contract: balanced with unified outputs, fanout-substituted, crossing-free, equivalent.
  */
 template <typename Spec, typename Impl>
@@ -122,12 +86,12 @@ void check_contract(const Spec& spec, const Impl& impl, const fanout_substitutio
     CHECK(is_balanced(impl, {.unify_outputs = true, .buffer_constant_outputs = false}));
     CHECK(is_fanout_substituted(impl, fs_ps));
     CHECK(count_crossings(impl) == 0);
-    check_equivalent(spec, impl);
+    check_virtual_eq(spec, impl);
 }
 
 }  // namespace
 
-TEST_CASE("Buffer chains are removed and the minimum is re-inserted", "[planar-rebalancing]")
+TEST_CASE("Buffer chains are removed and only the needed buffers are re-inserted", "[planar-rebalancing]")
 {
     technology_network tec{};
 
@@ -334,7 +298,7 @@ TEST_CASE("An output driven directly by a node that also drives a gate", "[plana
     // the input is not fanout-substituted (n drives the gate and the output), so the result is not either
     CHECK(is_balanced(rebalanced, {.unify_outputs = true, .buffer_constant_outputs = false}));
     CHECK(count_crossings(rebalanced) == 0);
-    check_equivalent(tec, rebalanced);
+    check_virtual_eq(tec, rebalanced);
 }
 
 TEST_CASE("Gates with a repeated fanin and nodes with two outputs", "[planar-rebalancing]")

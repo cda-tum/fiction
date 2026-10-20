@@ -54,7 +54,7 @@ namespace detail
 
 /**
  * Copies a planar `virtual_pi_network` into a plain network whose node order encodes the rank order: the primary
- * inputs in the order of rank 0, then the gates level by level in rank order. The returned vector holds, for every
+ * inputs in the order of level 0, then the gates level by level in rank order. The returned vector holds, for every
  * primary input of the result in that order, the index of the input of the original network it stands for; a virtual
  * input maps to the index of its real input.
  *
@@ -180,7 +180,7 @@ void register_planarization(nb::module_& m)
         [](const py_tec_network& network, const decltype(params{}.on_progress)& on_progress,
            const decltype(params{}.strategy) strategy, const decltype(params{}.criterion) criterion,
            const decltype(params{}.xor_gates) xor_gates, const decltype(params{}.max_swaps) max_swaps,
-           const decltype(params{}.max_crossings_per_rank)         max_crossings_per_rank,
+           const decltype(params{}.max_crossings_per_level)        max_crossings_per_level,
            const decltype(params{}.duplication_cost.node_weight)   node_weight,
            const decltype(params{}.duplication_cost.buffer_weight) buffer_weight,
            const decltype(params{}.duplication_cost.depth_growth)  depth_growth,
@@ -195,7 +195,7 @@ void register_planarization(nb::module_& m)
             ps.duplication.criterion                      = criterion;
             ps.duplication.xor_gates                      = xor_gates;
             ps.duplication.max_swaps                      = max_swaps;
-            ps.duplication.max_crossings_per_rank         = max_crossings_per_rank;
+            ps.duplication.max_crossings_per_level        = max_crossings_per_level;
             ps.duplication.duplication_cost.node_weight   = node_weight;
             ps.duplication.duplication_cost.buffer_weight = buffer_weight;
             ps.duplication.duplication_cost.depth_growth  = depth_growth;
@@ -222,12 +222,12 @@ void register_planarization(nb::module_& m)
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy") = defaults.duplication.strategy, nb::arg("criterion") = defaults.duplication.criterion,
         nb::arg("xor_gates") = defaults.duplication.xor_gates, nb::arg("max_swaps") = defaults.duplication.max_swaps,
-        nb::arg("max_crossings_per_rank") = defaults.duplication.max_crossings_per_rank,
-        nb::arg("node_weight")            = defaults.duplication.duplication_cost.node_weight,
-        nb::arg("buffer_weight")          = defaults.duplication.duplication_cost.buffer_weight,
-        nb::arg("depth_growth")           = defaults.duplication.duplication_cost.depth_growth,
-        nb::arg("lookahead_budget")       = defaults.duplication.lookahead_budget,
-        nb::arg("max_duplications")       = defaults.duplication.max_duplications,
+        nb::arg("max_crossings_per_level") = defaults.duplication.max_crossings_per_level,
+        nb::arg("node_weight")             = defaults.duplication.duplication_cost.node_weight,
+        nb::arg("buffer_weight")           = defaults.duplication.duplication_cost.buffer_weight,
+        nb::arg("depth_growth")            = defaults.duplication.duplication_cost.depth_growth,
+        nb::arg("lookahead_budget")        = defaults.duplication.lookahead_budget,
+        nb::arg("max_duplications")        = defaults.duplication.max_duplications,
         nb::arg("po_order") = defaults.duplication.po_order, nb::arg("seed") = defaults.duplication.seed,
         nb::arg("fanout_degree") = defaults.fanout_degree, nb::arg("statistics") = nullptr,
         R"doc(Planarizes a balanced technology network with unified outputs: node duplication with the chosen
@@ -239,10 +239,10 @@ Args:
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     strategy: Planarization strategy: duplicate every level, or decide per level (hybrid).
     criterion: How the hybrid strategy estimates the cost of duplicating a level.
-    xor_gates: Whether the crossing gadgets consist of XOR gates, which are smaller and shallower than the
-        AND-OR-NOT gadgets.
+    xor_gates: Whether the crossing gates consist of XOR gates, which are smaller and shallower than the
+        AND-OR-NOT crossing gates.
     max_swaps: Maximum number of adjacent swaps per level that the hybrid strategy tries to reduce crossings.
-    max_crossings_per_rank: Levels with more crossings are always duplicated; the crossing gates reject such ranks.
+    max_crossings_per_level: Levels with more crossings are always duplicated; the crossing gates reject such levels.
     node_weight: Weight of a gate in the duplication cost model of the hybrid strategy.
     buffer_weight: Weight of a buffer or inverter chain node in the duplication cost model.
     depth_growth: Growth of the duplication cost per level in the duplication cost model.
@@ -263,8 +263,8 @@ Raises:
         drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `fanout_degree` is below 2,
         or if the duplication options are invalid (a lookahead budget of zero, a negative or non-finite cost
         weight).
-    RuntimeError: If more than `max_duplications` nodes were duplicated, if a rank has more than
-        `max_crossings_per_rank` crossings, or if a stage cannot keep its contract. Note that
+    RuntimeError: If more than `max_duplications` nodes were duplicated, if two adjacent
+        levels have more than `max_crossings_per_level` crossings, or if a stage cannot keep its contract.
         `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth of the
         network.
 )doc");

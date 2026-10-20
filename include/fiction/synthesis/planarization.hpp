@@ -48,9 +48,9 @@ struct planarization_params
      */
     utils::progress_callback on_progress{};
     /**
-     * Parameters of the node duplication stage, including the strategy and the gadget type of the crossing gates.
-     * The pipeline defaults to the hybrid strategy, which decides per level between duplicating nodes and keeping the
-     * crossings for the crossing gates.
+     * Parameters of the node duplication stage, including the strategy and whether the crossing gates are built from
+     * XOR gates. The pipeline defaults to the hybrid strategy, which decides per level between duplicating nodes and
+     * keeping the crossings for the crossing gates.
      */
     // NOLINTNEXTLINE(modernize-use-designated-initializers): Sphinx cannot render designated initializers
     node_duplication_planarization_params duplication{
@@ -147,9 +147,9 @@ template <typename Ntk>
         if (st.duplication.num_crossing_levels > 0)
         {
             crossing_gate_planarization_params cg_ps{};
-            cg_ps.on_progress            = progress;
-            cg_ps.xor_gates              = ps.duplication.xor_gates;
-            cg_ps.max_crossings_per_rank = ps.duplication.max_crossings_per_rank;
+            cg_ps.on_progress             = progress;
+            cg_ps.xor_gates               = ps.duplication.xor_gates;
+            cg_ps.max_crossings_per_level = ps.duplication.max_crossings_per_level;
 
             planar = crossing_gate_planarization(planar, cg_ps, &st.crossing_gates);
         }
@@ -165,16 +165,9 @@ template <typename Ntk>
 
         // the stages keep their contracts by construction; a cheap check turns any slip into an error rather than
         // a silently wrong result
-        utils::graph::mincross_params mc_ps{};
-        mc_ps.optimize = false;
-        utils::graph::mincross_stats mc_st{};
-
-        utils::graph::mincross(*result, mc_ps, &mc_st);
-
-        if (mc_st.num_crossings != 0)
+        if (const auto crossings = utils::graph::count_crossings(*result); crossings != 0)
         {
-            throw std::runtime_error(
-                fmt::format("Planarization failed: the result contains {} crossings", mc_st.num_crossings));
+            throw std::runtime_error(fmt::format("Planarization failed: the result contains {} crossings", crossings));
         }
 
         if (!is_balanced(*result, {.unify_outputs = true, .buffer_constant_outputs = false}))

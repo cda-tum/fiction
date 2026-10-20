@@ -79,7 +79,7 @@ struct node_duplication_planarization_params
         DUPLICATION,
         /**
          * Decide per level whether duplicating nodes or keeping the crossings for `crossing_gate_planarization` is
-         * cheaper. The result contains crossings on the levels where gadgets are cheaper.
+         * cheaper. The result contains crossings on the levels where crossing gates are cheaper.
          */
         HYBRID
     };
@@ -104,7 +104,7 @@ struct node_duplication_planarization_params
      * duplicating a node is the weighted size of its transitive fanin, since every duplicate drags its whole cone
      * along. A gate weighs `node_weight` and a chain buffer or inverter weighs `buffer_weight`. The sum is scaled by
      * \f$\text{depth\_growth}^{d}\f$ for a duplication on level \f$d\f$, because duplicates on deep levels are
-     * duplicated again by the decisions below. The weights are in units of one crossing gadget node. The defaults
+     * duplicated again by the decisions below. The weights are in units of one crossing gate node. The defaults
      * were determined empirically on the benchmark sets. Weights must be finite and non-negative, the growth finite
      * and positive.
      */
@@ -146,15 +146,15 @@ struct node_duplication_planarization_params
      */
     uint32_t max_swaps = 32u;
     /**
-     * Whether the subsequent `crossing_gate_planarization` builds its gadgets from XOR gates, which are smaller and
-     * shallower than the AND-OR-NOT gadgets. Sets the gadget cost of the hybrid strategy.
+     * Whether the subsequent `crossing_gate_planarization` builds its crossing gates from XOR gates, which are smaller
+     * and shallower than the AND-OR-NOT crossing gates. Sets the cost of the crossing gates in the hybrid strategy.
      */
     bool xor_gates = true;
     /**
      * Levels with more crossings are always duplicated in the hybrid strategy, matching the limit of
      * `crossing_gate_planarization`.
      */
-    uint32_t max_crossings_per_rank = 1000u;
+    uint32_t max_crossings_per_level = 1000u;
     /**
      * Decision criterion of the hybrid strategy.
      */
@@ -169,9 +169,10 @@ struct node_duplication_planarization_params
      */
     uint64_t lookahead_budget = 1000000u;
     /**
-     * Abort with `std::runtime_error` as soon as more nodes than this have been duplicated. Node duplication can
-     * grow exponentially with the depth of the network, so the limit is checked at every duplicate. `0` disables the
-     * limit, which may exhaust the memory on an adverse network.
+     * Abort with `std::runtime_error` as soon as more nodes than this are duplicated at once: the duplicates of the
+     * result plus those of the level under construction, which the hybrid strategy may still discard. Node
+     * duplication can grow exponentially with the depth of the network, so the limit is checked at every duplicate.
+     * `0` disables the limit, which may exhaust the memory on an adverse network.
      */
     uint64_t max_duplications = 2000000u;
 };
@@ -421,16 +422,19 @@ class node_duplication_planarization_impl
     }
     /**
      * Decides for the hybrid strategy whether the level just computed keeps its crossings instead of its duplicates.
-     * If so, the level uses the source nodes reordered to reduce crossings, and the statistics count the kept
-     * crossings.
+     * If so, the level uses the source nodes reordered to reduce crossings, its duplicates are discarded, and the
+     * statistics count the kept crossings.
      *
      * @param next_level Level below the current one as the duplication computed it; replaced if crossings are kept.
-     * @param copies_on_level Number of duplicates in `next_level`.
+     * @param copies_before Number of duplicates before the computation of `next_level`.
      * @return `true` iff the level keeps its crossings.
      */
-    [[nodiscard]] bool keep_crossings(std::vector<mockturtle::node<Ntk>>& next_level, const uint64_t copies_on_level)
+    [[nodiscard]] bool keep_crossings(std::vector<mockturtle::node<Ntk>>& next_level, const std::size_t copies_before)
     {
-        if (ps.strategy != node_duplication_planarization_params::planarization_strategy::HYBRID)
+        const uint64_t copies_on_level = copy_origin.size() - copies_before;
+
+        if (ps.strategy != node_duplication_planarization_params::planarization_strategy::HYBRID ||
+            copies_on_level == 0)
         {
             return false;
         }
@@ -450,6 +454,8 @@ class node_duplication_planarization_impl
         ++pst.num_crossing_levels;
         pst.num_crossings += cross_cost.num_crossings;
 
+        discard_copies(copies_before);
+
         return true;
     }
     /**
@@ -468,7 +474,6 @@ class node_duplication_planarization_impl
         const auto pos = output_level();
 
         levels.push_back(pos);
-        crossing_level.push_back(false);
         progress.advance();
 
         // outputs that inputs drive directly form the only level; there is nothing below them to order
@@ -482,11 +487,9 @@ class node_duplication_planarization_impl
             while (!next_level.empty() && !at_inputs)
             {
                 // the hybrid strategy considers keeping the crossings of a level instead of its duplicates
-                const auto copies_on_level = copy_origin.size() - copies_before;
-                const bool crossings       = copies_on_level > 0 && keep_crossings(next_level, copies_on_level);
+                static_cast<void>(keep_crossings(next_level, copies_before));
 
                 levels.push_back(next_level);
-                crossing_level.push_back(crossings);
 
                 copies_before = copy_origin.size();
                 next_level    = next_level_of(next_level);
@@ -498,7 +501,6 @@ class node_duplication_planarization_impl
             if (at_inputs)
             {
                 levels.push_back(next_level);
-                crossing_level.push_back(false);
             }
         }
 
@@ -565,6 +567,22 @@ class node_duplication_planarization_impl
         }
 
         return static_cast<mockturtle::node<Ntk>>(ntk.size() + copy_origin.size() - 1);
+    }
+    /**
+     * Removes the duplicates created since a given count, which belong to a level that keeps its crossings. The nodes
+     * of the level above connect to the source nodes of the removed duplicates.
+     *
+     * @param copies_before Number of duplicates to keep.
+     */
+    void discard_copies(const std::size_t copies_before)
+    {
+        for (const auto& n : levels.back())
+        {
+            std::ranges::for_each(fanins_of[n], [this](auto& c) { c = origin(c); });
+        }
+
+        copy_origin.resize(copies_before);
+        fanins_of.resize(ntk.size() + copies_before);
     }
     /**
      * Computes the planar order of the level below a given level: builds the H-graph of the level, one slice per
@@ -906,11 +924,7 @@ class node_duplication_planarization_impl
                 }
                 else
                 {
-                    // on a crossing level, the recorded fanins are the duplicates that were discarded
-                    const bool below_is_crossing_level = crossing_level[i + 1];
-
-                    old2new[n] = dest.create_node(collect_children(n, old2new, dest, below_is_crossing_level),
-                                                  ntk.node_function(o));
+                    old2new[n] = dest.create_node(collect_children(n, old2new, dest), ntk.node_function(o));
                     lvl_new.push_back(dest.get_node(old2new[n]));
                 }
             }
@@ -924,7 +938,7 @@ class node_duplication_planarization_impl
                 dest.create_po(ntk.is_complemented(po) ? dest.create_not(sig) : sig);
             });
 
-        // an input that drives nothing is reached from no output, so no level holds it; it belongs to rank 0 of the
+        // an input that drives nothing is reached from no output, so no level holds it; it belongs to level 0 of the
         // result all the same, after the inputs the duplication placed
         if (!levels.empty() && is_final_level(levels.back()))
         {
@@ -944,7 +958,7 @@ class node_duplication_planarization_impl
                 });
         }
 
-        // `levels` starts at the primary outputs; ranks start at the primary inputs
+        // `levels` starts at the primary outputs; the levels of the result start at the primary inputs
         std::reverse(lvls_new.begin(), lvls_new.end());
 
         dest.update_ranks();
@@ -959,14 +973,12 @@ class node_duplication_planarization_impl
      * @param n Source id or copy id of the node.
      * @param old2new Signals in the destination network per source id and copy id.
      * @param dest Destination network.
-     * @param by_origin Whether to connect to the source nodes themselves instead of the recorded copies, which is the
-     * case when the level below kept its crossings.
      * @return Fanin signals of the new node.
      */
     template <typename NtkDest>
     [[nodiscard]] std::vector<mockturtle::signal<NtkDest>>
     collect_children(const mockturtle::node<Ntk> n, const std::vector<mockturtle::signal<NtkDest>>& old2new,
-                     NtkDest& dest, const bool by_origin) const
+                     NtkDest& dest) const
     {
         const auto o = origin(n);
 
@@ -977,7 +989,7 @@ class node_duplication_planarization_impl
         const auto& candidates = fanins_of[n];
 
         ntk.foreach_fanin(o,
-                          [this, &old2new, &dest, &candidates, &children, by_origin](const auto& f)
+                          [this, &old2new, &dest, &candidates, &children](const auto& f)
                           {
                               const auto fn = ntk.get_node(f);
 
@@ -994,7 +1006,7 @@ class node_duplication_planarization_impl
 
                                   assert(it != candidates.cend() && "A fanin has no copy in the level below");
 
-                                  sig = old2new[by_origin ? origin(*it) : *it];
+                                  sig = old2new[*it];
                               }
 
                               children.push_back(ntk.is_complemented(f) ? dest.create_not(sig) : sig);
@@ -1005,32 +1017,32 @@ class node_duplication_planarization_impl
     /**
      * Decides whether keeping the crossings of a level beats duplicating it, according to the decision criterion.
      *
-     * @param gadget_cost Nodes the crossing gadgets and their padding add.
+     * @param crossing_gate_cost Nodes the crossing gates and their padding add.
      * @param duplicated The level as the duplication strategy would build it, duplicates as copy ids.
      * @param crossed The level in its crossing-minimized source order.
      * @param lvl Level in the source network.
      * @param copies_on_level Number of duplicates in `duplicated`.
      * @return `true` iff the crossings are cheaper.
      */
-    [[nodiscard]] bool crossings_are_cheaper(const uint64_t                            gadget_cost,
+    [[nodiscard]] bool crossings_are_cheaper(const uint64_t                            crossing_gate_cost,
                                              const std::vector<mockturtle::node<Ntk>>& duplicated,
                                              const std::vector<mockturtle::node<Ntk>>& crossed, const uint32_t lvl,
                                              const uint64_t copies_on_level) const
     {
-        if (gadget_cost == std::numeric_limits<uint64_t>::max())
+        if (crossing_gate_cost == std::numeric_limits<uint64_t>::max())
         {
             return false;
         }
 
         if (ps.criterion == node_duplication_planarization_params::decision_criterion::LOOKAHEAD)
         {
-            // what each option costs in nodes: the gadgets or the copies on this level, plus what the duplication
-            // strategy creates below it; the second run stops once it loses
+            // what each option costs in nodes: the crossing gates or the copies on this level, plus what the
+            // duplication strategy creates below it; the second run stops once it loses
             const auto below_crossed = copies_below(crossed, ps.lookahead_budget);
 
             if (below_crossed <= ps.lookahead_budget)
             {
-                const auto crossing_total = gadget_cost + below_crossed;
+                const auto crossing_total = crossing_gate_cost + below_crossed;
 
                 if (copies_on_level > crossing_total)
                 {
@@ -1048,7 +1060,7 @@ class node_duplication_planarization_impl
             }
         }
 
-        return gadget_cost < duplication_cost(duplicated, lvl);
+        return crossing_gate_cost < duplication_cost(duplicated, lvl);
     }
     /**
      * Counts the nodes the duplication strategy creates below a level, given its order, by running it on a copy of
@@ -1124,7 +1136,7 @@ class node_duplication_planarization_impl
     struct crossing_cost_result
     {
         /**
-         * Estimated number of nodes the crossing gadgets and their padding add.
+         * Estimated number of nodes the crossing gates and their padding add.
          */
         uint64_t cost;
         /**
@@ -1142,22 +1154,22 @@ class node_duplication_planarization_impl
      */
     static constexpr double UNWEIGHED = -1.0;
     /**
-     * Number of nodes one crossing gadget adds.
+     * Number of nodes one crossing gate adds.
      *
-     * @return Gadget size.
+     * @return Crossing gate size.
      */
-    [[nodiscard]] uint64_t gadget_nodes() const noexcept
+    [[nodiscard]] uint64_t crossing_gate_nodes() const noexcept
     {
-        return ps.xor_gates ? XOR_GADGET_NODES : AND_OR_GADGET_NODES;
+        return ps.xor_gates ? XOR_CROSSING_GATE_NODES : AND_OR_CROSSING_GATE_NODES;
     }
     /**
-     * Number of levels one crossing gadget spans.
+     * Number of levels one crossing gate spans.
      *
-     * @return Gadget depth.
+     * @return Crossing gate depth.
      */
-    [[nodiscard]] uint64_t gadget_depth() const noexcept
+    [[nodiscard]] uint64_t crossing_gate_depth() const noexcept
     {
-        return ps.xor_gates ? XOR_GADGET_DEPTH : AND_OR_GADGET_DEPTH;
+        return ps.xor_gates ? XOR_CROSSING_GATE_DEPTH : AND_OR_CROSSING_GATE_DEPTH;
     }
     /**
      * Weighted size of the transitive fanin of a source node, see `duplication_cost_model`.
@@ -1299,43 +1311,6 @@ class node_duplication_planarization_impl
         return targets;
     }
     /**
-     * Counts the crossings between an upper level and the level below it, both in their current order.
-     *
-     * @param upper Nodes of the upper level, duplicates as copy ids.
-     * @param lower Nodes of the lower level, source ids in order.
-     * @return Number of crossings.
-     */
-    [[nodiscard]] uint64_t count_crossings(const std::vector<mockturtle::node<Ntk>>& upper,
-                                           const std::vector<mockturtle::node<Ntk>>& lower) const
-    {
-        const auto pos = positions(lower);
-
-        std::vector<uint64_t> swept(lower.size() + 1, 0);
-        std::size_t           max_pos   = 0;
-        uint64_t              crossings = 0;
-
-        for (const auto& n : upper)
-        {
-            const auto targets = fanin_positions(n, pos);
-
-            for (const auto p : targets)
-            {
-                for (auto k = p + 1; k <= max_pos; ++k)
-                {
-                    crossings += swept[k];
-                }
-            }
-
-            for (const auto p : targets)
-            {
-                max_pos = std::max(max_pos, p);
-                ++swept[p];
-            }
-        }
-
-        return crossings;
-    }
-    /**
      * Orders a level by the barycenters of the positions its nodes are used from in the upper level, then applies up
      * to `max_swaps` adjacent swaps that reduce the crossing count. A swap of two neighbours only changes the
      * crossings between their own edges, so each candidate is evaluated on those edges alone.
@@ -1422,12 +1397,12 @@ class node_duplication_planarization_impl
     }
     /**
      * Costs keeping the crossings between the upper level and a level in its original order: the level is reordered
-     * to minimize crossings, then every crossing is charged one gadget and every edge the buffers that pad it to the
-     * number of gadgets on the most crossed edge.
+     * to minimize crossings, then every crossing is charged one crossing gate and every edge the buffers that pad it to
+     * the number of crossing gates on the most crossed edge.
      *
      * @param upper Nodes of the upper level, duplicates as copy ids.
      * @param lower Nodes of the lower level in source order; reordered.
-     * @return Cost and crossing count; the cost is infinite above `max_crossings_per_rank`, where counting stops.
+     * @return Cost and crossing count; the cost is infinite above `max_crossings_per_level`, where counting stops.
      */
     [[nodiscard]] crossing_cost_result crossing_cost(const std::vector<mockturtle::node<Ntk>>& upper,
                                                      std::vector<mockturtle::node<Ntk>>&       lower) const
@@ -1466,7 +1441,7 @@ class node_duplication_planarization_impl
                         ++num_crossings;
 
                         // a level this crossed is always duplicated; no need to cost it
-                        if (num_crossings > ps.max_crossings_per_rank)
+                        if (num_crossings > ps.max_crossings_per_level)
                         {
                             return {std::numeric_limits<uint64_t>::max(), num_crossings};
                         }
@@ -1486,13 +1461,13 @@ class node_duplication_planarization_impl
             }
         }
 
-        uint64_t cost = num_crossings * gadget_nodes();
+        uint64_t cost = num_crossings * crossing_gate_nodes();
 
         if (num_crossings > 0)
         {
             for (const auto& [key, count] : per_edge)
             {
-                cost += (max_per_edge - count) * gadget_depth();
+                cost += (max_per_edge - count) * crossing_gate_depth();
             }
         }
 
@@ -1530,10 +1505,6 @@ class node_duplication_planarization_impl
      * Levelized duplication order, level 0 being the primary outputs; duplicates as copy ids.
      */
     levelized_node_order<Ntk> levels{};
-    /**
-     * Whether a level of `levels` kept its crossings instead of its duplicates.
-     */
-    std::vector<bool> crossing_level{};
     /**
      * Stamp of the level in which each source node was last placed itself, indexed by source node; allocated on
      * first use.
@@ -1575,8 +1546,8 @@ class node_duplication_planarization_impl
  *
  * With the hybrid strategy, the algorithm decides per level whether duplicating is cheaper than keeping the crossings
  * and resolving them later with `crossing_gate_planarization`: the duplication cost is the weighted size of the
- * duplicated cones, the crossing cost the size of the gadgets plus their padding after a crossing minimization of the
- * level. Levels that keep their crossings are not duplicated, and the result is then not planar.
+ * duplicated cones, the crossing cost the size of the crossing gates plus their padding after a crossing minimization
+ * of the level. Levels that keep their crossings are not duplicated, and the result is then not planar.
  *
  * For a bounded fanin, the duplication strategy takes time linear in the number of nodes it creates, which can be
  * exponential in the depth of the network. The hybrid strategy adds a crossing minimization per level. Its `LOOKAHEAD`
@@ -1587,7 +1558,7 @@ class node_duplication_planarization_impl
  *
  * The input must be balanced with unified outputs (see `network_balancing`), carry ranks (see `mutable_rank_view`),
  * and contain no virtual primary inputs (see `delete_virtual_pis`). The result is ranked; with the duplication strategy
- * it is crossing-free, which `mincross` verifies before the function returns.
+ * it is crossing-free, which the function verifies before it returns.
  *
  * @tparam Ntk Ranked, balanced source network type.
  * @param ntk Source network.
@@ -1644,16 +1615,9 @@ node_duplication_planarization(const Ntk& ntk, const node_duplication_planarizat
 
     if (ps.strategy == node_duplication_planarization_params::planarization_strategy::DUPLICATION)
     {
-        utils::graph::mincross_params mc_ps{};
-        mc_ps.optimize = false;
-        utils::graph::mincross_stats mc_st{};
-
-        utils::graph::mincross(result, mc_ps, &mc_st);
-
-        if (mc_st.num_crossings != 0)
+        if (const auto crossings = utils::graph::count_crossings(result); crossings != 0)
         {
-            throw std::runtime_error(
-                fmt::format("Planarization failed: the result contains {} crossings", mc_st.num_crossings));
+            throw std::runtime_error(fmt::format("Planarization failed: the result contains {} crossings", crossings));
         }
     }
 

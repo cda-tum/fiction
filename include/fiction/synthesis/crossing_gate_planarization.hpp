@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Planarizes a ranked logic network by replacing every edge crossing with a crossing gadget.
+ * @brief Planarizes a ranked logic network by replacing every edge crossing with a crossing gate.
  * @author Benjamin Hien (hibenj)
  */
 
@@ -52,15 +52,16 @@ struct crossing_gate_planarization_params
      */
     utils::progress_callback on_progress{};
     /**
-     * Build crossing gadgets from XOR gates (three XORs, four levels) instead of AND, OR, and NOT gates (fourteen
+     * Build crossing gates from XOR gates (three XORs, four levels) instead of AND, OR, and NOT gates (fourteen
      * levels).
      */
     bool xor_gates = true;
     /**
-     * Ranks with more crossings than this are rejected, since the number of gadgets grows with the crossings. The
-     * limit bounds the gadgets of a rank, not the buffers that every pass adds along the other edges of the rank.
+     * Adjacent levels with more crossings between them than this are rejected, since the number of crossing gates grows
+     * with the crossings. The limit bounds the crossing gates between two levels, not the buffers that every pass adds
+     * along the other edges between them.
      */
-    uint32_t max_crossings_per_rank = 1000u;
+    uint32_t max_crossings_per_level = 1000u;
 };
 
 /**
@@ -73,7 +74,7 @@ struct crossing_gate_planarization_stats
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * Number of crossings replaced by gadgets.
+     * Number of crossings replaced by crossing gates.
      */
     uint64_t num_crossings{0};
     /**
@@ -92,21 +93,21 @@ namespace detail
 {
 
 /**
- * Number of nodes of one XOR crossing gadget, buffers included.
+ * Number of nodes of one XOR crossing gate, buffers included.
  */
-inline constexpr uint64_t XOR_GADGET_NODES = 10u;
+inline constexpr uint64_t XOR_CROSSING_GATE_NODES = 10u;
 /**
- * Number of levels one XOR crossing gadget spans.
+ * Number of levels one XOR crossing gate spans.
  */
-inline constexpr uint64_t XOR_GADGET_DEPTH = 4u;
+inline constexpr uint64_t XOR_CROSSING_GATE_DEPTH = 4u;
 /**
- * Number of nodes of one crossing gadget built from AND, OR, and NOT gates, buffers included.
+ * Number of nodes of one crossing gate built from AND, OR, and NOT gates, buffers included.
  */
-inline constexpr uint64_t AND_OR_GADGET_NODES = 59u;
+inline constexpr uint64_t AND_OR_CROSSING_GATE_NODES = 59u;
 /**
- * Number of levels one crossing gadget built from AND, OR, and NOT gates spans.
+ * Number of levels one crossing gate built from AND, OR, and NOT gates spans.
  */
-inline constexpr uint64_t AND_OR_GADGET_DEPTH = 14u;
+inline constexpr uint64_t AND_OR_CROSSING_GATE_DEPTH = 14u;
 
 /**
  * Implementation of the crossing gate planarization algorithm.
@@ -135,8 +136,8 @@ class crossing_gate_planarization_impl
     /**
      * Runs the algorithm.
      *
-     * @return Planar copy of the source network with crossing gadgets.
-     * @throws std::runtime_error If a rank has more crossings than `max_crossings_per_rank` allows.
+     * @return Planar copy of the source network with crossing gates.
+     * @throws std::runtime_error If two adjacent levels have more crossings than `max_crossings_per_level` allows.
      */
     [[nodiscard]] Ntk run()
     {
@@ -150,12 +151,12 @@ class crossing_gate_planarization_impl
         auto& dest    = init.first;
         auto& old2new = init.second;
 
-        // rank 0 of the result keeps the input order of the primary inputs
-        std::vector<mockturtle::node<Ntk>> rank0{};
-        rank0.reserve(ntk.rank_width(0));
+        // level 0 of the result keeps the order of the primary inputs
+        std::vector<mockturtle::node<Ntk>> input_order{};
+        input_order.reserve(ntk.rank_width(0));
         for (const auto& pi : ntk.get_ranks(0))
         {
-            rank0.push_back(dest.get_node(old2new[pi]));
+            input_order.push_back(dest.get_node(old2new[pi]));
         }
 
         for (uint32_t r = 1; r <= ntk.depth(); ++r)
@@ -204,14 +205,14 @@ class crossing_gate_planarization_impl
         networks::restore_names(ntk, dest, old2new);
 
         dest.update_ranks();
-        dest.set_ranks(0, rank0);
+        dest.set_ranks(0, input_order);
 
-        return dest;
+        return std::move(dest);
     }
 
   private:
     /**
-     * An edge between two adjacent ranks of the source network.
+     * An edge between two adjacent levels of the source network.
      */
     struct edge
     {
@@ -266,7 +267,7 @@ class crossing_gate_planarization_impl
         uint64_t level;
     };
     /**
-     * Crossings between two adjacent ranks and the edges between them in rank order of their sources.
+     * Crossings between two adjacent levels and the edges between them in rank order of their sources.
      */
     struct stage
     {
@@ -280,8 +281,8 @@ class crossing_gate_planarization_impl
         std::vector<edge> edges{};
     };
     /**
-     * Levels an input of the XOR gadget is delayed by so that it meets the buffered XOR of both inputs: the XOR and its
-     * buffer.
+     * Levels an input of the XOR crossing gate is delayed by so that it meets the buffered XOR of both inputs: the XOR
+     * and its buffer.
      */
     static constexpr uint32_t XOR_CORE_DELAY = 2u;
     /**
@@ -290,25 +291,25 @@ class crossing_gate_planarization_impl
      */
     static constexpr uint32_t AND_OR_INNER_DELAY = 3u;
     /**
-     * Levels an input of the AND-OR-NOT gadget is delayed by so that it meets the buffered AND-OR-NOT XOR of both
-     * inputs: the XOR of depth six and its buffer.
+     * Levels an input of the AND-OR-NOT crossing gate is delayed by so that it meets the buffered AND-OR-NOT XOR of
+     * both inputs: the XOR of depth six and its buffer.
      */
     static constexpr uint32_t AND_OR_CORE_DELAY = 7u;
     /**
-     * Depth of one crossing gadget, including the buffers that align the edges it is placed on.
+     * Depth of one crossing gate, including the buffers that align the edges it is placed on.
      *
-     * @return Number of levels a gadget occupies.
+     * @return Number of levels a crossing gate occupies.
      */
-    [[nodiscard]] uint32_t gadget_depth() const noexcept
+    [[nodiscard]] uint32_t crossing_gate_depth() const noexcept
     {
-        return static_cast<uint32_t>(ps.xor_gates ? XOR_GADGET_DEPTH : AND_OR_GADGET_DEPTH);
+        return static_cast<uint32_t>(ps.xor_gates ? XOR_CROSSING_GATE_DEPTH : AND_OR_CROSSING_GATE_DEPTH);
     }
     /**
-     * Finds the crossings between every pair of adjacent ranks. Edges are swept in rank order of their sources; an
+     * Finds the crossings between every pair of adjacent levels. Edges are swept in rank order of their sources; an
      * edge that ends left of the end of an earlier edge crosses it. The level of a crossing is one more than the
      * highest level already assigned to either edge, so that crossings on one edge are resolved in order.
      *
-     * @throws std::runtime_error If a rank has more crossings than `max_crossings_per_rank`.
+     * @throws std::runtime_error If two adjacent levels have more crossings than `max_crossings_per_level`.
      */
     void detect_crossings()
     {
@@ -317,17 +318,17 @@ class crossing_gate_planarization_impl
 
         for (uint32_t r = 0; r < ntk.depth(); ++r)
         {
-            stage rank_stage{};
+            stage level_stage{};
 
             // edges already swept, grouped by target position, with the level each one has reached
             std::vector<std::deque<std::pair<edge, uint64_t>>> swept(ntk.rank_width(r + 1) + 1);
 
-            uint64_t max_pos        = 0;
-            uint64_t rank_crossings = 0;
+            uint64_t max_pos         = 0;
+            uint64_t level_crossings = 0;
 
             ntk.foreach_node_in_rank(
                 r,
-                [this, &rank_stage, &swept, &max_pos, &rank_crossings, r](const auto& n)
+                [this, &level_stage, &swept, &max_pos, &level_crossings, r](const auto& n)
                 {
                     std::vector<edge> targets{};
                     targets.reserve(fanout_ntk.fanout_size(n));
@@ -336,7 +337,7 @@ class crossing_gate_planarization_impl
                               { return ntk.rank_position(a.target) < ntk.rank_position(b.target); });
 
                     // every edge swept so far that ends right of this edge's target crosses it; the crossing's
-                    // level is one more than the levels both edges have reached, so gadgets stack bottom-up
+                    // level is one more than the levels both edges have reached, so crossing gates stack bottom-up
                     for (const auto& e : targets)
                     {
                         const uint64_t pos       = ntk.rank_position(e.target);
@@ -348,16 +349,16 @@ class crossing_gate_planarization_impl
                             {
                                 const auto level = std::max(local_lvl, prev_lvl);
 
-                                rank_stage.crossings.push_back({prev_edge, e, level});
-                                ++rank_crossings;
+                                level_stage.crossings.push_back({prev_edge, e, level});
+                                ++level_crossings;
 
-                                // checked per crossing, so that a rank far above the limit does not fill the memory
-                                // the limit is meant to protect
-                                if (rank_crossings > ps.max_crossings_per_rank)
+                                // checked per crossing, so that a pair of levels far above the limit does not fill the
+                                // memory the limit is meant to protect
+                                if (level_crossings > ps.max_crossings_per_level)
                                 {
                                     throw std::runtime_error(
-                                        fmt::format("Rank {} has more than the {} crossings allowed", r,
-                                                    ps.max_crossings_per_rank));
+                                        fmt::format("Levels {} and {} have more than the {} crossings allowed", r,
+                                                    r + 1, ps.max_crossings_per_level));
                                 }
 
                                 local_lvl = std::max(local_lvl, prev_lvl) + 1;
@@ -365,7 +366,7 @@ class crossing_gate_planarization_impl
                             }
                         }
 
-                        rank_stage.edges.push_back(e);
+                        level_stage.edges.push_back(e);
                     }
 
                     for (const auto& e : targets)
@@ -376,15 +377,15 @@ class crossing_gate_planarization_impl
                     }
                 });
 
-            pst.num_crossings += rank_crossings;
+            pst.num_crossings += level_crossings;
 
-            stages.push_back(std::move(rank_stage));
+            stages.push_back(std::move(level_stage));
         }
     }
     /**
-     * Resolves the crossings of one stage in order of their levels. Each pass over the edges places one gadget per
-     * crossing whose left edge is next in line and swaps the two edges; every other edge is extended by a buffer
-     * chain of the gadget depth, so that all edges of the stage grow by the same number of levels per pass.
+     * Resolves the crossings of one stage in order of their levels. Each pass over the edges places one crossing gate
+     * per crossing whose left edge is next in line and swaps the two edges; every other edge is extended by a buffer
+     * chain of the crossing gate depth, so that all edges of the stage grow by the same number of levels per pass.
      *
      * @param dest Destination network.
      * @param old2new Map from source nodes to destination signals.
@@ -399,8 +400,8 @@ class crossing_gate_planarization_impl
 
         std::size_t placed = 0;
 
-        // one pass per gadget depth: adjacent crossing edges get a gadget and swap places, every other edge a
-        // buffer chain of the same depth, until every crossing of the rank is resolved
+        // one pass per crossing gate depth: adjacent crossing edges get a crossing gate and swap places, every other
+        // edge a buffer chain of the same depth, until every crossing between the two levels is resolved
         while (placed < ordered.size())
         {
             const auto placed_before = placed;
@@ -415,10 +416,10 @@ class crossing_gate_planarization_impl
                         throw std::runtime_error("A crossing's edges are not adjacent; the rank order is inconsistent");
                     }
 
-                    place_gadget(dest, old2new, ordered[placed]);
+                    place_crossing_gate(dest, old2new, ordered[placed]);
                     ++placed;
 
-                    // the gadget consumes both edges of the crossing
+                    // the crossing gate consumes both edges of the crossing
                     std::swap(st.edges[i], st.edges[i + 1]);
                     i += 2;
                 }
@@ -436,7 +437,7 @@ class crossing_gate_planarization_impl
         }
     }
     /**
-     * Signal at the current end of an edge: the end of its last gadget or buffer chain, or its source.
+     * Signal at the current end of an edge: the end of its last crossing gate or buffer chain, or its source.
      *
      * @param old2new Map from source nodes to destination signals.
      * @param e Edge.
@@ -453,7 +454,7 @@ class crossing_gate_planarization_impl
         return old2new[e.source];
     }
     /**
-     * Extends an edge by a buffer chain of the gadget depth.
+     * Extends an edge by a buffer chain of the crossing gate depth.
      *
      * @param dest Destination network.
      * @param old2new Map from source nodes to destination signals.
@@ -461,30 +462,12 @@ class crossing_gate_planarization_impl
      */
     void extend_edge(Ntk& dest, const mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new, const edge& e)
     {
-        edge_end[e] = buffer_chain(dest, edge_signal(old2new, e), gadget_depth());
-    }
-    /**
-     * Appends a chain of buffers to a signal.
-     *
-     * @param dest Destination network.
-     * @param sig Signal to buffer.
-     * @param length Number of buffers.
-     * @return The end of the chain.
-     */
-    [[nodiscard]] static mockturtle::signal<Ntk> buffer_chain(Ntk& dest, mockturtle::signal<Ntk> sig,
-                                                              const uint32_t length)
-    {
-        for (uint32_t i = 0; i < length; ++i)
-        {
-            sig = dest.create_buf(sig);
-        }
-
-        return sig;
+        edge_end[e] = networks::buffer_chain(dest, edge_signal(old2new, e), crossing_gate_depth());
     }
     /**
      * An XOR built from AND, OR, and NOT gates, balanced to six levels: \f$(a \land \lnot(a \land b)) \lor (b \land
      * \lnot(a \land b))\f$ with the direct paths of `a` and `b` buffered to the depth of the shared term. Nodes are
-     * created from left to right per level, which keeps the gadget planar in creation order.
+     * created from left to right per level, which keeps the XOR planar in creation order.
      *
      * @param dest Destination network.
      * @param a Left input.
@@ -497,35 +480,37 @@ class crossing_gate_planarization_impl
         const auto fo_a = dest.create_buf(a);
         const auto fo_b = dest.create_buf(b);
 
-        const auto a_delayed = buffer_chain(dest, fo_a, AND_OR_INNER_DELAY);
+        const auto a_delayed = networks::buffer_chain(dest, fo_a, AND_OR_INNER_DELAY);
         const auto core      = dest.create_buf(dest.create_not(dest.create_and(fo_a, fo_b)));
         const auto p_a       = dest.create_and(a_delayed, core);
-        const auto b_delayed = buffer_chain(dest, fo_b, AND_OR_INNER_DELAY);
+        const auto b_delayed = networks::buffer_chain(dest, fo_b, AND_OR_INNER_DELAY);
         const auto p_b       = dest.create_and(b_delayed, core);
 
         return dest.create_or(p_a, p_b);
     }
     /**
-     * Places the gadget that swaps the signals of two crossing edges: with \f$c_0 = a \oplus b\f$, the left output
+     * Places the crossing gate that swaps the signals of two crossing edges: with \f$c_0 = a \oplus b\f$, the left
+     * output
      * \f$a \oplus c_0 = b\f$ continues the right edge and the right output \f$c_0 \oplus b = a\f$ continues the
      * left edge, so the left edge ends up right of the right edge. The direct paths are buffered to the depth of
-     * the gadget, and nodes are created from left to right per level, which keeps the gadget planar in creation
-     * order.
+     * the crossing gate, and nodes are created from left to right per level, which keeps the crossing gate planar in
+     * creation order.
      *
      * @param dest Destination network.
      * @param old2new Map from source nodes to destination signals.
      * @param c Crossing to resolve.
      */
-    void place_gadget(Ntk& dest, const mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new, const crossing& c)
+    void place_crossing_gate(Ntk& dest, const mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
+                             const crossing& c)
     {
         const auto a = dest.create_buf(edge_signal(old2new, c.left));
         const auto b = dest.create_buf(edge_signal(old2new, c.right));
 
         if (ps.xor_gates)
         {
-            const auto a_delayed = buffer_chain(dest, a, XOR_CORE_DELAY);
+            const auto a_delayed = networks::buffer_chain(dest, a, XOR_CORE_DELAY);
             const auto c0        = dest.create_buf(dest.create_xor(a, b));
-            const auto b_delayed = buffer_chain(dest, b, XOR_CORE_DELAY);
+            const auto b_delayed = networks::buffer_chain(dest, b, XOR_CORE_DELAY);
 
             const auto left_out  = dest.create_xor(a_delayed, c0);  // = b
             const auto right_out = dest.create_xor(c0, b_delayed);  // = a
@@ -535,9 +520,9 @@ class crossing_gate_planarization_impl
         }
         else
         {
-            const auto a_delayed = buffer_chain(dest, a, AND_OR_CORE_DELAY);
+            const auto a_delayed = networks::buffer_chain(dest, a, AND_OR_CORE_DELAY);
             const auto c0        = dest.create_buf(and_or_xor(dest, a, b));
-            const auto b_delayed = buffer_chain(dest, b, AND_OR_CORE_DELAY);
+            const auto b_delayed = networks::buffer_chain(dest, b, AND_OR_CORE_DELAY);
 
             const auto left_out  = and_or_xor(dest, a_delayed, c0);  // = b
             const auto right_out = and_or_xor(dest, c0, b_delayed);  // = a
@@ -563,11 +548,11 @@ class crossing_gate_planarization_impl
      */
     crossing_gate_planarization_stats& pst;
     /**
-     * Crossings and edges per pair of adjacent ranks.
+     * Crossings and edges per pair of adjacent levels.
      */
     std::vector<stage> stages{};
     /**
-     * Current end of every edge in the destination network, once a gadget or buffer chain was placed on it.
+     * Current end of every edge in the destination network, once a crossing gate or buffer chain was placed on it.
      */
     std::unordered_map<edge, mockturtle::signal<Ntk>, edge_hash> edge_end{};
 };
@@ -575,13 +560,13 @@ class crossing_gate_planarization_impl
 }  // namespace detail
 
 /**
- * Planarizes a ranked, balanced logic network by replacing every crossing of two edges with a crossing gadget that
- * swaps the two signals. Crossings between two ranks are resolved pass by pass; in every pass, each remaining
- * crossing whose edges are adjacent receives a gadget and every other edge a buffer chain of the same depth, so the
- * result stays balanced. The rank order of the input is kept.
+ * Planarizes a ranked, balanced logic network by replacing every crossing of two edges with a crossing gate that
+ * swaps the two signals. Crossings between two levels are resolved pass by pass; in every pass, each remaining
+ * crossing whose edges are adjacent receives a crossing gate and every other edge a buffer chain of the same depth, so
+ * the result stays balanced. The rank order of the input is kept.
  *
- * Gadgets consist of three XORs when `xor_gates` is set, otherwise of AND, OR, and NOT gates, which makes them
- * deeper. The result is verified crossing-free with `mincross` before the function returns.
+ * Crossing gates consist of three XORs when `xor_gates` is set, otherwise of AND, OR, and NOT gates, which makes them
+ * deeper. The result is verified crossing-free before the function returns.
  *
  * @tparam Ntk Ranked, balanced network type (see `mutable_rank_view`).
  * @param ntk Source network.
@@ -589,7 +574,8 @@ class crossing_gate_planarization_impl
  * @param pst Statistics.
  * @return Planar network of the same type that computes the same functions as `ntk`.
  * @throws std::invalid_argument If `ntk` is not balanced.
- * @throws std::runtime_error If a rank exceeds `max_crossings_per_rank` or the result still contains crossings.
+ * @throws std::runtime_error If two adjacent levels exceed `max_crossings_per_level` or the result still contains
+ * crossings.
  */
 template <typename Ntk>
 [[nodiscard]] Ntk crossing_gate_planarization(const Ntk& ntk, const crossing_gate_planarization_params& ps = {},
@@ -613,16 +599,9 @@ template <typename Ntk>
 
     auto result = p.run();
 
-    utils::graph::mincross_params mc_ps{};
-    mc_ps.optimize = false;
-    utils::graph::mincross_stats mc_st{};
-
-    utils::graph::mincross(result, mc_ps, &mc_st);
-
-    if (mc_st.num_crossings != 0)
+    if (const auto crossings = utils::graph::count_crossings(result); crossings != 0)
     {
-        throw std::runtime_error(
-            fmt::format("Planarization failed: the result contains {} crossings", mc_st.num_crossings));
+        throw std::runtime_error(fmt::format("Planarization failed: the result contains {} crossings", crossings));
     }
 
     if (pst != nullptr)

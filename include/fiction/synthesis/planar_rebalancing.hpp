@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Removes buffer chains from a planar ranked network and re-inserts the minimum that keeps it balanced.
+ * @brief Removes buffer chains from a planar ranked network and re-inserts buffers on as-soon-as-possible levels.
  * @author Benjamin Hien (hibenj)
  */
 
@@ -167,7 +167,7 @@ class planar_rebalancing_impl
     }
     /**
      * Recomputes the ranks of the stripped network and puts its primary inputs in the order of the source network.
-     * Only the input order matters for the sweep that re-inserts the buffers; the order within the other ranks is
+     * Only the input order matters for the sweep that re-inserts the buffers; the order within the other levels is
      * derived from the consumer order of the source network as the sweep goes.
      *
      * @param stripped Stripped network; its ranks are recomputed.
@@ -177,13 +177,13 @@ class planar_rebalancing_impl
     {
         stripped.update_ranks();
 
-        std::vector<mockturtle::node<Ntk>> rank0{};
-        rank0.reserve(ntk.rank_width(0));
+        std::vector<mockturtle::node<Ntk>> input_order{};
+        input_order.reserve(ntk.rank_width(0));
         for (const auto& pi : ntk.get_ranks(0))
         {
-            rank0.push_back(stripped.get_node(old2new[pi]));
+            input_order.push_back(stripped.get_node(old2new[pi]));
         }
-        stripped.set_ranks(0, rank0);
+        stripped.set_ranks(0, input_order);
     }
     /**
      * Consumers of a node in the source network, ordered by the rank position of the node's direct fanouts, with
@@ -203,7 +203,7 @@ class planar_rebalancing_impl
                                   {
                                       auto c = fo;
 
-                                      while (is_chain_buffer(c) && !ntk.is_po(c))
+                                      while (is_chain_buffer(c) && output_count[c] == 0)
                                       {
                                           c = networks::fanouts(fanout_ntk, c).front();
                                       }
@@ -220,7 +220,7 @@ class planar_rebalancing_impl
                                                             }
                                                         });
 
-                                      // ordered by the direct fanout, which sits in the rank above `n`; a buffer
+                                      // ordered by the direct fanout, which sits in the level above `n`; a buffer
                                       // chain that ends in a primary output stands for that output
                                       for (std::size_t i = 0; i < edges; ++i)
                                       {
@@ -420,12 +420,12 @@ class planar_rebalancing_impl
         auto& balanced = init.first;
         auto& new2bal  = init.second;
 
-        // rank 0 of the result keeps the primary input order; captured before the sweep moves the map to buffers
-        std::vector<mockturtle::node<Ntk>> rank0{};
-        rank0.reserve(stripped.rank_width(0));
+        // level 0 of the result keeps the primary input order; captured before the sweep moves the map to buffers
+        std::vector<mockturtle::node<Ntk>> input_order{};
+        input_order.reserve(stripped.rank_width(0));
         for (const auto& pi : stripped.get_ranks(0))
         {
-            rank0.push_back(balanced.get_node(new2bal[pi]));
+            input_order.push_back(balanced.get_node(new2bal[pi]));
         }
 
         const auto po_level = max_po_level(stripped);
@@ -449,9 +449,9 @@ class planar_rebalancing_impl
         networks::restore_names(stripped, balanced, new2bal);
 
         balanced.update_ranks();
-        balanced.set_ranks(0, rank0);
+        balanced.set_ranks(0, input_order);
 
-        return balanced;
+        return std::move(balanced);
     }
     /**
      * Level of the highest primary output driver, constants excluded.
@@ -556,18 +556,21 @@ class planar_rebalancing_impl
 }  // namespace detail
 
 /**
- * Removes every buffer that drives a single consumer from a ranked, planar network and re-inserts the minimum number
- * of buffers that makes all edges span exactly one level and puts all primary outputs on the top level. Buffers that
- * lead from one source to several consumers are shared level by level, so the fanout splits right above its targets.
- * The rank order of the input is kept, so a planar input yields a planar output; fanout nodes with more than one
- * consumer are kept, so a fanout-substituted input yields a fanout-substituted output.
+ * Removes every buffer that drives a single consumer from a ranked, planar network and re-inserts buffers on the
+ * as-soon-as-possible levels of the remaining network: every gate and fanout node sits on the lowest level its fanins
+ * allow, and all primary outputs sit on the level of the deepest one. Buffers that lead from one source to several
+ * consumers are shared level by level, so the fanout splits right above its targets. The depth is the smallest the
+ * network allows, and the buffer count is the smallest for these levels. A gate is never delayed to save buffers, so
+ * other balanced level assignments can need fewer buffers. The rank order of the input is kept, so a planar input
+ * yields a planar output; fanout nodes with more than one consumer are kept, so a fanout-substituted input yields a
+ * fanout-substituted output.
  *
- * This is the post-processing step of `planar_fanout_substitution`, which pads every rank to a uniform depth.
+ * This is the post-processing step of `planar_fanout_substitution`, which pads every level to a uniform depth.
  *
  * @tparam Ntk Ranked network type (see `mutable_rank_view`) that supports `create_buf` and `is_buf`.
  * @param ntk Ranked, planar input network.
  * @param ps Parameters.
- * @return A balanced, planar network with unified outputs and no redundant buffers.
+ * @return A balanced, planar network with unified outputs.
  * @throws std::invalid_argument If a gate has only constant fanins; such a gate cannot be reached from the inputs.
  * @throws std::runtime_error If the input is not planar.
  */

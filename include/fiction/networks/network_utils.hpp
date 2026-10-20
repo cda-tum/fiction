@@ -492,6 +492,28 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
 }
 
 /**
+ * Appends a chain of buffers to a signal.
+ *
+ * @tparam Ntk Network type.
+ * @param ntk Network to extend.
+ * @param sig Signal to buffer.
+ * @param length Number of buffers.
+ * @return The end of the chain, `sig` itself for a length of zero.
+ */
+template <typename Ntk>
+[[nodiscard]] mockturtle::signal<Ntk> buffer_chain(Ntk& ntk, mockturtle::signal<Ntk> sig, const uint32_t length)
+{
+    static_assert(mockturtle::has_create_buf_v<Ntk>, "Ntk does not implement the create_buf method");
+
+    for (uint32_t i = 0; i < length; ++i)
+    {
+        sig = ntk.create_buf(sig);
+    }
+
+    return sig;
+}
+
+/**
  * Creates an empty network of the same type as `src` with copies of its constants and primary inputs, virtual
  * primary inputs included, and a map from the nodes of `src` to their copies. Primary inputs are created in the
  * order that `foreach_pi_unranked` yields when `Ntk` offers it, so that rank bookkeeping of the copy matches `src`.
@@ -539,7 +561,7 @@ initialize_copy_network_with_virtual_pis(const Ntk& src)
         src.foreach_pi(copy_pi);
     }
 
-    return {dest, old2new};
+    return {std::move(dest), std::move(old2new)};
 }
 
 }  // namespace fiction::networks
