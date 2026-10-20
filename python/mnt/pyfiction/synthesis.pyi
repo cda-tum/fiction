@@ -700,9 +700,10 @@ class decision_criterion(enum.Enum):
 
     LOOKAHEAD = 1
     """
-    The number of nodes that duplicating actually creates: the copies on
-    the level plus those that running the duplication strategy on the
-    levels below creates.
+    The number of nodes that duplicating actually creates.
+
+    The copies on the level plus those that running the duplication
+    strategy on the levels below creates.
 
     Both options are run, and the second run stops once it exceeds the
     first. Levels whose runs exceed `lookahead_budget` fall back to
@@ -776,7 +777,8 @@ def planarization(
     """
     Planarizes a balanced technology network with unified outputs: node duplication with the chosen
     strategy, crossing gates for the levels the hybrid strategy left crossed, planar fanout substitution, and planar
-    rebalancing. See `network_balancing` for the precondition.
+    rebalancing. See `network_balancing` for the precondition. Gates that no output reaches are dropped. The function
+    checks the result for crossings and for balance with unified outputs; `is_fanout_substituted` checks its fanout degree.
 
     Args:
         network: Balanced technology network with unified outputs.
@@ -803,10 +805,9 @@ def planarization(
         those inputs together when simulating or checking equivalence.
 
     Raises:
-        ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if a gate
-            drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `fanout_degree` is below 2,
-            or if the duplication options are invalid (a lookahead budget of zero, a negative or non-finite cost
-            weight).
+        ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if
+            `fanout_degree` is below 2, or if the duplication options are invalid (a lookahead budget of zero, a
+            negative or non-finite cost weight).
         RuntimeError: If more than `max_duplications` nodes were duplicated, if two adjacent
             levels have more than `max_crossings_per_level` crossings, or if a stage cannot keep its contract.
             `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth of the

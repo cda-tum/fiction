@@ -285,7 +285,8 @@ also available on their own.
 `planarization` runs the whole pipeline: node duplication with the chosen strategy, crossing gates for the levels the
 hybrid strategy left crossed, planar fanout substitution, and planar rebalancing. The pipeline defaults to the hybrid
 strategy with the lookahead criterion and XOR crossing gates; the planarization experiment in `experiments/` runs
-this default configuration on the benchmark sets and checks every result for equivalence.
+this default configuration on the benchmark sets and checks every result for equivalence. The pipeline checks its
+result for crossings and for balance with unified outputs; `is_fanout_substituted` checks the fanout degree on request.
 
 ::::{tab-set}
 :sync-group: language

@@ -23,6 +23,7 @@
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planarization.hpp>
 
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
@@ -205,17 +206,20 @@ void register_planarization(nb::module_& m)
             ps.duplication.seed                                   = seed;
             ps.fanout_degree                                      = fanout_degree;
 
+            // gates that no output reaches have no level and cannot be ranked, so they are dropped
+            const auto cleaned = mockturtle::cleanup_dangling(network);
+
             // the pipeline needs a balanced network with unified outputs and ranks; the ranks follow the node order.
             // The result's node order is its rank order, and every input is reported with the index of the original
             // input it stands for, so that virtual inputs can be tied to their real ones.
-            if (!fiction::synthesis::is_balanced(network, {.unify_outputs = true, .buffer_constant_outputs = false}))
+            if (!fiction::synthesis::is_balanced(cleaned, {.unify_outputs = true, .buffer_constant_outputs = false}))
             {
                 throw std::invalid_argument("The network must be balanced with unified outputs; see network_balancing");
             }
 
             const nb::gil_scoped_release release{};
 
-            const fiction::networks::views::mutable_rank_view ranked{network};
+            const fiction::networks::views::mutable_rank_view ranked{cleaned};
 
             return detail::flatten(fiction::synthesis::planarization(ranked, ps, statistics));
         },
@@ -233,7 +237,8 @@ void register_planarization(nb::module_& m)
         nb::arg("fanout_degree") = defaults.fanout_degree, nb::arg("statistics") = nullptr,
         R"doc(Planarizes a balanced technology network with unified outputs: node duplication with the chosen
 strategy, crossing gates for the levels the hybrid strategy left crossed, planar fanout substitution, and planar
-rebalancing. See `network_balancing` for the precondition.
+rebalancing. See `network_balancing` for the precondition. Gates that no output reaches are dropped. The function
+checks the result for crossings and for balance with unified outputs; `is_fanout_substituted` checks its fanout degree.
 
 Args:
     network: Balanced technology network with unified outputs.
@@ -260,10 +265,9 @@ Returns:
     those inputs together when simulating or checking equivalence.
 
 Raises:
-    ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if a gate
-        drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `fanout_degree` is below 2,
-        or if the duplication options are invalid (a lookahead budget of zero, a negative or non-finite cost
-        weight).
+    ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if
+        `fanout_degree` is below 2, or if the duplication options are invalid (a lookahead budget of zero, a
+        negative or non-finite cost weight).
     RuntimeError: If more than `max_duplications` nodes were duplicated, if two adjacent
         levels have more than `max_crossings_per_level` crossings, or if a stage cannot keep its contract.
         `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth of the
