@@ -29,6 +29,7 @@
 #include <limits>
 #include <stdexcept>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::utils::graph
@@ -450,14 +451,16 @@ class mincross_impl
 
             if (r > 0)
             {
-                c0 += in_cross(v, w);
-                c1 += in_cross(w, v);
+                const auto [keep, swapped] = in_cross(v, w);
+                c0 += keep;
+                c1 += swapped;
             }
 
             if (r + 1 < fanout_ntk.depth())
             {
-                c0 += out_cross(v, w);
-                c1 += out_cross(w, v);
+                const auto [keep, swapped] = out_cross(v, w);
+                c0 += keep;
+                c1 += swapped;
             }
 
             if (c1 < c0 || (c0 > 0 && order == median_sorting::DESCENDING && c1 == c0))
@@ -471,87 +474,80 @@ class mincross_impl
     }
 
     /**
-     * Counts the number of edge crossings between fanins of two nodes in the previous rank.
+     * @brief Counts the crossings between the fanin edges of two adjacent nodes in the previous rank, for both orders
+     * of the nodes.
      *
-     * @param left First node.
-     * @param right Second node.
-     * @return Number of crossings.
+     * @param left Left node.
+     * @param right Right node.
+     * @return Crossings with `left` left of `right` and with the nodes swapped.
      */
-    uint32_t in_cross(const node& left, const node& right)
+    std::pair<uint32_t, uint32_t> in_cross(const node& left, const node& right)
     {
-        std::vector<uint32_t> left_sources{};
-        left_sources.reserve(fanout_ntk.fanin_size(left));
-        std::vector<uint32_t> right_sources{};
-        right_sources.reserve(fanout_ntk.fanin_size(right));
-
-        fanout_ntk.foreach_fanin(left,
-                                 [this, &left_sources](auto const& f)
-                                 {
-                                     const auto src = fanout_ntk.get_node(f);
-                                     if (fanout_ntk.is_constant(src))
+        const auto gather = [this](const node& n, std::vector<uint32_t>& sources)
+        {
+            sources.clear();
+            fanout_ntk.foreach_fanin(n,
+                                     [this, &sources](auto const& f)
                                      {
-                                         return;
-                                     }
-                                     left_sources.push_back(fanout_ntk.rank_position(src));
-                                 });
+                                         const auto src = fanout_ntk.get_node(f);
+                                         if (!fanout_ntk.is_constant(src))
+                                         {
+                                             sources.push_back(fanout_ntk.rank_position(src));
+                                         }
+                                     });
+        };
 
-        fanout_ntk.foreach_fanin(right,
-                                 [this, &right_sources](auto const& f)
-                                 {
-                                     const auto src = fanout_ntk.get_node(f);
-                                     if (fanout_ntk.is_constant(src))
-                                     {
-                                         return;
-                                     }
-                                     right_sources.push_back(fanout_ntk.rank_position(src));
-                                 });
+        gather(left, left_positions);
+        gather(right, right_positions);
 
-        return count_crossings(left_sources, right_sources);
+        return count_crossings(left_positions, right_positions);
     }
 
     /**
-     * Counts the number of edge crossings between fanouts of two nodes in the next rank.
+     * @brief Counts the crossings between the fanout edges of two adjacent nodes in the next rank, for both orders of
+     * the nodes.
      *
-     * @param left First node.
-     * @param right Second node.
-     * @return Number of crossings.
+     * @param left Left node.
+     * @param right Right node.
+     * @return Crossings with `left` left of `right` and with the nodes swapped.
      */
-    uint32_t out_cross(const node& left, const node& right)
+    std::pair<uint32_t, uint32_t> out_cross(const node& left, const node& right)
     {
-        std::vector<uint32_t> left_targets{};
-        left_targets.reserve(fanout_ntk.fanout_size(left));
-        fanout_ntk.foreach_fanout(left, [this, &left_targets](auto const& tgt)
-                                  { left_targets.push_back(fanout_ntk.rank_position(tgt)); });
+        const auto gather = [this](const node& n, std::vector<uint32_t>& targets)
+        {
+            targets.clear();
+            fanout_ntk.foreach_fanout(n, [this, &targets](auto const& tgt)
+                                      { targets.push_back(fanout_ntk.rank_position(tgt)); });
+        };
 
-        std::vector<uint32_t> right_targets{};
-        right_targets.reserve(fanout_ntk.fanout_size(right));
-        fanout_ntk.foreach_fanout(right, [this, &right_targets](auto const& tgt)
-                                  { right_targets.push_back(fanout_ntk.rank_position(tgt)); });
+        gather(left, left_positions);
+        gather(right, right_positions);
 
-        return count_crossings(left_targets, right_targets);
+        return count_crossings(left_positions, right_positions);
     }
 
     /**
-     * Computes the number of crossings between two sets of ranked positions.
+     * @brief Counts the crossings between two sets of ranked positions in one pass.
      *
-     * @param a Positions from first set of connections.
-     * @param b Positions from second set of connections.
-     * @return Total number of crossings between the sets.
+     * @param a Positions of the connections of the left node.
+     * @param b Positions of the connections of the right node.
+     * @return Crossings with the first node left of the second, and with the nodes swapped.
      */
-    uint32_t count_crossings(const std::vector<uint32_t>& a, const std::vector<uint32_t>& b)
+    static std::pair<uint32_t, uint32_t> count_crossings(const std::vector<uint32_t>& a, const std::vector<uint32_t>& b)
     {
-        uint32_t count = 0;
+        uint32_t kept    = 0;
+        uint32_t swapped = 0;
+
         for (const auto x : a)
         {
             for (const auto y : b)
             {
-                if (x > y)
-                {
-                    ++count;
-                }
+                kept += static_cast<uint32_t>(x > y);
+                swapped += static_cast<uint32_t>(x < y);
             }
         }
-        return count;
+
+        return {kept, swapped};
     }
 
     /**
@@ -609,6 +605,14 @@ class mincross_impl
      * Current total number of edge crossings in the network.
      */
     uint64_t total_crossings = std::numeric_limits<uint64_t>::max();
+    /**
+     * @brief Scratch space for the rank positions of the connections of the left node.
+     */
+    std::vector<uint32_t> left_positions{};
+    /**
+     * @brief Scratch space for the rank positions of the connections of the right node.
+     */
+    std::vector<uint32_t> right_positions{};
     /**
      * Stores median values used to sort nodes within ranks during optimization.
      */
