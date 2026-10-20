@@ -99,8 +99,9 @@ struct node_duplication_planarization_params
          */
         WEIGHTED_CONE,
         /**
-         * @brief The number of nodes that duplicating actually creates: the copies on the level plus those that running
-         * the duplication strategy on the levels below creates.
+         * @brief The number of nodes that duplicating actually creates.
+         *
+         * The copies on the level plus those that running the duplication strategy on the levels below creates.
          *
          * Both options are run, and the second run stops once it exceeds the first. Levels whose runs exceed
          * `lookahead_budget` fall back to `WEIGHTED_CONE`.
@@ -183,8 +184,10 @@ struct node_duplication_planarization_params
      */
     uint64_t lookahead_budget = 1000000u;
     /**
-     * @brief Abort with `std::runtime_error` as soon as more nodes than this are duplicated at once: the duplicates of
-     * the result plus those of the level under construction, which the hybrid strategy may still discard.
+     * @brief Abort with `std::runtime_error` as soon as more nodes than this are duplicated at once.
+     *
+     * The duplicates of the result plus those of the level under construction, which the hybrid strategy may still
+     * discard.
      *
      * Node duplication can grow exponentially with the depth of the network, so the limit is checked at every
      * duplicate. `0` disables the limit, which may exhaust the memory on an adverse network.
@@ -280,13 +283,16 @@ struct hgraph_node
     std::size_t predecessor{};
     /**
      * @brief Sum of the cone weights of the fanins that the shortest path ending here places once for two consecutive
-     * consumers; the tie-break among equally short paths prefers the heaviest sum.
+     * consumers.
+     *
+     * The tie-break among equally short paths prefers the heaviest sum.
      */
     double shared_weight{0.0};
     /**
-     * @brief Whether `first_fanin` and the last fanin of the predecessor on the shortest path are different nodes that
-     * share a fanin in the level below; the last tie-break prefers such paths, since placing the two side by side
-     * avoids a duplication there.
+     * @brief Whether the shortest path places two different fanins that share a fanin in the level below side by side.
+     *
+     * These are `first_fanin` and the last fanin of the predecessor. The last tie-break prefers such paths, since the
+     * two side by side avoid a duplication below.
      */
     bool shares_below{false};
     /**
@@ -410,8 +416,10 @@ class node_duplication_planarization_impl
     {}
 
     /**
-     * @brief Collects the primary outputs that form the first level: every non-constant output node once, in rank
-     * order, or shuffled when the parameters ask for a random output order.
+     * @brief Collects the primary outputs that form the first level.
+     *
+     * The level holds every non-constant output node once, in rank order, or shuffled when the parameters ask for a
+     * random output order.
      *
      * @return Nodes of the output level.
      */
@@ -615,8 +623,9 @@ class node_duplication_planarization_impl
         fanins_of.resize(ntk.size() + copies_before);
     }
     /**
-     * @brief Computes the planar order of the level below a given level: builds the H-graph of the level, one slice per
-     * node, and follows its shortest path.
+     * @brief Computes the planar order of the level below a given level.
+     *
+     * Builds the H-graph of the level, one slice per node, and follows its shortest path.
      *
      * Duplicates of the level below receive copy ids.
      *
@@ -837,8 +846,10 @@ class node_duplication_planarization_impl
         }
     }
     /**
-     * @brief Computes the order of the next level from the H-graph of the current level: the ordering with the least
-     * delay in the last slice is chosen and its predecessors are followed back to the first slice.
+     * @brief Computes the order of the next level from the H-graph of the current level.
+     *
+     * The ordering with the least delay in the last slice is chosen and its predecessors are followed back to the first
+     * slice.
      *
      * The fanins of each ordering are placed from right to left as they are encountered.
      *
@@ -1169,7 +1180,9 @@ class node_duplication_planarization_impl
     }
     /**
      * @brief Tolerance for comparing cone weights, which are sums of the model's weights scaled by powers of
-     * `depth_growth`; ties up to rounding count as equal.
+     * `depth_growth`.
+     *
+     * Ties up to rounding count as equal.
      */
     static constexpr double WEIGHT_TOLERANCE = 1e-9;
     /**
@@ -1193,7 +1206,9 @@ class node_duplication_planarization_impl
     }
     /**
      * @brief Weighted size of the transitive fanin cone of a source node under `duplication_cost_model`, without the
-     * depth scaling: a gate weighs `node_weight`, a chain buffer or inverter `buffer_weight`.
+     * depth scaling.
+     *
+     * A gate weighs `node_weight`, a chain buffer or inverter `buffer_weight`.
      *
      * Memoized per source node.
      *

@@ -262,8 +262,10 @@ class planar_fanout_substitution_impl
         return children;
     }
     /**
-     * @brief Pushes a node down by `pad` levels: with a buffer chain, or with a shorter chain plus its fanout tree so
-     * that the tree's leaves end up `pad` levels below the node.
+     * @brief Pushes a node down by `pad` levels.
+     *
+     * With a buffer chain, or with a shorter chain plus its fanout tree so that the tree's leaves end up `pad` levels
+     * below the node.
      *
      * @param dest Destination network.
      * @param n Source node.
@@ -350,8 +352,9 @@ class planar_fanout_substitution_impl
         }
     }
     /**
-     * @brief Returns the signal a consumer of `n` connects to: `child` itself while it has no output yet, otherwise the
-     * next free output of the fanout tree of `n`.
+     * @brief Returns the signal a consumer of `n` connects to.
+     *
+     * `child` itself while it has no output yet, otherwise the next free output of the fanout tree of `n`.
      *
      * @param dest Destination network.
      * @param n Source node.

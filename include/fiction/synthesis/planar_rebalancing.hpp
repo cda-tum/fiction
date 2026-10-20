@@ -330,8 +330,10 @@ class planar_rebalancing_impl
         }
     }
     /**
-     * @brief Places one level of the result: edges that span further get a buffer, one per source and level, shared by
-     * all consecutive edges of that source; a node whose fanin edges all end on this level is cloned.
+     * @brief Places one level of the result.
+     *
+     * Edges that span further get a buffer, one per source and level, shared by all consecutive edges of that source; a
+     * node whose fanin edges all end on this level is cloned.
      *
      * The map from stripped nodes to signals is updated once the level is complete, so that every clone reads the
      * signals of the level below.
@@ -569,15 +571,15 @@ class planar_rebalancing_impl
 }  // namespace detail
 
 /**
- * @brief Removes every buffer that drives a single consumer from a ranked, planar network and re-inserts buffers on the
- * as-soon-as-possible levels of the remaining network: every gate and fanout node sits on the lowest level its fanins
- * allow, and all primary outputs sit on the level of the deepest one.
+ * @brief Removes every buffer that drives a single consumer from a ranked, planar network and re-inserts buffers on
+ * as-soon-as-possible levels.
  *
- * Buffers that lead from one source to several consumers are shared level by level, so the fanout splits right above
- * its targets. The depth is the smallest the network allows, and the buffer count is the smallest for these levels. A
- * gate is never delayed to save buffers, so other balanced level assignments can need fewer buffers. The rank order of
- * the input is kept, so a planar input yields a planar output; fanout nodes with more than one consumer are kept, so a
- * fanout-substituted input yields a fanout-substituted output.
+ * Every gate and fanout node sits on the lowest level its fanins allow, and all primary outputs sit on the level of
+ * the deepest one. Buffers that lead from one source to several consumers are shared level by level, so the fanout
+ * splits right above its targets. The depth is the smallest the network allows, and the buffer count is the smallest
+ * for these levels. A gate is never delayed to save buffers, so other balanced level assignments can need fewer
+ * buffers. The rank order of the input is kept, so a planar input yields a planar output; fanout nodes with more than
+ * one consumer are kept, so a fanout-substituted input yields a fanout-substituted output.
  *
  * This is the post-processing step of `planar_fanout_substitution`, which pads every level to a uniform depth.
  *

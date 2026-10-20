@@ -292,13 +292,16 @@ class crossing_gate_planarization_impl
      */
     static constexpr uint32_t XOR_CORE_DELAY = 2u;
     /**
-     * @brief Levels an input of the AND-OR-NOT XOR is delayed by so that it meets the buffered NAND of both inputs: the
-     * NAND, its inverter, and its buffer.
+     * @brief Levels an input of the AND-OR-NOT XOR is delayed by so that it meets the buffered NAND of both inputs.
+     *
+     * The NAND, its inverter, and its buffer.
      */
     static constexpr uint32_t AND_OR_INNER_DELAY = 3u;
     /**
      * @brief Levels an input of the AND-OR-NOT crossing gate is delayed by so that it meets the buffered AND-OR-NOT XOR
-     * of both inputs: the XOR of depth six and its buffer.
+     * of both inputs.
+     *
+     * The XOR of depth six and its buffer.
      */
     static constexpr uint32_t AND_OR_CORE_DELAY = 7u;
     /**
@@ -500,11 +503,11 @@ class crossing_gate_planarization_impl
         return dest.create_or(p_a, p_b);
     }
     /**
-     * @brief Places the crossing gate that swaps the signals of two crossing edges: with \f$c_0 = a \oplus b\f$, the
-     * left output \f$a \oplus c_0 = b\f$ continues the right edge and the right output \f$c_0 \oplus b = a\f$ continues
-     * the left edge, so the left edge ends up right of the right edge.
+     * @brief Places the crossing gate that swaps the signals of two crossing edges.
      *
-     * The direct paths are buffered to the depth of the crossing gate, and nodes are created from left to right per
+     * With \f$c_0 = a \oplus b\f$, the left output \f$a \oplus c_0 = b\f$ continues the right edge and the right
+     * output \f$c_0 \oplus b = a\f$ continues the left edge, so the left edge ends up right of the right edge. The
+     * direct paths are buffered to the depth of the crossing gate, and nodes are created from left to right per
      * level, which keeps the crossing gate planar in creation order.
      *
      * @param dest Destination network.

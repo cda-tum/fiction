@@ -210,11 +210,11 @@ void minimize_crossings(const Ntk& ntk, const std::vector<mockturtle::node<Ntk>>
 }
 
 /**
- * @brief Costs keeping the crossings between the upper level and a lower level: the lower level is reordered to
- * minimize crossings, then every crossing is charged one crossing gate and every edge the buffers that pad it to the
- * number of crossing gates on the most crossed edge.
+ * @brief Costs keeping the crossings between an upper level and a lower level.
  *
- * Crossings are found by sweeping the edges in the order of the upper level. The sweep takes time in
+ * The lower level is reordered to minimize crossings, then every crossing is charged one crossing gate and every edge
+ * the buffers that pad it to the number of crossing gates on the most crossed edge. Crossings are found by sweeping the
+ * edges in the order of the upper level. The sweep takes time in
  * \f$O(E \cdot W + C)\f$ for \f$E\f$ edges, a lower level of width \f$W\f$, and \f$C\f$ counted crossings.
  *
  * @tparam Ntk Network type.
