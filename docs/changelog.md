@@ -147,6 +147,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
+  - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
   - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places

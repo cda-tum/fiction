@@ -717,9 +717,6 @@ class node_duplication_planarization_impl
 
             for (auto& cur : orderings)
             {
-                // the cone weight of the fanin this ordering can share with the previous one
-                const double share = cone_weight(cur.first_fanin);
-
                 // relax every edge from the previous slice: a shared fanin costs one placement, otherwise two. Three
                 // keys decide: the shorter path, among equally short ones the heavier shared cone, and among those
                 // a path whose adjacent fanins share a fanin in the level below
@@ -729,7 +726,7 @@ class node_duplication_planarization_impl
 
                     const bool   shares = cur.first_fanin == last.last_fanin;
                     const auto   delay  = last.delay + (shares ? 1 : 2);
-                    const double weight = last.shared_weight + (shares ? share : 0.0);
+                    const double weight = last.shared_weight + (shares ? cone_weight(cur.first_fanin) : 0.0);
 
                     // evaluated at most once, and only if the delay and the weight do not decide
                     std::optional<bool> below{};
