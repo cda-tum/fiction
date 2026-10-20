@@ -27585,16 +27585,26 @@ Template Args:
     Ntk: Logic network type that models a leveled circuit with rank
          information.)doc";
 
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_build_neighbors =
+R"doc(Collects the non-constant fanins and the fanouts of every node in flat
+arrays, once.
+
+)doc";
+
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_crossings =
-R"doc(Counts the crossings between two sets of ranked positions in one pass.
+R"doc(Adds the crossings between the edges of two nodes to a pair of
+counters, for both orders of the nodes.
+
+The neighbors of `left` and `right` in an adjacent rank are compared
+by their rank positions.
 
 Args:
-    a: Positions of the connections of the left node.
-    b: Positions of the connections of the right node.
-
-Returns:
-    Crossings with the first node left of the second, and with the
-    nodes swapped.
+    begin: Offsets of the neighbor lists.
+    neighbors: Neighbor lists.
+    left: Index of the left node.
+    right: Index of the right node.
+    kept: Receives the crossings with `left` left of `right`.
+    swapped: Receives the crossings with the nodes swapped.
 
 )doc";
 
@@ -27602,22 +27612,22 @@ static const char *mkd_doc_fiction_utils_graph_mincross_impl_fanout_ntk =
 R"doc(Fanout-augmented view of the network for efficient traversal and
 connectivity queries.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_cross =
-R"doc(Counts the crossings between the fanin edges of two adjacent nodes in
-the previous rank, for both orders of the nodes.
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_begin =
+R"doc(Offsets of the fanin lists in `in_nodes`: node `i` has the entries
+`in_begin[i]` to `in_begin[i + 1]`.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_nodes = R"doc(Node indices of the non-constant fanins of all nodes.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_index_of =
+R"doc(Index of a node in the flat arrays.
 
 Args:
-    left: Left node.
-    right: Right node.
+    n: Node.
 
 Returns:
-    Crossings with `left` left of `right` and with the nodes swapped.
+    Index of `n`.
 
 )doc";
-
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_left_positions =
-R"doc(Scratch space for the rank positions of the connections of the left
-node.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_median_map =
 R"doc(Stores median values used to sort nodes within ranks during
@@ -27672,24 +27682,21 @@ state.
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_ntk = R"doc(Logic network being reordered.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_out_cross =
-R"doc(Counts the crossings between the fanout edges of two adjacent nodes in
-the next rank, for both orders of the nodes.
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_out_begin = R"doc(Offsets of the fanout lists in `out_nodes`, like `in_begin`.)doc";
 
-Args:
-    left: Left node.
-    right: Right node.
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_out_nodes = R"doc(Node indices of the fanouts of all nodes.)doc";
 
-Returns:
-    Crossings with `left` left of `right` and with the nodes swapped.
-
-)doc";
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_positions =
+R"doc(Position within its rank per node index while the transposition sweeps
+run.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_ps = R"doc(Parameters for crossing minimization.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_pst =
 R"doc(Statistics that store the final number of crossings after
 optimization.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_ranks = R"doc(Nodes of every rank while the transposition sweeps run.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_reorder =
 R"doc(Reorders the nodes in a given rank according to computed medians.
@@ -27699,10 +27706,6 @@ Args:
     order: Sorting order of medians.
 
 )doc";
-
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_right_positions =
-R"doc(Scratch space for the rank positions of the connections of the right
-node.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_run =
 R"doc(Runs the crossing minimization algorithm and returns a reordered
@@ -27718,6 +27721,10 @@ static const char *mkd_doc_fiction_utils_graph_mincross_impl_total_crossings = R
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_transpose =
 R"doc(Performs pairwise transpositions within ranks to further reduce
 crossings.
+
+The sweeps run on flat copies of the ranks, the rank positions, and
+the neighbor lists; the ranks of the network are written back at the
+end.
 
 Args:
     order: Sorting heuristic for tie-breaking.
