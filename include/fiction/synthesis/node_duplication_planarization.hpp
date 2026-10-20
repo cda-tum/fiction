@@ -1092,8 +1092,82 @@ class node_duplication_planarization_impl
         return children;
     }
     /**
+     * @brief Levels a counting run visited and the nodes it had created at each of them.
+     *
+     * The count below a level depends on the level's source nodes in their order only, so a later query for a level
+     * that the run visited reads its answer from the trace instead of running again.
+     */
+    struct run_trace
+    {
+        /**
+         * @brief Source nodes of every level the run produced, top-down, without the level it started from.
+         */
+        std::vector<node_list> levels{};
+        /**
+         * @brief Nodes the run had created up to and including each level of `levels`.
+         */
+        std::vector<uint64_t> created{};
+        /**
+         * @brief Whether the run reached the primary inputs; otherwise `created.back()` is a lower bound.
+         */
+        bool complete{false};
+    };
+    /**
+     * @brief Largest number of nodes a trace records; a longer run leaves no trace.
+     */
+    static constexpr std::size_t MAX_TRACE_NODES = std::size_t{1} << 22u;
+    /**
+     * @brief Whether the nodes created below a level exceed a bound.
+     *
+     * Reads the answer from the trace of the path the duplication takes (`path`) when it visited the level, and runs
+     * the duplication strategy below the level otherwise.
+     *
+     * @param level Nodes of the level, duplicates as copy ids.
+     * @param bound Count to compare with.
+     * @param below Receives the trace of the nodes below `level`: the part of `path` below it, or the trace of the
+     * run.
+     * @return `true` iff more than `bound` nodes are created below `level`.
+     */
+    [[nodiscard]] bool exceeds_below(const node_list& level, const uint64_t bound, run_trace& below)
+    {
+        node_list origins{};
+        origins.reserve(level.size());
+        std::ranges::transform(level, std::back_inserter(origins), [this](const auto n) { return origin(n); });
+
+        const auto it = std::ranges::find(path.levels, origins);
+
+        if (it == path.levels.end())
+        {
+            return copies_below(level, bound, &below) > bound;
+        }
+
+        // the part of the path below the level, counted from the level
+        const auto visited = static_cast<std::size_t>(std::distance(path.levels.begin(), it));
+        const auto base    = path.created[visited];
+
+        below.levels.assign(std::next(it), path.levels.end());
+        below.created.assign(path.created.begin() + static_cast<std::ptrdiff_t>(visited) + 1, path.created.end());
+        std::ranges::for_each(below.created, [base](auto& c) { c -= base; });
+        below.complete = path.complete;
+
+        const auto count = path.created.back() - base;
+
+        // a cut run only gives a lower bound
+        if (count > bound || path.complete)
+        {
+            return count > bound;
+        }
+
+        below = {};
+
+        return copies_below(level, bound, &below) > bound;
+    }
+    /**
      * @brief Decides whether keeping the crossings of a level beats duplicating it, according to the decision
      * criterion.
+     *
+     * The `LOOKAHEAD` criterion also records the path the duplication takes below the level it chose, so that the next
+     * decision, which lies on that path, needs no second run.
      *
      * @param crossing_gate_cost Nodes the crossing gates and their padding add.
      * @param duplicated The level as the duplication strategy would build it, duplicates as copy ids.
@@ -1105,7 +1179,7 @@ class node_duplication_planarization_impl
     [[nodiscard]] bool crossings_are_cheaper(const uint64_t                            crossing_gate_cost,
                                              const std::vector<mockturtle::node<Ntk>>& duplicated,
                                              const std::vector<mockturtle::node<Ntk>>& crossed, const uint32_t lvl,
-                                             const uint64_t copies_on_level) const
+                                             const uint64_t copies_on_level)
     {
         if (crossing_gate_cost == std::numeric_limits<uint64_t>::max())
         {
@@ -1114,9 +1188,12 @@ class node_duplication_planarization_impl
 
         if (ps.criterion == node_duplication_planarization_params::decision_criterion::LOOKAHEAD)
         {
+            run_trace below_crossed_path{};
+            run_trace below_duplicated_path{};
+
             // what each option costs in nodes: the crossing gates or the copies on this level, plus what the
             // duplication strategy creates below it; the second run stops once it loses
-            const auto below_crossed = copies_below(crossed, ps.lookahead_budget);
+            const auto below_crossed = copies_below(crossed, ps.lookahead_budget, &below_crossed_path);
 
             if (below_crossed <= ps.lookahead_budget)
             {
@@ -1124,18 +1201,27 @@ class node_duplication_planarization_impl
 
                 if (copies_on_level > crossing_total)
                 {
+                    path = std::move(below_crossed_path);
                     return true;
                 }
 
                 const auto remaining = crossing_total - copies_on_level;
+                const bool cheaper   = exceeds_below(duplicated, remaining, below_duplicated_path);
 
-                return copies_below(duplicated, remaining) > remaining;
+                path = std::move(cheaper ? below_crossed_path : below_duplicated_path);
+                return cheaper;
             }
 
-            if (copies_below(duplicated, ps.lookahead_budget) <= ps.lookahead_budget)
+            if (!exceeds_below(duplicated, ps.lookahead_budget, below_duplicated_path))
             {
+                path = std::move(below_duplicated_path);
                 return false;
             }
+
+            const bool cheaper = crossing_gate_cost < duplication_cost(duplicated, lvl);
+
+            path = std::move(cheaper ? below_crossed_path : below_duplicated_path);
+            return cheaper;
         }
 
         return crossing_gate_cost < duplication_cost(duplicated, lvl);
@@ -1148,9 +1234,11 @@ class node_duplication_planarization_impl
      *
      * @param level Nodes of the level, duplicates as copy ids of this instance or as repeated source nodes.
      * @param budget Count at which the run is cut off.
+     * @param trace Receives the levels the run visits, if given.
      * @return Nodes created below the level, or a value above `budget` if cut off.
      */
-    [[nodiscard]] uint64_t copies_below(const std::vector<mockturtle::node<Ntk>>& level, const uint64_t budget) const
+    [[nodiscard]] uint64_t copies_below(const std::vector<mockturtle::node<Ntk>>& level, const uint64_t budget,
+                                        run_trace* trace = nullptr) const
     {
         // the cone weights steer the tie-breaks, so the run must weigh like the main one
         node_duplication_planarization_params sub_ps{};
@@ -1181,7 +1269,7 @@ class node_duplication_planarization_impl
             }
         }
 
-        return sub.run_from(start, budget);
+        return sub.run_from(start, budget, trace);
     }
     /**
      * @brief Runs the duplication strategy from a given level down to the primary inputs and counts the nodes it
@@ -1189,14 +1277,43 @@ class node_duplication_planarization_impl
      *
      * @param start Nodes of the level to start from, duplicates as copy ids of this instance.
      * @param budget Count at which the run is cut off.
+     * @param trace Receives the levels the run visits and the nodes created at each, if given; stays empty for a run
+     * longer than `MAX_TRACE_NODES` nodes.
      * @return Nodes created below `start`, or a value above `budget` if cut off.
      */
-    [[nodiscard]] uint64_t run_from(const std::vector<mockturtle::node<Ntk>>& start, const uint64_t budget)
+    [[nodiscard]] uint64_t run_from(const std::vector<mockturtle::node<Ntk>>& start, const uint64_t budget,
+                                    run_trace* trace = nullptr)
     {
         const auto initial = copy_origin.size();
 
+        std::size_t traced = 0;
+
+        const auto trace_level = [this, trace, initial, &traced](const node_list& level)
+        {
+            if (trace == nullptr || traced > MAX_TRACE_NODES)
+            {
+                return;
+            }
+
+            traced += level.size();
+
+            if (traced > MAX_TRACE_NODES)
+            {
+                trace->levels.clear();
+                trace->created.clear();
+                return;
+            }
+
+            auto& origins = trace->levels.emplace_back();
+            origins.reserve(level.size());
+            std::ranges::transform(level, std::back_inserter(origins), [this](const auto n) { return origin(n); });
+            trace->created.push_back(copy_origin.size() - initial);
+        };
+
         auto next_level = next_level_of(start);
         bool at_inputs  = is_final_level(next_level);
+
+        trace_level(next_level);
 
         while (!next_level.empty() && !at_inputs)
         {
@@ -1207,6 +1324,13 @@ class node_duplication_planarization_impl
 
             next_level = next_level_of(next_level);
             at_inputs  = is_final_level(next_level);
+
+            trace_level(next_level);
+        }
+
+        if (trace != nullptr && traced <= MAX_TRACE_NODES)
+        {
+            trace->complete = true;
         }
 
         return copy_origin.size() - initial;
@@ -1365,6 +1489,11 @@ class node_duplication_planarization_impl
      * @brief Fanins of the node whose slice is being computed, in rank order.
      */
     std::vector<mockturtle::node<Ntk>> slice_fanins{};
+    /**
+     * @brief Path the duplication takes below the level of the last decision of the `LOOKAHEAD` criterion, as the
+     * counting run that chose it visited it; empty before the first decision.
+     */
+    run_trace path{};
     /**
      * @brief Levelized duplication order, level 0 being the primary outputs; duplicates as copy ids.
      */
