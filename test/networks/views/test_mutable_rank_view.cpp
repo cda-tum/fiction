@@ -305,7 +305,7 @@ TEST_CASE("Updating ranks resets the width", "[mutable-rank-view]")
     tec.create_po(g2);
 
     // an initial rank configuration that puts every node in the first rank is as wide as the network
-    std::vector<std::vector<technology_network::node>> initial{
+    const std::vector<std::vector<technology_network::node>> initial{
         {tec.get_node(x1), tec.get_node(x2), tec.get_node(x3), tec.get_node(g1), tec.get_node(g2)},
         {}};
 

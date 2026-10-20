@@ -17,7 +17,6 @@
 #pragma once
 
 #include "fiction/networks/name_utils.hpp"
-#include "fiction/networks/network_utils.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 #include "fiction/synthesis/crossing_cost.hpp"
 #include "fiction/synthesis/crossing_gate_planarization.hpp"
@@ -42,7 +41,6 @@
 #include <random>
 #include <stdexcept>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 

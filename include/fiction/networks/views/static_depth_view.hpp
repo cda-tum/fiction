@@ -285,7 +285,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     {
         const auto l = levels.at(static_cast<std::size_t>(this->node_to_index(n)));
 
-        if (l == no_level)
+        if (l == NO_LEVEL)
         {
             throw std::out_of_range("static_depth_view: the node has no level");
         }
@@ -306,7 +306,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     {
         const auto i = static_cast<std::size_t>(this->node_to_index(n));
 
-        return i < levels.size() && levels[i] != no_level;
+        return i < levels.size() && levels[i] != NO_LEVEL;
     }
 
     /**
@@ -351,7 +351,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void update_levels()
     {
-        levels.assign(this->size(), no_level);
+        levels.assign(this->size(), NO_LEVEL);
         crit_path_valid = false;
 
         compute_levels();
@@ -384,7 +384,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     /**
      * @brief Marks a node without a level.
      */
-    static constexpr uint32_t no_level = std::numeric_limits<uint32_t>::max();
+    static constexpr uint32_t NO_LEVEL = std::numeric_limits<uint32_t>::max();
     /**
      * @brief Level slot of a node; grows the storage for a node added after the last update.
      */
@@ -394,7 +394,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
 
         if (i >= levels.size())
         {
-            levels.resize(i + 1, no_level);
+            levels.resize(i + 1, NO_LEVEL);
         }
 
         return levels[i];
@@ -406,7 +406,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     {
         auto& slot = levels[this->node_to_index(n)];
 
-        if (slot != no_level)
+        if (slot != NO_LEVEL)
         {
             return slot;
         }
@@ -537,7 +537,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     depth_view_params ps;
     /**
-     * Level per node index; `no_level` for a node without one.
+     * Level per node index; `NO_LEVEL` for a node without one.
      */
     std::vector<uint32_t> levels;
     /**

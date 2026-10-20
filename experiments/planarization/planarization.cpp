@@ -301,7 +301,7 @@ try
             const auto crossings_before = count_crossings(ranked);
 
             fmt::print("[i]   planarizing\n");
-            node_duplication_planarization_params d_ps{};
+            const node_duplication_planarization_params d_ps{};
 
             node_duplication_planarization_stats st{};
             const auto                           planar = node_duplication_planarization(ranked, d_ps, &st);

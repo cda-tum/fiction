@@ -271,74 +271,74 @@ class mincross_impl
             r0,
             [this, &r0, &r1](auto const& n)
             {
-                std::vector<uint32_t> positions{};
+                std::vector<uint32_t> neighbor_positions{};
                 if (r1 > r0)
                 {
                     // Go forward: fanouts
-                    positions.reserve(fanout_ntk.fanout_size(n));
+                    neighbor_positions.reserve(fanout_ntk.fanout_size(n));
                     fanout_ntk.foreach_fanout(n,
-                                              [this, &r1, &positions](auto const& fo)
+                                              [this, &r1, &neighbor_positions](auto const& fo)
                                               {
                                                   if (fanout_ntk.level(fo) == r1)
                                                   {
-                                                      positions.push_back(fanout_ntk.rank_position(fo));
+                                                      neighbor_positions.push_back(fanout_ntk.rank_position(fo));
                                                   }
                                               });
                 }
                 else
                 {
                     // Go backward: fanins
-                    positions.reserve(fanout_ntk.fanin_size(n));
+                    neighbor_positions.reserve(fanout_ntk.fanin_size(n));
                     fanout_ntk.foreach_fanin(n,
-                                             [this, &r1, &positions](auto const& fi)
+                                             [this, &r1, &neighbor_positions](auto const& fi)
                                              {
                                                  const auto src = fanout_ntk.get_node(fi);
                                                  if (fanout_ntk.level(src) == r1 && !fanout_ntk.is_constant(src))
                                                  {
-                                                     positions.push_back(fanout_ntk.rank_position(src));
+                                                     neighbor_positions.push_back(fanout_ntk.rank_position(src));
                                                  }
                                              });
                 }
 
-                if (positions.empty())
+                if (neighbor_positions.empty())
                 {
                     median_map[n] = -1;  // No connections
                     return;
                 }
 
-                std::ranges::sort(positions);
+                std::ranges::sort(neighbor_positions);
 
-                if (positions.size() == 1)
+                if (neighbor_positions.size() == 1)
                 {
-                    median_map[n] = positions[0];
+                    median_map[n] = neighbor_positions[0];
                 }
-                else if (positions.size() == 2)
+                else if (neighbor_positions.size() == 2)
                 {
-                    median_map[n] = (positions[0] + positions[1]) / 2.0;
+                    median_map[n] = (neighbor_positions[0] + neighbor_positions[1]) / 2.0;
                 }
                 else
                 {
-                    const std::size_t j = positions.size();
+                    const std::size_t j = neighbor_positions.size();
                     if (j % 2 == 1)
                     {
-                        median_map[n] = positions[j / 2];
+                        median_map[n] = neighbor_positions[j / 2];
                     }
                     else
                     {
                         // Weighted median
                         const std::size_t rm    = j / 2;
                         const std::size_t lm    = rm - 1;
-                        const uint32_t    lspan = positions[lm] - positions.front();
-                        const uint32_t    rspan = positions.back() - positions[rm];
+                        const uint32_t    lspan = neighbor_positions[lm] - neighbor_positions.front();
+                        const uint32_t    rspan = neighbor_positions.back() - neighbor_positions[rm];
 
                         if (lspan == rspan)
                         {
-                            median_map[n] = (positions[lm] + positions[rm]) / 2.0;
+                            median_map[n] = (neighbor_positions[lm] + neighbor_positions[rm]) / 2.0;
                         }
                         else
                         {
-                            const double w = (positions[lm] * static_cast<double>(rspan)) +
-                                             (positions[rm] * static_cast<double>(lspan));
+                            const double w = (neighbor_positions[lm] * static_cast<double>(rspan)) +
+                                             (neighbor_positions[rm] * static_cast<double>(lspan));
                             median_map[n]  = w / (lspan + rspan);
                         }
                     }

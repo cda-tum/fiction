@@ -30,7 +30,6 @@
 #include <mockturtle/algorithms/cleanup.hpp>
 
 #include <cstddef>
-#include <cstdint>
 #include <sstream>
 #include <stdexcept>
 #include <string>

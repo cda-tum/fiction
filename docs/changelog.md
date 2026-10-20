@@ -318,6 +318,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Experiments:
 
   - Gate-layout experiments use canonical types with unchanged computations.
+  - The `planarization` experiment keeps duplication parameters immutable.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.

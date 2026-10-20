@@ -121,6 +121,7 @@ TEST_CASE("gate and fanin iteration agree with the klut network", "[technology-n
     technology_network tec{};
 
     std::vector<technology_network::signal> pool{};
+    pool.reserve(100);
 
     for (auto i = 0u; i < 40u; ++i)
     {

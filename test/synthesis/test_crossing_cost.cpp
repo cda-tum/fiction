@@ -118,8 +118,8 @@ TEST_CASE("Unavoidable crossings are charged one crossing gate each plus the pad
 {
     const auto ranked = rank(single_crossing_network());
 
-    const auto          upper = ranked.get_ranks(1);
-    std::vector<node_t> lower = ranked.get_ranks(0);
+    const auto                upper = ranked.get_ranks(1);
+    const std::vector<node_t> lower = ranked.get_ranks(0);
 
     for (const bool xor_gates : {false, true})
     {
@@ -133,7 +133,7 @@ TEST_CASE("Unavoidable crossings are charged one crossing gate each plus the pad
         // two of the four edges cross and carry one crossing gate; the other two are padded by its depth
         CHECK(result.num_crossings == 1);
         CHECK(result.cost == synthesis::detail::crossing_gate_nodes(xor_gates) +
-                                 2 * synthesis::detail::crossing_gate_depth(xor_gates));
+                                 (2 * synthesis::detail::crossing_gate_depth(xor_gates)));
     }
 }
 

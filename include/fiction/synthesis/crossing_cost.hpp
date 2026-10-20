@@ -19,6 +19,8 @@
 
 #include "fiction/synthesis/crossing_gate_planarization.hpp"
 
+#include <mockturtle/traits.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -267,7 +269,7 @@ template <typename Ntk>
                     // a level this crossed is always duplicated; no need to cost it
                     if (num_crossings > crossing_gates.max_crossings_per_level)
                     {
-                        return {std::numeric_limits<uint64_t>::max(), num_crossings};
+                        return {.cost = std::numeric_limits<uint64_t>::max(), .num_crossings = num_crossings};
                     }
 
                     ++prev_count;
@@ -295,7 +297,7 @@ template <typename Ntk>
         }
     }
 
-    return {cost, num_crossings};
+    return {.cost = cost, .num_crossings = num_crossings};
 }
 
 }  // namespace fiction::synthesis::detail

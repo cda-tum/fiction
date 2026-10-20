@@ -133,7 +133,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
         static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
 
-        rank_pos.assign(this->size(), no_rank);
+        rank_pos.assign(this->size(), NO_RANK);
 
         init_ranks();
     }
@@ -156,7 +156,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
         static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
 
-        rank_pos.assign(this->size(), no_rank);
+        rank_pos.assign(this->size(), NO_RANK);
 
         init_ranks(init_ranks_vec);
     }
@@ -229,7 +229,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
         const auto pos = position_of(n);
 
-        if (pos == no_rank)
+        if (pos == NO_RANK)
         {
             throw std::out_of_range("node has no rank");
         }
@@ -594,7 +594,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     {
         this->update_levels();
         max_rank_width = 0;
-        rank_pos.assign(this->size(), no_rank);
+        rank_pos.assign(this->size(), NO_RANK);
         ranks.clear();
         ranks.resize(this->depth() + 1);
         init_ranks();
@@ -619,11 +619,11 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
   private:
     /**
-     * Marks a node without a rank position.
+     * @brief Marks a node without a rank position.
      */
-    static constexpr uint32_t no_rank = std::numeric_limits<uint32_t>::max();
+    static constexpr uint32_t NO_RANK = std::numeric_limits<uint32_t>::max();
     /**
-     * @brief Rank position per node index; `no_rank` for a node without one.
+     * @brief Rank position per node index; `NO_RANK` for a node without one.
      */
     std::vector<uint32_t> rank_pos;
     /**
@@ -636,7 +636,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     uint32_t max_rank_width;
 
     /**
-     * @brief Rank position of a node, `no_rank` if it has none.
+     * @brief Rank position of a node, `NO_RANK` if it has none.
      *
      * @param n Node to look up.
      * @return Position of `n` within its rank.
@@ -645,7 +645,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     {
         const auto i = static_cast<std::size_t>(this->node_to_index(n));
 
-        return i < rank_pos.size() ? rank_pos[i] : no_rank;
+        return i < rank_pos.size() ? rank_pos[i] : NO_RANK;
     }
     /**
      * @brief Rank position slot of a node; grows the storage for a node added after the last update.
@@ -659,7 +659,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
         if (i >= rank_pos.size())
         {
-            rank_pos.resize(i + 1, no_rank);
+            rank_pos.resize(i + 1, NO_RANK);
         }
 
         return rank_pos[i];
