@@ -83,6 +83,38 @@ TEST_CASE("create and use primary inputs in a technology network", "[technology-
     CHECK(x1 != x2);
 }
 
+TEST_CASE("recognize primary inputs among gates, buffers, and constants in a technology network",
+          "[technology-network]")
+{
+    technology_network tec{};
+
+    const auto x   = tec.create_pi();
+    const auto y   = tec.create_pi();
+    const auto buf = tec.create_buf(x);
+    const auto fo1 = tec.create_buf(buf);
+    const auto fo2 = tec.create_buf(buf);
+    const auto g   = tec.create_and(fo1, y);
+
+    tec.create_po(fo2);
+    tec.create_po(g);
+
+    for (const auto n : {x, y})
+    {
+        CHECK(tec.is_pi(n));
+        CHECK(tec.is_ci(n));
+    }
+
+    for (const auto n : {tec.get_node(tec.get_constant(false)), tec.get_node(tec.get_constant(true)), buf, fo1, fo2, g})
+    {
+        CHECK(!tec.is_pi(n));
+        CHECK(!tec.is_ci(n));
+    }
+
+    // a node beyond the network is no input
+    CHECK(!tec.is_pi(tec.size()));
+    CHECK(!tec.is_ci(tec.size()));
+}
+
 TEST_CASE("create and use primary outputs in a technology network", "[technology-network]")
 {
     technology_network tec{};
