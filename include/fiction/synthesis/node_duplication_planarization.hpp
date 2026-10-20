@@ -161,17 +161,12 @@ struct node_duplication_planarization_params
      */
     uint32_t max_swaps = 32u;
     /**
-     * @brief Whether the subsequent `crossing_gate_planarization` builds its crossing gates from XOR gates, which are
-     * smaller and shallower than the AND-OR-NOT crossing gates.
+     * @brief Parameters of the `crossing_gate_planarization` that resolves the crossings the hybrid strategy keeps.
      *
-     * Sets the cost of the crossing gates in the hybrid strategy.
+     * The hybrid strategy costs the crossing gates by `xor_gates`, and it always duplicates a level whose crossings
+     * exceed `max_crossings_per_level`. `on_progress` has no effect here; `planarization` forwards its own callback.
      */
-    bool xor_gates = true;
-    /**
-     * @brief Levels with more crossings are always duplicated in the hybrid strategy, matching the limit of
-     * `crossing_gate_planarization`.
-     */
-    uint32_t max_crossings_per_level = 1000u;
+    crossing_gate_planarization_params crossing_gates{};
     /**
      * @brief Decision criterion of the hybrid strategy.
      */
@@ -1197,7 +1192,7 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] uint64_t crossing_gate_nodes() const noexcept
     {
-        return ps.xor_gates ? XOR_CROSSING_GATE_NODES : AND_OR_CROSSING_GATE_NODES;
+        return ps.crossing_gates.xor_gates ? XOR_CROSSING_GATE_NODES : AND_OR_CROSSING_GATE_NODES;
     }
     /**
      * @brief Number of levels one crossing gate spans.
@@ -1206,7 +1201,7 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] uint64_t crossing_gate_depth() const noexcept
     {
-        return ps.xor_gates ? XOR_CROSSING_GATE_DEPTH : AND_OR_CROSSING_GATE_DEPTH;
+        return ps.crossing_gates.xor_gates ? XOR_CROSSING_GATE_DEPTH : AND_OR_CROSSING_GATE_DEPTH;
     }
     /**
      * @brief Weighted size of the transitive fanin of a source node, see `duplication_cost_model`.
@@ -1482,7 +1477,7 @@ class node_duplication_planarization_impl
                         ++num_crossings;
 
                         // a level this crossed is always duplicated; no need to cost it
-                        if (num_crossings > ps.max_crossings_per_level)
+                        if (num_crossings > ps.crossing_gates.max_crossings_per_level)
                         {
                             return {std::numeric_limits<uint64_t>::max(), num_crossings};
                         }

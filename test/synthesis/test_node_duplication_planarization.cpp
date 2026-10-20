@@ -353,8 +353,8 @@ TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper
         for (const bool xor_gates : {false, true})
         {
             node_duplication_planarization_params ps{};
-            ps.strategy  = node_duplication_planarization_params::planarization_strategy::HYBRID;
-            ps.xor_gates = xor_gates;
+            ps.strategy                 = node_duplication_planarization_params::planarization_strategy::HYBRID;
+            ps.crossing_gates.xor_gates = xor_gates;
 
             node_duplication_planarization_stats st{};
             const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -388,8 +388,8 @@ TEST_CASE("Hybrid strategy with an infinite crossing cost duplicates everything"
     const auto                           duplicated = node_duplication_planarization(ranked, {}, &dup_st);
 
     node_duplication_planarization_params ps{};
-    ps.strategy                = node_duplication_planarization_params::planarization_strategy::HYBRID;
-    ps.max_crossings_per_level = 0;
+    ps.strategy                               = node_duplication_planarization_params::planarization_strategy::HYBRID;
+    ps.crossing_gates.max_crossings_per_level = 0;
 
     node_duplication_planarization_stats st{};
     const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -691,9 +691,9 @@ TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")
         const auto ranked = rank(ntk);
 
         node_duplication_planarization_params ps{};
-        ps.strategy  = node_duplication_planarization_params::planarization_strategy::HYBRID;
-        ps.criterion = node_duplication_planarization_params::decision_criterion::LOOKAHEAD;
-        ps.xor_gates = true;
+        ps.strategy                 = node_duplication_planarization_params::planarization_strategy::HYBRID;
+        ps.criterion                = node_duplication_planarization_params::decision_criterion::LOOKAHEAD;
+        ps.crossing_gates.xor_gates = true;
 
         node_duplication_planarization_stats st{};
         const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);

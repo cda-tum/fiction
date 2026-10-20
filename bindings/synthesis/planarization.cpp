@@ -179,31 +179,31 @@ void register_planarization(nb::module_& m)
         "planarization",
         [](const py_tec_network& network, const decltype(params{}.on_progress)& on_progress,
            const decltype(params{}.strategy) strategy, const decltype(params{}.criterion) criterion,
-           const decltype(params{}.xor_gates) xor_gates, const decltype(params{}.max_swaps) max_swaps,
-           const decltype(params{}.max_crossings_per_level)        max_crossings_per_level,
-           const decltype(params{}.duplication_cost.node_weight)   node_weight,
-           const decltype(params{}.duplication_cost.buffer_weight) buffer_weight,
-           const decltype(params{}.duplication_cost.depth_growth)  depth_growth,
-           const decltype(params{}.lookahead_budget)               lookahead_budget,
+           const decltype(params{}.crossing_gates.xor_gates) xor_gates, const decltype(params{}.max_swaps) max_swaps,
+           const decltype(params{}.crossing_gates.max_crossings_per_level) max_crossings_per_level,
+           const decltype(params{}.duplication_cost.node_weight)           node_weight,
+           const decltype(params{}.duplication_cost.buffer_weight)         buffer_weight,
+           const decltype(params{}.duplication_cost.depth_growth)          depth_growth,
+           const decltype(params{}.lookahead_budget)                       lookahead_budget,
            const decltype(params{}.max_duplications) max_duplications, const decltype(params{}.po_order) po_order,
            const decltype(params{}.seed)&                                           seed,
            const decltype(fiction::synthesis::planarization_params{}.fanout_degree) fanout_degree, stats* statistics)
         {
             fiction::synthesis::planarization_params ps{};
-            ps.on_progress                                = on_progress;
-            ps.duplication.strategy                       = strategy;
-            ps.duplication.criterion                      = criterion;
-            ps.duplication.xor_gates                      = xor_gates;
-            ps.duplication.max_swaps                      = max_swaps;
-            ps.duplication.max_crossings_per_level        = max_crossings_per_level;
-            ps.duplication.duplication_cost.node_weight   = node_weight;
-            ps.duplication.duplication_cost.buffer_weight = buffer_weight;
-            ps.duplication.duplication_cost.depth_growth  = depth_growth;
-            ps.duplication.lookahead_budget               = lookahead_budget;
-            ps.duplication.max_duplications               = max_duplications;
-            ps.duplication.po_order                       = po_order;
-            ps.duplication.seed                           = seed;
-            ps.fanout_degree                              = fanout_degree;
+            ps.on_progress                                        = on_progress;
+            ps.duplication.strategy                               = strategy;
+            ps.duplication.criterion                              = criterion;
+            ps.duplication.crossing_gates.xor_gates               = xor_gates;
+            ps.duplication.max_swaps                              = max_swaps;
+            ps.duplication.crossing_gates.max_crossings_per_level = max_crossings_per_level;
+            ps.duplication.duplication_cost.node_weight           = node_weight;
+            ps.duplication.duplication_cost.buffer_weight         = buffer_weight;
+            ps.duplication.duplication_cost.depth_growth          = depth_growth;
+            ps.duplication.lookahead_budget                       = lookahead_budget;
+            ps.duplication.max_duplications                       = max_duplications;
+            ps.duplication.po_order                               = po_order;
+            ps.duplication.seed                                   = seed;
+            ps.fanout_degree                                      = fanout_degree;
 
             // the pipeline needs a balanced network with unified outputs and ranks; the ranks follow the node order.
             // The result's node order is its rank order, and every input is reported with the index of the original
@@ -221,8 +221,9 @@ void register_planarization(nb::module_& m)
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy") = defaults.duplication.strategy, nb::arg("criterion") = defaults.duplication.criterion,
-        nb::arg("xor_gates") = defaults.duplication.xor_gates, nb::arg("max_swaps") = defaults.duplication.max_swaps,
-        nb::arg("max_crossings_per_level") = defaults.duplication.max_crossings_per_level,
+        nb::arg("xor_gates")               = defaults.duplication.crossing_gates.xor_gates,
+        nb::arg("max_swaps")               = defaults.duplication.max_swaps,
+        nb::arg("max_crossings_per_level") = defaults.duplication.crossing_gates.max_crossings_per_level,
         nb::arg("node_weight")             = defaults.duplication.duplication_cost.node_weight,
         nb::arg("buffer_weight")           = defaults.duplication.duplication_cost.buffer_weight,
         nb::arg("depth_growth")            = defaults.duplication.duplication_cost.depth_growth,

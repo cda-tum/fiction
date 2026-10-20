@@ -99,9 +99,9 @@ TEST_CASE("Every strategy yields a planar, balanced, fanout-substituted network"
                 for (const bool xor_gates : {false, true})
                 {
                     planarization_params ps{};
-                    ps.duplication.strategy  = strategy;
-                    ps.duplication.criterion = criterion;
-                    ps.duplication.xor_gates = xor_gates;
+                    ps.duplication.strategy                 = strategy;
+                    ps.duplication.criterion                = criterion;
+                    ps.duplication.crossing_gates.xor_gates = xor_gates;
 
                     planarization_stats st{};
                     const auto          result = planarization(ranked, ps, &st);
@@ -178,8 +178,8 @@ TEST_CASE("Statistics report the runtime and progress reaches every stage", "[pl
     std::vector<std::string> tasks{};
 
     planarization_params ps{};
-    ps.duplication.strategy    = node_duplication_planarization_params::planarization_strategy::HYBRID;
-    ps.duplication.xor_gates   = true;
+    ps.duplication.strategy                 = node_duplication_planarization_params::planarization_strategy::HYBRID;
+    ps.duplication.crossing_gates.xor_gates = true;
     ps.duplication.on_progress = [&tasks](const std::string_view task, const std::size_t, const std::size_t)
     {
         if (tasks.empty() || tasks.back() != task)
@@ -206,7 +206,7 @@ TEST_CASE("Kept crossings run through the crossing gates for both crossing gate 
         planarization_params ps{};
         ps.duplication.strategy  = node_duplication_planarization_params::planarization_strategy::HYBRID;
         ps.duplication.criterion = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE;
-        ps.duplication.xor_gates = xor_gates;
+        ps.duplication.crossing_gates.xor_gates = xor_gates;
         // a prohibitive duplication cost makes the hybrid strategy keep every crossing it may keep
         ps.duplication.duplication_cost.node_weight = 1e6;
 
@@ -235,7 +235,7 @@ TEST_CASE("The lookahead budget fallback and the crossing limit are honored", "[
     SECTION("a crossing limit of zero duplicates every level")
     {
         planarization_params ps{};
-        ps.duplication.max_crossings_per_level = 0;
+        ps.duplication.crossing_gates.max_crossings_per_level = 0;
 
         planarization_stats st{};
         const auto          result = planarization(ranked, ps, &st);

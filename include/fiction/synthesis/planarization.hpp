@@ -152,10 +152,8 @@ template <typename Ntk>
 
         if (st.duplication.num_crossing_levels > 0)
         {
-            crossing_gate_planarization_params cg_ps{};
-            cg_ps.on_progress             = progress;
-            cg_ps.xor_gates               = ps.duplication.xor_gates;
-            cg_ps.max_crossings_per_level = ps.duplication.max_crossings_per_level;
+            auto cg_ps        = ps.duplication.crossing_gates;
+            cg_ps.on_progress = progress;
 
             planar = crossing_gate_planarization(planar, cg_ps, &st.crossing_gates);
         }
