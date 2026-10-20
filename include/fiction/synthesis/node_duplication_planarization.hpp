@@ -367,6 +367,10 @@ class node_duplication_planarization_impl
      */
     using hgraph_slice = std::vector<hgraph_node<Ntk>>;
     /**
+     * Unscaled cone weight per source node, negative for a node not weighed yet.
+     */
+    using cone_weight_map = std::vector<double>;
+    /**
      * Creates the implementation.
      *
      * @param src Source network.
@@ -378,7 +382,9 @@ class node_duplication_planarization_impl
             ntk{src},
             ps{p},
             pst{st},
-            fanins_of(src.size())
+            fanins_of(src.size()),
+            own_cone_weights(src.size(), UNWEIGHED),
+            cone_weights{&own_cone_weights}
     {}
 
     /**
@@ -391,14 +397,19 @@ class node_duplication_planarization_impl
     {
         std::vector<mockturtle::node<Ntk>> pos{};
         pos.reserve(ntk.num_pos());
-        ntk.foreach_node(
-            [this, &pos](const auto& n)
+        ntk.foreach_po(
+            [this, &pos](const auto& po)
             {
-                if (ntk.is_po(n) && !ntk.is_constant(n) && std::find(pos.cbegin(), pos.cend(), n) == pos.cend())
+                if (const auto n = ntk.get_node(po); !ntk.is_constant(n))
                 {
                     pos.push_back(n);
                 }
             });
+
+        // the balanced network holds all non-constant outputs on one level, where the rank order is a total order
+        std::ranges::sort(pos,
+                          [this](const auto& a, const auto& b) { return ntk.rank_position(a) < ntk.rank_position(b); });
+        pos.erase(std::unique(pos.begin(), pos.end()), pos.end());
 
         if (ps.po_order == node_duplication_planarization_params::output_order::RANDOM_PO_ORDER)
         {
@@ -505,6 +516,24 @@ class node_duplication_planarization_impl
 
   private:
     /**
+     * Creates an instance that only counts the duplicates the duplication strategy creates. It shares the cone
+     * weights of `parent`, so that every cone is weighed once per run, and records neither the planar order of the
+     * levels nor the fanins that `build_network` needs.
+     *
+     * @param parent Instance whose network and cone weights are shared.
+     * @param p Parameters.
+     * @param st Statistics.
+     */
+    node_duplication_planarization_impl(const node_duplication_planarization_impl&   parent,
+                                        const node_duplication_planarization_params& p,
+                                        node_duplication_planarization_stats&        st) :
+            ntk{parent.ntk},
+            ps{p},
+            pst{st},
+            record{false},
+            cone_weights{parent.cone_weights}
+    {}
+    /**
      * Maps a node id to the source node it stands for.
      *
      * @param n Source node id or copy id.
@@ -529,7 +558,11 @@ class node_duplication_planarization_impl
         }
 
         copy_origin.push_back(n);
-        fanins_of.emplace_back();
+
+        if (record)
+        {
+            fanins_of.emplace_back();
+        }
 
         return static_cast<mockturtle::node<Ntk>>(ntk.size() + copy_origin.size() - 1);
     }
@@ -622,8 +655,19 @@ class node_duplication_planarization_impl
                     const auto   delay  = last.delay + (shares ? 1 : 2);
                     const double weight = last.shared_weight + (shares ? share : 0.0);
 
+                    // evaluated at most once, and only if the delay and the weight do not decide
+                    std::optional<bool> below{};
+                    const auto          shares_below = [&]
+                    {
+                        if (!below.has_value())
+                        {
+                            below = !shares && share_fanin(cur.first_fanin, last.last_fanin);
+                        }
+
+                        return *below;
+                    };
+
                     bool better = false;
-                    bool below  = false;
 
                     if (delay != cur.delay)
                     {
@@ -635,8 +679,7 @@ class node_duplication_planarization_impl
                     }
                     else
                     {
-                        below  = !shares && share_fanin(cur.first_fanin, last.last_fanin);
-                        better = below && !cur.shares_below;
+                        better = shares_below() && !cur.shares_below;
                     }
 
                     if (better)
@@ -644,7 +687,7 @@ class node_duplication_planarization_impl
                         cur.predecessor   = last_idx;
                         cur.delay         = delay;
                         cur.shared_weight = weight;
-                        cur.shares_below  = below || (!shares && share_fanin(cur.first_fanin, last.last_fanin));
+                        cur.shares_below  = shares_below();
                     }
                 }
             }
@@ -661,12 +704,27 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] bool share_fanin(const mockturtle::node<Ntk> a, const mockturtle::node<Ntk> b) const
     {
-        const auto fa = networks::fanins(ntk, a);
-        const auto fb = networks::fanins(ntk, b);
+        bool shared = false;
 
-        return std::any_of(
-            fa.fanin_nodes.cbegin(), fa.fanin_nodes.cend(), [&fb](const auto& f)
-            { return std::find(fb.fanin_nodes.cbegin(), fb.fanin_nodes.cend(), f) != fb.fanin_nodes.cend(); });
+        ntk.foreach_fanin(a,
+                          [this, &shared, b](const auto& fa)
+                          {
+                              const auto na = ntk.get_node(fa);
+
+                              if (!ntk.is_constant(na))
+                              {
+                                  ntk.foreach_fanin(b,
+                                                    [this, &shared, na](const auto& fb)
+                                                    {
+                                                        shared = shared || na == ntk.get_node(fb);
+                                                        return !shared;
+                                                    });
+                              }
+
+                              return !shared;
+                          });
+
+        return shared;
     }
     /**
      * Places one fanin into the next level, which is built from right to left.
@@ -676,11 +734,10 @@ class node_duplication_planarization_impl
      *
      * @param n Source node to place.
      * @param level_rtl Next level under construction, rightmost node first.
-     * @param placed Whether the source node itself is already in the level.
      * @param fanins Receives the id (source or copy) that the consumer connects to.
      */
     void place_fanin(const mockturtle::node<Ntk> n, std::vector<mockturtle::node<Ntk>>& level_rtl,
-                     std::vector<bool>& placed, std::vector<mockturtle::node<Ntk>>& fanins)
+                     std::vector<mockturtle::node<Ntk>>& fanins)
     {
         if (!level_rtl.empty() && origin(level_rtl.back()) == n)
         {
@@ -688,9 +745,9 @@ class node_duplication_planarization_impl
             return;
         }
 
-        if (!placed[n])
+        if (placed_in[n] != level_stamp)
         {
-            placed[n] = true;
+            placed_in[n] = level_stamp;
             level_rtl.push_back(n);
             fanins.push_back(n);
         }
@@ -706,27 +763,28 @@ class node_duplication_planarization_impl
      *
      * @param ordering H-graph node to place.
      * @param level_rtl Next level under construction, rightmost node first.
-     * @param placed Whether a source node itself is already in the level.
      */
-    void place_ordering(const hgraph_node<Ntk>& ordering, std::vector<mockturtle::node<Ntk>>& level_rtl,
-                        std::vector<bool>& placed)
+    void place_ordering(const hgraph_node<Ntk>& ordering, std::vector<mockturtle::node<Ntk>>& level_rtl)
     {
         std::vector<mockturtle::node<Ntk>> fanins{};
         fanins.reserve(ordering.middle_fanins.size() + 2);
 
-        place_fanin(ordering.last_fanin, level_rtl, placed, fanins);
+        place_fanin(ordering.last_fanin, level_rtl, fanins);
 
         for (const auto& n : ordering.middle_fanins)
         {
-            place_fanin(n, level_rtl, placed, fanins);
+            place_fanin(n, level_rtl, fanins);
         }
 
         if (ordering.first_fanin != ordering.last_fanin)
         {
-            place_fanin(ordering.first_fanin, level_rtl, placed, fanins);
+            place_fanin(ordering.first_fanin, level_rtl, fanins);
         }
 
-        fanins_of[ordering.root] = std::move(fanins);
+        if (record)
+        {
+            fanins_of[ordering.root] = std::move(fanins);
+        }
     }
     /**
      * Computes the order of the next level from the H-graph of the current level: the ordering with the least delay
@@ -738,7 +796,13 @@ class node_duplication_planarization_impl
     [[nodiscard]] std::vector<mockturtle::node<Ntk>> compute_node_order()
     {
         std::vector<mockturtle::node<Ntk>> level_rtl{};
-        std::vector<bool>                  placed(ntk.size(), false);
+
+        // a fresh stamp empties the set of source nodes placed in the level without touching every node
+        if (placed_in.empty())
+        {
+            placed_in.assign(ntk.size(), 0);
+        }
+        ++level_stamp;
 
         if (hgraph.empty())
         {
@@ -757,7 +821,7 @@ class node_duplication_planarization_impl
             return level_rtl;
         }
 
-        place_ordering(*best, level_rtl, placed);
+        place_ordering(*best, level_rtl);
 
         // walk the shortest path back to the first slice, placing every ordering on the way
         std::size_t slice       = hgraph.size() - 1;
@@ -767,7 +831,7 @@ class node_duplication_planarization_impl
         {
             const auto& ordering = hgraph[slice - 1][predecessor];
 
-            place_ordering(ordering, level_rtl, placed);
+            place_ordering(ordering, level_rtl);
 
             --slice;
             predecessor = ordering.predecessor;
@@ -996,13 +1060,15 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] uint64_t copies_below(const std::vector<mockturtle::node<Ntk>>& level, const uint64_t budget) const
     {
+        // the cone weights steer the tie-breaks, so the run must weigh like the main one
         node_duplication_planarization_params sub_ps{};
         sub_ps.strategy         = node_duplication_planarization_params::planarization_strategy::DUPLICATION;
         sub_ps.max_duplications = 0;  // the budget cuts the run off
+        sub_ps.duplication_cost = ps.duplication_cost;
 
         node_duplication_planarization_stats sub_st{};
 
-        node_duplication_planarization_impl sub{ntk, sub_ps, sub_st};
+        node_duplication_planarization_impl sub{*this, sub_ps, sub_st};
 
         std::vector<mockturtle::node<Ntk>> start{};
         start.reserve(level.size());
@@ -1036,8 +1102,6 @@ class node_duplication_planarization_impl
     {
         const auto initial = copy_origin.size();
 
-        levels.push_back(start);
-
         auto next_level = next_level_of(start);
         bool at_inputs  = is_final_level(next_level);
 
@@ -1047,8 +1111,6 @@ class node_duplication_planarization_impl
             {
                 return budget + 1;
             }
-
-            levels.push_back(next_level);
 
             next_level = next_level_of(next_level);
             at_inputs  = is_final_level(next_level);
@@ -1075,6 +1137,10 @@ class node_duplication_planarization_impl
      * ties up to rounding count as equal.
      */
     static constexpr double WEIGHT_TOLERANCE = 1e-9;
+    /**
+     * Marks a node in `cone_weight_map` whose cone has not been weighed.
+     */
+    static constexpr double UNWEIGHED = -1.0;
     /**
      * Number of nodes one crossing gadget adds.
      *
@@ -1119,9 +1185,11 @@ class node_duplication_planarization_impl
     {
         const auto& m = ps.duplication_cost;
 
-        if (const auto it = cone_weights.find(root); it != cone_weights.end())
+        auto& weight = (*cone_weights)[root];
+
+        if (weight != UNWEIGHED)
         {
-            return it->second;
+            return weight;
         }
 
         std::vector<mockturtle::node<Ntk>>        stack{root};
@@ -1144,7 +1212,7 @@ class node_duplication_planarization_impl
             ntk.foreach_fanin(n, [&stack, this](const auto& f) { stack.push_back(ntk.get_node(f)); });
         }
 
-        cone_weights.emplace(root, total);
+        weight = total;
 
         return total;
     }
@@ -1467,9 +1535,27 @@ class node_duplication_planarization_impl
      */
     std::vector<bool> crossing_level{};
     /**
+     * Stamp of the level in which each source node was last placed itself, indexed by source node; allocated on
+     * first use.
+     */
+    std::vector<uint32_t> placed_in{};
+    /**
+     * Stamp of the level under construction, never 0.
+     */
+    uint32_t level_stamp{0};
+    /**
+     * Whether the instance records the order and the fanins of the levels. Counting instances (see `copies_below`)
+     * do not.
+     */
+    bool record{true};
+    /**
+     * Cone weights of this instance, filled on demand; counting instances use their parent's.
+     */
+    cone_weight_map own_cone_weights{};
+    /**
      * Unscaled cone weight per source node, filled on demand.
      */
-    mutable std::unordered_map<mockturtle::node<Ntk>, double> cone_weights{};
+    cone_weight_map* cone_weights;
 };
 
 }  // namespace detail
@@ -1491,6 +1577,13 @@ class node_duplication_planarization_impl
  * and resolving them later with `crossing_gate_planarization`: the duplication cost is the weighted size of the
  * duplicated cones, the crossing cost the size of the gadgets plus their padding after a crossing minimization of the
  * level. Levels that keep their crossings are not duplicated, and the result is then not planar.
+ *
+ * For a bounded fanin, the duplication strategy takes time linear in the number of nodes it creates, which can be
+ * exponential in the depth of the network. The hybrid strategy adds a crossing minimization per level. Its `LOOKAHEAD`
+ * criterion also runs the duplication strategy below every level that has duplicates, at most twice, each run cut off
+ * at `lookahead_budget` created nodes; the time is quadratic in the depth of the network in the worst case.
+ * `WEIGHTED_CONE` avoids these runs and weighs every distinct cone once, which takes time proportional to the sum of
+ * the cone sizes.
  *
  * The input must be balanced with unified outputs (see `network_balancing`), carry ranks (see `mutable_rank_view`),
  * and contain no virtual primary inputs (see `delete_virtual_pis`). The result is ranked; with the duplication strategy
