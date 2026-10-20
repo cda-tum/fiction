@@ -247,7 +247,7 @@ Args:
     buffer_weight: Weight of a buffer or inverter chain node in the duplication cost model.
     depth_growth: Growth of the duplication cost per level in the duplication cost model.
     lookahead_budget: Nodes a lookahead may create before it is cut off; must be positive.
-    max_duplications: Abort once more nodes than this have been duplicated; 0 lifts the limit.
+    max_duplications: Abort once more than this many nodes are duplicated at once; 0 lifts the limit.
     po_order: Primary output order used to seed the first level.
     seed: Seed of the random primary output order; None draws a random seed.
     fanout_degree: Maximum output degree of the fanout nodes in the result; at least 2.

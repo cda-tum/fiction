@@ -674,13 +674,19 @@ class planarization_strategy(enum.Enum):
     """How a level is made crossing-free."""
 
     DUPLICATION = 0
-    """Duplicate nodes on every level. The result is planar."""
+    """
+    Duplicate nodes on every level.
+
+    The result is planar.
+    """
 
     HYBRID = 1
     """
     Decide per level whether duplicating nodes or keeping the crossings
-    for `crossing_gate_planarization` is cheaper. The result contains
-    crossings on the levels where gadgets are cheaper.
+    for `crossing_gate_planarization` is cheaper.
+
+    The result contains crossings on the levels where crossing gates are
+    cheaper.
     """
 
 class decision_criterion(enum.Enum):
@@ -696,9 +702,11 @@ class decision_criterion(enum.Enum):
     """
     The number of nodes that duplicating actually creates: the copies on
     the level plus those that running the duplication strategy on the
-    levels below creates. Both options are run, and the second run stops
-    once it exceeds the first. Levels whose runs exceed `lookahead_budget`
-    fall back to `WEIGHTED_CONE`.
+    levels below creates.
+
+    Both options are run, and the second run stops once it exceeds the
+    first. Levels whose runs exceed `lookahead_budget` fall back to
+    `WEIGHTED_CONE`.
     """
 
 class output_order(enum.Enum):
@@ -712,8 +720,9 @@ class output_order(enum.Enum):
 
     RANDOM_PO_ORDER = 1
     """
-    Shuffle the primary outputs randomly. Different orders can yield
-    different numbers of duplications.
+    Shuffle the primary outputs randomly.
+
+    Different orders can yield different numbers of duplications.
     """
 
 class planarization_stats:
@@ -739,7 +748,7 @@ class planarization_stats:
 
     @property
     def num_crossings(self) -> int:
-        """Number of crossings replaced by gadgets."""
+        """Number of crossings replaced by crossing gates."""
 
     @property
     def num_nodes(self) -> int:
@@ -753,7 +762,7 @@ def planarization(
     criterion: decision_criterion = ...,
     xor_gates: bool = True,
     max_swaps: int = 32,
-    max_crossings_per_rank: int = 1000,
+    max_crossings_per_level: int = 1000,
     node_weight: float = 2.0,
     buffer_weight: float = 0.5,
     depth_growth: float = 1.02,
@@ -774,15 +783,15 @@ def planarization(
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         strategy: Planarization strategy: duplicate every level, or decide per level (hybrid).
         criterion: How the hybrid strategy estimates the cost of duplicating a level.
-        xor_gates: Whether the crossing gadgets consist of XOR gates, which are smaller and shallower than the
-            AND-OR-NOT gadgets.
+        xor_gates: Whether the crossing gates consist of XOR gates, which are smaller and shallower than the
+            AND-OR-NOT crossing gates.
         max_swaps: Maximum number of adjacent swaps per level that the hybrid strategy tries to reduce crossings.
-        max_crossings_per_rank: Levels with more crossings are always duplicated; the crossing gates reject such ranks.
+        max_crossings_per_level: Levels with more crossings are always duplicated; the crossing gates reject such levels.
         node_weight: Weight of a gate in the duplication cost model of the hybrid strategy.
         buffer_weight: Weight of a buffer or inverter chain node in the duplication cost model.
         depth_growth: Growth of the duplication cost per level in the duplication cost model.
         lookahead_budget: Nodes a lookahead may create before it is cut off; must be positive.
-        max_duplications: Abort once more nodes than this have been duplicated; 0 lifts the limit.
+        max_duplications: Abort once more than this many nodes are duplicated at once; 0 lifts the limit.
         po_order: Primary output order used to seed the first level.
         seed: Seed of the random primary output order; None draws a random seed.
         fanout_degree: Maximum output degree of the fanout nodes in the result; at least 2.
@@ -798,8 +807,8 @@ def planarization(
             drives no output (remove such gates first, e.g., with `cleanup_dangling`), if `fanout_degree` is below 2,
             or if the duplication options are invalid (a lookahead budget of zero, a negative or non-finite cost
             weight).
-        RuntimeError: If more than `max_duplications` nodes were duplicated, if a rank has more than
-            `max_crossings_per_rank` crossings, or if a stage cannot keep its contract. Note that
+        RuntimeError: If more than `max_duplications` nodes were duplicated, if two adjacent
+            levels have more than `max_crossings_per_level` crossings, or if a stage cannot keep its contract.
             `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth of the
             network.
     """
