@@ -19,6 +19,7 @@
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
+#include "fiction/synthesis/crossing_cost.hpp"
 #include "fiction/synthesis/crossing_gate_planarization.hpp"
 #include "fiction/synthesis/network_balancing.hpp"
 #include "fiction/traits.hpp"
@@ -37,7 +38,6 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
-#include <numeric>
 #include <optional>
 #include <random>
 #include <stdexcept>
@@ -465,8 +465,13 @@ class node_duplication_planarization_impl
         // level of `next_level` in the source network
         const auto lvl = ntk.depth() - static_cast<uint32_t>(levels.size());
 
-        auto       original_rank = ntk.get_ranks(lvl);
-        const auto cross_cost    = crossing_cost(levels.back(), original_rank);
+        auto original_rank = ntk.get_ranks(lvl);
+
+        std::vector<mockturtle::node<Ntk>> upper{};
+        upper.reserve(levels.back().size());
+        std::ranges::transform(levels.back(), std::back_inserter(upper), [this](const auto& n) { return origin(n); });
+
+        const auto cross_cost = crossing_cost(ntk, upper, original_rank, ps.max_swaps, ps.crossing_gates);
 
         if (!crossings_are_cheaper(cross_cost.cost, next_level, original_rank, lvl, copies_on_level))
         {
@@ -1163,20 +1168,6 @@ class node_duplication_planarization_impl
         return copy_origin.size() - initial;
     }
     /**
-     * @brief Result of costing the crossings of a level.
-     */
-    struct crossing_cost_result
-    {
-        /**
-         * @brief Estimated number of nodes the crossing gates and their padding add.
-         */
-        uint64_t cost;
-        /**
-         * @brief Number of crossings between the level and the one above it.
-         */
-        uint64_t num_crossings;
-    };
-    /**
      * @brief Tolerance for comparing cone weights, which are sums of the model's weights scaled by powers of
      * `depth_growth`; ties up to rounding count as equal.
      */
@@ -1185,24 +1176,6 @@ class node_duplication_planarization_impl
      * @brief Marks a node in `cone_weight_map` whose cone has not been weighed.
      */
     static constexpr double UNWEIGHED = -1.0;
-    /**
-     * @brief Number of nodes one crossing gate adds.
-     *
-     * @return Crossing gate size.
-     */
-    [[nodiscard]] uint64_t crossing_gate_nodes() const noexcept
-    {
-        return ps.crossing_gates.xor_gates ? XOR_CROSSING_GATE_NODES : AND_OR_CROSSING_GATE_NODES;
-    }
-    /**
-     * @brief Number of levels one crossing gate spans.
-     *
-     * @return Crossing gate depth.
-     */
-    [[nodiscard]] uint64_t crossing_gate_depth() const noexcept
-    {
-        return ps.crossing_gates.xor_gates ? XOR_CROSSING_GATE_DEPTH : AND_OR_CROSSING_GATE_DEPTH;
-    }
     /**
      * @brief Weighted size of the transitive fanin of a source node, see `duplication_cost_model`.
      *
@@ -1303,211 +1276,6 @@ class node_duplication_planarization_impl
         }
 
         return cost;
-    }
-    /**
-     * @brief Positions of the nodes of a level, indexed by source node.
-     *
-     * @param level Nodes of the level, source ids only.
-     * @return Position per source node, `npos` for nodes not in the level.
-     */
-    [[nodiscard]] std::vector<std::size_t> positions(const std::vector<mockturtle::node<Ntk>>& level) const
-    {
-        constexpr auto npos = std::numeric_limits<std::size_t>::max();
-
-        std::vector<std::size_t> pos(ntk.size(), npos);
-        for (std::size_t i = 0; i < level.size(); ++i)
-        {
-            pos[level[i]] = i;
-        }
-
-        return pos;
-    }
-    /**
-     * @brief Positions in the lower level of the non-constant fanins of an upper node.
-     *
-     * @param n Node of the upper level, source id or copy id.
-     * @param pos Position of every source node in the lower level, `npos` for nodes outside it.
-     * @return Positions of the fanins of `n` in fanin order.
-     */
-    [[nodiscard]] std::vector<std::size_t> fanin_positions(const mockturtle::node<Ntk>     n,
-                                                           const std::vector<std::size_t>& pos) const
-    {
-        std::vector<std::size_t> targets{};
-        ntk.foreach_fanin(origin(n),
-                          [this, &pos, &targets](const auto& f)
-                          {
-                              if (const auto p = pos[ntk.get_node(f)]; p != std::numeric_limits<std::size_t>::max())
-                              {
-                                  targets.push_back(p);
-                              }
-                          });
-
-        return targets;
-    }
-    /**
-     * @brief Orders a level by the barycenters of the positions its nodes are used from in the upper level, then
-     * applies up to `max_swaps` adjacent swaps that reduce the crossing count.
-     *
-     * A swap of two neighbours only changes the crossings between their own edges, so each candidate is evaluated on
-     * those edges alone.
-     *
-     * @param upper Nodes of the upper level, duplicates as copy ids.
-     * @param lower Nodes of the lower level, source ids; reordered.
-     */
-    void minimize_crossings(const std::vector<mockturtle::node<Ntk>>& upper,
-                            std::vector<mockturtle::node<Ntk>>&       lower) const
-    {
-        if (lower.size() < 2)
-        {
-            return;
-        }
-
-        const auto pos = positions(lower);
-
-        // positions in the upper level that use each node of the lower level, one entry per edge
-        std::vector<std::vector<std::size_t>> users(lower.size());
-
-        for (std::size_t t = 0; t < upper.size(); ++t)
-        {
-            for (const auto p : fanin_positions(upper[t], pos))
-            {
-                users[p].push_back(t);
-            }
-        }
-
-        std::vector<std::size_t> order(lower.size());
-        std::iota(order.begin(), order.end(), 0u);
-
-        const auto key = [&users](const std::size_t i)
-        {
-            if (users[i].empty())
-            {
-                return static_cast<double>(i);
-            }
-
-            return static_cast<double>(std::accumulate(users[i].cbegin(), users[i].cend(), std::size_t{0})) /
-                   static_cast<double>(users[i].size());
-        };
-
-        std::stable_sort(order.begin(), order.end(),
-                         [&key](const std::size_t a, const std::size_t b) { return key(a) < key(b); });
-
-        // crossings between the edges of two nodes of the lower level, the first standing left of the second: an
-        // edge of the left node crosses every edge of the right node that ends further left in the upper level
-        const auto crossings_between = [&users](const std::size_t left, const std::size_t right)
-        {
-            uint64_t count = 0;
-
-            for (const auto a : users[left])
-            {
-                for (const auto b : users[right])
-                {
-                    if (a > b)
-                    {
-                        ++count;
-                    }
-                }
-            }
-
-            return count;
-        };
-
-        uint32_t swaps = 0;
-
-        for (std::size_t i = 0; i + 1 < order.size() && swaps < ps.max_swaps; ++i)
-        {
-            if (crossings_between(order[i + 1], order[i]) < crossings_between(order[i], order[i + 1]))
-            {
-                std::swap(order[i], order[i + 1]);
-                ++swaps;
-            }
-        }
-
-        std::vector<mockturtle::node<Ntk>> sorted{};
-        sorted.reserve(lower.size());
-        for (const auto i : order)
-        {
-            sorted.push_back(lower[i]);
-        }
-        lower = std::move(sorted);
-    }
-    /**
-     * @brief Costs keeping the crossings between the upper level and a level in its original order: the level is
-     * reordered to minimize crossings, then every crossing is charged one crossing gate and every edge the buffers that
-     * pad it to the number of crossing gates on the most crossed edge.
-     *
-     * @param upper Nodes of the upper level, duplicates as copy ids.
-     * @param lower Nodes of the lower level in source order; reordered.
-     * @return Cost and crossing count; the cost is infinite above `max_crossings_per_level`, where counting stops.
-     */
-    [[nodiscard]] crossing_cost_result crossing_cost(const std::vector<mockturtle::node<Ntk>>& upper,
-                                                     std::vector<mockturtle::node<Ntk>>&       lower) const
-    {
-        minimize_crossings(upper, lower);
-
-        const auto pos = positions(lower);
-
-        // crossings per edge, edges keyed by (upper node, position of its fanin)
-        std::unordered_map<uint64_t, uint64_t> per_edge{};
-        const auto                             edge_key = [](const mockturtle::node<Ntk> n, const std::size_t p)
-        { return (static_cast<uint64_t>(n) << 32u) | static_cast<uint64_t>(p); };
-
-        // per position of the lower level: the keys of the edges swept so far and their crossing counts
-        using swept_edges = std::vector<std::pair<uint64_t, uint64_t>>;
-
-        std::vector<swept_edges> swept(lower.size() + 1);
-        std::size_t              max_pos       = 0;
-        uint64_t                 num_crossings = 0;
-        uint64_t                 max_per_edge  = 0;
-
-        for (const auto& n : upper)
-        {
-            const auto targets = fanin_positions(n, pos);
-
-            // every edge swept so far that ends right of this edge's target crosses it
-            for (const auto p : targets)
-            {
-                const auto key = edge_key(n, p);
-                per_edge.try_emplace(key, 0);
-
-                for (auto k = max_pos; k > p; --k)
-                {
-                    for (auto& [prev_key, prev_count] : swept[k])
-                    {
-                        ++num_crossings;
-
-                        // a level this crossed is always duplicated; no need to cost it
-                        if (num_crossings > ps.crossing_gates.max_crossings_per_level)
-                        {
-                            return {std::numeric_limits<uint64_t>::max(), num_crossings};
-                        }
-
-                        ++prev_count;
-                        ++per_edge[prev_key];
-                        ++per_edge[key];
-                        max_per_edge = std::max({max_per_edge, per_edge[prev_key], per_edge[key]});
-                    }
-                }
-            }
-
-            for (const auto p : targets)
-            {
-                max_pos = std::max(max_pos, p);
-                swept[p].emplace_back(edge_key(n, p), 0);
-            }
-        }
-
-        uint64_t cost = num_crossings * crossing_gate_nodes();
-
-        if (num_crossings > 0)
-        {
-            for (const auto& [key, count] : per_edge)
-            {
-                cost += (max_per_edge - count) * crossing_gate_depth();
-            }
-        }
-
-        return {cost, num_crossings};
     }
     /**
      * @brief Source network.
