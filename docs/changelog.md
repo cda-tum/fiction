@@ -242,7 +242,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
-  - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` in constant time.
+  - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
+    fanins in constant time per node.
   - `networks::views::mutable_rank_view::set_ranks` and `set_all_ranks` throw `std::invalid_argument` or
     `std::out_of_range` for ranks that do not fit the network instead of asserting.
   - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
