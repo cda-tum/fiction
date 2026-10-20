@@ -18,6 +18,7 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/network_ranking_utils.hpp"
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -65,19 +66,6 @@ mutable_rank_view<technology_network> prepare(const Ntk& ntk)
     ps.buffer_constant_outputs = false;
 
     return mutable_rank_view{network_balancing<technology_network>(fanout_substitution<technology_network>(ntk), ps)};
-}
-
-/**
- * Balances with unified outputs and ranks the given network without substituting fanouts.
- */
-template <typename Ntk>
-mutable_rank_view<technology_network> rank_without_substitution(const Ntk& ntk)
-{
-    network_balancing_params ps{};
-    ps.unify_outputs           = true;
-    ps.buffer_constant_outputs = false;
-
-    return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
 }
 
 /**
@@ -360,7 +348,7 @@ TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper
     for (const auto& ntk : {blueprints::full_adder_network<technology_network>(),
                             blueprints::parity_network<technology_network>(), blueprints::clpl<technology_network>()})
     {
-        const auto ranked = rank_without_substitution(ntk);
+        const auto ranked = rank(ntk);
 
         for (const bool xor_gates : {false, true})
         {
@@ -394,7 +382,7 @@ TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper
 TEST_CASE("Hybrid strategy with an infinite crossing cost duplicates everything", "[node-duplication-planarization]")
 {
     const auto ntk    = blueprints::parity_network<technology_network>();
-    const auto ranked = rank_without_substitution(ntk);
+    const auto ranked = rank(ntk);
 
     node_duplication_planarization_stats dup_st{};
     const auto                           duplicated = node_duplication_planarization(ranked, {}, &dup_st);
@@ -415,7 +403,7 @@ TEST_CASE("Hybrid strategy with an infinite crossing cost duplicates everything"
 TEST_CASE("Hybrid strategy with a prohibitive duplication cost keeps crossings", "[node-duplication-planarization]")
 {
     const auto ntk    = blueprints::parity_network<technology_network>();
-    const auto ranked = rank_without_substitution(ntk);
+    const auto ranked = rank(ntk);
 
     node_duplication_planarization_params ps{};
     ps.strategy                     = node_duplication_planarization_params::planarization_strategy::HYBRID;
@@ -505,7 +493,7 @@ TEST_CASE("Outputs driven by inputs pass through unchanged", "[node-duplication-
     tec.create_po(tec.create_not(x2));
     tec.create_po(x1);
 
-    const auto ranked = rank_without_substitution(tec);
+    const auto ranked = rank(tec);
     REQUIRE(ranked.depth() == 1);
 
     for (const auto strategy : {node_duplication_planarization_params::planarization_strategy::DUPLICATION,
@@ -532,7 +520,7 @@ TEST_CASE("Outputs driven by inputs pass through unchanged", "[node-duplication-
     aig.create_po(!b);
     aig.create_po(!a);
 
-    const auto planar = node_duplication_planarization(rank_without_substitution(aig));
+    const auto planar = node_duplication_planarization(rank(aig));
 
     check_planar_and_equivalent(aig, planar);
     CHECK(planar.num_pos() == 3);
@@ -551,7 +539,7 @@ TEST_CASE("Primary inputs without fanout are kept in rank 0", "[node-duplication
     tec.create_po(tec.create_or(x2, x3));
     tec.create_po(tec.create_and(x1, x3));
 
-    const auto ranked = rank_without_substitution(tec);
+    const auto ranked = rank(tec);
 
     node_duplication_planarization_stats st{};
     const auto                           planar = node_duplication_planarization(ranked, {}, &st);
@@ -700,7 +688,7 @@ TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")
     for (const auto& ntk : {blueprints::full_adder_network<technology_network>(),
                             blueprints::parity_network<technology_network>(), blueprints::clpl<technology_network>()})
     {
-        const auto ranked = rank_without_substitution(ntk);
+        const auto ranked = rank(ntk);
 
         node_duplication_planarization_params ps{};
         ps.strategy  = node_duplication_planarization_params::planarization_strategy::HYBRID;
@@ -752,7 +740,7 @@ TEST_CASE("Gates with the same fanin twice", "[node-duplication-planarization]")
     tec.create_po(f2);
     tec.create_po(tec.create_not(f1));
 
-    const auto ranked = rank_without_substitution(tec);
+    const auto ranked = rank(tec);
     const auto planar = node_duplication_planarization(ranked);
 
     check_planar_and_equivalent(tec, planar);
@@ -762,7 +750,7 @@ TEST_CASE("Hybrid strategy falls back to the cone model when the lookahead budge
           "[node-duplication-planarization]")
 {
     const auto ntk    = blueprints::parity_network<technology_network>();
-    const auto ranked = rank_without_substitution(ntk);
+    const auto ranked = rank(ntk);
 
     node_duplication_planarization_params ps{};
     ps.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID;
@@ -830,7 +818,7 @@ TEST_CASE("Tie-break among equally short paths copies the lightest cone", "[node
     for (const bool inverter_first : {true, false})
     {
         const auto tec    = build(inverter_first);
-        const auto ranked = rank_without_substitution(tec);
+        const auto ranked = rank(tec);
 
         node_duplication_planarization_stats st{};
         const auto                           planar = node_duplication_planarization(ranked, {}, &st);
@@ -855,7 +843,7 @@ TEST_CASE("Constant fanins are kept", "[node-duplication-planarization]")
     tec.create_po(o1);
     tec.create_po(tec.create_and(x1, x2));
 
-    const auto ranked = rank_without_substitution(tec);
+    const auto ranked = rank(tec);
     const auto planar = node_duplication_planarization(ranked);
 
     check_planar_and_equivalent(tec, planar);

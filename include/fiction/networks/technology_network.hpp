@@ -75,9 +75,10 @@ class technology_network : public mockturtle::klut_network
 #pragma region Primary I / O and functions
 
     /**
-     * Checks whether a node is a combinational input in constant time. A node is an input iff it is not a constant and
-     * has no fanins, because every gate has at least one fanin and `create_node` maps functions without fanins to
-     * constants. `klut_network::is_ci` scans all inputs instead.
+     * @brief Checks whether a node is a combinational input in constant time.
+     *
+     * A node is an input iff it is not a constant and has no fanins, because every gate has at least one fanin and
+     * `create_node` maps functions without fanins to constants. `klut_network::is_ci` scans all inputs instead.
      *
      * @param n Node to consider.
      * @return `true` iff `n` is a combinational input.
@@ -87,8 +88,9 @@ class technology_network : public mockturtle::klut_network
         return n > 1 && n < _storage->nodes.size() && _storage->nodes[n].children.empty();
     }
     /**
-     * Checks whether a node is a primary input in constant time. Equals `is_ci`, because this network has no further
-     * kinds of combinational inputs.
+     * @brief Checks whether a node is a primary input in constant time.
+     *
+     * Equals `is_ci`, because this network has no further kinds of combinational inputs.
      *
      * @param n Node to consider.
      * @return `true` iff `n` is a primary input.

@@ -218,7 +218,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     ~mutable_rank_view() = default;
 
     /**
-     * Returns the rank position of a node.
+     * @brief Returns the rank position of a node.
      *
      * @param n Node to get the rank position of.
      * @return Rank position of node `n`.
@@ -272,7 +272,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Sets the associated rank positions for nodes in a specific level, given the order of `nodes`.
+     * @brief Sets the associated rank positions for nodes in a specific level, given the order of `nodes`.
      *
      * @param level Level at which to replace nodes.
      * @param nodes The new node order to be set at the given level.
@@ -317,7 +317,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Sets the associated rank positions for all nodes in the network.
+     * @brief Sets the associated rank positions for all nodes in the network.
      *
      * @param new_ranks A vector of vectors specifying the new node order for each level.
      * @throws std::invalid_argument If `new_ranks` does not hold one permutation of the nodes per level.
@@ -586,8 +586,10 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Recomputes levels and ranks. Ranks start in node index order per level. After an exception the view holds no
-     * valid ranks until `update_ranks` succeeds.
+     * @brief Recomputes levels and ranks.
+     *
+     * Ranks start in node index order per level. After an exception the view holds no valid ranks until
+     * `update_ranks` succeeds.
      *
      * @throws std::invalid_argument If the network has a gate that no output reaches.
      */
@@ -649,9 +651,10 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Initializes the ranks for the given network. It traverses the nodes in the network in index order and inserts
-     * each non-constant node into the rank of its level, so that every non-constant node, including an input that
-     * drives nothing, has a rank afterwards.
+     * @brief Initializes the ranks for the given network.
+     *
+     * It traverses the nodes in the network in index order and inserts each non-constant node into the rank of its
+     * level, so that every non-constant node, including an input that drives nothing, has a rank afterwards.
      *
      * A gate that no output reaches has no level and would have no rank either. Such a network is rejected: the view
      * keeps the invariant that every non-constant node is ranked, and callers remove dead gates beforehand with

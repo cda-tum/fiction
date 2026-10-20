@@ -43,42 +43,46 @@ namespace fiction::synthesis
 {
 
 /**
- * Parameters for the crossing gate planarization algorithm.
+ * @brief Parameters for the crossing gate planarization algorithm.
  */
 struct crossing_gate_planarization_params
 {
     /**
-     * Receives completed work and the phase total.
+     * @brief Receives completed work and the phase total.
      */
     utils::progress_callback on_progress{};
     /**
-     * Build crossing gates from XOR gates (three XORs, four levels) instead of AND, OR, and NOT gates (fourteen
+     * @brief Build crossing gates from XOR gates (three XORs, four levels) instead of AND, OR, and NOT gates (fourteen
      * levels).
      */
     bool xor_gates = true;
     /**
-     * Adjacent levels with more crossings between them than this are rejected, since the number of crossing gates grows
-     * with the crossings. The limit bounds the crossing gates between two levels, not the buffers that every pass adds
-     * along the other edges between them.
+     * @brief Adjacent levels with more crossings between them than this are rejected, since the number of crossing
+     * gates grows with the crossings.
+     *
+     * The limit bounds the crossing gates between two levels, not the buffers that every pass adds along the other
+     * edges between them.
      */
     uint32_t max_crossings_per_level = 1000u;
 };
 
 /**
- * Statistics of the crossing gate planarization algorithm.
+ * @brief Statistics of the crossing gate planarization algorithm.
  */
 struct crossing_gate_planarization_stats
 {
     /**
-     * Runtime of the planarization core. Excludes the final planarity check.
+     * @brief Runtime of the planarization core.
+     *
+     * Excludes the final planarity check.
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * Number of crossings replaced by crossing gates.
+     * @brief Number of crossings replaced by crossing gates.
      */
     uint64_t num_crossings{0};
     /**
-     * Writes the statistics to a stream.
+     * @brief Writes the statistics to a stream.
      *
      * @param out Stream to write to.
      */
@@ -93,24 +97,24 @@ namespace detail
 {
 
 /**
- * Number of nodes of one XOR crossing gate, buffers included.
+ * @brief Number of nodes of one XOR crossing gate, buffers included.
  */
 inline constexpr uint64_t XOR_CROSSING_GATE_NODES = 10u;
 /**
- * Number of levels one XOR crossing gate spans.
+ * @brief Number of levels one XOR crossing gate spans.
  */
 inline constexpr uint64_t XOR_CROSSING_GATE_DEPTH = 4u;
 /**
- * Number of nodes of one crossing gate built from AND, OR, and NOT gates, buffers included.
+ * @brief Number of nodes of one crossing gate built from AND, OR, and NOT gates, buffers included.
  */
 inline constexpr uint64_t AND_OR_CROSSING_GATE_NODES = 59u;
 /**
- * Number of levels one crossing gate built from AND, OR, and NOT gates spans.
+ * @brief Number of levels one crossing gate built from AND, OR, and NOT gates spans.
  */
 inline constexpr uint64_t AND_OR_CROSSING_GATE_DEPTH = 14u;
 
 /**
- * Implementation of the crossing gate planarization algorithm.
+ * @brief Implementation of the crossing gate planarization algorithm.
  *
  * @tparam Ntk Ranked, balanced network type.
  */
@@ -119,7 +123,7 @@ class crossing_gate_planarization_impl
 {
   public:
     /**
-     * Creates the implementation.
+     * @brief Creates the implementation.
      *
      * @param src Source network.
      * @param p Parameters.
@@ -134,7 +138,7 @@ class crossing_gate_planarization_impl
     {}
 
     /**
-     * Runs the algorithm.
+     * @brief Runs the algorithm.
      *
      * @return Planar copy of the source network with crossing gates.
      * @throws std::runtime_error If two adjacent levels have more crossings than `max_crossings_per_level` allows.
@@ -212,30 +216,30 @@ class crossing_gate_planarization_impl
 
   private:
     /**
-     * An edge between two adjacent levels of the source network.
+     * @brief An edge between two adjacent levels of the source network.
      */
     struct edge
     {
         /**
-         * Source node.
+         * @brief Source node.
          */
         mockturtle::node<Ntk> source;
         /**
-         * Target node.
+         * @brief Target node.
          */
         mockturtle::node<Ntk> target;
         /**
-         * Equality of two edges.
+         * @brief Equality of two edges.
          */
         bool operator==(const edge&) const = default;
     };
     /**
-     * Hash of an edge.
+     * @brief Hash of an edge.
      */
     struct edge_hash
     {
         /**
-         * Combines source and target.
+         * @brief Combines source and target.
          *
          * @param e Edge.
          * @return Hash value.
@@ -248,55 +252,57 @@ class crossing_gate_planarization_impl
         }
     };
     /**
-     * A crossing of two edges. `level` orders the crossings on the same edge: a crossing of level \f$l\f$ can only
-     * be resolved after all crossings of lower levels on its edges.
+     * @brief A crossing of two edges.
+     *
+     * `level` orders the crossings on the same edge: a crossing of level \f$l\f$ can only be resolved after all
+     * crossings of lower levels on its edges.
      */
     struct crossing
     {
         /**
-         * The left edge of the crossing.
+         * @brief The left edge of the crossing.
          */
         edge left;
         /**
-         * The right edge of the crossing.
+         * @brief The right edge of the crossing.
          */
         edge right;
         /**
-         * Resolution level.
+         * @brief Resolution level.
          */
         uint64_t level;
     };
     /**
-     * Crossings between two adjacent levels and the edges between them in rank order of their sources.
+     * @brief Crossings between two adjacent levels and the edges between them in rank order of their sources.
      */
     struct stage
     {
         /**
-         * Crossings of the stage.
+         * @brief Crossings of the stage.
          */
         std::vector<crossing> crossings{};
         /**
-         * All edges of the stage, sources in rank order, targets in rank order per source.
+         * @brief All edges of the stage, sources in rank order, targets in rank order per source.
          */
         std::vector<edge> edges{};
     };
     /**
-     * Levels an input of the XOR crossing gate is delayed by so that it meets the buffered XOR of both inputs: the XOR
-     * and its buffer.
+     * @brief Levels an input of the XOR crossing gate is delayed by so that it meets the buffered XOR of both inputs:
+     * the XOR and its buffer.
      */
     static constexpr uint32_t XOR_CORE_DELAY = 2u;
     /**
-     * Levels an input of the AND-OR-NOT XOR is delayed by so that it meets the buffered NAND of both inputs: the NAND,
-     * its inverter, and its buffer.
+     * @brief Levels an input of the AND-OR-NOT XOR is delayed by so that it meets the buffered NAND of both inputs: the
+     * NAND, its inverter, and its buffer.
      */
     static constexpr uint32_t AND_OR_INNER_DELAY = 3u;
     /**
-     * Levels an input of the AND-OR-NOT crossing gate is delayed by so that it meets the buffered AND-OR-NOT XOR of
-     * both inputs: the XOR of depth six and its buffer.
+     * @brief Levels an input of the AND-OR-NOT crossing gate is delayed by so that it meets the buffered AND-OR-NOT XOR
+     * of both inputs: the XOR of depth six and its buffer.
      */
     static constexpr uint32_t AND_OR_CORE_DELAY = 7u;
     /**
-     * Depth of one crossing gate, including the buffers that align the edges it is placed on.
+     * @brief Depth of one crossing gate, including the buffers that align the edges it is placed on.
      *
      * @return Number of levels a crossing gate occupies.
      */
@@ -305,9 +311,11 @@ class crossing_gate_planarization_impl
         return static_cast<uint32_t>(ps.xor_gates ? XOR_CROSSING_GATE_DEPTH : AND_OR_CROSSING_GATE_DEPTH);
     }
     /**
-     * Finds the crossings between every pair of adjacent levels. Edges are swept in rank order of their sources; an
-     * edge that ends left of the end of an earlier edge crosses it. The level of a crossing is one more than the
-     * highest level already assigned to either edge, so that crossings on one edge are resolved in order.
+     * @brief Finds the crossings between every pair of adjacent levels.
+     *
+     * Edges are swept in rank order of their sources; an edge that ends left of the end of an earlier edge crosses it.
+     * The level of a crossing is one more than the highest level already assigned to either edge, so that crossings on
+     * one edge are resolved in order.
      *
      * @throws std::runtime_error If two adjacent levels have more crossings than `max_crossings_per_level`.
      */
@@ -383,9 +391,11 @@ class crossing_gate_planarization_impl
         }
     }
     /**
-     * Resolves the crossings of one stage in order of their levels. Each pass over the edges places one crossing gate
-     * per crossing whose left edge is next in line and swaps the two edges; every other edge is extended by a buffer
-     * chain of the crossing gate depth, so that all edges of the stage grow by the same number of levels per pass.
+     * @brief Resolves the crossings of one stage in order of their levels.
+     *
+     * Each pass over the edges places one crossing gate per crossing whose left edge is next in line and swaps the two
+     * edges; every other edge is extended by a buffer chain of the crossing gate depth, so that all edges of the stage
+     * grow by the same number of levels per pass.
      *
      * @param dest Destination network.
      * @param old2new Map from source nodes to destination signals.
@@ -437,7 +447,7 @@ class crossing_gate_planarization_impl
         }
     }
     /**
-     * Signal at the current end of an edge: the end of its last crossing gate or buffer chain, or its source.
+     * @brief Signal at the current end of an edge: the end of its last crossing gate or buffer chain, or its source.
      *
      * @param old2new Map from source nodes to destination signals.
      * @param e Edge.
@@ -454,7 +464,7 @@ class crossing_gate_planarization_impl
         return old2new[e.source];
     }
     /**
-     * Extends an edge by a buffer chain of the crossing gate depth.
+     * @brief Extends an edge by a buffer chain of the crossing gate depth.
      *
      * @param dest Destination network.
      * @param old2new Map from source nodes to destination signals.
@@ -465,9 +475,10 @@ class crossing_gate_planarization_impl
         edge_end[e] = networks::buffer_chain(dest, edge_signal(old2new, e), crossing_gate_depth());
     }
     /**
-     * An XOR built from AND, OR, and NOT gates, balanced to six levels: \f$(a \land \lnot(a \land b)) \lor (b \land
-     * \lnot(a \land b))\f$ with the direct paths of `a` and `b` buffered to the depth of the shared term. Nodes are
-     * created from left to right per level, which keeps the XOR planar in creation order.
+     * @brief An XOR built from AND, OR, and NOT gates, balanced to six levels: \f$(a \land \lnot(a \land b)) \lor (b
+     * \land \lnot(a \land b))\f$ with the direct paths of `a` and `b` buffered to the depth of the shared term.
+     *
+     * Nodes are created from left to right per level, which keeps the XOR planar in creation order.
      *
      * @param dest Destination network.
      * @param a Left input.
@@ -489,12 +500,12 @@ class crossing_gate_planarization_impl
         return dest.create_or(p_a, p_b);
     }
     /**
-     * Places the crossing gate that swaps the signals of two crossing edges: with \f$c_0 = a \oplus b\f$, the left
-     * output
-     * \f$a \oplus c_0 = b\f$ continues the right edge and the right output \f$c_0 \oplus b = a\f$ continues the
-     * left edge, so the left edge ends up right of the right edge. The direct paths are buffered to the depth of
-     * the crossing gate, and nodes are created from left to right per level, which keeps the crossing gate planar in
-     * creation order.
+     * @brief Places the crossing gate that swaps the signals of two crossing edges: with \f$c_0 = a \oplus b\f$, the
+     * left output \f$a \oplus c_0 = b\f$ continues the right edge and the right output \f$c_0 \oplus b = a\f$ continues
+     * the left edge, so the left edge ends up right of the right edge.
+     *
+     * The direct paths are buffered to the depth of the crossing gate, and nodes are created from left to right per
+     * level, which keeps the crossing gate planar in creation order.
      *
      * @param dest Destination network.
      * @param old2new Map from source nodes to destination signals.
@@ -532,27 +543,28 @@ class crossing_gate_planarization_impl
         }
     }
     /**
-     * Source network.
+     * @brief Source network.
      */
     const Ntk& ntk;
     /**
-     * Fanout view of the source network.
+     * @brief Fanout view of the source network.
      */
     const mockturtle::fanout_view<Ntk> fanout_ntk;
     /**
-     * Parameters.
+     * @brief Parameters.
      */
     const crossing_gate_planarization_params& ps;
     /**
-     * Statistics.
+     * @brief Statistics.
      */
     crossing_gate_planarization_stats& pst;
     /**
-     * Crossings and edges per pair of adjacent levels.
+     * @brief Crossings and edges per pair of adjacent levels.
      */
     std::vector<stage> stages{};
     /**
-     * Current end of every edge in the destination network, once a crossing gate or buffer chain was placed on it.
+     * @brief Current end of every edge in the destination network, once a crossing gate or buffer chain was placed on
+     * it.
      */
     std::unordered_map<edge, mockturtle::signal<Ntk>, edge_hash> edge_end{};
 };
@@ -560,10 +572,12 @@ class crossing_gate_planarization_impl
 }  // namespace detail
 
 /**
- * Planarizes a ranked, balanced logic network by replacing every crossing of two edges with a crossing gate that
- * swaps the two signals. Crossings between two levels are resolved pass by pass; in every pass, each remaining
- * crossing whose edges are adjacent receives a crossing gate and every other edge a buffer chain of the same depth, so
- * the result stays balanced. The rank order of the input is kept.
+ * @brief Planarizes a ranked, balanced logic network by replacing every crossing of two edges with a crossing gate that
+ * swaps the two signals.
+ *
+ * Crossings between two levels are resolved pass by pass; in every pass, each remaining crossing whose edges are
+ * adjacent receives a crossing gate and every other edge a buffer chain of the same depth, so the result stays
+ * balanced. The rank order of the input is kept.
  *
  * Crossing gates consist of three XORs when `xor_gates` is set, otherwise of AND, OR, and NOT gates, which makes them
  * deeper. The result is verified crossing-free before the function returns.

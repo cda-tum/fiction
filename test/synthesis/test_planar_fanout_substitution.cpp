@@ -18,6 +18,7 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/network_ranking_utils.hpp"
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -44,19 +45,6 @@ using namespace fiction::utils::graph;
 
 namespace
 {
-
-/**
- * Balances with unified outputs and ranks the given network without substituting fanouts.
- */
-template <typename Ntk>
-mutable_rank_view<technology_network> rank(const Ntk& ntk)
-{
-    network_balancing_params ps{};
-    ps.unify_outputs           = true;
-    ps.buffer_constant_outputs = false;
-
-    return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
-}
 
 /**
  * Checks the full contract: fanout-substituted, balanced, crossing-free, equivalent.

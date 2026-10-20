@@ -45,8 +45,10 @@ struct network_balancing_params
      */
     bool unify_outputs = false;
     /**
-     * Whether primary outputs driven by a constant receive a buffer chain when unifying outputs. Placement flows that
-     * do not place constants set this to `false`: such outputs then stay unbuffered, and `is_balanced` ignores them.
+     * @brief Whether primary outputs driven by a constant receive a buffer chain when unifying outputs.
+     *
+     * Placement flows that do not place constants set this to `false`: such outputs then stay unbuffered, and
+     * `is_balanced` ignores them.
      */
     bool buffer_constant_outputs = true;
     /** @brief Reports completed work in each bounded phase. */

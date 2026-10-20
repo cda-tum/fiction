@@ -65,8 +65,10 @@ Ntk handle_virtual_pis(const Ntk& network)
 }
 
 /**
- * Leaf signals for copying a network such that the primary input created i-th receives `pis[i]`. A ranked network
- * lists its inputs in rank order, so its leaves are permuted accordingly; any other network takes `pis` as they are.
+ * @brief Leaf signals for copying a network such that the primary input created i-th receives `pis[i]`.
+ *
+ * A ranked network lists its inputs in rank order, so its leaves are permuted accordingly; any other network takes
+ * `pis` as they are.
  *
  * @tparam NtkDest Destination network type.
  * @tparam Ntk Source network type.

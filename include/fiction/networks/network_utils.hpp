@@ -492,7 +492,7 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
 }
 
 /**
- * Appends a chain of buffers to a signal.
+ * @brief Appends a chain of buffers to a signal.
  *
  * @tparam Ntk Network type.
  * @param ntk Network to extend.
@@ -514,9 +514,11 @@ template <typename Ntk>
 }
 
 /**
- * Creates an empty network of the same type as `src` with copies of its constants and primary inputs, virtual
- * primary inputs included, and a map from the nodes of `src` to their copies. Primary inputs are created in the
- * order that `foreach_pi_unranked` yields when `Ntk` offers it, so that rank bookkeeping of the copy matches `src`.
+ * @brief Creates an empty network of the same type as `src` with copies of its constants and primary inputs, virtual
+ * primary inputs included, and a map from the nodes of `src` to their copies.
+ *
+ * Primary inputs are created in the order that `foreach_pi_unranked` yields when `Ntk` offers it, so that rank
+ * bookkeeping of the copy matches `src`.
  *
  * @tparam Ntk Network type.
  * @param src Source network.

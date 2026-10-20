@@ -37,16 +37,18 @@ namespace fiction::synthesis
 {
 
 /**
- * Parameters for the planar fanout substitution algorithm.
+ * @brief Parameters for the planar fanout substitution algorithm.
  */
 struct planar_fanout_substitution_params
 {
     /**
-     * Receives completed work and the phase total.
+     * @brief Receives completed work and the phase total.
      */
     utils::progress_callback on_progress{};
     /**
-     * Maximum output degree of each fanout node, at least 2. Every other node drives exactly one consumer.
+     * @brief Maximum output degree of each fanout node, at least 2.
+     *
+     * Every other node drives exactly one consumer.
      */
     uint32_t degree = 2u;
 };
@@ -55,7 +57,7 @@ namespace detail
 {
 
 /**
- * Implementation of the planar fanout substitution algorithm.
+ * @brief Implementation of the planar fanout substitution algorithm.
  *
  * @tparam Ntk Ranked network type.
  */
@@ -64,7 +66,7 @@ class planar_fanout_substitution_impl
 {
   public:
     /**
-     * Creates the implementation.
+     * @brief Creates the implementation.
      *
      * @param src Source network.
      * @param p Parameters.
@@ -77,7 +79,7 @@ class planar_fanout_substitution_impl
     {}
 
     /**
-     * Runs the algorithm.
+     * @brief Runs the algorithm.
      *
      * @return Fanout-substituted copy of the source network with the same ranks and no new crossings.
      */
@@ -140,7 +142,7 @@ class planar_fanout_substitution_impl
 
   private:
     /**
-     * Number of fanout nodes a node with the given number of outputs needs.
+     * @brief Number of fanout nodes a node with the given number of outputs needs.
      *
      * @param fanouts Number of outputs.
      * @return Number of fanout nodes in its tree.
@@ -158,7 +160,8 @@ class planar_fanout_substitution_impl
         return (fanouts - 1 + per_node - 1) / per_node;
     }
     /**
-     * Level of the fanout node with the given index in a breadth-first fanout tree, the root's first node being 0.
+     * @brief Level of the fanout node with the given index in a breadth-first fanout tree, the root's first node being
+     * 0.
      *
      * @param index Creation index of the fanout node.
      * @return Its level in the tree.
@@ -177,7 +180,7 @@ class planar_fanout_substitution_impl
         return level;
     }
     /**
-     * Depth of the fanout tree of a node with the given number of outputs.
+     * @brief Depth of the fanout tree of a node with the given number of outputs.
      *
      * @param fanouts Number of outputs.
      * @return Number of levels the tree adds below the node.
@@ -189,7 +192,7 @@ class planar_fanout_substitution_impl
         return num_nodes == 0 ? 0 : fanout_node_level(num_nodes - 1) + 1;
     }
     /**
-     * Whether a node already is a fanout node within the degree limit and needs no tree.
+     * @brief Whether a node already is a fanout node within the degree limit and needs no tree.
      *
      * @param n Node.
      * @return `true` iff `n` is a proper fanout node.
@@ -206,7 +209,7 @@ class planar_fanout_substitution_impl
         }
     }
     /**
-     * Depth of the deepest fanout tree any node of a level needs.
+     * @brief Depth of the deepest fanout tree any node of a level needs.
      *
      * @param r Level.
      * @return Maximum tree depth in the level.
@@ -227,7 +230,7 @@ class planar_fanout_substitution_impl
         return depth;
     }
     /**
-     * Collects the fanin signals of a node in the destination network, taking free fanout slots where needed.
+     * @brief Collects the fanin signals of a node in the destination network, taking free fanout slots where needed.
      *
      * @param dest Destination network.
      * @param n Source node.
@@ -259,8 +262,8 @@ class planar_fanout_substitution_impl
         return children;
     }
     /**
-     * Pushes a node down by `pad` levels: with a buffer chain, or with a shorter chain plus its fanout tree so that
-     * the tree's leaves end up `pad` levels below the node.
+     * @brief Pushes a node down by `pad` levels: with a buffer chain, or with a shorter chain plus its fanout tree so
+     * that the tree's leaves end up `pad` levels below the node.
      *
      * @param dest Destination network.
      * @param n Source node.
@@ -289,10 +292,11 @@ class planar_fanout_substitution_impl
         }
     }
     /**
-     * Builds the breadth-first fanout tree of a node. Exactly as many outputs as the node has consumers are kept, in
-     * breadth-first order; each of them is padded with buffers to the depth of the tree, so that every consumer
-     * connects at the same depth and no buffer is left without a consumer. The outputs are stored in
-     * `available_fanouts` in planar order.
+     * @brief Builds the breadth-first fanout tree of a node.
+     *
+     * Exactly as many outputs as the node has consumers are kept, in breadth-first order; each of them is padded with
+     * buffers to the depth of the tree, so that every consumer connects at the same depth and no buffer is left without
+     * a consumer. The outputs are stored in `available_fanouts` in planar order.
      *
      * @param dest Destination network.
      * @param n Source node.
@@ -346,7 +350,7 @@ class planar_fanout_substitution_impl
         }
     }
     /**
-     * Returns the signal a consumer of `n` connects to: `child` itself while it has no output yet, otherwise the
+     * @brief Returns the signal a consumer of `n` connects to: `child` itself while it has no output yet, otherwise the
      * next free output of the fanout tree of `n`.
      *
      * @param dest Destination network.
@@ -375,19 +379,19 @@ class planar_fanout_substitution_impl
         return sig;
     }
     /**
-     * Source network.
+     * @brief Source network.
      */
     const Ntk& ntk;
     /**
-     * Fanout view of the source network.
+     * @brief Fanout view of the source network.
      */
     const mockturtle::fanout_view<Ntk> fanout_ntk;
     /**
-     * Free outputs of the fanout tree per source node, each padded to the depth of the tree.
+     * @brief Free outputs of the fanout tree per source node, each padded to the depth of the tree.
      */
     mockturtle::node_map<std::queue<mockturtle::signal<Ntk>>, Ntk> available_fanouts;
     /**
-     * Parameters.
+     * @brief Parameters.
      */
     const planar_fanout_substitution_params& ps;
 };
@@ -395,10 +399,12 @@ class planar_fanout_substitution_impl
 }  // namespace detail
 
 /**
- * Substitutes high-output degrees in a ranked logic network with trees of fanout nodes while keeping the ranks and
- * the planarity of the network. Every node of a level is pushed down by the depth of the deepest fanout tree in that
- * level, with buffers for nodes that need no tree or a shallower one, so that all edges keep running between adjacent
- * levels and the rank order stays the one of the input. The result is balanced if the input is.
+ * @brief Substitutes high-output degrees in a ranked logic network with trees of fanout nodes while keeping the ranks
+ * and the planarity of the network.
+ *
+ * Every node of a level is pushed down by the depth of the deepest fanout tree in that level, with buffers for nodes
+ * that need no tree or a shallower one, so that all edges keep running between adjacent levels and the rank order stays
+ * the one of the input. The result is balanced if the input is.
  *
  * Virtual primary inputs of the input are kept.
  *

@@ -27,6 +27,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 
 #include <string>
@@ -185,5 +186,28 @@ TEST_CASE("Initialize a copy network with virtual primary inputs", "[network-uti
 
         CHECK(copies == dest_pis);
         CHECK(copies.size() == 3);
+    }
+}
+
+TEST_CASE("Buffer chains", "[network-utils]")
+{
+    technology_network tec{};
+
+    const auto x = tec.create_pi();
+
+    SECTION("a chain of length zero returns the signal")
+    {
+        CHECK(buffer_chain(tec, x, 0) == x);
+        CHECK(tec.num_gates() == 0);
+    }
+    SECTION("every buffer extends the chain by one level")
+    {
+        const auto end = buffer_chain(tec, x, 3);
+
+        tec.create_po(end);
+
+        CHECK(tec.num_gates() == 3);
+        CHECK(tec.is_buf(tec.get_node(end)));
+        CHECK(mockturtle::depth_view{tec}.depth() == 3);
     }
 }

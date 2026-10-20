@@ -74,6 +74,10 @@
 
 ```
 
+```{doxygenfunction} fiction::networks::buffer_chain
+
+```
+
 ```{doxygenfunction} fiction::networks::initialize_copy_network_with_virtual_pis
 
 ```

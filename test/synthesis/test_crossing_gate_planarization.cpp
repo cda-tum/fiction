@@ -18,6 +18,7 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/network_ranking_utils.hpp"
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -44,19 +45,6 @@ using namespace fiction::utils::graph;
 
 namespace
 {
-
-/**
- * Balances with unified outputs and ranks the given network without substituting fanouts.
- */
-template <typename Ntk>
-mutable_rank_view<technology_network> rank(const Ntk& ntk)
-{
-    network_balancing_params ps{};
-    ps.unify_outputs           = true;
-    ps.buffer_constant_outputs = false;
-
-    return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
-}
 
 /**
  * Checks the contract: balanced with unified outputs, crossing-free, equivalent.
@@ -165,7 +153,10 @@ TEST_CASE("A single crossing becomes one crossing gate", "[crossing-gate-planari
 
         check_contract(tec, planar);
         CHECK(st.num_crossings == 1);
-        CHECK(planar.depth() > ranked.depth());
+
+        // the sizes the hybrid strategy of the node duplication plans with
+        CHECK(planar.size() == ranked.size() + synthesis::detail::AND_OR_CROSSING_GATE_NODES);
+        CHECK(planar.depth() == ranked.depth() + synthesis::detail::AND_OR_CROSSING_GATE_DEPTH);
     }
     SECTION("XOR gates")
     {
@@ -177,7 +168,10 @@ TEST_CASE("A single crossing becomes one crossing gate", "[crossing-gate-planari
 
         check_contract(tec, planar);
         CHECK(st.num_crossings == 1);
-        CHECK(planar.depth() > ranked.depth());
+
+        // the sizes the hybrid strategy of the node duplication plans with
+        CHECK(planar.size() == ranked.size() + synthesis::detail::XOR_CROSSING_GATE_NODES);
+        CHECK(planar.depth() == ranked.depth() + synthesis::detail::XOR_CROSSING_GATE_DEPTH);
 
         std::ostringstream os{};
         st.report(os);

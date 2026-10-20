@@ -50,156 +50,178 @@ namespace fiction::synthesis
 {
 
 /**
- * Parameters for the node duplication planarization algorithm.
+ * @brief Parameters for the node duplication planarization algorithm.
  */
 struct node_duplication_planarization_params
 {
     /**
-     * Order in which the primary outputs are placed in the first level before the algorithm starts.
+     * @brief Order in which the primary outputs are placed in the first level before the algorithm starts.
      */
     enum class output_order : uint8_t
     {
         /**
-         * Keep the primary output order of the input network.
+         * @brief Keep the primary output order of the input network.
          */
         KEEP_PO_ORDER,
         /**
-         * Shuffle the primary outputs randomly. Different orders can yield different numbers of duplications.
+         * @brief Shuffle the primary outputs randomly.
+         *
+         * Different orders can yield different numbers of duplications.
          */
         RANDOM_PO_ORDER
     };
     /**
-     * How a level is made crossing-free.
+     * @brief How a level is made crossing-free.
      */
     enum class planarization_strategy : uint8_t
     {
         /**
-         * Duplicate nodes on every level. The result is planar.
+         * @brief Duplicate nodes on every level.
+         *
+         * The result is planar.
          */
         DUPLICATION,
         /**
-         * Decide per level whether duplicating nodes or keeping the crossings for `crossing_gate_planarization` is
-         * cheaper. The result contains crossings on the levels where crossing gates are cheaper.
+         * @brief Decide per level whether duplicating nodes or keeping the crossings for `crossing_gate_planarization`
+         * is cheaper.
+         *
+         * The result contains crossings on the levels where crossing gates are cheaper.
          */
         HYBRID
     };
     /**
-     * How the hybrid strategy estimates the cost of duplicating a level.
+     * @brief How the hybrid strategy estimates the cost of duplicating a level.
      */
     enum class decision_criterion : uint8_t
     {
         /**
-         * The weighted size of the duplicated cones, see `duplication_cost_model`.
+         * @brief The weighted size of the duplicated cones, see `duplication_cost_model`.
          */
         WEIGHTED_CONE,
         /**
-         * The number of nodes that duplicating actually creates: the copies on the level plus those that running
-         * the duplication strategy on the levels below creates. Both options are run, and the second run stops once
-         * it exceeds the first. Levels whose runs exceed `lookahead_budget` fall back to `WEIGHTED_CONE`.
+         * @brief The number of nodes that duplicating actually creates: the copies on the level plus those that running
+         * the duplication strategy on the levels below creates.
+         *
+         * Both options are run, and the second run stops once it exceeds the first. Levels whose runs exceed
+         * `lookahead_budget` fall back to `WEIGHTED_CONE`.
          */
         LOOKAHEAD
     };
     /**
-     * Weights of the duplication cost model of the hybrid strategy's `WEIGHTED_CONE` criterion. The cost of
-     * duplicating a node is the weighted size of its transitive fanin, since every duplicate drags its whole cone
-     * along. A gate weighs `node_weight` and a chain buffer or inverter weighs `buffer_weight`. The sum is scaled by
-     * \f$\text{depth\_growth}^{d}\f$ for a duplication on level \f$d\f$, because duplicates on deep levels are
-     * duplicated again by the decisions below. The weights are in units of one crossing gate node. The defaults
-     * were determined empirically on the benchmark sets. Weights must be finite and non-negative, the growth finite
-     * and positive.
+     * @brief Weights of the duplication cost model of the hybrid strategy's `WEIGHTED_CONE` criterion.
+     *
+     * The cost of duplicating a node is the weighted size of its transitive fanin, since every duplicate drags its
+     * whole cone along. A gate weighs `node_weight` and a chain buffer or inverter weighs `buffer_weight`. The sum is
+     * scaled by \f$\text{depth\_growth}^{d}\f$ for a duplication on level \f$d\f$, because duplicates on deep levels
+     * are duplicated again by the decisions below. The weights are in units of one crossing gate node. The defaults
+     * were determined empirically on the benchmark sets. Weights must be finite and non-negative, the growth finite and
+     * positive.
      */
     struct duplication_cost_model
     {
         /**
-         * Weight of a gate.
+         * @brief Weight of a gate.
          */
         double node_weight = 2.0;
         /**
-         * Weight of a buffer or inverter chain node.
+         * @brief Weight of a buffer or inverter chain node.
          */
         double buffer_weight = 0.5;
         /**
-         * Growth of the duplication cost per level on which the duplication happens.
+         * @brief Growth of the duplication cost per level on which the duplication happens.
          */
         double depth_growth = 1.02;
     };
     /**
-     * Planarization strategy. This is the first member, so that `planarization_params` can select the hybrid
-     * strategy with a plain default initializer.
+     * @brief Planarization strategy.
+     *
+     * This is the first member, so that `planarization_params` can select the hybrid strategy with a plain default
+     * initializer.
      */
     planarization_strategy strategy = planarization_strategy::DUPLICATION;
     /**
-     * Receives completed work and the phase total.
+     * @brief Receives completed work and the phase total.
      */
     utils::progress_callback on_progress{};
     /**
-     * Primary output order used to seed the first level.
+     * @brief Primary output order used to seed the first level.
      */
     output_order po_order = output_order::KEEP_PO_ORDER;
     /**
-     * Seed for the random primary output order. A random seed is drawn when none is given.
+     * @brief Seed for the random primary output order.
+     *
+     * A random seed is drawn when none is given.
      */
     std::optional<uint32_t> seed = std::nullopt;
     /**
-     * Maximum number of adjacent swaps per level that the hybrid strategy tries after the barycenter ordering to
-     * reduce the crossings it costs. `0` keeps the barycenter order.
+     * @brief Maximum number of adjacent swaps per level that the hybrid strategy tries after the barycenter ordering to
+     * reduce the crossings it costs.
+     *
+     * `0` keeps the barycenter order.
      */
     uint32_t max_swaps = 32u;
     /**
-     * Whether the subsequent `crossing_gate_planarization` builds its crossing gates from XOR gates, which are smaller
-     * and shallower than the AND-OR-NOT crossing gates. Sets the cost of the crossing gates in the hybrid strategy.
+     * @brief Whether the subsequent `crossing_gate_planarization` builds its crossing gates from XOR gates, which are
+     * smaller and shallower than the AND-OR-NOT crossing gates.
+     *
+     * Sets the cost of the crossing gates in the hybrid strategy.
      */
     bool xor_gates = true;
     /**
-     * Levels with more crossings are always duplicated in the hybrid strategy, matching the limit of
+     * @brief Levels with more crossings are always duplicated in the hybrid strategy, matching the limit of
      * `crossing_gate_planarization`.
      */
     uint32_t max_crossings_per_level = 1000u;
     /**
-     * Decision criterion of the hybrid strategy.
+     * @brief Decision criterion of the hybrid strategy.
      */
     decision_criterion criterion = decision_criterion::LOOKAHEAD;
     /**
-     * Duplication cost model of the hybrid strategy.
+     * @brief Duplication cost model of the hybrid strategy.
      */
     duplication_cost_model duplication_cost{};
     /**
-     * Nodes a lookahead may create before it is cut off; levels whose both options exceed it fall back to the
-     * weighted cone model. Must be positive.
+     * @brief Nodes a lookahead may create before it is cut off; levels whose both options exceed it fall back to the
+     * weighted cone model.
+     *
+     * Must be positive.
      */
     uint64_t lookahead_budget = 1000000u;
     /**
-     * Abort with `std::runtime_error` as soon as more nodes than this are duplicated at once: the duplicates of the
-     * result plus those of the level under construction, which the hybrid strategy may still discard. Node
-     * duplication can grow exponentially with the depth of the network, so the limit is checked at every duplicate.
-     * `0` disables the limit, which may exhaust the memory on an adverse network.
+     * @brief Abort with `std::runtime_error` as soon as more nodes than this are duplicated at once: the duplicates of
+     * the result plus those of the level under construction, which the hybrid strategy may still discard.
+     *
+     * Node duplication can grow exponentially with the depth of the network, so the limit is checked at every
+     * duplicate. `0` disables the limit, which may exhaust the memory on an adverse network.
      */
     uint64_t max_duplications = 2000000u;
 };
 
 /**
- * Statistics of the node duplication planarization algorithm.
+ * @brief Statistics of the node duplication planarization algorithm.
  */
 struct node_duplication_planarization_stats
 {
     /**
-     * Runtime of the duplication core. Excludes the final planarity check.
+     * @brief Runtime of the duplication core.
+     *
+     * Excludes the final planarity check.
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * Number of nodes in the planarized network minus the number of nodes in the input network.
+     * @brief Number of nodes in the planarized network minus the number of nodes in the input network.
      */
     uint64_t num_duplications{0};
     /**
-     * Number of levels on which the hybrid strategy kept the crossings.
+     * @brief Number of levels on which the hybrid strategy kept the crossings.
      */
     uint64_t num_crossing_levels{0};
     /**
-     * Number of crossings the hybrid strategy left for `crossing_gate_planarization`.
+     * @brief Number of crossings the hybrid strategy left for `crossing_gate_planarization`.
      */
     uint64_t num_crossings{0};
     /**
-     * Writes the statistics to a stream.
+     * @brief Writes the statistics to a stream.
      *
      * @param out Stream to write to.
      */
@@ -216,7 +238,7 @@ namespace detail
 {
 
 /**
- * Nodes grouped by level, outermost vector indexed by level.
+ * @brief Nodes grouped by level, outermost vector indexed by level.
  *
  * @tparam Ntk Network type.
  */
@@ -224,7 +246,7 @@ template <typename Ntk>
 using levelized_node_order = std::vector<std::vector<mockturtle::node<Ntk>>>;
 
 /**
- * One node of the H-graph used to compute the duplication order of a level.
+ * @brief One node of the H-graph used to compute the duplication order of a level.
  *
  * For a node in level \f$l\f$ of the input network, all orderings of its fanins in level \f$l-1\f$ are enumerated. One
  * H-graph node represents one such ordering by its first and last fanin, which decide the delay of the ordering. The
@@ -236,42 +258,44 @@ template <typename Ntk>
 struct hgraph_node
 {
     /**
-     * Node of the upper level whose fanins are ordered. A copy id when that node is a duplicate.
+     * @brief Node of the upper level whose fanins are ordered.
+     *
+     * A copy id when that node is a duplicate.
      */
     mockturtle::node<Ntk> root;
     /**
-     * Leftmost fanin of the ordering; the one a predecessor ordering can share.
+     * @brief Leftmost fanin of the ordering; the one a predecessor ordering can share.
      */
     mockturtle::node<Ntk> first_fanin;
     /**
-     * Rightmost fanin of the ordering; the one a successor ordering can share.
+     * @brief Rightmost fanin of the ordering; the one a successor ordering can share.
      */
     mockturtle::node<Ntk> last_fanin;
     /**
-     * All remaining fanins.
+     * @brief All remaining fanins.
      */
     std::vector<mockturtle::node<Ntk>> middle_fanins{};
     /**
-     * Delay of the shortest path through the H-graph that ends in this node.
+     * @brief Delay of the shortest path through the H-graph that ends in this node.
      */
     uint64_t delay;
     /**
-     * Index of the predecessor H-graph node on that shortest path, within the slice of the previous node.
+     * @brief Index of the predecessor H-graph node on that shortest path, within the slice of the previous node.
      */
     std::size_t predecessor{};
     /**
-     * Sum of the cone weights of the fanins that the shortest path ending here places once for two consecutive
+     * @brief Sum of the cone weights of the fanins that the shortest path ending here places once for two consecutive
      * consumers; the tie-break among equally short paths prefers the heaviest sum.
      */
     double shared_weight{0.0};
     /**
-     * Whether `first_fanin` and the last fanin of the predecessor on the shortest path are different nodes that share
-     * a fanin in the level below; the last tie-break prefers such paths, since placing the two side by side avoids a
-     * duplication there.
+     * @brief Whether `first_fanin` and the last fanin of the predecessor on the shortest path are different nodes that
+     * share a fanin in the level below; the last tie-break prefers such paths, since placing the two side by side
+     * avoids a duplication there.
      */
     bool shares_below{false};
     /**
-     * Creates an H-graph node.
+     * @brief Creates an H-graph node.
      *
      * @param r Node whose fanins are ordered.
      * @param first Leftmost fanin of the ordering.
@@ -288,7 +312,9 @@ struct hgraph_node
 };
 
 /**
- * Enumerates the H-graph nodes of one slice, i.e., all orderings of the given fanins by their first and last element.
+ * @brief Enumerates the H-graph nodes of one slice, i.e., all orderings of the given fanins by their first and last
+ * element.
+ *
  * A single fanin yields one H-graph node. Delays start at infinity.
  *
  * @tparam Ntk Network type.
@@ -347,7 +373,7 @@ template <typename Ntk>
 }
 
 /**
- * Implementation of the node duplication planarization algorithm.
+ * @brief Implementation of the node duplication planarization algorithm.
  *
  * Nodes of the source network keep their ids. Every duplicate receives a fresh id above `ntk.size()`; `origin()` maps
  * it back to the source node. For every node of a level, `fanins_of` records which nodes (originals or duplicates) of
@@ -360,19 +386,19 @@ class node_duplication_planarization_impl
 {
   public:
     /**
-     * Nodes of one level or the fanins of one node, source ids or copy ids.
+     * @brief Nodes of one level or the fanins of one node, source ids or copy ids.
      */
     using node_list = std::vector<mockturtle::node<Ntk>>;
     /**
-     * One slice of the H-graph: every ordering of the fanins of one node.
+     * @brief One slice of the H-graph: every ordering of the fanins of one node.
      */
     using hgraph_slice = std::vector<hgraph_node<Ntk>>;
     /**
-     * Unscaled cone weight per source node, negative for a node not weighed yet.
+     * @brief Unscaled cone weight per source node, negative for a node not weighed yet.
      */
     using cone_weight_map = std::vector<double>;
     /**
-     * Creates the implementation.
+     * @brief Creates the implementation.
      *
      * @param src Source network.
      * @param p Parameters.
@@ -389,8 +415,8 @@ class node_duplication_planarization_impl
     {}
 
     /**
-     * Collects the primary outputs that form the first level: every non-constant output node once, in rank order, or
-     * shuffled when the parameters ask for a random output order.
+     * @brief Collects the primary outputs that form the first level: every non-constant output node once, in rank
+     * order, or shuffled when the parameters ask for a random output order.
      *
      * @return Nodes of the output level.
      */
@@ -421,7 +447,9 @@ class node_duplication_planarization_impl
         return pos;
     }
     /**
-     * Decides for the hybrid strategy whether the level just computed keeps its crossings instead of its duplicates.
+     * @brief Decides for the hybrid strategy whether the level just computed keeps its crossings instead of its
+     * duplicates.
+     *
      * If so, the level uses the source nodes reordered to reduce crossings, its duplicates are discarded, and the
      * statistics count the kept crossings.
      *
@@ -459,7 +487,7 @@ class node_duplication_planarization_impl
         return true;
     }
     /**
-     * Runs the algorithm.
+     * @brief Runs the algorithm.
      *
      * @return Planar network with duplicated nodes and virtual primary inputs.
      */
@@ -518,9 +546,10 @@ class node_duplication_planarization_impl
 
   private:
     /**
-     * Creates an instance that only counts the duplicates the duplication strategy creates. It shares the cone
-     * weights of `parent`, so that every cone is weighed once per run, and records neither the planar order of the
-     * levels nor the fanins that `build_network` needs.
+     * @brief Creates an instance that only counts the duplicates the duplication strategy creates.
+     *
+     * It shares the cone weights of `parent`, so that every cone is weighed once per run, and records neither the
+     * planar order of the levels nor the fanins that `build_network` needs.
      *
      * @param parent Instance whose network and cone weights are shared.
      * @param p Parameters.
@@ -536,7 +565,7 @@ class node_duplication_planarization_impl
             cone_weights{parent.cone_weights}
     {}
     /**
-     * Maps a node id to the source node it stands for.
+     * @brief Maps a node id to the source node it stands for.
      *
      * @param n Source node id or copy id.
      * @return The source node.
@@ -546,7 +575,7 @@ class node_duplication_planarization_impl
         return n < ntk.size() ? n : copy_origin[n - ntk.size()];
     }
     /**
-     * Allocates a new copy id for a source node.
+     * @brief Allocates a new copy id for a source node.
      *
      * @param n Source node.
      * @return The copy id.
@@ -569,8 +598,9 @@ class node_duplication_planarization_impl
         return static_cast<mockturtle::node<Ntk>>(ntk.size() + copy_origin.size() - 1);
     }
     /**
-     * Removes the duplicates created since a given count, which belong to a level that keeps its crossings. The nodes
-     * of the level above connect to the source nodes of the removed duplicates.
+     * @brief Removes the duplicates created since a given count, which belong to a level that keeps its crossings.
+     *
+     * The nodes of the level above connect to the source nodes of the removed duplicates.
      *
      * @param copies_before Number of duplicates to keep.
      */
@@ -585,8 +615,10 @@ class node_duplication_planarization_impl
         fanins_of.resize(ntk.size() + copies_before);
     }
     /**
-     * Computes the planar order of the level below a given level: builds the H-graph of the level, one slice per
-     * node, and follows its shortest path. Duplicates of the level below receive copy ids.
+     * @brief Computes the planar order of the level below a given level: builds the H-graph of the level, one slice per
+     * node, and follows its shortest path.
+     *
+     * Duplicates of the level below receive copy ids.
      *
      * @param level Nodes of the current level, source ids or copy ids, in planar order.
      * @return Nodes of the level below in planar order, duplicates as copy ids.
@@ -604,7 +636,7 @@ class node_duplication_planarization_impl
         return compute_node_order();
     }
     /**
-     * Adds one slice to the H-graph of the current level.
+     * @brief Adds one slice to the H-graph of the current level.
      *
      * A slice holds every ordering of the fanins of `n` as an H-graph node (`enumerate_orderings`). The delay of each
      * ordering is the shortest path from the first slice of the level: moving to an ordering whose first fanin equals
@@ -714,7 +746,7 @@ class node_duplication_planarization_impl
         hgraph.push_back(std::move(orderings));
     }
     /**
-     * Whether two source nodes have a fanin in common.
+     * @brief Whether two source nodes have a fanin in common.
      *
      * @param a First node.
      * @param b Second node.
@@ -745,7 +777,7 @@ class node_duplication_planarization_impl
         return shared;
     }
     /**
-     * Places one fanin into the next level, which is built from right to left.
+     * @brief Places one fanin into the next level, which is built from right to left.
      *
      * If the rightmost node already placed stands for `n`, that copy is shared. Otherwise `n` is appended: as the
      * source node itself when it has not been placed in this level yet, as a fresh copy when it has.
@@ -777,7 +809,7 @@ class node_duplication_planarization_impl
         }
     }
     /**
-     * Places the fanins of one H-graph ordering into the next level and records them for the ordering's root.
+     * @brief Places the fanins of one H-graph ordering into the next level and records them for the ordering's root.
      *
      * @param ordering H-graph node to place.
      * @param level_rtl Next level under construction, rightmost node first.
@@ -805,9 +837,10 @@ class node_duplication_planarization_impl
         }
     }
     /**
-     * Computes the order of the next level from the H-graph of the current level: the ordering with the least delay
-     * in the last slice is chosen and its predecessors are followed back to the first slice. The fanins of each
-     * ordering are placed from right to left as they are encountered.
+     * @brief Computes the order of the next level from the H-graph of the current level: the ordering with the least
+     * delay in the last slice is chosen and its predecessors are followed back to the first slice.
+     *
+     * The fanins of each ordering are placed from right to left as they are encountered.
      *
      * @return Nodes of the next level in planar order, duplicates as copy ids.
      */
@@ -860,7 +893,7 @@ class node_duplication_planarization_impl
         return level_rtl;
     }
     /**
-     * Whether a level consists of primary inputs only.
+     * @brief Whether a level consists of primary inputs only.
      *
      * @param level Nodes of the level.
      * @return `true` iff every node stands for a primary input.
@@ -870,7 +903,7 @@ class node_duplication_planarization_impl
         return std::all_of(level.cbegin(), level.cend(), [this](const auto& n) { return ntk.is_pi(origin(n)); });
     }
     /**
-     * Builds the planar `virtual_pi_network` from the levelized duplication order.
+     * @brief Builds the planar `virtual_pi_network` from the levelized duplication order.
      *
      * Levels are processed from the primary inputs upwards. A repeated primary input becomes a virtual primary input;
      * every other repeated node becomes a fresh gate with the same function. Fanins are connected in the fanin order
@@ -967,7 +1000,7 @@ class node_duplication_planarization_impl
         return dest;
     }
     /**
-     * Collects the fanin signals of a node in the destination network, in the fanin order of its source node.
+     * @brief Collects the fanin signals of a node in the destination network, in the fanin order of its source node.
      *
      * @tparam NtkDest Destination network type.
      * @param n Source id or copy id of the node.
@@ -1015,7 +1048,8 @@ class node_duplication_planarization_impl
         return children;
     }
     /**
-     * Decides whether keeping the crossings of a level beats duplicating it, according to the decision criterion.
+     * @brief Decides whether keeping the crossings of a level beats duplicating it, according to the decision
+     * criterion.
      *
      * @param crossing_gate_cost Nodes the crossing gates and their padding add.
      * @param duplicated The level as the duplication strategy would build it, duplicates as copy ids.
@@ -1063,8 +1097,10 @@ class node_duplication_planarization_impl
         return crossing_gate_cost < duplication_cost(duplicated, lvl);
     }
     /**
-     * Counts the nodes the duplication strategy creates below a level, given its order, by running it on a copy of
-     * the state. Stops early once the count exceeds `budget`.
+     * @brief Counts the nodes the duplication strategy creates below a level, given its order, by running it on a copy
+     * of the state.
+     *
+     * Stops early once the count exceeds `budget`.
      *
      * @param level Nodes of the level, duplicates as copy ids of this instance or as repeated source nodes.
      * @param budget Count at which the run is cut off.
@@ -1104,7 +1140,8 @@ class node_duplication_planarization_impl
         return sub.run_from(start, budget);
     }
     /**
-     * Runs the duplication strategy from a given level down to the primary inputs and counts the nodes it creates.
+     * @brief Runs the duplication strategy from a given level down to the primary inputs and counts the nodes it
+     * creates.
      *
      * @param start Nodes of the level to start from, duplicates as copy ids of this instance.
      * @param budget Count at which the run is cut off.
@@ -1131,30 +1168,30 @@ class node_duplication_planarization_impl
         return copy_origin.size() - initial;
     }
     /**
-     * Result of costing the crossings of a level.
+     * @brief Result of costing the crossings of a level.
      */
     struct crossing_cost_result
     {
         /**
-         * Estimated number of nodes the crossing gates and their padding add.
+         * @brief Estimated number of nodes the crossing gates and their padding add.
          */
         uint64_t cost;
         /**
-         * Number of crossings between the level and the one above it.
+         * @brief Number of crossings between the level and the one above it.
          */
         uint64_t num_crossings;
     };
     /**
-     * Tolerance for comparing cone weights, which are sums of the model's weights scaled by powers of `depth_growth`;
-     * ties up to rounding count as equal.
+     * @brief Tolerance for comparing cone weights, which are sums of the model's weights scaled by powers of
+     * `depth_growth`; ties up to rounding count as equal.
      */
     static constexpr double WEIGHT_TOLERANCE = 1e-9;
     /**
-     * Marks a node in `cone_weight_map` whose cone has not been weighed.
+     * @brief Marks a node in `cone_weight_map` whose cone has not been weighed.
      */
     static constexpr double UNWEIGHED = -1.0;
     /**
-     * Number of nodes one crossing gate adds.
+     * @brief Number of nodes one crossing gate adds.
      *
      * @return Crossing gate size.
      */
@@ -1163,7 +1200,7 @@ class node_duplication_planarization_impl
         return ps.xor_gates ? XOR_CROSSING_GATE_NODES : AND_OR_CROSSING_GATE_NODES;
     }
     /**
-     * Number of levels one crossing gate spans.
+     * @brief Number of levels one crossing gate spans.
      *
      * @return Crossing gate depth.
      */
@@ -1172,7 +1209,7 @@ class node_duplication_planarization_impl
         return ps.xor_gates ? XOR_CROSSING_GATE_DEPTH : AND_OR_CROSSING_GATE_DEPTH;
     }
     /**
-     * Weighted size of the transitive fanin of a source node, see `duplication_cost_model`.
+     * @brief Weighted size of the transitive fanin of a source node, see `duplication_cost_model`.
      *
      * @param root Source node.
      * @param current_level Level on which the node is duplicated.
@@ -1187,8 +1224,10 @@ class node_duplication_planarization_impl
         return to_cost(cone_weight(root) * scale);
     }
     /**
-     * Weighted size of the transitive fanin cone of a source node under `duplication_cost_model`, without the depth
-     * scaling: a gate weighs `node_weight`, a chain buffer or inverter `buffer_weight`. Memoized per source node.
+     * @brief Weighted size of the transitive fanin cone of a source node under `duplication_cost_model`, without the
+     * depth scaling: a gate weighs `node_weight`, a chain buffer or inverter `buffer_weight`.
+     *
+     * Memoized per source node.
      *
      * @param root Source node.
      * @return Weighted cone size.
@@ -1229,7 +1268,7 @@ class node_duplication_planarization_impl
         return total;
     }
     /**
-     * Rounds a cost to an integer, saturating at the maximum.
+     * @brief Rounds a cost to an integer, saturating at the maximum.
      *
      * @param cost Cost.
      * @return Rounded cost.
@@ -1244,8 +1283,8 @@ class node_duplication_planarization_impl
         return static_cast<uint64_t>(std::llround(std::max(cost, 0.0)));
     }
     /**
-     * Cost of the duplicates in a level: every copy beyond the first occurrence of a source node costs the weighted
-     * size of that node's cone.
+     * @brief Cost of the duplicates in a level: every copy beyond the first occurrence of a source node costs the
+     * weighted size of that node's cone.
      *
      * @param level Nodes of the level, duplicates as copy ids.
      * @param lvl Level in the source network.
@@ -1271,7 +1310,7 @@ class node_duplication_planarization_impl
         return cost;
     }
     /**
-     * Positions of the nodes of a level, indexed by source node.
+     * @brief Positions of the nodes of a level, indexed by source node.
      *
      * @param level Nodes of the level, source ids only.
      * @return Position per source node, `npos` for nodes not in the level.
@@ -1289,7 +1328,7 @@ class node_duplication_planarization_impl
         return pos;
     }
     /**
-     * Positions in the lower level of the non-constant fanins of an upper node.
+     * @brief Positions in the lower level of the non-constant fanins of an upper node.
      *
      * @param n Node of the upper level, source id or copy id.
      * @param pos Position of every source node in the lower level, `npos` for nodes outside it.
@@ -1311,9 +1350,11 @@ class node_duplication_planarization_impl
         return targets;
     }
     /**
-     * Orders a level by the barycenters of the positions its nodes are used from in the upper level, then applies up
-     * to `max_swaps` adjacent swaps that reduce the crossing count. A swap of two neighbours only changes the
-     * crossings between their own edges, so each candidate is evaluated on those edges alone.
+     * @brief Orders a level by the barycenters of the positions its nodes are used from in the upper level, then
+     * applies up to `max_swaps` adjacent swaps that reduce the crossing count.
+     *
+     * A swap of two neighbours only changes the crossings between their own edges, so each candidate is evaluated on
+     * those edges alone.
      *
      * @param upper Nodes of the upper level, duplicates as copy ids.
      * @param lower Nodes of the lower level, source ids; reordered.
@@ -1396,9 +1437,9 @@ class node_duplication_planarization_impl
         lower = std::move(sorted);
     }
     /**
-     * Costs keeping the crossings between the upper level and a level in its original order: the level is reordered
-     * to minimize crossings, then every crossing is charged one crossing gate and every edge the buffers that pad it to
-     * the number of crossing gates on the most crossed edge.
+     * @brief Costs keeping the crossings between the upper level and a level in its original order: the level is
+     * reordered to minimize crossings, then every crossing is charged one crossing gate and every edge the buffers that
+     * pad it to the number of crossing gates on the most crossed edge.
      *
      * @param upper Nodes of the upper level, duplicates as copy ids.
      * @param lower Nodes of the lower level in source order; reordered.
@@ -1474,57 +1515,58 @@ class node_duplication_planarization_impl
         return {cost, num_crossings};
     }
     /**
-     * Source network.
+     * @brief Source network.
      */
     const Ntk& ntk;
     /**
-     * Parameters.
+     * @brief Parameters.
      */
     const node_duplication_planarization_params& ps;
     /**
-     * Statistics.
+     * @brief Statistics.
      */
     node_duplication_planarization_stats& pst;
     /**
-     * Source node of every copy id, indexed by `copy id - ntk.size()`.
+     * @brief Source node of every copy id, indexed by `copy id - ntk.size()`.
      */
     std::vector<mockturtle::node<Ntk>> copy_origin{};
     /**
-     * For every source id and copy id, the ids of the level below it connects to, in placement order.
+     * @brief For every source id and copy id, the ids of the level below it connects to, in placement order.
      */
     std::vector<node_list> fanins_of;
     /**
-     * H-graph of the current level, one slice per node of the level.
+     * @brief H-graph of the current level, one slice per node of the level.
      */
     std::vector<hgraph_slice> hgraph{};
     /**
-     * Fanins of the node whose slice is being computed, in rank order.
+     * @brief Fanins of the node whose slice is being computed, in rank order.
      */
     std::vector<mockturtle::node<Ntk>> slice_fanins{};
     /**
-     * Levelized duplication order, level 0 being the primary outputs; duplicates as copy ids.
+     * @brief Levelized duplication order, level 0 being the primary outputs; duplicates as copy ids.
      */
     levelized_node_order<Ntk> levels{};
     /**
-     * Stamp of the level in which each source node was last placed itself, indexed by source node; allocated on
+     * @brief Stamp of the level in which each source node was last placed itself, indexed by source node; allocated on
      * first use.
      */
     std::vector<uint32_t> placed_in{};
     /**
-     * Stamp of the level under construction, never 0.
+     * @brief Stamp of the level under construction, never 0.
      */
     uint32_t level_stamp{0};
     /**
-     * Whether the instance records the order and the fanins of the levels. Counting instances (see `copies_below`)
-     * do not.
+     * @brief Whether the instance records the order and the fanins of the levels.
+     *
+     * Counting instances (see `copies_below`) do not.
      */
     bool record{true};
     /**
-     * Cone weights of this instance, filled on demand; counting instances use their parent's.
+     * @brief Cone weights of this instance, filled on demand; counting instances use their parent's.
      */
     cone_weight_map own_cone_weights{};
     /**
-     * Unscaled cone weight per source node, filled on demand.
+     * @brief Unscaled cone weight per source node, filled on demand.
      */
     cone_weight_map* cone_weights;
 };
@@ -1532,7 +1574,7 @@ class node_duplication_planarization_impl
 }  // namespace detail
 
 /**
- * Planarizes a ranked, balanced logic network by duplicating nodes.
+ * @brief Planarizes a ranked, balanced logic network by duplicating nodes.
  *
  * The algorithm was originally proposed in \"Fabricatable Interconnect and Molecular QCA Circuits\" by A. Chaudhary,
  * D. Z. Chen, X. S. Hu, M. T. Niemier, R. Ravichandran, and K. Whitton in IEEE TCAD 2007. It solves the node
@@ -1554,7 +1596,7 @@ class node_duplication_planarization_impl
  * criterion also runs the duplication strategy below every level that has duplicates, at most twice, each run cut off
  * at `lookahead_budget` created nodes; the time is quadratic in the depth of the network in the worst case.
  * `WEIGHTED_CONE` avoids these runs and weighs every distinct cone once, which takes time proportional to the sum of
- * the cone sizes.
+ * the cone sizes. Every level also allocates scratch space linear in the number of nodes of the input network.
  *
  * The input must be balanced with unified outputs (see `network_balancing`), carry ranks (see `mutable_rank_view`),
  * and contain no virtual primary inputs (see `delete_virtual_pis`). The result is ranked; with the duplication strategy
@@ -1580,6 +1622,11 @@ node_duplication_planarization(const Ntk& ntk, const node_duplication_planarizat
     static_assert(mockturtle::has_create_node_v<Ntk>, "Ntk does not implement the create_node method");
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
     static_assert(mockturtle::has_depth_v<Ntk>, "Ntk does not implement the depth method");
+    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
+    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
+    static_assert(mockturtle::has_fanout_size_v<Ntk>, "Ntk does not implement the fanout_size method");
+    static_assert(mockturtle::has_node_function_v<Ntk>, "Ntk does not implement the node_function method");
+    static_assert(has_foreach_pi_unranked_v<Ntk>, "Ntk does not implement the foreach_pi_unranked method");
 
     if (!is_balanced(ntk, {.unify_outputs = true, .buffer_constant_outputs = false}))
     {

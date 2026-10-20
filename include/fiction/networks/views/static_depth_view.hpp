@@ -85,8 +85,11 @@ class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
     explicit static_depth_view(Ntk const& ntk, [[maybe_unused]] depth_view_params const& params = {}) : Ntk(ntk) {}
 
     /**
-     * @return Whether a level is stored for the node: the wrapped network's answer if it offers `has_level`, otherwise
-     * `true`, since a network with a depth interface keeps levels for every node.
+     * @brief Checks whether a level is stored for a node.
+     *
+     * @param n Node to check.
+     * @return The wrapped network's answer if it offers `has_level`, otherwise `true`, since a network with a depth
+     * interface keeps levels for every node.
      */
     [[nodiscard]] bool has_level([[maybe_unused]] typename Ntk::node const& n) const
     {
@@ -281,9 +284,13 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
-     * @return Whether a level is stored for the node. Every combinational input has one. A gate has none if no output
-     * reaches it (a dangling gate) or if it was added after the last call to `update_levels` without `on_add` being
-     * called for it.
+     * @brief Checks whether a level is stored for a node.
+     *
+     * Every combinational input has one. A gate has none if no output reaches it (a dangling gate) or if it was added
+     * after the last call to `update_levels` without `on_add` being called for it.
+     *
+     * @param n Node to check.
+     * @return `true` iff a level is stored for `n`.
      */
     [[nodiscard]] bool has_level(node const& n) const
     {

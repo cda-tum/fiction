@@ -662,13 +662,15 @@ Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nul
 }
 
 /**
- * Counts the edge crossings between every pair of adjacent ranks of a ranked, balanced network in its current rank
- * order. In contrast to `mincross` with `optimize = false`, the network is neither copied nor reordered.
+ * @brief Counts the edge crossings between every pair of adjacent levels of a ranked, balanced network in its current
+ * rank order.
+ *
+ * In contrast to `mincross` with `optimize = false`, the network is neither copied nor reordered.
  *
  * @tparam Ntk A ranked network type.
  * @param ntk The balanced network whose crossings are counted.
  * @return The number of crossings.
- * @throws std::invalid_argument If an edge does not connect adjacent ranks, i.e., if `ntk` is not balanced.
+ * @throws std::invalid_argument If an edge does not connect adjacent levels, i.e., if `ntk` is not balanced.
  */
 template <typename Ntk>
 [[nodiscard]] uint64_t count_crossings(const Ntk& ntk)
@@ -681,7 +683,7 @@ template <typename Ntk>
 
     for (uint32_t r = 0; r < ntk.depth(); ++r)
     {
-        // positions in rank `r + 1` that every node of rank `r` drives, one entry per edge
+        // positions in level `r + 1` that every node of level `r` drives, one entry per edge
         std::vector<std::vector<uint32_t>> targets(ntk.rank_width(r));
 
         ntk.foreach_node_in_rank(r + 1,
@@ -700,31 +702,43 @@ template <typename Ntk>
                                                            if (ntk.level(s) != r)
                                                            {
                                                                throw std::invalid_argument(
-                                                                   "An edge does not connect adjacent ranks");
+                                                                   "An edge does not connect adjacent levels");
                                                            }
 
                                                            targets[ntk.rank_position(s)].push_back(pos);
                                                        });
                                  });
 
-        // sweep the sources from left to right; an edge that ends left of an earlier edge's end crosses it
-        std::vector<uint64_t> swept(ntk.rank_width(r + 1) + 1, 0);
-        uint64_t              max_pos = 0;
+        // sweep the sources from left to right; an edge that ends left of an earlier edge's end crosses it. A Fenwick
+        // tree over the target positions counts the earlier edges that end right of a position.
+        const auto width = static_cast<std::size_t>(ntk.rank_width(r + 1));
+
+        std::vector<uint64_t> fenwick(width + 1, 0);
+        uint64_t              swept = 0;
 
         for (const auto& edges : targets)
         {
             for (const auto pos : edges)
             {
-                for (auto k = pos + 1; k <= max_pos; ++k)
+                uint64_t not_right = 0;
+
+                for (auto i = static_cast<std::size_t>(pos) + 1; i > 0; i -= i & (~i + 1))
                 {
-                    crossings += swept[k];
+                    not_right += fenwick[i];
                 }
+
+                crossings += swept - not_right;
             }
 
+            // edges of one source do not cross each other, so they are counted once all of them are queried
             for (const auto pos : edges)
             {
-                max_pos = std::max<uint64_t>(max_pos, pos);
-                ++swept[pos];
+                for (auto i = static_cast<std::size_t>(pos) + 1; i <= width; i += i & (~i + 1))
+                {
+                    ++fenwick[i];
+                }
+
+                ++swept;
             }
         }
     }

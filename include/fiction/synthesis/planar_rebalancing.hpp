@@ -36,12 +36,12 @@ namespace fiction::synthesis
 {
 
 /**
- * Parameters for the planar rebalancing algorithm.
+ * @brief Parameters for the planar rebalancing algorithm.
  */
 struct planar_rebalancing_params
 {
     /**
-     * Receives completed work and the phase total.
+     * @brief Receives completed work and the phase total.
      */
     utils::progress_callback on_progress{};
 };
@@ -50,7 +50,7 @@ namespace detail
 {
 
 /**
- * Implementation of the planar rebalancing algorithm.
+ * @brief Implementation of the planar rebalancing algorithm.
  *
  * @tparam Ntk Ranked network type.
  */
@@ -59,7 +59,7 @@ class planar_rebalancing_impl
 {
   public:
     /**
-     * Creates the implementation.
+     * @brief Creates the implementation.
      *
      * @param src Source network.
      * @param p Parameters.
@@ -74,7 +74,7 @@ class planar_rebalancing_impl
     }
 
     /**
-     * Runs the algorithm.
+     * @brief Runs the algorithm.
      *
      * @return Balanced copy of the source network without redundant buffers, with the same rank order.
      * @throws std::invalid_argument If a gate has only constant fanins.
@@ -103,25 +103,27 @@ class planar_rebalancing_impl
 
   private:
     /**
-     * An edge of the stripped network while buffers are re-inserted along it.
+     * @brief An edge of the stripped network while buffers are re-inserted along it.
      */
     struct edge
     {
         /**
-         * Source node in the stripped network.
+         * @brief Source node in the stripped network.
          */
         mockturtle::node<Ntk> source;
         /**
-         * Target node in the stripped network. Equal to `source` for an edge that leads to a primary output.
+         * @brief Target node in the stripped network.
+         *
+         * Equal to `source` for an edge that leads to a primary output.
          */
         mockturtle::node<Ntk> target;
         /**
-         * Buffers still to insert before the target is reached.
+         * @brief Buffers still to insert before the target is reached.
          */
         uint32_t buffers;
     };
     /**
-     * Whether a node is a buffer that drives exactly one consumer and can be removed.
+     * @brief Whether a node is a buffer that drives exactly one consumer and can be removed.
      *
      * @param n Node of the source network.
      * @return `true` iff `n` is a chain buffer.
@@ -131,8 +133,9 @@ class planar_rebalancing_impl
         return ntk.is_buf(n) && fanout_ntk.fanout_size(n) == 1;
     }
     /**
-     * Copies every node of the source network except chain buffers into `stripped`. A chain buffer maps to the
-     * signal of its fanin, so that its consumer connects to the node the buffer delayed.
+     * @brief Copies every node of the source network except chain buffers into `stripped`.
+     *
+     * A chain buffer maps to the signal of its fanin, so that its consumer connects to the node the buffer delayed.
      *
      * @param stripped Destination network; holds the copied primary inputs on entry.
      * @param old2new Map from source nodes to destination signals; completed here.
@@ -166,7 +169,9 @@ class planar_rebalancing_impl
         networks::restore_names(ntk, stripped, old2new);
     }
     /**
-     * Recomputes the ranks of the stripped network and puts its primary inputs in the order of the source network.
+     * @brief Recomputes the ranks of the stripped network and puts its primary inputs in the order of the source
+     * network.
+     *
      * Only the input order matters for the sweep that re-inserts the buffers; the order within the other levels is
      * derived from the consumer order of the source network as the sweep goes.
      *
@@ -186,9 +191,11 @@ class planar_rebalancing_impl
         stripped.set_ranks(0, input_order);
     }
     /**
-     * Consumers of a node in the source network, ordered by the rank position of the node's direct fanouts, with
-     * chain buffers skipped. There is one entry per edge: a gate that reads the node twice appears twice, and a
-     * consumer equal to the node itself stands for one primary output the node drives; direct outputs come first.
+     * @brief Consumers of a node in the source network, ordered by the rank position of the node's direct fanouts, with
+     * chain buffers skipped.
+     *
+     * There is one entry per edge: a gate that reads the node twice appears twice, and a consumer equal to the node
+     * itself stands for one primary output the node drives; direct outputs come first.
      *
      * @param n Node of the source network.
      * @return Consumers of `n` in rank order of the source network.
@@ -248,15 +255,15 @@ class planar_rebalancing_impl
         return result;
     }
     /**
-     * Consumers of every stripped node in rank order, derived from the source network.
+     * @brief Consumers of every stripped node in rank order, derived from the source network.
      */
     using consumer_map = std::unordered_map<mockturtle::node<Ntk>, std::vector<mockturtle::node<Ntk>>>;
     /**
-     * Map from stripped nodes to signals of the network under construction.
+     * @brief Map from stripped nodes to signals of the network under construction.
      */
     using signal_map = mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>;
     /**
-     * Collects the consumers of every stripped node in the rank order of the source network.
+     * @brief Collects the consumers of every stripped node in the rank order of the source network.
      *
      * @param stripped Stripped network with final ranks.
      * @param old2new Map from source nodes to signals of the stripped network.
@@ -286,8 +293,9 @@ class planar_rebalancing_impl
         return consumers;
     }
     /**
-     * Appends the outgoing edges of a placed node to the edge list of its level, in consumer order. A primary output
-     * of the node is an edge from the node to itself that reaches up to the output level.
+     * @brief Appends the outgoing edges of a placed node to the edge list of its level, in consumer order.
+     *
+     * A primary output of the node is an edge from the node to itself that reaches up to the output level.
      *
      * @param n Placed node of the stripped network.
      * @param stripped Stripped network with final ranks.
@@ -322,10 +330,11 @@ class planar_rebalancing_impl
         }
     }
     /**
-     * Places one level of the result: edges that span further get a buffer, one per source and level, shared by all
-     * consecutive edges of that source; a node whose fanin edges all end on this level is cloned. The map from
-     * stripped nodes to signals is updated once the level is complete, so that every clone reads the signals of the
-     * level below.
+     * @brief Places one level of the result: edges that span further get a buffer, one per source and level, shared by
+     * all consecutive edges of that source; a node whose fanin edges all end on this level is cloned.
+     *
+     * The map from stripped nodes to signals is updated once the level is complete, so that every clone reads the
+     * signals of the level below.
      *
      * @param current Edges that enter this level, in rank order.
      * @param stripped Stripped network with final ranks.
@@ -402,11 +411,13 @@ class planar_rebalancing_impl
         return next;
     }
     /**
-     * Re-inserts buffers into the stripped network so that every edge spans exactly one level and all primary outputs
-     * sit on the top level. Edges are swept level by level; consecutive edges from the same source share one buffer
-     * per level, so a fanout splits right above its targets. The sweep starts from the primary inputs in their source
-     * order and appends the edges of every placed node in the consumer order of the source network, which reproduces
-     * the planar embedding of the source and keeps the result planar.
+     * @brief Re-inserts buffers into the stripped network so that every edge spans exactly one level and all primary
+     * outputs sit on the top level.
+     *
+     * Edges are swept level by level; consecutive edges from the same source share one buffer per level, so a fanout
+     * splits right above its targets. The sweep starts from the primary inputs in their source order and appends the
+     * edges of every placed node in the consumer order of the source network, which reproduces the planar embedding of
+     * the source and keeps the result planar.
      *
      * @param stripped Stripped network with final ranks.
      * @param old2new Map from source nodes to signals of the stripped network.
@@ -454,7 +465,7 @@ class planar_rebalancing_impl
         return std::move(balanced);
     }
     /**
-     * Level of the highest primary output driver, constants excluded.
+     * @brief Level of the highest primary output driver, constants excluded.
      *
      * @param net Ranked network.
      * @return Maximum level among the primary output nodes, 0 if there are none.
@@ -475,7 +486,7 @@ class planar_rebalancing_impl
         return level;
     }
     /**
-     * Checks that the `fanins` edges from position `first` on all lead to `target` on this level, i.e., that the
+     * @brief Checks that the `fanins` edges from position `first` on all lead to `target` on this level, i.e., that the
      * node's fanin edges are consecutive as in a planar order.
      *
      * @param current Edges of the level.
@@ -497,7 +508,7 @@ class planar_rebalancing_impl
                            { return e.target == target && e.buffers == 0 && e.source != e.target; });
     }
     /**
-     * Number of non-constant fanins of a node.
+     * @brief Number of non-constant fanins of a node.
      *
      * @param net Network.
      * @param n Node.
@@ -518,8 +529,10 @@ class planar_rebalancing_impl
         return count;
     }
     /**
-     * Rejects gates whose fanins are all constants. The sweep reaches a gate only along edges that start at the
-     * primary inputs, so such a gate has no level to be placed on; constant propagation folds it before rebalancing.
+     * @brief Rejects gates whose fanins are all constants.
+     *
+     * The sweep reaches a gate only along edges that start at the primary inputs, so such a gate has no level to be
+     * placed on; constant propagation folds it before rebalancing.
      *
      * @throws std::invalid_argument If a gate has only constant fanins.
      */
@@ -536,19 +549,19 @@ class planar_rebalancing_impl
             });
     }
     /**
-     * Source network.
+     * @brief Source network.
      */
     const Ntk& ntk;
     /**
-     * Fanout view of the source network.
+     * @brief Fanout view of the source network.
      */
     const mockturtle::fanout_view<Ntk> fanout_ntk;
     /**
-     * Parameters.
+     * @brief Parameters.
      */
     const planar_rebalancing_params& ps;
     /**
-     * Number of primary outputs every source node drives directly.
+     * @brief Number of primary outputs every source node drives directly.
      */
     std::vector<uint32_t> output_count;
 };
@@ -556,14 +569,15 @@ class planar_rebalancing_impl
 }  // namespace detail
 
 /**
- * Removes every buffer that drives a single consumer from a ranked, planar network and re-inserts buffers on the
+ * @brief Removes every buffer that drives a single consumer from a ranked, planar network and re-inserts buffers on the
  * as-soon-as-possible levels of the remaining network: every gate and fanout node sits on the lowest level its fanins
- * allow, and all primary outputs sit on the level of the deepest one. Buffers that lead from one source to several
- * consumers are shared level by level, so the fanout splits right above its targets. The depth is the smallest the
- * network allows, and the buffer count is the smallest for these levels. A gate is never delayed to save buffers, so
- * other balanced level assignments can need fewer buffers. The rank order of the input is kept, so a planar input
- * yields a planar output; fanout nodes with more than one consumer are kept, so a fanout-substituted input yields a
- * fanout-substituted output.
+ * allow, and all primary outputs sit on the level of the deepest one.
+ *
+ * Buffers that lead from one source to several consumers are shared level by level, so the fanout splits right above
+ * its targets. The depth is the smallest the network allows, and the buffer count is the smallest for these levels. A
+ * gate is never delayed to save buffers, so other balanced level assignments can need fewer buffers. The rank order of
+ * the input is kept, so a planar input yields a planar output; fanout nodes with more than one consumer are kept, so a
+ * fanout-substituted input yields a fanout-substituted output.
  *
  * This is the post-processing step of `planar_fanout_substitution`, which pads every level to a uniform depth.
  *

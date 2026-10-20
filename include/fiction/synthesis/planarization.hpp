@@ -39,51 +39,56 @@ namespace fiction::synthesis
 {
 
 /**
- * Parameters for the planarization pipeline.
+ * @brief Parameters for the planarization pipeline.
  */
 struct planarization_params
 {
     /**
-     * Receives completed work and the phase total of every stage in turn, unless `duplication.on_progress` is set.
+     * @brief Receives completed work and the phase total of every stage in turn, unless `duplication.on_progress` is
+     * set.
      */
     utils::progress_callback on_progress{};
     /**
-     * Parameters of the node duplication stage, including the strategy and whether the crossing gates are built from
-     * XOR gates. The pipeline defaults to the hybrid strategy, which decides per level between duplicating nodes and
-     * keeping the crossings for the crossing gates.
+     * @brief Parameters of the node duplication stage, including the strategy and whether the crossing gates are built
+     * from XOR gates.
+     *
+     * The pipeline defaults to the hybrid strategy, which decides per level between duplicating nodes and keeping the
+     * crossings for the crossing gates.
      */
     // NOLINTNEXTLINE(modernize-use-designated-initializers): Sphinx cannot render designated initializers
     node_duplication_planarization_params duplication{
         node_duplication_planarization_params::planarization_strategy::HYBRID};
     /**
-     * Maximum output degree of the fanout nodes in the result. Must be at least 2.
+     * @brief Maximum output degree of the fanout nodes in the result.
+     *
+     * Must be at least 2.
      */
     uint32_t fanout_degree = 2u;
 };
 
 /**
- * Statistics of the planarization pipeline.
+ * @brief Statistics of the planarization pipeline.
  */
 struct planarization_stats
 {
     /**
-     * Runtime of the whole pipeline.
+     * @brief Runtime of the whole pipeline.
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * Statistics of the node duplication stage.
+     * @brief Statistics of the node duplication stage.
      */
     node_duplication_planarization_stats duplication{};
     /**
-     * Statistics of the crossing gate stage; empty if no level kept its crossings.
+     * @brief Statistics of the crossing gate stage; empty if no level kept its crossings.
      */
     crossing_gate_planarization_stats crossing_gates{};
     /**
-     * Number of nodes of the result.
+     * @brief Number of nodes of the result.
      */
     uint64_t num_nodes{0};
     /**
-     * Writes the statistics to a stream.
+     * @brief Writes the statistics to a stream.
      *
      * @param out Stream to write to.
      */
@@ -98,12 +103,15 @@ struct planarization_stats
 };
 
 /**
- * Planarizes a balanced, ranked logic network and returns a planar, balanced, fanout-substituted network that
- * computes the same functions. The pipeline runs `node_duplication_planarization` with the chosen strategy, resolves
- * the crossings that the hybrid strategy kept with `crossing_gate_planarization`, restores fanout nodes with
- * `planar_fanout_substitution`, and removes the buffers that this leaves behind with `planar_rebalancing`.
+ * @brief Planarizes a balanced, ranked logic network and returns a planar, balanced, fanout-substituted network that
+ * computes the same functions.
  *
- * Duplicated primary inputs become virtual primary inputs of the result.
+ * The pipeline runs `node_duplication_planarization` with the chosen strategy, resolves the crossings that the hybrid
+ * strategy kept with `crossing_gate_planarization`, restores fanout nodes with `planar_fanout_substitution`, and
+ * removes the buffers that this leaves behind with `planar_rebalancing`.
+ *
+ * Duplicated primary inputs become virtual primary inputs of the result. The function checks the result for crossings
+ * and for balance with unified outputs. The fanout degree is not checked; `is_fanout_substituted` does it on request.
  *
  * @tparam Ntk Ranked, balanced network type (see `mutable_rank_view`) without virtual primary inputs.
  * @param ntk Source network.
