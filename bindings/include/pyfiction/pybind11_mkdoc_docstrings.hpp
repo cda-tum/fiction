@@ -7491,6 +7491,36 @@ static const char *mkd_doc_fiction_networks_technology_network_create_xor = R"do
 
 static const char *mkd_doc_fiction_networks_technology_network_create_xor3 = R"doc(Creates an XOR3 gate with the supplied signals.)doc";
 
+static const char *mkd_doc_fiction_networks_technology_network_foreach_fanin =
+R"doc(Applies a function to every fanin of a node in constant time per node.
+
+Constants and inputs have no fanins. `klut_network::foreach_fanin`
+tells inputs from gates with `klut_network::is_ci`, which scans all
+inputs.
+
+Args:
+    n: Node whose fanins to visit.
+    fn: Function to apply to each fanin.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_technology_network_foreach_gate =
+R"doc(Applies a function to every gate in constant time per node.
+
+`klut_network::foreach_gate` tests every node with
+`klut_network::is_ci`, which scans all inputs.
+
+Args:
+    fn: Function to apply to each gate.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_technology_network_is_and = R"doc(Returns whether the node implements the AND function.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_is_and3 = R"doc(Returns whether the node implements the AND3 function.)doc";
@@ -25304,12 +25334,11 @@ A single fanin yields one H-graph node. Delays start at infinity.
 Args:
     root: Node whose fanins are ordered.
     nodes: Fanins in rank order.
+    orderings: Receives the H-graph nodes of the slice; replaces its
+               content and reuses its storage.
 
 Template Args:
     Ntk: Network type.
-
-Returns:
-    H-graph nodes of the slice.
 
 )doc";
 
@@ -25689,6 +25718,18 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight_map =
+R"doc(Cone weights of the source nodes and the scratch space that weighs a
+cone.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight_map_stamp = R"doc(Stamp of the cone being weighed, never 0.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight_map_visited = R"doc(Stamp of the cone in which each source node was last visited.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight_map_weight =
+R"doc(Unscaled cone weight per source node, negative for a node not weighed
+yet.)doc";
+
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weights = R"doc(Unscaled cone weight per source node, filled on demand.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_copies_below =
@@ -25701,6 +25742,7 @@ Args:
     level: Nodes of the level, duplicates as copy ids of this instance
            or as repeated source nodes.
     budget: Count at which the run is cut off.
+    trace: Receives the levels the run visits, if given.
 
 Returns:
     Nodes created below the level, or a value above `budget` if cut
@@ -25713,6 +25755,10 @@ static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarizati
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_crossings_are_cheaper =
 R"doc(Decides whether keeping the crossings of a level beats duplicating it,
 according to the decision criterion.
+
+The `LOOKAHEAD` criterion also records the path the duplication takes
+below the level it chose, so that the next decision, which lies on
+that path, needs no second run.
 
 Args:
     crossing_gate_cost: Nodes the crossing gates and their padding
@@ -25754,11 +25800,33 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_exceeds_below =
+R"doc(Whether the nodes created below a level exceed a bound.
+
+Reads the answer from the trace of the path the duplication takes
+(`path`) when it visited the level, and runs the duplication strategy
+below the level otherwise.
+
+Args:
+    level: Nodes of the level, duplicates as copy ids.
+    bound: Count to compare with.
+    below: Receives the trace of the nodes below `level`: the part of
+           `path` below it, or the trace of the run.
+
+Returns:
+    `true` iff more than `bound` nodes are created below `level`.
+
+)doc";
+
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_fanins_of =
 R"doc(For every source id and copy id, the ids of the level below it
 connects to, in placement order.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_hgraph = R"doc(H-graph of the current level, one slice per node of the level.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_hgraph_size =
+R"doc(Number of slices of `hgraph` in use; the slices beyond it keep their
+storage for the next level.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_is_final_level =
 R"doc(Whether a level consists of primary inputs only.
@@ -25877,6 +25945,11 @@ static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarizati
 R"doc(Cone weights of this instance, filled on demand; counting instances
 use their parent's.)doc";
 
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_path =
+R"doc(Path the duplication takes below the level of the last decision of the
+`LOOKAHEAD` criterion, as the counting run that chose it visited it;
+empty before the first decision.)doc";
+
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_place_fanin =
 R"doc(Places one fanin into the next level, which is built from right to
 left.
@@ -25889,7 +25962,7 @@ Args:
     n: Source node to place.
     level_rtl: Next level under construction, rightmost node first.
     fanins: Receives the id (source or copy) that the consumer
-            connects to.
+            connects to; ignored by instances that do not record.
 
 )doc";
 
@@ -25932,11 +26005,32 @@ Args:
     start: Nodes of the level to start from, duplicates as copy ids of
            this instance.
     budget: Count at which the run is cut off.
+    trace: Receives the levels the run visits and the nodes created at
+           each, if given; stays empty for a run longer than
+           `MAX_TRACE_NODES` nodes.
 
 Returns:
     Nodes created below `start`, or a value above `budget` if cut off.
 
 )doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_trace =
+R"doc(Levels a counting run visited and the nodes it had created at each of
+them.
+
+The count below a level depends on the level's source nodes in their
+order only, so a later query for a level that the run visited reads
+its answer from the trace instead of running again.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_trace_complete =
+R"doc(Whether the run reached the primary inputs; otherwise `created.back()`
+is a lower bound.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_trace_created = R"doc(Nodes the run had created up to and including each level of `levels`.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_trace_levels =
+R"doc(Source nodes of every level the run produced, top-down, without the
+level it started from.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_share_fanin =
 R"doc(Whether two source nodes have a fanin in common.
@@ -25971,7 +26065,7 @@ Template Args:
 
 static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_available_fanouts =
 R"doc(Free outputs of the fanout tree per source node, each padded to the
-depth of the tree.)doc";
+depth of the tree, in reverse planar order.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_fanout_node_level =
 R"doc(Level of the fanout node with the given index in a breadth-first
@@ -25984,8 +26078,6 @@ Returns:
     Its level in the tree.
 
 )doc";
-
-static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_fanout_ntk = R"doc(Fanout view of the source network.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_gather_children =
 R"doc(Collects the fanin signals of a node in the destination network,
@@ -27494,14 +27586,15 @@ Template Args:
          information.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_crossings =
-R"doc(Computes the number of crossings between two sets of ranked positions.
+R"doc(Counts the crossings between two sets of ranked positions in one pass.
 
 Args:
-    a: Positions from first set of connections.
-    b: Positions from second set of connections.
+    a: Positions of the connections of the left node.
+    b: Positions of the connections of the right node.
 
 Returns:
-    Total number of crossings between the sets.
+    Crossings with the first node left of the second, and with the
+    nodes swapped.
 
 )doc";
 
@@ -27510,17 +27603,21 @@ R"doc(Fanout-augmented view of the network for efficient traversal and
 connectivity queries.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_cross =
-R"doc(Counts the number of edge crossings between fanins of two nodes in the
-previous rank.
+R"doc(Counts the crossings between the fanin edges of two adjacent nodes in
+the previous rank, for both orders of the nodes.
 
 Args:
-    left: First node.
-    right: Second node.
+    left: Left node.
+    right: Right node.
 
 Returns:
-    Number of crossings.
+    Crossings with `left` left of `right` and with the nodes swapped.
 
 )doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_left_positions =
+R"doc(Scratch space for the rank positions of the connections of the left
+node.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_median_map =
 R"doc(Stores median values used to sort nodes within ranks during
@@ -27576,15 +27673,15 @@ state.
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_ntk = R"doc(Logic network being reordered.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_out_cross =
-R"doc(Counts the number of edge crossings between fanouts of two nodes in
-the next rank.
+R"doc(Counts the crossings between the fanout edges of two adjacent nodes in
+the next rank, for both orders of the nodes.
 
 Args:
-    left: First node.
-    right: Second node.
+    left: Left node.
+    right: Right node.
 
 Returns:
-    Number of crossings.
+    Crossings with `left` left of `right` and with the nodes swapped.
 
 )doc";
 
@@ -27602,6 +27699,10 @@ Args:
     order: Sorting order of medians.
 
 )doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_right_positions =
+R"doc(Scratch space for the rank positions of the connections of the right
+node.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_run =
 R"doc(Runs the crossing minimization algorithm and returns a reordered
