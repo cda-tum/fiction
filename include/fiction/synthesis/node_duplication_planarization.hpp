@@ -321,25 +321,25 @@ struct hgraph_node
  * @tparam Ntk Network type.
  * @param root Node whose fanins are ordered.
  * @param nodes Fanins in rank order.
- * @return H-graph nodes of the slice.
+ * @param orderings Receives the H-graph nodes of the slice; replaces its content and reuses its storage.
  */
 template <typename Ntk>
-[[nodiscard]] std::vector<hgraph_node<Ntk>> enumerate_orderings(const mockturtle::node<Ntk>               root,
-                                                                const std::vector<mockturtle::node<Ntk>>& nodes)
+void enumerate_orderings(const mockturtle::node<Ntk> root, const std::vector<mockturtle::node<Ntk>>& nodes,
+                         std::vector<hgraph_node<Ntk>>& orderings)
 {
     constexpr auto inf = std::numeric_limits<uint64_t>::max();
 
-    std::vector<hgraph_node<Ntk>> orderings{};
+    orderings.clear();
 
     if (nodes.empty())
     {
-        return orderings;
+        return;
     }
 
     if (nodes.size() == 1)
     {
         orderings.emplace_back(root, nodes.front(), nodes.front(), inf);
-        return orderings;
+        return;
     }
 
     orderings.reserve(nodes.size() * (nodes.size() - 1));
@@ -369,8 +369,6 @@ template <typename Ntk>
             orderings.push_back(std::move(backward));
         }
     }
-
-    return orderings;
 }
 
 /**
@@ -395,9 +393,23 @@ class node_duplication_planarization_impl
      */
     using hgraph_slice = std::vector<hgraph_node<Ntk>>;
     /**
-     * @brief Unscaled cone weight per source node, negative for a node not weighed yet.
+     * @brief Cone weights of the source nodes and the scratch space that weighs a cone.
      */
-    using cone_weight_map = std::vector<double>;
+    struct cone_weight_map
+    {
+        /**
+         * @brief Unscaled cone weight per source node, negative for a node not weighed yet.
+         */
+        std::vector<double> weight;
+        /**
+         * @brief Stamp of the cone in which each source node was last visited.
+         */
+        std::vector<uint32_t> visited;
+        /**
+         * @brief Stamp of the cone being weighed, never 0.
+         */
+        uint32_t stamp{0};
+    };
     /**
      * @brief Creates the implementation.
      *
@@ -411,7 +423,7 @@ class node_duplication_planarization_impl
             ps{p},
             pst{st},
             fanins_of(src.size()),
-            own_cone_weights(src.size(), UNWEIGHED),
+            own_cone_weights{std::vector<double>(src.size(), UNWEIGHED), std::vector<uint32_t>(src.size(), 0u)},
             cone_weights{&own_cone_weights}
     {}
 
@@ -634,7 +646,7 @@ class node_duplication_planarization_impl
      */
     [[nodiscard]] node_list next_level_of(const node_list& level)
     {
-        hgraph.clear();
+        hgraph_size = 0;
 
         for (const auto& n : level)
         {
@@ -685,9 +697,16 @@ class node_duplication_planarization_impl
             throw std::invalid_argument("A gate has only constant fanins; propagate constants before planarization");
         }
 
-        auto orderings = enumerate_orderings<Ntk>(n, slice_fanins);
+        if (hgraph_size == hgraph.size())
+        {
+            hgraph.emplace_back();
+        }
 
-        if (hgraph.empty())
+        auto& orderings = hgraph[hgraph_size];
+
+        enumerate_orderings<Ntk>(n, slice_fanins, orderings);
+
+        if (hgraph_size == 0)
         {
             for (auto& ordering : orderings)
             {
@@ -696,7 +715,7 @@ class node_duplication_planarization_impl
         }
         else
         {
-            const auto& previous = hgraph.back();
+            const auto& previous = hgraph[hgraph_size - 1];
 
             for (auto& cur : orderings)
             {
@@ -752,7 +771,7 @@ class node_duplication_planarization_impl
             }
         }
 
-        hgraph.push_back(std::move(orderings));
+        ++hgraph_size;
     }
     /**
      * @brief Whether two source nodes have a fanin in common.
@@ -793,14 +812,18 @@ class node_duplication_planarization_impl
      *
      * @param n Source node to place.
      * @param level_rtl Next level under construction, rightmost node first.
-     * @param fanins Receives the id (source or copy) that the consumer connects to.
+     * @param fanins Receives the id (source or copy) that the consumer connects to; ignored by instances that do not
+     * record.
      */
     void place_fanin(const mockturtle::node<Ntk> n, std::vector<mockturtle::node<Ntk>>& level_rtl,
                      std::vector<mockturtle::node<Ntk>>& fanins)
     {
         if (!level_rtl.empty() && origin(level_rtl.back()) == n)
         {
-            fanins.push_back(level_rtl.back());
+            if (record)
+            {
+                fanins.push_back(level_rtl.back());
+            }
             return;
         }
 
@@ -808,13 +831,19 @@ class node_duplication_planarization_impl
         {
             placed_in[n] = level_stamp;
             level_rtl.push_back(n);
-            fanins.push_back(n);
+            if (record)
+            {
+                fanins.push_back(n);
+            }
         }
         else
         {
             const auto copy = make_copy(n);
             level_rtl.push_back(copy);
-            fanins.push_back(copy);
+            if (record)
+            {
+                fanins.push_back(copy);
+            }
         }
     }
     /**
@@ -826,7 +855,11 @@ class node_duplication_planarization_impl
     void place_ordering(const hgraph_node<Ntk>& ordering, std::vector<mockturtle::node<Ntk>>& level_rtl)
     {
         std::vector<mockturtle::node<Ntk>> fanins{};
-        fanins.reserve(ordering.middle_fanins.size() + 2);
+
+        if (record)
+        {
+            fanins.reserve(ordering.middle_fanins.size() + 2);
+        }
 
         place_fanin(ordering.last_fanin, level_rtl, fanins);
 
@@ -866,12 +899,12 @@ class node_duplication_planarization_impl
         }
         ++level_stamp;
 
-        if (hgraph.empty())
+        if (hgraph_size == 0)
         {
             return level_rtl;
         }
 
-        const auto& last_slice = hgraph.back();
+        const auto& last_slice = hgraph[hgraph_size - 1];
 
         // the least delay; among equal delays the heaviest shared weight; among those the first in rank order
         const auto best = std::min_element(
@@ -886,7 +919,7 @@ class node_duplication_planarization_impl
         place_ordering(*best, level_rtl);
 
         // walk the shortest path back to the first slice, placing every ordering on the way
-        std::size_t slice       = hgraph.size() - 1;
+        std::size_t slice       = hgraph_size - 1;
         std::size_t predecessor = best->predecessor;
 
         while (slice > 0 && predecessor < hgraph[slice - 1].size())
@@ -1219,15 +1252,28 @@ class node_duplication_planarization_impl
     {
         const auto& m = ps.duplication_cost;
 
-        auto& weight = (*cone_weights)[root];
+        auto& weight = cone_weights->weight[root];
 
         if (weight != UNWEIGHED)
         {
             return weight;
         }
 
-        std::vector<mockturtle::node<Ntk>>        stack{root};
-        std::unordered_set<mockturtle::node<Ntk>> visited{};
+        // a fresh stamp empties the set of visited nodes without touching every node
+        const auto stamp = ++cone_weights->stamp;
+
+        std::vector<mockturtle::node<Ntk>> stack{};
+
+        const auto visit = [&stack, &visited = cone_weights->visited, stamp](const mockturtle::node<Ntk> n)
+        {
+            if (visited[n] != stamp)
+            {
+                visited[n] = stamp;
+                stack.push_back(n);
+            }
+        };
+
+        visit(root);
 
         double total = 0.0;
 
@@ -1236,14 +1282,9 @@ class node_duplication_planarization_impl
             const auto n = stack.back();
             stack.pop_back();
 
-            if (!visited.insert(n).second)
-            {
-                continue;
-            }
-
             total += (ntk.fanin_size(n) == 1 && ntk.fanout_size(n) == 1) ? m.buffer_weight : m.node_weight;
 
-            ntk.foreach_fanin(n, [&stack, this](const auto& f) { stack.push_back(ntk.get_node(f)); });
+            ntk.foreach_fanin(n, [&visit, this](const auto& f) { visit(ntk.get_node(f)); });
         }
 
         weight = total;
@@ -1316,6 +1357,10 @@ class node_duplication_planarization_impl
      * @brief H-graph of the current level, one slice per node of the level.
      */
     std::vector<hgraph_slice> hgraph{};
+    /**
+     * @brief Number of slices of `hgraph` in use; the slices beyond it keep their storage for the next level.
+     */
+    std::size_t hgraph_size{0};
     /**
      * @brief Fanins of the node whose slice is being computed, in rank order.
      */
