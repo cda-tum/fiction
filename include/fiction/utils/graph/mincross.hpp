@@ -382,12 +382,28 @@ class mincross_impl
     }
 
     /**
-     * Performs pairwise transpositions within ranks to further reduce crossings.
+     * @brief Performs pairwise transpositions within ranks to further reduce crossings.
+     *
+     * The sweeps run on flat copies of the ranks, the rank positions, and the neighbor lists; the ranks of the network
+     * are written back at the end.
      *
      * @param order Sorting heuristic for tie-breaking.
      */
     void transpose(const median_sorting order)
     {
+        build_neighbors();
+
+        ranks = fanout_ntk.get_all_ranks();
+
+        positions.assign(fanout_ntk.size(), 0);
+        for (const auto& rank : ranks)
+        {
+            for (std::size_t i = 0; i < rank.size(); ++i)
+            {
+                positions[index_of(rank[i])] = static_cast<uint32_t>(i);
+            }
+        }
+
         std::vector<uint8_t> candidate(fanout_ntk.depth() + 1, 1);
         uint32_t             delta          = 0;
         uint32_t             max_iterations = 0;
@@ -418,6 +434,8 @@ class mincross_impl
                 break;
             }
         }
+
+        fanout_ntk.set_all_ranks(ranks);
     }
 
     /**
@@ -429,43 +447,40 @@ class mincross_impl
      */
     uint32_t transpose_step(const uint32_t r, const median_sorting order)
     {
-        auto rank = fanout_ntk.get_ranks(r);
+        // the pairs of the pass are taken from the order at its start
+        const auto rank = ranks[r];
 
         if (rank.size() <= 1)
         {
             return 0;
         }
 
+        const bool has_fanins  = r > 0;
+        const bool has_fanouts = r + 1 < fanout_ntk.depth();
+
         uint32_t rv = 0;
 
         for (uint32_t i = 0; i < rank.size() - 1; ++i)
         {
-            auto const& v = rank[i];
-            auto const& w = rank[i + 1];
-
-            // Ensure v comes before w
-            assert(fanout_ntk.rank_position(v) < fanout_ntk.rank_position(w) &&
-                   "invalid ranks: nodes must be ordered in ascending rank_position");
+            const auto v = index_of(rank[i]);
+            const auto w = index_of(rank[i + 1]);
 
             uint32_t c0 = 0, c1 = 0;
 
-            if (r > 0)
+            if (has_fanins)
             {
-                const auto [keep, swapped] = in_cross(v, w);
-                c0 += keep;
-                c1 += swapped;
+                count_crossings(in_begin, in_nodes, v, w, c0, c1);
             }
 
-            if (r + 1 < fanout_ntk.depth())
+            if (has_fanouts)
             {
-                const auto [keep, swapped] = out_cross(v, w);
-                c0 += keep;
-                c1 += swapped;
+                count_crossings(out_begin, out_nodes, v, w, c0, c1);
             }
 
             if (c1 < c0 || (c0 > 0 && order == median_sorting::DESCENDING && c1 == c0))
             {
-                fanout_ntk.swap(v, w);  // Perform the swap in the rank
+                std::swap(ranks[r][positions[v]], ranks[r][positions[w]]);
+                std::swap(positions[v], positions[w]);
                 rv += (c0 - c1);
             }
         }
@@ -474,80 +489,83 @@ class mincross_impl
     }
 
     /**
-     * @brief Counts the crossings between the fanin edges of two adjacent nodes in the previous rank, for both orders
-     * of the nodes.
+     * @brief Index of a node in the flat arrays.
      *
-     * @param left Left node.
-     * @param right Right node.
-     * @return Crossings with `left` left of `right` and with the nodes swapped.
+     *
+     * @param n Node.
+     * @return Index of `n`.
      */
-    std::pair<uint32_t, uint32_t> in_cross(const node& left, const node& right)
+    [[nodiscard]] std::size_t index_of(const node& n) const
     {
-        const auto gather = [this](const node& n, std::vector<uint32_t>& sources)
-        {
-            sources.clear();
-            fanout_ntk.foreach_fanin(n,
-                                     [this, &sources](auto const& f)
-                                     {
-                                         const auto src = fanout_ntk.get_node(f);
-                                         if (!fanout_ntk.is_constant(src))
-                                         {
-                                             sources.push_back(fanout_ntk.rank_position(src));
-                                         }
-                                     });
-        };
-
-        gather(left, left_positions);
-        gather(right, right_positions);
-
-        return count_crossings(left_positions, right_positions);
+        return static_cast<std::size_t>(fanout_ntk.node_to_index(n));
     }
 
     /**
-     * @brief Counts the crossings between the fanout edges of two adjacent nodes in the next rank, for both orders of
-     * the nodes.
-     *
-     * @param left Left node.
-     * @param right Right node.
-     * @return Crossings with `left` left of `right` and with the nodes swapped.
+     * @brief Collects the non-constant fanins and the fanouts of every node in flat arrays, once.
      */
-    std::pair<uint32_t, uint32_t> out_cross(const node& left, const node& right)
+    void build_neighbors()
     {
-        const auto gather = [this](const node& n, std::vector<uint32_t>& targets)
+        if (!in_begin.empty())
         {
-            targets.clear();
-            fanout_ntk.foreach_fanout(n, [this, &targets](auto const& tgt)
-                                      { targets.push_back(fanout_ntk.rank_position(tgt)); });
-        };
+            return;
+        }
 
-        gather(left, left_positions);
-        gather(right, right_positions);
+        const auto size = static_cast<std::size_t>(fanout_ntk.size());
 
-        return count_crossings(left_positions, right_positions);
-    }
+        in_begin.assign(size + 1, 0);
+        out_begin.assign(size + 1, 0);
 
-    /**
-     * @brief Counts the crossings between two sets of ranked positions in one pass.
-     *
-     * @param a Positions of the connections of the left node.
-     * @param b Positions of the connections of the right node.
-     * @return Crossings with the first node left of the second, and with the nodes swapped.
-     */
-    static std::pair<uint32_t, uint32_t> count_crossings(const std::vector<uint32_t>& a, const std::vector<uint32_t>& b)
-    {
-        uint32_t kept    = 0;
-        uint32_t swapped = 0;
-
-        for (const auto x : a)
+        for (std::size_t i = 0; i < size; ++i)
         {
-            for (const auto y : b)
+            const node n = fanout_ntk.index_to_node(static_cast<uint32_t>(i));
+
+            if (!fanout_ntk.is_constant(n))
             {
+                fanout_ntk.foreach_fanin(n,
+                                         [this](auto const& f)
+                                         {
+                                             const auto src = fanout_ntk.get_node(f);
+                                             if (!fanout_ntk.is_constant(src))
+                                             {
+                                                 in_nodes.push_back(static_cast<uint32_t>(index_of(src)));
+                                             }
+                                         });
+                fanout_ntk.foreach_fanout(n, [this](auto const& tgt)
+                                          { out_nodes.push_back(static_cast<uint32_t>(index_of(tgt))); });
+            }
+
+            in_begin[i + 1]  = static_cast<uint32_t>(in_nodes.size());
+            out_begin[i + 1] = static_cast<uint32_t>(out_nodes.size());
+        }
+    }
+
+    /**
+     * @brief Adds the crossings between the edges of two nodes to a pair of counters, for both orders of the nodes.
+     *
+     * The neighbors of `left` and `right` in an adjacent rank are compared by their rank positions.
+     *
+     * @param begin Offsets of the neighbor lists.
+     * @param neighbors Neighbor lists.
+     * @param left Index of the left node.
+     * @param right Index of the right node.
+     * @param kept Receives the crossings with `left` left of `right`.
+     * @param swapped Receives the crossings with the nodes swapped.
+     */
+    void count_crossings(const std::vector<uint32_t>& begin, const std::vector<uint32_t>& neighbors,
+                         const std::size_t left, const std::size_t right, uint32_t& kept, uint32_t& swapped) const
+    {
+        for (auto a = begin[left]; a < begin[left + 1]; ++a)
+        {
+            const auto x = positions[neighbors[a]];
+
+            for (auto b = begin[right]; b < begin[right + 1]; ++b)
+            {
+                const auto y = positions[neighbors[b]];
+
                 kept += static_cast<uint32_t>(x > y);
                 swapped += static_cast<uint32_t>(x < y);
             }
         }
-
-        return {kept, swapped};
     }
 
     /**
@@ -606,13 +624,29 @@ class mincross_impl
      */
     uint64_t total_crossings = std::numeric_limits<uint64_t>::max();
     /**
-     * @brief Scratch space for the rank positions of the connections of the left node.
+     * @brief Nodes of every rank while the transposition sweeps run.
      */
-    std::vector<uint32_t> left_positions{};
+    std::vector<std::vector<node>> ranks{};
     /**
-     * @brief Scratch space for the rank positions of the connections of the right node.
+     * @brief Position within its rank per node index while the transposition sweeps run.
      */
-    std::vector<uint32_t> right_positions{};
+    std::vector<uint32_t> positions{};
+    /**
+     * @brief Offsets of the fanin lists in `in_nodes`: node `i` has the entries `in_begin[i]` to `in_begin[i + 1]`.
+     */
+    std::vector<uint32_t> in_begin{};
+    /**
+     * @brief Node indices of the non-constant fanins of all nodes.
+     */
+    std::vector<uint32_t> in_nodes{};
+    /**
+     * @brief Offsets of the fanout lists in `out_nodes`, like `in_begin`.
+     */
+    std::vector<uint32_t> out_begin{};
+    /**
+     * @brief Node indices of the fanouts of all nodes.
+     */
+    std::vector<uint32_t> out_nodes{};
     /**
      * Stores median values used to sort nodes within ranks during optimization.
      */
