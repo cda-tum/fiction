@@ -151,9 +151,9 @@ class crossing_gate_planarization_impl
 
         detect_crossings();
 
-        auto  init    = networks::initialize_copy_network_with_virtual_pis(ntk);
-        auto& dest    = init.first;
-        auto& old2new = init.second;
+        auto init    = networks::initialize_copy_network_with_virtual_pis(ntk);
+        auto dest    = std::move(init.first);
+        auto old2new = std::move(init.second);
 
         // level 0 of the result keeps the order of the primary inputs
         std::vector<mockturtle::node<Ntk>> input_order{};
@@ -211,7 +211,7 @@ class crossing_gate_planarization_impl
         dest.update_ranks();
         dest.set_ranks(0, input_order);
 
-        return std::move(dest);
+        return dest;
     }
 
   private:

@@ -31,9 +31,7 @@
 
 #include <cstdint>
 #include <iostream>
-#include <optional>
 #include <stdexcept>
-#include <utility>
 
 namespace fiction::synthesis
 {
@@ -141,7 +139,7 @@ template <typename Ntk>
     // a callback set on the duplication stage wins over the pipeline-wide one
     const auto progress = ps.duplication.on_progress ? ps.duplication.on_progress : ps.on_progress;
 
-    std::optional<networks::virtual_pi_network<Ntk>> result{};
+    networks::virtual_pi_network<Ntk> result{};
 
     // the stopwatch must stop before the statistics are copied out
     {
@@ -169,21 +167,21 @@ template <typename Ntk>
         planar_rebalancing_params rb_ps{};
         rb_ps.on_progress = progress;
 
-        result.emplace(planar_rebalancing(planar_fanout_substitution(planar, fs_ps), rb_ps));
+        result = planar_rebalancing(planar_fanout_substitution(planar, fs_ps), rb_ps);
 
         // the stages keep their contracts by construction; a cheap check turns any slip into an error rather than
         // a silently wrong result
-        if (const auto crossings = utils::graph::count_crossings(*result); crossings != 0)
+        if (const auto crossings = utils::graph::count_crossings(result); crossings != 0)
         {
             throw std::runtime_error(fmt::format("Planarization failed: the result contains {} crossings", crossings));
         }
 
-        if (!is_balanced(*result, {.unify_outputs = true, .buffer_constant_outputs = false}))
+        if (!is_balanced(result, {.unify_outputs = true, .buffer_constant_outputs = false}))
         {
             throw std::runtime_error("Planarization failed: the result is not balanced with unified outputs");
         }
 
-        st.num_nodes = result->size();
+        st.num_nodes = result.size();
     }
 
     if (pst != nullptr)
@@ -191,7 +189,7 @@ template <typename Ntk>
         *pst = st;
     }
 
-    return std::move(*result);
+    return result;
 }
 
 }  // namespace fiction::synthesis

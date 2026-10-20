@@ -427,9 +427,9 @@ class planar_rebalancing_impl
     {
         const auto consumers = stripped_consumers(stripped, old2new);
 
-        auto  init     = networks::initialize_copy_network_with_virtual_pis(stripped);
-        auto& balanced = init.first;
-        auto& new2bal  = init.second;
+        auto init     = networks::initialize_copy_network_with_virtual_pis(stripped);
+        auto balanced = std::move(init.first);
+        auto new2bal  = std::move(init.second);
 
         // level 0 of the result keeps the primary input order; captured before the sweep moves the map to buffers
         std::vector<mockturtle::node<Ntk>> input_order{};
@@ -462,7 +462,7 @@ class planar_rebalancing_impl
         balanced.update_ranks();
         balanced.set_ranks(0, input_order);
 
-        return std::move(balanced);
+        return balanced;
     }
     /**
      * @brief Level of the highest primary output driver, constants excluded.
