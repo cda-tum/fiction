@@ -185,12 +185,47 @@ equivalence_result is_equivalent(const Spec& spec, const Impl& impl)
 
 }  // namespace
 
+/**
+ * This program planarizes the benchmark networks of the trindade16, fontes18, ISCAS85, EPFL, and IWLS93 suites whose
+ * balanced network has at most 8000 nodes, by node duplication alone and by the planarization pipeline, and checks
+ * every result. The results are printed as a table and saved as `planarization.json`.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv An array of C-style strings containing the command-line arguments.
+ * @return `EXIT_SUCCESS` if every benchmark was planarized and verified, `EXIT_FAILURE` otherwise.
+ *
+ * Command-line Options:
+ *   <filter>      Runs only the benchmarks whose name contains the given text.
+ *   --help, -h    Prints the usage and exits.
+ *
+ * Example Usage:
+ *   To run all benchmarks:
+ *   ./planarization
+ *
+ *   To run the ISCAS85 benchmarks:
+ *   ./planarization ISCAS85
+ */
 int main(const int argc, const char** argv)
 try
 {
-    // an optional first argument restricts the run to benchmarks whose name contains it
     const std::span<const char*> args{argv, static_cast<std::size_t>(argc)};
-    const std::string            filter = args.size() > 1 ? args[1] : "";
+
+    if (args.size() > 2 || (args.size() == 2 && (std::string{args[1]} == "--help" || std::string{args[1]} == "-h")))
+    {
+        fmt::print("Usage: planarization [<filter>]\n"
+                   "  <filter>      Runs only the benchmarks whose name contains the given text.\n"
+                   "  --help, -h    Prints this usage and exits.\n");
+
+        return args.size() > 2 ? EXIT_FAILURE : EXIT_SUCCESS;
+    }
+
+    // an optional first argument restricts the run to benchmarks whose name contains it
+    const std::string filter = args.size() > 1 ? args[1] : "";
+
+    if (filter.empty())
+    {
+        fmt::print("[i] running all benchmarks; pass a name filter to restrict the run, or --help for the usage\n");
+    }
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint32_t,
                             uint32_t, uint64_t, double, bool, std::string, double, bool, uint64_t, uint32_t, uint32_t,
