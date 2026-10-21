@@ -112,6 +112,11 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         const auto transformed = all_cds | std::views::transform([](const auto& cd) -> const auto& { return cd; });
         CHECK_THAT(minimum_energy(transformed.begin(), transformed.end()), Catch::Matchers::WithinAbs(0.0, 0.00001));
 
+        /** @brief Forward transform range that produces charge-distribution values. */
+        const auto values = all_cds | std::views::transform([](const auto& cd) { return cd; });
+        CHECK_THAT(minimum_energy(values.begin(), values.end()), Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK((*minimum_energy_distribution(values.begin(), values.end())).same_charge_states(second));
+
         const std::forward_list<charge_distribution> forward_cds{all_cds.front(), all_cds.back()};
         CHECK_THAT(minimum_energy(forward_cds.cbegin(), forward_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(minimum_energy_distribution(forward_cds.cbegin(), forward_cds.cend())->same_charge_states(second));

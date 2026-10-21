@@ -17,9 +17,6 @@ from importlib.metadata import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from sphinx import addnodes
-from sphinx_markdown_builder.translator import MarkdownTranslator
-
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
 
@@ -134,10 +131,5 @@ def normalize_llms_sitemap(app: Sphinx, exception: Exception | None) -> None:
 
 
 def setup(app: Sphinx) -> None:
-    """Render inline C++ types in Markdown and normalize the exported sitemap."""
-    app.add_node(
-        addnodes.desc_inline,
-        override=True,
-        **{"llms-markdown": (MarkdownTranslator.visit_literal, MarkdownTranslator.depart_literal)},
-    )
+    """Normalize the sitemap after sphinx-llm finishes exporting pages."""
     app.connect("build-finished", normalize_llms_sitemap, priority=900)

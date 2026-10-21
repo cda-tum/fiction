@@ -23,11 +23,10 @@
 #include <cmath>
 #include <concepts>
 #include <cstddef>
-#include <exception>
 #include <functional>
+#include <future>
 #include <random>
 #include <stdexcept>
-#include <thread>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -70,6 +69,8 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
  * This implementation is based on:
  * https://codereview.stackexchange.com/questions/70310/simple-simulated-annealing-template-in-c11
  *
+ * Exceptions from random initialization, state operations, and callables propagate to the caller.
+ *
  * @tparam State Copyable state type.
  * @tparam CostFunc Cost function with a signed result for State, also invocable on const and mutable state lvalues.
  * @tparam TempFunc Temperature schedule returning double and accepting a mutable temperature lvalue.
@@ -82,7 +83,6 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
  * @param schedule The temperature schedule.
  * @param next The next state function that determines an adjacent state given a current one.
  * @return A pair of the optimized state and its cost value.
- * @throws ... Propagates exceptions from random initialization, state operations, and callables.
  */
 // NOLINTBEGIN(cppcoreguidelines-missing-std-forward): the callables are invoked once per annealing
 // cycle, so forwarding them would move from them on the first call
@@ -137,6 +137,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
                 continue;
             }
 
+            // Same-sign subtraction preserves small integer deltas; opposite signs can overflow before conversion.
             const auto cost_delta = (new_cost < 0) == (current_cost < 0) ?
                                         static_cast<double>(new_cost - current_cost) :
                                         static_cast<double>(new_cost) - static_cast<double>(current_cost);
@@ -167,6 +168,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * these random initial states where the best result of all generated states is finally returned.
  *
  * Each initial state runs in its own thread. The provided callables must support concurrent invocation.
+ * The function waits for all started workers before propagating a worker or launch exception.
  *
  * @note The State type must be default constructible.
  *
@@ -185,7 +187,6 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * @return A pair of the overall best optimized state and its cost value.
  * @throws std::invalid_argument If instances is zero.
  * @throws std::system_error If a worker thread cannot be started.
- * @throws ... Propagates worker exceptions after all started workers finish.
  */
 // NOLINTBEGIN(cppcoreguidelines-missing-std-forward): the callables are shared by every annealing
 // instance, so forwarding them would move from them on the first one
@@ -219,45 +220,28 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
 
     /** @brief Result for each worker. */
     std::vector<std::pair<state_t, cost_t>> results(instances);
-    /** @brief Exceptions captured by the workers. */
-    std::vector<std::exception_ptr> failures(instances);
-    /** @brief Workers that join during stack unwinding. */
-    std::vector<std::jthread> threads{};
+    /** @brief Async workers that finish during stack unwinding. */
+    std::vector<std::future<void>> threads{};
     threads.reserve(instances);
 
     // Function to perform simulated annealing and store the result in the results vector
-    const auto perform_simulated_annealing = [&results, &failures, &init_temp, &final_temp, &cycles, &rand_state, &cost,
-                                              &schedule, &next](const std::size_t index)
+    const auto perform_simulated_annealing =
+        [&results, &init_temp, &final_temp, &cycles, &rand_state, &cost, &schedule, &next](const std::size_t index)
     {
-        try
-        {
-            results[index] =
-                simulated_annealing(std::invoke(rand_state), init_temp, final_temp, cycles, cost, schedule, next);
-        }
-        catch (...)
-        {
-            failures[index] = std::current_exception();
-        }
+        results[index] =
+            simulated_annealing(std::invoke(rand_state), init_temp, final_temp, cycles, cost, schedule, next);
     };
 
     // Start threads
     for (std::size_t i = 0; i < instances; i++)
     {
-        threads.emplace_back(perform_simulated_annealing, i);
+        threads.emplace_back(std::async(std::launch::async, perform_simulated_annealing, i));
     }
 
     // Join threads (wait for all threads to finish)
     for (auto& thread : threads)
     {
-        thread.join();
-    }
-
-    for (const auto& failure : failures)
-    {
-        if (failure)
-        {
-            std::rethrow_exception(failure);
-        }
+        thread.get();
     }
 
     // Find the minimum result

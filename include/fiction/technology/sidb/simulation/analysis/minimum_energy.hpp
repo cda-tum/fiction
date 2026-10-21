@@ -42,7 +42,8 @@ template <std::forward_iterator InputIt>
     }
 [[nodiscard]] InputIt minimum_energy_distribution(const InputIt first, const InputIt last) noexcept
 {
-    return std::min_element(first, last, [](const auto& cd1, const auto& cd2) { return cd1.energy() < cd2.energy(); });
+    return std::ranges::min_element(first, last,
+                                    [](const auto& cd1, const auto& cd2) { return cd1.energy() < cd2.energy(); });
 }
 
 /**

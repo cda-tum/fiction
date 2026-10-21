@@ -228,8 +228,8 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
  *
  * @tparam NtkSrc Source logic network type.
  * @tparam NtkDest Target network or gate-level layout type.
- * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
  * @tparam Signal Target signal or layout output port type.
+ * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
  * @param old2new Mapping of signals from `ntk_src` to `ntk_dest`.
  */
@@ -243,9 +243,8 @@ template <typename NtkSrc, typename NtkDest, typename Signal>
               (mockturtle::has_foreach_node_v<NtkSrc> && mockturtle::has_foreach_fanin_v<NtkSrc> &&
                mockturtle::has_get_node_v<NtkSrc> && mockturtle::has_foreach_po_v<NtkSrc> &&
                mockturtle::has_make_signal_v<NtkSrc> && mockturtle::has_is_complemented_v<NtkSrc> &&
-               requires(NtkDest& dest, const NtkSrc& src, const Signal& target) {
-                   dest.set_name(target, src.get_name(src.get_constant(false)));
-               }))
+               requires(NtkDest& dest, const NtkSrc& src, const Signal& target,
+                        const mockturtle::signal<NtkSrc>& original) { dest.set_name(target, src.get_name(original)); }))
 void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<Signal, NtkSrc>& old2new)
 {
     if constexpr (mockturtle::has_has_name_v<NtkSrc> && mockturtle::has_get_name_v<NtkSrc> && (requires {

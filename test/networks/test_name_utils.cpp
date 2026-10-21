@@ -53,6 +53,15 @@ struct incomplete_named_network : mockturtle::names_view<mockturtle::aig_network
     void foreach_node(Fn&&) const = delete;
 };
 
+/** @brief Named network without constant lookup. */
+struct named_without_constant : mockturtle::names_view<mockturtle::aig_network>
+{
+    /** @brief Creates an empty named network. */
+    named_without_constant() = default;
+    /** @brief Disables constant lookup. @param value Constant value. @return Constant signal. */
+    signal get_constant(bool value) const = delete;
+};
+
 /**
  * @brief Checks signal-name transfer and its forwarding wrapper.
  * @tparam Src Source network type.
@@ -151,6 +160,21 @@ static_assert(!all_names_transferable<incomplete_named_network, mockturtle::name
 static_assert(signal_names_transferable<mockturtle::aig_network, mockturtle::aig_network>);
 static_assert(signal_names_transferable<incomplete_named_network, mockturtle::aig_network>);
 static_assert(!signal_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+
+static_assert(signal_names_transferable<named_without_constant, mockturtle::names_view<mockturtle::aig_network>>);
+
+TEST_CASE("Signal names transfer without constant lookup", "[name-utils]")
+{
+    named_without_constant source{};
+    const auto             input = source.create_pi("input");
+    source.create_po(input);
+    mockturtle::names_view<mockturtle::aig_network>                               destination{};
+    const auto                                                                    target = destination.create_pi();
+    mockturtle::node_map<mockturtle::aig_network::signal, named_without_constant> mapping{source};
+    mapping[source.get_node(input)] = target;
+    restore_signal_names(source, destination, mapping);
+    CHECK(destination.get_name(target) == "input");
+}
 
 TEST_CASE("Unnamed network name transfers clear names and remain optional", "[name-utils]")
 {
