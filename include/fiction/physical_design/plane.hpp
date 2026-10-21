@@ -27,6 +27,8 @@
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
+#include <kitty/bit_operations.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -1328,7 +1330,8 @@ class plane_impl
      * @brief Places a primary input.
      *
      * The first input sits at the top right of the input diagonal; the others follow down the diagonal, with inputs in
-     * the lower half of the diagonal wired in from the left border and inputs in the upper half from the top border.
+     * the lower half of the diagonal wired in from the left border and inputs in the upper half from the top border. An
+     * input that drives nothing stays at the border without a wire.
      *
      * @param n Input node.
      */
@@ -1357,7 +1360,15 @@ class plane_impl
                                                             layouts::layout_base::coordinate{0, place_t.y} :
                                                             layouts::layout_base::coordinate{place_t.x, 0};
 
-        pi2node[n]  = place(layout, border, ntk, n);
+        pi2node[n] = place(layout, border, ntk, n);
+
+        if (ntk.fanout_size(n) == 0)
+        {
+            node2pos[n] = pi2node[n];
+
+            return;
+        }
+
         node2pos[n] = layout.create_buf(wire_straight(layout, border, place_t), place_t);
     }
     /**
@@ -1453,8 +1464,9 @@ class plane_impl
      *
      * The nodes of the output level sit on one diagonal, so each node owns the row of its tile. A node with two outputs
      * takes the row below as well, which pushes the rows of every following node down by one until a gap between two
-     * nodes absorbs the shift; a pushed node first runs south to its row, then east. Rows are assigned in rank order
-     * and the outputs are created in output order.
+     * nodes absorbs the shift; a pushed node first runs south to its row, then east. Rows are assigned in rank order. A
+     * constant output takes a row of its own below the others, driven by a constant gate next to the border. The
+     * outputs of the layout keep the order of the network.
      *
      * @return `1` plus the number of rows the shifts add below the last diagonal, `0` if none were needed.
      */
@@ -1487,18 +1499,32 @@ class plane_impl
 
         uint64_t last_row = 0;
 
+        std::vector<typename Lyt::object_id> output_order(ntk.num_pos());
+
         ntk.foreach_po(
-            [this, &row_of, &last_row](const auto& po, const auto i)
+            [this, &row_of, &last_row, &next_free_row, &output_order](const auto& po, const auto i)
             {
-                const auto drv = ntk.get_node(po);
+                const auto drv      = ntk.get_node(po);
+                const auto po_index = static_cast<uint32_t>(i);
 
                 if (ntk.is_constant(drv))
                 {
+                    const auto row = next_free_row++;
+
+                    kitty::dynamic_truth_table function{0};
+                    if (ntk.constant_value(drv))
+                    {
+                        kitty::set_bit(function, 0);
+                    }
+
+                    const auto constant    = layout.create_gate({}, function, {first_pos.x, row});
+                    output_order[po_index] = layout.create_po(constant, output_name(po_index), {first_pos.x + 1, row});
+                    last_row               = std::max(last_row, row);
+
                     return;
                 }
 
-                const auto po_index = static_cast<uint32_t>(i);
-                auto       anchor   = layout.get_tile(node2pos[drv]);
+                auto anchor = layout.get_tile(node2pos[drv]);
 
                 // down to the output's row, sharing the south run with the node's other output
                 if (row_of[po_index] > static_cast<uint64_t>(anchor.y))
@@ -1508,10 +1534,13 @@ class plane_impl
 
                 const layouts::layout_base::coordinate border{first_pos.x + 1, anchor.y};
 
-                layout.create_po(wire_straight(layout, anchor, border), output_name(po_index), border);
+                output_order[po_index] =
+                    layout.create_po(wire_straight(layout, anchor, border), output_name(po_index), border);
 
                 last_row = std::max(last_row, static_cast<uint64_t>(anchor.y));
             });
+
+        layout.set_output_order(output_order);
 
         const auto bottom = static_cast<uint64_t>(place_t.y);
 
@@ -1582,7 +1611,8 @@ class plane_impl
  * Every level of the network is placed on one anti-diagonal of the layout in rank order, so the planar embedding of
  * the network is preserved. Lookup tables decide for every node whether it sits east or south of its predecessor's
  * wire and how many routing lines the level needs; the wires are then run east and south so that all nodes of a
- * level share one diagonal. Primary inputs sit on the left and top borders, primary outputs on the right border.
+ * level share one diagonal. Primary inputs sit on the left and top borders, primary outputs on the right border;
+ * constant outputs take rows of their own below the others.
  *
  * The input must be planar in its rank order (see `synthesis::planarization`) with at most two non-constant fanins
  * and at most two fanouts per node, primary outputs included.

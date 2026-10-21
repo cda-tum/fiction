@@ -37,6 +37,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 
+#include <cstdint>
 #include <stdexcept>
 
 using namespace fiction;
@@ -184,6 +185,49 @@ TEST_CASE("Nodes with two outputs push the following output rows down", "[plane]
 
     CHECK(layout.num_pos() == 5);
     CHECK(layout.num_crossings() == 0);
+}
+
+TEST_CASE("Constant outputs keep their position", "[plane]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x2));
+    tec.create_po(tec.get_constant(true));
+    tec.create_po(tec.create_or(x1, x2));
+    tec.create_po(tec.get_constant(false));
+
+    check_plane_both_crossing_gates(tec);
+
+    const auto planar = planarization(rank(tec));
+    const auto layout = plane<cartesian_gate_layout>(planar);
+
+    CHECK(layout.num_pos() == 4);
+    CHECK(layout.is_po_tile(layout.get_tile(layout.po_at(1))));
+}
+
+TEST_CASE("Unused inputs stay at the border", "[plane]")
+{
+    technology_network tec{};
+
+    const auto                  x1 = tec.create_pi();
+    [[maybe_unused]] const auto x2 = tec.create_pi();
+    const auto                  x3 = tec.create_pi();
+    [[maybe_unused]] const auto x4 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x3));
+
+    check_plane_both_crossing_gates(tec);
+
+    const auto planar = planarization(rank(tec));
+    const auto layout = plane<cartesian_gate_layout>(planar);
+
+    CHECK(layout.num_pis() == 4);
+
+    // the two unused inputs sit at the border and drive nothing, so they have no wire
+    uint32_t unused = 0;
+    layout.foreach_pi([&layout, &unused](const auto& pi) { unused += layout.fanout_size(pi) == 0; });
+    CHECK(unused == 2);
 }
 
 TEST_CASE("Progress is reported", "[plane]")
