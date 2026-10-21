@@ -422,9 +422,9 @@ class priority_queue
      * @param item The element to be added.
      * @param priority The priority of the element.
      */
-    void put(const coord_vec_type& item, double priority)
+    void put(coord_vec_type item, double priority)
     {
-        elements.emplace(priority, counter++, item);
+        elements.emplace(priority, counter++, std::move(item));
     }
     /**
      * Retrieves and removes the element with the highest priority from the queue.
@@ -2371,25 +2371,26 @@ class graph_oriented_layout_design_impl
     {
         if (ssg.frontier_flag)
         {
-            const auto expansion = expand(ssg, worker_progress);
+            /** @brief Expansion result whose accepted states transfer to the frontier. */
+            auto expansion = expand(ssg, worker_progress);
             progress.advance();
             ++ssg.completed_expansions;
             worker_progress.update(static_cast<std::size_t>(&ssg - ssg_vec.data()), ssg.progress_description,
                                    ssg.completed_expansions);
             if (expansion.second)
             {
-                return expansion.second;
+                return std::move(expansion.second);
             }
 
             // Update costs and frontier
-            for (const auto& [next, cost] : expansion.first)
+            for (auto& [next, cost] : expansion.first)
             {
                 /** @brief One lookup retains the best known cost for this placement sequence. */
                 const auto [entry, inserted] = ssg.cost_so_far.try_emplace(next, cost);
                 if (inserted || cost < entry->second)
                 {
                     entry->second = cost;
-                    ssg.frontier.put(next, cost);
+                    ssg.frontier.put(std::move(next), cost);
                 }
             }
         }
