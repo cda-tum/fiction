@@ -1618,7 +1618,8 @@ class plane_impl
  * and at most two fanouts per node, primary outputs included.
  *
  * @tparam Lyt Cartesian gate-level layout type.
- * @tparam Ntk Ranked network type (see `mutable_rank_view`).
+ * @tparam Ntk Ranked network type with levels and rank positions (see `mutable_rank_view`); the result of
+ * `synthesis::planarization` is one.
  * @param ntk Network to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
@@ -1631,12 +1632,11 @@ class plane_impl
  */
 template <typename Lyt, typename Ntk>
     requires std::derived_from<Lyt, layouts::cartesian_layout> &&
-             std::same_as<typename Lyt::object_id, layouts::layout_object_id>
+             std::same_as<typename Lyt::object_id, layouts::layout_object_id> && mockturtle::is_network_type_v<Ntk> &&
+             mockturtle::has_depth_v<Ntk> && mockturtle::has_rank_position_v<Ntk> &&
+             mockturtle::has_at_rank_position_v<Ntk> && mockturtle::has_foreach_node_in_rank_v<Ntk>
 [[nodiscard]] Lyt plane(const Ntk& ntk, const plane_params& ps = {}, plane_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
-
     if (ntk.num_pis() == 0)
     {
         throw std::invalid_argument("The network has no primary inputs");
