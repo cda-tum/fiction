@@ -146,6 +146,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
+    with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
   - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
   - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
@@ -318,6 +320,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Physical-design experiments convert mapped networks before placement with unchanged computations.
   - Gate-layout experiments use canonical types with unchanged computations.
   - The `planarization` experiment keeps duplication parameters immutable.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
@@ -648,6 +651,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
+    changing the other inputs' truth-table order.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.

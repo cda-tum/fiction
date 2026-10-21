@@ -7296,8 +7296,7 @@ Template Args:
     NtkDest: Target network or gate-level layout type.
     T: Mapping type to identify signals by. Currently,
        `mockturtle::signal<NtkDest>` and
-       `branching_signal_container<NtkSrc, fanout_size>` are
-       supported.
+       `branching_signal_container<fanout_size>` are supported.
 
 )doc";
 
@@ -7360,7 +7359,8 @@ static const char *mkd_doc_fiction_networks_restore_signal_names_2 =
 R"doc(Same as the other restore_signal_names function but this overload uses
 a `mockturtle::node_map` with a branching_signal_container that is
 specifically used for networks or layouts that allow branches to be
-distinct, e.g., by their position on the layout.
+distinct, e.g., by their position on the layout. Skips branches with
+no mapped layout object.
 
 Args:
     ntk_src: Source logic network whose signal names are to be
@@ -7371,7 +7371,6 @@ Args:
              branching_signal_container.
 
 Template Args:
-    NtkSrc: Source logic network type.
     NtkDest: Target network or gate-level layout type.
     fanout_size: Maximum fanout size in the network.
 
@@ -8282,7 +8281,6 @@ involved that got extended by wire nodes. This container solves that
 issue.
 
 Template Args:
-    Ntk: Logic network type.
     fanout_size: Maximum fanout size possible in the layout and/or the
                  network.)doc";
 
@@ -8626,19 +8624,19 @@ R"doc(Routes objectives, allowing incomplete routing when
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container = R"doc(Stores edge colors for eastward and southward routing.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container = R"doc(Owns the colored traversal and its directional colors.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_east = R"doc(Color for eastward edges.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_east = R"doc(Identifier for eastward edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_ntk = R"doc(Network with routing colors assigned to edges.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_ntk = R"doc(Named traversal with separate node and edge colors.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_null = R"doc(Color for unassigned edges.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_null = R"doc(Identifier for uncolored edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_south = R"doc(Color for southward edges.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_south = R"doc(Identifier for southward edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_coloring_container = R"doc(Initializes the network and its routing direction colors.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_coloring_container = R"doc(Colors the named technology-network traversal.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_opposite_color = R"doc(Returns the other routing direction color.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_opposite_color = R"doc(Returns the other direction color.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_compare_gate_tiles =
 R"doc(Custom comparison function for sorting tiles based on the sum of their
@@ -8725,9 +8723,21 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_connect_and_place = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_connect_and_place =
+R"doc(Routes ordered inputs to a placed two-input gate.
 
-static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_2 = R"doc()doc";
+Template Args:
+    Lyt: Output layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_2 =
+R"doc(Routes one input to a placed unary gate.
+
+Template Args:
+    Lyt: Output layout type.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_create_wiring_reduction_layout =
 R"doc(Create a wiring_reduction_layout suitable for finding excess wiring
@@ -8805,7 +8815,7 @@ outside the frame.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_determine_layout_size = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_determine_layout_size = R"doc(Computes the extent required by colored gates and primary outputs.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_determine_new_coord =
 R"doc(This function calculates the new coordinates of a tile after adjusting
@@ -8827,7 +8837,16 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_east_south_edge_coloring = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_east_south_edge_coloring =
+R"doc(Colors the named traversal for orthogonal placement.
+
+Args:
+    ntk: Topologically ordered named technology network to read.
+
+Returns:
+    Traversal with its own node and edge color storage.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl =
 R"doc(Places and routes a network with SMT constraints.
@@ -9445,7 +9464,8 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_node2pos =
 R"doc(Maps nodes to tile positions when creating the layout from the SMT
-model.)doc";
+model. Layout fanout is bounded by max_fanin_size; add a separate
+bound if layouts permit more branches.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_optimize =
 R"doc(Creates and returns a z3::optimize if optimization criteria were set
@@ -9574,10 +9594,11 @@ Args:
     ctxp: The context that is used in all solvers.
     lyt: The empty gate-level layout that is going to contain the
          created layout.
+    ntk: Named technology-network traversal that owns the placement
+         map's node IDs.
     ps: The parameters to respect in the SMT instance generation
         process.
-    ntk: Topologically ordered input network.
-    sbl: Forbidden gate port configurations on layout tiles.
+    sbl: Gate orientations forbidden at each tile.
 
 )doc";
 
@@ -10004,7 +10025,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Number of constant outputs; every search graph preserves this source
 interface.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_custom_cost_objective = R"doc(Custom cost objective.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_custom_cost_objective = R"doc(Owned custom cost objective.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_expand =
 R"doc(Computes possible expansions and their priorities for the current
@@ -10137,14 +10158,16 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
-R"doc(Constructor for the graph-oriented layout design algorithm.
+R"doc(Initializes graph-oriented layout design with owned options and a cost
+callback.
 
 Args:
     src: The source network to be placed, already converted to a
          `technology_network`.
-    p: The parameters for the graph-enhanced layout search algorithm.
+    p: GOLD parameters transferred into owned invocation storage.
     st: The statistics object to record execution details.
-    custom: The custom layout cost function.
+    custom: Custom layout cost function transferred into owned
+            storage.
 
 )doc";
 
@@ -10285,7 +10308,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters owned by this invocation.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_pst = R"doc(Statistics.)doc";
 
@@ -10395,9 +10418,9 @@ Hexagonal layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_is_east_south_colored = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_is_east_south_colored = R"doc(Checks that fanouts use distinct direction colors.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_is_eastern_po_orientation_available = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_is_eastern_po_orientation_available = R"doc(Checks whether the eastern side can host a primary output.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_nested_vector_hash =
 R"doc(This struct defines a hash function for a nested vector of layout
@@ -10463,12 +10486,8 @@ Args:
 static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl =
 R"doc(Implementation of the orthogonal physical design algorithm.
 
-The specification network is converted to a `technology_network`
-before anything else happens, so this class is templated on the layout
-type only. Carrying the caller's network type through the whole
-implementation would duplicate every member for each network type the
-caller happens to use, without a single line of the body depending on
-it. The conversion lives in the `orthogonal` entry point below.
+The named technology network has normalized fanout. This class
+specializes only the output layout type.
 
 Template Args:
     Lyt: Gate-level layout type.)doc";
@@ -10533,7 +10552,6 @@ Args:
 
 Template Args:
     Lyt: Desired gate-level layout type.
-    Ntk: Network type that acts as specification.
 
 )doc";
 
@@ -10704,7 +10722,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_recursively_paint_edges = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_recursively_paint_edges = R"doc(Paints adjacent edges with alternating direction colors.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_routing_connection_obstructed =
 R"doc(Combines layout connections with explicit search constraints.
@@ -10866,43 +10884,64 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view = R"doc(Immutable network view with optional randomized topological traversal.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view =
+R"doc(Orders named technology-network nodes for GOLD traversal.
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_create_topo_rec = R"doc()doc";
+Template Args:
+    CiToCo: Traverse from primary inputs to outputs when true, or from
+            outputs to inputs otherwise.
+    Randomize: Shuffle traversal choices when true.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate = R"doc(Calls the supplied function for each gate in topological order.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_create_topo_rec = R"doc(Visits dependencies before appending a node.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate_reverse =
-R"doc(Calls the supplied function for each gate in reverse topological
-order.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_node = R"doc(Calls the supplied function for each node in topological order.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_index_to_node = R"doc(Returns the node at the supplied topological position.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_node_to_index = R"doc(Returns the node position in the topological order.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_num_gates = R"doc(Returns the number of non-input, non-constant nodes.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_offset = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_rng = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_size = R"doc(Returns the number of nodes in the view.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_order = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view =
-R"doc(Builds a topological order, randomized only when `Randomize` is true.
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate =
+R"doc(Visits gates in traversal order.
 
 Args:
-    ntk: Network to traverse.
-    seed_val: Random seed; ignored when `Randomize` is false, the
-              default.
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
 
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate_reverse =
+R"doc(Visits gates in reverse traversal order.
+
+Args:
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_node =
+R"doc(Visits all nodes in traversal order.
+
+Args:
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_index_to_node = R"doc(Returns the node at a traversal index.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_node_to_index = R"doc(Returns a node's traversal index.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_num_gates = R"doc(Returns the number of traversed gates.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_offset = R"doc(Returns the number of constant and primary-input traversal entries.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_rng = R"doc(Reproducible traversal shuffle engine.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_size = R"doc(Returns the number of nodes in traversal order.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_order = R"doc(Traversal order for the selected direction and randomization mode.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view = R"doc(Builds the selected traversal with a reproducible shuffle seed.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_update_topo = R"doc(Orders dependencies and includes every declared primary input.)doc";
 
@@ -11251,13 +11290,12 @@ with a fan-in too large to be handled by the specified clocking
 scheme.
 
 Args:
-    ntk: The network that is to place and route.
+    ntk: Named technology network to place and route.
     ps: Parameters.
     pst: Statistics.
 
 Template Args:
     Lyt: Desired gate-level layout type.
-    Ntk: Network type that acts as specification.
 
 Returns:
     A gate-level layout of type `Lyt` that implements `ntk` as an FCN
@@ -11371,14 +11409,13 @@ other gates. This is useful if a tile is known to be faulty or if it
 is known to be used for a different purpose.
 
 Args:
-    ntk: The network that is to place and route.
+    ntk: Named technology network to place and route.
     black_list: The black list of tiles and their gate orientations.
     ps: Parameters.
     pst: Statistics.
 
 Template Args:
     Lyt: Desired gate-level layout type.
-    Ntk: Network type that acts as specification.
 
 Returns:
     A gate-level layout of type `Lyt` that implements `ntk` as an FCN
@@ -11498,8 +11535,8 @@ Cost Objectives\" by S. Hofmann, M. Walter, and R. Wille in LASCAS
 
 Args:
     ntk: The network to be placed and routed.
-    ps: The parameters for the A* priority routing algorithm. Defaults
-        to an empty parameter set.
+    ps: Parameters for graph-oriented layout design. Defaults to an
+        empty parameter set.
     pst: A pointer to a statistics object to record execution details.
          Defaults to nullptr.
     custom_cost_objective: A custom cost objective that is evaluated
@@ -11511,7 +11548,6 @@ Args:
 
 Template Args:
     Lyt: Cartesian gate-level layout type.
-    Ntk: Network type.
 
 Returns:
     The smallest layout yielded by the graph-oriented layout design
@@ -11902,13 +11938,12 @@ May throw a high_degree_fanin_exception if `ntk` contains any node
 with a fan-in larger than 2.
 
 Args:
-    ntk: The network that is to place and route.
+    ntk: Named technology network to place and route.
     ps: Parameters.
     pst: Statistics.
 
 Template Args:
     Lyt: Desired gate-level layout type.
-    Ntk: Network type that acts as specification.
 
 Returns:
     A gate-level layout of type `Lyt` that implements `ntk` as an FCN
@@ -12949,7 +12984,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port pointing to the placed gate in `lyt`.
@@ -12968,7 +13002,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port pointing to the placed gate in `lyt`.
@@ -12987,11 +13020,11 @@ Args:
     b: Second incoming signal to the newly placed gate in `lyt`.
     c: Third optional incoming constant value signal to the newly
        placed gate in `lyt`. Might change the gate function when set,
-       e.g., from a MAJ to an AND if `c == false`.
+       e.g., from a MAJ to an AND if `c == false`. If no network fanin
+       is constant, `c` replaces the third input.
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port pointing to the placed gate in `lyt`.
@@ -13012,7 +13045,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port pointing to the placed gate in `lyt`.
@@ -13036,7 +13068,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port of the newly placed gate in `lyt`.
@@ -13062,7 +13093,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port of the newly placed gate in `lyt`.
@@ -14572,7 +14602,7 @@ Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO
 2024 (https://ieeexplore.ieee.org/abstract/document/10628962).
 
 Args:
-    ntk: The input network to be mapped onto the defective surface.
+    ntk: Named technology network to map onto the defective surface.
     lattice_tiling: The lattice tiling used for the circuit design.
     defective_surface: The defective surface on which the SiDB circuit
                        is designed.
@@ -14584,7 +14614,6 @@ Args:
            `nullptr`, statistics are discarded.
 
 Template Args:
-    Ntk: The type of the input network.
     GateLyt: Gate-level layout type.
 
 Returns:
