@@ -22,7 +22,7 @@
 #include <cassert>
 #include <cmath>
 #include <concepts>
-#include <cstdlib>
+#include <cstddef>
 #include <exception>
 #include <functional>
 #include <random>
@@ -46,7 +46,7 @@ constexpr auto linear_temperature_schedule(const double t) noexcept
     return t - 10.0;
 }
 /**
- * A logarithmically decreasing temperature schedule. The temperature is altered by multiplying it with `0.99`.
+ * A geometrically decreasing temperature schedule. The temperature is altered by multiplying it with `0.99`.
  *
  * @param t The current temperature.
  * @return The next temperature, i.e. \f$\texttt{t} \cdot 0.99\f$.

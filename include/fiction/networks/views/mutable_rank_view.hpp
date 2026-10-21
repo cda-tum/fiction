@@ -85,7 +85,7 @@ class mutable_rank_view<Ntk, true> : public fiction::networks::views::static_dep
 /**
  * @class mutable_rank_view<Ntk, false>
  *
- * If no rank_interface exists, inherits from mockturtle::static_depth_view<Ntk> and initializes ranks for the network.
+ * If no rank interface exists, inherits from `static_depth_view<Ntk>` and initializes the network ranks.
  *
  * @tparam Ntk The network type.
  */
@@ -555,17 +555,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
                           [this](auto const& n1, auto const& n2) { return rank_position(n1) < rank_position(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
-    /**
-     * Overrides the base class method to also call the add_event on create_pi().
-     *
-     * @return Newly created PI signal.
-     */
-    signal create_pi()
-    {
-        auto const n = fiction::networks::views::static_depth_view<Ntk>::create_pi();
-        return n;
-    }
-
     /**
      * @brief Recomputes levels and ranks.
      *
