@@ -12,7 +12,6 @@
  * @file
  * @brief Tests for `fiction/utils/optimization/simulated_annealing.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>

@@ -11,7 +11,7 @@
 /**
  * @file
  * @brief Tests for names transferred between networks and placed layouts.
- * @author OpenAI Codex
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_template_test_macros.hpp>

@@ -13,7 +13,6 @@
  * @brief Helpers that transfer names between networks and layouts.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI Codex
  */
 
 #pragma once

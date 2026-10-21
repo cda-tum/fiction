@@ -13,7 +13,6 @@
  * @brief Simulated Annealing with linear and geometric temperature schedules.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI Codex
  */
 
 #pragma once

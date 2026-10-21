@@ -13,7 +13,6 @@
  * @brief Network view that reorders unsorted networks with a breadth-first traversal.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #pragma once

@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/networks/views/mutable_rank_view.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include <catch2/catch_template_test_macros.hpp>

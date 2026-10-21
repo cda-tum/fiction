@@ -13,7 +13,6 @@
  * @brief Finds the charge distribution of least energy in a range.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #pragma once
