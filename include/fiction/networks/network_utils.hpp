@@ -12,13 +12,16 @@
  * @file
  * @brief Edge type for mockturtle networks plus fanin, fanout, and edge iteration helpers.
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #pragma once
 
+#include "fiction/traits.hpp"
 #include "fiction/utils/stl/hash.hpp"
 
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/node_map.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -27,6 +30,7 @@
 #include <functional>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace mockturtle
@@ -485,6 +489,81 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
     ntk.foreach_po([&ntk, &inv_jdfs](const auto& po) { inv_jdfs(ntk.get_node(po)); });
 
     return inv_levels;
+}
+
+/**
+ * @brief Appends a chain of buffers to a signal.
+ *
+ * @tparam Ntk Network type.
+ * @param ntk Network to extend.
+ * @param sig Signal to buffer.
+ * @param length Number of buffers.
+ * @return The end of the chain, `sig` itself for a length of zero.
+ */
+template <typename Ntk>
+[[nodiscard]] mockturtle::signal<Ntk> buffer_chain(Ntk& ntk, mockturtle::signal<Ntk> sig, const uint32_t length)
+{
+    static_assert(mockturtle::has_create_buf_v<Ntk>, "Ntk does not implement the create_buf method");
+
+    for (uint32_t i = 0; i < length; ++i)
+    {
+        sig = ntk.create_buf(sig);
+    }
+
+    return sig;
+}
+
+/**
+ * @brief Creates an empty network of the same type as `src` with copies of its constants and primary inputs, virtual
+ * primary inputs included, and a map from the nodes of `src` to their copies.
+ *
+ * Primary inputs are created in the order that `foreach_pi_unranked` yields when `Ntk` offers it, so that rank
+ * bookkeeping of the copy matches `src`.
+ *
+ * @tparam Ntk Network type.
+ * @param src Source network.
+ * @return The destination network and the node map from `src` to the destination.
+ */
+template <typename Ntk>
+[[nodiscard]] std::pair<Ntk, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>>
+initialize_copy_network_with_virtual_pis(const Ntk& src)
+{
+    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant method");
+    static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi method");
+
+    mockturtle::node_map<mockturtle::signal<Ntk>, Ntk> old2new{src};
+    Ntk                                                dest{};
+
+    old2new[src.get_constant(false)] = dest.get_constant(false);
+    if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
+    {
+        old2new[src.get_constant(true)] = dest.get_constant(true);
+    }
+
+    const auto copy_pi = [&](const auto& n)
+    {
+        if constexpr (has_is_real_pi_v<Ntk>)
+        {
+            if (!src.is_real_pi(n))
+            {
+                old2new[n] = dest.create_virtual_pi(old2new[src.get_real_pi(n)]);
+                return;
+            }
+        }
+        old2new[n] = dest.create_pi();
+    };
+
+    if constexpr (has_foreach_pi_unranked_v<Ntk>)
+    {
+        src.foreach_pi_unranked(copy_pi);
+    }
+    else
+    {
+        src.foreach_pi(copy_pi);
+    }
+
+    return {std::move(dest), std::move(old2new)};
 }
 
 }  // namespace fiction::networks

@@ -20,7 +20,6 @@
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
 
-#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <memory>
@@ -143,7 +142,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] bool is_virtual_pi(node const& n) const
     {
-        return std::ranges::find(v_storage->virtual_inputs, n) != v_storage->virtual_inputs.cend();
+        return v_storage->map_virtual_to_real_pi.contains(n);
     }
 
     /**
@@ -184,7 +183,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] bool is_virtual_ci(node const& n) const
     {
-        return std::ranges::find(v_storage->virtual_inputs, n) != v_storage->virtual_inputs.cend();
+        return v_storage->map_virtual_to_real_pi.contains(n);
     }
 
     /**

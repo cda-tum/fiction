@@ -32,3 +32,25 @@ def test_balancing(mux21: technology_network) -> None:
     balanced_unify = network_balancing(mux21, **unify_options)
     assert balanced_unify.num_gates() == 6
     assert is_balanced(balanced_unify, **unify_options)
+
+
+def test_balancing_keeps_constant_outputs_unbuffered_on_request(interface_network: technology_network) -> None:
+    """A network with two constant outputs gets buffer chains for them only when asked to."""
+    buffered_options: dict[str, Any] = {
+        "unify_outputs": True,
+        "buffer_constant_outputs": True,
+    }
+    buffered = network_balancing(interface_network, **buffered_options)
+    assert is_balanced(buffered, **buffered_options)
+
+    unbuffered_options: dict[str, Any] = {
+        "unify_outputs": True,
+        "buffer_constant_outputs": False,
+    }
+    unbuffered = network_balancing(interface_network, **unbuffered_options)
+    assert is_balanced(unbuffered, **unbuffered_options)
+
+    # the two constant outputs receive no buffers, so the unbuffered network is smaller and does not count as
+    # balanced once the constant outputs take part in the comparison again
+    assert unbuffered.num_gates() < buffered.num_gates()
+    assert not is_balanced(unbuffered, **buffered_options)

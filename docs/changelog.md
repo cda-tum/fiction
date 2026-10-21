@@ -10,6 +10,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `synthesis::planarization` turns a balanced, ranked network into a planar, balanced, fanout-substituted one and
+    checks planarity and balance on its result
+  - `synthesis::node_duplication_planarization` planarizes a balanced, ranked network by duplicating nodes; its
+    hybrid strategy keeps the crossings of a level where crossing gates are cheaper
+  - `synthesis::crossing_gate_planarization` replaces the crossings of a balanced, ranked network with crossing
+    gates built from XOR or AND-OR-NOT gates
+  - `synthesis::network_balancing_params::buffer_constant_outputs` lets a flow that does not place constants keep
+    constant outputs unbuffered when unifying outputs; `is_balanced` then ignores them
+  - `synthesis::planar_fanout_substitution` and `synthesis::planar_rebalancing` substitute fanouts and rebalance
+    with shared buffers while keeping ranks and planarity
+  - `utils::graph::count_crossings` counts the edge crossings of a ranked, balanced network without copying it
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `physical_design::cell_grid_extent` returns the extent of the cell grid that a gate library spans on a
     gate-level layout
@@ -39,6 +50,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - `networks::initialize_copy_network_with_virtual_pis` copies the constants and inputs of a network, virtual
+    inputs included
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores tagged dots and defects without templates
   - `sidb::charge_distribution` assigns one charge state per SiDB and carries its energy;
@@ -62,6 +75,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - API module pages provide overviews and link to dedicated API subpages.
   - Added a development tooling reference and a funding footer with institutional logos.
 
+- Experiments:
+
+  - `planarization` runs the trindade16, fontes18, ISCAS85, EPFL, and IWLS93 benchmarks whose balanced network has at
+    most 8000 nodes through node duplication and through the planarization pipeline, and checks every result by SAT
+    or, above 50000 nodes, by random simulation
+
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
     `print_sidb_layout` accept and produce `sidb::layout`; the SQD reader takes the lattice from the file
@@ -69,6 +88,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - `mnt.pyfiction.synthesis.planarization` planarizes a balanced technology network and reports its virtual inputs
+  - `mnt.pyfiction.synthesis.network_balancing` and `is_balanced` accept the `buffer_constant_outputs` keyword
   - The callback members of parameter classes accept `None`, which clears the callback.
   - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.
@@ -125,6 +146,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
+  - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
+  - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
     throw `std::invalid_argument`.
@@ -220,6 +244,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
+    fanins in constant time per node.
+  - `networks::views::mutable_rank_view::set_ranks` and `set_all_ranks` throw `std::invalid_argument` or
+    `std::out_of_range` for ranks that do not fit the network instead of asserting.
   - `gate_layout<>` defaults to Cartesian geometry; its header provides canonical aliases for all three topologies.
   - **Breaking:** `types.hpp` drops the three `*_gate_clk_lyt` presets, their pointers, `gate_layout_t`,
     and transitive layout includes. Include `fiction/layouts/gate_layout.hpp` and use its canonical types.
@@ -291,6 +319,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Experiments:
 
   - Gate-layout experiments use canonical types with unchanged computations.
+  - The `planarization` experiment keeps duplication parameters immutable.
   - Physical-design experiments use shared routing values and the `bounding_box` API.
   - Experiments now report exceptions with a failure exit status. Layout-area products use 64-bit arithmetic.
   - SiDB generator and circuit experiments use concrete parameter types with unchanged numerical values.
@@ -677,6 +706,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
   - `convert_network` keeps the inverters of a technology network when the target network
     type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
+  - `synthesis::delete_virtual_pis` maps outputs driven by a virtual primary input to the real one and supports ranked
+    AIGs whose signals differ from nodes
+  - `verification::virtual_miter` pairs primary inputs by creation order, so ranked networks whose inputs are
+    reordered or unused compare correctly
+  - `networks::views::static_depth_view` gives every input a level, so an input that drives nothing sits in rank 0
+    of `networks::views::mutable_rank_view`, which rejects a gate that no output reaches with `std::invalid_argument`
 
 - Build system:
 
@@ -723,6 +758,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
+  - Depth and rank view assignment now preserves wrapped network names and metadata.
+  - `networks::views::mutable_rank_view::update_ranks` resets `width()`.
   - Clocking-state moves now avoid synchronization-map allocations on Windows.
   - Gate-layout name-presence queries now report empty names consistently after failed assignment.
   - Gate-layout name-presence queries now avoid copying names and allocating memory.
@@ -757,6 +794,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
+  - Corrected planarization complexity bounds to include weighted-cone traversals.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
   - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.

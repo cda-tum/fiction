@@ -26,6 +26,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 #include <kitty/operators.hpp>
+#include <mockturtle/networks/klut.hpp>
 #include <mockturtle/networks/sequential.hpp>
 #include <mockturtle/traits.hpp>
 
@@ -81,6 +82,79 @@ TEST_CASE("create and use primary inputs in a technology network", "[technology-
     CHECK(tec.size() == 4);
     CHECK(tec.num_pis() == 2);
     CHECK(x1 != x2);
+}
+
+TEST_CASE("recognize primary inputs among gates, buffers, and constants in a technology network",
+          "[technology-network]")
+{
+    technology_network tec{};
+
+    const auto x   = tec.create_pi();
+    const auto y   = tec.create_pi();
+    const auto buf = tec.create_buf(x);
+    const auto fo1 = tec.create_buf(buf);
+    const auto fo2 = tec.create_buf(buf);
+    const auto g   = tec.create_and(fo1, y);
+
+    tec.create_po(fo2);
+    tec.create_po(g);
+
+    for (const auto n : {x, y})
+    {
+        CHECK(tec.is_pi(n));
+        CHECK(tec.is_ci(n));
+    }
+
+    for (const auto n : {tec.get_node(tec.get_constant(false)), tec.get_node(tec.get_constant(true)), buf, fo1, fo2, g})
+    {
+        CHECK(!tec.is_pi(n));
+        CHECK(!tec.is_ci(n));
+    }
+
+    // a node beyond the network is no input
+    CHECK(!tec.is_pi(tec.size()));
+    CHECK(!tec.is_ci(tec.size()));
+}
+
+TEST_CASE("gate and fanin iteration agree with the klut network", "[technology-network]")
+{
+    technology_network tec{};
+
+    std::vector<technology_network::signal> pool{};
+    pool.reserve(100);
+
+    for (auto i = 0u; i < 40u; ++i)
+    {
+        pool.push_back(tec.create_pi());
+    }
+    for (auto i = 0u; i < 60u; ++i)
+    {
+        pool.push_back(tec.create_and(pool[i], pool[i + 1]));
+    }
+
+    tec.create_po(pool.back());
+
+    const mockturtle::klut_network& base = tec;
+
+    std::vector<uint64_t> gates{};
+    std::vector<uint64_t> base_gates{};
+
+    tec.foreach_gate([&gates](const auto& n) { gates.push_back(n); });
+    base.foreach_gate([&base_gates](const auto& n) { base_gates.push_back(n); });
+
+    CHECK(gates == base_gates);
+
+    tec.foreach_node(
+        [&tec, &base](const auto& n)
+        {
+            std::vector<uint64_t> fanins{};
+            std::vector<uint64_t> base_fanins{};
+
+            tec.foreach_fanin(n, [&fanins, &tec](const auto& f) { fanins.push_back(tec.get_node(f)); });
+            base.foreach_fanin(n, [&base_fanins, &base](const auto& f) { base_fanins.push_back(base.get_node(f)); });
+
+            CHECK(fanins == base_fanins);
+        });
 }
 
 TEST_CASE("create and use primary outputs in a technology network", "[technology-network]")
