@@ -10,14 +10,15 @@ empty layout) to the exit of the maze (a layout with all gates placed). This app
 input network is restricted to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked and is not
 always optimal.
 
-With a fixed `seed`, sequential searches that finish before their timeout reproduce the same layout within the same
-build. Custom cost functions must also be deterministic. A seed does not fix how many expansions fit into a wall-clock
+An unset `seed` selects a random seed. With a fixed `seed`, sequential searches that finish before their timeout
+reproduce the same layout within the same build. Custom cost functions must also be deterministic. A seed does not
+fix how many expansions fit into a wall-clock
 timeout, and parallel searches depend on worker scheduling. `HIGH_EFFICIENCY` uses a 10-second timeout when no explicit
 timeout is supplied; this implicit timeout stops the search only after a solution exists.
 
 The `AREA` priority uses geometric tile counts, including when a partial layout is one tile wide or high. The area
-estimate excludes the spare eastern and southern borders and includes the candidate position. A one-tile axis does
-not make the area term zero. Layouts may change across library versions as the search and routing algorithms evolve.
+estimate excludes the spare eastern and southern borders and includes the candidate position. Layouts may change
+across library versions as the search and routing algorithms evolve.
 
 ::::{tab-set}
 :sync-group: language

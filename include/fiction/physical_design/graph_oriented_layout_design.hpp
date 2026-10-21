@@ -131,7 +131,8 @@ struct graph_oriented_layout_design_params
      */
     bool return_first = false;
     /**
-     * Timeout limit (in ms).
+     * Wall-clock timeout limit (in ms). Time-limited results depend on how many expansions finish.
+     * Without an explicit limit, `HIGH_EFFICIENCY` stops after 10 seconds once a solution exists.
      */
     uint64_t timeout = std::numeric_limits<uint64_t>::max();
     /**
@@ -178,6 +179,7 @@ struct graph_oriented_layout_design_params
      * When set to `true`, the algorithm will utilize multiple threads to process different search space graphs in
      * parallel, improving performance by distributing the workload across available CPU cores. If set to `false`, the
      * algorithm will run sequentially on a single thread.
+     * Parallel search results can depend on worker scheduling, even with a fixed seed.
      *
      * Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and complex networks (> 100 nodes).
      *
@@ -196,6 +198,8 @@ struct graph_oriented_layout_design_params
     /**
      * Random seed for PI spacing, fanout substitution, and topological ordering.
      * Generated randomly if not specified.
+     * Within one build, a fixed seed reproduces sequential searches that finish before their timeout,
+     * provided custom cost functions are deterministic.
      */
     std::optional<uint32_t> seed = std::nullopt;
     /**
@@ -365,6 +369,20 @@ struct graph_oriented_layout_design_stats
 
 namespace detail
 {
+/**
+ * @brief Estimates candidate area without the spare eastern and southern borders.
+ * @param width Layout width in tiles.
+ * @param height Layout height in tiles.
+ * @param position Candidate position to include in the area.
+ * @return Geometric area in tiles, including one-tile axes.
+ */
+[[nodiscard]] constexpr double candidate_layout_area(const uint32_t width, const uint32_t height,
+                                                     const fiction::layouts::layout_base::coordinate& position) noexcept
+{
+    return std::max(static_cast<double>(width) - 1.0, static_cast<double>(position.x) + 1.0) *
+           std::max(static_cast<double>(height) - 1.0, static_cast<double>(position.y) + 1.0);
+}
+
 /**
  * Alias for a vector of tiles in a given layout.
  *
@@ -2076,9 +2094,7 @@ class graph_oriented_layout_design_impl
             {
                 // Geometric candidate area excludes the spare eastern and southern borders, even on one-tile axes.
                 const double layout_size =
-                    (std::max(static_cast<double>(layout.width()) - 1.0, static_cast<double>(position.x) + 1.0) *
-                     std::max(static_cast<double>(layout.height()) - 1.0, static_cast<double>(position.y) + 1.0)) /
-                    (node_count * node_count);
+                    candidate_layout_area(layout.width(), layout.height(), position) / (node_count * node_count);
 
                 // position of last placed node
                 const double last_position =

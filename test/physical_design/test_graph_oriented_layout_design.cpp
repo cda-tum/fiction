@@ -18,6 +18,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
@@ -53,6 +54,7 @@
 #include <optional>
 #include <stdexcept>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 // The tests dereference optionals right after REQUIRE(x.has_value()), which the check does not model.
@@ -756,6 +758,8 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
 
 TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-design]")
 {
+    /** @brief Exercise both the reported fixed-spacing case and seeded PI placement. */
+    const auto randomize_spacing = GENERATE(false, true);
     /** @brief Captures geometry, functions, terminal kinds, and ordered connections without object identities. */
     const auto snapshot = [](const cartesian_gate_layout& layout)
     {
@@ -763,6 +767,10 @@ TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-
         std::vector<std::tuple<layout_base::coordinate, kitty::dynamic_truth_table, bool, bool>> objects{};
         /** @brief Connections keyed by destination coordinate and input index. */
         std::vector<std::tuple<layout_base::coordinate, uint32_t, layout_base::coordinate>> connections{};
+        /** @brief Terminal coordinates in their public input and output order. */
+        std::array<std::vector<layout_base::coordinate>, 2> terminals{};
+        layout.foreach_pi([&](const auto id) { terminals[0].push_back(layout.get_tile(id)); });
+        layout.foreach_po([&](const auto id) { terminals[1].push_back(layout.get_tile(id)); });
         layout.foreach_object(
             [&](const auto id)
             {
@@ -775,44 +783,54 @@ TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-
         std::sort(objects.begin(), objects.end(),
                   [](const auto& a, const auto& b) { return std::get<0>(a) < std::get<0>(b); });
         std::sort(connections.begin(), connections.end());
-        return std::tuple{layout.width(), layout.height(), layout.layers(), objects, connections};
+        return std::tuple{layout.width(),     layout.height(),        layout.layers(),
+                          std::move(objects), std::move(connections), std::move(terminals)};
     };
 
     for (const auto cost : {graph_oriented_layout_design_params::cost_objective::AREA,
                             graph_oriented_layout_design_params::cost_objective::ACP})
     {
         CAPTURE(cost);
-        /** @brief Both the reported full adder and a one-input layout exercise early one-tile axes. */
-        for (const auto& ntk :
-             {blueprints::full_adder_network<technology_network>(), blueprints::inverter_network<technology_network>()})
-        {
-            /** @brief An ample timeout lets these small sequential searches finish. */
-            graph_oriented_layout_design_params params{};
-            params.mode    = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-            params.cost    = cost;
-            params.seed    = 7;
-            params.timeout = 60000;
-            /** @brief Reference result for this input and seed. */
-            const auto reference = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
-            REQUIRE(reference.has_value());
-            check_eq(ntk, required_value(reference));
+        /** @brief Full-adder search exercises fanout substitution and ordered routing. */
+        const auto ntk = blueprints::full_adder_network<technology_network>();
+        /** @brief Stop at the first solution to keep this seeded-search regression bounded. */
+        graph_oriented_layout_design_params params{};
+        params.mode                                = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+        params.cost                                = cost;
+        params.seed                                = 7;
+        params.timeout                             = 60000;
+        params.return_first                        = true;
+        params.randomize_tiles_to_skip_between_pis = randomize_spacing;
+        params.tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0;
+        /** @brief Reference result for this input and seed. */
+        const auto reference = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+        REQUIRE(reference.has_value());
+        check_eq(ntk, required_value(reference));
 
-            params.seed                                = 42;
-            params.tiles_to_skip_between_pis           = 1;
-            params.randomize_tiles_to_skip_between_pis = true;
-            /** @brief Intervening invocation with different randomization parameters. */
-            const auto intervening = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
-            REQUIRE(intervening.has_value());
-            check_eq(ntk, required_value(intervening));
+        params.seed                                = 42;
+        params.tiles_to_skip_between_pis           = 3;
+        params.randomize_tiles_to_skip_between_pis = true;
+        /** @brief Intervening invocation with different randomization parameters. */
+        const auto intervening = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+        REQUIRE(intervening.has_value());
+        check_eq(ntk, required_value(intervening));
 
-            params.seed                                = 7;
-            params.tiles_to_skip_between_pis           = 0;
-            params.randomize_tiles_to_skip_between_pis = false;
-            /** @brief Repeating the original invocation must reproduce its complete physical result. */
-            const auto repeated = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
-            REQUIRE(repeated.has_value());
-            check_eq(ntk, required_value(repeated));
-            CHECK(snapshot(required_value(reference)) == snapshot(required_value(repeated)));
-        }
+        params.seed                                = 7;
+        params.tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0;
+        params.randomize_tiles_to_skip_between_pis = randomize_spacing;
+        /** @brief Repeating the original invocation must reproduce its complete physical result. */
+        const auto repeated = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+        REQUIRE(repeated.has_value());
+        check_eq(ntk, required_value(repeated));
+        CHECK(snapshot(required_value(reference)) == snapshot(required_value(repeated)));
     }
+}
+
+TEST_CASE("GOLD estimates geometric area on one-tile axes", "[graph-oriented-layout-design]")
+{
+    CHECK(fiction::physical_design::detail::candidate_layout_area(1, 1, {0, 0}) == 1.0);
+    CHECK(fiction::physical_design::detail::candidate_layout_area(1, 6, {0, 2}) == 5.0);
+    CHECK(fiction::physical_design::detail::candidate_layout_area(6, 1, {2, 0}) == 5.0);
+    CHECK(fiction::physical_design::detail::candidate_layout_area(4, 5, {1, 1}) == 12.0);
+    CHECK(fiction::physical_design::detail::candidate_layout_area(4, 5, {5, 6}) == 42.0);
 }
