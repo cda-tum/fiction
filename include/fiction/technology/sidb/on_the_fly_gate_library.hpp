@@ -245,12 +245,10 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                        return design_gate<layouts::hexagonal_gate_layout>(
-                            skeleton_with_defects, synthesis::create_fan_out_tt(), params, p, t);
+                        return design_gate(skeleton_with_defects, synthesis::create_fan_out_tt(), params, p, t);
                     }
 
-                    return design_gate<layouts::hexagonal_gate_layout>(skeleton, synthesis::create_fan_out_tt(), params,
-                                                                       p, t);
+                    return design_gate(skeleton, synthesis::create_fan_out_tt(), params, p, t);
                 }
             }
 
@@ -281,9 +279,8 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                                     return DOUBLE_WIRE;
                                 }
 
-                                return design_gate<layouts::hexagonal_gate_layout>(skeleton_with_defects,
-                                                                                   synthesis::create_double_wire_tt(),
-                                                                                   complex_gate_param, p, t);
+                                return design_gate(skeleton_with_defects, synthesis::create_double_wire_tt(),
+                                                   complex_gate_param, p, t);
                             }
 
                             if (params.using_predefined_crossing_and_double_wire_if_possible ==
@@ -292,8 +289,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                                 return DOUBLE_WIRE;
                             }
 
-                            return design_gate<layouts::hexagonal_gate_layout>(
-                                skeleton, synthesis::create_double_wire_tt(), complex_gate_param, p, t);
+                            return design_gate(skeleton, synthesis::create_double_wire_tt(), complex_gate_param, p, t);
                         }
 
                         if (defect_surface.has_value())
@@ -309,8 +305,8 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                                 return CROSSING;
                             }
 
-                            return design_gate<layouts::hexagonal_gate_layout>(
-                                skeleton_with_defects, synthesis::create_crossing_wire_tt(), complex_gate_param, p, t);
+                            return design_gate(skeleton_with_defects, synthesis::create_crossing_wire_tt(),
+                                               complex_gate_param, p, t);
                         }
 
                         if (params.using_predefined_crossing_and_double_wire_if_possible ==
@@ -319,8 +315,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                             return CROSSING;
                         }
 
-                        return design_gate<layouts::hexagonal_gate_layout>(
-                            skeleton, synthesis::create_crossing_wire_tt(), complex_gate_param, p, t);
+                        return design_gate(skeleton, synthesis::create_crossing_wire_tt(), complex_gate_param, p, t);
                     }
 
                     const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
@@ -336,11 +331,10 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                         const auto skeleton_with_defects =
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
-                        return design_gate<layouts::hexagonal_gate_layout>(skeleton_with_defects, std::vector<tt>{f},
-                                                                           params, p, t);
+                        return design_gate(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                     }
 
-                    return design_gate<layouts::hexagonal_gate_layout>(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate(skeleton, std::vector<tt>{f}, params, p, t);
                 }
                 return EMPTY_GATE;
             }
@@ -355,11 +349,10 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                         add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                    return design_gate<layouts::hexagonal_gate_layout>(skeleton_with_defects, std::vector<tt>{f},
-                                                                       params, p, t);
+                    return design_gate(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
                 }
 
-                return design_gate<layouts::hexagonal_gate_layout>(skeleton, std::vector<tt>{f}, params, p, t);
+                return design_gate(skeleton, std::vector<tt>{f}, params, p, t);
             }
 
             const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
@@ -370,11 +363,10 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                     add_defect_to_skeleton(defect_surface.value(), skeleton, params.influence_radius_charged_defects,
                                            center_cell, absolute_cell);
 
-                return design_gate<layouts::hexagonal_gate_layout>(skeleton_with_defects, std::vector<tt>{f}, params, p,
-                                                                   t);
+                return design_gate(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
             }
 
-            return design_gate<layouts::hexagonal_gate_layout>(skeleton, std::vector<tt>{f}, params, p, t);
+            return design_gate(skeleton, std::vector<tt>{f}, params, p, t);
         }
 
         catch (const std::out_of_range&)
@@ -484,7 +476,6 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      * impossible, or if the designer finds no gate, a `gate_design_exception` names the tile, the function, and the
      * ports so that placement can blacklist them.
      *
-     * @tparam GateLyt Gate-level layout type.
      * @param skeleton The skeleton, possibly with defects.
      * @param spec The Boolean function(s) to implement.
      * @param parameters Parameters.
@@ -493,7 +484,6 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
      * @return The designed gate.
      * @throws gate_design_exception if no gate can be designed.
      */
-    template <typename GateLyt>
     [[nodiscard]] static gate design_gate(const layout& skeleton, const std::vector<kitty::dynamic_truth_table>& spec,
                                           const on_the_fly_gate_library_params&            parameters,
                                           const fcn::port_list<fcn::port_direction>&       p,
