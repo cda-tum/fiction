@@ -67,6 +67,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Documented GOLD's fixed-seed repeatability limits and geometric `AREA` priority on one-tile axes.
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.

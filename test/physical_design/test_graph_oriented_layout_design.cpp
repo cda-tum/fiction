@@ -52,6 +52,7 @@
 #include <future>
 #include <optional>
 #include <stdexcept>
+#include <tuple>
 #include <vector>
 
 // The tests dereference optionals right after REQUIRE(x.has_value()), which the check does not model.
@@ -751,4 +752,67 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
     CHECK(extracted.get_output_name(0) == "result");
     check_eq(source, extracted);
+}
+
+TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-design]")
+{
+    /** @brief Captures geometry, functions, terminal kinds, and ordered connections without object identities. */
+    const auto snapshot = [](const cartesian_gate_layout& layout)
+    {
+        /** @brief Placed objects keyed by their coordinates. */
+        std::vector<std::tuple<layout_base::coordinate, kitty::dynamic_truth_table, bool, bool>> objects{};
+        /** @brief Connections keyed by destination coordinate and input index. */
+        std::vector<std::tuple<layout_base::coordinate, uint32_t, layout_base::coordinate>> connections{};
+        layout.foreach_object(
+            [&](const auto id)
+            {
+                /** @brief Physical position independent of the layout's object identities. */
+                const auto position = layout.get_tile(id);
+                objects.emplace_back(position, layout.object_function(id), layout.is_pi(id), layout.is_po(id));
+                layout.foreach_fanin(id, [&](const auto source, const auto index)
+                                     { connections.emplace_back(position, index, layout.get_tile(source)); });
+            });
+        std::sort(objects.begin(), objects.end(),
+                  [](const auto& a, const auto& b) { return std::get<0>(a) < std::get<0>(b); });
+        std::sort(connections.begin(), connections.end());
+        return std::tuple{layout.width(), layout.height(), layout.layers(), objects, connections};
+    };
+
+    for (const auto cost : {graph_oriented_layout_design_params::cost_objective::AREA,
+                            graph_oriented_layout_design_params::cost_objective::ACP})
+    {
+        CAPTURE(cost);
+        /** @brief Both the reported full adder and a one-input layout exercise early one-tile axes. */
+        for (const auto& ntk :
+             {blueprints::full_adder_network<technology_network>(), blueprints::inverter_network<technology_network>()})
+        {
+            /** @brief An ample timeout lets these small sequential searches finish. */
+            graph_oriented_layout_design_params params{};
+            params.mode    = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+            params.cost    = cost;
+            params.seed    = 7;
+            params.timeout = 60000;
+            /** @brief Reference result for this input and seed. */
+            const auto reference = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+            REQUIRE(reference.has_value());
+            check_eq(ntk, required_value(reference));
+
+            params.seed                                = 42;
+            params.tiles_to_skip_between_pis           = 1;
+            params.randomize_tiles_to_skip_between_pis = true;
+            /** @brief Intervening invocation with different randomization parameters. */
+            const auto intervening = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+            REQUIRE(intervening.has_value());
+            check_eq(ntk, required_value(intervening));
+
+            params.seed                                = 7;
+            params.tiles_to_skip_between_pis           = 0;
+            params.randomize_tiles_to_skip_between_pis = false;
+            /** @brief Repeating the original invocation must reproduce its complete physical result. */
+            const auto repeated = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+            REQUIRE(repeated.has_value());
+            check_eq(ntk, required_value(repeated));
+            CHECK(snapshot(required_value(reference)) == snapshot(required_value(repeated)));
+        }
+    }
 }

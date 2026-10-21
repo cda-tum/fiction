@@ -2074,10 +2074,10 @@ class graph_oriented_layout_design_impl
 
             if (ssg.cost == graph_oriented_layout_design_params::cost_objective::AREA)
             {
-                // current layout size
+                // Geometric candidate area excludes the spare eastern and southern borders, even on one-tile axes.
                 const double layout_size =
-                    ((std::max(static_cast<double>(layout.width()) - 2.0, static_cast<double>(position.x)) + 1.0) *
-                     (std::max(static_cast<double>(layout.height()) - 2.0, static_cast<double>(position.y)) + 1.0)) /
+                    (std::max(static_cast<double>(layout.width()) - 1.0, static_cast<double>(position.x) + 1.0) *
+                     std::max(static_cast<double>(layout.height()) - 1.0, static_cast<double>(position.y) + 1.0)) /
                     (node_count * node_count);
 
                 // position of last placed node
