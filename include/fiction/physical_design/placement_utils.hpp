@@ -21,14 +21,12 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/stl/array_utils.hpp"
 
 #include <kitty/operations.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -357,8 +355,7 @@ struct branching_signal_container
     /**
      * Storage for all branches.
      */
-    std::array<std::shared_ptr<branching_signal>, fanout_size> branches =
-        fiction::utils::stl::create_array<fanout_size, std::shared_ptr<branching_signal>>(nullptr);
+    std::array<std::shared_ptr<branching_signal>, fanout_size> branches{};
 };
 /**
  * Place any gate from a network. This function automatically identifies the arity of the passed node and fetches its

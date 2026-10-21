@@ -2538,21 +2538,15 @@ class graph_oriented_layout_design_impl
                     mockturtle::fanout_view network_substituted_random{
                         synthesis::fanout_substitution<tec_nt>(ntk, params)};
 
-                    topo_view_co_to_ci_random network_breadth_co_to_ci_random{network_substituted_random, seed};
-                    topo_view_ci_to_co_random network_breadth_ci_to_co_random{network_substituted_random, seed};
-                    topo_view_co_to_ci_random network_depth_co_to_ci_random{network_substituted_random, seed};
-                    topo_view_ci_to_co_random network_depth_ci_to_co_random{network_substituted_random, seed};
+                    topo_view_co_to_ci_random network_co_to_ci_random{network_substituted_random, seed};
+                    topo_view_ci_to_co_random network_ci_to_co_random{network_substituted_random, seed};
 
                     // prepare nodes to place for additional networks
-                    std::vector<tec_nt::node> nodes_to_place_breadth_co_to_ci_random{};
-                    std::vector<tec_nt::node> nodes_to_place_breadth_ci_to_co_random{};
-                    std::vector<tec_nt::node> nodes_to_place_depth_co_to_ci_random{};
-                    std::vector<tec_nt::node> nodes_to_place_depth_ci_to_co_random{};
+                    std::vector<tec_nt::node> nodes_to_place_co_to_ci_random{};
+                    std::vector<tec_nt::node> nodes_to_place_ci_to_co_random{};
 
-                    prepare_nodes_to_place(network_breadth_co_to_ci_random, nodes_to_place_breadth_co_to_ci_random);
-                    prepare_nodes_to_place(network_breadth_ci_to_co_random, nodes_to_place_breadth_ci_to_co_random);
-                    prepare_nodes_to_place(network_depth_co_to_ci_random, nodes_to_place_depth_co_to_ci_random);
-                    prepare_nodes_to_place(network_depth_ci_to_co_random, nodes_to_place_depth_ci_to_co_random);
+                    prepare_nodes_to_place(network_co_to_ci_random, nodes_to_place_co_to_ci_random);
+                    prepare_nodes_to_place(network_ci_to_co_random, nodes_to_place_ci_to_co_random);
 
                     if (ps.cost != graph_oriented_layout_design_params::cost_objective::CUSTOM)
                     {
@@ -2560,11 +2554,10 @@ class graph_oriented_layout_design_impl
                              j <= (num_search_space_graphs_maximum_effort - num_search_space_graphs_high_effort);
                              j += num_search_space_graphs_high_effort)
                         {
-                            assign_networks_and_nodes(
-                                j, network_breadth_co_to_ci_random, network_breadth_ci_to_co_random,
-                                network_depth_co_to_ci_random, network_depth_ci_to_co_random,
-                                nodes_to_place_breadth_co_to_ci_random, nodes_to_place_breadth_ci_to_co_random,
-                                nodes_to_place_depth_co_to_ci_random, nodes_to_place_depth_ci_to_co_random);
+                            assign_networks_and_nodes(j, network_co_to_ci_random, network_ci_to_co_random,
+                                                      network_co_to_ci_random, network_ci_to_co_random,
+                                                      nodes_to_place_co_to_ci_random, nodes_to_place_ci_to_co_random,
+                                                      nodes_to_place_co_to_ci_random, nodes_to_place_ci_to_co_random);
                         }
                     }
                     else
@@ -2573,11 +2566,10 @@ class graph_oriented_layout_design_impl
                              j <= (num_search_space_graphs_maximum_effort_custom - num_search_space_graphs_high_effort);
                              j += num_search_space_graphs_high_effort)
                         {
-                            assign_networks_and_nodes(
-                                j, network_breadth_co_to_ci_random, network_breadth_ci_to_co_random,
-                                network_depth_co_to_ci_random, network_depth_ci_to_co_random,
-                                nodes_to_place_breadth_co_to_ci_random, nodes_to_place_breadth_ci_to_co_random,
-                                nodes_to_place_depth_co_to_ci_random, nodes_to_place_depth_ci_to_co_random);
+                            assign_networks_and_nodes(j, network_co_to_ci_random, network_ci_to_co_random,
+                                                      network_co_to_ci_random, network_ci_to_co_random,
+                                                      nodes_to_place_co_to_ci_random, nodes_to_place_ci_to_co_random,
+                                                      nodes_to_place_co_to_ci_random, nodes_to_place_ci_to_co_random);
                         }
                     }
                 }

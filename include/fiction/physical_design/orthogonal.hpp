@@ -246,7 +246,7 @@ inline bool is_east_south_colored(
 }
 
 /** @brief Checks whether the eastern side can host a primary output. */
-inline uint32_t is_eastern_po_orientation_available(const coloring_container& ctn, const tec_nt::node& n) noexcept
+inline bool is_eastern_po_orientation_available(const coloring_container& ctn, const tec_nt::node& n) noexcept
 {
     bool eastern_side_available = true;
 
@@ -262,7 +262,7 @@ inline uint32_t is_eastern_po_orientation_available(const coloring_container& ct
                                      return false;
                                  });
 
-    return static_cast<uint32_t>(eastern_side_available);
+    return eastern_side_available;
 }
 
 /** @brief Computes the extent required by colored gates and primary outputs. */
