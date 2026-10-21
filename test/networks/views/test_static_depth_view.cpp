@@ -49,7 +49,7 @@ concept depth_viewable = requires { typename static_depth_view<Ntk>; };
 struct depth_without_node_index : mockturtle::aig_network
 {
     /** @brief Disables node indexing. @param n Node to inspect. */
-    uint32_t node_to_index(const node& n) const = delete;
+    [[nodiscard]] uint32_t node_to_index(const node& n) const = delete;
 };
 
 /** @brief Network without combinational-input traversal. */

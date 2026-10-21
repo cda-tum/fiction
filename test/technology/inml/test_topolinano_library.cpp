@@ -28,7 +28,6 @@
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
-#include <fiction/types.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <sstream>

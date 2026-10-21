@@ -59,7 +59,7 @@ struct named_without_constant : mockturtle::names_view<mockturtle::aig_network>
     /** @brief Creates an empty named network. */
     named_without_constant() = default;
     /** @brief Disables constant lookup. @param value Constant value. @return Constant signal. */
-    signal get_constant(bool value) const = delete;
+    [[nodiscard]] signal get_constant(bool value) const = delete;
 };
 
 /**
@@ -88,7 +88,7 @@ concept all_names_transferable =
 struct layout_without_input_name_query : cartesian_gate_layout
 {
     /** @brief Disables the input-name query. @param id Input object. */
-    bool has_name(object_id id) const = delete;
+    [[nodiscard]] bool has_name(object_id id) const = delete;
 };
 
 /** @brief Checks source input-name restoration. @tparam Src Source layout type. */
@@ -112,7 +112,7 @@ struct dual_interface_without_input_names : layout_without_input_names
     /** @brief Keeps the native setter in overload lookup. */
     using layout_without_input_names::set_name;
     /** @brief Converts an input object for the unrelated network-style API. @param id Input object. @return Signal. */
-    signal make_signal(object_id id) const;
+    [[nodiscard]] signal make_signal(object_id id) const;
     /** @brief Accepts network-style names. @param input Input signal. @param name Input name. */
     void set_name(signal input, const std::string& name);
 };

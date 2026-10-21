@@ -41,12 +41,12 @@ struct member_annealing_state
     /** @brief Signed state value. */
     int value{};
     /** @brief Returns the state cost. @return Signed cost. */
-    double cost() const
+    [[nodiscard]] double cost() const
     {
         return static_cast<double>(value);
     }
     /** @brief Produces a lower-cost neighbor. @return Neighbor state. */
-    member_annealing_state next() const
+    [[nodiscard]] member_annealing_state next() const
     {
         return {value - 1};
     }
@@ -513,7 +513,7 @@ TEST_CASE("Annealing results own their state values", "[sim-anneal]")
     /** @brief Preserves state values. */
     const auto next = [](const auto& state) { return state; };
     /** @brief Creates an independent initial state for a worker. */
-    const auto generator = [&initial] { return initial; };
+    const auto generator = [&initial] { return std::vector<int>{initial}; };
     /** @brief Owns the result after single-state storage leaves scope. */
     auto single = simulated_annealing(initial, 1.0, 1.0, 0, cost, schedule, next);
     /** @brief Owns the result after all worker storage leaves scope. */

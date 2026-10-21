@@ -73,14 +73,14 @@ concept rank_base_viewable = requires { typename static_depth_view<Ntk>; };
 struct ranked_without_node_index : mockturtle::depth_view<mockturtle::aig_network>
 {
     /** @brief Disables node indexing. @param n Node to inspect. */
-    uint32_t node_to_index(const node& n) const = delete;
+    [[nodiscard]] uint32_t node_to_index(const node& n) const = delete;
 };
 
 /** @brief Depth-enabled network without a storage size. */
 struct ranked_without_size : mockturtle::depth_view<mockturtle::aig_network>
 {
     /** @brief Disables storage sizing. */
-    uint32_t size() const = delete;
+    [[nodiscard]] uint32_t size() const = delete;
 };
 
 static_assert(rank_base_viewable<ranked_without_node_index>);
