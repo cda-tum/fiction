@@ -651,6 +651,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state
+    occupation probabilities. Both energy-labeling variants document ascending energy order.
   - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
     changing the other inputs' truth-table order.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
