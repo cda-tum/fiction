@@ -329,7 +329,6 @@ def plane(
     Place and route a planar technology network without wire crossings (PLANE).
     The network is the first element of the pair that `planarization` returns: its node order is the planar rank order,
     which the layout preserves. Every level is placed on one anti-diagonal of a 2DDWave-clocked Cartesian gate layout.
-    Gates that no output reaches are dropped before placement.
 
     Args:
         network: Planar, balanced, fanout-substituted technology network from `planarization`.
@@ -341,8 +340,9 @@ def plane(
         A crossing-free Cartesian gate layout that implements `network`.
 
     Raises:
-        ValueError: If `network` has no primary inputs, if a node drives more than two fanouts, if a gate has a constant
-            fanin next to a single non-constant one, if `network` is not balanced, or if its node order has crossings.
+        ValueError: If a gate of `network` is reached by no output, if `network` has no primary inputs, if a node drives
+            more than two fanouts, if a gate has a constant fanin next to a single non-constant one, if `network` is not
+            balanced, or if its node order has crossings.
         high_degree_fanin_exception: If a node has more than two non-constant fanins.
     """
 

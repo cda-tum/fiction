@@ -21,8 +21,6 @@
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/physical_design/plane.hpp>
 
-#include <mockturtle/algorithms/cleanup.hpp>
-
 #include <sstream>
 
 #include <nanobind/nanobind.h>
@@ -79,13 +77,11 @@ void register_plane(nb::module_& m)
             parameters.number_of_clock_phases = number_of_clock_phases;
             parameters.on_progress            = on_progress;
 
-            // gates that no output reaches have no level and cannot be ranked, so they are dropped
-            const auto cleaned = mockturtle::cleanup_dangling(network);
-
             const nb::gil_scoped_release release{};
 
-            // the node order of a planarized technology network is its rank order
-            const fiction::networks::views::mutable_rank_view ranked{cleaned};
+            // the node order of a planarized technology network is its rank order; `cleanup_dangling` would reorder
+            // the nodes, so a gate that no output reaches is rejected instead
+            const fiction::networks::views::mutable_rank_view ranked{network};
 
             return fiction::physical_design::plane<fiction::layouts::cartesian_gate_layout>(ranked, parameters,
                                                                                             statistics);
@@ -99,7 +95,6 @@ void register_plane(nb::module_& m)
         R"doc(Place and route a planar technology network without wire crossings (PLANE).
 The network is the first element of the pair that `planarization` returns: its node order is the planar rank order,
 which the layout preserves. Every level is placed on one anti-diagonal of a 2DDWave-clocked Cartesian gate layout.
-Gates that no output reaches are dropped before placement.
 
 Args:
     network: Planar, balanced, fanout-substituted technology network from `planarization`.
@@ -111,8 +106,9 @@ Returns:
     A crossing-free Cartesian gate layout that implements `network`.
 
 Raises:
-    ValueError: If `network` has no primary inputs, if a node drives more than two fanouts, if a gate has a constant
-        fanin next to a single non-constant one, if `network` is not balanced, or if its node order has crossings.
+    ValueError: If a gate of `network` is reached by no output, if `network` has no primary inputs, if a node drives
+        more than two fanouts, if a gate has a constant fanin next to a single non-constant one, if `network` is not
+        balanced, or if its node order has crossings.
     high_degree_fanin_exception: If a node has more than two non-constant fanins.)doc");
 }
 
