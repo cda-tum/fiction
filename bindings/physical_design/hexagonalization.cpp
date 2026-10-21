@@ -107,9 +107,7 @@ void register_hexagonalization(nb::module_& m)
             params.output_pin_extension = output_pin_extension;
             params.on_progress          = on_progress;
             const nb::gil_scoped_release release{};
-            return fiction::physical_design::hexagonalization<fiction::layouts::hexagonal_gate_layout,
-                                                              fiction::layouts::cartesian_gate_layout>(layout, params,
-                                                                                                       statistics);
+            return fiction::physical_design::hexagonalization(layout, params, statistics);
         },
         nb::arg("layout"), nb::kw_only(),
         nb::arg("input_pin_extension")  = hexagonalization_options{}.input_pin_extension,

@@ -82,7 +82,7 @@ void compare_dot_layout(const Lyt& lyt, const std::string_view& layout_print)
 {
     std::stringstream dot_stream{};
 
-    write_dot_layout<Lyt, Drawer>(lyt, dot_stream);
+    write_dot_layout<typename Lyt::coordinate_layout, Drawer>(lyt, dot_stream);
 
     CHECK(dot_stream.str() == layout_print);
 }
@@ -989,7 +989,7 @@ TEST_CASE("Layout DOT labels preserve terminal names", "[dot-drawers]")
     const std::string     name{"a\"\nb\\c"};
     layout.create_pi(name, {0, 0});
     std::stringstream stream{};
-    write_dot_layout<cartesian_gate_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(layout, stream);
+    write_dot_layout<cartesian_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(layout, stream);
     const auto label_start = stream.str().find(" [label=");
     REQUIRE(label_start != std::string::npos);
     std::istringstream label_stream{stream.str().substr(label_start + std::string_view{" [label="}.size())};
@@ -1022,7 +1022,7 @@ TEST_CASE("Layout DOT identifiers serialize signed coordinate boundaries", "[dot
     const auto            input  = layout.create_pi("a", {minimum, maximum});
     const auto            output = layout.create_buf(input, {0, 0});
     std::stringstream     stream{};
-    write_dot_layout<cartesian_gate_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(layout, stream);
+    write_dot_layout<cartesian_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(layout, stream);
     const auto source_id = drawer.tile_id(layout.get_tile(input));
     const auto target_id = drawer.tile_id(layout.get_tile(output));
     CHECK(std::regex_match(source_id, identifier));
@@ -1050,7 +1050,7 @@ TEST_CASE("Layout DOT progress retains areas above the unsigned 32-bit range", "
     std::size_t                 total{};
     std::stringstream           stream{};
     const auto progress = [&total](std::string_view, std::size_t, const std::size_t count) { total = count; };
-    CHECK_THROWS_AS((write_dot_layout<cartesian_gate_layout, interrupted_drawer>(layout, stream, {}, progress)),
+    CHECK_THROWS_AS((write_dot_layout<cartesian_layout, interrupted_drawer>(layout, stream, {}, progress)),
                     std::runtime_error);
     CHECK(total == layout.area());
 }

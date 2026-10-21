@@ -92,7 +92,7 @@ try
             const auto benchmark_network = read_ntk<tec_nt>(benchmark);
 
             // perform layout generation with an OGD-based heuristic algorithm
-            auto       gate_layout = orthogonal<cartesian_gate_layout>(benchmark_network, {}, &orthogonal_stats);
+            auto       gate_layout = orthogonal<cartesian_layout>(benchmark_network, {}, &orthogonal_stats);
             const auto layout_copy = gate_layout.clone();
 
             // calculate bounding box

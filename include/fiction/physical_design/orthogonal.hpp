@@ -753,20 +753,19 @@ class orthogonal_impl
  *
  * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
  *
- * @tparam Lyt Desired gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the returned gate-level layout.
  * @param ntk Named technology network to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
- * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `ps.layout_arrangement` is
- * empty.
+ * @return A gate-level layout of type `gate_layout<Geometry>` that implements `ntk` as an FCN circuit.
+ * @throws std::invalid_argument If `gate_layout<Geometry>` is a shifted Cartesian or hexagonal layout and
+ * `ps.layout_arrangement` is empty.
  */
-template <typename Lyt>
-    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
-Lyt orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {},
-               orthogonal_physical_design_stats* pst = nullptr)
+template <typename Geometry>
+layouts::gate_layout<Geometry> orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {},
+                                          orthogonal_physical_design_stats* pst = nullptr)
 {
-    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
+    layouts::require_arrangement<layouts::gate_layout<Geometry>>(ps.layout_arrangement);
 
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, 2))
@@ -774,8 +773,9 @@ Lyt orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {},
         throw networks::high_degree_fanin_exception();
     }
 
-    orthogonal_physical_design_stats st{};
-    detail::orthogonal_impl<Lyt>     p{synthesis::fanout_substitution<tec_nt>(ntk), std::move(ps), st};
+    orthogonal_physical_design_stats                        st{};
+    detail::orthogonal_impl<layouts::gate_layout<Geometry>> p{synthesis::fanout_substitution<tec_nt>(ntk),
+                                                              std::move(ps), st};
 
     auto result = p.run();
 

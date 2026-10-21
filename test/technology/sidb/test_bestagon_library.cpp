@@ -24,6 +24,8 @@
 using namespace fiction;
 using namespace fiction::sidb;
 
+static_assert(std::is_pointer_v<decltype(&bestagon_library::set_up_gate)>);
+
 TEST_CASE("Bestagon traits", "[sidb-bestagon-gate-library]")
 {
     CHECK(std::is_same_v<bestagon_library::layout, sidb::layout>);

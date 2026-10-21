@@ -53,13 +53,10 @@ using namespace fiction::verification;
 
 /**
  * @brief Assigns clock zero to every tile in the declared frame.
- * @tparam Lyt Gate-level layout type.
  * @param lyt Layout whose clock numbers are cleared.
  * @throws std::bad_alloc If an override cannot be allocated.
  */
-template <typename Lyt>
-    requires requires { requires std::same_as<typename Lyt::object_id, layout_object_id>; }
-void remove_clocking(Lyt& lyt)
+void remove_clocking(cartesian_gate_layout& lyt)
 {
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
@@ -110,7 +107,7 @@ try
         const auto mapped_network = mockturtle::map(network, gate_lib, map_params);
 
         // perform layout generation with an exact SMT-based algorithm
-        const auto original_layout = orthogonal<cartesian_gate_layout>(convert_network<tec_nt>(mapped_network));
+        const auto original_layout = orthogonal<cartesian_layout>(convert_network<tec_nt>(mapped_network));
 
         // obtain layout characteristics
         const auto width  = original_layout.width();

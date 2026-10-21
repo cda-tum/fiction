@@ -46,7 +46,7 @@ using namespace fiction::layouts;
 using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 
-TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-design]")
+TEST_CASE("Circuit design accepts a hexagonal gate layout", "[on-the-fly-circuit-design]")
 {
     hexagonal_gate_layout gate_layout{arrangement::EVEN_ROW, {3, 3}};
     const auto            first  = gate_layout.create_pi("a", {0, 0});

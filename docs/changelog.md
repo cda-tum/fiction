@@ -320,7 +320,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
-  - Clock-number assignment helpers now declare their gate-layout requirements with C++20 `requires` clauses.
+  - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
   - Physical-design experiments convert mapped networks before placement with unchanged computations.
   - Gate-layout experiments use canonical types with unchanged computations.
@@ -451,6 +451,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - **Breaking:** Gate-only APIs now take canonical gate layouts. Fixed-geometry algorithms and gate libraries are non-templates;
+    multi-geometry factories take coordinate geometries as template arguments.
   - Template APIs now declare their type and callback requirements with C++20 `requires` clauses.
     Unsupported arguments fail overload resolution; optional naming operations remain no-ops when unsupported.
   - C++ Python binding helpers now use a `register_` prefix.

@@ -180,7 +180,7 @@ void smt_sat_complete()
             exact_params.timeout       = 3'600'000;  // 1h in ms
 
             // perform layout generation with an SMT-based exact algorithm
-            auto gate_layout = exact<cartesian_gate_layout>(network, exact_params, &exact_stats);
+            auto gate_layout = exact<cartesian_layout>(network, exact_params, &exact_stats);
 
             if (gate_layout.has_value())
             {
@@ -231,7 +231,7 @@ void ortho_sat_complete()
         const auto network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
-        auto gate_layout = orthogonal<cartesian_gate_layout>(network, {}, &ortho_stats);
+        auto gate_layout = orthogonal<cartesian_layout>(network, {}, &ortho_stats);
 
         re_route_and_log(benchmark, network, gate_layout, routing_params, ortho_stats, color_routing_exp);
     }
@@ -276,7 +276,7 @@ void ortho_mcs()
         const auto network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
-        auto gate_layout = orthogonal<cartesian_gate_layout>(network, {}, &ortho_stats);
+        auto gate_layout = orthogonal<cartesian_layout>(network, {}, &ortho_stats);
 
         re_route_and_log(benchmark, network, gate_layout, routing_params, ortho_stats, color_routing_exp);
     }

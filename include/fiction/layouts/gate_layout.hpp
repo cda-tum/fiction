@@ -133,6 +133,8 @@ class gate_layout : public CoordinateLayout
     using object_id = layout_object_id;
     /** @brief Ordered destination endpoint. */
     using input_port = layout_input_port;
+    /** @brief Coordinate geometry used for placement. */
+    using coordinate_layout = CoordinateLayout;
     /** @brief Concrete layout type. */
     using base_type = gate_layout;
 

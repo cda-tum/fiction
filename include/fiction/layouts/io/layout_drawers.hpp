@@ -30,7 +30,6 @@
 
 #include <algorithm>
 #include <array>
-#include <concepts>
 #include <cstdint>
 #include <iomanip>
 #include <ostream>
@@ -600,16 +599,15 @@ class gate_layout_hexagonal_drawer : public detail::gate_layout_shifted_tile_dra
 /**
  * Writes a layout in DOT format into an output stream. Terminal names use quoted DOT strings.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @tparam Drawer DOT drawer type.
  * @param lyt Layout.
  * @param os Output stream.
  * @param drawer Formats the layout's tiles and topology.
  * @param on_progress Receives completed drawing work.
  */
-template <class Lyt, class Drawer>
-    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
-void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {},
+template <typename Geometry, class Drawer>
+void write_dot_layout(const layouts::gate_layout<Geometry>& lyt, std::ostream& os, const Drawer& drawer = {},
                       utils::progress_callback on_progress = {})
 {
     std::stringstream nodes{}, edges{}, topology{};
@@ -662,10 +660,9 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
  * @param on_progress Receives completed drawing work.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
-template <class Lyt, class Drawer>
-    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
-void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {},
-                      utils::progress_callback on_progress = {})
+template <typename Geometry, class Drawer>
+void write_dot_layout(const layouts::gate_layout<Geometry>& lyt, const std::string_view& filename,
+                      const Drawer& drawer = {}, utils::progress_callback on_progress = {})
 {
     fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_dot_layout(lyt, os, drawer, on_progress); });
 }

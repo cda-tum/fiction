@@ -36,7 +36,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <concepts>
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -154,18 +153,12 @@ namespace detail
 /**
  * Utility function to transform a Cartesian tile into a hexagonal one.
  *
- * @tparam CartLyt Cartesian source layout type.
- * @tparam HexLyt Hexagonal destination layout type.
  * @param cartesian_tile Tile on the Cartesian grid.
  * @param cartesian_layout_height Height of the Cartesian layout.
  * @return corresponding tile on the hexagonal grid.
  */
-template <typename CartLyt, typename HexLyt>
-    requires std::derived_from<CartLyt, layouts::cartesian_layout> &&
-             std::derived_from<HexLyt, layouts::hexagonal_layout> &&
-             (!std::derived_from<HexLyt, layouts::shifted_cartesian_layout>)
-[[nodiscard]] fiction::layouts::layout_base::coordinate to_hex(fiction::layouts::layout_base::coordinate cartesian_tile,
-                                                               const int32_t cartesian_layout_height)
+[[nodiscard]] inline fiction::layouts::layout_base::coordinate
+to_hex(fiction::layouts::layout_base::coordinate cartesian_tile, const int32_t cartesian_layout_height)
 {
     // compute new y coordinate as sum of x and y
     const auto y = static_cast<int64_t>(cartesian_tile.x) + cartesian_tile.y;
@@ -188,12 +181,10 @@ template <typename CartLyt, typename HexLyt>
  * western border. Such inputs are considered to be positioned left of the middle primary input when the layout is
  * converted to a hexagonal format.
  *
- * @tparam CartLyt Type of the Cartesian layout.
  * @param lyt The Cartesian gate-level layout containing primary inputs.
  * @return The number of primary inputs that are placed to the left of the middle primary input.
  */
-template <typename CartLyt>
-[[nodiscard]] int32_t compute_num_inputs_left_to_middle_pi(const CartLyt& lyt) noexcept
+[[nodiscard]] inline int32_t compute_num_inputs_left_to_middle_pi(const layouts::cartesian_gate_layout& lyt) noexcept
 {
     int32_t num_inputs_left_to_middle_pi = 0;
 
@@ -216,12 +207,10 @@ template <typename CartLyt>
  * southern border. Such outputs are considered to be positioned left of the middle primary output when the layout is
  * converted to a hexagonal format.
  *
- * @tparam CartLyt Type of the Cartesian layout.
  * @param lyt The Cartesian gate-level layout containing primary outputs.
  * @return The number of primary outputs that are placed to the left of the middle primary output.
  */
-template <typename CartLyt>
-[[nodiscard]] int32_t compute_num_outputs_left_to_middle_po(const CartLyt& lyt) noexcept
+[[nodiscard]] inline int32_t compute_num_outputs_left_to_middle_po(const layouts::cartesian_gate_layout& lyt) noexcept
 {
     int32_t num_outputs_left_to_middle_po = 0;
 
@@ -246,12 +235,10 @@ template <typename CartLyt>
  * northern border. Such inputs are considered to be positioned right of the middle primary input when the layout is
  * converted to a hexagonal format.
  *
- * @tparam CartLyt Type of the Cartesian layout.
  * @param lyt The Cartesian gate-level layout containing primary inputs.
  * @return The number of primary inputs that are placed to the right of the middle primary input.
  */
-template <typename CartLyt>
-[[nodiscard]] int32_t compute_num_inputs_right_to_middle_pi(const CartLyt& lyt) noexcept
+[[nodiscard]] inline int32_t compute_num_inputs_right_to_middle_pi(const layouts::cartesian_gate_layout& lyt) noexcept
 {
     int32_t num_inputs_right_to_middle_pi = 0;
 
@@ -274,12 +261,10 @@ template <typename CartLyt>
  * eastern border. Such outputs are considered to be positioned right of the middle primary output when the layout is
  * converted to a hexagonal format.
  *
- * @tparam CartLyt Type of the Cartesian layout.
  * @param lyt The Cartesian gate-level layout containing primary outputs.
  * @return The number of primary outputs that are placed to the right of the middle primary output.
  */
-template <typename CartLyt>
-[[nodiscard]] int32_t compute_num_outputs_right_to_middle_po(const CartLyt& lyt) noexcept
+[[nodiscard]] inline int32_t compute_num_outputs_right_to_middle_po(const layouts::cartesian_gate_layout& lyt) noexcept
 {
     int32_t num_outputs_right_to_middle_po = 0;
 
@@ -307,8 +292,6 @@ template <typename CartLyt>
  * non-empty tile, it calculates an offset value, which is the number of columns on the left side of the hexagonal
  * layout that will be empty. This offset is based on the leftmost tile that will appear in the hexagonal layout.
  *
- * @tparam HexLyt Even-row hexagonal gate-level layout return type.
- * @tparam CartLyt Input Cartesian gate-level layout type.
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
  * @param cartesian_layout_width Width of the Cartesian layout.
  * @param cartesian_layout_height Height of the Cartesian layout.
@@ -316,14 +299,10 @@ template <typename CartLyt>
  * @param output_mode Adjust offset based on POs relocated to the bottom row.
  * @return Signed shift that has to be added to any x-coordinate on the hexagonal layout.
  */
-template <typename HexLyt, typename CartLyt>
-    requires std::derived_from<CartLyt, layouts::cartesian_layout> &&
-             std::derived_from<HexLyt, layouts::hexagonal_layout> &&
-             (!std::derived_from<HexLyt, layouts::shifted_cartesian_layout>)
-[[nodiscard]] int32_t get_offset(const CartLyt& lyt, const int32_t cartesian_layout_width,
-                                 const int32_t                                        cartesian_layout_height,
-                                 const hexagonalization_params::io_pin_extension_mode input_mode,
-                                 const hexagonalization_params::io_pin_extension_mode output_mode)
+[[nodiscard]] inline int32_t get_offset(const layouts::cartesian_gate_layout& lyt, const int32_t cartesian_layout_width,
+                                        const int32_t                                        cartesian_layout_height,
+                                        const hexagonalization_params::io_pin_extension_mode input_mode,
+                                        const hexagonalization_params::io_pin_extension_mode output_mode)
 {
     int32_t offset{};
     int64_t first_diagonal = std::numeric_limits<int64_t>::max();
@@ -336,7 +315,7 @@ template <typename HexLyt, typename CartLyt>
                 return;
             }
             const auto diagonal = static_cast<int64_t>(t.x) + cartesian_layout_height - 1 - t.y;
-            const auto x        = to_hex<CartLyt, HexLyt>(t, cartesian_layout_height).x;
+            const auto x        = to_hex(t, cartesian_layout_height).x;
             if (diagonal < first_diagonal)
             {
                 first_diagonal = diagonal;
@@ -351,7 +330,7 @@ template <typename HexLyt, typename CartLyt>
     // 2) Adjust offset to accommodate primary inputs if required.
     if (input_mode != hexagonalization_params::io_pin_extension_mode::NONE)
     {
-        const auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, cartesian_layout_height);
+        const auto middle_pi = detail::to_hex({0, 0}, cartesian_layout_height);
 
         offset = std::min(middle_pi.x - compute_num_inputs_left_to_middle_pi(lyt), offset);
     }
@@ -359,8 +338,8 @@ template <typename HexLyt, typename CartLyt>
     // 3) Adjust offset to accommodate primary outputs if required.
     if (output_mode != hexagonalization_params::io_pin_extension_mode::NONE)
     {
-        const auto middle_po = detail::to_hex<CartLyt, HexLyt>(
-            {cartesian_layout_width - 1, cartesian_layout_height - 1}, cartesian_layout_height);
+        const auto middle_po =
+            detail::to_hex({cartesian_layout_width - 1, cartesian_layout_height - 1}, cartesian_layout_height);
 
         offset = std::min(middle_po.x - compute_num_outputs_left_to_middle_po(lyt), offset);
     }
@@ -370,27 +349,20 @@ template <typename HexLyt, typename CartLyt>
 }
 
 /** @brief Maps placed objects and ordered ports to a hexagonal layout.
- * @tparam HexLyt Hexagonal destination layout. @tparam CartLyt Cartesian source layout.
  */
-template <typename HexLyt, typename CartLyt>
-    requires requires {
-        requires std::same_as<typename HexLyt::object_id, layouts::layout_object_id>;
-        requires std::same_as<typename CartLyt::object_id, layouts::layout_object_id>;
-    } && std::derived_from<HexLyt, layouts::hexagonal_layout> &&
-             (!std::derived_from<HexLyt, layouts::shifted_cartesian_layout>) &&
-             std::derived_from<CartLyt, layouts::cartesian_layout>
 class hexagonalization_impl
 {
   public:
     /** @brief Initializes a conversion. @param lyt Source layout. @param p Parameters. @param st Statistics. */
-    hexagonalization_impl(const CartLyt& lyt, hexagonalization_params p, hexagonalization_stats* st = nullptr) :
+    hexagonalization_impl(const layouts::cartesian_gate_layout& lyt, hexagonalization_params p,
+                          hexagonalization_stats* st = nullptr) :
             layout(lyt),
             ps(std::move(p)),
             pst(st)
     {}
 
     /** @brief Converts objects and reroutes extended interface pins. @return Hexagonal layout. */
-    [[nodiscard]] HexLyt run()
+    [[nodiscard]] layouts::hexagonal_gate_layout run()
     {
         if (!layout.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME))
         {
@@ -398,7 +370,7 @@ class hexagonalization_impl
         }
         if (layout.is_empty())
         {
-            HexLyt empty{layouts::arrangement::EVEN_ROW, {}, layouts::clocking::row()};
+            layouts::hexagonal_gate_layout empty{layouts::arrangement::EVEN_ROW, {}, layouts::clocking::row()};
             empty.set_layout_name(layout.get_layout_name());
             if (pst != nullptr)
             {
@@ -426,10 +398,9 @@ class hexagonalization_impl
         const auto layout_depth  = (static_cast<int32_t>(static_cast<int64_t>(layout.layers()) - 1));
 
         // compute the hexagonal layout extent from the Cartesian extent
-        const auto hex_height =
-            detail::to_hex<CartLyt, HexLyt>({layout_width - 1, layout_height - 1, 0}, layout_height).y;
-        const auto hex_width = detail::to_hex<CartLyt, HexLyt>({layout_width - 1, 0, 0}, layout_height).x;
-        auto       hex_depth = layout_depth;
+        const auto hex_height = detail::to_hex({layout_width - 1, layout_height - 1, 0}, layout_height).y;
+        const auto hex_width  = detail::to_hex({layout_width - 1, 0, 0}, layout_height).x;
+        auto       hex_depth  = layout_depth;
 
         // if input and/or input pin will get extended and crossings are allowed, add crossing layer
         if (hex_depth == 0 && (ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND ||
@@ -439,10 +410,11 @@ class hexagonalization_impl
         }
 
         // create the initial hexagonal layout
-        HexLyt hex_layout{layouts::arrangement::EVEN_ROW,
-                          {static_cast<int64_t>(hex_width) + 1, static_cast<int64_t>(hex_height) + 1,
-                           static_cast<int64_t>(hex_depth) + 1},
-                          layouts::clocking::row()};
+        layouts::hexagonal_gate_layout hex_layout{layouts::arrangement::EVEN_ROW,
+                                                  {static_cast<int64_t>(hex_width) + 1,
+                                                   static_cast<int64_t>(hex_height) + 1,
+                                                   static_cast<int64_t>(hex_depth) + 1},
+                                                  layouts::clocking::row()};
 
         // initialize statistics for hexagonalization
         hexagonalization_stats stats{};
@@ -453,17 +425,16 @@ class hexagonalization_impl
             const mockturtle::stopwatch stop{stats.time_total};
 
             // calculate horizontal offset for hexagonal layout
-            const auto x_shift = detail::get_offset<HexLyt, CartLyt>(layout, layout_width, layout_height,
-                                                                     ps.input_pin_extension, ps.output_pin_extension);
+            const auto x_shift = detail::get_offset(layout, layout_width, layout_height, ps.input_pin_extension,
+                                                    ps.output_pin_extension);
 
             // determine the top primary input coordinate
-            auto middle_pi = detail::to_hex<CartLyt, HexLyt>({0, 0}, layout_height);
+            auto middle_pi = detail::to_hex({0, 0}, layout_height);
 
             // determine the bottom primary output coordinate
-            auto middle_po =
-                detail::to_hex<CartLyt, HexLyt>({(static_cast<int32_t>(static_cast<int64_t>(layout.width()) - 1)),
-                                                 (static_cast<int32_t>(static_cast<int64_t>(layout.height()) - 1))},
-                                                layout_height);
+            auto middle_po = detail::to_hex({(static_cast<int32_t>(static_cast<int64_t>(layout.width()) - 1)),
+                                             (static_cast<int32_t>(static_cast<int64_t>(layout.height()) - 1))},
+                                            layout_height);
 
             // vectors to store primary inputs
             std::vector<fiction::layouts::layout_base::coordinate> left_pis{};
@@ -487,7 +458,7 @@ class hexagonalization_impl
                 {
                     const auto old_coord = layout.get_tile(gate);
                     // convert Cartesian coordinate to hex coordinate
-                    auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
+                    auto hex_coord = detail::to_hex(old_coord, layout_height);
                     hex_coord      = {static_cast<int64_t>(hex_coord.x) + x_shift, hex_coord.y, hex_coord.z};
                     // create primary input in hex layout
                     hex_layout.create_pi(layout.get_name(gate), hex_coord);
@@ -550,7 +521,7 @@ class hexagonalization_impl
                     {
                         return;
                     }
-                    auto t             = detail::to_hex<CartLyt, HexLyt>(layout.get_tile(id), layout_height);
+                    auto t             = detail::to_hex(layout.get_tile(id), layout_height);
                     t                  = {static_cast<int64_t>(t.x) + x_shift, t.y, t.z};
                     const auto created = layout.is_gate(id) ?
                                              hex_layout.create_gate({}, layout.object_function(id), t) :
@@ -567,7 +538,7 @@ class hexagonalization_impl
                     // get the original Cartesian tile for the output
                     const auto old_coord = layout.get_tile(gate);
 
-                    auto hex_coord = detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height);
+                    auto hex_coord = detail::to_hex(old_coord, layout_height);
                     hex_coord      = {static_cast<int64_t>(hex_coord.x) + x_shift, hex_coord.y, hex_coord.z};
 
                     x_max = std::max(hex_coord.x, x_max);
@@ -596,17 +567,17 @@ class hexagonalization_impl
             layout.foreach_object(
                 [&](const auto id)
                 {
-                    auto destination  = detail::to_hex<CartLyt, HexLyt>(layout.get_tile(id), layout_height);
+                    auto destination  = detail::to_hex(layout.get_tile(id), layout_height);
                     destination       = {static_cast<int64_t>(destination.x) + x_shift, destination.y, destination.z};
                     const auto target = *hex_layout.find_object(destination);
-                    layout.foreach_fanin(
-                        id,
-                        [&](const auto source, const auto input)
-                        {
-                            auto position = detail::to_hex<CartLyt, HexLyt>(layout.get_tile(source), layout_height);
-                            position      = {static_cast<int64_t>(position.x) + x_shift, position.y, position.z};
-                            hex_layout.connect(*hex_layout.find_object(position), {target, input});
-                        });
+                    layout.foreach_fanin(id,
+                                         [&](const auto source, const auto input)
+                                         {
+                                             auto position = detail::to_hex(layout.get_tile(source), layout_height);
+                                             position      = {static_cast<int64_t>(position.x) + x_shift, position.y,
+                                                              position.z};
+                                             hex_layout.connect(*hex_layout.find_object(position), {target, input});
+                                         });
                 });
 
             if (ps.input_pin_extension != hexagonalization_params::io_pin_extension_mode::NONE)
@@ -619,8 +590,8 @@ class hexagonalization_impl
                 // process PIs from left column of the Cartesian layout
                 for (const auto& c : left_pis)
                 {
-                    const auto                               id = *hex_layout.find_object(c);
-                    std::vector<typename HexLyt::input_port> sinks{};
+                    const auto                                              id = *hex_layout.find_object(c);
+                    std::vector<layouts::hexagonal_gate_layout::input_port> sinks{};
                     hex_layout.foreach_sink(id, [&](const auto sink) { sinks.push_back(sink); });
                     middle_pi = {static_cast<int64_t>(middle_pi.x) - 1, middle_pi.y, middle_pi.z};
                     hex_layout.move_object(id, middle_pi);
@@ -639,8 +610,8 @@ class hexagonalization_impl
                 // process PIs from top row of the Cartesian layout (similar to before)
                 for (const auto& c : right_pis)
                 {
-                    const auto                               id = *hex_layout.find_object(c);
-                    std::vector<typename HexLyt::input_port> sinks{};
+                    const auto                                              id = *hex_layout.find_object(c);
+                    std::vector<layouts::hexagonal_gate_layout::input_port> sinks{};
                     hex_layout.foreach_sink(id, [&](const auto sink) { sinks.push_back(sink); });
                     middle_pi = {static_cast<int64_t>(middle_pi.x) + 1, middle_pi.y, middle_pi.z};
                     hex_layout.move_object(id, middle_pi);
@@ -854,7 +825,7 @@ class hexagonalization_impl
     /**
      * The 2DDWave-clocked layout to hexagonalize.
      */
-    const CartLyt& layout;
+    const layouts::cartesian_gate_layout& layout;
     /**
      * Hexagonalization parameters.
      */
@@ -873,8 +844,6 @@ class hexagonalization_impl
  * How a 45° Turn Prevents the Reinvention of the Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2023
  * (https://ieeexplore.ieee.org/document/10231278).
  *
- * @tparam HexLyt Even-row hexagonal gate-level layout return type.
- * @tparam CartLyt Input Cartesian gate-level layout type.
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
  * @param params Parameters.
  * @param stats Statistics.
@@ -882,12 +851,11 @@ class hexagonalization_impl
  * @throws std::invalid_argument If clocking or placed geometry does not satisfy the input contract.
  * @throws std::overflow_error If the transformed coordinates exceed the signed coordinate range.
  */
-template <typename HexLyt, typename CartLyt>
-    requires requires { typename detail::hexagonalization_impl<HexLyt, CartLyt>; }
-[[nodiscard]] HexLyt hexagonalization(const CartLyt& lyt, const hexagonalization_params& params = {},
-                                      hexagonalization_stats* stats = nullptr)
+[[nodiscard]] inline layouts::hexagonal_gate_layout hexagonalization(const layouts::cartesian_gate_layout& lyt,
+                                                                     const hexagonalization_params&        params = {},
+                                                                     hexagonalization_stats* stats = nullptr)
 {
-    detail::hexagonalization_impl<HexLyt, CartLyt> impl(lyt, params, stats);
+    detail::hexagonalization_impl impl{lyt, params, stats};
 
     return impl.run();
 }

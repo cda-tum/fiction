@@ -75,11 +75,11 @@ using namespace fiction::sidb;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
-static_assert(std::same_as<decltype(&exact<cartesian_gate_layout>),
+static_assert(std::same_as<decltype(&exact<cartesian_layout>),
                            std::optional<cartesian_gate_layout> (*)(const tec_nt&, const exact_physical_design_params&,
                                                                     exact_physical_design_stats*)>);
 static_assert(
-    std::same_as<decltype(&exact_with_blacklist<cartesian_gate_layout>),
+    std::same_as<decltype(&exact_with_blacklist<cartesian_layout>),
                  std::optional<cartesian_gate_layout> (*)(const tec_nt&, const surface_black_list<port_direction>&,
                                                           exact_physical_design_params, exact_physical_design_stats*)>);
 
@@ -345,7 +345,7 @@ Lyt generate_layout(const Ntk& ntk, exact_physical_design_params ps, const std::
 
     ps.layout_arrangement = a;
 
-    const auto layout = exact<Lyt>(convert_network<tec_nt>(ntk), ps, &stats);
+    const auto layout = exact<typename Lyt::coordinate_layout>(convert_network<tec_nt>(ntk), ps, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -360,7 +360,8 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<por
 {
     exact_physical_design_stats stats{};
 
-    const auto layout = exact_with_blacklist<Lyt>(convert_network<tec_nt>(ntk), black_list, ps, &stats);
+    const auto layout =
+        exact_with_blacklist<typename Lyt::coordinate_layout>(convert_network<tec_nt>(ntk), black_list, ps, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -789,16 +790,16 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
 TEST_CASE("High degree input networks", "[exact]")
 {
     CHECK_THROWS_AS(
-        exact<cartesian_gate_layout>(convert_network<tec_nt>(blueprints::maj1_network<mockturtle::mig_network>()),
-                                     twoddwave(configuration())),
+        exact<cartesian_layout>(convert_network<tec_nt>(blueprints::maj1_network<mockturtle::mig_network>()),
+                                twoddwave(configuration())),
         high_degree_fanin_exception);
     CHECK_THROWS_AS(
-        exact<cartesian_gate_layout>(convert_network<tec_nt>(blueprints::maj1_network<mockturtle::mig_network>()),
-                                     use(configuration())),
+        exact<cartesian_layout>(convert_network<tec_nt>(blueprints::maj1_network<mockturtle::mig_network>()),
+                                use(configuration())),
         high_degree_fanin_exception);
 
-    CHECK_NOTHROW(exact<cartesian_gate_layout>(
-        convert_network<tec_nt>(blueprints::maj1_network<mockturtle::mig_network>()), res(configuration())));
+    CHECK_NOTHROW(exact<cartesian_layout>(convert_network<tec_nt>(blueprints::maj1_network<mockturtle::mig_network>()),
+                                          res(configuration())));
 }
 
 TEST_CASE("Exact physical design with upper bounds", "[exact]")
@@ -810,7 +811,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
         upper_bound_config.upper_bound_area = 5u;  // allow only 5 tiles total; this will fail (and is tested for)
 
         const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-        const auto layout     = exact<cartesian_gate_layout>(convert_network<tec_nt>(half_adder), upper_bound_config);
+        const auto layout     = exact<cartesian_layout>(convert_network<tec_nt>(half_adder), upper_bound_config);
 
         // since a half adder cannot be synthesized on just 5 tiles, layout should not have a value
         CHECK(!layout.has_value());
@@ -820,7 +821,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
         upper_bound_config.upper_bound_y = 3u;  // allow only 3 tiles in y direction; this will work
 
         const auto mux    = blueprints::mux21_network<technology_network>();
-        auto       layout = exact<cartesian_gate_layout>(mux, upper_bound_config);
+        auto       layout = exact<cartesian_layout>(mux, upper_bound_config);
 
         REQUIRE(layout.has_value());
 
@@ -828,7 +829,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 
         upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail
 
-        layout = exact<cartesian_gate_layout>(mux, upper_bound_config);
+        layout = exact<cartesian_layout>(mux, upper_bound_config);
 
         CHECK(!layout.has_value());
     }
@@ -840,7 +841,7 @@ TEST_CASE("Exact physical design timeout", "[exact]")
     timeout_config.timeout = 1u;  // allow one millisecond to find a solution
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-    const auto layout     = exact<cartesian_gate_layout>(convert_network<tec_nt>(half_adder), timeout_config);
+    const auto layout     = exact<cartesian_layout>(convert_network<tec_nt>(half_adder), timeout_config);
 
     // The one-millisecond budget is insufficient for placing and routing the half adder.
     CHECK(!layout.has_value());
@@ -860,7 +861,7 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     {
         params.num_threads = 2;
     }
-    const auto layout = exact<cartesian_gate_layout>(convert_network<tec_nt>(maj), params);
+    const auto layout = exact<cartesian_layout>(convert_network<tec_nt>(maj), params);
 
     REQUIRE(layout.has_value());
 
@@ -906,8 +907,8 @@ TEST_CASE("Exact physical design reports progress", "[exact]")
         exact_physical_design_stats stats{};
 
         /** @brief Placement result from the selected exact entry point. */
-        const auto layout = with_blacklist ? exact_with_blacklist<cartesian_gate_layout>(ntk, {}, params, &stats) :
-                                             exact<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = with_blacklist ? exact_with_blacklist<cartesian_layout>(ntk, {}, params, &stats) :
+                                             exact<cartesian_layout>(ntk, params, &stats);
 
         CHECK(static_cast<bool>(params.on_progress));
 
@@ -925,9 +926,9 @@ TEST_CASE("Exact physical design requires an arrangement for shifted Cartesian a
 {
     const auto ntk = convert_network<tec_nt>(blueprints::and_or_network<mockturtle::mig_network>());
 
-    CHECK_THROWS_AS(exact<shifted_cartesian_gate_layout>(ntk), std::invalid_argument);
-    CHECK_THROWS_AS(exact<hexagonal_gate_layout>(ntk), std::invalid_argument);
-    CHECK_THROWS_AS(exact_with_blacklist<hexagonal_gate_layout>(ntk, {}), std::invalid_argument);
+    CHECK_THROWS_AS(exact<shifted_cartesian_layout>(ntk), std::invalid_argument);
+    CHECK_THROWS_AS(exact<hexagonal_layout>(ntk), std::invalid_argument);
+    CHECK_THROWS_AS(exact_with_blacklist<hexagonal_layout>(ntk, {}), std::invalid_argument);
 }
 
 TEMPLATE_TEST_CASE("Named specification conversion for exact", "[physical-network]", mockturtle::aig_network,
@@ -943,7 +944,7 @@ TEMPLATE_TEST_CASE("Named specification conversion for exact", "[physical-networ
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
     CHECK(ntk.get_output_name(0) == "result");
-    const auto result = exact<cartesian_gate_layout>(ntk);
+    const auto result = exact<cartesian_layout>(ntk);
     REQUIRE(result.has_value());
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
     const auto& lyt = result.value();

@@ -29,7 +29,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <concepts>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
@@ -133,9 +132,7 @@ struct on_the_fly_circuit_design_params
 /**
  * Statistics for the on-the-fly defect-aware circuit design.
  *
- * @tparam GateLyt Gate-level layout type.
  */
-template <typename GateLyt>
 struct on_the_fly_circuit_design_on_defective_surface_stats
 {
     /**
@@ -149,7 +146,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
     /**
      * The gate-level layout after P&R.
      */
-    std::optional<GateLyt> gate_layout{};
+    std::optional<layouts::hexagonal_gate_layout> gate_layout{};
 };
 
 /**
@@ -167,7 +164,6 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO 2024
  * (https://ieeexplore.ieee.org/abstract/document/10628962).
  *
- * @tparam GateLyt Gate-level layout type.
  * @param ntk Named technology network to map onto the defective surface.
  * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param defective_surface The defective surface on which the SiDB circuit is designed.
@@ -179,20 +175,17 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @throws utils::timeout_error If a circuit or gate-design timeout expires.
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  */
-template <typename GateLyt>
-    requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
-             std::derived_from<GateLyt, layouts::hexagonal_layout> &&
-             (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
-[[nodiscard]] layout on_the_fly_circuit_design_on_defective_surface(
-    const tec_nt& ntk, const GateLyt& lattice_tiling, const layout& defective_surface,
-    const on_the_fly_circuit_design_on_defective_surface_params&   params = {},
-    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>* stats  = nullptr)
+[[nodiscard]] inline layout
+on_the_fly_circuit_design_on_defective_surface(const tec_nt& ntk, const layouts::hexagonal_gate_layout& lattice_tiling,
+                                               const layout& defective_surface,
+                                               const on_the_fly_circuit_design_on_defective_surface_params& params = {},
+                                               on_the_fly_circuit_design_on_defective_surface_stats* stats = nullptr)
 {
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
     deadline             = utils::make_deadline(params.timeout, deadline);
     utils::check_deadline(deadline);
-    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt> st{};
+    on_the_fly_circuit_design_on_defective_surface_stats st{};
 
     physical_design::exact_physical_design_stats exact_stats{};
 
@@ -201,7 +194,7 @@ template <typename GateLyt>
     {
         const mockturtle::stopwatch stop{st.time_total};
 
-        std::optional<GateLyt> gate_layout = std::nullopt;
+        std::optional<layouts::hexagonal_gate_layout> gate_layout = std::nullopt;
 
         layout lyt{};
 
@@ -227,7 +220,8 @@ template <typename GateLyt>
                     static_cast<unsigned>(std::min<uint64_t>(exact_params.timeout, static_cast<uint64_t>(remaining)));
             }
             // P&R with *exact* and the pre-determined blacklist
-            gate_layout = physical_design::exact_with_blacklist<GateLyt>(ntk, black_list, exact_params, &exact_stats);
+            gate_layout = physical_design::exact_with_blacklist<layouts::hexagonal_layout>(ntk, black_list,
+                                                                                           exact_params, &exact_stats);
             st.exact_stats = exact_stats;
 
             if (gate_layout.has_value())
@@ -282,7 +276,6 @@ template <typename GateLyt>
  *
  * The function validates every gate type before designing the SiDB implementations.
  *
- * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
  * @param gate_lyt Pointy-top hexagonal gate-level layout.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_circuit_design_params` object.
@@ -293,12 +286,8 @@ template <typename GateLyt>
  * @throws utils::timeout_error if the shared circuit budget or an individual gate budget expires. No partial circuit
  * is returned. Deadline checks are cooperative and do not interrupt allocation or cell placement.
  */
-template <typename GateLyt>
-    requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; } &&
-             std::derived_from<GateLyt, layouts::hexagonal_layout> &&
-             (!std::derived_from<GateLyt, layouts::shifted_cartesian_layout>)
-[[nodiscard]] layout on_the_fly_circuit_design(const GateLyt&                          gate_lyt,
-                                               const on_the_fly_circuit_design_params& params = {})
+[[nodiscard]] inline layout on_the_fly_circuit_design(const layouts::hexagonal_gate_layout&   gate_lyt,
+                                                      const on_the_fly_circuit_design_params& params = {})
 {
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;

@@ -35,7 +35,7 @@ using namespace fiction::physical_design;
 TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 {
     const auto ntk    = blueprints::parity_network<mockturtle::aig_network>();
-    const auto layout = orthogonal<cartesian_gate_layout>(fiction::synthesis::convert_network<tec_nt>(ntk));
+    const auto layout = orthogonal<cartesian_layout>(fiction::synthesis::convert_network<tec_nt>(ntk));
 
     post_layout_optimization_params full_optimization_params{};
 

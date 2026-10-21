@@ -232,13 +232,13 @@ try
     orthogonal_physical_design_stats ortho_stats{};
 
     // perform layout generation with a scalable algorithm
-    auto ortho_gate_lyt = orthogonal<cartesian_gate_layout>(top_ntk, ortho_params, &ortho_stats);
+    auto ortho_gate_lyt = orthogonal<cartesian_layout>(top_ntk, ortho_params, &ortho_stats);
 
     // print layout properties
     print_gate_layout_properties(ortho_gate_lyt);
     // draw the layout
-    write_dot_layout<cartesian_gate_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(
-        ortho_gate_lyt, designs + "ortho_lyt.dot");
+    write_dot_layout<cartesian_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(ortho_gate_lyt,
+                                                                                            designs + "ortho_lyt.dot");
 
     // apply the QCA ONE gate library to retrieve a QCA layout
     auto ortho_cell_layout = apply_gate_library<qca_one_library>(ortho_gate_lyt);
@@ -270,7 +270,7 @@ try
         exact_physical_design_stats exact_stats{};
 
         // perform layout generation with an SMT-based exact algorithm
-        auto exact_gate_lyt = exact<cartesian_gate_layout>(top_ntk, exact_params, &exact_stats);
+        auto exact_gate_lyt = exact<cartesian_layout>(top_ntk, exact_params, &exact_stats);
 
         // if attempt was successful
         if (exact_gate_lyt.has_value())
@@ -278,7 +278,7 @@ try
             // print layout properties
             print_gate_layout_properties(*exact_gate_lyt);
             // draw the layout
-            write_dot_layout<cartesian_gate_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(
+            write_dot_layout<cartesian_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(
                 *exact_gate_lyt, designs + "exact_lyt.dot");
 
             // apply the QCA ONE gate library to retrieve a QCA layout

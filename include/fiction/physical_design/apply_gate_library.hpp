@@ -51,14 +51,13 @@ namespace fiction::physical_design
  * molQCA, and iNML layouts this way.
  *
  * @tparam GateLibrary Gate library whose tile size is used.
- * @tparam GateLyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param gate_lyt Gate-level layout.
  * @return Axis sizes of the grid, including the layer count of `gate_lyt`.
  * @throws std::overflow_error If an extent is outside the signed 32-bit coordinate range.
  */
-template <typename GateLibrary, typename GateLyt>
-    requires requires { requires std::same_as<typename GateLyt::object_id, layouts::layout_object_id>; }
-[[nodiscard]] layouts::layout_base::extent cell_grid_extent(const GateLyt& gate_lyt)
+template <typename GateLibrary, typename Geometry>
+[[nodiscard]] layouts::layout_base::extent cell_grid_extent(const layouts::gate_layout<Geometry>& gate_lyt)
 {
     if (gate_lyt.width() == 0 || gate_lyt.height() == 0 || gate_lyt.layers() == 0)
     {
@@ -67,8 +66,8 @@ template <typename GateLibrary, typename GateLyt>
 
     using cell_t = layouts::layout_base::coordinate;
 
-    const auto rel_to_abs_cell_pos =
-        [](const GateLyt& g, const fiction::layouts::layout_base::coordinate& t, const cell_t& rel)
+    const auto rel_to_abs_cell_pos = [](const layouts::gate_layout<Geometry>&            g,
+                                        const fiction::layouts::layout_base::coordinate& t, const cell_t& rel)
     {
         return layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size()>(g, t,
                                                                                                                    rel);

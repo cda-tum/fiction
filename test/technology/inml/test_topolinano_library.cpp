@@ -40,6 +40,8 @@ using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::verification;
 
+static_assert(std::is_pointer_v<decltype(&topolinano_library::set_up_gate)>);
+
 TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 {
     CHECK(std::is_same_v<topolinano_library::layout, inml::layout>);

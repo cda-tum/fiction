@@ -34,6 +34,8 @@ using namespace fiction::fcn;
 using namespace fiction::layouts;
 using namespace fiction::mol_qca;
 
+static_assert(std::is_pointer_v<decltype(&sim7_mol_library::set_up_gate)>);
+
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 {
     CHECK(std::is_same_v<sim7_mol_library::layout, mol_qca::layout>);

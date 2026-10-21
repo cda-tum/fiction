@@ -36,19 +36,16 @@ using namespace fiction::physical_design;
 
 /**
  * @brief Assigns clock zero to every tile in the declared frame.
- * @tparam Lyt Gate-level layout type.
  * @param lyt Layout whose clock numbers are cleared.
  */
-template <typename Lyt>
-    requires requires { requires std::same_as<typename Lyt::object_id, layout_object_id>; }
-void remove_clocking(Lyt& lyt)
+void remove_clocking(cartesian_gate_layout& lyt)
 {
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    auto lyt = orthogonal<cartesian_gate_layout>(
+    auto lyt = orthogonal<cartesian_layout>(
         fiction::synthesis::convert_network<tec_nt>(blueprints::nary_operation_network<mockturtle::aig_network>()));
     remove_clocking(lyt);
 
