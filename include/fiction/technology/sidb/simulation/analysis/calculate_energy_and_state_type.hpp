@@ -32,7 +32,6 @@
 #include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -112,8 +111,6 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
             }
         });
 
-    std::ranges::sort(est, [](const auto& a, const auto& b) { return a.first < b.first; });
-
     return est;
 }
 /**
@@ -139,7 +136,9 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
     const std::vector<kitty::dynamic_truth_table>& spec, const uint64_t input_index,
     const std::vector<logic::bdl_wire>& input_bdl_wires, const std::vector<logic::bdl_wire>& output_bdl_wires)
 {
-    energy_and_state_type est{};
+    energy_and_state_type              est{};
+    const logic::is_operational_params params{.op_condition =
+                                                  logic::is_operational_params::operational_condition::REJECT_KINKS};
 
     energy_dist.for_each(
         [&](const double energy, const uint64_t occurrence [[maybe_unused]])
@@ -150,9 +149,6 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
                 {
                     continue;
                 }
-
-                logic::is_operational_params params{};
-                params.op_condition = logic::is_operational_params::operational_condition::REJECT_KINKS;
 
                 const auto op_status =
                     logic::verify_logic_match(lyt, cd, params, spec, input_index, input_bdl_wires, output_bdl_wires);
