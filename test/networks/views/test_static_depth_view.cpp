@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/networks/views/static_depth_view.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -30,6 +31,7 @@
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <cstdint>
 #include <memory>
 #include <utility>
 
@@ -44,6 +46,23 @@ using namespace fiction::networks::views;
 template <typename Ntk>
 concept depth_viewable = requires { typename static_depth_view<Ntk>; };
 
+/** @brief Network without indexed node storage access. */
+struct depth_without_node_index : mockturtle::aig_network
+{
+    /** @brief Disables node indexing. @param n Node to inspect. */
+    uint32_t node_to_index(const node& n) const = delete;
+};
+
+/** @brief Network without combinational-input traversal. */
+struct depth_without_ci_traversal : mockturtle::aig_network
+{
+    /** @brief Disables input traversal. @tparam Fn Callback type. */
+    template <typename Fn>
+    void foreach_ci(Fn&&) const = delete;
+};
+
+static_assert(!depth_viewable<depth_without_node_index>);
+static_assert(!depth_viewable<depth_without_ci_traversal>);
 static_assert(depth_viewable<mockturtle::aig_network>);
 static_assert(!depth_viewable<int>);
 static_assert(requires(const static_depth_view<mockturtle::aig_network>& ntk) { static_depth_view{ntk}; });

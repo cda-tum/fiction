@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -29,6 +30,7 @@
 #include <cmath>
 #include <forward_list>
 #include <iterator>
+#include <ranges>
 #include <vector>
 
 using namespace fiction;
@@ -51,6 +53,8 @@ static_assert(minimum_distribution_range<std::forward_list<charge_distribution>:
 static_assert(minimum_energy_range<std::forward_list<charge_distribution>::const_iterator>);
 static_assert(!minimum_distribution_range<std::istream_iterator<charge_distribution>>);
 static_assert(!minimum_energy_range<std::istream_iterator<charge_distribution>>);
+static_assert(!minimum_distribution_range<const int*>);
+static_assert(!minimum_energy_range<const int*>);
 
 TEST_CASE("Test minimum energy function", "[minimum-energy]")
 {
@@ -104,6 +108,9 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
 
         CHECK_THAT(minimum_energy(all_cds.cbegin(), all_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(minimum_energy_distribution(all_cds.cbegin(), all_cds.cend())->same_charge_states(second));
+
+        const auto transformed = all_cds | std::views::transform([](const auto& cd) -> const auto& { return cd; });
+        CHECK_THAT(minimum_energy(transformed.begin(), transformed.end()), Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         const std::forward_list<charge_distribution> forward_cds{all_cds.front(), all_cds.back()};
         CHECK_THAT(minimum_energy(forward_cds.cbegin(), forward_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));

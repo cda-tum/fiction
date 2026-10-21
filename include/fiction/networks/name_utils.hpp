@@ -13,6 +13,7 @@
  * @brief Helpers that transfer names between networks and layouts.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -113,6 +114,28 @@ template <typename NtkSrc, typename NtkDest>
              (requires(const NtkSrc& src, NtkDest& dest) {
                  src.foreach_pi([](const auto&, const auto) {});
                  dest.pi_at(uint32_t{});
+                 requires(
+                     !requires { requires std::same_as<typename NtkSrc::object_id, layouts::layout_object_id>; } ||
+                     requires(const NtkSrc& source, typename NtkSrc::object_id input) {
+                         source.has_name(input);
+                         source.get_name(input);
+                     });
+                 requires(
+                     requires { requires std::same_as<typename NtkSrc::object_id, layouts::layout_object_id>; } ||
+                     requires(const NtkSrc& source, mockturtle::signal<NtkSrc> input) {
+                         source.has_name(input);
+                         source.get_name(input);
+                     });
+                 requires(
+                     !requires { requires std::same_as<typename NtkDest::object_id, layouts::layout_object_id>; } ||
+                     requires(NtkDest& target, const std::string& name) {
+                         target.set_name(target.pi_at(uint32_t{}), name);
+                     });
+                 requires(
+                     requires { requires std::same_as<typename NtkDest::object_id, layouts::layout_object_id>; } ||
+                     requires(NtkDest& target, const std::string& name) {
+                         target.set_name(target.make_signal(target.pi_at(uint32_t{})), name);
+                     });
              } && (requires {
                   requires std::same_as<typename NtkSrc::object_id, layouts::layout_object_id>;
               } || mockturtle::has_make_signal_v<NtkSrc>) && (requires {

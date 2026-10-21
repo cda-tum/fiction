@@ -13,6 +13,7 @@
  * @brief Network view that reorders unsorted networks with a breadth-first traversal.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -70,11 +71,12 @@ namespace fiction::networks::views
  * @tparam sorted Whether the network already provides a topological order.
  */
 template <class Ntk, bool sorted = mockturtle::is_topologically_sorted_v<Ntk>>
-    requires(sorted ||
-             (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> &&
-              mockturtle::has_get_constant_v<Ntk> && mockturtle::has_foreach_pi_v<Ntk> &&
-              mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_incr_trav_id_v<Ntk> &&
-              mockturtle::has_set_visited_v<Ntk> && mockturtle::has_trav_id_v<Ntk> && mockturtle::has_visited_v<Ntk>))
+    requires(sorted || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> &&
+                        mockturtle::has_get_constant_v<Ntk> && mockturtle::has_foreach_pi_v<Ntk> &&
+                        mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_incr_trav_id_v<Ntk> &&
+                        mockturtle::has_set_visited_v<Ntk> && mockturtle::has_trav_id_v<Ntk> &&
+                        mockturtle::has_visited_v<Ntk> && mockturtle::has_foreach_ci_v<Ntk> &&
+                        mockturtle::has_foreach_node_v<Ntk> && mockturtle::has_get_node_v<Ntk>))
 class bfs_topo_view
 {};
 

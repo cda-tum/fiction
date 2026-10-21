@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Tests for names transferred between networks and placed layouts.
+ * @author OpenAI Codex
  */
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -73,6 +74,48 @@ concept all_names_transferable =
     requires(const Src& src, Dest& dest, mockturtle::node_map<mockturtle::aig_network::signal, Src>& map) {
         restore_names(src, dest, map);
     };
+
+/** @brief Native layout without an input-name query. */
+struct layout_without_input_name_query : cartesian_gate_layout
+{
+    /** @brief Disables the input-name query. @param id Input object. */
+    bool has_name(object_id id) const = delete;
+};
+
+/** @brief Checks source input-name restoration. @tparam Src Source layout type. */
+template <typename Src>
+concept source_input_names_transferable = requires(const Src& src, tec_nt& dest) { restore_input_names(src, dest); };
+
+static_assert(!source_input_names_transferable<layout_without_input_name_query>);
+
+/** @brief Native layout without an input-name setter. */
+struct layout_without_input_names : cartesian_gate_layout
+{
+    /** @brief Disables input-name assignment. @param id Input object. @param name Input name. */
+    void set_name(object_id id, const std::string& name) = delete;
+};
+
+/** @brief Native layout with unsupported native naming and an unrelated network-style setter. */
+struct dual_interface_without_input_names : layout_without_input_names
+{
+    /** @brief Network-style signal type. */
+    using signal = mockturtle::aig_network::signal;
+    /** @brief Keeps the native setter in overload lookup. */
+    using layout_without_input_names::set_name;
+    /** @brief Converts an input object for the unrelated network-style API. @param id Input object. @return Signal. */
+    signal make_signal(object_id id) const;
+    /** @brief Accepts network-style names. @param input Input signal. @param name Input name. */
+    void set_name(signal input, const std::string& name);
+};
+
+/** @brief Checks input-name restoration. @tparam Dest Destination network or layout type. */
+template <typename Dest>
+concept input_names_transferable = requires(const tec_nt& src, Dest& dest) { restore_input_names(src, dest); };
+
+static_assert(input_names_transferable<cartesian_gate_layout>);
+static_assert(input_names_transferable<mockturtle::aig_network>);
+static_assert(!input_names_transferable<layout_without_input_names>);
+static_assert(!input_names_transferable<dual_interface_without_input_names>);
 
 /** @brief Native layout without an output-name setter. */
 struct layout_without_output_names : cartesian_gate_layout

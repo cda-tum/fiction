@@ -13,6 +13,7 @@
  * @brief Network view that provides node levels and overall network depth.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -69,10 +70,13 @@ struct depth_view_params
 template <typename Ntk, typename NodeCostFn = mockturtle::unit_cost<Ntk>,
           bool has_depth_interface =
               mockturtle::has_depth_v<Ntk> && mockturtle::has_level_v<Ntk> && mockturtle::has_update_levels_v<Ntk>>
-    requires(has_depth_interface || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> &&
-                                     mockturtle::has_get_node_v<Ntk> && mockturtle::has_is_complemented_v<Ntk> &&
-                                     mockturtle::has_visited_v<Ntk> && mockturtle::has_set_visited_v<Ntk> &&
-                                     mockturtle::has_foreach_po_v<Ntk> && mockturtle::has_foreach_fanin_v<Ntk>))
+    requires(has_depth_interface ||
+             (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+              mockturtle::has_is_complemented_v<Ntk> && mockturtle::has_visited_v<Ntk> &&
+              mockturtle::has_set_visited_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
+              mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_node_to_index_v<Ntk> &&
+              mockturtle::has_foreach_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk> && mockturtle::has_is_ci_v<Ntk> &&
+              mockturtle::has_is_pi_v<Ntk>))
 class static_depth_view
 {};
 
@@ -140,8 +144,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             Ntk(),
             ps(params),
             cost_fn(node_cost_fn)
-    {
-    }
+    {}
 
     /**
      * Constructs an `fiction::static_depth_view` from an existing network.

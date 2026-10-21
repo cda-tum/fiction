@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/utils/optimization/simulated_annealing.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -21,14 +22,35 @@
 #include <fiction/utils/optimization/simulated_annealing.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <concepts>
+#include <cstdint>
+#include <limits>
+#include <memory>
 #include <random>
 #include <stdexcept>
 #include <utility>
 
 using namespace fiction;
 using namespace fiction::utils::optimization;
+
+/** @brief State whose cost and neighbor are member functions. */
+struct member_annealing_state
+{
+    /** @brief Signed state value. */
+    int value{};
+    /** @brief Returns the state cost. @return Signed cost. */
+    double cost() const
+    {
+        return static_cast<double>(value);
+    }
+    /** @brief Produces a lower-cost neighbor. @return Neighbor state. */
+    member_annealing_state next() const
+    {
+        return {value - 1};
+    }
+};
 
 /** @brief Signed floating-point cost callable on a named lvalue. */
 struct lvalue_annealing_cost
@@ -50,6 +72,18 @@ struct overloaded_annealing_cost
     {
         return static_cast<float>(state) + 0.25f;
     }
+};
+
+/** @brief Cost whose mutable-state overload violates the signed-cost contract. @tparam Result Actual cost type. */
+template <typename Result>
+struct invalid_annealing_cost
+{
+    /** @brief Declares a signed cost for state rvalues. @return Declared cost. */
+    double operator()(int&&) const;
+    /** @brief Declares a signed cost for const states. @return Declared cost. */
+    double operator()(const int&) const;
+    /** @brief Declares the unsupported actual cost. @return Actual cost. */
+    Result operator()(int&) const;
 };
 
 /** @brief Schedule whose named-lvalue result is a reference accepted by std::clamp. */
@@ -88,13 +122,14 @@ struct nondefault_annealing_state
 
 /**
  * @brief Checks the single-state annealing callable contract.
+ * @tparam State State type to optimize.
  * @tparam Cost Cost callable type.
  * @tparam Schedule Temperature schedule type.
  * @tparam Next Next-state callable type.
  */
-template <typename Cost, typename Schedule, typename Next>
-concept annealable = requires(Cost&& cost, Schedule&& schedule, Next&& next) {
-    simulated_annealing(0, 2.0, 1.0, 1, std::forward<Cost>(cost), std::forward<Schedule>(schedule),
+template <typename Cost, typename Schedule, typename Next, typename State = int>
+concept annealable = requires(const State& state, Cost&& cost, Schedule&& schedule, Next&& next) {
+    simulated_annealing(state, 2.0, 1.0, 1, std::forward<Cost>(cost), std::forward<Schedule>(schedule),
                         std::forward<Next>(next));
 };
 
@@ -121,6 +156,10 @@ TEST_CASE("Annealing accepts signed floating-point costs and actual callable for
     CHECK((annealable<decltype(cost), reference_annealing_schedule, decltype(next)>));
     CHECK((annealable<lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<rvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<invalid_annealing_cost<void>, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<invalid_annealing_cost<unsigned>, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<decltype(cost), decltype(schedule),
+                            decltype([](const auto&) { return std::make_unique<int>(0); }), std::unique_ptr<int>>));
     CHECK_FALSE((annealable<int, decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
     CHECK_FALSE((annealable<decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
@@ -382,4 +421,83 @@ TEST_CASE("Concurrent annealing preserves a known minimum", "[sim-anneal]")
     const auto result = multi_simulated_annealing(2.0, 1.0, 256, 8, initial, cost, schedule, next);
     CHECK(result.first == 0);
     CHECK(result.second == 0.0);
+}
+
+TEST_CASE("Annealing compares extreme signed costs without overflow", "[sim-anneal]")
+{
+    /** @brief Keeps the state's signed integer cost. */
+    const auto cost = [](int state) { return state; };
+    /** @brief Completes one temperature step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** @brief Records whether the maximally worse neighbor became the current state. */
+    bool accepted_worse{};
+    /** @brief Proposes the largest signed cost. */
+    const auto next = [&accepted_worse](int state)
+    {
+        accepted_worse = accepted_worse || state == std::numeric_limits<int>::max();
+        return std::numeric_limits<int>::max();
+    };
+    /** @brief Best state after two proposals with an extreme cost difference. */
+    const auto result = simulated_annealing(std::numeric_limits<int>::min(), 2.0, 1.0, 2, cost, schedule, next);
+    CHECK_FALSE(accepted_worse);
+    CHECK(result.first == std::numeric_limits<int>::min());
+    CHECK(result.second == std::numeric_limits<int>::min());
+}
+
+TEST_CASE("Annealing propagates callable failures after joining workers", "[sim-anneal]")
+{
+    /** @brief Returns a signed state cost. */
+    const auto cost = [](int state) { return static_cast<double>(state); };
+    /** @brief Completes one temperature step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** @brief Retains the current state. */
+    const auto next = [](int state) { return state; };
+    /** @brief Reports a cost-evaluation failure. */
+    const auto failing_cost = [](int) -> double { throw std::runtime_error("cost failed"); };
+    CHECK_THROWS_AS(simulated_annealing(0, 2.0, 1.0, 1, failing_cost, schedule, next), std::runtime_error);
+
+    /** @brief Counts workers that started before the exception reaches the caller. */
+    std::atomic<unsigned> completed{};
+    /** @brief Records each started worker. */
+    const auto generator = [&completed]
+    {
+        ++completed;
+        return 0;
+    };
+    CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 4, generator, failing_cost, schedule, next),
+                    std::runtime_error);
+    CHECK(completed == 4);
+    /** @brief Reports an initial-state failure from a worker. */
+    const auto failing_generator = []() -> int { throw std::runtime_error("generator failed"); };
+    CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 4, failing_generator, cost, schedule, next),
+                    std::runtime_error);
+}
+
+TEST_CASE("Annealing invokes member-function callables", "[sim-anneal]")
+{
+    /** @brief Completes one temperature step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** @brief Optimizes the state through its member functions. */
+    const auto result = simulated_annealing(member_annealing_state{}, 2.0, 1.0, 1, &member_annealing_state::cost,
+                                            schedule, &member_annealing_state::next);
+    CHECK(result.first.value == -1);
+    CHECK(result.second == -1.0);
+}
+
+TEST_CASE("Annealing preserves small differences between large signed costs", "[sim-anneal]")
+{
+    /** @brief Keeps signed 64-bit costs. */
+    const auto cost = [](int64_t state) { return state; };
+    /** @brief Finishes the temperature step. */
+    const auto schedule = [](double) { return 0.0; };
+    /** @brief Reaches the lower-cost state only if the worse proposal was accepted. */
+    const auto next = [](int64_t state)
+    {
+        return state == std::numeric_limits<int64_t>::max() ? std::numeric_limits<int64_t>::min() :
+                                                              std::numeric_limits<int64_t>::max();
+    };
+    /** @brief Best state when a one-unit increase is rejected at low temperature. */
+    const auto result =
+        simulated_annealing(std::numeric_limits<int64_t>::max() - 1, 0.01, 0.0, 2, cost, schedule, next);
+    CHECK(result.first == std::numeric_limits<int64_t>::max() - 1);
 }

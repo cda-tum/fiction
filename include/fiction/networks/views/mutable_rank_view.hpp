@@ -13,6 +13,7 @@
  * @brief Network view that exposes and rearranges node ranks within their level.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -61,7 +62,8 @@ template <class Ntk, bool has_rank_interface =
     requires requires { typename static_depth_view<Ntk>; } &&
              (has_rank_interface || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_node_v<Ntk> &&
                                      mockturtle::has_get_node_v<Ntk> && mockturtle::has_num_pis_v<Ntk> &&
-                                     mockturtle::has_is_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk>))
+                                     mockturtle::has_is_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk> &&
+                                     mockturtle::has_size_v<Ntk> && mockturtle::has_node_to_index_v<Ntk>))
 class mutable_rank_view
 {};
 
@@ -106,9 +108,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Initializes an empty `mutable_rank_view` object, sets up base class properties,
      * and ensures that the network type (Ntk) satisfies required interface methods.
      */
-    explicit mutable_rank_view() : fiction::networks::views::static_depth_view<Ntk>(), ranks{}, max_rank_width{0}
-    {
-    }
+    explicit mutable_rank_view() : fiction::networks::views::static_depth_view<Ntk>(), ranks{}, max_rank_width{0} {}
 
     /**
      * Constructs an `mutable_rank_view` from an existing network.

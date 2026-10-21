@@ -13,13 +13,16 @@
  * @brief Finds the charge distribution of least energy in a range.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #pragma once
 
 #include <algorithm>
+#include <concepts>
 #include <iterator>
 #include <limits>
+#include <type_traits>
 
 namespace fiction::sidb::simulation::analysis
 {
@@ -34,6 +37,9 @@ namespace fiction::sidb::simulation::analysis
  * @return Iterator to the minimum energy charge distribution found in the input range, or `last` if the range is empty.
  */
 template <std::forward_iterator InputIt>
+    requires requires(const std::remove_cvref_t<std::iter_reference_t<InputIt>>& distribution) {
+        { distribution.energy() < distribution.energy() } -> std::convertible_to<bool>;
+    }
 [[nodiscard]] InputIt minimum_energy_distribution(const InputIt first, const InputIt last) noexcept
 {
     return std::min_element(first, last, [](const auto& cd1, const auto& cd2) { return cd1.energy() < cd2.energy(); });
@@ -50,11 +56,15 @@ template <std::forward_iterator InputIt>
  * if the range is empty.
  */
 template <std::forward_iterator InputIt>
+    requires requires(InputIt first) {
+        minimum_energy_distribution(first, first);
+        { (*first).energy() } -> std::convertible_to<double>;
+    }
 [[nodiscard]] double minimum_energy(const InputIt first, const InputIt last) noexcept
 {
     if (first != last)
     {
-        return minimum_energy_distribution(first, last)->energy();
+        return (*minimum_energy_distribution(first, last)).energy();
     }
 
     return std::numeric_limits<double>::infinity();
