@@ -10605,6 +10605,16 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot =
+R"doc(Primary output waiting for its row, keyed by the rank position of its
+driver.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot_driver = R"doc(Driver of the output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot_index = R"doc(Index of the output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot_rank = R"doc(Rank position of the driver on the output level.)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl_pi2node =
 R"doc(Primary input of the layout for every input node; sets the input order
 of the layout.)doc";
@@ -10615,7 +10625,8 @@ R"doc(Places a primary input.
 The first input sits at the top right of the input diagonal; the
 others follow down the diagonal, with inputs in the lower half of the
 diagonal wired in from the left border and inputs in the upper half
-from the top border.
+from the top border. An input that drives nothing stays at the border
+without a wire.
 
 Args:
     n: Input node.
@@ -10683,8 +10694,10 @@ The nodes of the output level sit on one diagonal, so each node owns
 the row of its tile. A node with two outputs takes the row below as
 well, which pushes the rows of every following node down by one until
 a gap between two nodes absorbs the shift; a pushed node first runs
-south to its row, then east. Rows are assigned in rank order and the
-outputs are created in output order.
+south to its row, then east. Rows are assigned in rank order. A
+constant output takes a row of its own below the others, driven by a
+constant gate next to the border. The outputs of the layout keep the
+order of the network.
 
 Returns:
     `1` plus the number of rows the shifts add below the last
@@ -13234,7 +13247,8 @@ preserved. Lookup tables decide for every node whether it sits east or
 south of its predecessor's wire and how many routing lines the level
 needs; the wires are then run east and south so that all nodes of a
 level share one diagonal. Primary inputs sit on the left and top
-borders, primary outputs on the right border.
+borders, primary outputs on the right border; constant outputs take
+rows of their own below the others.
 
 The input must be planar in its rank order (see
 `synthesis::planarization`) with at most two non-constant fanins and
