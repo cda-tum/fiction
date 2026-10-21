@@ -175,8 +175,10 @@ struct node_duplication_planarization_params
      */
     duplication_cost_model duplication_cost{};
     /**
-     * @brief Nodes a lookahead may create before it is cut off; levels whose both options exceed it fall back to the
-     * weighted cone model.
+     * @brief Node-count threshold for the crossing alternative's lookahead; if both alternatives exceed it, the
+     * decision uses the weighted cone model. The duplication alternative may use a comparison-derived threshold.
+     *
+     * Counting runs check their threshold between levels and can exceed it by the nodes created on one level.
      *
      * Must be positive.
      */
@@ -1538,12 +1540,13 @@ class node_duplication_planarization_impl
  * duplicated cones, the crossing cost the size of the crossing gates plus their padding after a crossing minimization
  * of the level. Levels that keep their crossings are not duplicated, and the result is then not planar.
  *
- * For a bounded fanin, the duplication strategy takes time linear in the number of nodes it creates, which can be
- * exponential in the depth of the network. The hybrid strategy adds a crossing minimization per level. Its `LOOKAHEAD`
- * criterion also runs the duplication strategy below every level that has duplicates, at most twice, each run cut off
- * at `lookahead_budget` created nodes; the time is quadratic in the depth of the network in the worst case.
- * `WEIGHTED_CONE` avoids these runs and weighs every distinct cone once, which takes time proportional to the sum of
- * the cone sizes. Every level also allocates scratch space linear in the number of nodes of the input network.
+ * Duplication can create exponentially many nodes in the depth of the network. Both strategies weigh fanin cones to
+ * break ties. Each source cone is computed at most once; the traversal work is proportional to the sum of its nodes
+ * and edges over all computed cones, which can be quadratic in the source network size for bounded fanin.
+ * The hybrid strategy also minimizes crossings when a level's duplication alternative creates copies. Its `LOOKAHEAD`
+ * criterion uses at most two counting runs below such levels and reuses recorded counts where possible. Counting
+ * runs stop at a node-count threshold checked between levels. `WEIGHTED_CONE` skips these counting runs. Cone caches
+ * and visited markers use space linear in the input network size.
  *
  * The input must be balanced with unified outputs (see `network_balancing`), carry ranks (see `mutable_rank_view`),
  * and contain no virtual primary inputs (see `delete_virtual_pis`). The result is ranked; with the duplication strategy
