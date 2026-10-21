@@ -681,20 +681,12 @@ static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_create_dot = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_dimensions = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_foreach_pi_unranked =
 R"doc(Whether `Ntk` offers `foreach_pi_unranked`, which visits the primary
 inputs in creation order regardless of their rank, as
 `networks::views::mutable_rank_view` does.)doc";
 
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_functional_implementations = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_gate_ports = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_real_pi = R"doc()doc";
 
@@ -748,8 +740,6 @@ static const char *mkd_doc_fiction_has_is_xor_and = R"doc()doc";
 static const char *mkd_doc_fiction_has_num_real_pis = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_num_virtual_pis = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_set_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_update_ranks = R"doc()doc";
 
@@ -1084,8 +1074,6 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library_topolinano_library = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_cell_grid = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
@@ -1888,8 +1876,6 @@ The grid has value semantics; copies are independent.
 
 Template Args:
     CellType: Enumeration of the cell types of one technology.)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_grid_2 = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_assign_cell_name =
 R"doc(Assigns a name to a cell. The empty string removes the name.
@@ -7301,11 +7287,9 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_networks_restore_network_name =
-R"doc(Helper function to conveniently assign the name of a source network or
-layout to a target network or layout as they use different function
-names for the same purpose. This function comes in handy when networks
-are translated or layouts are being created from networks that are
-supposed to have the same name.
+R"doc(Transfers the source network or gate-layout name. An unnamed source
+clears a supported destination name. A destination without naming
+support is unchanged.
 
 Args:
     ntk_or_lyt_src: Source network or layout whose name is to be
@@ -7863,21 +7847,12 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_networks_views_static_depth_view =
-R"doc(Provides `depth` and `level` methods for networks, similar to
-`mockturtle::static_depth_view`. Unlike the `mockturtle`
-implementation, this version uses flat hashmaps to store `level` data
-instead of `mockturtle::node_map`. Additionally, the `add_event`
-functionality has been removed. As a result, if the underlying network
-changes, either `on_add` has to be called when adding a node to the
-network and keep the current depth information or the `update_levels`
-method must be called to refresh the `static_depth_view` information.
-These modifications address performance issues encountered with
-`mockturtle::static_depth_view`.
-
-This view computes the level of each node and the overall depth of the
-network. The `level` and `depth` methods adhere to the network
-interface. Levels are calculated during construction and can be
-updated later by invoking the `update_levels` method.
+R"doc(Provides node levels and network depth, stored in vectors indexed by
+node index. Call `on_add` after adding a node, or `update_levels`
+after changing the network, to refresh the stored levels. Critical-
+path membership is computed on its first query after an update.
+Networks that already supply the depth interface retain their own
+storage and update behavior.
 
 Template Args:
     Ntk: The network type.
@@ -10887,6 +10862,10 @@ Args:
     cartesian_tile: Tile on the Cartesian grid.
     cartesian_layout_height: Height of the Cartesian layout.
 
+Template Args:
+    CartLyt: Cartesian source layout type.
+    HexLyt: Hexagonal destination layout type.
+
 Returns:
     corresponding tile on the hexagonal grid.
 
@@ -13277,7 +13256,8 @@ Args:
                                       defects keep SiDBs at.
 
 Template Args:
-    GateLibrary: SiDB gate library type.
+    GateLibrary: SiDB gate library with static implementation and
+                 position or direction port lookup.
     Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
@@ -16977,12 +16957,15 @@ R"doc(Computes the minimum energy of a range of charge distributions. If the
 range is empty, positive infinity indicates that no valid energy value
 exists.
 
+Exceptions from iterator operations and energy comparisons propagate
+to the caller.
+
 Args:
     first: Begin of the range to examine.
     last: End of the range to examine.
 
 Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
+    InputIt: Forward iterator over charge distributions.
 
 Returns:
     Value of the minimum energy found in the input range (unit: eV),
@@ -16994,12 +16977,15 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_minimum_energy_distr
 R"doc(Returns an iterator to the charge distribution of minimum energy
 contained in a range. If the range is empty, `last` is returned.
 
+Exceptions from iterator operations and energy comparisons propagate
+to the caller.
+
 Args:
     first: Begin of the range to examine.
     last: End of the range to examine.
 
 Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
+    InputIt: Forward iterator over charge distributions.
 
 Returns:
     Iterator to the minimum energy charge distribution found in the
@@ -18497,7 +18483,7 @@ stored data. All methods of this class are thread-safe.
 
 Template Args:
     Key: The type of the key used to identify entries in the domain.
-    MappedTypes: Value types stored in the tuple.)doc";
+    MappedTypes: Nonempty pack of value types stored in the tuple.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_domain_add_value =
 R"doc(Adds a value to the operational domain. This function is thread-safe
@@ -24731,8 +24717,9 @@ Args:
     ntk: The input logic network.
 
 Template Args:
-    NtkDest: Type of the returned logic network.
-    NtkSrc: Type of the input logic network.
+    NtkDest: Logic network with constant, input, output, and Boolean
+             gate creation.
+    NtkSrc: Logic network with node, interface, and fanin traversal.
 
 Returns:
     A logic network of type `NtkDest` that is logically equivalent to
@@ -28331,7 +28318,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_optimization_geometric_temperature_schedule =
-R"doc(A logarithmically decreasing temperature schedule. The temperature is
+R"doc(A geometrically decreasing temperature schedule. The temperature is
 altered by multiplying it with `0.99`.
 
 Args:
@@ -28361,13 +28348,16 @@ states using a provided random state generator. SA as specified above
 is then run on all these random initial states where the best result
 of all generated states is finally returned.
 
-Each initial state runs in its own thread.
+Each initial state runs as an asynchronous task. All callables,
+including the random-state generator, must support concurrent
+invocation. The function waits for all started workers before
+propagating a worker or launch exception.
 
 Args:
     init_temp: The initial temperature.
     final_temp: The final temperature.
     cycles: The number of cycles for each temperature value.
-    instances: The number of random initial states to generate.
+    instances: Positive number of random initial states to generate.
     rand_state: The random state generator function.
     cost: The cost function to minimize.
     schedule: The temperature schedule.
@@ -28375,15 +28365,20 @@ Args:
           given a current one.
 
 Template Args:
-    RandStateFunc: The random state generator function type (specifies
-                   the State type via its return value).
-    CostFunc: The cost function type (specifies the cost value via its
-              return value).
-    TempFunc: The temperature schedule function type.
-    NextFunc: The next state function type.
+    RandStateFunc: Lvalue-invocable generator returning a default-
+                   constructible state.
+    CostFunc: Cost callable accepted by single-state annealing.
+    TempFunc: Temperature schedule returning double and accepting a
+              mutable temperature lvalue.
+    NextFunc: Next-state function returning State and accepting a
+              mutable state lvalue.
 
 Returns:
     A pair of the overall best optimized state and its cost value.
+
+Raises:
+    ValueError: If instances is zero.
+    std::system_error: If a worker thread cannot be started.
 
 Note:
     The State type must be default constructible.
@@ -28410,6 +28405,9 @@ This implementation is based on:
 https://codereview.stackexchange.com/questions/70310/simple-simulated-
 annealing-template-in-c11
 
+Exceptions from random initialization, state operations, and callables
+propagate to the caller.
+
 Args:
     init_state: The initial state to optimize.
     init_temp: The initial temperature.
@@ -28421,11 +28419,13 @@ Args:
           given a current one.
 
 Template Args:
-    State: The state type.
-    CostFunc: The cost function type (specifies the cost type via its
-              return value).
-    TempFunc: The temperature schedule function type.
-    NextFunc: The next state function type.
+    State: Copyable state type.
+    CostFunc: Cost function with a signed result for State, also
+              invocable on const and mutable state lvalues.
+    TempFunc: Temperature schedule returning double and accepting a
+              mutable temperature lvalue.
+    NextFunc: Next-state function returning State and accepting a
+              mutable state lvalue.
 
 Returns:
     A pair of the optimized state and its cost value.
@@ -29421,8 +29421,8 @@ Args:
 
 Template Args:
     NtkDest: The type of the resulting network.
-    NtkSource1: The type of the first input network.
-    NtkSource2: The type of the second input network.
+    NtkSrc1: Type of the first input network with interface counts.
+    NtkSrc2: Type of the second input network with interface counts.
 
 Returns:
     An `optional` containing the virtual miter network if successful,
@@ -29487,7 +29487,29 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
+static const char *mkd_doc_mockturtle_detail_foreach_element_if_transform =
+R"doc(Applies a transform and callback to elements that satisfy a predicate.
+A false callback result stops traversal.
+
+Args:
+    begin: First source element.
+    end: End of the source range.
+    pred: Selection predicate.
+    transform: Element transform.
+    fn: Callback for transformed elements.
+    counter_offset: First callback index.
+
+Template Args:
+    Iterator: Iterator over the source elements.
+    ElementType: Transformed element type passed to the callback.
+    Pred: Predicate selecting source elements.
+    Transform: Transform applied to selected elements.
+    Fn: Void or Boolean callback, optionally accepting an index.
+
+Returns:
+    Iterator after the last visited source element.
+
+)doc";
 
 static const char *mkd_doc_mockturtle_edge =
 R"doc(Representation of an edge between two network nodes.
