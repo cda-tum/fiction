@@ -686,61 +686,66 @@ compute_level_variables(const Ntk& ntk, const Lyt& lyt,
     level_variables vars{std::vector<orientation>(ntk.rank_width(lvl), orientation::EAST),
                          std::vector<uint64_t>(ntk.rank_width(lvl), 0)};
 
-    ntk.foreach_node_in_rank(
-        lvl,
-        [&ntk, &lyt, &node2pos, lvl, &vars](const auto& n, const auto i)
-        {
-            const auto gap = predecessor_gap(ntk, lyt, node2pos, lvl, n);
+    ntk.foreach_node_in_rank(lvl,
+                             [&ntk, &lyt, &node2pos, lvl, &vars](const auto& n, const auto i)
+                             {
+                                 const auto gap = predecessor_gap(ntk, lyt, node2pos, lvl, n);
 
-            if (num_fanins(ntk, n) == 2)
-            {
-                // a gate after a south-oriented node without room between their predecessors turns east
-                if (i != 0 && vars.orientations[i - 1] == orientation::SOUTH && gap == 0)
-                {
-                    vars.orientations[i] = orientation::EAST_SECOND;
-                }
+                                 if (num_fanins(ntk, n) == 2)
+                                 {
+                                     // a gate after a south-oriented node without room between their predecessors turns
+                                     // east
+                                     if (i != 0 && vars.orientations[i - 1] == orientation::SOUTH && gap == 0)
+                                     {
+                                         vars.orientations[i] = orientation::EAST_SECOND;
+                                     }
 
-                return;
-            }
+                                     return;
+                                 }
 
-            if (num_fanins(ntk, n) != 1)
-            {
-                return;
-            }
+                                 if (num_fanins(ntk, n) != 1)
+                                 {
+                                     return;
+                                 }
 
-            const auto allowed = allowed_orientation_of(ntk, n);
+                                 const auto allowed = allowed_orientation_of(ntk, n);
 
-            if (ntk.is_fanout(n))
-            {
-                const auto connection = fanout_connection_of(ntk, n);
+                                 if (ntk.is_fanout(n))
+                                 {
+                                     const auto connection = fanout_connection_of(ntk, n);
 
-                if (i != 0)
-                {
-                    const auto& rule =
-                        FANOUT_RULES[index_of(connection)][index_of(allowed)][gap][index_of(vars.orientations[i - 1])];
-                    vars.orientations[i] = rule.direction;
-                    vars.new_lines[i]    = rule.new_lines;
-                }
-                else if (connection == fanout_connection::BOTH_SINGLE || connection == fanout_connection::SECOND_SINGLE)
-                {
-                    vars.orientations[i] = orientation::EAST_SECOND;
-                }
+                                     if (i != 0)
+                                     {
+                                         const auto& rule     = FANOUT_RULES.at(index_of(connection))
+                                                                    .at(index_of(allowed))
+                                                                    .at(gap)
+                                                                    .at(index_of(vars.orientations[i - 1]));
+                                         vars.orientations[i] = rule.direction;
+                                         vars.new_lines[i]    = rule.new_lines;
+                                     }
+                                     else if (connection == fanout_connection::BOTH_SINGLE ||
+                                              connection == fanout_connection::SECOND_SINGLE)
+                                     {
+                                         vars.orientations[i] = orientation::EAST_SECOND;
+                                     }
 
-                return;
-            }
+                                     return;
+                                 }
 
-            if (i != 0)
-            {
-                const auto& rule     = BUFFER_RULES[index_of(buffer_connection_of(ntk, n))][index_of(allowed)][gap]
-                                                   [index_of(vars.orientations[i - 1])];
-                vars.orientations[i] = rule.direction;
-                vars.new_lines[i]    = rule.new_lines;
-            }
-            else
-            {
-                vars.orientations[i] = start_orientation(ntk, lvl);
-            }
-        });
+                                 if (i != 0)
+                                 {
+                                     const auto& rule     = BUFFER_RULES.at(index_of(buffer_connection_of(ntk, n)))
+                                                                .at(index_of(allowed))
+                                                                .at(gap)
+                                                                .at(index_of(vars.orientations[i - 1]));
+                                     vars.orientations[i] = rule.direction;
+                                     vars.new_lines[i]    = rule.new_lines;
+                                 }
+                                 else
+                                 {
+                                     vars.orientations[i] = start_orientation(ntk, lvl);
+                                 }
+                             });
 
     return vars;
 }
@@ -1017,17 +1022,18 @@ template <typename Lyt>
 [[nodiscard]] typename Lyt::object_id reuse_or_create_buf(Lyt& lyt, const typename Lyt::object_id a,
                                                           const layouts::layout_base::coordinate& t)
 {
-    if (lyt.is_empty_tile(t))
+    const auto occupant = lyt.find_object(t);
+
+    if (!occupant.has_value())
     {
         return lyt.create_buf(a, t);
     }
 
-    const auto occupant    = lyt.find_object(t).value();
-    bool       driven_by_a = false;
+    bool driven_by_a = false;
 
-    if (lyt.is_buf(occupant) && lyt.fanin_size(occupant) == 1)
+    if (lyt.is_buf(*occupant) && lyt.fanin_size(*occupant) == 1)
     {
-        lyt.foreach_fanin(occupant, [&a, &driven_by_a](const auto& source) { driven_by_a = source == a; });
+        lyt.foreach_fanin(*occupant, [&a, &driven_by_a](const auto& source) { driven_by_a = source == a; });
     }
 
     if (!driven_by_a)
@@ -1036,7 +1042,7 @@ template <typename Lyt>
                                            static_cast<uint64_t>(t.y)));
     }
 
-    return occupant;
+    return *occupant;
 }
 /**
  * @brief Wires the signal on `src` in a straight line towards `dest`, east or south, up to the tile before `dest`.
@@ -1054,7 +1060,9 @@ template <typename Lyt>
 [[nodiscard]] typename Lyt::object_id wire_straight(Lyt& lyt, const layouts::layout_base::coordinate& src,
                                                     const layouts::layout_base::coordinate& dest)
 {
-    if (lyt.is_empty_tile(src))
+    const auto source = lyt.find_object(src);
+
+    if (!source.has_value())
     {
         throw std::logic_error(
             fmt::format("wire source ({},{}) is empty", static_cast<uint64_t>(src.x), static_cast<uint64_t>(src.y)));
@@ -1070,7 +1078,7 @@ template <typename Lyt>
                                            static_cast<uint64_t>(src.x), static_cast<uint64_t>(src.y)));
     }
 
-    auto a = lyt.find_object(src).value();
+    auto a = *source;
 
     if (east)
     {
