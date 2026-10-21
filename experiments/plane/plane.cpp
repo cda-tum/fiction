@@ -16,6 +16,8 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -40,6 +42,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::networks::io;
 using namespace fiction::networks::views;
@@ -87,23 +90,25 @@ tec_nt read_network(const std::string& name)
 template <typename Ntk, typename Lyt>
 std::pair<bool, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
 {
-    if (lyt.size() > MAX_NODES_FOR_EQUIVALENCE)
+    const auto extracted = extract_layout_network(lyt);
+
+    if (extracted.size() > MAX_NODES_FOR_EQUIVALENCE)
     {
         return {true, "skipped"};
     }
 
-    if (lyt.size() > MAX_NODES_FOR_SAT)
+    if (extracted.size() > MAX_NODES_FOR_SAT)
     {
         using tt_t = kitty::partial_truth_table;
         const mockturtle::partial_simulator sim{ntk.num_pis(), SIMULATION_PATTERNS};
 
         const auto reference = mockturtle::simulate<tt_t>(ntk, sim);
-        const auto candidate = mockturtle::simulate<tt_t>(lyt, sim);
+        const auto candidate = mockturtle::simulate<tt_t>(extracted, sim);
 
         return {reference == candidate, "simulation"};
     }
 
-    return {equivalence_checking(ntk, lyt) != eq_type::NO, "SAT"};
+    return {equivalence_checking(ntk, extracted) != eq_type::NO, "SAT"};
 }
 
 }  // namespace
@@ -155,8 +160,8 @@ int main(const int argc, const char** argv)  // NOLINT
 
             fmt::print("[i]   planarizing {} nodes\n", balanced.size());
             planarization_params p_ps{};
-            p_ps.duplication.max_duplications = MAX_DUPLICATIONS;
-            p_ps.duplication.xor_gates        = xor_gates;
+            p_ps.duplication.max_duplications         = MAX_DUPLICATIONS;
+            p_ps.duplication.crossing_gates.xor_gates = xor_gates;
             planarization_stats p_st{};
             const auto          planar = planarization(ranked, p_ps, &p_st);
 
@@ -170,7 +175,7 @@ int main(const int argc, const char** argv)  // NOLINT
 
             try
             {
-                const auto layout = plane<cart_gate_clk_lyt>(planar, {}, &l_st);
+                const auto layout = plane<cartesian_gate_layout>(planar, {}, &l_st);
 
                 crossings = layout.num_crossings();
 

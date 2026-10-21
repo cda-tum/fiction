@@ -16,11 +16,13 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/gate_layout.hpp"
+#include "fiction/layouts/layout_base.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/graph/mincross.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -33,6 +35,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -450,14 +453,13 @@ template <typename Ntk>
 /**
  * Number of free rows between a tile and another tile south of it.
  *
- * @tparam Lyt Layout type.
  * @param north Upper tile.
  * @param south Lower tile.
  * @return `south.y - north.y - 1`.
  * @throws std::logic_error If `south` is not south of `north`.
  */
-template <typename Lyt>
-[[nodiscard]] uint64_t rows_between(const tile<Lyt>& north, const tile<Lyt>& south)
+[[nodiscard]] inline uint64_t rows_between(const layouts::layout_base::coordinate& north,
+                                           const layouts::layout_base::coordinate& south)
 {
     if (south.y <= north.y)
     {
@@ -563,14 +565,15 @@ template <typename Ntk>
  * @tparam Ntk Ranked network type.
  * @tparam Lyt Layout type.
  * @param ntk Network.
+ * @param lyt Layout.
  * @param node2pos Positions of the placed nodes.
  * @param lvl Level of `n`.
  * @param n Node.
  * @return Gap; zero on the input level and for a predecessor without left neighbour.
  */
 template <typename Ntk, typename Lyt>
-[[nodiscard]] std::size_t predecessor_gap(const Ntk&                                                ntk,
-                                          const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
+[[nodiscard]] std::size_t predecessor_gap(const Ntk& ntk, const Lyt& lyt,
+                                          const mockturtle::node_map<typename Lyt::object_id, Ntk>& node2pos,
                                           const uint32_t lvl, const mockturtle::node<Ntk>& n)
 {
     if (lvl == 0)
@@ -588,8 +591,7 @@ template <typename Ntk, typename Lyt>
 
     const auto neighbour = ntk.at_rank_position(lvl - 1, r - 1);
 
-    const auto gap =
-        rows_between<Lyt>(static_cast<tile<Lyt>>(node2pos[neighbour]), static_cast<tile<Lyt>>(node2pos[pre]));
+    const auto gap = rows_between(lyt.get_tile(node2pos[neighbour]), lyt.get_tile(node2pos[pre]));
 
     return static_cast<std::size_t>(std::min<uint64_t>(gap, MAX_GAP));
 }
@@ -663,23 +665,24 @@ struct level_variables
  * @tparam Ntk Ranked network type with a fanout interface.
  * @tparam Lyt Layout type.
  * @param ntk Network.
+ * @param lyt Layout.
  * @param node2pos Positions of the placed nodes.
  * @param lvl Level.
  * @return Orientations and new lines, aligned with the rank order of the level.
  */
 template <typename Ntk, typename Lyt>
 [[nodiscard]] level_variables
-compute_level_variables(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
-                        const uint32_t lvl)
+compute_level_variables(const Ntk& ntk, const Lyt& lyt,
+                        const mockturtle::node_map<typename Lyt::object_id, Ntk>& node2pos, const uint32_t lvl)
 {
     level_variables vars{std::vector<orientation>(ntk.rank_width(lvl), orientation::EAST),
                          std::vector<uint64_t>(ntk.rank_width(lvl), 0)};
 
     ntk.foreach_node_in_rank(
         lvl,
-        [&ntk, &node2pos, lvl, &vars](const auto& n, const auto i)
+        [&ntk, &lyt, &node2pos, lvl, &vars](const auto& n, const auto i)
         {
-            const auto gap = predecessor_gap<Ntk, Lyt>(ntk, node2pos, lvl, n);
+            const auto gap = predecessor_gap(ntk, lyt, node2pos, lvl, n);
 
             if (num_fanins(ntk, n) == 2)
             {
@@ -765,20 +768,21 @@ template <typename Ntk>
  * @tparam Ntk Ranked network type.
  * @tparam Lyt Layout type.
  * @param ntk Network.
+ * @param lyt Layout.
  * @param node2pos Positions of the placed nodes.
  * @param lvl Level.
  * @return Rows per gate, in the order of `two_input_indices`.
  */
 template <typename Ntk, typename Lyt>
 [[nodiscard]] std::vector<uint64_t>
-two_input_new_lines(const Ntk& ntk, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
+two_input_new_lines(const Ntk& ntk, const Lyt& lyt, const mockturtle::node_map<typename Lyt::object_id, Ntk>& node2pos,
                     const uint32_t lvl)
 {
     std::vector<uint64_t> lines{};
     lines.reserve(ntk.rank_width(lvl));
 
     ntk.foreach_node_in_rank(lvl,
-                             [&ntk, &node2pos, &lines](const auto& n)
+                             [&ntk, &lyt, &node2pos, &lines](const auto& n)
                              {
                                  const auto pre = ranked_fanins(ntk, n);
 
@@ -787,8 +791,8 @@ two_input_new_lines(const Ntk& ntk, const mockturtle::node_map<mockturtle::signa
                                      return;
                                  }
 
-                                 lines.push_back(rows_between<Lyt>(static_cast<tile<Lyt>>(node2pos[pre[0]]),
-                                                                   static_cast<tile<Lyt>>(node2pos[pre[1]])));
+                                 lines.push_back(
+                                     rows_between(lyt.get_tile(node2pos[pre[0]]), lyt.get_tile(node2pos[pre[1]])));
                              });
 
     return lines;
@@ -891,18 +895,19 @@ inline void lift_to_common_diagonal(level_wiring& wiring, const std::vector<std:
  * @tparam Ntk Ranked network type.
  * @tparam Lyt Layout type.
  * @param ntk Network.
+ * @param lyt Layout.
  * @param node2pos Positions of the placed nodes.
  * @param new_lines New lines per node.
  * @param lvl Level.
  * @return East and south runs per node.
  */
 template <typename Ntk, typename Lyt>
-[[nodiscard]] level_wiring compute_wiring(const Ntk&                                                ntk,
-                                          const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos,
+[[nodiscard]] level_wiring compute_wiring(const Ntk& ntk, const Lyt& lyt,
+                                          const mockturtle::node_map<typename Lyt::object_id, Ntk>& node2pos,
                                           const std::vector<uint64_t>& new_lines, const uint32_t lvl)
 {
     const auto gates      = two_input_indices(ntk, lvl);
-    const auto gate_lines = two_input_new_lines<Ntk, Lyt>(ntk, node2pos, lvl);
+    const auto gate_lines = two_input_new_lines(ntk, lyt, node2pos, lvl);
 
     const auto width = new_lines.size();
 
@@ -995,21 +1000,20 @@ template <typename Ntk, typename Lyt>
  * @throws std::logic_error If `t` holds anything but a wire driven by `a`.
  */
 template <typename Lyt>
-[[nodiscard]] mockturtle::signal<Lyt> reuse_or_create_buf(Lyt& lyt, const mockturtle::signal<Lyt>& a,
-                                                          const tile<Lyt>& t)
+[[nodiscard]] typename Lyt::object_id reuse_or_create_buf(Lyt& lyt, const typename Lyt::object_id a,
+                                                          const layouts::layout_base::coordinate& t)
 {
     if (lyt.is_empty_tile(t))
     {
         return lyt.create_buf(a, t);
     }
 
-    const auto occupant    = lyt.get_node(t);
+    const auto occupant    = lyt.find_object(t).value();
     bool       driven_by_a = false;
 
     if (lyt.is_buf(occupant) && lyt.fanin_size(occupant) == 1)
     {
-        lyt.foreach_fanin(occupant, [&lyt, &a, &driven_by_a](const auto& f)
-                          { driven_by_a = lyt.get_node(f) == lyt.get_node(a); });
+        lyt.foreach_fanin(occupant, [&a, &driven_by_a](const auto& source) { driven_by_a = source == a; });
     }
 
     if (!driven_by_a)
@@ -1018,7 +1022,7 @@ template <typename Lyt>
                                            static_cast<uint64_t>(t.y)));
     }
 
-    return static_cast<mockturtle::signal<Lyt>>(t);
+    return occupant;
 }
 /**
  * Wires the signal on `src` in a straight line towards `dest`, east or south, up to the tile before `dest`. Shared
@@ -1032,7 +1036,8 @@ template <typename Lyt>
  * @throws std::logic_error If `src` is empty or `dest` is neither east nor south of `src`.
  */
 template <typename Lyt>
-[[nodiscard]] mockturtle::signal<Lyt> wire_straight(Lyt& lyt, const tile<Lyt>& src, const tile<Lyt>& dest)
+[[nodiscard]] typename Lyt::object_id wire_straight(Lyt& lyt, const layouts::layout_base::coordinate& src,
+                                                    const layouts::layout_base::coordinate& dest)
 {
     if (lyt.is_empty_tile(src))
     {
@@ -1050,20 +1055,20 @@ template <typename Lyt>
                                            static_cast<uint64_t>(src.x), static_cast<uint64_t>(src.y)));
     }
 
-    auto a = static_cast<mockturtle::signal<Lyt>>(src);
+    auto a = lyt.find_object(src).value();
 
     if (east)
     {
         for (auto x = src.x + 1; x < dest.x; ++x)
         {
-            a = reuse_or_create_buf(lyt, a, tile<Lyt>{x, src.y, 0});
+            a = reuse_or_create_buf(lyt, a, layouts::layout_base::coordinate{x, src.y, 0});
         }
     }
     else
     {
         for (auto y = src.y + 1; y < dest.y; ++y)
         {
-            a = reuse_or_create_buf(lyt, a, tile<Lyt>{src.x, y, 0});
+            a = reuse_or_create_buf(lyt, a, layouts::layout_base::coordinate{src.x, y, 0});
         }
     }
 
@@ -1080,18 +1085,23 @@ template <typename Lyt>
  * @return Tile the signal ends on.
  */
 template <typename Lyt>
-[[nodiscard]] tile<Lyt> wire_east_then_south(Lyt& lyt, tile<Lyt> from, const uint64_t east, const uint64_t south)
+[[nodiscard]] layouts::layout_base::coordinate wire_east_then_south(Lyt& lyt, layouts::layout_base::coordinate from,
+                                                                    const uint64_t east, const uint64_t south)
 {
     if (east != 0)
     {
-        [[maybe_unused]] const auto end = wire_straight(lyt, from, {from.x + east + 1, from.y});
-        from                            = {from.x + east, from.y, from.z};
+        const auto x = static_cast<uint64_t>(from.x) + east;
+
+        [[maybe_unused]] const auto end = wire_straight(lyt, from, {x + 1, from.y});
+        from                            = {x, from.y, from.z};
     }
 
     if (south != 0)
     {
-        [[maybe_unused]] const auto end = wire_straight(lyt, from, {from.x, from.y + south + 1});
-        from                            = {from.x, from.y + south, from.z};
+        const auto y = static_cast<uint64_t>(from.y) + south;
+
+        [[maybe_unused]] const auto end = wire_straight(lyt, from, {from.x, y + 1});
+        from                            = {from.x, y, from.z};
     }
 
     return from;
@@ -1110,8 +1120,9 @@ template <typename Lyt>
  * @throws std::logic_error If `t` is occupied or neither east nor south of `pre_t`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] mockturtle::signal<Lyt> connect_and_place_planar(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                                               const mockturtle::node<Ntk>& n, const tile<Lyt>& pre_t)
+[[nodiscard]] typename Lyt::object_id connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t,
+                                                               const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                                                               const layouts::layout_base::coordinate& pre_t)
 {
     if (!lyt.is_empty_tile(t))
     {
@@ -1138,9 +1149,10 @@ template <typename Lyt, typename Ntk>
  * @throws std::logic_error If `t` is occupied, or if a predecessor is not where its name says.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] mockturtle::signal<Lyt>
-connect_and_place_planar(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-                         const tile<Lyt>& north_t, const tile<Lyt>& west_t, const std::optional<bool>& c = std::nullopt)
+[[nodiscard]] typename Lyt::object_id
+connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t, const Ntk& ntk,
+                         const mockturtle::node<Ntk>& n, const layouts::layout_base::coordinate& north_t,
+                         const layouts::layout_base::coordinate& west_t, const std::optional<bool>& c = std::nullopt)
 {
     if (!lyt.is_empty_tile(t))
     {
@@ -1197,11 +1209,9 @@ class plane_impl
         // one step per level plus one for the outputs
         utils::progress_reporter progress{ps.on_progress, "placing levels", ntk.depth() + 2};
 
-        pi2node = reserve_input_nodes(layout, ntk);
-
         // the storage is sparse, so the working area can be generous: every level advances the diagonal by at most
         // its width plus one, hence inputs plus nodes bound both dimensions. Shrunk to the bounding box at the end.
-        const auto bound = static_cast<uint64_t>(ntk.num_pis()) + static_cast<uint64_t>(ntk.size()) + 1;
+        const auto bound = static_cast<uint64_t>(ntk.num_pis()) + static_cast<uint64_t>(ntk.size()) + 2;
         layout.resize({bound, bound});
 
         first_pos = {ntk.num_pis() - 1, 0};
@@ -1215,12 +1225,18 @@ class plane_impl
         const auto extra_rows = route_outputs();
         progress.advance();
 
-        layout.resize({first_pos.x + 1, place_t.y + extra_rows, 0});
+        layout.resize({static_cast<uint64_t>(first_pos.x) + 2, static_cast<uint64_t>(place_t.y) + extra_rows + 1, 1});
+
+        // the inputs were created in rank order; the layout lists them in the order of the network
+        std::vector<typename Lyt::object_id> input_order{};
+        input_order.reserve(ntk.num_pis());
+        ntk.foreach_pi([this, &input_order](const auto& pi) { input_order.push_back(pi2node[pi]); });
+        layout.set_input_order(input_order);
 
         networks::restore_names(ntk, layout, node2pos);
 
-        pst.x_size    = layout.x() + 1;
-        pst.y_size    = layout.y() + 1;
+        pst.x_size    = layout.width();
+        pst.y_size    = layout.height();
         pst.num_gates = layout.num_gates();
         pst.num_wires = layout.num_wires();
 
@@ -1235,8 +1251,8 @@ class plane_impl
      */
     void place_level(const uint32_t lvl)
     {
-        const auto vars   = compute_level_variables<fanout_ntk, Lyt>(ntk, node2pos, lvl);
-        const auto wiring = compute_wiring<fanout_ntk, Lyt>(ntk, node2pos, vars.new_lines, lvl);
+        const auto vars   = compute_level_variables(ntk, layout, node2pos, lvl);
+        const auto wiring = compute_wiring(ntk, layout, node2pos, vars.new_lines, lvl);
 
         std::optional<uint64_t> diagonal{};
 
@@ -1278,7 +1294,8 @@ class plane_impl
     {
         if (ntk.rank_position(n) == 0)
         {
-            node2pos[n] = layout.move_node(pi2node[n], first_pos);
+            pi2node[n]  = place(layout, first_pos, ntk, n);
+            node2pos[n] = pi2node[n];
             place_t     = first_pos;
 
             return;
@@ -1288,14 +1305,17 @@ class plane_impl
 
         if (place_t.x == 0)
         {
-            node2pos[n] = layout.move_node(pi2node[n], place_t);
+            pi2node[n]  = place(layout, place_t, ntk, n);
+            node2pos[n] = pi2node[n];
 
             return;
         }
 
-        const tile<Lyt> border = place_t.x < first_pos.x / 2 ? tile<Lyt>{0, place_t.y} : tile<Lyt>{place_t.x, 0};
+        const layouts::layout_base::coordinate border = place_t.x < first_pos.x / 2 ?
+                                                            layouts::layout_base::coordinate{0, place_t.y} :
+                                                            layouts::layout_base::coordinate{place_t.x, 0};
 
-        node2pos[n] = layout.move_node(pi2node[n], border);
+        pi2node[n]  = place(layout, border, ntk, n);
         node2pos[n] = layout.create_buf(wire_straight(layout, border, place_t), place_t);
     }
     /**
@@ -1310,11 +1330,11 @@ class plane_impl
     void place_single_fanin(const mockturtle::node<fanout_ntk> n, const std::size_t i, const orientation orient,
                             const level_wiring& wiring)
     {
-        const auto pre = networks::fanins(ntk, n).fanin_nodes.front();
-        const auto pre_t =
-            wire_east_then_south(layout, static_cast<tile<Lyt>>(node2pos[pre]), wiring.x[i], wiring.y[i]);
+        const auto pre   = networks::fanins(ntk, n).fanin_nodes.front();
+        const auto pre_t = wire_east_then_south(layout, layout.get_tile(node2pos[pre]), wiring.x[i], wiring.y[i]);
 
-        place_t = is_east(orient) ? tile<Lyt>{pre_t.x + 1, pre_t.y} : tile<Lyt>{pre_t.x, pre_t.y + 1};
+        place_t = is_east(orient) ? layouts::layout_base::coordinate{pre_t.x + 1, pre_t.y} :
+                                    layouts::layout_base::coordinate{pre_t.x, pre_t.y + 1};
 
         node2pos[n] = connect_and_place_planar(layout, place_t, ntk, n, pre_t);
 
@@ -1336,8 +1356,8 @@ class plane_impl
     {
         const auto fc = networks::fanins(ntk, n);
 
-        auto pre1_t = static_cast<tile<Lyt>>(node2pos[fc.fanin_nodes[0]]);
-        auto pre2_t = static_cast<tile<Lyt>>(node2pos[fc.fanin_nodes[1]]);
+        auto pre1_t = layout.get_tile(node2pos[fc.fanin_nodes[0]]);
+        auto pre2_t = layout.get_tile(node2pos[fc.fanin_nodes[1]]);
 
         // pre1 is the northern predecessor
         if (pre2_t.y < pre1_t.y)
@@ -1370,7 +1390,7 @@ class plane_impl
     void check_diagonal(const mockturtle::node<fanout_ntk> n, const uint32_t lvl,
                         std::optional<uint64_t>& diagonal) const
     {
-        const auto t   = static_cast<tile<Lyt>>(node2pos[n]);
+        const auto t   = layout.get_tile(node2pos[n]);
         const auto sum = static_cast<uint64_t>(t.x) + static_cast<uint64_t>(t.y);
 
         if (!diagonal.has_value())
@@ -1413,7 +1433,7 @@ class plane_impl
                                  {
                                      const auto& outputs = outputs_of[n];
 
-                                     auto row = static_cast<uint64_t>(static_cast<tile<Lyt>>(node2pos[n]).y);
+                                     auto row = static_cast<uint64_t>(layout.get_tile(node2pos[n]).y);
 
                                      for (const auto po_index : outputs)
                                      {
@@ -1436,15 +1456,15 @@ class plane_impl
                 }
 
                 const auto po_index = static_cast<uint32_t>(i);
-                auto       anchor   = static_cast<tile<Lyt>>(node2pos[drv]);
+                auto       anchor   = layout.get_tile(node2pos[drv]);
 
                 // down to the output's row, sharing the south run with the node's other output
-                if (row_of[po_index] > anchor.y)
+                if (row_of[po_index] > static_cast<uint64_t>(anchor.y))
                 {
-                    anchor = static_cast<tile<Lyt>>(wire_straight(layout, anchor, {anchor.x, row_of[po_index] + 1}));
+                    anchor = layout.get_tile(wire_straight(layout, anchor, {anchor.x, row_of[po_index] + 1}));
                 }
 
-                const tile<Lyt> border{first_pos.x + 1, anchor.y};
+                const layouts::layout_base::coordinate border{first_pos.x + 1, anchor.y};
 
                 layout.create_po(wire_straight(layout, anchor, border), output_name(po_index), border);
 
@@ -1489,23 +1509,23 @@ class plane_impl
     /**
      * Signal in the layout of every placed node.
      */
-    mockturtle::node_map<mockturtle::signal<Lyt>, fanout_ntk> node2pos;
+    mockturtle::node_map<typename Lyt::object_id, fanout_ntk> node2pos;
     /**
      * Layout under construction.
      */
     Lyt layout;
     /**
-     * Reserved input nodes of the layout, before they are moved to their positions.
+     * Primary input of the layout for every input node; sets the input order of the layout.
      */
-    mockturtle::node_map<mockturtle::node<Lyt>, fanout_ntk> pi2node{ntk};
+    mockturtle::node_map<typename Lyt::object_id, fanout_ntk> pi2node{ntk};
     /**
      * Tile of the first node of the last placed level: the top right end of the current diagonal.
      */
-    tile<Lyt> first_pos{};
+    layouts::layout_base::coordinate first_pos{};
     /**
      * Tile of the last placed node.
      */
-    tile<Lyt> place_t{};
+    layouts::layout_base::coordinate place_t{};
 };
 
 }  // namespace detail
@@ -1524,7 +1544,7 @@ class plane_impl
  * The input must be planar in its rank order (see `synthesis::planarization`) with at most two non-constant fanins
  * and at most two fanouts per node, primary outputs included.
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Lyt Cartesian gate-level layout type.
  * @tparam Ntk Ranked network type (see `mutable_rank_view`).
  * @param ntk Network to place and route.
  * @param ps Parameters.
@@ -1532,13 +1552,15 @@ class plane_impl
  * @return Crossing-free gate-level layout that implements `ntk`.
  * @throws networks::high_degree_fanin_exception If a node has more than two non-constant fanins.
  * @throws std::invalid_argument If `ntk` has no primary inputs, if a node drives more than two fanouts, if a gate has
- * a constant fanin next to a single non-constant one, or if the rank order of `ntk` has crossings.
+ * a constant fanin next to a single non-constant one, if `ntk` is not balanced, or if the rank order of `ntk` has
+ * crossings.
  * @throws std::logic_error If placement or routing cannot keep the layout planar; such an input is a defect.
  */
 template <typename Lyt, typename Ntk>
+    requires std::derived_from<Lyt, layouts::cartesian_layout> &&
+             std::same_as<typename Lyt::object_id, layouts::layout_object_id>
 [[nodiscard]] Lyt plane(const Ntk& ntk, const plane_params& ps = {}, plane_stats* pst = nullptr)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position method");
 
@@ -1588,15 +1610,9 @@ template <typename Lyt, typename Ntk>
             "before placement");
     }
 
-    utils::graph::mincross_params mc_ps{};
-    mc_ps.optimize = false;
-    utils::graph::mincross_stats mc_st{};
-
-    utils::graph::mincross(ntk, mc_ps, &mc_st);
-
-    if (mc_st.num_crossings != 0)
+    if (const auto crossings = utils::graph::count_crossings(ntk); crossings != 0)
     {
-        throw std::invalid_argument(fmt::format("The rank order of the network has {} crossings", mc_st.num_crossings));
+        throw std::invalid_argument(fmt::format("The rank order of the network has {} crossings", crossings));
     }
 
     plane_stats st{};

@@ -20,10 +20,9 @@
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
@@ -49,8 +48,6 @@ using namespace fiction::synthesis;
 
 namespace
 {
-
-using gate_layout = gate_level_layout<cartesian_layout<coords::offset>>;
 
 /**
  * Balances the network with unified outputs and ranks it.
@@ -82,7 +79,7 @@ template <typename Ntk>
 void check_plane(const Ntk& ntk, const bool xor_gates, const clocking::num_clks phases = clocking::num_clks::FOUR)
 {
     planarization_params p_ps{};
-    p_ps.duplication.xor_gates = xor_gates;
+    p_ps.duplication.crossing_gates.xor_gates = xor_gates;
 
     const auto planar = planarization(rank(ntk), p_ps);
 
@@ -90,13 +87,13 @@ void check_plane(const Ntk& ntk, const bool xor_gates, const clocking::num_clks 
     ps.number_of_clock_phases = phases;
     plane_stats st{};
 
-    const auto layout = plane<gate_layout>(planar, ps, &st);
+    const auto layout = plane<cartesian_gate_layout>(planar, ps, &st);
 
     check_stats(st);
     CHECK(layout.num_crossings() == 0);
     CHECK(layout.num_pis() == planar.num_pis());
     CHECK(layout.num_pos() == planar.num_pos());
-    check_eq(planar, layout);
+    check_eq(planar, extract_layout_network(layout));
 }
 
 template <typename Ntk>
@@ -132,7 +129,7 @@ TEST_CASE("Three clock phases", "[plane]")
 TEST_CASE("Gate library applies to the layout", "[plane]")
 {
     const auto planar = planarization(rank(blueprints::full_adder_network<mockturtle::mig_network>()));
-    const auto layout = plane<gate_layout>(planar);
+    const auto layout = plane<cartesian_gate_layout>(planar);
 
     CHECK_NOTHROW(apply_gate_library<qca::qca_one_library>(layout));
 }
@@ -156,7 +153,7 @@ TEST_CASE("Constant fanins", "[plane]")
 
         const auto planar = planarization(rank(tec));
 
-        CHECK_THROWS_AS(plane<gate_layout>(planar), std::invalid_argument);
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(planar), std::invalid_argument);
     }
 }
 
@@ -196,7 +193,7 @@ TEST_CASE("Nodes with two outputs push the following output rows down", "[plane]
     check_plane_both_gadgets(tec);
 
     const auto planar = planarization(rank(tec));
-    const auto layout = plane<gate_layout>(planar);
+    const auto layout = plane<cartesian_gate_layout>(planar);
 
     CHECK(layout.num_pos() == 5);
     CHECK(layout.num_crossings() == 0);
@@ -210,9 +207,9 @@ TEST_CASE("Progress is reported", "[plane]")
     plane_params      ps{};
     ps.on_progress = rec.callback();
 
-    const auto layout = plane<gate_layout>(planar, ps);
+    const auto layout = plane<cartesian_gate_layout>(planar, ps);
 
-    check_eq(planar, layout);
+    check_eq(planar, extract_layout_network(layout));
 
     CHECK(rec.is_consistent("placing levels"));
     CHECK(rec.final_count("placing levels") == planar.depth() + 2);
@@ -234,13 +231,13 @@ TEST_CASE("Invalid inputs are rejected", "[plane]")
 
         const auto ranked = rank(tec);
 
-        CHECK_THROWS_AS(plane<gate_layout>(ranked), std::invalid_argument);
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
     }
     SECTION("a gate with three fanins")
     {
         const auto ranked = rank(blueprints::maj1_network<technology_network>());
 
-        CHECK_THROWS_AS(plane<gate_layout>(ranked), high_degree_fanin_exception);
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), high_degree_fanin_exception);
     }
     SECTION("a node with three fanouts")
     {
@@ -256,7 +253,7 @@ TEST_CASE("Invalid inputs are rejected", "[plane]")
 
         const mutable_rank_view ranked{tec};
 
-        CHECK_THROWS_AS(plane<gate_layout>(ranked), std::invalid_argument);
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
     }
     SECTION("a network without primary inputs")
     {
@@ -265,25 +262,25 @@ TEST_CASE("Invalid inputs are rejected", "[plane]")
 
         const mutable_rank_view ranked{tec};
 
-        CHECK_THROWS_AS(plane<gate_layout>(ranked), std::invalid_argument);
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
     }
 }
 
 TEST_CASE("Shared wires and routing conflicts", "[plane]")
 {
-    gate_layout lyt{{4, 4}, clocking::twoddwave(clocking::num_clks::FOUR)};
+    cartesian_gate_layout lyt{{5, 5}, clocking::twoddwave(clocking::num_clks::FOUR)};
 
     const auto a = lyt.create_pi("a", {0, 0});
 
     // a wire east of the input, then a second consumer that reuses it
     const auto first = physical_design::detail::wire_straight(lyt, {0, 0}, {3, 0});
-    CHECK(lyt.get_tile(lyt.get_node(first)) == tile<gate_layout>{2, 0});
-    CHECK(lyt.fanout_size(lyt.get_node(a)) == 1);
+    CHECK(lyt.get_tile(first) == cartesian_gate_layout::tile{2, 0});
+    CHECK(lyt.fanout_size(a) == 1);
 
     const auto wires_after_first = lyt.num_wires();
 
     const auto second = physical_design::detail::wire_straight(lyt, {0, 0}, {2, 0});
-    CHECK(lyt.get_node(second) == lyt.get_node(tile<gate_layout>{1, 0}));
+    CHECK(lyt.find_object(cartesian_gate_layout::tile{1, 0}) == second);
     CHECK(lyt.num_wires() == wires_after_first);
 
     // a foreign signal on the way is a conflict
@@ -296,6 +293,6 @@ TEST_CASE("Shared wires and routing conflicts", "[plane]")
     CHECK_THROWS_AS(physical_design::detail::wire_straight(lyt, {2, 0}, {1, 1}), std::logic_error);
     CHECK_THROWS_AS(physical_design::detail::wire_straight(lyt, {3, 3}, {3, 4}), std::logic_error);  // empty source
 
-    CHECK(physical_design::detail::rows_between<gate_layout>({0, 0}, {0, 3}) == 2);
-    CHECK_THROWS_AS(physical_design::detail::rows_between<gate_layout>({0, 3}, {0, 0}), std::logic_error);
+    CHECK(physical_design::detail::rows_between({0, 0}, {0, 3}) == 2);
+    CHECK_THROWS_AS(physical_design::detail::rows_between({0, 3}, {0, 0}), std::logic_error);
 }
