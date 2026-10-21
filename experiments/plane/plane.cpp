@@ -35,6 +35,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <exception>
 #include <span>
 #include <sstream>
@@ -113,12 +114,54 @@ std::pair<bool, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
 
 }  // namespace
 
-int main(const int argc, const char** argv)  // NOLINT
+/**
+ * @brief Planarizes benchmark networks, places and routes them with PLANE, and verifies every layout.
+ *
+ * This program balances the benchmark networks of the trindade16, fontes18, ISCAS85, EPFL, and IWLS93 suites whose
+ * balanced network has at most 8000 nodes, planarizes them with the planarization pipeline, places and routes the
+ * planar networks with PLANE, and checks every layout for crossings and for equivalence with its network. The results
+ * are printed as a table and saved as `plane.json`.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv An array of C-style strings containing the command-line arguments.
+ * @return `EXIT_SUCCESS` if every benchmark was placed and verified, `EXIT_FAILURE` otherwise.
+ *
+ * Command-line Options:
+ *   <filter>      Runs only the benchmarks whose name contains the given text; "" runs all of them.
+ *   xor           Builds the crossing gates from XOR gates instead of AND, OR, and NOT gates.
+ *   --help, -h    Prints the usage and exits.
+ *
+ * Example Usage:
+ *   To run all benchmarks:
+ *   ./plane
+ *
+ *   To run the ISCAS85 benchmarks with XOR crossing gates:
+ *   ./plane ISCAS85 xor
+ */
+int main(const int argc, const char** argv)
 {
     const std::span<const char*> args{argv, static_cast<std::size_t>(argc)};
-    const std::string            filter = args.size() > 1 ? args[1] : "";
-    // optional second argument "xor": build the crossing gadgets from XOR gates as in the paper's experiments
-    const bool xor_gates = args.size() > 2 && std::string{args[2]} == "xor";
+
+    if (args.size() > 3 || (args.size() == 3 && std::string{args[2]} != "xor") ||
+        (args.size() == 2 && (std::string{args[1]} == "--help" || std::string{args[1]} == "-h")))
+    {
+        fmt::print("Usage: plane [<filter> [xor]]\n"
+                   "  <filter>      Runs only the benchmarks whose name contains the given text; \"\" runs all.\n"
+                   "  xor           Builds the crossing gates from XOR gates instead of AND, OR, and NOT gates.\n"
+                   "  --help, -h    Prints this usage and exits.\n");
+
+        return args.size() == 2 ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+
+    // an optional first argument restricts the run to benchmarks whose name contains it
+    const std::string filter = args.size() > 1 ? args[1] : "";
+    // an optional second argument "xor" builds the crossing gates from XOR gates as in the paper's experiments
+    const bool xor_gates = args.size() > 2;
+
+    if (filter.empty())
+    {
+        fmt::print("[i] running all benchmarks; pass a name filter to restrict the run, or --help for the usage\n");
+    }
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, double, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, double, bool, std::string, double, std::string>
@@ -211,5 +254,5 @@ int main(const int argc, const char** argv)  // NOLINT
 
     fmt::print("[i] {} benchmark(s) with failures\n", failures);
 
-    return failures == 0 ? 0 : 1;
+    return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

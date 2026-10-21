@@ -18,6 +18,7 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/network_ranking_utils.hpp"
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -29,7 +30,6 @@
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/plane.hpp>
-#include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planarization.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
@@ -48,19 +48,6 @@ using namespace fiction::synthesis;
 
 namespace
 {
-
-/**
- * Balances the network with unified outputs and ranks it.
- */
-template <typename Ntk>
-mutable_rank_view<technology_network> rank(const Ntk& ntk)
-{
-    network_balancing_params ps{};
-    ps.unify_outputs           = true;
-    ps.buffer_constant_outputs = false;
-
-    return mutable_rank_view{network_balancing<technology_network>(ntk, ps)};
-}
 
 void check_stats(const plane_stats& st)
 {
@@ -97,7 +84,7 @@ void check_plane(const Ntk& ntk, const bool xor_gates, const clocking::num_clks 
 }
 
 template <typename Ntk>
-void check_plane_both_gadgets(const Ntk& ntk)
+void check_plane_both_crossing_gates(const Ntk& ntk)
 {
     check_plane(ntk, false);
     check_plane(ntk, true);
@@ -107,17 +94,17 @@ void check_plane_both_gadgets(const Ntk& ntk)
 
 TEST_CASE("Layout equivalence", "[plane]")
 {
-    check_plane_both_gadgets(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_plane_both_gadgets(blueprints::maj1_network<mockturtle::aig_network>());
-    check_plane_both_gadgets(blueprints::maj4_network<mockturtle::aig_network>());
-    check_plane_both_gadgets(blueprints::half_adder_network<mockturtle::mig_network>());
-    check_plane_both_gadgets(blueprints::full_adder_network<mockturtle::mig_network>());
-    check_plane_both_gadgets(blueprints::mux21_network<technology_network>());
-    check_plane_both_gadgets(blueprints::parity_network<technology_network>());
-    check_plane_both_gadgets(blueprints::clpl<technology_network>());
-    check_plane_both_gadgets(blueprints::multi_output_network<technology_network>());
-    check_plane_both_gadgets(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check_plane_both_gadgets(blueprints::nary_operation_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check_plane_both_crossing_gates(blueprints::maj1_network<mockturtle::aig_network>());
+    check_plane_both_crossing_gates(blueprints::maj4_network<mockturtle::aig_network>());
+    check_plane_both_crossing_gates(blueprints::half_adder_network<mockturtle::mig_network>());
+    check_plane_both_crossing_gates(blueprints::full_adder_network<mockturtle::mig_network>());
+    check_plane_both_crossing_gates(blueprints::mux21_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::parity_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::clpl<technology_network>());
+    check_plane_both_crossing_gates(blueprints::multi_output_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::nary_operation_network<technology_network>());
 }
 
 TEST_CASE("Three clock phases", "[plane]")
@@ -139,7 +126,7 @@ TEST_CASE("Constant fanins", "[plane]")
     SECTION("a gate with two inputs and a constant third one is placed")
     {
         // the MIG adders map to majority gates with a constant fanin
-        check_plane_both_gadgets(blueprints::half_adder_network<mockturtle::mig_network>());
+        check_plane_both_crossing_gates(blueprints::half_adder_network<mockturtle::mig_network>());
     }
     SECTION("a gate with a single input next to a constant is rejected")
     {
@@ -168,7 +155,7 @@ TEST_CASE("Inputs that drive outputs directly", "[plane]")
     tec.create_po(tec.create_and(x2, x3));
     tec.create_po(x3);
 
-    check_plane_both_gadgets(tec);
+    check_plane_both_crossing_gates(tec);
 }
 
 TEST_CASE("Nodes with two outputs push the following output rows down", "[plane]")
@@ -190,7 +177,7 @@ TEST_CASE("Nodes with two outputs push the following output rows down", "[plane]
     tec.create_po(a2);
     tec.create_po(a2);
 
-    check_plane_both_gadgets(tec);
+    check_plane_both_crossing_gates(tec);
 
     const auto planar = planarization(rank(tec));
     const auto layout = plane<cartesian_gate_layout>(planar);

@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Planar Layout from Network Embedding (PLANE): placement and routing of a planar, ranked logic network.
+ * @brief Planar placement and routing of ranked logic networks (PLANE).
  * @author Benjamin Hien (hibenj)
  */
 
@@ -52,50 +52,52 @@ namespace fiction::physical_design
 {
 
 /**
- * Parameters for the planar placement and routing.
+ * @brief Parameters for the planar placement and routing.
  */
 struct plane_params
 {
     /**
-     * Number of clock phases of the 2DDWave clocking scheme. Three and four are supported.
+     * @brief Number of clock phases of the 2DDWave clocking scheme.
+     *
+     * Three and four are supported.
      */
     layouts::clocking::num_clks number_of_clock_phases = layouts::clocking::num_clks::FOUR;
     /**
-     * Receives completed work and the phase total.
+     * @brief Receives completed work and the phase total.
      */
     utils::progress_callback on_progress{};
 };
 /**
- * Statistics of the planar placement and routing.
+ * @brief Statistics of the planar placement and routing.
  */
 struct plane_stats
 {
     /**
-     * Runtime of placement and routing.
+     * @brief Runtime of placement and routing.
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * Layout width.
+     * @brief Layout width.
      */
     uint64_t x_size{0ull};
     /**
-     * Layout height.
+     * @brief Layout height.
      */
     uint64_t y_size{0ull};
     /**
-     * Number of gates.
+     * @brief Number of gates.
      */
     uint64_t num_gates{0ull};
     /**
-     * Number of wires.
+     * @brief Number of wires.
      */
     uint64_t num_wires{0ull};
     /**
-     * Number of crossings; zero for every layout this algorithm returns.
+     * @brief Number of crossings; zero for every layout this algorithm returns.
      */
     uint64_t num_crossings{0ull};
     /**
-     * Writes the statistics to a stream.
+     * @brief Writes the statistics to a stream.
      *
      * @param out Stream to write to.
      */
@@ -113,31 +115,32 @@ namespace detail
 {
 
 /**
- * Direction in which a node is placed relative to the end of its predecessor's wire. The lookup tables of the
- * placement model distinguish two variants per direction, which the placement treats alike; the variant only steers
- * the entries chosen for the following node.
+ * @brief Direction in which a node is placed relative to the end of its predecessor's wire.
+ *
+ * The lookup tables of the placement model distinguish two variants per direction, which the placement treats alike;
+ * the variant only steers the entries chosen for the following node.
  */
 enum class orientation : uint8_t
 {
     /**
-     * East of the wire end.
+     * @brief East of the wire end.
      */
     EAST = 0,
     /**
-     * East of the wire end, second variant.
+     * @brief East of the wire end, second variant.
      */
     EAST_SECOND = 1,
     /**
-     * South of the wire end.
+     * @brief South of the wire end.
      */
     SOUTH = 2,
     /**
-     * South of the wire end, second variant.
+     * @brief South of the wire end, second variant.
      */
     SOUTH_SECOND = 3
 };
 /**
- * Whether an orientation places a node east of its predecessor's wire end.
+ * @brief Whether an orientation places a node east of its predecessor's wire end.
  *
  * @param o Orientation.
  * @return `true` iff the node goes east.
@@ -147,113 +150,113 @@ enum class orientation : uint8_t
     return o == orientation::EAST || o == orientation::EAST_SECOND;
 }
 /**
- * Directions a node may take because of the fanout that drives it.
+ * @brief Directions a node may take because of the fanout that drives it.
  */
 enum class allowed_orientation : uint8_t
 {
     /**
-     * The node is the first consumer of a fanout and goes east.
+     * @brief The node is the first consumer of a fanout and goes east.
      */
     EAST = 0,
     /**
-     * The node is the second consumer of a fanout and goes south.
+     * @brief The node is the second consumer of a fanout and goes south.
      */
     SOUTH = 1,
     /**
-     * The node is not driven by a fanout.
+     * @brief The node is not driven by a fanout.
      */
     FREE = 2
 };
 /**
- * How the two consumers of a fanout node connect: whether each one is a single-fanin node or a two-input gate.
+ * @brief Whether each of the two consumers of a fanout node is a single-fanin node or a two-input gate.
  */
 enum class fanout_connection : uint8_t
 {
     /**
-     * Both consumers have a single fanin.
+     * @brief Both consumers have a single fanin.
      */
     BOTH_SINGLE = 0,
     /**
-     * The first consumer has a single fanin, the second is a two-input gate.
+     * @brief The first consumer has a single fanin, the second is a two-input gate.
      */
     FIRST_SINGLE = 1,
     /**
-     * The second consumer has a single fanin, the first is a two-input gate.
+     * @brief The second consumer has a single fanin, the first is a two-input gate.
      */
     SECOND_SINGLE = 2,
     /**
-     * Both consumers are two-input gates.
+     * @brief Both consumers are two-input gates.
      */
     BOTH_GATES = 3
 };
 /**
- * Whether a single-fanin node drives the rightmost fanin of a two-input gate.
+ * @brief Whether a single-fanin node drives the rightmost fanin of a two-input gate.
  */
 enum class buffer_connection : uint8_t
 {
     /**
-     * The node drives a single-fanin node, the leftmost fanin of a gate, or an output.
+     * @brief The node drives a single-fanin node, the leftmost fanin of a gate, or an output.
      */
     UNCONNECTED = 0,
     /**
-     * The node drives the rightmost fanin of a two-input gate.
+     * @brief The node drives the rightmost fanin of a two-input gate.
      */
     CONNECTED = 1
 };
 /**
- * Largest number of free rows between a node's predecessor and the predecessor's left neighbour that the lookup
+ * @brief Largest number of free rows between a node's predecessor and the predecessor's left neighbour that the lookup
  * tables distinguish.
  */
 inline constexpr std::size_t MAX_GAP = 2u;
 /**
- * Number of `orientation` enumerators.
+ * @brief Number of `orientation` enumerators.
  */
 inline constexpr std::size_t NUM_ORIENTATIONS = 4u;
 /**
- * Number of `allowed_orientation` enumerators.
+ * @brief Number of `allowed_orientation` enumerators.
  */
 inline constexpr std::size_t NUM_ALLOWED_ORIENTATIONS = 3u;
 /**
- * Number of `buffer_connection` enumerators.
+ * @brief Number of `buffer_connection` enumerators.
  */
 inline constexpr std::size_t NUM_BUFFER_CONNECTIONS = 2u;
 /**
- * Number of `fanout_connection` enumerators.
+ * @brief Number of `fanout_connection` enumerators.
  */
 inline constexpr std::size_t NUM_FANOUT_CONNECTIONS = 4u;
 /**
- * One entry of a lookup table: the orientation of the node and the routing lines it needs.
+ * @brief Orientation and routing-line demand of a node, one entry of a lookup table.
  */
 struct placement_rule
 {
     /**
-     * Orientation of the node.
+     * @brief Orientation of the node.
      */
     orientation direction;
     /**
-     * New routing lines the node needs.
+     * @brief New routing lines the node needs.
      */
     uint64_t new_lines;
 };
 /**
- * Rules indexed by the orientation of the previous node in the rank.
+ * @brief Rules indexed by the orientation of the previous node in the rank.
  */
 using rules_by_previous = std::array<placement_rule, NUM_ORIENTATIONS>;
 /**
- * Rules indexed by the predecessor gap, then by the previous orientation.
+ * @brief Rules indexed by the predecessor gap, then by the previous orientation.
  */
 using rules_by_gap = std::array<rules_by_previous, MAX_GAP + 1>;
 /**
- * Rules indexed by the allowed orientation, then by gap and previous orientation.
+ * @brief Rules indexed by the allowed orientation, then by gap and previous orientation.
  */
 using rules_by_allowed = std::array<rules_by_gap, NUM_ALLOWED_ORIENTATIONS>;
 /**
- * Shorthand for the orientation enumerators of the tables below.
+ * @brief Shorthand for the orientation enumerators of the tables below.
  */
 using o = orientation;
 /**
- * Placement rules for single-fanin nodes that are not fanouts, indexed by `buffer_connection`, `allowed_orientation`,
- * gap, and the orientation of the previous node.
+ * @brief Placement rules for single-fanin nodes that are not fanouts, indexed by `buffer_connection`,
+ * `allowed_orientation`, gap, and the orientation of the previous node.
  */
 inline constexpr std::array<rules_by_allowed, NUM_BUFFER_CONNECTIONS> BUFFER_RULES = {{
     // UNCONNECTED
@@ -300,8 +303,8 @@ inline constexpr std::array<rules_by_allowed, NUM_BUFFER_CONNECTIONS> BUFFER_RUL
     }},
 }};
 /**
- * Placement rules for fanout nodes, indexed by `fanout_connection`, `allowed_orientation`, gap, and the orientation
- * of the previous node.
+ * @brief Placement rules for fanout nodes, indexed by `fanout_connection`, `allowed_orientation`, gap, and the
+ * orientation of the previous node.
  */
 inline constexpr std::array<rules_by_allowed, NUM_FANOUT_CONNECTIONS> FANOUT_RULES = {{
     // BOTH_SINGLE
@@ -390,7 +393,7 @@ inline constexpr std::array<rules_by_allowed, NUM_FANOUT_CONNECTIONS> FANOUT_RUL
     }},
 }};
 /**
- * Converts an enumerator to the index it stands for in the lookup tables.
+ * @brief Converts an enumerator to the index it stands for in the lookup tables.
  *
  * @tparam E Enumeration type.
  * @param e Enumerator.
@@ -402,7 +405,7 @@ template <typename E>
     return static_cast<std::size_t>(e);
 }
 /**
- * Number of non-constant fanins of a node.
+ * @brief Number of non-constant fanins of a node.
  *
  * @tparam Ntk Network type.
  * @param ntk Network.
@@ -415,7 +418,7 @@ template <typename Ntk>
     return networks::fanins(ntk, n).fanin_nodes.size();
 }
 /**
- * Non-constant fanins of a node sorted by rank position.
+ * @brief Non-constant fanins of a node sorted by rank position.
  *
  * @tparam Ntk Ranked network type.
  * @param ntk Network.
@@ -433,7 +436,7 @@ template <typename Ntk>
     return fanin_nodes;
 }
 /**
- * Fanouts of a node sorted by rank position.
+ * @brief Fanouts of a node sorted by rank position.
  *
  * @tparam Ntk Ranked network type with a fanout interface.
  * @param ntk Network.
@@ -451,7 +454,7 @@ template <typename Ntk>
     return fanout_nodes;
 }
 /**
- * Number of free rows between a tile and another tile south of it.
+ * @brief Number of free rows between a tile and another tile south of it.
  *
  * @param north Upper tile.
  * @param south Lower tile.
@@ -471,7 +474,7 @@ template <typename Ntk>
     return static_cast<uint64_t>(south.y) - static_cast<uint64_t>(north.y) - 1;
 }
 /**
- * How the two consumers of a fanout node connect.
+ * @brief How the two consumers of a fanout node connect.
  *
  * @tparam Ntk Ranked network type with a fanout interface.
  * @param ntk Network.
@@ -513,7 +516,7 @@ template <typename Ntk>
     return fanout_connection::BOTH_GATES;
 }
 /**
- * Whether a single-fanin node drives the rightmost fanin of a two-input gate.
+ * @brief Whether a single-fanin node drives the rightmost fanin of a two-input gate.
  *
  * @tparam Ntk Ranked network type with a fanout interface.
  * @param ntk Network.
@@ -538,8 +541,9 @@ template <typename Ntk>
     return buffer_connection::UNCONNECTED;
 }
 /**
- * Direction a single-fanin node may take: fixed by its position among the consumers of a driving fanout, free
- * otherwise.
+ * @brief Direction a single-fanin node may take.
+ *
+ * A consumer of a fanout node is fixed by its position among the consumers; every other node is free.
  *
  * @tparam Ntk Ranked network type with a fanout interface.
  * @param ntk Network.
@@ -559,8 +563,10 @@ template <typename Ntk>
     return ranked_fanouts(ntk, pre)[0] == n ? allowed_orientation::EAST : allowed_orientation::SOUTH;
 }
 /**
- * Free rows between the leftmost predecessor of a node and that predecessor's left neighbour in the rank below,
- * clamped to `MAX_GAP`: the room available for placing the node.
+ * @brief Room for placing a node, measured in free rows between its leftmost predecessor and that predecessor's left
+ * neighbour.
+ *
+ * The count is clamped to `MAX_GAP`, the largest gap the lookup tables distinguish.
  *
  * @tparam Ntk Ranked network type.
  * @tparam Lyt Layout type.
@@ -596,8 +602,10 @@ template <typename Ntk, typename Lyt>
     return static_cast<std::size_t>(std::min<uint64_t>(gap, MAX_GAP));
 }
 /**
- * Orientation of the first node of a level: south in the second variant if the first fanout structure or gate of
- * the level is a two-input gate, east otherwise.
+ * @brief Orientation of the first node of a level.
+ *
+ * The first node goes south in the second variant if the first fanout structure or gate of the level is a two-input
+ * gate, east otherwise.
  *
  * @tparam Ntk Ranked network type with a fanout interface.
  * @param ntk Network.
@@ -646,21 +654,21 @@ template <typename Ntk>
     return found.value_or(orientation::EAST);
 }
 /**
- * Orientation and routing-line demand of every node of a level.
+ * @brief Orientation and routing-line demand of every node of a level.
  */
 struct level_variables
 {
     /**
-     * Orientation per node of the level.
+     * @brief Orientation per node of the level.
      */
     std::vector<orientation> orientations;
     /**
-     * New routing lines per node of the level.
+     * @brief New routing lines per node of the level.
      */
     std::vector<uint64_t> new_lines;
 };
 /**
- * Computes the orientation and the new routing lines of every node of a level from the lookup tables.
+ * @brief Computes the orientation and the new routing lines of every node of a level from the lookup tables.
  *
  * @tparam Ntk Ranked network type with a fanout interface.
  * @tparam Lyt Layout type.
@@ -737,7 +745,7 @@ compute_level_variables(const Ntk& ntk, const Lyt& lyt,
     return vars;
 }
 /**
- * Rank positions of the two-input gates of a level.
+ * @brief Rank positions of the two-input gates of a level.
  *
  * @tparam Ntk Ranked network type.
  * @param ntk Network.
@@ -762,8 +770,9 @@ template <typename Ntk>
     return indices;
 }
 /**
- * Rows between the two predecessors of every two-input gate of a level: the diagonal advance each gate brings on
- * its own.
+ * @brief Rows between the two predecessors of every two-input gate of a level.
+ *
+ * Those rows are the diagonal advance each gate brings on its own.
  *
  * @tparam Ntk Ranked network type.
  * @tparam Lyt Layout type.
@@ -798,24 +807,27 @@ two_input_new_lines(const Ntk& ntk, const Lyt& lyt, const mockturtle::node_map<t
     return lines;
 }
 /**
- * Wire lengths of every node of a level: how far its predecessor's signal runs east and south before the node is
- * placed.
+ * @brief Wire lengths of every node of a level.
+ *
+ * They state how far the predecessor's signal runs east and south before the node is placed.
  */
 struct level_wiring
 {
     /**
-     * East run per node.
+     * @brief East run per node.
      */
     std::vector<uint64_t> x;
     /**
-     * South run per node.
+     * @brief South run per node.
      */
     std::vector<uint64_t> y;
 };
 /**
- * Lifts every node of a level onto the diagonal with the largest demand. The demand of a node is `x + y`, that of a
- * two-input gate additionally the rows between its predecessors, which the gate advances on its own. Nodes left of
- * the node with the largest demand get the difference as south run, nodes right of it as east run.
+ * @brief Lifts every node of a level onto the diagonal with the largest demand.
+ *
+ * The demand of a node is `x + y`, that of a two-input gate additionally the rows between its predecessors, which the
+ * gate advances on its own. Nodes left of the node with the largest demand get the difference as south run, nodes right
+ * of it as east run.
  *
  * @param wiring Wire lengths; adjusted.
  * @param gates Rank positions of the two-input gates.
@@ -884,7 +896,7 @@ inline void lift_to_common_diagonal(level_wiring& wiring, const std::vector<std:
     }
 }
 /**
- * Computes the wire lengths of every node of a level.
+ * @brief Computes the wire lengths of every node of a level.
  *
  * Two-input gates split the level into clusters. Inside a cluster a node runs east by the new lines of the nodes
  * right of it and south by the new lines of the nodes left of it, so the cluster sits on one diagonal. A gate advances
@@ -989,8 +1001,10 @@ template <typename Ntk, typename Lyt>
     return wiring;
 }
 /**
- * Continues signal `a` on tile `t` with a buffer. A tile that already holds a wire driven by `a` is shared, which
- * turns the tile of `a` into a layout fanout; any other occupant is a routing conflict.
+ * @brief Continues signal `a` on tile `t` with a buffer.
+ *
+ * A tile that already holds a wire driven by `a` is shared, which turns the tile of `a` into a layout fanout; any other
+ * occupant is a routing conflict.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt Layout.
@@ -1025,8 +1039,9 @@ template <typename Lyt>
     return occupant;
 }
 /**
- * Wires the signal on `src` in a straight line towards `dest`, east or south, up to the tile before `dest`. Shared
- * wire tiles are reused, see `reuse_or_create_buf`.
+ * @brief Wires the signal on `src` in a straight line towards `dest`, east or south, up to the tile before `dest`.
+ *
+ * Shared wire tiles are reused, see `reuse_or_create_buf`.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt Layout.
@@ -1075,7 +1090,7 @@ template <typename Lyt>
     return a;
 }
 /**
- * Runs the signal on `from` east and then south by the given lengths and returns the tile it ends on.
+ * @brief Runs the signal on `from` east and then south by the given lengths and returns the tile it ends on.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt Layout.
@@ -1107,7 +1122,7 @@ template <typename Lyt>
     return from;
 }
 /**
- * Places a single-fanin node on tile `t` and wires its predecessor to it.
+ * @brief Places a single-fanin node on tile `t` and wires its predecessor to it.
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Network type.
@@ -1133,8 +1148,8 @@ template <typename Lyt, typename Ntk>
     return place(lyt, t, ntk, n, wire_straight(lyt, pre_t, t));
 }
 /**
- * Places a two-input gate on tile `t` and wires its predecessors to it, the northern one from above and the western
- * one from the left.
+ * @brief Places a two-input gate on tile `t` and wires its predecessors to it, the northern one from above and the
+ * western one from the left.
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Network type.
@@ -1164,7 +1179,7 @@ connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t, co
 }
 
 /**
- * Implementation of PLANE.
+ * @brief Implementation of PLANE.
  *
  * Every level of the ranked network is placed on one anti-diagonal of a 2DDWave-clocked layout, the ranks running
  * from the top right to the bottom left. For each level the lookup tables give every node an orientation and a demand
@@ -1179,11 +1194,29 @@ class plane_impl
 {
   public:
     /**
-     * Network type seen by the implementation: the input wrapped in a fanout view.
+     * @brief Input network wrapped in a fanout view.
      */
     using fanout_ntk = mockturtle::fanout_view<Ntk>;
     /**
-     * Creates the implementation.
+     * @brief Primary output waiting for its row, keyed by the rank position of its driver.
+     */
+    struct output_slot
+    {
+        /**
+         * @brief Rank position of the driver on the output level.
+         */
+        uint32_t rank;
+        /**
+         * @brief Index of the output.
+         */
+        uint32_t index;
+        /**
+         * @brief Driver of the output.
+         */
+        mockturtle::node<fanout_ntk> driver;
+    };
+    /**
+     * @brief Creates the implementation.
      *
      * @param src Network.
      * @param p Parameters.
@@ -1197,7 +1230,7 @@ class plane_impl
             layout{{0, 0}, layouts::clocking::twoddwave(ps.number_of_clock_phases)}
     {}
     /**
-     * Places and routes the network.
+     * @brief Places and routes the network.
      *
      * @return The layout.
      * @throws std::logic_error If the placement breaks the diagonal invariant or a wire runs into an occupied tile.
@@ -1245,7 +1278,7 @@ class plane_impl
 
   private:
     /**
-     * Places every node of a level in rank order.
+     * @brief Places every node of a level in rank order.
      *
      * @param lvl Level.
      */
@@ -1284,9 +1317,10 @@ class plane_impl
                                  });
     }
     /**
-     * Places a primary input. The first input sits at the top right of the input diagonal; the others follow down the
-     * diagonal, with inputs in the lower half of the diagonal wired in from the left border and inputs in the upper
-     * half from the top border.
+     * @brief Places a primary input.
+     *
+     * The first input sits at the top right of the input diagonal; the others follow down the diagonal, with inputs in
+     * the lower half of the diagonal wired in from the left border and inputs in the upper half from the top border.
      *
      * @param n Input node.
      */
@@ -1319,8 +1353,9 @@ class plane_impl
         node2pos[n] = layout.create_buf(wire_straight(layout, border, place_t), place_t);
     }
     /**
-     * Places a single-fanin node: its predecessor's wire runs east and south as computed, and the node sits east or
-     * south of the wire end.
+     * @brief Places a single-fanin node east or south of the end of its predecessor's wire.
+     *
+     * The wire runs east and south by the lengths `compute_wiring` assigned.
      *
      * @param n Node.
      * @param i Rank position of `n`.
@@ -1344,9 +1379,11 @@ class plane_impl
         }
     }
     /**
-     * Places a two-input gate at the corner below its northern predecessor and right of its western one, after both
-     * wires ran east and south as computed. The western predecessor's east run is at least as long as the east run
-     * of the next node in the rank, so that its south run stays clear of that node's wire.
+     * @brief Places a two-input gate at the corner below its northern predecessor and right of its western one.
+     *
+     * Both wires first run east and south by the lengths `compute_wiring` assigned. The western predecessor's east run
+     * is at least as long as the east run of the next node in the rank, so that its south run stays clear of that
+     * node's wire.
      *
      * @param n Node.
      * @param i Rank position of `n`.
@@ -1380,7 +1417,7 @@ class plane_impl
         }
     }
     /**
-     * Checks that a placed node sits on the level's diagonal.
+     * @brief Checks that a placed node sits on the level's diagonal.
      *
      * @param n Node just placed.
      * @param lvl Level.
@@ -1404,44 +1441,41 @@ class plane_impl
         }
     }
     /**
-     * Routes every primary output to the right border. The nodes of the output level sit on one diagonal, so each
-     * node owns the row of its tile. A node with two outputs takes the row below as well, which pushes the rows of
-     * every following node down by one until a gap between two nodes absorbs the shift; a pushed node first runs
-     * south to its row, then east. Rows are assigned in rank order and the outputs are created in output order.
+     * @brief Routes every primary output to the right border.
+     *
+     * The nodes of the output level sit on one diagonal, so each node owns the row of its tile. A node with two outputs
+     * takes the row below as well, which pushes the rows of every following node down by one until a gap between two
+     * nodes absorbs the shift; a pushed node first runs south to its row, then east. Rows are assigned in rank order
+     * and the outputs are created in output order.
      *
      * @return `1` plus the number of rows the shifts add below the last diagonal, `0` if none were needed.
      */
     [[nodiscard]] uint64_t route_outputs()
     {
-        // outputs per driver, in output order
-        mockturtle::node_map<std::vector<uint32_t>, fanout_ntk> outputs_of{ntk};
+        // the non-constant outputs by the rank position of their driver, then by output index
+        std::vector<output_slot> outputs{};
+        outputs.reserve(ntk.num_pos());
         ntk.foreach_po(
-            [this, &outputs_of](const auto& po, const auto i)
+            [this, &outputs](const auto& po, const auto i)
             {
                 if (const auto drv = ntk.get_node(po); !ntk.is_constant(drv))
                 {
-                    outputs_of[drv].push_back(static_cast<uint32_t>(i));
+                    outputs.push_back({ntk.rank_position(drv), static_cast<uint32_t>(i), drv});
                 }
             });
+        std::ranges::sort(outputs, {}, [](const output_slot& slot) { return std::pair{slot.rank, slot.index}; });
 
-        // row of every output, assigned in the rank order of the drivers
+        // row of every output: the driver's row, pushed down below the rows already taken
         std::vector<uint64_t> row_of(ntk.num_pos(), 0);
         uint64_t              next_free_row = 0;
 
-        ntk.foreach_node_in_rank(ntk.depth(),
-                                 [this, &outputs_of, &row_of, &next_free_row](const auto& n)
-                                 {
-                                     const auto& outputs = outputs_of[n];
+        for (const auto& slot : outputs)
+        {
+            const auto row = std::max(static_cast<uint64_t>(layout.get_tile(node2pos[slot.driver]).y), next_free_row);
 
-                                     auto row = static_cast<uint64_t>(layout.get_tile(node2pos[n]).y);
-
-                                     for (const auto po_index : outputs)
-                                     {
-                                         row              = std::max(row, next_free_row);
-                                         row_of[po_index] = row;
-                                         next_free_row    = row + 1;
-                                     }
-                                 });
+            row_of[slot.index] = row;
+            next_free_row      = row + 1;
+        }
 
         uint64_t last_row = 0;
 
@@ -1476,7 +1510,7 @@ class plane_impl
         return last_row > bottom ? last_row - bottom : 0;
     }
     /**
-     * Name of a primary output: the network's if it has one, `po<index>` otherwise.
+     * @brief Name of a primary output, the network's name if it has one and `po<index>` otherwise.
      *
      * @param po_index Index of the output.
      * @return Name.
@@ -1495,35 +1529,35 @@ class plane_impl
     }
 
     /**
-     * The network.
+     * @brief The network.
      */
     const fanout_ntk ntk;
     /**
-     * Parameters.
+     * @brief Parameters.
      */
     const plane_params& ps;
     /**
-     * Statistics.
+     * @brief Statistics.
      */
     plane_stats& pst;
     /**
-     * Signal in the layout of every placed node.
+     * @brief Signal in the layout of every placed node.
      */
     mockturtle::node_map<typename Lyt::object_id, fanout_ntk> node2pos;
     /**
-     * Layout under construction.
+     * @brief Layout under construction.
      */
     Lyt layout;
     /**
-     * Primary input of the layout for every input node; sets the input order of the layout.
+     * @brief Primary input of the layout for every input node; sets the input order of the layout.
      */
     mockturtle::node_map<typename Lyt::object_id, fanout_ntk> pi2node{ntk};
     /**
-     * Tile of the first node of the last placed level: the top right end of the current diagonal.
+     * @brief Tile of the first node of the last placed level, the top right end of the current diagonal.
      */
     layouts::layout_base::coordinate first_pos{};
     /**
-     * Tile of the last placed node.
+     * @brief Tile of the last placed node.
      */
     layouts::layout_base::coordinate place_t{};
 };
@@ -1531,10 +1565,11 @@ class plane_impl
 }  // namespace detail
 
 /**
- * Planar Layout from Network Embedding (PLANE): places and routes a planar, balanced, fanout-substituted, ranked
- * logic network as a 2DDWave-clocked gate-level layout without wire crossings. The approach was originally proposed
- * in \"A Fully Planar Approach to Field-coupled Nanocomputing: Scalable Placement and Routing Without Wire
- * Crossings\" by B. Hien, M. Walter, S. Hofmann, and R. Wille in IEEE NANO 2025.
+ * @brief Places and routes a planar, balanced, fanout-substituted, ranked logic network as a 2DDWave-clocked gate-level
+ * layout without wire crossings (PLANE, Planar Layout from Network Embedding).
+ *
+ * The approach was originally proposed in \"A Fully Planar Approach to Field-coupled Nanocomputing: Scalable Placement
+ * and Routing Without Wire Crossings\" by B. Hien, M. Walter, S. Hofmann, and R. Wille in IEEE NANO 2025.
  *
  * Every level of the network is placed on one anti-diagonal of the layout in rank order, so the planar embedding of
  * the network is preserved. Lookup tables decide for every node whether it sits east or south of its predecessor's
