@@ -278,8 +278,8 @@ It needs a network whose gates have at most two inputs (AND, OR, and inverters a
 [the paper](https://doi.org/10.1109/NANO63165.2025.11113822). The network is balanced, planarized by node duplication
 and crossing gates, fanout-substituted, and rebalanced; the Planar Layout from Network Embedding (PLANE) algorithm
 then places every level on one diagonal of a 2DDWave-clocked Cartesian layout. Duplicated inputs become separate
-layout inputs. `-n 3|4` sets the number of clock phases, `-x` builds crossing gadgets from XOR gates, and `-v` prints
-the statistics.
+layout inputs. `-n 3|4` sets the number of clock phases, `-x` builds crossing gates from XOR gates, and `-v` prints the
+statistics.
 
 ### Graph-oriented layout design (`gold`)
 

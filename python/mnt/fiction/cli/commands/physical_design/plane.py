@@ -15,15 +15,9 @@ from typing import TYPE_CHECKING
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.pyfiction.physical_design import num_clks, plane_params, plane_stats
+from mnt.pyfiction.physical_design import num_clks, plane_stats
 from mnt.pyfiction.physical_design import plane as plane_layout
-from mnt.pyfiction.synthesis import (
-    network_balancing,
-    network_balancing_params,
-    planarization,
-    planarization_params,
-    planarization_stats,
-)
+from mnt.pyfiction.synthesis import network_balancing, planarization, planarization_stats
 
 if TYPE_CHECKING:
     import argparse
@@ -49,7 +43,7 @@ def _plane_arguments(parser: Parser) -> None:
         help="the number of clock phases of the result",
     )
     parser.add_argument(
-        "-x", "--xor-gates", action="store_true", help="build crossing gadgets from XOR gates instead of AND, OR, NOT"
+        "-x", "--xor-gates", action="store_true", help="build crossing gates from XOR gates instead of AND, OR, NOT"
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="print the statistics")
 
@@ -72,24 +66,23 @@ def plane(session: Session, args: argparse.Namespace) -> Result:
     """
     network = session.as_technology_network(session.networks.current())
 
-    balancing = network_balancing_params()
-    balancing.unify_outputs = True
-    balancing.buffer_constant_outputs = False
-    balanced = network_balancing(network, balancing)
-
-    planarization_parameters = planarization_params()
-    planarization_parameters.on_progress = session.report_progress
-    planarization_parameters.duplication.xor_gates = args.xor_gates
+    balanced = network_balancing(network, unify_outputs=True, buffer_constant_outputs=False)
 
     planarization_statistics = planarization_stats()
-    planar, _original_inputs = planarization(balanced, planarization_parameters, planarization_statistics)
-
-    params = plane_params()
-    params.on_progress = session.report_progress
-    params.number_of_clock_phases = num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR
+    planar, _original_inputs = planarization(
+        balanced,
+        on_progress=session.report_progress,
+        xor_gates=args.xor_gates,
+        statistics=planarization_statistics,
+    )
 
     stats = plane_stats()
-    layout = plane_layout(planar, params, stats)
+    layout = plane_layout(
+        planar,
+        statistics=stats,
+        number_of_clock_phases=num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR,
+        on_progress=session.report_progress,
+    )
     session.gate_layouts.add(layout)
 
     return {

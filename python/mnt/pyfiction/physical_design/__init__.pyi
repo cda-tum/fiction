@@ -288,28 +288,6 @@ def orthogonal(
     on_progress: Callable[[str, int, int], None] | None = ...,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout: ...
 
-class plane_params:
-    """Parameters for the planar placement and routing."""
-
-    def __init__(self) -> None:
-        """Default constructor."""
-
-    @property
-    def number_of_clock_phases(self) -> num_clks:
-        """
-        Number of clock phases of the 2DDWave clocking scheme. Three and four
-        are supported.
-        """
-
-    @number_of_clock_phases.setter
-    def number_of_clock_phases(self, arg: num_clks, /) -> None: ...
-    @property
-    def on_progress(self, /) -> Callable[[str, int, int], None] | None:
-        """Receives completed work and the phase total."""
-
-    @on_progress.setter
-    def on_progress(self, value: Callable[[str, int, int], None] | None) -> None: ...
-
 class plane_stats:
     """Statistics of the planar placement and routing."""
 
@@ -317,7 +295,7 @@ class plane_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of placement and routing."""
 
     @property
@@ -342,25 +320,29 @@ class plane_stats:
 
 def plane(
     network: mnt.pyfiction.networks.technology_network,
-    parameters: plane_params = ...,
+    *,
     statistics: plane_stats | None = None,
+    number_of_clock_phases: num_clks = ...,
+    on_progress: Callable[[str, int, int], None] | None = ...,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout:
     """
-    Planar Layout from Network Embedding (PLANE): places and routes a planar network as a 2DDWave-clocked
-    Cartesian gate-level layout without wire crossings. The network is the first element of the pair that `planarization`
-    returns: its node order is the planar rank order, which the layout preserves.
+    Place and route a planar technology network without wire crossings (PLANE).
+    The network is the first element of the pair that `planarization` returns: its node order is the planar rank order,
+    which the layout preserves. Every level is placed on one anti-diagonal of a 2DDWave-clocked Cartesian gate layout.
+    Gates that no output reaches are dropped before placement.
 
     Args:
         network: Planar, balanced, fanout-substituted technology network from `planarization`.
-        parameters: Parameters.
-        statistics: Optional statistics object that receives the runtime and the layout sizes.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
+        number_of_clock_phases: Number of clock phases of the 2DDWave clocking. 3 and 4 are supported.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 
     Returns:
-        A crossing-free Cartesian gate-level layout that implements `network`.
+        A crossing-free Cartesian gate layout that implements `network`.
 
     Raises:
         ValueError: If `network` has no primary inputs, if a node drives more than two fanouts, if a gate has a constant
-            fanin next to a single non-constant one, or if the rank order of `network` has crossings.
+            fanin next to a single non-constant one, if `network` is not balanced, or if its node order has crossings.
         high_degree_fanin_exception: If a node has more than two non-constant fanins.
     """
 

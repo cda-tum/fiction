@@ -33,10 +33,10 @@ predecessor's wire and how many routing lines the level needs.
 :::{tab-item} Python
 :sync: python
 
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.physical_design.plane_params
-   :members:
+The keyword-only options select the clock phases and progress reporting; `statistics` receives the runtime and
+the layout sizes.
 
+```{eval-rst}
 .. autoclass:: mnt.pyfiction.physical_design.plane_stats
    :members:
 

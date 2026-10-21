@@ -41,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
   - Long-running CLI commands show responsive progress. Counted phases use real bars; searches show
     candidate extents on one aggregate row. Quiet mode and redirected output suppress displays.
+  - `plane` balances and planarizes the active network and places and routes it without wire crossings.
 
 - Code quality:
 
@@ -82,6 +83,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `planarization` runs the trindade16, fontes18, ISCAS85, EPFL, and IWLS93 benchmarks whose balanced network has at
     most 8000 nodes through node duplication and through the planarization pipeline, and checks every result by SAT
     or, above 50000 nodes, by random simulation
+  - `plane` planarizes the same benchmarks, places and routes them with PLANE, and checks every layout for crossings
+    and for equivalence by SAT or, above 200000 nodes, by random simulation
 
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and

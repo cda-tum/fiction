@@ -15,12 +15,13 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/progress.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/physical_design/plane.hpp>
+
+#include <mockturtle/algorithms/cleanup.hpp>
 
 #include <sstream>
 
@@ -30,29 +31,28 @@
 #include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
+/**
+ * @brief Namespace alias for nanobind.
+ */
+namespace nb = nanobind;
+
 namespace pyfiction
 {
+
+/** @brief Native options constructed for each Python call. */
+using plane_options = fiction::physical_design::plane_params;
 
 /**
  * @brief Binds PLANE helpers.
  * @param m Python module.
  */
-void register_plane(nanobind::module_& m)
+void register_plane(nb::module_& m)
 {
-    namespace py = nanobind;
+    using stats = fiction::physical_design::plane_stats;
 
-    using params = fiction::physical_design::plane_params;
-    using stats  = fiction::physical_design::plane_stats;
-
-    py::class_<params>(m, "plane_params", DOC(fiction_physical_design_plane_params))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("number_of_clock_phases", &params::number_of_clock_phases,
-                DOC(fiction_physical_design_plane_params_number_of_clock_phases))
-        .def_rw("on_progress", &params::on_progress, pyfiction::ON_PROGRESS_GETTER, pyfiction::CALLBACK_SETTER,
-                DOC(fiction_physical_design_plane_params_on_progress));
-
-    py::class_<stats>(m, "plane_stats", DOC(fiction_physical_design_plane_stats))
-        .def(py::init<>(), "Default constructor.")
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
+    nb::class_<stats>(m, "plane_stats", DOC(fiction_physical_design_plane_stats))
+        .def(nb::init<>(), "Default constructor.")
         .def(
             "__repr__",
             [](const stats& st)
@@ -71,30 +71,48 @@ void register_plane(nanobind::module_& m)
 
     m.def(
         "plane",
-        [](const py_tec_network& network, const params& ps, stats* pst)
+        [](const py_tec_network& network, stats* statistics,
+           const decltype(plane_options{}.number_of_clock_phases) number_of_clock_phases,
+           const decltype(plane_options{}.on_progress)&           on_progress)
         {
-            // the node order of a planarized technology network is its rank order
-            const fiction::networks::views::mutable_rank_view ranked{network};
+            plane_options parameters{};
+            parameters.number_of_clock_phases = number_of_clock_phases;
+            parameters.on_progress            = on_progress;
 
-            return fiction::physical_design::plane<fiction::layouts::cartesian_gate_layout>(ranked, ps, pst);
+            // gates that no output reaches have no level and cannot be ranked, so they are dropped
+            const auto cleaned = mockturtle::cleanup_dangling(network);
+
+            const nb::gil_scoped_release release{};
+
+            // the node order of a planarized technology network is its rank order
+            const fiction::networks::views::mutable_rank_view ranked{cleaned};
+
+            return fiction::physical_design::plane<fiction::layouts::cartesian_gate_layout>(ranked, parameters,
+                                                                                            statistics);
         },
-        py::arg("network"), py::arg("parameters") = params{}, py::arg("statistics") = nullptr,
-        py::call_guard<py::gil_scoped_release>(),
-        R"doc(Planar Layout from Network Embedding (PLANE): places and routes a planar network as a 2DDWave-clocked
-Cartesian gate-level layout without wire crossings. The network is the first element of the pair that `planarization`
-returns: its node order is the planar rank order, which the layout preserves.
+        nb::arg("network"), nb::kw_only(), nb::arg("statistics") = nullptr,
+        nb::arg("number_of_clock_phases") = plane_options{}.number_of_clock_phases,
+        nb::arg("on_progress").none()     = nb::none(),
+        nb::sig("def plane(network: mnt.pyfiction.networks.technology_network, *, statistics: plane_stats | None = "
+                "None, number_of_clock_phases: num_clks = ..., on_progress: Callable[[str, int, int], None] | None = "
+                "...) -> mnt.pyfiction.layouts.cartesian_gate_layout"),
+        R"doc(Place and route a planar technology network without wire crossings (PLANE).
+The network is the first element of the pair that `planarization` returns: its node order is the planar rank order,
+which the layout preserves. Every level is placed on one anti-diagonal of a 2DDWave-clocked Cartesian gate layout.
+Gates that no output reaches are dropped before placement.
 
 Args:
     network: Planar, balanced, fanout-substituted technology network from `planarization`.
-    parameters: Parameters.
-    statistics: Optional statistics object that receives the runtime and the layout sizes.
+    statistics: Statistics object filled by the algorithm; None discards statistics.
+    number_of_clock_phases: Number of clock phases of the 2DDWave clocking. 3 and 4 are supported.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 
 Returns:
-    A crossing-free Cartesian gate-level layout that implements `network`.
+    A crossing-free Cartesian gate layout that implements `network`.
 
 Raises:
     ValueError: If `network` has no primary inputs, if a node drives more than two fanouts, if a gate has a constant
-        fanin next to a single non-constant one, or if the rank order of `network` has crossings.
+        fanin next to a single non-constant one, if `network` is not balanced, or if its node order has crossings.
     high_degree_fanin_exception: If a node has more than two non-constant fanins.)doc");
 }
 

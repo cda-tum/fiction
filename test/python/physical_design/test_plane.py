@@ -12,8 +12,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.physical_design import num_clks, plane, plane_params, plane_stats
-from mnt.pyfiction.synthesis import network_balancing, network_balancing_params, planarization
+from mnt.pyfiction.physical_design import num_clks, plane, plane_stats
+from mnt.pyfiction.synthesis import network_balancing, planarization
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
@@ -29,10 +29,7 @@ def _planar(network: technology_network) -> technology_network:
     Returns:
         The planar network whose node order is its rank order.
     """
-    params = network_balancing_params()
-    params.unify_outputs = True
-    params.buffer_constant_outputs = False
-    planar, _ = planarization(network_balancing(network, params))
+    planar, _ = planarization(network_balancing(network, unify_outputs=True, buffer_constant_outputs=False))
     return planar
 
 
@@ -45,9 +42,7 @@ def test_plane_default(mux21: technology_network) -> None:
 
 
 def test_plane_three_clock_phases(mux21: technology_network) -> None:
-    params = plane_params()
-    params.number_of_clock_phases = num_clks.THREE
-    layout = plane(_planar(mux21), params)
+    layout = plane(_planar(mux21), number_of_clock_phases=num_clks.THREE)
     assert layout.num_clocks() == 3
     assert layout.num_crossings() == 0
 
@@ -55,8 +50,8 @@ def test_plane_three_clock_phases(mux21: technology_network) -> None:
 def test_plane_with_stats(mux21: technology_network) -> None:
     stats = plane_stats()
     layout = plane(_planar(mux21), statistics=stats)
-    assert stats.x_size == layout.x() + 1
-    assert stats.y_size == layout.y() + 1
+    assert stats.x_size == layout.width()
+    assert stats.y_size == layout.height()
     assert stats.num_gates > 0
     assert stats.num_wires > 0
     assert stats.num_crossings == 0
@@ -64,11 +59,9 @@ def test_plane_with_stats(mux21: technology_network) -> None:
 
 
 def test_plane_reports_progress(mux21: technology_network) -> None:
-    params = plane_params()
     reports = []
-    params.on_progress = lambda task, done, total: reports.append((task, done, total))
     planar = _planar(mux21)
-    layout = plane(planar, params)
+    layout = plane(planar, on_progress=lambda task, done, total: reports.append((task, done, total)))
     assert equivalence_checking(planar, layout) == eq_type.STRONG
     placements = [(done, total) for task, done, total in reports if task == "placing levels"]
     assert placements[0][0] == 0
@@ -78,8 +71,5 @@ def test_plane_reports_progress(mux21: technology_network) -> None:
 
 def test_plane_rejects_crossings(mux21: technology_network) -> None:
     # the balanced network is ranked by node order, which still has crossings
-    params = network_balancing_params()
-    params.unify_outputs = True
-    params.buffer_constant_outputs = False
     with pytest.raises(ValueError, match="crossings"):
-        plane(network_balancing(mux21, params))
+        plane(network_balancing(mux21, unify_outputs=True, buffer_constant_outputs=False))
