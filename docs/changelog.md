@@ -756,9 +756,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Dependencies:
 
-  - The download and lock tooling now requires uv 0.13.4 or later to reject compromised eMudhra chains.
-    Rebuild Docker images with the patched uv; update host trust stores separately.
-  - Docs dependencies now require certifi 2026.10.19, which retains unaffected emSign roots
+  - The download and lock tooling now requires `uv` 0.13.4 or later to reject compromised eMudhra chains.
+    Rebuild Docker images with the patched `uv`; update host trust stores separately.
+  - Docs dependencies now require `certifi` 2026.10.19, which retains unaffected emSign roots
     removed by 2026.10.18 while rejecting the compromised chains.
 
 - Documentation:
