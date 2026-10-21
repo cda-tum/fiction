@@ -41,11 +41,13 @@ def calculate_energy_and_state_type_with_kinks_accepted(
     input_index: int,
 ) -> list[tuple[float, state_type]]:
     """
-    Labels every energy level of an energy distribution by whether the
-    physically valid charge distributions at that level encode the
-    expected output for the given input pattern (`ACCEPTED`) or not
-    (`REJECTED`). Kinks in the wires are tolerated: only the output BDL
-    pairs are inspected.
+    Labels each charge distribution matching an energy level by whether
+    its output BDL pairs encode the expected output for the given input
+    pattern (`ACCEPTED`) or not (`REJECTED`). Kinks in the wires are
+    tolerated.
+
+    Distributions at the same energy contribute separate entries to
+    preserve their occupation probabilities.
 
     Args:
         energy_distribution: The energy distribution of the charge distributions.
@@ -57,7 +59,9 @@ def calculate_energy_and_state_type_with_kinks_accepted(
                      simulated for.
 
     Returns:
-        The energies with their state types, ascending by energy.
+        One energy and state type per matching charge distribution,
+        ascending by energy. Empty if no distribution matches an energy
+        level within `utils::math::ERROR_MARGIN`.
     """
 
 def calculate_energy_and_state_type_with_kinks_rejected(
@@ -70,10 +74,11 @@ def calculate_energy_and_state_type_with_kinks_rejected(
     output_bdl_wires: Sequence[mnt.pyfiction.sidb.simulation.logic.bdl_wire],
 ) -> list[tuple[float, state_type]]:
     """
-    Like `calculate_energy_and_state_type_with_kinks_accepted`, but a
-    charge distribution with kinks in its wires is `REJECTED` as well:
-    every energy level is `ACCEPTED`, and additionally `REJECTED` if any
-    of its charge distributions fails the logic match with kinks rejected.
+    Labels each charge distribution matching an energy level as `ACCEPTED`
+    if it passes `logic::verify_logic_match` with kinks rejected, or
+    `REJECTED` otherwise. Each distribution contributes exactly one label
+    per matching energy level. Distributions at the same energy contribute
+    separate entries to preserve their occupation probabilities.
 
     Args:
         lyt: The layout the charge distributions belong to.
@@ -87,7 +92,9 @@ def calculate_energy_and_state_type_with_kinks_rejected(
         output_bdl_wires: The output BDL wires of `lyt`.
 
     Returns:
-        The energies with their state types.
+        One energy and state type per matching charge distribution,
+        ascending by energy. Empty if no distribution matches an energy
+        level within `utils::math::ERROR_MARGIN`.
 
     Raises:
         IndexError: if logic validation encounters an invalid lattice

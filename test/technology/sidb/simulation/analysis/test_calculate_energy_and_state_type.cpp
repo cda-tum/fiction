@@ -13,9 +13,9 @@
  * @brief Tests for `fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -26,6 +26,7 @@
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/analysis/occupation_probability_of_excited_states.hpp>
@@ -36,9 +37,11 @@
 #include <fiction/types.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <limits>
 #include <set>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
