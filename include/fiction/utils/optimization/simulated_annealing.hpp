@@ -159,7 +159,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
         temp = std::clamp(std::invoke(schedule, temp), final_temp, init_temp);
     }
 
-    return {best_state, best_cost};
+    return {std::move(best_state), best_cost};
 }
 /**
  * This variation of Simulated Annealing (SA) does not start from just one provided initial state, but generates a
@@ -261,8 +261,8 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     }
 
     // Find the minimum result
-    return *std::min_element(results.cbegin(), results.cend(),
-                             [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
+    return std::move(*std::min_element(results.begin(), results.end(),
+                                       [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; }));
 }
 
 }  // namespace fiction::utils::optimization

@@ -31,6 +31,7 @@
 #include <random>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::utils::optimization;
@@ -500,4 +501,28 @@ TEST_CASE("Annealing preserves small differences between large signed costs", "[
     const auto result =
         simulated_annealing(std::numeric_limits<int64_t>::max() - 1, 0.01, 0.0, 2, cost, schedule, next);
     CHECK(result.first == std::numeric_limits<int64_t>::max() - 1);
+}
+
+TEST_CASE("Annealing results own their state values", "[sim-anneal]")
+{
+    /** @brief Caller-owned initial state. */
+    const std::vector<int> initial(64, 7);
+    /** @brief Gives every state the same signed cost. */
+    const auto cost = [](const auto&) { return 0.0; };
+    /** @brief Preserves the temperature. */
+    const auto schedule = [](double temperature) { return temperature; };
+    /** @brief Preserves state values. */
+    const auto next = [](const auto& state) { return state; };
+    /** @brief Creates an independent initial state for a worker. */
+    const auto generator = [&initial] { return initial; };
+    /** @brief Owns the result after single-state storage leaves scope. */
+    auto single = simulated_annealing(initial, 1.0, 1.0, 0, cost, schedule, next);
+    /** @brief Owns the result after all worker storage leaves scope. */
+    auto multi = multi_simulated_annealing(1.0, 1.0, 0, 2, generator, cost, schedule, next);
+    CHECK(single.first == initial);
+    CHECK(multi.first == initial);
+    single.first.front() = 8;
+    multi.first.back()   = 9;
+    CHECK(initial.front() == 7);
+    CHECK(initial.back() == 7);
 }
