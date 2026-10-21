@@ -2086,7 +2086,7 @@ class graph_oriented_layout_design_impl
                     (node_count * node_count);
 
                 const double priority = remaining_nodes_to_place + layout_size + last_position;
-                next_positions.emplace_back(new_sequence, priority);
+                next_positions.emplace_back(std::move(new_sequence), priority);
             }
             else
             {
@@ -2097,11 +2097,11 @@ class graph_oriented_layout_design_impl
 
                 const double priority = remaining_nodes_to_place + cost;
 
-                next_positions.emplace_back(new_sequence, priority);
+                next_positions.emplace_back(std::move(new_sequence), priority);
             }
         }
 
-        return {next_positions, std::nullopt};
+        return {std::move(next_positions), std::nullopt};
     }
     /**
      * Computes possible expansions and their priorities for the current vertex in the search space graph.
@@ -2384,11 +2384,12 @@ class graph_oriented_layout_design_impl
             // Update costs and frontier
             for (const auto& [next, cost] : expansion.first)
             {
-                if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() || cost < ssg.cost_so_far[next])
+                /** @brief One lookup retains the best known cost for this placement sequence. */
+                const auto [entry, inserted] = ssg.cost_so_far.try_emplace(next, cost);
+                if (inserted || cost < entry->second)
                 {
-                    ssg.cost_so_far[next] = cost;
-                    double priority       = cost;
-                    ssg.frontier.put(next, priority);
+                    entry->second = cost;
+                    ssg.frontier.put(next, cost);
                 }
             }
         }
