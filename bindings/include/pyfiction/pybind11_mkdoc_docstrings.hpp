@@ -13261,7 +13261,9 @@ Args:
 
 Template Args:
     Lyt: Cartesian gate-level layout type.
-    Ntk: Ranked network type (see `mutable_rank_view`).
+    Ntk: Ranked network type with levels and rank positions (see
+         `mutable_rank_view`); the result of
+         `synthesis::planarization` is one.
 
 Returns:
     Crossing-free gate-level layout that implements `ntk`.
