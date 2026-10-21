@@ -166,7 +166,8 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * number of random initial states using a provided random state generator. SA as specified above is then run on all
  * these random initial states where the best result of all generated states is finally returned.
  *
- * Each initial state runs in its own thread. The provided callables must support concurrent invocation.
+ * Each initial state runs as an asynchronous task. All callables, including the random-state generator, must support
+ * concurrent invocation.
  * The function waits for all started workers before propagating a worker or launch exception.
  *
  * @note The State type must be default constructible.

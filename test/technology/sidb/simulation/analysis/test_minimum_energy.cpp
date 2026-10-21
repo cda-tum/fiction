@@ -30,6 +30,7 @@
 #include <forward_list>
 #include <iterator>
 #include <ranges>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -120,4 +121,16 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         CHECK_THAT(minimum_energy(forward_cds.cbegin(), forward_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(minimum_energy_distribution(forward_cds.cbegin(), forward_cds.cend())->same_charge_states(second));
     }
+}
+
+TEST_CASE("Minimum energy propagates forward-view failures", "[minimum-energy]")
+{
+    const layout                           lyt{};
+    const std::vector<charge_distribution> distributions{charge_distribution{lyt}, charge_distribution{lyt}};
+    /** @brief Reports a failure while reading a valid forward range. */
+    const auto failing =
+        distributions | std::views::transform([](const charge_distribution&) -> const charge_distribution&
+                                              { throw std::runtime_error("iterator failed"); });
+    CHECK_THROWS_AS(minimum_energy_distribution(failing.begin(), failing.end()), std::runtime_error);
+    CHECK_THROWS_AS(minimum_energy(failing.begin(), failing.end()), std::runtime_error);
 }

@@ -30,6 +30,8 @@ namespace fiction::sidb::simulation::analysis
  * Returns an iterator to the charge distribution of minimum energy contained in a range. If the range is empty,
  * `last` is returned.
  *
+ * Exceptions from iterator operations and energy comparisons propagate to the caller.
+ *
  * @tparam InputIt Forward iterator over charge distributions.
  * @param first Begin of the range to examine.
  * @param last End of the range to examine.
@@ -39,7 +41,7 @@ template <std::forward_iterator InputIt>
     requires requires(const std::remove_cvref_t<std::iter_reference_t<InputIt>>& distribution) {
         { distribution.energy() < distribution.energy() } -> std::convertible_to<bool>;
     }
-[[nodiscard]] InputIt minimum_energy_distribution(const InputIt first, const InputIt last) noexcept
+[[nodiscard]] InputIt minimum_energy_distribution(const InputIt first, const InputIt last)
 {
     return std::ranges::min_element(first, last,
                                     [](const auto& cd1, const auto& cd2) { return cd1.energy() < cd2.energy(); });
@@ -48,6 +50,8 @@ template <std::forward_iterator InputIt>
 /**
  * Computes the minimum energy of a range of charge distributions. If the range is empty, positive infinity indicates
  * that no valid energy value exists.
+ *
+ * Exceptions from iterator operations and energy comparisons propagate to the caller.
  *
  * @tparam InputIt Forward iterator over charge distributions.
  * @param first Begin of the range to examine.
@@ -60,7 +64,7 @@ template <std::forward_iterator InputIt>
         minimum_energy_distribution(first, first);
         { (*first).energy() } -> std::convertible_to<double>;
     }
-[[nodiscard]] double minimum_energy(const InputIt first, const InputIt last) noexcept
+[[nodiscard]] double minimum_energy(const InputIt first, const InputIt last)
 {
     if (first != last)
     {
