@@ -10555,6 +10555,155 @@ static const char *mkd_doc_fiction_physical_design_detail_placement_info_pi2node
 R"doc(Original placed primary-input identities, independent of routed output
 ports.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl =
+R"doc(Implementation of PLANE.
+
+Every level of the ranked network is placed on one anti-diagonal of a
+2DDWave-clocked layout, the ranks running from the top right to the
+bottom left. For each level the lookup tables give every node an
+orientation and a demand for routing lines, `compute_wiring` turns the
+demands into the east and south runs of the predecessors' wires, and
+the nodes are placed in rank order at the ends of those wires. The
+wire of a fanout node is shared by its consumers.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Ranked, planar network type.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_check_diagonal =
+R"doc(Checks that a placed node sits on the level's diagonal.
+
+Args:
+    n: Node just placed.
+    lvl: Level.
+    diagonal: Diagonal of the level, set by its first node.
+
+Raises:
+    std::logic_error: If `n` is on another diagonal.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_first_pos =
+R"doc(Tile of the first node of the last placed level, the top right end of
+the current diagonal.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_layout = R"doc(Layout under construction.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_node2pos = R"doc(Signal in the layout of every placed node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_ntk = R"doc(The network.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_name =
+R"doc(Name of a primary output, the network's name if it has one and
+`po<index>` otherwise.
+
+Args:
+    po_index: Index of the output.
+
+Returns:
+    Name.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_pi2node =
+R"doc(Primary input of the layout for every input node; sets the input order
+of the layout.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_input =
+R"doc(Places a primary input.
+
+The first input sits at the top right of the input diagonal; the
+others follow down the diagonal, with inputs in the lower half of the
+diagonal wired in from the left border and inputs in the upper half
+from the top border.
+
+Args:
+    n: Input node.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_level =
+R"doc(Places every node of a level in rank order.
+
+Args:
+    lvl: Level.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_single_fanin =
+R"doc(Places a single-fanin node east or south of the end of its
+predecessor's wire.
+
+The wire runs east and south by the lengths `compute_wiring` assigned.
+
+Args:
+    n: Node.
+    i: Rank position of `n`.
+    orient: Orientation of `n`.
+    wiring: Wire lengths of the level.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_t = R"doc(Tile of the last placed node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_two_fanin =
+R"doc(Places a two-input gate at the corner below its northern predecessor
+and right of its western one.
+
+Both wires first run east and south by the lengths `compute_wiring`
+assigned. The western predecessor's east run is at least as long as
+the east run of the next node in the rank, so that its south run stays
+clear of that node's wire.
+
+Args:
+    n: Node.
+    i: Rank position of `n`.
+    wiring: Wire lengths of the level.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_plane_impl =
+R"doc(Creates the implementation.
+
+Args:
+    src: Network.
+    p: Parameters.
+    st: Statistics.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_route_outputs =
+R"doc(Routes every primary output to the right border.
+
+The nodes of the output level sit on one diagonal, so each node owns
+the row of its tile. A node with two outputs takes the row below as
+well, which pushes the rows of every following node down by one until
+a gap between two nodes absorbs the shift; a pushed node first runs
+south to its row, then east. Rows are assigned in rank order and the
+outputs are created in output order.
+
+Returns:
+    `1` plus the number of rows the shifts add below the last
+    diagonal, `0` if none were needed.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_run =
+R"doc(Places and routes the network.
+
+Returns:
+    The layout.
+
+Raises:
+    std::logic_error: If the placement breaks the diagonal invariant
+                      or a wire runs into an occupied tile.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl =
 R"doc(Relocates retained objects and reroutes their explicit logical input
 endpoints.)doc";
@@ -13068,6 +13217,84 @@ Returns:
     Output port of the newly placed gate in `lyt`.
 
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_plane =
+R"doc(Places and routes a planar, balanced, fanout-substituted, ranked logic
+network as a 2DDWave-clocked gate-level layout without wire crossings
+(PLANE, Planar Layout from Network Embedding).
+
+The approach was originally proposed in \"A Fully Planar Approach to
+Field-coupled Nanocomputing: Scalable Placement and Routing Without
+Wire Crossings\" by B. Hien, M. Walter, S. Hofmann, and R. Wille in
+IEEE NANO 2025.
+
+Every level of the network is placed on one anti-diagonal of the
+layout in rank order, so the planar embedding of the network is
+preserved. Lookup tables decide for every node whether it sits east or
+south of its predecessor's wire and how many routing lines the level
+needs; the wires are then run east and south so that all nodes of a
+level share one diagonal. Primary inputs sit on the left and top
+borders, primary outputs on the right border.
+
+The input must be planar in its rank order (see
+`synthesis::planarization`) with at most two non-constant fanins and
+at most two fanouts per node, primary outputs included.
+
+Args:
+    ntk: Network to place and route.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Lyt: Cartesian gate-level layout type.
+    Ntk: Ranked network type (see `mutable_rank_view`).
+
+Returns:
+    Crossing-free gate-level layout that implements `ntk`.
+
+Raises:
+    networks::high_degree_fanin_exception: If a node has more than two
+                                           non-constant fanins.
+    std::invalid_argument: If `ntk` has no primary inputs, if a node
+                           drives more than two fanouts, if a gate has
+                           a constant fanin next to a single non-
+                           constant one, if `ntk` is not balanced, or
+                           if the rank order of `ntk` has crossings.
+    std::logic_error: If placement or routing cannot keep the layout
+                      planar; such an input is a defect.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_params = R"doc(Parameters for the planar placement and routing.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_params_number_of_clock_phases =
+R"doc(Number of clock phases of the 2DDWave clocking scheme.
+
+Three and four are supported.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats = R"doc(Statistics of the planar placement and routing.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_num_crossings = R"doc(Number of crossings; zero for every layout this algorithm returns.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_num_gates = R"doc(Number of gates.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_num_wires = R"doc(Number of wires.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_report =
+R"doc(Writes the statistics to a stream.
+
+Args:
+    out: Stream to write to.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_time_total = R"doc(Runtime of placement and routing.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_x_size = R"doc(Layout width.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_y_size = R"doc(Layout height.)doc";
 
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization =
 R"doc(A post-layout optimization algorithm as originally proposed in \"Post-
