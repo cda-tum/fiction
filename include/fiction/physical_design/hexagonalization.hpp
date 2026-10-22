@@ -18,13 +18,11 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
@@ -647,7 +645,8 @@ class hexagonalization_impl
                     }
 
                     if (auto new_path = physical_design::path_finding::a_star<path>(
-                            hex_layout, {obj.source, target}, dist(), cost(), params_astar, search_obstructions);
+                            hex_layout, {.source = obj.source, .target = target}, dist(), cost(), params_astar,
+                            search_obstructions);
                         !new_path.empty())
                     {
                         // for planar extension, if target is in the crossing layer, update path
@@ -771,7 +770,8 @@ class hexagonalization_impl
                     }
 
                     if (auto new_path = physical_design::path_finding::a_star<path>(
-                            hex_layout, {source, obj.target}, dist(), cost(), params_astar, search_obstructions);
+                            hex_layout, {.source = source, .target = obj.target}, dist(), cost(), params_astar,
+                            search_obstructions);
                         !new_path.empty())
                     {
                         // for planar extension, if source or target are in the crossing layer, update path

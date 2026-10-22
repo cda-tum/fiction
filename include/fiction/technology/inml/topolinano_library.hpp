@@ -21,7 +21,6 @@
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/inml/layout.hpp"
@@ -334,9 +333,10 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @param lyt The layout to check.
      * @param n Node whose fanins are to be considered.
      * @return `true` iff `n` has an AND, OR, or MAJ fanin node.
+     * @throws std::invalid_argument If `n` does not identify a live object in `lyt`.
      */
     [[nodiscard]] static bool has_and_or_maj_fanin(const layouts::shifted_cartesian_gate_layout&           lyt,
-                                                   const layouts::shifted_cartesian_gate_layout::object_id n) noexcept
+                                                   const layouts::shifted_cartesian_gate_layout::object_id n)
     {
         auto pre_and_or_maj = false;
 
@@ -374,9 +374,10 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @param lyt The layout to check.
      * @param n Node whose fanouts are to be considered.
      * @return `true` iff `n` has a fanout node as fanout.
+     * @throws std::invalid_argument If `n` does not identify a live object in `lyt`.
      */
     [[nodiscard]] static bool has_fanout_fanout(const layouts::shifted_cartesian_gate_layout&           lyt,
-                                                const layouts::shifted_cartesian_gate_layout::object_id n) noexcept
+                                                const layouts::shifted_cartesian_gate_layout::object_id n)
     {
         auto fanout_fanout = false;
 

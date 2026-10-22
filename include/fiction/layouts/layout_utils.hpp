@@ -35,6 +35,7 @@
 #include <optional>
 #include <random>
 #include <stdexcept>
+#include <utility>
 
 namespace fiction::layouts
 {
@@ -123,7 +124,8 @@ relative_to_absolute_cell_position(const gate_layout<Geometry>&                 
                                    const fiction::layouts::layout_base::coordinate& t,
                                    const layout_base::coordinate&                   relative_c)
 {
-    if (relative_c.x < 0 || relative_c.x >= GateSizeX || relative_c.y < 0 || relative_c.y >= GateSizeY)
+    if (relative_c.x < 0 || std::cmp_greater_equal(relative_c.x, GateSizeX) || relative_c.y < 0 ||
+        std::cmp_greater_equal(relative_c.y, GateSizeY))
     {
         throw std::invalid_argument("The relative cell must be within the bounds of a single tile");
     }
