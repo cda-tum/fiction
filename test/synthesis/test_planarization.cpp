@@ -202,12 +202,12 @@ TEST_CASE("Kept crossings run through the crossing gates for both crossing gate 
 
     for (const bool xor_gates : {false, true})
     {
-        planarization_params ps{
+        // a prohibitive duplication cost makes the hybrid strategy keep every crossing it may keep
+        const planarization_params ps{
             .duplication = {.strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
                             .crossing_gates = {.xor_gates = xor_gates},
-                            .criterion = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE}};
-        // a prohibitive duplication cost makes the hybrid strategy keep every crossing it may keep
-        ps.duplication.duplication_cost.node_weight = 1e6;
+                            .criterion      = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE,
+                            .duplication_cost = {.node_weight = 1e6}}};
 
         planarization_stats st{};
         const auto          result = planarization(ranked, ps, &st);

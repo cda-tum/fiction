@@ -404,7 +404,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
 
     const simulation_parameters params{2, -0.28};
 
-    quicksim_params qs_params{.sim_params = params};
+    const quicksim_params qs_params{.sim_params = params};
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.28);
 
@@ -473,8 +473,8 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
 
         SECTION("timeout with 0 ms")
         {
-            qs_params.timeout                       = 0;
-            const auto simulation_results_timeout_0 = quicksim(lyt, qs_params);
+            const auto simulation_results_timeout_0 =
+                quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100, .timeout = 0});
 
             CHECK(!simulation_results_timeout_0.has_value());
         }
