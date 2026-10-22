@@ -23,7 +23,6 @@
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/utils/stl/stl_utils.hpp"
 
 #include <phmap.h>
 
@@ -33,6 +32,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <queue>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
@@ -107,8 +107,11 @@ class a_star_impl
             {
                 return reconstruct_path();
             }
-            // don't examine the current coordinate again
-            closed_list.insert(current);
+            // Superseded queue entries must not expand a processed coordinate again.
+            if (!closed_list.insert(current).second)
+            {
+                continue;
+            }
 
             // expand from current coordinate
             expand(current);
@@ -170,27 +173,14 @@ class a_star_impl
         {
             return this->f > other.f;
         }
-        /**
-         * Equality operator that only compares the stored coordinates. This allows for a convenient lookup in the
-         * priority queue.
-         *
-         * @param other Other coordinate_f to compare with.
-         * @return `true` iff this coord value is equal to the other's.
-         */
-        bool operator==(const coordinate_f& other) const
-        {
-            return this->coord == other.coord;
-        }
     };
 
     /**
-     * Priority queue for coordinates sorted by their f-values. Uses std::greater to get the smallest f-value on top...
-     * C++ is weird at times...
+     * Priority queue for coordinates sorted by increasing f-values.
      */
-    using a_star_priority_queue =
-        fiction::utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<>>;
+    using a_star_priority_queue = std::priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<>>;
     /**
-     * Open list that contains all coordinates to process next sorted by their f-value.
+     * Queued improvements sorted by f-value. Superseded entries are skipped after their coordinate is processed.
      */
     a_star_priority_queue open_list{};
     /**
@@ -244,9 +234,9 @@ class a_star_impl
             // compute the g-value of cz. In this implementation, the costs of each 'step' are given by a function
             const g_f_type tentative_g = g(current) + cost(current, successor);
 
-            // f-value does not matter because the comparator compares only the coordinates
-            const auto it = open_list.find({successor, 0});
-            if (it != open_list.end() && no_improvement(successor, tentative_g))
+            /** @brief Best cost found for this successor, if any. */
+            const auto known = g_values.find(successor);
+            if (known != g_values.cend() && tentative_g >= known->second)
             {
                 return;  // skip the coordinate if it does not offer improvement
             }
@@ -258,19 +248,7 @@ class a_star_impl
             // compute new f-value
             const auto f = tentative_g + static_cast<g_f_type>(distance(successor, objective.target));
 
-            // if successor is contained in the open list (frontier)
-            if (it != open_list.end())
-            {
-                // update its f-value
-                it->f = f;
-                // A smaller f-value can move only toward the root of the heap.
-                std::ranges::push_heap(open_list.begin(), it + 1, std::greater<>{});
-            }
-            else
-            {
-                // add successor to the open list
-                open_list.push({successor, f});
-            }
+            open_list.push({successor, f});
         };
 
         if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
@@ -318,18 +296,6 @@ class a_star_impl
     void set_g(const fiction::layouts::layout_base::coordinate& c, const g_f_type g_val)
     {
         g_values.insert_or_assign(c, g_val);
-    }
-    /**
-     * Checks if the given g-value is greater or equal than the stored g-value of the given coordinate. If that is the
-     * case, the new g-value does not improve the path.
-     *
-     * @param c Coordinate to whose g-value is to be checked.
-     * @param g_val g-value to compare to c's.
-     * @return `true` iff the given g-value does not mean an improvement for the given coordinate.
-     */
-    bool no_improvement(const fiction::layouts::layout_base::coordinate& c, const g_f_type g_val)
-    {
-        return g_val >= g(c);
     }
     /**
      * Reconstruct the final path from the origin map that was created during the path finding algorithm.
