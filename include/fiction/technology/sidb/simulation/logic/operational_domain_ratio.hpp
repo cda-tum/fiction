@@ -17,9 +17,9 @@
 
 #pragma once
 
+#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
-#include "fiction/types.hpp"
 
 #include <vector>
 

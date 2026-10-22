@@ -18,9 +18,9 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
 
+#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp>
-#include <fiction/types.hpp>
 
 #include <cmath>
 #include <optional>

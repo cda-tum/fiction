@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
@@ -25,7 +26,6 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/logic/verify_logic_match.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <kitty/bit_operations.hpp>

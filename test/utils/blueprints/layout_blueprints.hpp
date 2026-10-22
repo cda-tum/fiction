@@ -23,11 +23,11 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
-#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 

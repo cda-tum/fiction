@@ -20,11 +20,11 @@
 #include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/simulation_parameters.hpp"
 
+#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/types.hpp>
 
 #include <sstream>
 #include <vector>

@@ -18,10 +18,10 @@
 
 #pragma once
 
+#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 #include "fiction/utils/math/math_utils.hpp"

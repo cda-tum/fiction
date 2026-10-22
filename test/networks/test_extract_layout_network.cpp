@@ -23,7 +23,7 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
-#include <fiction/types.hpp>
+#include <fiction/synthesis/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/print.hpp>

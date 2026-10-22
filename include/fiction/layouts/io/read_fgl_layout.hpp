@@ -25,7 +25,7 @@
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/types.hpp"
+#include "fiction/synthesis/types.hpp"
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>

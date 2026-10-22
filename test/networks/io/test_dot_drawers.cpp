@@ -25,7 +25,7 @@
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
 #include <fiction/networks/io/dot_drawers.hpp>
-#include <fiction/types.hpp>
+#include <fiction/synthesis/types.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/networks/aig.hpp>

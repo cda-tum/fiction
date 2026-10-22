@@ -16,6 +16,7 @@
  */
 
 #include "fiction/synthesis/truth_tables.hpp"
+#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
@@ -23,7 +24,6 @@
 #include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/types.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fmt/format.h>

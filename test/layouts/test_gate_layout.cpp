@@ -31,7 +31,7 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
-#include <fiction/types.hpp>
+#include <fiction/synthesis/types.hpp>
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>

@@ -17,8 +17,8 @@
 
 #pragma once
 
+#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
 
 #include <kitty/hash.hpp>

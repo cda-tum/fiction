@@ -19,22 +19,12 @@
 #pragma once
 
 #include "fiction/networks/technology_network.hpp"
+#include "fiction/synthesis/types.hpp"
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
-
-namespace fiction::synthesis
-{
-
-/**
- * @brief Dynamic truth table for Boolean functions.
- */
-using truth_table = kitty::dynamic_truth_table;
-
-}  // namespace fiction::synthesis
 
 namespace fiction::networks
 {

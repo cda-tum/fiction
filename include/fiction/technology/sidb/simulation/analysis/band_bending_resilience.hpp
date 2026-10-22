@@ -18,10 +18,10 @@
 
 #pragma once
 
+#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 
 #include <algorithm>

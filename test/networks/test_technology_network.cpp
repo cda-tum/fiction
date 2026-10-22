@@ -20,8 +20,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/synthesis/types.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/operations.hpp>

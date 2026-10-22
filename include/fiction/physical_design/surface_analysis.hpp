@@ -20,10 +20,10 @@
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
-#include "fiction/types.hpp"
 
 #include <kitty/hash.hpp>
 

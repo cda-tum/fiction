@@ -18,9 +18,9 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
 
+#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/layout.hpp>
-#include <fiction/types.hpp>
 
 #include <sstream>
 #include <vector>

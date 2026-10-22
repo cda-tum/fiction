@@ -19,10 +19,10 @@
 #include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/types.hpp>
 
 #include <stdexcept>
 #include <vector>

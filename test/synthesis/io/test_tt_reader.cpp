@@ -17,7 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/synthesis/io/tt_reader.hpp>
-#include <fiction/types.hpp>
+#include <fiction/synthesis/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/operations.hpp>

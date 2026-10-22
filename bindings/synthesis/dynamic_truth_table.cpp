@@ -14,7 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <fiction/types.hpp>
+#include <fiction/synthesis/types.hpp>
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>

@@ -17,13 +17,13 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
-#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
-#include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
-#include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
+#include <fiction/synthesis/truth_tables.hpp>                       // truth tables helper functions
+#include <fiction/synthesis/types.hpp>                              // pre-defined types suitable for the FCN domain
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>           // reader for SiDB layouts
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>  // SiDB simulation parameters
+#include <fiction/technology/sidb/simulation/engine.hpp>            // SiDB simulation engines
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
-#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                    // string formatting
 #include <mockturtle/utils/stopwatch.hpp>  // stopwatch for measuring time

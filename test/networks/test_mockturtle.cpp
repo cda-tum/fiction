@@ -25,7 +25,7 @@
 #include <fiction/networks/mockturtle_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
-#include <fiction/types.hpp>
+#include <fiction/synthesis/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <lorina/common.hpp>

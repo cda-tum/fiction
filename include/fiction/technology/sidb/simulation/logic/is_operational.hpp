@@ -21,6 +21,7 @@
 #pragma once
 
 #include "fiction/synthesis/truth_tables.hpp"
+#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
@@ -39,7 +40,6 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 

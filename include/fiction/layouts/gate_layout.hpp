@@ -26,7 +26,7 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/types.hpp"
+#include "fiction/synthesis/types.hpp"
 
 #include <kitty/constructors.hpp>
 #include <mockturtle/utils/truth_table_cache.hpp>

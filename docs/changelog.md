@@ -50,6 +50,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - `fiction/synthesis/types.hpp` now provides `synthesis::truth_table` without network headers;
+    `fiction/types.hpp` still exports it.
   - `networks::initialize_copy_network_with_virtual_pis` copies the constants and inputs of a network, virtual
     inputs included
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
@@ -326,7 +328,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
-  - Experiments use canonical network and truth-table types without changing their computations.
+  - Experiments use canonical network and truth-table types. Truth-table-only experiments include
+    `fiction/synthesis/types.hpp`; their computations remain unchanged.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
   - Physical-design experiments convert mapped networks before placement with unchanged computations.
