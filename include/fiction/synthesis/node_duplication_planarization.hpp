@@ -133,6 +133,9 @@ struct node_duplication_planarization_params
     };
     /**
      * @brief Planarization strategy.
+     *
+     * This is the first member, so that `planarization_params` can select the hybrid strategy with a plain default
+     * initializer.
      */
     planarization_strategy strategy = planarization_strategy::DUPLICATION;
     /**

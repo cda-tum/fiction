@@ -261,6 +261,7 @@ struct graph_oriented_layout_design_params
 
     return "";
 }
+// NOLINTBEGIN(bugprone-exception-escape): Preserve the public noexcept contract; stream exceptions terminate.
 /**
  * @brief Streams an effort mode to an output stream.
  *
@@ -268,11 +269,11 @@ struct graph_oriented_layout_design_params
  * @param mode Effort mode to stream.
  * @return Output stream.
  */
-// NOLINTNEXTLINE(bugprone-exception-escape): Preserve the public noexcept contract; stream exceptions terminate.
 inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_design_params::effort_mode mode) noexcept
 {
     return os << to_string(mode);
 }
+// NOLINTEND(bugprone-exception-escape)
 /**
  * Converts a cost objective to a string representation.
  *
@@ -307,6 +308,7 @@ inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_de
 
     return "";
 }
+// NOLINTBEGIN(bugprone-exception-escape): Preserve the public noexcept contract; stream exceptions terminate.
 /**
  * @brief Streams a cost objective to an output stream.
  *
@@ -314,12 +316,12 @@ inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_de
  * @param cost Cost objective to stream.
  * @return Output stream.
  */
-// NOLINTNEXTLINE(bugprone-exception-escape): Preserve the public noexcept contract; stream exceptions terminate.
 inline std::ostream& operator<<(std::ostream&                                             os,
                                 const graph_oriented_layout_design_params::cost_objective cost) noexcept
 {
     return os << to_string(cost);
 }
+// NOLINTEND(bugprone-exception-escape)
 /**
  * This struct stores statistics about the graph-oriented layout design process.
  */
