@@ -87,10 +87,7 @@ class fgl_parsing_error(RuntimeError): ...
 
 @overload
 def read_fgl_layout(
-    filename: str,
-    layout_name: str = "",
-    *,
-    layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout] = ...,
+    filename: str, layout_name: str = "", *, layout_type: type[mnt.pyfiction.layouts.cartesian_gate_layout] = ...
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout:
     """
     Reads a gate-level layout from an FGL file.
