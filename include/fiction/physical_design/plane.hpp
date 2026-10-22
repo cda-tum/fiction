@@ -22,7 +22,9 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
+#include "fiction/networks/technology_network.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/graph/mincross.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -1138,21 +1140,42 @@ template <typename Lyt>
     return from;
 }
 /**
+ * @brief Named technology network over the storage of `ntk`, the form that `place` reads gate functions from.
+ *
+ * The view shares the nodes of `ntk`, so node identifiers stay valid, and keeps the names of `ntk` if it carries any.
+ *
+ * @tparam Ntk Network type derived from `technology_network`.
+ * @param ntk Network.
+ * @return Named view over the storage of `ntk`.
+ */
+template <typename Ntk>
+    requires std::derived_from<Ntk, networks::technology_network>
+[[nodiscard]] tec_nt placement_view(const Ntk& ntk)
+{
+    if constexpr (std::derived_from<Ntk, tec_nt>)
+    {
+        return static_cast<const tec_nt&>(ntk);
+    }
+    else
+    {
+        return tec_nt{static_cast<const networks::technology_network&>(ntk)};
+    }
+}
+/**
  * @brief Places a single-fanin node on tile `t` and wires its predecessor to it.
  *
  * @tparam Lyt Gate-level layout type.
- * @tparam Ntk Network type.
  * @param lyt Layout.
  * @param t Tile east or south of `pre_t`.
- * @param ntk Network.
+ * @param ntk Named technology network over the storage of the ranked network, see `placement_view`.
  * @param n Node.
  * @param pre_t Tile that holds the predecessor's signal.
  * @return Signal of the placed node.
  * @throws std::logic_error If `t` is occupied or neither east nor south of `pre_t`.
  */
-template <typename Lyt, typename Ntk>
+template <typename Lyt>
 [[nodiscard]] typename Lyt::object_id connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t,
-                                                               const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                                                               const tec_nt& ntk, const tec_nt::node& n,
                                                                const layouts::layout_base::coordinate& pre_t)
 {
     if (!lyt.is_empty_tile(t))
@@ -1168,10 +1191,9 @@ template <typename Lyt, typename Ntk>
  * western one from the left.
  *
  * @tparam Lyt Gate-level layout type.
- * @tparam Ntk Network type.
  * @param lyt Layout.
  * @param t Tile.
- * @param ntk Network.
+ * @param ntk Named technology network over the storage of the ranked network, see `placement_view`.
  * @param n Node.
  * @param north_t Tile that holds the northern predecessor's signal, in the column of `t`.
  * @param west_t Tile that holds the western predecessor's signal, in the row of `t`.
@@ -1179,10 +1201,10 @@ template <typename Lyt, typename Ntk>
  * @return Signal of the placed node.
  * @throws std::logic_error If `t` is occupied, or if a predecessor is not where its name says.
  */
-template <typename Lyt, typename Ntk>
+template <typename Lyt>
 [[nodiscard]] typename Lyt::object_id
-connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t, const Ntk& ntk,
-                         const mockturtle::node<Ntk>& n, const layouts::layout_base::coordinate& north_t,
+connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n,
+                         const layouts::layout_base::coordinate& north_t,
                          const layouts::layout_base::coordinate& west_t, const std::optional<bool>& c = std::nullopt)
 {
     if (!lyt.is_empty_tile(t))
@@ -1240,6 +1262,7 @@ class plane_impl
      */
     plane_impl(const Ntk& src, const plane_params& p, plane_stats& st) :
             ntk{src},
+            placement_ntk{placement_view(ntk)},
             ps{p},
             pst{st},
             node2pos{ntk},
@@ -1345,7 +1368,7 @@ class plane_impl
     {
         if (ntk.rank_position(n) == 0)
         {
-            pi2node[n]  = place(layout, first_pos, ntk, n);
+            pi2node[n]  = place(layout, first_pos, placement_ntk, n);
             node2pos[n] = pi2node[n];
             place_t     = first_pos;
 
@@ -1356,7 +1379,7 @@ class plane_impl
 
         if (place_t.x == 0)
         {
-            pi2node[n]  = place(layout, place_t, ntk, n);
+            pi2node[n]  = place(layout, place_t, placement_ntk, n);
             node2pos[n] = pi2node[n];
 
             return;
@@ -1366,7 +1389,7 @@ class plane_impl
                                                             layouts::layout_base::coordinate{0, place_t.y} :
                                                             layouts::layout_base::coordinate{place_t.x, 0};
 
-        pi2node[n] = place(layout, border, ntk, n);
+        pi2node[n] = place(layout, border, placement_ntk, n);
 
         if (ntk.fanout_size(n) == 0)
         {
@@ -1396,7 +1419,7 @@ class plane_impl
         place_t = is_east(orient) ? layouts::layout_base::coordinate{pre_t.x + 1, pre_t.y} :
                                     layouts::layout_base::coordinate{pre_t.x, pre_t.y + 1};
 
-        node2pos[n] = connect_and_place_planar(layout, place_t, ntk, n, pre_t);
+        node2pos[n] = connect_and_place_planar(layout, place_t, placement_ntk, n, pre_t);
 
         if (ntk.rank_position(n) == 0)
         {
@@ -1434,7 +1457,7 @@ class plane_impl
 
         place_t = {pre1_t.x, pre2_t.y};
 
-        node2pos[n] = connect_and_place_planar(layout, place_t, ntk, n, pre1_t, pre2_t, fc.constant_fanin);
+        node2pos[n] = connect_and_place_planar(layout, place_t, placement_ntk, n, pre1_t, pre2_t, fc.constant_fanin);
 
         if (ntk.rank_position(n) == 0)
         {
@@ -1576,6 +1599,10 @@ class plane_impl
      */
     const fanout_ntk ntk;
     /**
+     * @brief Named technology network over the storage of `ntk`, the form that `place` reads gate functions from.
+     */
+    const tec_nt placement_ntk;
+    /**
      * @brief Parameters.
      */
     const plane_params& ps;
@@ -1624,7 +1651,7 @@ class plane_impl
  * and at most two fanouts per node, primary outputs included.
  *
  * @tparam Lyt Cartesian gate-level layout type.
- * @tparam Ntk Ranked network type with levels and rank positions (see `mutable_rank_view`); the result of
+ * @tparam Ntk Ranked technology network type with levels and rank positions (see `mutable_rank_view`); the result of
  * `synthesis::planarization` is one.
  * @param ntk Network to place and route.
  * @param ps Parameters.
@@ -1638,9 +1665,10 @@ class plane_impl
  */
 template <typename Lyt, typename Ntk>
     requires std::derived_from<Lyt, layouts::cartesian_layout> &&
-             std::same_as<typename Lyt::object_id, layouts::layout_object_id> && mockturtle::is_network_type_v<Ntk> &&
-             mockturtle::has_depth_v<Ntk> && mockturtle::has_rank_position_v<Ntk> &&
-             mockturtle::has_at_rank_position_v<Ntk> && mockturtle::has_foreach_node_in_rank_v<Ntk>
+             std::same_as<typename Lyt::object_id, layouts::layout_object_id> &&
+             std::derived_from<Ntk, networks::technology_network> && mockturtle::has_depth_v<Ntk> &&
+             mockturtle::has_rank_position_v<Ntk> && mockturtle::has_at_rank_position_v<Ntk> &&
+             mockturtle::has_foreach_node_in_rank_v<Ntk>
 [[nodiscard]] Lyt plane(const Ntk& ntk, const plane_params& ps = {}, plane_stats* pst = nullptr)
 {
     if (ntk.num_pis() == 0)
