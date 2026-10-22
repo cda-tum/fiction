@@ -10857,6 +10857,15 @@ static const char *mkd_doc_fiction_physical_design_detail_placement_rule_directi
 
 static const char *mkd_doc_fiction_physical_design_detail_placement_rule_new_lines = R"doc(New routing lines the node needs.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_placement_rule_placement_rule =
+R"doc(Creates a rule.
+
+Args:
+    d: Orientation of the node.
+    n: New routing lines the node needs.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_placement_view =
 R"doc(Named technology network over the storage of `ntk`, the form that
 `place` reads gate functions from.
