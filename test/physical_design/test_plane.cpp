@@ -246,6 +246,34 @@ TEST_CASE("Progress is reported", "[plane]")
     CHECK(rec.final_count("placing levels") == planar.depth() + 2);
 }
 
+TEST_CASE("Asymmetric gates keep their fanin order", "[plane]")
+{
+    // a less-than gate in both fanin orders: the second fanin ends up north of the first in one of them
+    const auto check = [](const bool swap_fanins)
+    {
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        tec.create_po(swap_fanins ? tec.create_lt(x2, x1) : tec.create_lt(x1, x2));
+
+        const auto ranked = rank(tec);
+        const auto layout = plane<cartesian_gate_layout>(ranked);
+
+        CHECK(layout.num_crossings() == 0);
+        check_eq(ranked, extract_layout_network(layout));
+    };
+
+    SECTION("first fanin north")
+    {
+        check(false);
+    }
+    SECTION("second fanin north")
+    {
+        check(true);
+    }
+}
+
 TEST_CASE("Invalid inputs are rejected", "[plane]")
 {
     SECTION("a rank order with crossings")

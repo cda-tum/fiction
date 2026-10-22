@@ -1194,25 +1194,27 @@ template <typename Lyt>
     return place(lyt, t, ntk, n, wire_straight(lyt, pre_t, t));
 }
 /**
- * @brief Places a two-input gate on tile `t` and wires its predecessors to it, the northern one from above and the
- * western one from the left.
+ * @brief Places a two-input gate on tile `t` and wires its predecessors to it, one from above and one from the left.
+ *
+ * The signals reach the gate in fanin order, so asymmetric functions keep their meaning whichever predecessor sits
+ * north.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt Layout.
  * @param t Tile.
  * @param ntk Named technology network over the storage of the ranked network, see `placement_view`.
  * @param n Node.
- * @param north_t Tile that holds the northern predecessor's signal, in the column of `t`.
- * @param west_t Tile that holds the western predecessor's signal, in the row of `t`.
+ * @param first_t Tile that holds the first fanin's signal, in the column or the row of `t`.
+ * @param second_t Tile that holds the second fanin's signal, in the other one of column and row of `t`.
  * @param c Value of a constant third fanin, if any.
  * @return Signal of the placed node.
- * @throws std::logic_error If `t` is occupied, or if a predecessor is not where its name says.
+ * @throws std::logic_error If `t` is occupied, or if a predecessor is neither north nor west of `t`.
  */
 template <typename Lyt>
 [[nodiscard]] typename Lyt::object_id
 connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n,
-                         const layouts::layout_base::coordinate& north_t,
-                         const layouts::layout_base::coordinate& west_t, const std::optional<bool>& c = std::nullopt)
+                         const layouts::layout_base::coordinate& first_t,
+                         const layouts::layout_base::coordinate& second_t, const std::optional<bool>& c = std::nullopt)
 {
     if (!lyt.is_empty_tile(t))
     {
@@ -1220,7 +1222,7 @@ connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t, co
                                            static_cast<uint64_t>(t.y), n));
     }
 
-    return place(lyt, t, ntk, n, wire_straight(lyt, north_t, t), wire_straight(lyt, west_t, t), c);
+    return place(lyt, t, ntk, n, wire_straight(lyt, first_t, t), wire_straight(lyt, second_t, t), c);
 }
 
 /**
@@ -1448,23 +1450,24 @@ class plane_impl
     {
         const auto fc = networks::fanins(ntk, n);
 
-        auto pre1_t = layout.get_tile(node2pos[fc.fanin_nodes[0]]);
-        auto pre2_t = layout.get_tile(node2pos[fc.fanin_nodes[1]]);
+        const auto first_t  = layout.get_tile(node2pos[fc.fanin_nodes[0]]);
+        const auto second_t = layout.get_tile(node2pos[fc.fanin_nodes[1]]);
 
-        // pre1 is the northern predecessor
-        if (pre2_t.y < pre1_t.y)
-        {
-            std::swap(pre1_t, pre2_t);
-        }
+        // the northern predecessor sets the column of the gate, the western one its row
+        const bool first_is_north = first_t.y <= second_t.y;
 
         const auto next_x = i + 1 < wiring.x.size() ? wiring.x[i + 1] : uint64_t{0};
 
-        pre1_t = wire_east_then_south(layout, pre1_t, wiring.x[i], wiring.y[i]);
-        pre2_t = wire_east_then_south(layout, pre2_t, std::max(wiring.x[i], next_x), wiring.y[i]);
+        const auto north_t =
+            wire_east_then_south(layout, first_is_north ? first_t : second_t, wiring.x[i], wiring.y[i]);
+        const auto west_t = wire_east_then_south(layout, first_is_north ? second_t : first_t,
+                                                 std::max(wiring.x[i], next_x), wiring.y[i]);
 
-        place_t = {pre1_t.x, pre2_t.y};
+        place_t = {north_t.x, west_t.y};
 
-        node2pos[n] = connect_and_place_planar(layout, place_t, placement_ntk, n, pre1_t, pre2_t, fc.constant_fanin);
+        // the signals reach the gate in fanin order
+        node2pos[n] = connect_and_place_planar(layout, place_t, placement_ntk, n, first_is_north ? north_t : west_t,
+                                               first_is_north ? west_t : north_t, fc.constant_fanin);
 
         if (ntk.rank_position(n) == 0)
         {
