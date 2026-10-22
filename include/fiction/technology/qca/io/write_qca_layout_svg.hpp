@@ -27,6 +27,7 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -37,6 +38,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace fiction::qca::io
 {
@@ -438,30 +440,35 @@ class write_qca_layout_svg_impl
     }
 
     /**
-     * Generates an SVG string representing the cell-based clocked cell layout and appends it to the output stream.
+     * Generates an SVG string from in-bounds occupied cells in layer, row, and column painting order.
      */
     void generate_cell_based_svg()
     {
         std::stringstream cell_descriptions{};
 
-        utils::progress_reporter progress{ps.on_progress, "rendering cell positions", lyt.area() * lyt.layers()};
-        lyt.foreach_cell_position(
-            [this, &cell_descriptions, &progress](const auto& c)
+        std::vector<qca::layout::cell> cells{};
+        cells.reserve(lyt.num_cells());
+        lyt.foreach_cell(
+            [&](const auto& c)
             {
-                if (!lyt.is_empty_cell(c))
+                if (lyt.is_within_bounds(c))
                 {
-                    // Determines cell type and color
-                    const auto desc_col = generate_description_color(c);
-
-                    cell_descriptions << fmt::format(
-                        fmt::runtime(desc_col.first), desc_col.second,
-                        fcn::io::detail::svg::STARTING_OFFSET_TILE_X + fcn::io::detail::svg::STARTING_OFFSET_CELL_X +
-                            (c.x * svg::CELL_DISTANCE),
-                        fcn::io::detail::svg::STARTING_OFFSET_TILE_Y + fcn::io::detail::svg::STARTING_OFFSET_CELL_Y +
-                            (c.y * svg::CELL_DISTANCE));
+                    cells.push_back(c);
                 }
-                progress.advance();
             });
+        std::sort(cells.begin(), cells.end());
+        utils::progress_reporter progress{ps.on_progress, "rendering cells", cells.size()};
+        for (const auto& c : cells)
+        {
+            const auto desc_col = generate_description_color(c);
+            cell_descriptions << fmt::format(
+                fmt::runtime(desc_col.first), desc_col.second,
+                fcn::io::detail::svg::STARTING_OFFSET_TILE_X + fcn::io::detail::svg::STARTING_OFFSET_CELL_X +
+                    (c.x * svg::CELL_DISTANCE),
+                fcn::io::detail::svg::STARTING_OFFSET_TILE_Y + fcn::io::detail::svg::STARTING_OFFSET_CELL_Y +
+                    (c.y * svg::CELL_DISTANCE));
+            progress.advance();
+        }
 
         const double viewbox_x =
             (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.width()) * svg::CELL_DISTANCE);

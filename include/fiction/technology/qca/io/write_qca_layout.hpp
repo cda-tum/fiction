@@ -23,6 +23,7 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -217,18 +218,25 @@ class write_qca_layout_impl
             }
         };
         validate_name(lyt.get_layout_name());
+        std::vector<qca::layout::cell> cells{};
+        cells.reserve(lyt.num_cells());
         lyt.foreach_cell(
             [&](const auto& c)
             {
-                if (lyt.is_within_bounds(c) && !qca::is_constant(lyt.get_cell_type(c)))
+                if (lyt.is_within_bounds(c))
                 {
-                    validate_name(lyt.get_cell_name(c));
+                    if (!qca::is_constant(lyt.get_cell_type(c)))
+                    {
+                        validate_name(lyt.get_cell_name(c));
+                    }
+                    cells.push_back(c);
                 }
             });
+        std::sort(cells.begin(), cells.end());
 
         write_header();
 
-        write_cell_layers();
+        write_cell_layers(cells);
 
         // close design block
         os << qcad::CLOSE_DESIGN << std::flush;
@@ -253,11 +261,14 @@ class write_qca_layout_impl
                           FICTION_VERSION, FICTION_REPO);
     }
 
-    void write_cell_layers()
+    /**
+     * @brief Writes occupied cells in layer, row, and column order, retaining empty layers and inter-layer vias.
+     * @param cells In-bounds cells sorted by layer, row, and column.
+     */
+    void write_cell_layers(const std::vector<qca::layout::cell>& cells)
     {
-        utils::progress_reporter progress{ps.on_progress, "writing rows",
-                                          static_cast<std::size_t>(lyt.height()) *
-                                              static_cast<std::size_t>(lyt.layers())};
+        utils::progress_reporter progress{ps.on_progress, "writing cells", cells.size()};
+        auto                     cell = cells.cbegin();
         // for each layer
         for (uint32_t z = 0; z < lyt.layers(); ++z)
         {
@@ -271,20 +282,9 @@ class write_qca_layout_impl
             os << qcad::PSZ_DESCRIPTION << ((z == 0) ? "Ground Layer" : ("Crossing Layer " + std::to_string(z)))
                << '\n';
 
-            // for each row
-            for (uint32_t y = 0; y < lyt.height(); ++y)
+            while (cell != cells.cend() && cell->z == static_cast<decltype(cell->z)>(z))
             {
-                // for each cell
-                for (uint32_t x = 0; x < lyt.width(); ++x)
-                {
-                    const qca::layout::cell c{x, y, z};
-
-                    // skip empty cells
-                    if (!lyt.is_empty_cell(c))
-                    {
-                        write_cell(c, ps.create_inter_layer_via_cells);
-                    }
-                }
+                write_cell(*cell++, ps.create_inter_layer_via_cells);
                 progress.advance();
             }
 
