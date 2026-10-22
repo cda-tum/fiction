@@ -19,11 +19,14 @@
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <bit>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <istream>
 #include <iterator>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -31,8 +34,9 @@ namespace fiction::synthesis::io
 {
 
 /**
- * Simple reader to parse truth tables from files. The files must be organized as follows: Each line consists of a
- * truth table in hexadecimal form plus its corresponding Boolean expression. The two are separated by a space.
+ * Reads whitespace-separated pairs of a hexadecimal truth table and its corresponding Boolean expression.
+ * Truth tables use a `0x` or `0X` prefix and a power-of-two number of hexadecimal digits. A single digit represents
+ * two variables. Expressions must be single tokens; the reader does not parse them.
  *
  * This format is used by, e.g., Alan Mishchenko for his DSD functions: https://people.eecs.berkeley.edu/~alanmi/temp5/
  */
@@ -63,22 +67,39 @@ class tt_reader
         }
     }
     /**
-     * Returns the next truth table parsed from the file or std::nullopt if no further truth tables are available.
+     * Returns the next truth table, or `std::nullopt` when all records have been read.
      *
      * @return Next truth table from the file.
+     * @throws std::invalid_argument If a record is incomplete, has an invalid prefix, digit count, or character, or
+     * requires 38 or more variables.
      */
     std::optional<TT> next()
     {
-        if (pos >= elements.size() - 1)
+        if (pos >= elements.size())
         {
             return std::nullopt;
         }
 
-        // remove the 0x prefix
-        auto table = elements[pos].substr(2u);
-        // determine number of truth table variables
-        auto num_vars = static_cast<uint32_t>(std::log2(table.size() << 2ul));
-        // create truth table
+        if (elements.size() - pos < 2u || !(elements[pos].starts_with("0x") || elements[pos].starts_with("0X")))
+        {
+            throw std::invalid_argument("truth-table records require a prefixed hexadecimal table and an expression");
+        }
+
+        /** @brief Hexadecimal digits without the prefix. */
+        const auto table = elements[pos].substr(2u);
+        if (!std::has_single_bit(table.size()) ||
+            table.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos)
+        {
+            throw std::invalid_argument("truth tables require a power-of-two number of hexadecimal digits");
+        }
+        /** @brief Number of variables represented by the hexadecimal digits. */
+        const auto num_vars = static_cast<uint32_t>(std::bit_width(table.size())) + 1u;
+        // kitty's dynamic truth table uses a 32-bit shift to allocate blocks above six variables.
+        if (num_vars >= 38u)
+        {
+            throw std::invalid_argument("truth tables require fewer than 38 variables");
+        }
+        /** @brief Truth table represented by the current record. */
         TT tt{num_vars};
         kitty::create_from_hex_string(tt, table);
 

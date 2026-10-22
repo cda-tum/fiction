@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/synthesis/io/tt_reader.hpp>
 
@@ -22,6 +23,7 @@
 #include <kitty/operations.hpp>
 
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;
@@ -53,4 +55,50 @@ TEST_CASE("Read truth tables", "[tt-reader]")
     check(6u, "0990900906606006");
     check(6u, "0000966996690000");
     check(6u, "6006066090090990");
+    CHECK_FALSE(reader.next().has_value());
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Empty truth-table input", "[tt-reader]")
+{
+    std::stringstream stream{GENERATE("", " \t\r\n")};
+    tt_reader<>       reader{stream};
+
+    CHECK_FALSE(reader.next().has_value());
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Invalid truth-table records", "[tt-reader]")
+{
+    std::stringstream stream{GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr",
+                                      "0x: expr", "0x@ expr", "0x` expr", "0x\xff expr", "0xabc expr")};
+    tt_reader<>       reader{stream};
+
+    CHECK_THROWS_AS(reader.next(), std::invalid_argument);
+}
+
+TEST_CASE("Truth-table digit counts and hexadecimal case", "[tt-reader]")
+{
+    const auto hex =
+        GENERATE(std::string{"F"}, std::string{"e8"}, std::string{"AbCd"}, std::string{"0123456789ABCDEF"});
+    const auto        prefix = GENERATE("0x", "0X");
+    std::stringstream stream{prefix + hex + " expression"};
+    tt_reader<>       reader{stream};
+
+    const auto result = reader.next();
+    REQUIRE(result.has_value());
+    CHECK(result->num_bits() == hex.size() * 4u);
+    kitty::dynamic_truth_table expected{result->num_vars()};
+    kitty::create_from_hex_string(expected, hex);
+    CHECK(kitty::equal(*result, expected));
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Incomplete record after a truth table", "[tt-reader]")
+{
+    std::stringstream stream{"0x8 (a*b)\n0x6"};
+    tt_reader<>       reader{stream};
+
+    REQUIRE(reader.next().has_value());
+    CHECK_THROWS_AS(reader.next(), std::invalid_argument);
 }
