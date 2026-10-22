@@ -8456,6 +8456,32 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation = R"doc(Directions a node may take because of the fanout that drives it.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation_EAST = R"doc(The node is the first consumer of a fanout and goes east.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation_FREE = R"doc(The node is not driven by a fanout.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation_SOUTH = R"doc(The node is the second consumer of a fanout and goes south.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation_of =
+R"doc(Direction a single-fanin node may take.
+
+A consumer of a fanout node is fixed by its position among the
+consumers; every other node is free.
+
+Args:
+    ntk: Network.
+    n: Single-fanin node.
+
+Template Args:
+    Ntk: Ranked network type with a fanout interface.
+
+Returns:
+    Allowed orientation.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl = R"doc(Maps gate-level tiles to cell-level gate implementations.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl =
@@ -8549,6 +8575,32 @@ if it provides one, and recovers the layout name.
 
 Returns:
     The produced layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_buffer_connection =
+R"doc(Whether a single-fanin node drives the rightmost fanin of a two-input
+gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_buffer_connection_CONNECTED = R"doc(The node drives the rightmost fanin of a two-input gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_buffer_connection_UNCONNECTED =
+R"doc(The node drives a single-fanin node, the leftmost fanin of a gate, or
+an output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_buffer_connection_of =
+R"doc(Whether a single-fanin node drives the rightmost fanin of a two-input
+gate.
+
+Args:
+    ntk: Network.
+    n: Single-fanin node.
+
+Template Args:
+    Ntk: Ranked network type with a fanout interface.
+
+Returns:
+    Connection type.
 
 )doc";
 
@@ -8651,6 +8703,26 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_compute_level_variables =
+R"doc(Computes the orientation and the new routing lines of every node of a
+level from the lookup tables.
+
+Args:
+    ntk: Network.
+    lyt: Layout.
+    node2pos: Positions of the placed nodes.
+    lvl: Level.
+
+Template Args:
+    Ntk: Ranked network type with a fanout interface.
+    Lyt: Layout type.
+
+Returns:
+    Orientations and new lines, aligned with the rank order of the
+    level.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_compute_num_inputs_left_to_middle_pi =
 R"doc(This function iterates over all primary inputs in the given Cartesian
 layout and counts those whose tile is at the western border. Such
@@ -8723,6 +8795,34 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_compute_wiring =
+R"doc(Computes the wire lengths of every node of a level.
+
+Two-input gates split the level into clusters. Inside a cluster a node
+runs east by the new lines of the nodes right of it and south by the
+new lines of the nodes left of it, so the cluster sits on one
+diagonal. A gate advances the diagonal by the rows between its
+predecessors; the surplus of a cluster's lines over that advance is
+propagated to the clusters right of it as south runs and to the
+clusters left of it as east runs. Finally all nodes are lifted onto
+the largest diagonal.
+
+Args:
+    ntk: Network.
+    lyt: Layout.
+    node2pos: Positions of the placed nodes.
+    new_lines: New lines per node.
+    lvl: Level.
+
+Template Args:
+    Ntk: Ranked network type.
+    Lyt: Layout type.
+
+Returns:
+    East and south runs per node.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_connect_and_place =
 R"doc(Routes ordered inputs to a placed two-input gate.
 
@@ -8736,6 +8836,58 @@ R"doc(Routes one input to a placed unary gate.
 
 Template Args:
     Lyt: Output layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_planar =
+R"doc(Places a single-fanin node on tile `t` and wires its predecessor to
+it.
+
+Args:
+    lyt: Layout.
+    t: Tile east or south of `pre_t`.
+    ntk: Named technology network over the storage of the ranked
+         network, see `placement_view`.
+    n: Node.
+    pre_t: Tile that holds the predecessor's signal.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    Signal of the placed node.
+
+Raises:
+    std::logic_error: If `t` is occupied or neither east nor south of
+                      `pre_t`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_planar_2 =
+R"doc(Places a two-input gate on tile `t` and wires its predecessors to it,
+the northern one from above and the western one from the left.
+
+Args:
+    lyt: Layout.
+    t: Tile.
+    ntk: Named technology network over the storage of the ranked
+         network, see `placement_view`.
+    n: Node.
+    north_t: Tile that holds the northern predecessor's signal, in the
+             column of `t`.
+    west_t: Tile that holds the western predecessor's signal, in the
+            row of `t`.
+    c: Value of a constant third fanin, if any.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    Signal of the placed node.
+
+Raises:
+    std::logic_error: If `t` is occupied, or if a predecessor is not
+                      where its name says.
 
 )doc";
 
@@ -9746,6 +9898,36 @@ static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_rout
 
 static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_to_clear = R"doc(Intermediate wire coordinates to remove.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection =
+R"doc(Whether each of the two consumers of a fanout node is a single-fanin
+node or a two-input gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_BOTH_GATES = R"doc(Both consumers are two-input gates.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_BOTH_SINGLE = R"doc(Both consumers have a single fanin.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_FIRST_SINGLE = R"doc(The first consumer has a single fanin, the second is a two-input gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_SECOND_SINGLE = R"doc(The second consumer has a single fanin, the first is a two-input gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_of =
+R"doc(How the two consumers of a fanout node connect.
+
+Args:
+    ntk: Network.
+    n: Fanout node.
+
+Template Args:
+    Ntk: Ranked network type with a fanout interface.
+
+Returns:
+    Connection type; `BOTH_SINGLE` for a fanout that drives an output.
+
+Raises:
+    std::logic_error: If `n` does not drive exactly two nodes.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_fit_occupied_geometry =
 R"doc(Fits zero-origin geometry to occupied objects. Empty layouts receive
 empty geometry.
@@ -10418,9 +10600,72 @@ Hexagonal layout.
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_index_of =
+R"doc(Converts an enumerator to the index it stands for in the lookup
+tables.
+
+Args:
+    e: Enumerator.
+
+Template Args:
+    E: Enumeration type.
+
+Returns:
+    Index.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_is_east =
+R"doc(Whether an orientation places a node east of its predecessor's wire
+end.
+
+Args:
+    o: Orientation.
+
+Returns:
+    `true` iff the node goes east.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_is_east_south_colored = R"doc(Checks that fanouts use distinct direction colors.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_is_eastern_po_orientation_available = R"doc(Checks whether the eastern side can host a primary output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_variables = R"doc(Orientation and routing-line demand of every node of a level.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_variables_new_lines = R"doc(New routing lines per node of the level.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_variables_orientations = R"doc(Orientation per node of the level.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_wiring =
+R"doc(Wire lengths of every node of a level.
+
+They state how far the predecessor's signal runs east and south before
+the node is placed.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_wiring_x = R"doc(East run per node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_wiring_y = R"doc(South run per node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_lift_to_common_diagonal =
+R"doc(Lifts every node of a level onto the diagonal with the largest demand.
+
+The demand of a node is `x + y`, that of a two-input gate additionally
+the rows between its predecessors, which the gate advances on its own.
+Nodes left of the node with the largest demand get the difference as
+south run, nodes right of it as east run.
+
+Args:
+    wiring: Wire lengths; adjusted.
+    gates: Rank positions of the two-input gates.
+    gate_lines: Rows between the predecessors of every gate, in the
+                order of `gates`.
+
+Raises:
+    std::logic_error: If a node demands more than the largest
+                      diagonal.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_nested_vector_hash =
 R"doc(This struct defines a hash function for a nested vector of layout
@@ -10448,6 +10693,21 @@ static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_DEST
 static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_num_fanins =
+R"doc(Number of non-constant fanins of a node.
+
+Args:
+    ntk: Network.
+    n: Node.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    Non-constant fanins.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_object_at =
 R"doc(Returns the object placed at a coordinate. @param lyt Layout. @param t
@@ -10482,6 +10742,22 @@ Args:
     lyt: Layout to optimize.
 
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation =
+R"doc(Direction in which a node is placed relative to the end of its
+predecessor's wire.
+
+The lookup tables of the placement model distinguish two variants per
+direction, which the placement treats alike; the variant only steers
+the entries chosen for the following node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation_EAST = R"doc(East of the wire end.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation_EAST_SECOND = R"doc(East of the wire end, second variant.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation_SOUTH = R"doc(South of the wire end.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation_SOUTH_SECOND = R"doc(South of the wire end, second variant.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl =
 R"doc(Implementation of the orthogonal physical design algorithm.
@@ -10572,6 +10848,32 @@ static const char *mkd_doc_fiction_physical_design_detail_placement_info_node2po
 static const char *mkd_doc_fiction_physical_design_detail_placement_info_pi2node =
 R"doc(Original placed primary-input identities, independent of routed output
 ports.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_placement_rule =
+R"doc(Orientation and routing-line demand of a node, one entry of a lookup
+table.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_placement_rule_direction = R"doc(Orientation of the node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_placement_rule_new_lines = R"doc(New routing lines the node needs.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_placement_view =
+R"doc(Named technology network over the storage of `ntk`, the form that
+`place` reads gate functions from.
+
+The view shares the nodes of `ntk`, so node identifiers stay valid,
+and keeps the names of `ntk` if it carries any.
+
+Args:
+    ntk: Network.
+
+Template Args:
+    Ntk: Network type derived from `technology_network`.
+
+Returns:
+    Named view over the storage of `ntk`.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl =
 R"doc(Implementation of PLANE.
@@ -10853,6 +11155,30 @@ static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimizati
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_wiring_reduction_stats = R"doc(Wiring reduction stats.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_predecessor_gap =
+R"doc(Room for placing a node, measured in free rows between its leftmost
+predecessor and that predecessor's left neighbour.
+
+The count is clamped to `MAX_GAP`, the largest gap the lookup tables
+distinguish.
+
+Args:
+    ntk: Network.
+    lyt: Layout.
+    node2pos: Positions of the placed nodes.
+    lvl: Level of `n`.
+    n: Node.
+
+Template Args:
+    Ntk: Ranked network type.
+    Lyt: Layout type.
+
+Returns:
+    Gap; zero on the input level and for a predecessor without left
+    neighbour.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_priority_queue =
 R"doc(A priority queue class for managing elements with associated
 priorities. The elements are stored in a priority queue, with the
@@ -10888,7 +11214,60 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_ranked_fanins =
+R"doc(Non-constant fanins of a node sorted by rank position.
+
+Args:
+    ntk: Network.
+    n: Node.
+
+Template Args:
+    Ntk: Ranked network type.
+
+Returns:
+    Fanins of `n`, leftmost first.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_ranked_fanouts =
+R"doc(Fanouts of a node sorted by rank position.
+
+Args:
+    ntk: Network.
+    n: Node.
+
+Template Args:
+    Ntk: Ranked network type with a fanout interface.
+
+Returns:
+    Fanouts of `n`, leftmost first.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_recursively_paint_edges = R"doc(Paints adjacent edges with alternating direction colors.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_reuse_or_create_buf =
+R"doc(Continues signal `a` on tile `t` with a buffer.
+
+A tile that already holds a wire driven by `a` is shared, which turns
+the tile of `a` into a layout fanout; any other occupant is a routing
+conflict.
+
+Args:
+    lyt: Layout.
+    a: Signal to continue.
+    t: Tile.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    Signal of the buffer on `t`.
+
+Raises:
+    std::logic_error: If `t` holds anything but a wire driven by `a`.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_routing_connection_obstructed =
 R"doc(Combines layout connections with explicit search constraints.
@@ -10935,6 +11314,21 @@ Template Args:
 Returns:
     The coordinate to enter, or `std::nullopt` if the step is
     obstructed.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_rows_between =
+R"doc(Number of free rows between a tile and another tile south of it.
+
+Args:
+    north: Upper tile.
+    south: Lower tile.
+
+Returns:
+    `south.y - north.y - 1`.
+
+Raises:
+    std::logic_error: If `south` is not south of `north`.
 
 )doc";
 
@@ -11038,6 +11432,24 @@ from the parameters before use.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_progress_description = R"doc(Most recent candidate description for the worker progress row.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_start_orientation =
+R"doc(Orientation of the first node of a level.
+
+The first node goes south in the second variant if the first fanout
+structure or gate of the level is a two-input gate, east otherwise.
+
+Args:
+    ntk: Network.
+    lvl: Level.
+
+Template Args:
+    Ntk: Ranked network type with a fanout interface.
+
+Returns:
+    Orientation of the first node.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
 
@@ -11111,6 +11523,41 @@ static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view = 
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_update_topo = R"doc(Orders dependencies and includes every declared primary input.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_two_input_indices =
+R"doc(Rank positions of the two-input gates of a level.
+
+Args:
+    ntk: Network.
+    lvl: Level.
+
+Template Args:
+    Ntk: Ranked network type.
+
+Returns:
+    Positions, ascending.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_two_input_new_lines =
+R"doc(Rows between the two predecessors of every two-input gate of a level.
+
+Those rows are the diagonal advance each gate brings on its own.
+
+Args:
+    ntk: Network.
+    lyt: Layout.
+    node2pos: Positions of the placed nodes.
+    lvl: Level.
+
+Template Args:
+    Ntk: Ranked network type.
+    Lyt: Layout type.
+
+Returns:
+    Rows per gate, in the order of `two_input_indices`.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
 wiring_reduction_layout.
@@ -11137,7 +11584,49 @@ Template Args:
 
 static const char *mkd_doc_fiction_physical_design_detail_wire_east = R"doc()doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_wire_east_then_south =
+R"doc(Runs the signal on `from` east and then south by the given lengths and
+returns the tile it ends on.
+
+Args:
+    lyt: Layout.
+    from: Tile that holds the signal.
+    east: Length of the east run.
+    south: Length of the south run that follows.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    Tile the signal ends on.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_wire_south = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_wire_straight =
+R"doc(Wires the signal on `src` in a straight line towards `dest`, east or
+south, up to the tile before `dest`.
+
+Shared wire tiles are reused, see `reuse_or_create_buf`.
+
+Args:
+    lyt: Layout.
+    src: Tile that holds the signal.
+    dest: Tile east or south of `src`.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    Signal on the tile before `dest`; the signal of `src` if the tiles
+    are adjacent.
+
+Raises:
+    std::logic_error: If `src` is empty or `dest` is neither east nor
+                      south of `src`.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl =
 R"doc(Searches horizontal and vertical wire cuts and edits the caller's
@@ -13305,11 +13794,10 @@ Returns:
 Raises:
     networks::high_degree_fanin_exception: If a node has more than two
                                            non-constant fanins.
-    std::invalid_argument: If `ntk` has no primary inputs, if a node
-                           drives more than two fanouts, if a gate has
-                           a constant fanin next to a single non-
-                           constant one, if `ntk` is not balanced, or
-                           if the rank order of `ntk` has crossings.
+    ValueError: If `ntk` has no primary inputs, if a node drives more
+                than two fanouts, if a gate has a constant fanin next
+                to a single non-constant one, if `ntk` is not
+                balanced, or if the rank order of `ntk` has crossings.
     std::logic_error: If placement or routing cannot keep the layout
                       planar; such an input is a defect.
 
