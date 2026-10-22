@@ -100,6 +100,8 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
         /** @brief Parsed defects retain their row and column. */
         const auto lyt = read_surface_defects(stream);
         CHECK(lyt.num_defects() == 4);
+        CHECK(lyt.get_defect(site_at_row(0, 0)).type == defect_type::DB);
+        CHECK(lyt.get_defect(site_at_row(0, 1)).type == defect_type::DIHYDRIDE_PAIR);
         CHECK(lyt.get_defect(site_at_row(1, 0)).type == defect_type::SI_VACANCY);
         CHECK(lyt.get_defect(site_at_row(1, 1)).type == defect_type::SINGLE_DIHYDRIDE);
     }
@@ -133,6 +135,7 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
     {
         /** @brief Binary output preserves the separator. */
         std::ofstream output{filename, std::ios::binary};
+        REQUIRE(output.is_open());
         output << surface;
     }
     CHECK(read_surface_defects(filename.string()) == expected);

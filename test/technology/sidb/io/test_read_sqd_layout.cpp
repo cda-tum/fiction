@@ -1211,7 +1211,8 @@ TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
 {
     /** @brief Minimal valid SQD document. */
     const std::string xml{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design/></siqad>"};
-    for (const auto& malformed : {xml + '\0' + "<invalid>", xml + "<other/>", "<other/>" + xml, xml + xml})
+    for (const auto& malformed : {xml + '\0' + "<invalid>", xml + "<other/>", "<other/>" + xml, xml + xml, xml + "text",
+                                  xml.substr(0, xml.size() - 1)})
     {
         /** @brief Stream whose valid SQD portion must not hide other input. */
         std::istringstream stream{malformed};
@@ -1229,6 +1230,7 @@ TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
         {
             /** @brief Binary output preserves control bytes. */
             std::ofstream output{filename, std::ios::binary};
+            REQUIRE(output.is_open());
             output << xml << control << "<invalid>";
         }
         CHECK_THROWS_AS(read_sqd_layout(filename.string()), sqd_parsing_error);

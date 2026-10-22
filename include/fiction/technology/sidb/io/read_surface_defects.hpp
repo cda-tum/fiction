@@ -203,6 +203,7 @@ class surface_defects_reader
 /**
  * Reads a defect matrix from a stream into a defects-only `sidb::layout` on the H-Si(100)-2x1 lattice. Each `[...]`
  * row lists one defect index per column; entry `x` of row `y` becomes the defect at column `x` of single-SiDB row `y`.
+ * Open file streams in binary mode to preserve every input byte.
  *
  * @param is The input stream to read from.
  * @param name The name to give to the layout.

@@ -507,6 +507,7 @@ class sqd_reader
  * Explicit geometry must contain finite vectors and two basis sites. Without geometry, the reader accepts the two
  * predefined reconstruction names and defaults to H-Si(100)-2x1 when the name is absent.
  * The input must have a single `siqad` root and contain no NUL bytes.
+ * Open file streams in binary mode to preserve every input byte.
  *
  * @param is The input stream to read from.
  * @param name The name to give to the layout.
