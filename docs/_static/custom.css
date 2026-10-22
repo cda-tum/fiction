@@ -2,6 +2,21 @@
   gap: 0.75rem;
 }
 
+.acknowledgements {
+  margin-top: 1rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--color-background-border);
+  font-size: var(--font-size--small);
+  color: var(--color-foreground-secondary);
+}
+
+.acknowledgements-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
 body[data-theme="dark"]
   .highlight
   :is(.s, .s1, .s2, .sa, .sb, .sc, .sd, .se, .sh, .si, .sr, .ss, .sx, .dl) {

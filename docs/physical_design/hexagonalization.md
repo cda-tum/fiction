@@ -28,6 +28,10 @@ $$
 
 **Header:** `fiction/physical_design/hexagonalization.hpp`
 
+```{doxygenclass} fiction::physical_design::hexagonalization_io_pin_routing_error
+:members:
+```
+
 ```{doxygenstruct} fiction::physical_design::hexagonalization_params
 :members:
 ```
@@ -46,8 +50,14 @@ $$
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.physical_design.hexagonalization_io_pin_extension_mode
+   :members:
+   :undoc-members:
+
 .. autoclass:: mnt.pyfiction.physical_design.hexagonalization_stats
    :members:
+
+.. autoexception:: mnt.pyfiction.physical_design.hexagonalization_io_pin_routing_error
 
 .. autofunction:: mnt.pyfiction.physical_design.hexagonalization
 ```

@@ -49,22 +49,27 @@ struct result
 {
     /**
      * @brief Name of the algorithm used to determine the charge distributions.
+     * Defaults to an empty string.
      */
     std::string algorithm_name{};
     /**
      * @brief Total simulation runtime in seconds.
+     * Defaults to zero seconds.
      */
     std::chrono::duration<double> simulation_runtime{};
     /**
      * @brief The simulated layout.
+     * Defaults to an empty Si(100)-2x1 layout.
      */
     layout lyt{};
     /**
      * @brief Charge distributions determined by the algorithm.
+     * Empty by default.
      */
     std::vector<charge_distribution> charge_distributions{};
     /**
      * @brief Physical parameters used in the simulation.
+     * Uses the default physical simulation parameters.
      */
     model::simulation_parameters sim_params{};
     /**

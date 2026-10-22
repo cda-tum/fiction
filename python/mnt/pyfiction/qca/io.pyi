@@ -24,8 +24,13 @@ def write_qca_layout(
     create_inter_layer_via_cells controls via cells; on_progress reports writing progress.
 
     Args:
+        layout: Layout to write.
+        filename: Output file path.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         create_inter_layer_via_cells: Create via cells in between each layer.
+
+    Raises:
+        RuntimeError: The file cannot be created, written, closed, or replaced.
     """
 
 def write_qca_layout_svg(
@@ -40,6 +45,12 @@ def write_qca_layout_svg(
     simple selects a compact drawing; on_progress reports writing progress.
 
     Args:
+        layout: Layout to write.
+        filename: Output file path.
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         simple: Use a compact SVG drawing.
+
+    Raises:
+        RuntimeError: The file cannot be created, written, closed, or replaced, or the layout contains
+            an unsupported cell type.
     """

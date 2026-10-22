@@ -10,17 +10,15 @@ function revealTabTarget() {
   if (!target) return;
 
   let panel = target.closest(".sd-tab-content");
-  let changed = false;
   while (panel) {
     const label = panel.previousElementSibling;
     const input = document.getElementById(label.htmlFor);
     if (!input.checked) {
       label.click();
-      changed = true;
     }
     panel = panel.parentElement.closest(".sd-tab-content");
   }
-  if (changed) target.scrollIntoView();
+  target.scrollIntoView();
 }
 
 window.addEventListener("load", revealTabTarget);

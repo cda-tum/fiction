@@ -101,12 +101,18 @@ void register_domain_writer(nb::module_& m, const char* file_name, const char* s
         R"doc(Return the domain CSV with a header and one row per selected sample.
 Columns hold the sweep-parameter values and operational-status tag; temperature domains add critical temperature.
 The keyword options select status tags and which samples to write.
-Raises ValueError unless the domain has one to three sweep dimensions.
 
 Args:
+    opdom: Domain samples to write.
     operational_tag: The tag used to represent the operational value of a parameter set.
     non_operational_tag: The tag used to represent the non-operational value of a parameter set.
     writing_mode: Write all samples or only operational samples.
+
+Returns:
+    CSV text for the domain.
+
+Raises:
+    ValueError: The domain does not have one to three sweep dimensions.
 )doc");
 }
 
@@ -132,24 +138,34 @@ void register_write_operational_domain(nb::module_& m)
         R"doc(Write the operational domain to the supplied filename as CSV.
 CSV columns hold the sweep-parameter values followed by the operational-status tag.
 The keyword options select status tags and which samples to write.
-Raises ValueError unless the domain has one to three sweep dimensions.
 
 Args:
+    opdom: Domain samples to write.
+    filename: Output CSV file path.
     operational_tag: The tag used to represent the operational value of a parameter set.
     non_operational_tag: The tag used to represent the non-operational value of a parameter set.
     writing_mode: Write all samples or only operational samples.
+
+Raises:
+    ValueError: The domain does not have one to three sweep dimensions.
+    RuntimeError: The file cannot be created, written, closed, or replaced.
 )doc");
     detail::register_domain_writer<fiction::sidb::simulation::logic::critical_temperature_domain>(
         m, "write_critical_temperature_domain", "write_critical_temperature_domain_to_string",
         R"doc(Write critical-temperature samples to a CSV file.
 CSV columns hold sweep-parameter values, the operational-status tag, and critical temperature.
 The keyword options select status tags and which samples to write.
-Raises ValueError unless the domain has one to three sweep dimensions.
 
 Args:
+    opdom: Domain samples to write.
+    filename: Output CSV file path.
     operational_tag: The tag used to represent the operational value of a parameter set.
     non_operational_tag: The tag used to represent the non-operational value of a parameter set.
     writing_mode: Write all samples or only operational samples.
+
+Raises:
+    ValueError: The domain does not have one to three sweep dimensions.
+    RuntimeError: The file cannot be created, written, closed, or replaced.
 )doc");
 }
 

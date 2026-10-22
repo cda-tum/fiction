@@ -1,6 +1,6 @@
 (graph_oriented_layout_design)=
 
-# Graph-oriented Layout Design
+# Graph-Oriented Layout Design
 
 Generates FCN gate-level layouts from logic network specifications by spanning a search space graph where each placement
 event can be represented as a search space vertex characterized by a partial layout at that instance. Edges between a
@@ -26,6 +26,18 @@ always optimal.
 :members:
 ```
 
+```{doxygenfunction} fiction::physical_design::to_string(const graph_oriented_layout_design_params::effort_mode mode) noexcept
+```
+
+```{doxygenfunction} fiction::physical_design::operator<<(std::ostream& os, const graph_oriented_layout_design_params::effort_mode mode) noexcept
+```
+
+```{doxygenfunction} fiction::physical_design::to_string(const graph_oriented_layout_design_params::cost_objective cost) noexcept
+```
+
+```{doxygenfunction} fiction::physical_design::operator<<(std::ostream& os, const graph_oriented_layout_design_params::cost_objective cost) noexcept
+```
+
 ```{doxygenfunction} fiction::physical_design::graph_oriented_layout_design
 
 ```
@@ -36,6 +48,14 @@ always optimal.
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.physical_design.gold_cost_objective
+   :members:
+   :undoc-members:
+
+.. autoclass:: mnt.pyfiction.physical_design.gold_effort_mode
+   :members:
+   :undoc-members:
+
 .. autoclass:: mnt.pyfiction.physical_design.graph_oriented_layout_design_stats
    :members:
 

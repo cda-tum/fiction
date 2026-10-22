@@ -68,10 +68,12 @@ struct equivalence_checking_stats
      * Stores the equivalence type.
      */
     eq_type eq = eq_type::NO;
-    /**
-     * Throughput values at which weak equivalence manifests.
-     */
-    int64_t tp_spec = 1ll, tp_impl = 1ll, tp_diff = 0ll;
+    /** @brief Specification throughput denominator. Defaults to `1`. */
+    int64_t tp_spec = 1ll;
+    /** @brief Implementation throughput denominator. Defaults to `1`. */
+    int64_t tp_impl = 1ll;
+    /** @brief Absolute difference between the throughput denominators. Defaults to `0`. */
+    int64_t tp_diff = 0ll;
     /**
      * Stores a possible counter example.
      */
@@ -80,10 +82,10 @@ struct equivalence_checking_stats
      * Stores the runtime.
      */
     mockturtle::stopwatch<>::duration runtime{0};
-    /**
-     * Stores DRVs.
-     */
-    fiction::verification::gate_level_drv_stats spec_drv_stats{}, impl_drv_stats{};
+    /** @brief Design rule violations in the specification layout. */
+    fiction::verification::gate_level_drv_stats spec_drv_stats{};
+    /** @brief Design rule violations in the implementation layout. */
+    fiction::verification::gate_level_drv_stats impl_drv_stats{};
 };
 
 namespace detail
@@ -308,17 +310,12 @@ class equivalence_checking_impl
  * @return The equivalence type of `spec` and `impl`.
  */
 template <typename Spec, typename Impl>
+    requires(mockturtle::is_network_type_v<Spec> ||
+             requires { requires std::same_as<typename Spec::object_id, layouts::layout_object_id>; }) &&
+            (mockturtle::is_network_type_v<Impl> ||
+             requires { requires std::same_as<typename Impl::object_id, layouts::layout_object_id>; })
 eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
 {
-    static_assert(
-        mockturtle::is_network_type_v<Spec> || requires {
-            requires std::same_as<typename Spec::object_id, fiction::layouts::layout_object_id>;
-        }, "Spec is not a network or gate layout");
-    static_assert(
-        mockturtle::is_network_type_v<Impl> || requires {
-            requires std::same_as<typename Impl::object_id, fiction::layouts::layout_object_id>;
-        }, "Impl is not a network or gate layout");
-
     equivalence_checking_stats        st{};
     detail::equivalence_checking_impl p{spec, impl, st};
 

@@ -81,7 +81,12 @@ struct count_gate_types_stats
     /** @brief Number of other objects. */
     uint64_t num_other{};
 
-    /** @brief Prints gate counts. @param out Output stream. @param detailed Whether to print every gate type. */
+    /**
+     * @brief Prints gate counts.
+     *
+     * @param out Output stream.
+     * @param detailed Whether to print every gate type.
+     */
     void report(std::ostream& out = std::cout, const bool detailed = false) const
     {
         out << fmt::format("[i] AND2   = {}\n", num_and2);
@@ -378,13 +383,10 @@ class count_gate_types_impl
  * @param pst Statistics.
  */
 template <typename Ntk>
+    requires(mockturtle::is_network_type_v<Ntk> ||
+             requires { requires std::same_as<typename Ntk::object_id, layouts::layout_object_id>; })
 void count_gate_types(const Ntk& ntk, count_gate_types_stats* pst = nullptr)
 {
-    static_assert(
-        mockturtle::is_network_type_v<Ntk> || requires {
-            requires std::same_as<typename Ntk::object_id, fiction::layouts::layout_object_id>;
-        }, "Ntk is not a network or gate layout");
-
     count_gate_types_stats        st{};
     detail::count_gate_types_impl p{ntk, st};
 

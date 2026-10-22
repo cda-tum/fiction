@@ -14,7 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/network_conversion.hpp>
@@ -168,7 +167,20 @@ void register_network_conversion(nb::module_& m)
             "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.TEC] = "
             "mnt.pyfiction.synthesis.network_target.TEC) "
             "-> mnt.pyfiction.networks.technology_network"),
-        DOC(fiction_synthesis_convert_network));
+        R"doc(Convert a logic network to the selected network type.
+Real buffer nodes used for fanouts and path balancing are supported. Converting
+to the input network's type returns a copy with dangling nodes removed.
+
+Args:
+    network: Input logic network.
+    target: Network type to produce: TEC, AIG, XAG, or MIG. Defaults to network_target.TEC.
+
+Returns:
+    A logically equivalent network of the selected type.
+
+Raises:
+    ValueError: A gate has neither a supported implementation nor a truth table.
+)doc");
     detail::register_convert_network_to<detail::network_target::AIG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "

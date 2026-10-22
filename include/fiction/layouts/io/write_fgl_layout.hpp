@@ -330,6 +330,7 @@ void write_fgl_layout(const fiction::layouts::gate_layout<Geometry>& lyt, std::o
  * @param filename The file name to create and write into. Should preferably use the .fgl extension.
  * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
  * contains illegal XML text controls.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <typename Geometry>
 void write_fgl_layout(const fiction::layouts::gate_layout<Geometry>& lyt, const std::string_view& filename,

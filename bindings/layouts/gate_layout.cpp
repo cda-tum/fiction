@@ -15,18 +15,18 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate/extent tuple input signatures.
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 
 #include <fmt/format.h>
 
@@ -336,7 +336,8 @@ void register_gate_layout(nb::module_& m, const std::string& topology)
         .def("input_count", &GateLyt::input_count, nb::arg("object"), DOC(fiction_layouts_gate_layout_input_count))
         .def("find_object", &GateLyt::find_object, nb::arg("t"), DOC(fiction_layouts_gate_layout_find_object))
         .def("contains", &GateLyt::contains, nb::arg("object"), DOC(fiction_layouts_gate_layout_contains))
-        .def("get_tile", &GateLyt::get_tile, nb::arg("object"), DOC(fiction_layouts_gate_layout_get_tile))
+        .def("get_tile", &GateLyt::get_tile, nb::arg("object"),
+             parameter_doc(DOC(fiction_layouts_gate_layout_get_tile), {{"id", "object"}}).c_str())
         .def("source", &GateLyt::source, nb::arg("input"), DOC(fiction_layouts_gate_layout_source))
         .def("connect", &GateLyt::connect, nb::arg("source"), nb::arg("input"),
              DOC(fiction_layouts_gate_layout_connect))
@@ -588,11 +589,15 @@ void register_gate_layout(nb::module_& m, const std::string& topology)
             "Returns a string representation of the layout.", nb::call_guard<nb::gil_scoped_release>())
 
         .def("assign_synchronization_element", &GateLyt::assign_synchronization_element, nb::arg("coordinate"),
-             nb::arg("delay"), DOC(fiction_layouts_gate_layout_assign_synchronization_element))
+             nb::arg("delay"),
+             parameter_doc(DOC(fiction_layouts_gate_layout_assign_synchronization_element),
+                           {{"cz", "coordinate"}, {"se", "delay"}})
+                 .c_str())
         .def("is_synchronization_element", &GateLyt::is_synchronization_element, nb::arg("coordinate"),
-             DOC(fiction_layouts_gate_layout_is_synchronization_element))
-        .def("get_synchronization_element", &GateLyt::get_synchronization_element, nb::arg("coordinate"),
-             DOC(fiction_layouts_gate_layout_get_synchronization_element))
+             parameter_doc(DOC(fiction_layouts_gate_layout_is_synchronization_element), {{"cz", "coordinate"}}).c_str())
+        .def(
+            "get_synchronization_element", &GateLyt::get_synchronization_element, nb::arg("coordinate"),
+            parameter_doc(DOC(fiction_layouts_gate_layout_get_synchronization_element), {{"cz", "coordinate"}}).c_str())
         .def("num_se", &GateLyt::num_se, DOC(fiction_layouts_gate_layout_num_se));
 }
 
@@ -626,15 +631,18 @@ void register_gate_layout(nb::module_& m)
     /**
      * Gate-level clocked Cartesian layout.
      */
-    detail::register_gate_layout<py_cartesian_layout, py_cartesian_gate_layout>(m, "cartesian");
+    detail::register_gate_layout<fiction::layouts::cartesian_layout, fiction::layouts::cartesian_gate_layout>(
+        m, "cartesian");
     /**
      * Gate-level clocked shifted Cartesian layout.
      */
-    detail::register_gate_layout<py_shifted_cartesian_layout, py_shifted_cartesian_gate_layout>(m, "shifted_cartesian");
+    detail::register_gate_layout<fiction::layouts::shifted_cartesian_layout,
+                                 fiction::layouts::shifted_cartesian_gate_layout>(m, "shifted_cartesian");
     /**
      * Gate-level clocked hexagonal layout.
      */
-    detail::register_gate_layout<py_hexagonal_layout, py_hexagonal_gate_layout>(m, "hexagonal");
+    detail::register_gate_layout<fiction::layouts::hexagonal_layout, fiction::layouts::hexagonal_gate_layout>(
+        m, "hexagonal");
 }
 
 }  // namespace pyfiction

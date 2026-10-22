@@ -1,32 +1,11 @@
 # FCN I/O
 
-## MagCAD & SCERPA
+Export FCN cell layouts for MagCAD and SCERPA.
+The writer validates cell types supported by the target format.
 
-::::{tab-set}
-:sync-group: language
+```{toctree}
+:maxdepth: 1
 
-:::{tab-item} C++
-:sync: cpp
-
-**Header:** `fiction/technology/fcn/io/write_qll_layout.hpp`
-
-```{doxygenfunction} fiction::fcn::io::write_qll_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
-
+qll
+unsupported_cell_type
 ```
-
-```{doxygenfunction} fiction::fcn::io::write_qll_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})
-
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autofunction:: mnt.pyfiction.fcn.io.write_qll_layout
-```
-
-:::
-
-::::

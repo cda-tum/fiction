@@ -97,10 +97,10 @@ def twoddwave_distance(
         2DDWave distance between `source` and `target`.
 
     Note:
-        To represent :math:`\\infty`,
-        `std::numeric_limits<uint32_t>::max()` is returned for distances
-        of infinite length. We are using `uint32_t` to prevent overflows
-        when adding distances in the default `uint64_t` number range.
+        Infinite distances return 4,294,967,295 (2^32 - 1)
+        (`std::numeric_limits<uint32_t>::max()` in C++). This 32-bit
+        sentinel prevents overflows when adding distances in the default
+        64-bit unsigned number range.
     """
 
 def chebyshev_distance(
@@ -237,7 +237,8 @@ def a_star_distance(
     the polynomial complexity of A*.
 
     If no path between `source` and `target` exists in `layout`, the
-    returned distance is `std::numeric_limits<uint64_t>::max()`.
+    returned distance is 18,446,744,073,709,551,615 (2^64 - 1)
+    (`std::numeric_limits<uint64_t>::max()` in C++).
 
     Args:
         layout: The layout in which the distance between `source` and
@@ -252,6 +253,9 @@ def a_star_distance(
 
     Returns:
         Minimum path length between `source` and `target` in `layout`.
+
+    Raises:
+        ValueError: If source or target lies outside the layout extent.
     """
 
 @overload
@@ -317,7 +321,8 @@ def yen_k_shortest_paths(
     """
     Find up to k shortest loop-free paths from source to target.
     The keyword options select obstructions and crossing constraints.
-    Raises ValueError when source or target lies outside the layout extent.
+    If k is zero, returns an empty list without checking endpoint bounds.
+    Raises ValueError when k is nonzero and source or target lies outside the layout extent.
 
     Args:
         obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
@@ -381,6 +386,7 @@ def enumerate_all_paths(
     """
     Enumerate all loop-free paths from source to target in the layout.
     The keyword options select obstructions and crossing constraints.
+    Raises ValueError when source or target lies outside the layout extent.
 
     Args:
         crossings: Allow wires to cross on separate layers.
