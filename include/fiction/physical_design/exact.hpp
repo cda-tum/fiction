@@ -3294,38 +3294,36 @@ class exact_impl
  * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in too large to be handled by the
  * specified clocking scheme.
  *
- * @tparam Lyt Desired gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the returned gate-level layout.
  * @param ntk Named technology network to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
- * parameters; `std::nullopt`, otherwise.
- * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and
+ * @return A gate-level layout of type `gate_layout<Geometry>` that implements `ntk` as an FCN circuit if one is found
+ * under the given parameters; `std::nullopt`, otherwise.
+ * @throws std::invalid_argument If `gate_layout<Geometry>` is a shifted Cartesian or hexagonal layout and
  * `ps.layout_arrangement` is empty.
  */
-template <typename Lyt>
-std::optional<Lyt> exact(const tec_nt& ntk, const exact_physical_design_params& ps = {},
-                         exact_physical_design_stats* pst = nullptr)
+template <typename Geometry>
+std::optional<layouts::gate_layout<Geometry>> exact(const tec_nt& ntk, const exact_physical_design_params& ps = {},
+                                                    exact_physical_design_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
+    layouts::require_arrangement<layouts::gate_layout<Geometry>>(ps.layout_arrangement);
 
-    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
-
-    auto clocking_scheme =
-        layouts::clocking::get_scheme(ps.scheme, (std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
-                                                  !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>) ?
-                                                     ps.layout_arrangement :
-                                                     std::nullopt);
+    auto clocking_scheme = layouts::clocking::get_scheme(
+        ps.scheme, (std::derived_from<layouts::gate_layout<Geometry>, fiction::layouts::hexagonal_layout> &&
+                    !std::derived_from<layouts::gate_layout<Geometry>, fiction::layouts::shifted_cartesian_layout>) ?
+                       ps.layout_arrangement :
+                       std::nullopt);
 
     if (!clocking_scheme.has_value())
     {
         throw layouts::clocking::unsupported_scheme_exception();
     }
     // the layout topology bounds the degrees of schemes that impose no bound of their own
-    const auto max_in_degree  = std::min<uint32_t>(clocking_scheme->max_in_degree(), Lyt::max_fanin_size);
-    const auto max_out_degree = std::min<uint32_t>(clocking_scheme->max_out_degree(), Lyt::max_fanin_size);
+    const auto max_in_degree =
+        std::min<uint32_t>(clocking_scheme->max_in_degree(), layouts::gate_layout<Geometry>::max_fanin_size);
+    const auto max_out_degree =
+        std::min<uint32_t>(clocking_scheme->max_out_degree(), layouts::gate_layout<Geometry>::max_fanin_size);
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, max_in_degree))
     {
@@ -3337,7 +3335,7 @@ std::optional<Lyt> exact(const tec_nt& ntk, const exact_physical_design_params& 
 
     exact_physical_design_stats st{};
 
-    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, std::move(*clocking_scheme)};
+    detail::exact_impl<layouts::gate_layout<Geometry>> p{intermediate_ntk, ps, st, std::move(*clocking_scheme)};
 
     auto result = p.run();
 
@@ -3354,40 +3352,38 @@ std::optional<Lyt> exact(const tec_nt& ntk, const exact_physical_design_params& 
  * AND gate of a certain rotation, but not for other gates. This is useful if a tile is known to be faulty or if it is
  * known to be used for a different purpose.
  *
- * @tparam Lyt Desired gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the returned gate-level layout.
  * @param ntk Named technology network to place and route.
  * @param black_list The black list of tiles and their gate orientations.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit if one is found under the given
- * parameters; `std::nullopt`, otherwise.
- * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and
+ * @return A gate-level layout of type `gate_layout<Geometry>` that implements `ntk` as an FCN circuit if one is found
+ * under the given parameters; `std::nullopt`, otherwise.
+ * @throws std::invalid_argument If `gate_layout<Geometry>` is a shifted Cartesian or hexagonal layout and
  * `ps.layout_arrangement` is empty.
  */
-template <typename Lyt>
-std::optional<Lyt> exact_with_blacklist(const tec_nt& ntk, const surface_black_list<fcn::port_direction>& black_list,
-                                        exact_physical_design_params ps  = {},
-                                        exact_physical_design_stats* pst = nullptr)
+template <typename Geometry>
+std::optional<layouts::gate_layout<Geometry>>
+exact_with_blacklist(const tec_nt& ntk, const surface_black_list<fcn::port_direction>& black_list,
+                     exact_physical_design_params ps = {}, exact_physical_design_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
+    layouts::require_arrangement<layouts::gate_layout<Geometry>>(ps.layout_arrangement);
 
-    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
-
-    auto clocking_scheme =
-        layouts::clocking::get_scheme(ps.scheme, (std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
-                                                  !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>) ?
-                                                     ps.layout_arrangement :
-                                                     std::nullopt);
+    auto clocking_scheme = layouts::clocking::get_scheme(
+        ps.scheme, (std::derived_from<layouts::gate_layout<Geometry>, fiction::layouts::hexagonal_layout> &&
+                    !std::derived_from<layouts::gate_layout<Geometry>, fiction::layouts::shifted_cartesian_layout>) ?
+                       ps.layout_arrangement :
+                       std::nullopt);
 
     if (!clocking_scheme.has_value())
     {
         throw layouts::clocking::unsupported_scheme_exception();
     }
     // the layout topology bounds the degrees of schemes that impose no bound of their own
-    const auto max_in_degree  = std::min<uint32_t>(clocking_scheme->max_in_degree(), Lyt::max_fanin_size);
-    const auto max_out_degree = std::min<uint32_t>(clocking_scheme->max_out_degree(), Lyt::max_fanin_size);
+    const auto max_in_degree =
+        std::min<uint32_t>(clocking_scheme->max_in_degree(), layouts::gate_layout<Geometry>::max_fanin_size);
+    const auto max_out_degree =
+        std::min<uint32_t>(clocking_scheme->max_out_degree(), layouts::gate_layout<Geometry>::max_fanin_size);
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, max_in_degree))
     {
@@ -3400,7 +3396,8 @@ std::optional<Lyt> exact_with_blacklist(const tec_nt& ntk, const surface_black_l
     exact_physical_design_stats st{};
 
     /** @brief Exact placement state for the specification and tile blacklist. */
-    detail::exact_impl<Lyt> p{intermediate_ntk, std::move(ps), st, std::move(*clocking_scheme), black_list};
+    detail::exact_impl<layouts::gate_layout<Geometry>> p{intermediate_ntk, std::move(ps), st,
+                                                         std::move(*clocking_scheme), black_list};
 
     auto result = p.run();
 

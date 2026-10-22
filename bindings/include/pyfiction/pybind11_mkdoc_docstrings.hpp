@@ -145,20 +145,21 @@ static const char *mkd_doc_fiction_fcn_gate_library =
 R"doc( Base class for various FCN libraries used to map gate-level layouts
  to cell-level ones. Any new gate library can extend `gate_library` if
  it benefits from its features but does not have to. The only
- requirement is that it must be a static class that provides a
+ requirement is that it must provide a public static set_up_gate
+ function for each supported gate-layout geometry, for example:
 
 ```
 embed:rst
 .. code-block:: c++
 
-template <typename GateLyt>
-static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+static gate set_up_gate(const fiction::layouts::cartesian_gate_layout& lyt,
+const fiction::layouts::layout_base::coordinate& t)
 ```
 
 
 
 
- public member function. Additionally, a
+ Additionally, a
 
 ```
 embed:rst
@@ -681,20 +682,12 @@ static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_create_dot = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_dimensions = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_foreach_pi_unranked =
 R"doc(Whether `Ntk` offers `foreach_pi_unranked`, which visits the primary
 inputs in creation order regardless of their rank, as
 `networks::views::mutable_rank_view` does.)doc";
 
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_functional_implementations = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_gate_ports = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_real_pi = R"doc()doc";
 
@@ -748,8 +741,6 @@ static const char *mkd_doc_fiction_has_is_xor_and = R"doc()doc";
 static const char *mkd_doc_fiction_has_num_real_pis = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_num_virtual_pis = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_set_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_update_ranks = R"doc()doc";
 
@@ -1006,9 +997,6 @@ Args:
     lyt: Layout.
     t: Occupied tile.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     Physical connector ports.
 
@@ -1021,11 +1009,11 @@ Args:
     lyt: The layout to check.
     n: Node whose fanins are to be considered.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     `true` iff `n` has an AND, OR, or MAJ fanin node.
+
+Raises:
+    ValueError: If `n` does not identify a live object in `lyt`.
 
 )doc";
 
@@ -1036,11 +1024,11 @@ Args:
     lyt: The layout to check.
     n: Node whose fanouts are to be considered.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     `true` iff `n` has a fanout node as fanout.
+
+Raises:
+    ValueError: If `n` does not identify a live object in `lyt`.
 
 )doc";
 
@@ -1067,9 +1055,6 @@ Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a ToPoliNano gate.
 
-Template Args:
-    GateLyt: Shifted Cartesian gate-level layout type.
-
 Returns:
     ToPoliNano gate representation of `t` including I/Os, rotation,
     etc.
@@ -1084,8 +1069,6 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library_topolinano_library = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_cell_grid = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
@@ -1888,8 +1871,6 @@ The grid has value semantics; copies are independent.
 
 Template Args:
     CellType: Enumeration of the cell types of one technology.)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_grid_2 = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_assign_cell_name =
 R"doc(Assigns a name to a cell. The empty string removes the name.
@@ -2769,7 +2750,8 @@ as specified on each visitor.
 
 Template Args:
     CoordinateLayout: Coordinate geometry used for placement. Defaults
-                      to `cartesian_layout`.)doc";
+                      to `cartesian_layout`. Gate layouts cannot serve
+                      as coordinate geometries.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_adjacent_opposite_tiles =
 R"doc(Returns pairs of opposite adjacent tiles.
@@ -5391,7 +5373,7 @@ Args:
     name: The name to give to the generated layout.
 
 Template Args:
-    Lyt: The layout type to be created from an input.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 )doc";
 
@@ -5412,7 +5394,7 @@ Args:
     is: The input stream to read from.
 
 Template Args:
-    Lyt: The layout type to be used as input.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5426,7 +5408,7 @@ Args:
     name: The name to give to the generated layout.
 
 Template Args:
-    Lyt: The layout type to be created from an input.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 )doc";
 
@@ -5443,7 +5425,7 @@ Args:
     filename: The file name to open and read from.
 
 Template Args:
-    Lyt: The layout type to be used as input.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5516,7 +5498,7 @@ Args:
     on_progress: Receives completed drawing work.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Drawer: DOT drawer type.
 
 )doc";
@@ -6146,9 +6128,7 @@ Args:
 Template Args:
     GateSizeX: Horizontal tile size.
     GateSizeY: Vertical tile size.
-    GateLyt: Gate-level layout type.
-    Coordinate: Cell coordinate type, e.g., `layout_base::coordinate`.
-                Hexagonal tiles can yield negative positions.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Absolute cell position in a layout.
@@ -6683,7 +6663,6 @@ Args:
     t: Tile whose port routing is determined.
 
 Template Args:
-    Lyt: Gate-level layout type.
     RespectClocking: Whether to respect the layout clocking while
                      tracing incoming and outgoing signals.
 
@@ -6724,9 +6703,6 @@ and output, const cells etc. are computed additionally.
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a molQCA gate.
-
-Template Args:
-    GateLyt: Cartesian gate-level layout type.
 
 Returns:
     molQCA gate representation of `t` including I/Os, rotation, const
@@ -7294,18 +7270,16 @@ Args:
 Template Args:
     NtkSrc: Source network type.
     NtkDest: Target network or gate-level layout type.
-    T: Mapping type to identify signals by. Currently,
-       `mockturtle::signal<NtkDest>` and
-       `branching_signal_container<fanout_size>` are supported.
+    T: Mapping value type: `mockturtle::signal<NtkDest>`,
+       `layouts::layout_object_id`, or
+       `physical_design::branching_signal_container<fanout_size>`.
 
 )doc";
 
 static const char *mkd_doc_fiction_networks_restore_network_name =
-R"doc(Helper function to conveniently assign the name of a source network or
-layout to a target network or layout as they use different function
-names for the same purpose. This function comes in handy when networks
-are translated or layouts are being created from networks that are
-supposed to have the same name.
+R"doc(Transfers the source network or gate-layout name. An unnamed source
+clears a supported destination name. A destination without naming
+support is unchanged.
 
 Args:
     ntk_or_lyt_src: Source network or layout whose name is to be
@@ -7776,6 +7750,14 @@ Template Args:
 
 static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_clear_colors = R"doc(Remove all assigned colors.)doc";
 
+static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_clear_colors_2 =
+R"doc(Assigns the given color to all nodes and preserves edge colors.
+
+Args:
+    clr: Color to assign to the nodes.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_edge_color =
 R"doc(Returns the assigned color of a given edge.
 
@@ -7855,21 +7837,12 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_networks_views_static_depth_view =
-R"doc(Provides `depth` and `level` methods for networks, similar to
-`mockturtle::static_depth_view`. Unlike the `mockturtle`
-implementation, this version uses flat hashmaps to store `level` data
-instead of `mockturtle::node_map`. Additionally, the `add_event`
-functionality has been removed. As a result, if the underlying network
-changes, either `on_add` has to be called when adding a node to the
-network and keep the current depth information or the `update_levels`
-method must be called to refresh the `static_depth_view` information.
-These modifications address performance issues encountered with
-`mockturtle::static_depth_view`.
-
-This view computes the level of each node and the overall depth of the
-network. The `level` and `depth` methods adhere to the network
-interface. Levels are calculated during construction and can be
-updated later by invoking the `update_levels` method.
+R"doc(Provides node levels and network depth, stored in vectors indexed by
+node index. Call `on_add` after adding a node, or `update_levels`
+after changing the network, to refresh the stored levels. Critical-
+path membership is computed on its first query after an update.
+Networks that already supply the depth interface retain their own
+storage and update behavior.
 
 Template Args:
     Ntk: The network type.
@@ -8330,7 +8303,7 @@ Args:
 
 Template Args:
     GateLibrary: Gate library whose tile size is used.
-    GateLyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Axis sizes of the grid, including the layer count of `gate_lyt`.
@@ -8402,7 +8375,7 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: The gate-level layout type to route.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     `true` iff routing was successful, i.e., iff all objectives could
@@ -8660,9 +8633,6 @@ input when the layout is converted to a hexagonal format.
 Args:
     lyt: The Cartesian gate-level layout containing primary inputs.
 
-Template Args:
-    CartLyt: Type of the Cartesian layout.
-
 Returns:
     The number of primary inputs that are placed to the left of the
     middle primary input.
@@ -8677,9 +8647,6 @@ input when the layout is converted to a hexagonal format.
 
 Args:
     lyt: The Cartesian gate-level layout containing primary inputs.
-
-Template Args:
-    CartLyt: Type of the Cartesian layout.
 
 Returns:
     The number of primary inputs that are placed to the right of the
@@ -8696,9 +8663,6 @@ output when the layout is converted to a hexagonal format.
 Args:
     lyt: The Cartesian gate-level layout containing primary outputs.
 
-Template Args:
-    CartLyt: Type of the Cartesian layout.
-
 Returns:
     The number of primary outputs that are placed to the left of the
     middle primary output.
@@ -8713,9 +8677,6 @@ output when the layout is converted to a hexagonal format.
 
 Args:
     lyt: The Cartesian gate-level layout containing primary outputs.
-
-Template Args:
-    CartLyt: Type of the Cartesian layout.
 
 Returns:
     The number of primary outputs that are placed to the right of the
@@ -9898,10 +9859,6 @@ Args:
     output_mode: Adjust offset based on POs relocated to the bottom
                  row.
 
-Template Args:
-    HexLyt: Even-row hexagonal gate-level layout return type.
-    CartLyt: Input Cartesian gate-level layout type.
-
 Returns:
     Signed shift that has to be added to any x-coordinate on the
     hexagonal layout.
@@ -9929,16 +9886,8 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Implementation of the graph-oriented layout design algorithm. This
 class handles the initialization and execution of the algorithm.
 
-The specification network is converted to a `technology_network`
-before anything else happens, so this class is templated on the layout
-type only. Carrying the caller's network type through the whole
-implementation would duplicate every member for each network type the
-caller happens to use, without a single line of the body depending on
-it. The conversion lives in the `graph_oriented_layout_design` entry
-point below.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.)doc";
+The algorithm places a named technology network on a Cartesian gate-
+level layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_adjust_layout_size =
 R"doc(Adjusts the layout size based on the last position.
@@ -10329,7 +10278,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Places a node with two inputs in the layout and routes it.
 
 Args:
-    position: The tile representing the position for placement.
+    destination: Identity of the placed gate to route.
     layout: The layout in which to place the node.
     node2pos: A dictionary mapping nodes from the network to signals
               in the layout.
@@ -10341,7 +10290,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Places a node with a single input in the layout and routes it.
 
 Args:
-    position: The tile representing the position for placement.
+    destination: Identity of the placed gate to route.
     layout: The layout in which to place the node.
     node2pos: A dictionary mapping nodes from the network to signals
               in the layout.
@@ -10393,12 +10342,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl =
-R"doc(Maps placed objects and ordered ports to a hexagonal layout.
-
-Template Args:
-    HexLyt: Hexagonal destination layout. @tparam CartLyt Cartesian
-            source layout.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl = R"doc(Maps placed objects and ordered ports to a hexagonal layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_hexagonalization_impl =
 R"doc(Initializes a conversion. @param lyt Source layout. @param p
@@ -11201,7 +11145,7 @@ Args:
     stats: Statistics.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     `true` iff `lyt` could be successfully clocked via a valid clock
@@ -11295,16 +11239,16 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit if one is found under the given parameters;
-    `std::nullopt`, otherwise.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit if one is found under the given
+    parameters; `std::nullopt`, otherwise.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11415,16 +11359,16 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit if one is found under the given parameters;
-    `std::nullopt`, otherwise.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit if one is found under the given
+    parameters; `std::nullopt`, otherwise.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11440,7 +11384,7 @@ Args:
     lyt: Layout to inspect.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Routing objectives that preserve logical input numbering.
@@ -11468,7 +11412,7 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Type of the clocked layout.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     An edge intersection graph of paths satisfying the given routing
@@ -11545,9 +11489,6 @@ Args:
                            calculated based on the current partial
                            layout and returns an uint64_t that should
                            be minimized.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.
 
 Returns:
     The smallest layout yielded by the graph-oriented layout design
@@ -11751,10 +11692,6 @@ Args:
     params: Parameters.
     stats: Statistics.
 
-Template Args:
-    HexLyt: Even-row hexagonal gate-level layout return type.
-    CartLyt: Input Cartesian gate-level layout type.
-
 Returns:
     Hexagonal representation of the Cartesian layout.
 
@@ -11943,15 +11880,15 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -13269,7 +13206,8 @@ Args:
                                       defects keep SiDBs at.
 
 Template Args:
-    GateLibrary: SiDB gate library type.
+    GateLibrary: SiDB gate library with static implementation and
+                 position or direction port lookup.
     Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
@@ -13752,7 +13690,7 @@ Args:
     t: Occupied tile.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Physical connector ports.
@@ -13786,7 +13724,7 @@ Args:
     t: Tile to be realized as a QCA ONE gate.
 
 Template Args:
-    GateLyt: Cartesian gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     QCA ONE gate representation of `t` including I/Os, rotation, const
@@ -13857,9 +13795,6 @@ and output, const cells etc. are computed additionally.
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a Bestagon gate.
-
-Template Args:
-    GateLyt: Hexagonal gate-level layout type.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
@@ -14560,9 +14495,6 @@ Args:
             encapsulated in an `on_the_fly_circuit_design_params`
             object.
 
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-
 Returns:
     Layout representing the designed SiDB circuit.
 
@@ -14571,6 +14503,9 @@ Raises:
                 row arrangement.
     fcn::unsupported_gate_type_exception: if any object has an
                                           unsupported function.
+    fcn::unsupported_gate_orientation_exception: if a gate orientation
+                                                 has no
+                                                 implementation.
     unsuccessful_gate_design_error: if a gate cannot be designed.
     utils::timeout_error: if the shared circuit budget or an
                           individual gate budget expires. No partial
@@ -14610,11 +14545,8 @@ Args:
             encapsulated in an
             `on_the_fly_circuit_design_on_defective_surface_params`
             object.
-    stats: Pointer to a structure for collecting statistics. If
+    stats: Receives statistics after circuit design succeeds. If
            `nullptr`, statistics are discarded.
-
-Template Args:
-    GateLyt: Gate-level layout type.
 
 Returns:
     Layout representing the designed circuit on the defective surface.
@@ -14623,6 +14555,11 @@ Raises:
     utils::timeout_error: If a circuit or gate-design timeout expires.
     ValueError: If the simulation engine does not support the
                 requested gate-design timeout.
+    fcn::unsupported_gate_orientation_exception: If a gate orientation
+                                                 has no
+                                                 implementation.
+    unsuccessful_pr_error: If placement and routing cannot satisfy the
+                           blacklist.
 
 Note:
     A circuit or gate timeout aborts the operation. Only a completed,
@@ -14645,11 +14582,7 @@ R"doc(Total millisecond budget across surface analysis, placement-and-
 routing retries, and gate design. The maximum value means unlimited;
 zero expires immediately. Cancellation is cooperative.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats =
-R"doc(Statistics for the on-the-fly defect-aware circuit design.
-
-Template Args:
-    GateLyt: Gate-level layout type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats = R"doc(Statistics for the on-the-fly defect-aware circuit design.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats_exact_stats = R"doc(The `stats` of the *exact* algorithm.)doc";
 
@@ -16227,9 +16160,6 @@ Args:
     p: The ports of the tile.
     tile: The tile.
 
-Template Args:
-    GateLyt: Gate-level layout type.
-
 Returns:
     The designed gate.
 
@@ -16262,9 +16192,6 @@ implementation.
 Args:
     lyt: Layout that owns the object.
     object: Object to inspect.
-
-Template Args:
-    GateLyt: Gate-level layout type.
 
 Returns:
     Whether the object implements identity, INV, or a supported binary
@@ -16314,10 +16241,6 @@ Args:
                 subsequent search, capped by the enclosing deadline.
     defect_surface: Optional atomic defect surface in case atomic
                     defects are present.
-
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-    Params: Type of the parameter used for the gate library.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
@@ -16969,12 +16892,15 @@ R"doc(Computes the minimum energy of a range of charge distributions. If the
 range is empty, positive infinity indicates that no valid energy value
 exists.
 
+Exceptions from iterator operations and energy comparisons propagate
+to the caller.
+
 Args:
     first: Begin of the range to examine.
     last: End of the range to examine.
 
 Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
+    InputIt: Forward iterator over charge distributions.
 
 Returns:
     Value of the minimum energy found in the input range (unit: eV),
@@ -16986,12 +16912,15 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_minimum_energy_distr
 R"doc(Returns an iterator to the charge distribution of minimum energy
 contained in a range. If the range is empty, `last` is returned.
 
+Exceptions from iterator operations and energy comparisons propagate
+to the caller.
+
 Args:
     first: Begin of the range to examine.
     last: End of the range to examine.
 
 Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
+    InputIt: Forward iterator over charge distributions.
 
 Returns:
     Iterator to the minimum energy charge distribution found in the
@@ -18489,7 +18418,7 @@ stored data. All methods of this class are thread-safe.
 
 Template Args:
     Key: The type of the key used to identify entries in the domain.
-    MappedTypes: Value types stored in the tuple.)doc";
+    MappedTypes: Nonempty pack of value types stored in the tuple.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_domain_add_value =
 R"doc(Adds a value to the operational domain. This function is thread-safe
@@ -24591,9 +24520,6 @@ Args:
     t: Tile whose incoming and outgoing port directions are
        determined.
 
-Template Args:
-    Lyt: Pointy-top hexagonal gate-level layout type.
-
 Returns:
     Incoming and outgoing port directions of the tile.
 
@@ -24723,8 +24649,9 @@ Args:
     ntk: The input logic network.
 
 Template Args:
-    NtkDest: Type of the returned logic network.
-    NtkSrc: Type of the input logic network.
+    NtkDest: Logic network with constant, input, output, and Boolean
+             gate creation.
+    NtkSrc: Logic network with node, interface, and fanin traversal.
 
 Returns:
     A logic network of type `NtkDest` that is logically equivalent to
@@ -28323,7 +28250,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_optimization_geometric_temperature_schedule =
-R"doc(A logarithmically decreasing temperature schedule. The temperature is
+R"doc(A geometrically decreasing temperature schedule. The temperature is
 altered by multiplying it with `0.99`.
 
 Args:
@@ -28353,29 +28280,39 @@ states using a provided random state generator. SA as specified above
 is then run on all these random initial states where the best result
 of all generated states is finally returned.
 
-Each initial state runs in its own thread.
+Each initial state runs as an asynchronous task. All callables,
+including the random-state generator, must support concurrent
+invocation. The function waits for all started workers before
+propagating a worker or launch exception.
 
 Args:
     init_temp: The initial temperature.
     final_temp: The final temperature.
     cycles: The number of cycles for each temperature value.
-    instances: The number of random initial states to generate.
+    instances: Positive number of random initial states to generate.
     rand_state: The random state generator function.
     cost: The cost function to minimize.
-    schedule: The temperature schedule.
+    schedule: Temperature schedule that eventually reaches
+              `final_temp`.
     next: The next state function that determines an adjacent state
           given a current one.
 
 Template Args:
-    RandStateFunc: The random state generator function type (specifies
-                   the State type via its return value).
-    CostFunc: The cost function type (specifies the cost value via its
-              return value).
-    TempFunc: The temperature schedule function type.
-    NextFunc: The next state function type.
+    RandStateFunc: Lvalue-invocable generator returning a default-
+                   constructible state.
+    CostFunc: Cost callable accepted by single-state annealing.
+    TempFunc: Temperature schedule returning double and accepting a
+              mutable temperature lvalue.
+    NextFunc: Next-state function returning State and accepting a
+              mutable state lvalue.
 
 Returns:
     A pair of the overall best optimized state and its cost value.
+
+Raises:
+    ValueError: If instances is zero or either temperature bound is
+                not finite.
+    std::system_error: If a worker thread cannot be started.
 
 Note:
     The State type must be default constructible.
@@ -28402,25 +28339,34 @@ This implementation is based on:
 https://codereview.stackexchange.com/questions/70310/simple-simulated-
 annealing-template-in-c11
 
+Exceptions from random initialization, state operations, and callables
+propagate to the caller.
+
 Args:
     init_state: The initial state to optimize.
     init_temp: The initial temperature.
     final_temp: The final temperature.
     cycles: The number of cycles for each temperature value.
     cost: The cost function to minimize.
-    schedule: The temperature schedule.
+    schedule: Temperature schedule that eventually reaches
+              `final_temp`.
     next: The next state function that determines an adjacent state
           given a current one.
 
 Template Args:
-    State: The state type.
-    CostFunc: The cost function type (specifies the cost type via its
-              return value).
-    TempFunc: The temperature schedule function type.
-    NextFunc: The next state function type.
+    State: Copyable state type.
+    CostFunc: Cost function with a signed result for State, also
+              invocable on const and mutable state lvalues.
+    TempFunc: Temperature schedule returning double and accepting a
+              mutable temperature lvalue.
+    NextFunc: Next-state function returning State and accepting a
+              mutable state lvalue.
 
 Returns:
     A pair of the optimized state and its cost value.
+
+Raises:
+    ValueError: If either temperature bound is not finite.
 
 )doc";
 
@@ -29413,8 +29359,8 @@ Args:
 
 Template Args:
     NtkDest: The type of the resulting network.
-    NtkSource1: The type of the first input network.
-    NtkSource2: The type of the second input network.
+    NtkSrc1: Type of the first input network with interface counts.
+    NtkSrc2: Type of the second input network with interface counts.
 
 Returns:
     An `optional` containing the virtual miter network if successful,
@@ -29479,7 +29425,29 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
+static const char *mkd_doc_mockturtle_detail_foreach_element_if_transform =
+R"doc(Applies a transform and callback to elements that satisfy a predicate.
+A false callback result stops traversal.
+
+Args:
+    begin: First source element.
+    end: End of the source range.
+    pred: Selection predicate.
+    transform: Element transform.
+    fn: Callback for transformed elements.
+    counter_offset: First callback index.
+
+Template Args:
+    Iterator: Iterator over the source elements.
+    ElementType: Transformed element type passed to the callback.
+    Pred: Predicate selecting source elements.
+    Transform: Transform applied to selected elements.
+    Fn: Void or Boolean callback, optionally accepting an index.
+
+Returns:
+    Iterator after the last visited source element.
+
+)doc";
 
 static const char *mkd_doc_mockturtle_edge =
 R"doc(Representation of an edge between two network nodes.

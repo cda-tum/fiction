@@ -22,6 +22,7 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
@@ -186,8 +187,8 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_layout = exact_with_blacklist<hexagonal_gate_layout>(convert_network<tec_nt>(mapped_network),
-                                                                             black_list, exact_params, &exact_stats);
+        const auto gate_layout = exact_with_blacklist<hexagonal_layout>(convert_network<tec_nt>(mapped_network),
+                                                                        black_list, exact_params, &exact_stats);
 
         if (gate_layout.has_value())
         {

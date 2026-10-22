@@ -36,7 +36,6 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <concepts>
 #include <cstddef>
 #include <new>
 #include <stdexcept>
@@ -49,31 +48,23 @@ using namespace fiction::physical_design;
 
 /**
  * @brief Assigns clock zero to every occupied tile.
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to update.
  */
-template <typename Lyt>
-void remove_clocking(Lyt& lyt)
+template <typename Geometry>
+void remove_clocking(gate_layout<Geometry>& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     lyt.foreach_object([&lyt](const auto id) { lyt.assign_clock_number(lyt.get_tile(id), 0); });
 }
 
 /**
  * @brief Checks clock assignment with each supported solver.
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to clock and compare.
  */
-template <typename Lyt>
-void remove_assign_and_check_clocking(Lyt lyt)
+template <typename Geometry>
+void remove_assign_and_check_clocking(gate_layout<Geometry> lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     const auto lyt_clone = lyt.clone();
 
     // for each supported solver
@@ -121,7 +112,7 @@ TEST_CASE("Determine clock numbers for simple layouts", "[determine-clocking]")
 
 TEST_CASE("Determine clock numbers for a 3-phase layout", "[determine-clocking]")
 {
-    remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
+    remove_assign_and_check_clocking(orthogonal<cartesian_layout>(
         fiction::synthesis::convert_network<tec_nt>(blueprints::maj1_network<mockturtle::aig_network>()),
         {.number_of_clock_phases = clocking::num_clks::THREE}));
 }
@@ -158,11 +149,11 @@ TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[deter
 
 TEST_CASE("Determine clock numbers for complex layouts", "[determine-clocking]")
 {
-    remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
+    remove_assign_and_check_clocking(orthogonal<cartesian_layout>(
         fiction::synthesis::convert_network<tec_nt>(blueprints::maj1_network<mockturtle::aig_network>())));
-    remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
+    remove_assign_and_check_clocking(orthogonal<cartesian_layout>(
         fiction::synthesis::convert_network<tec_nt>(blueprints::maj4_network<mockturtle::aig_network>())));
-    remove_assign_and_check_clocking(orthogonal<cartesian_gate_layout>(
+    remove_assign_and_check_clocking(orthogonal<cartesian_layout>(
         fiction::synthesis::convert_network<tec_nt>(blueprints::nary_operation_network<mockturtle::aig_network>())));
 }
 

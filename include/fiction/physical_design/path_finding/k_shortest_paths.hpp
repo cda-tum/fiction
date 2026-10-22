@@ -266,12 +266,11 @@ class yen_k_shortest_paths_impl
  * `objective.target`.
  */
 template <typename Path, typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] path_collection<Path>
 yen_k_shortest_paths(const Lyt& layout, const routing_objective& objective, const uint32_t k,
                      const yen_k_shortest_paths_params& params = {}, const layouts::obstructions& obstructions = {})
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     if (k == 0)
     {
         return {};

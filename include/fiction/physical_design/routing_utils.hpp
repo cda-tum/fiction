@@ -208,11 +208,10 @@ class path_set : public std::set<Path>
  * @return `true` iff `successor` hosts a wire that is crossable from `src`.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& src,
                                      const fiction::layouts::layout_base::coordinate& successor) noexcept
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt must be a coordinate layout type");
-
     assert(lyt.is_adjacent_elevation_of(src, successor));
 
     if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
@@ -376,17 +375,14 @@ void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const Path& path,
  *
  * Intermediate single-sink wires are followed through declared topology. Missing inputs produce no objective;
  * disconnected input slots keep their indices. Cycles of intermediate wires reject.
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to inspect.
  * @return Routing objectives that preserve logical input numbering.
  * @throws std::invalid_argument If an intermediate wire chain contains a cycle.
  */
-template <typename Lyt>
-std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
+template <typename Geometry>
+std::vector<routing_objective> extract_routing_objectives(const layouts::gate_layout<Geometry>& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
     const auto intermediate = [&lyt](const auto id) { return lyt.is_wire(id) && !lyt.is_fanout(id); };
     std::vector<routing_objective> objectives{};
     lyt.foreach_object(
@@ -399,8 +395,8 @@ std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
             lyt.foreach_fanin(id,
                               [&](const auto port, const auto input)
                               {
-                                  auto                                        source = port;
-                                  std::unordered_set<typename Lyt::object_id> visited{};
+                                  auto                                          source = port;
+                                  std::unordered_set<layouts::layout_object_id> visited{};
                                   while (intermediate(source))
                                   {
                                       if (!visited.insert(source).second)

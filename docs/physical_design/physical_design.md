@@ -9,7 +9,7 @@ placement; the conversion preserves network, primary-input, and primary-output n
 
 ```cpp
 const auto specification = fiction::synthesis::convert_network<fiction::tec_nt>(source);
-const auto layout = fiction::physical_design::orthogonal<fiction::layouts::cartesian_gate_layout>(specification);
+const auto layout = fiction::physical_design::orthogonal<fiction::layouts::cartesian_layout>(specification);
 ```
 
 `orthogonal` and `exact` normalize fanout for the selected layout and clocking scheme. GOLD removes dangling gates

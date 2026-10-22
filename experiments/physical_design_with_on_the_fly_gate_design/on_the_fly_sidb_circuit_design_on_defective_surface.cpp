@@ -172,7 +172,7 @@ try
 
         params.sidb_on_the_fly_gate_library_parameters.design_gate_params = design_gate_params;
 
-        on_the_fly_circuit_design_on_defective_surface_stats<hexagonal_gate_layout> st{};
+        on_the_fly_circuit_design_on_defective_surface_stats st{};
 
         try
         {

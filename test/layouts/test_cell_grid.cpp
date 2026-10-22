@@ -20,9 +20,7 @@
 
 #include <fiction/layouts/cell_grid.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/traits.hpp>
 
-#include <concepts>
 #include <cstdint>
 #include <set>
 
@@ -42,15 +40,17 @@ enum class test_cell : uint8_t
 
 using grid = cell_grid<test_cell>;
 
-}  // namespace
+/**
+ * @brief Checks whether a cell type can form a grid.
+ * @tparam CellType Cell type to test.
+ */
+template <typename CellType>
+concept grid_cell_type = requires { typename cell_grid<CellType>; };
 
-TEST_CASE("Cell grid traits", "[cell-grid]")
-{
-    CHECK(std::derived_from<grid, fiction::layouts::cartesian_layout>);
-    CHECK(is_cell_grid_v<grid>);
-    CHECK(has_get_layout_name_v<grid>);
-    CHECK(has_set_layout_name_v<grid>);
-}
+static_assert(grid_cell_type<test_cell>);
+static_assert(!grid_cell_type<int>);
+
+}  // namespace
 
 TEST_CASE("Cell type and name assignment", "[cell-grid]")
 {

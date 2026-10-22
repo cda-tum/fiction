@@ -20,7 +20,7 @@ leaves an existing destination layout unchanged.
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::read_fgl_layout(Lyt& lyt, std::istream& is)
+```{doxygenfunction} fiction::layouts::io::read_fgl_layout(layouts::gate_layout<Geometry>& lyt, std::istream& is)
 
 ```
 
@@ -28,7 +28,7 @@ leaves an existing destination layout unchanged.
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::read_fgl_layout(Lyt& lyt, const std::string_view& filename)
+```{doxygenfunction} fiction::layouts::io::read_fgl_layout(layouts::gate_layout<Geometry>& lyt, const std::string_view& filename)
 
 ```
 

@@ -28,12 +28,14 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/traits.hpp>
 
-#include <vector>
-
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
 
+/**
+ * @brief Checks network and nested color view traits.
+ * @tparam Ntk Logic network type.
+ */
 template <typename Ntk>
 void test_color_view()
 {
@@ -58,7 +60,8 @@ void test_color_view()
     CHECK(mockturtle::has_eval_color_v<color_ntk>);
     CHECK(mockturtle::has_eval_fanins_color_v<color_ntk>);
 
-    color_ntk color_view{ntk};
+    /** @brief Node and edge color view for the network. */
+    const color_ntk color_view{ntk};
 
     using color_color_ntk = out_of_place_edge_color_view<color_ntk>;
     CHECK(mockturtle::is_network_type_v<color_color_ntk>);
@@ -70,7 +73,8 @@ void test_color_view()
     CHECK(mockturtle::has_eval_color_v<color_color_ntk>);
     CHECK(mockturtle::has_eval_fanins_color_v<color_color_ntk>);
 
-    [[maybe_unused]] color_color_ntk color_color_view{color_view};
+    /** @brief Nested node and edge color view. */
+    [[maybe_unused]] const color_color_ntk color_color_view{color_view};
 }
 
 TEST_CASE("Create edge color views", "[edge-color-view]")
@@ -103,7 +107,8 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
     const auto f8 = aig_ntk.create_and(f4, f7);
     aig_ntk.create_po(f8);
 
-    out_of_place_edge_color_view aig_ecv{aig_ntk};
+    /** @brief Node and edge color view over the AIG. */
+    const out_of_place_edge_color_view aig_ecv{aig_ntk};
 
     auto const white  = aig_ecv.new_color();
     auto const yellow = aig_ecv.new_color();
@@ -170,5 +175,26 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
         /* (f1, f5) is not yellow */
         CHECK(aig_ecv.eval_edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
                                       [yellow](const auto color) { return color != yellow; }));
+    }
+    SECTION("clears current colors while preserving explicit node-color calls")
+    {
+        /** Const access to the mutable color storage. */
+        const auto& color_view = aig_ecv;
+        color_view.paint(color_view.get_node(f1), red);
+        color_view.paint_edge({color_view.get_node(f1), color_view.get_node(f3)}, red);
+        color_view.clear_colors();
+        CHECK(color_view.color(color_view.get_node(f1)) == 0u);
+        CHECK(color_view.edge_color({color_view.get_node(f1), color_view.get_node(f3)}) == 0u);
+
+        color_view.paint(color_view.get_node(f1), red);
+        color_view.paint_edge({color_view.get_node(f1), color_view.get_node(f3)}, red);
+        color_view.clear_colors(yellow);
+        CHECK(color_view.color(color_view.get_node(f1)) == yellow);
+        CHECK(color_view.edge_color({color_view.get_node(f1), color_view.get_node(f3)}) == red);
+
+        color_view.clear_colors(0u);
+        CHECK(color_view.color(color_view.get_node(f1)) == 0u);
+        CHECK(color_view.edge_color({color_view.get_node(f1), color_view.get_node(f3)}) == red);
+        CHECK(color_view.current_color() == red);
     }
 }

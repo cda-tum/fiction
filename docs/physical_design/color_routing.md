@@ -25,7 +25,7 @@ to the layout.
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::color_routing(Lyt& lyt, const std::vector<routing_objective>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)
+```{doxygenfunction} fiction::physical_design::color_routing(layouts::gate_layout<Geometry>& lyt, const std::vector<routing_objective>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)
 
 ```
 

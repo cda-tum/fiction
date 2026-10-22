@@ -25,7 +25,6 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -333,26 +332,22 @@ class generate_edge_intersection_graph_impl
  * least one coordinate. To generate the paths for the routing objectives, all possible paths from source to target in
  * the layout are enumerated while taking obstructions into consideration. The given layout must be clocked.
  *
- * @tparam Lyt Type of the clocked layout.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The layout to generate the edge intersection graph for.
  * @param objectives Source coordinates and indexed destination inputs.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
  */
-template <typename Lyt>
-edge_intersection_graph generate_edge_intersection_graph(const Lyt&                              lyt,
+template <typename Geometry>
+edge_intersection_graph generate_edge_intersection_graph(const layouts::gate_layout<Geometry>&   lyt,
                                                          const std::vector<routing_objective>&   objectives,
                                                          generate_edge_intersection_graph_params ps  = {},
                                                          generate_edge_intersection_graph_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a clocked layout");
-
     generate_edge_intersection_graph_stats st{};
 
-    detail::generate_edge_intersection_graph_impl<Lyt> p{lyt, objectives, ps, st};
+    detail::generate_edge_intersection_graph_impl<layouts::gate_layout<Geometry>> p{lyt, objectives, ps, st};
 
     const auto result = p.run();
 

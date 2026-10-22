@@ -35,7 +35,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 // ============================================================================
-// fiction: type presets and traits (the two heaviest shared headers)
+// fiction: shared layout and trait definitions
 // ============================================================================
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>

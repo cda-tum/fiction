@@ -230,12 +230,11 @@ class enumerate_all_paths_impl
  * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective& objective,
                                                         const enumerate_all_paths_params& params       = {},
                                                         const layouts::obstructions&      obstructions = {})
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params, obstructions}.run();
 }
 
