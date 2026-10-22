@@ -779,6 +779,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Gray-code iterators now index from their current position, compare positions, support copy assignment,
+    and preserve 64-bit offsets and distances across the signed boundary.
   - Edge-color views now support clearing only node colors and clearing both node and edge colors.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
