@@ -314,7 +314,10 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
-     * Set the level of a node.
+     * Sets the level of a node and invalidates cached critical-path membership.
+     *
+     * @param n Node whose level to set.
+     * @param level New node level.
      */
     void set_level(node const& n, uint32_t level)
     {
@@ -323,7 +326,9 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
-     * Set the depth of the network.
+     * Sets the depth of the network and invalidates cached critical-path membership.
+     *
+     * @param level New network depth.
      */
     void set_depth(const uint32_t level)
     {

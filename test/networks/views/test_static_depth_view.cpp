@@ -220,7 +220,8 @@ TEST_CASE("Critical paths include complemented output edges", "[static-depth-vie
     const auto              b          = aig.create_pi();
     const auto              c          = aig.create_pi();
     const auto              short_gate = aig.create_and(a, b);
-    const auto              long_gate  = aig.create_and(short_gate, c);
+    const auto              middle     = aig.create_and(b, c);
+    const auto              long_gate  = aig.create_and(middle, a);
     aig.create_po(!short_gate);
     aig.create_po(long_gate);
 

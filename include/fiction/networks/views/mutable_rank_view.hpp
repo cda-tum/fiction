@@ -434,6 +434,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Applies a given function to each node in rank order.
      *
      * This function overrides the `foreach_node` method of the base class.
+     * Constants are excluded. Optional callback indices increase across all ranks from zero.
+     * A callback returning `false` stops the entire traversal.
      *
      * @tparam Fn Functor type.
      * @param fn The function to apply.
@@ -467,6 +469,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Applies a given function to each gate in rank order.
      *
      * This function overrides the `foreach_gate` method of the base class.
+     * Optional callback indices increase across all ranks from zero.
+     * A callback returning `false` stops the entire traversal.
      *
      * @tparam Fn Functor type.
      * @param fn The function to apply.

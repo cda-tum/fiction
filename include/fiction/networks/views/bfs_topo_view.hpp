@@ -128,10 +128,10 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     }
 
     /**
-     * Returns the topological index of a node.
+     * Returns the topological index of a node in expected constant time.
      *
      * @param n Node whose index is to be determined.
-     * @return Index of the node in the topological order.
+     * @return Index of the node in the topological order, or `size()` if the node is absent.
      */
     uint32_t node_to_index(const node& n) const
     {
@@ -203,8 +203,8 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     }
 
     /**
-     * Updates the breadth-first topological order of the network.
-     * Called once during construction.
+     * Recomputes the breadth-first topological order and node indices for the unchanged underlying network.
+     * The constructor calls this function automatically.
      */
     void update_bfs_topo()
     {
