@@ -8865,7 +8865,10 @@ Raises:
 
 static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_planar_2 =
 R"doc(Places a two-input gate on tile `t` and wires its predecessors to it,
-the northern one from above and the western one from the left.
+one from above and one from the left.
+
+The signals reach the gate in fanin order, so asymmetric functions
+keep their meaning whichever predecessor sits north.
 
 Args:
     lyt: Layout.
@@ -8873,10 +8876,10 @@ Args:
     ntk: Named technology network over the storage of the ranked
          network, see `placement_view`.
     n: Node.
-    north_t: Tile that holds the northern predecessor's signal, in the
-             column of `t`.
-    west_t: Tile that holds the western predecessor's signal, in the
-            row of `t`.
+    first_t: Tile that holds the first fanin's signal, in the column
+             or the row of `t`.
+    second_t: Tile that holds the second fanin's signal, in the other
+              one of column and row of `t`.
     c: Value of a constant third fanin, if any.
 
 Template Args:
@@ -8886,8 +8889,8 @@ Returns:
     Signal of the placed node.
 
 Raises:
-    std::logic_error: If `t` is occupied, or if a predecessor is not
-                      where its name says.
+    std::logic_error: If `t` is occupied, or if a predecessor is
+                      neither north nor west of `t`.
 
 )doc";
 
