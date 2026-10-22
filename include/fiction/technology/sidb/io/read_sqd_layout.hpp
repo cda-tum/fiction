@@ -486,7 +486,7 @@ class sqd_reader
             eps_r     = parse_sqd_number(eps_r_string);
             lambda_tf = parse_sqd_number(lambda_tf_string);
 
-            if (!std::isfinite(eps_r) || !std::isfinite(lambda_tf) || eps_r < 0.0 || lambda_tf < 0.0)
+            if (eps_r < 0.0 || lambda_tf < 0.0)
             {
                 throw sqd_parsing_error("Error parsing SQD file: invalid Coulomb material parameters");
             }

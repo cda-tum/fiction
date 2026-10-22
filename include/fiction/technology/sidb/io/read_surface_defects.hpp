@@ -97,10 +97,10 @@ namespace detail
 namespace defects
 {
 
-/* Regex */
-
-inline const std::regex RE_DEFECT_MATRIX{R"(\[(?:\s*\d+\s*)+\])"};  // each match is one row
-inline const std::regex RE_ROW_INDICES{R"((\d+))"};                 // each match is one index
+/** @brief Matches a bracketed row of whitespace-separated non-negative defect indices. */
+inline const std::regex RE_DEFECT_MATRIX{R"(\[\s*\d+(?:\s+\d+)*\s*\])"};
+/** @brief Matches one defect index within a recognized row. */
+inline const std::regex RE_ROW_INDICES{R"(\d+)"};
 
 /**
  * Maps indices in the data format to defect types.
@@ -112,15 +112,6 @@ inline constexpr std::array<sidb::model::defect_type, 11> INDEX_TO_DEFECT{
      sidb::model::defect_type::RAISED_SI, sidb::model::defect_type::ETCH_PIT, sidb::model::defect_type::MISSING_DIMER}};
 
 }  // namespace defects
-
-// data types cannot properly be converted to bit field types
-#pragma GCC diagnostic push
-#ifndef __clang__
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif
-#pragma GCC diagnostic ignored "-Wconversion"
-
-#pragma GCC diagnostic pop
 
 /**
  * Reads a defect matrix into a defects-only `sidb::layout`: entry `x` of row `y` becomes the defect at column `x` of

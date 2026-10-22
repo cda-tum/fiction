@@ -82,7 +82,8 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
     }
     SECTION("lines with negative numbers or non-numeral characters are ignored")
     {
-        for (const auto* const surface : {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]"})
+        for (const auto* const surface : {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]",
+                                          "[[0 1 0 0] [111111111111111111111111x] [0 1 0 0]]"})
         {
             std::istringstream surface_stream{surface};
             const auto         lyt = read_surface_defects(surface_stream);
@@ -91,6 +92,16 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
             CHECK(lyt.get_defect(site_at_row(1, 0)).type == defect_type::DB);
             CHECK(lyt.get_defect(site_at_row(1, 1)).type == defect_type::DB);
         }
+    }
+    SECTION("rows allow whitespace between indices")
+    {
+        /** @brief Mixed whitespace and surrounding non-row text retain row extraction. */
+        std::istringstream stream{"text[[1\t2]\n[3\r\n4]]text"};
+        /** @brief Parsed defects retain their row and column. */
+        const auto lyt = read_surface_defects(stream);
+        CHECK(lyt.num_defects() == 4);
+        CHECK(lyt.get_defect(site_at_row(1, 0)).type == defect_type::SI_VACANCY);
+        CHECK(lyt.get_defect(site_at_row(1, 1)).type == defect_type::SINGLE_DIHYDRIDE);
     }
     SECTION("exceptions")
     {

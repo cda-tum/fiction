@@ -870,6 +870,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes and multiple XML roots. SiDB file readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
