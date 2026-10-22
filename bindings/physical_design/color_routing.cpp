@@ -73,7 +73,8 @@ void register_color_routing_impl(nb::module_& m)
 
             for (const auto& obj : objectives)
             {
-                objs.push_back({std::get<0>(obj), std::get<1>(obj), std::get<2>(obj)});
+                objs.push_back(
+                    {.source = std::get<0>(obj), .target = std::get<1>(obj), .input_index = std::get<2>(obj)});
             }
 
             return fiction::physical_design::color_routing(lyt, objs, params);
