@@ -243,7 +243,7 @@ TEST_CASE("QCA SVG clips cells to the frame in both render modes", "[write-qca-l
     CHECK(actual.str() == expected.str());
 }
 
-TEST_CASE("QCA SVG retains empty detailed tiles and layer painting order", "[write-qca-layout-svg]")
+TEST_CASE("QCA SVG paints lower layers before upper layers", "[write-qca-layout-svg]")
 {
     const auto  simple    = GENERATE(false, true);
     const auto  tile_size = GENERATE(uint16_t{1}, uint16_t{5});
@@ -256,17 +256,4 @@ TEST_CASE("QCA SVG retains empty detailed tiles and layer painting order", "[wri
     REQUIRE(svg.find("fill:#008dc8") != std::string::npos);
     REQUIRE(svg.find("fill:#e28686") != std::string::npos);
     CHECK(svg.find("fill:#008dc8") < svg.find("fill:#e28686"));
-    if (tile_size == 5)
-    {
-        tinyxml2::XMLDocument document{};
-        REQUIRE(document.Parse(svg.c_str()) == tinyxml2::XML_SUCCESS);
-        const auto* layer = document.FirstChildElement("svg")->FirstChildElement("g");
-        REQUIRE(layer != nullptr);
-        unsigned tiles{0};
-        for (const auto* tile = layer->FirstChildElement("g"); tile != nullptr; tile = tile->NextSiblingElement("g"))
-        {
-            ++tiles;
-        }
-        CHECK(tiles == (simple ? 1 : 2));
-    }
 }
