@@ -36,7 +36,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
@@ -46,7 +45,6 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -205,6 +203,10 @@ enum class buffer_connection : uint8_t
      */
     CONNECTED = 1
 };
+/**
+ * @brief Largest number of fanins of a gate and of fanouts of a node that the lookup tables cover.
+ */
+inline constexpr std::size_t MAX_DEGREE = 2u;
 /**
  * @brief Largest number of free rows between a node's predecessor and the predecessor's left neighbour that the lookup
  * tables distinguish.
@@ -494,7 +496,7 @@ template <typename Ntk>
 
     const auto fo = ranked_fanouts(ntk, n);
 
-    if (fo.size() != 2)
+    if (fo.size() != MAX_DEGREE)
     {
         throw std::logic_error(fmt::format("fanout node {} drives {} nodes instead of two", n, fo.size()));
     }
@@ -535,7 +537,7 @@ template <typename Ntk>
 
     const auto fo = ntk.fanout(n);
 
-    if (fo.size() == 1 && num_fanins(ntk, fo[0]) == 2 && ranked_fanins(ntk, fo[0])[1] == n)
+    if (fo.size() == 1 && num_fanins(ntk, fo[0]) == MAX_DEGREE && ranked_fanins(ntk, fo[0])[1] == n)
     {
         return buffer_connection::CONNECTED;
     }
@@ -634,20 +636,20 @@ template <typename Ntk>
 
                                  const auto fanin_nodes = networks::fanins(ntk, n).fanin_nodes;
 
-                                 if (fanin_nodes.size() == 2)
+                                 if (fanin_nodes.size() == MAX_DEGREE)
                                  {
                                      found = orientation::SOUTH_SECOND;
                                      return;
                                  }
 
                                  if (fanin_nodes.size() == 1 && ntk.is_fanout(fanin_nodes.front()) &&
-                                     ntk.fanout_size(fanin_nodes.front()) == 2)
+                                     ntk.fanout_size(fanin_nodes.front()) == MAX_DEGREE)
                                  {
                                      found = orientation::EAST;
                                      return;
                                  }
 
-                                 if (ntk.fanout_size(n) == 2)
+                                 if (ntk.fanout_size(n) == MAX_DEGREE)
                                  {
                                      found = orientation::EAST;
                                  }
@@ -693,7 +695,7 @@ compute_level_variables(const Ntk& ntk, const Lyt& lyt,
                              {
                                  const auto gap = predecessor_gap(ntk, lyt, node2pos, lvl, n);
 
-                                 if (num_fanins(ntk, n) == 2)
+                                 if (num_fanins(ntk, n) == MAX_DEGREE)
                                  {
                                      // a gate after a south-oriented node without room between their predecessors turns
                                      // east
@@ -768,7 +770,7 @@ template <typename Ntk>
     ntk.foreach_node_in_rank(lvl,
                              [&ntk, &indices](const auto& n, const auto i)
                              {
-                                 if (num_fanins(ntk, n) == 2)
+                                 if (num_fanins(ntk, n) == MAX_DEGREE)
                                  {
                                      indices.push_back(i);
                                  }
@@ -802,7 +804,7 @@ two_input_new_lines(const Ntk& ntk, const Lyt& lyt, const mockturtle::node_map<t
                              {
                                  const auto pre = ranked_fanins(ntk, n);
 
-                                 if (pre.size() != 2)
+                                 if (pre.size() != MAX_DEGREE)
                                  {
                                      return;
                                  }
@@ -839,6 +841,7 @@ struct level_wiring
  * @param wiring Wire lengths; adjusted.
  * @param gates Rank positions of the two-input gates.
  * @param gate_lines Rows between the predecessors of every gate, in the order of `gates`.
+ * @throws std::logic_error If a node demands more than the largest diagonal.
  */
 inline void lift_to_common_diagonal(level_wiring& wiring, const std::vector<std::size_t>& gates,
                                     const std::vector<uint64_t>& gate_lines)
@@ -876,19 +879,22 @@ inline void lift_to_common_diagonal(level_wiring& wiring, const std::vector<std:
         max    = max_gate;
     }
 
-    std::unordered_map<std::size_t, std::size_t> gate_of_position{};
+    // rows a gate advances on its own, per rank position; zero for every other node
+    std::vector<uint64_t> own_lines(x.size(), 0);
     for (std::size_t i = 0; i < gates.size(); ++i)
     {
-        gate_of_position[gates[i]] = i;
+        own_lines[gates[i]] = gate_lines[i];
     }
 
     for (std::size_t i = 0; i < x.size(); ++i)
     {
-        const auto it     = gate_of_position.find(i);
-        const auto own    = it != gate_of_position.cend() ? gate_lines[it->second] : uint64_t{0};
-        const auto demand = x[i] + y[i] + own;
+        const auto demand = x[i] + y[i] + own_lines[i];
 
-        assert(demand <= max && "a node demands more than the largest diagonal; the propagation of lines is broken");
+        if (demand > max)
+        {
+            throw std::logic_error(fmt::format(
+                "node at rank position {} demands {} rows but the largest diagonal has {}", i, demand, max));
+        }
 
         const auto diff = max - demand;
 
@@ -1642,7 +1648,7 @@ template <typename Lyt, typename Ntk>
         throw std::invalid_argument("The network has no primary inputs");
     }
 
-    if (networks::has_high_degree_fanin_nodes(ntk, 2))
+    if (networks::has_high_degree_fanin_nodes(ntk, detail::MAX_DEGREE))
     {
         throw networks::high_degree_fanin_exception();
     }
@@ -1652,7 +1658,7 @@ template <typename Lyt, typename Ntk>
     ntk.foreach_node(
         [&ntk, &high_degree_fanout](const auto& n)
         {
-            if (!ntk.is_constant(n) && ntk.fanout_size(n) > 2)
+            if (!ntk.is_constant(n) && ntk.fanout_size(n) > detail::MAX_DEGREE)
             {
                 high_degree_fanout = true;
             }

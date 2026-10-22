@@ -35,11 +35,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <span>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -139,6 +141,7 @@ std::pair<bool, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
  *   ./plane ISCAS85 xor
  */
 int main(const int argc, const char** argv)
+try
 {
     const std::span<const char*> args{argv, static_cast<std::size_t>(argc)};
 
@@ -255,4 +258,11 @@ int main(const int argc, const char** argv)
     fmt::print("[i] {} benchmark(s) with failures\n", failures);
 
     return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+catch (const std::exception& exception)
+{
+    static_cast<void>(std::fputs("[e] Experiment failed: ", stderr));
+    static_cast<void>(std::fputs(exception.what(), stderr));
+    static_cast<void>(std::fputc('\n', stderr));
+    return EXIT_FAILURE;
 }
