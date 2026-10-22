@@ -600,6 +600,8 @@ class write_qca_layout_svg_impl
  * Writes an SVG representation of a QCA layout into an output stream. Both tile- and cell-based layouts are
  * supported. For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
  *
+ * Cells outside the layout extent are skipped. Cell-based output paints lower layers before upper layers.
+ *
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
  *
@@ -618,6 +620,8 @@ inline void write_qca_layout_svg(const qca::layout& lyt, std::ostream& os, const
 /**
  * Writes an SVG representation of a QCA layout into a file. Both tile- and cell-based layouts are supported.
  * For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
+ *
+ * Cells outside the layout extent are skipped. Cell-based output paints lower layers before upper layers.
  *
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).

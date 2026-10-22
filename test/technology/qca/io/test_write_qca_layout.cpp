@@ -1531,3 +1531,38 @@ TEST_CASE("QCAD retains quantum-dot offsets at large coordinates", "[qcad]")
     CHECK(stream.str().find(fmt::format("x={}\n", positive_dot)) != std::string::npos);
     CHECK(stream.str().find(fmt::format("x={}\n", negative_dot)) != std::string::npos);
 }
+
+TEST_CASE("QCAD preserves optional via layers before empty crossing layers", "[qcad]")
+{
+    const auto  create_vias = GENERATE(false, true);
+    qca::layout layout{{3, 3, 2}};
+    for (const auto& cell : {qca::layout::cell{0, 2}, qca::layout::cell{2, 0}})
+    {
+        layout.assign_cell_type(cell, qca::cell_type::NORMAL);
+        layout.assign_cell_mode(cell, qca::cell_mode::VERTICAL);
+    }
+    std::ostringstream stream{};
+    write_qca_layout(layout, stream, {.create_inter_layer_via_cells = create_vias});
+    const auto output   = stream.str();
+    const auto ground   = output.find("pszDescription=Ground Layer\n");
+    const auto crossing = output.find("pszDescription=Crossing Layer 1\n");
+    const auto via      = output.find("pszDescription=Via Layer 1\n");
+    REQUIRE(ground != std::string::npos);
+    REQUIRE(crossing != std::string::npos);
+    if (create_vias)
+    {
+        REQUIRE(via != std::string::npos);
+        CHECK(ground < via);
+        CHECK(via < crossing);
+        const auto via_cells = output.substr(via, crossing - via);
+        const auto first     = via_cells.find("x=140.000000\ny=100.000000\n");
+        const auto second    = via_cells.find("x=100.000000\ny=140.000000\n");
+        REQUIRE(first != std::string::npos);
+        REQUIRE(second != std::string::npos);
+        CHECK(first < second);
+    }
+    else
+    {
+        CHECK(via == std::string::npos);
+    }
+}

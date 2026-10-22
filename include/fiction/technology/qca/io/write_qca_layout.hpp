@@ -606,6 +606,7 @@ class write_qca_layout_impl
 /**
  * Writes a QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
  * a physical simulator for the QCA technology platform.
+ * Cells outside the layout extent are skipped. Cells within each layer are written in row and column order.
  *
  * This overload uses an output stream to write into.
  *
@@ -625,6 +626,7 @@ inline void write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca
 /**
  * Writes a QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
  * a physical simulator for the QCA technology platform.
+ * Cells outside the layout extent are skipped. Cells within each layer are written in row and column order.
  *
  * This overload uses a file name to create and write into.
  *
