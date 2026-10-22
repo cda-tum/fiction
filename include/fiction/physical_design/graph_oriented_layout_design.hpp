@@ -2134,9 +2134,6 @@ class graph_oriented_layout_design_impl
     {
         const auto min_layout_width = ssg.network.num_pis();
 
-        std::vector<std::pair<coord_vec_type, double>> next_positions;
-        next_positions.reserve(2 * ps.num_vertex_expansions);
-
         auto layout = initialize_layout(min_layout_width);
         report_graph(ssg, layout, 0, worker_progress);
 
