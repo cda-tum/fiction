@@ -12,7 +12,6 @@
  * @file
  * @brief Enumerates every loop-less path between two coordinates in a layout.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #pragma once

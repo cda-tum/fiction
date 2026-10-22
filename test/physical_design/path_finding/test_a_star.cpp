@@ -12,7 +12,6 @@
  * @file
  * @brief Tests for `fiction/physical_design/path_finding/a_star.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>

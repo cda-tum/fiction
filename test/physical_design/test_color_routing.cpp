@@ -12,7 +12,6 @@
  * @file
  * @brief Tests for `fiction/physical_design/color_routing.hpp`.
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>

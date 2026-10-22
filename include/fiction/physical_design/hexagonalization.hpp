@@ -13,7 +13,6 @@
  * @brief Maps a Cartesian gate-level layout onto a hexagonal one.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
- * @author OpenAI Codex
  */
 
 #pragma once

@@ -13,7 +13,6 @@
  * @brief A* shortest-path search between two layout coordinates, plus its distance functor.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI Codex
  */
 
 #pragma once
@@ -264,7 +263,7 @@ class a_star_impl
             {
                 // update its f-value
                 it->f = f;
-                std::make_heap(open_list.begin(), open_list.end(), std::greater<>{});
+                std::ranges::make_heap(open_list, std::greater<>{});
             }
             else
             {
