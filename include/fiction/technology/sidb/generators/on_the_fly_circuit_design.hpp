@@ -168,12 +168,13 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @param defective_surface The defective surface on which the SiDB circuit is designed.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_circuit_design_on_defective_surface_params` object.
- * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
+ * @param stats Receives statistics after circuit design succeeds. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed circuit on the defective surface.
  * @note A circuit or gate timeout aborts the operation. Only a completed, unsuccessful gate search blacklists a tile.
  * @throws utils::timeout_error If a circuit or gate-design timeout expires.
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  * @throws fcn::unsupported_gate_orientation_exception If a gate orientation has no implementation.
+ * @throws unsuccessful_pr_error If placement and routing cannot satisfy the blacklist.
  */
 [[nodiscard]] inline layout
 on_the_fly_circuit_design_on_defective_surface(const tec_nt& ntk, const layouts::hexagonal_gate_layout& lattice_tiling,
@@ -274,6 +275,7 @@ on_the_fly_circuit_design_on_defective_surface(const tec_nt& ntk, const layouts:
  * @return Layout representing the designed SiDB circuit.
  * @throws std::invalid_argument if gate mapping uses a column arrangement instead of a row arrangement.
  * @throws fcn::unsupported_gate_type_exception if any object has an unsupported function.
+ * @throws fcn::unsupported_gate_orientation_exception if a gate orientation has no implementation.
  * @throws unsuccessful_gate_design_error if a gate cannot be designed.
  * @throws utils::timeout_error if the shared circuit budget or an individual gate budget expires. No partial circuit
  * is returned. Deadline checks are cooperative and do not interrupt allocation or cell placement.
