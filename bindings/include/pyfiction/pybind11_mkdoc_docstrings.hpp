@@ -145,20 +145,21 @@ static const char *mkd_doc_fiction_fcn_gate_library =
 R"doc( Base class for various FCN libraries used to map gate-level layouts
  to cell-level ones. Any new gate library can extend `gate_library` if
  it benefits from its features but does not have to. The only
- requirement is that it must be a static class that provides a
+ requirement is that it must provide a public static set_up_gate
+ function for each supported gate-layout geometry, for example:
 
 ```
 embed:rst
 .. code-block:: c++
 
-template <typename GateLyt>
-static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+static gate set_up_gate(const fiction::layouts::cartesian_gate_layout& lyt,
+const fiction::layouts::layout_base::coordinate& t)
 ```
 
 
 
 
- public member function. Additionally, a
+ Additionally, a
 
 ```
 embed:rst
@@ -996,9 +997,6 @@ Args:
     lyt: Layout.
     t: Occupied tile.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     Physical connector ports.
 
@@ -1011,9 +1009,6 @@ Args:
     lyt: The layout to check.
     n: Node whose fanins are to be considered.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     `true` iff `n` has an AND, OR, or MAJ fanin node.
 
@@ -1025,9 +1020,6 @@ R"doc(Checks whether the given node has an fanout node as fanout.
 Args:
     lyt: The layout to check.
     n: Node whose fanouts are to be considered.
-
-Template Args:
-    Lyt: Gate-level layout type.
 
 Returns:
     `true` iff `n` has a fanout node as fanout.
@@ -1056,9 +1048,6 @@ and output, const cells etc. are computed additionally.
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a ToPoliNano gate.
-
-Template Args:
-    GateLyt: Shifted Cartesian gate-level layout type.
 
 Returns:
     ToPoliNano gate representation of `t` including I/Os, rotation,
@@ -5377,7 +5366,7 @@ Args:
     name: The name to give to the generated layout.
 
 Template Args:
-    Lyt: The layout type to be created from an input.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 )doc";
 
@@ -5398,7 +5387,7 @@ Args:
     is: The input stream to read from.
 
 Template Args:
-    Lyt: The layout type to be used as input.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5412,7 +5401,7 @@ Args:
     name: The name to give to the generated layout.
 
 Template Args:
-    Lyt: The layout type to be created from an input.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 )doc";
 
@@ -5429,7 +5418,7 @@ Args:
     filename: The file name to open and read from.
 
 Template Args:
-    Lyt: The layout type to be used as input.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5502,7 +5491,7 @@ Args:
     on_progress: Receives completed drawing work.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Drawer: DOT drawer type.
 
 )doc";
@@ -6132,9 +6121,7 @@ Args:
 Template Args:
     GateSizeX: Horizontal tile size.
     GateSizeY: Vertical tile size.
-    GateLyt: Gate-level layout type.
-    Coordinate: Cell coordinate type, e.g., `layout_base::coordinate`.
-                Hexagonal tiles can yield negative positions.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Absolute cell position in a layout.
@@ -6669,7 +6656,6 @@ Args:
     t: Tile whose port routing is determined.
 
 Template Args:
-    Lyt: Gate-level layout type.
     RespectClocking: Whether to respect the layout clocking while
                      tracing incoming and outgoing signals.
 
@@ -6710,9 +6696,6 @@ and output, const cells etc. are computed additionally.
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a molQCA gate.
-
-Template Args:
-    GateLyt: Cartesian gate-level layout type.
 
 Returns:
     molQCA gate representation of `t` including I/Os, rotation, const
@@ -8313,7 +8296,7 @@ Args:
 
 Template Args:
     GateLibrary: Gate library whose tile size is used.
-    GateLyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Axis sizes of the grid, including the layer count of `gate_lyt`.
@@ -8385,7 +8368,7 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: The gate-level layout type to route.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     `true` iff routing was successful, i.e., iff all objectives could
@@ -8643,9 +8626,6 @@ input when the layout is converted to a hexagonal format.
 Args:
     lyt: The Cartesian gate-level layout containing primary inputs.
 
-Template Args:
-    CartLyt: Type of the Cartesian layout.
-
 Returns:
     The number of primary inputs that are placed to the left of the
     middle primary input.
@@ -8660,9 +8640,6 @@ input when the layout is converted to a hexagonal format.
 
 Args:
     lyt: The Cartesian gate-level layout containing primary inputs.
-
-Template Args:
-    CartLyt: Type of the Cartesian layout.
 
 Returns:
     The number of primary inputs that are placed to the right of the
@@ -8679,9 +8656,6 @@ output when the layout is converted to a hexagonal format.
 Args:
     lyt: The Cartesian gate-level layout containing primary outputs.
 
-Template Args:
-    CartLyt: Type of the Cartesian layout.
-
 Returns:
     The number of primary outputs that are placed to the left of the
     middle primary output.
@@ -8696,9 +8670,6 @@ output when the layout is converted to a hexagonal format.
 
 Args:
     lyt: The Cartesian gate-level layout containing primary outputs.
-
-Template Args:
-    CartLyt: Type of the Cartesian layout.
 
 Returns:
     The number of primary outputs that are placed to the right of the
@@ -9881,10 +9852,6 @@ Args:
     output_mode: Adjust offset based on POs relocated to the bottom
                  row.
 
-Template Args:
-    HexLyt: Even-row hexagonal gate-level layout return type.
-    CartLyt: Input Cartesian gate-level layout type.
-
 Returns:
     Signed shift that has to be added to any x-coordinate on the
     hexagonal layout.
@@ -9912,16 +9879,8 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Implementation of the graph-oriented layout design algorithm. This
 class handles the initialization and execution of the algorithm.
 
-The specification network is converted to a `technology_network`
-before anything else happens, so this class is templated on the layout
-type only. Carrying the caller's network type through the whole
-implementation would duplicate every member for each network type the
-caller happens to use, without a single line of the body depending on
-it. The conversion lives in the `graph_oriented_layout_design` entry
-point below.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.)doc";
+The algorithm places a named technology network on a Cartesian gate-
+level layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_adjust_layout_size =
 R"doc(Adjusts the layout size based on the last position.
@@ -10376,12 +10335,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl =
-R"doc(Maps placed objects and ordered ports to a hexagonal layout.
-
-Template Args:
-    HexLyt: Hexagonal destination layout. @tparam CartLyt Cartesian
-            source layout.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl = R"doc(Maps placed objects and ordered ports to a hexagonal layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_hexagonalization_impl =
 R"doc(Initializes a conversion. @param lyt Source layout. @param p
@@ -10862,10 +10816,6 @@ Args:
     cartesian_tile: Tile on the Cartesian grid.
     cartesian_layout_height: Height of the Cartesian layout.
 
-Template Args:
-    CartLyt: Cartesian source layout type.
-    HexLyt: Hexagonal destination layout type.
-
 Returns:
     corresponding tile on the hexagonal grid.
 
@@ -11188,7 +11138,7 @@ Args:
     stats: Statistics.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     `true` iff `lyt` could be successfully clocked via a valid clock
@@ -11282,16 +11232,16 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit if one is found under the given parameters;
-    `std::nullopt`, otherwise.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit if one is found under the given
+    parameters; `std::nullopt`, otherwise.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11402,16 +11352,16 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit if one is found under the given parameters;
-    `std::nullopt`, otherwise.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit if one is found under the given
+    parameters; `std::nullopt`, otherwise.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11427,7 +11377,7 @@ Args:
     lyt: Layout to inspect.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Routing objectives that preserve logical input numbering.
@@ -11455,7 +11405,7 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Type of the clocked layout.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     An edge intersection graph of paths satisfying the given routing
@@ -11532,9 +11482,6 @@ Args:
                            calculated based on the current partial
                            layout and returns an uint64_t that should
                            be minimized.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.
 
 Returns:
     The smallest layout yielded by the graph-oriented layout design
@@ -11738,10 +11685,6 @@ Args:
     params: Parameters.
     stats: Statistics.
 
-Template Args:
-    HexLyt: Even-row hexagonal gate-level layout return type.
-    CartLyt: Input Cartesian gate-level layout type.
-
 Returns:
     Hexagonal representation of the Cartesian layout.
 
@@ -11930,15 +11873,15 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -13740,7 +13683,7 @@ Args:
     t: Occupied tile.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Physical connector ports.
@@ -13774,7 +13717,7 @@ Args:
     t: Tile to be realized as a QCA ONE gate.
 
 Template Args:
-    GateLyt: Cartesian gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     QCA ONE gate representation of `t` including I/Os, rotation, const
@@ -13845,9 +13788,6 @@ and output, const cells etc. are computed additionally.
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a Bestagon gate.
-
-Template Args:
-    GateLyt: Hexagonal gate-level layout type.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
@@ -14548,9 +14488,6 @@ Args:
             encapsulated in an `on_the_fly_circuit_design_params`
             object.
 
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-
 Returns:
     Layout representing the designed SiDB circuit.
 
@@ -14601,9 +14538,6 @@ Args:
     stats: Pointer to a structure for collecting statistics. If
            `nullptr`, statistics are discarded.
 
-Template Args:
-    GateLyt: Gate-level layout type.
-
 Returns:
     Layout representing the designed circuit on the defective surface.
 
@@ -14633,11 +14567,7 @@ R"doc(Total millisecond budget across surface analysis, placement-and-
 routing retries, and gate design. The maximum value means unlimited;
 zero expires immediately. Cancellation is cooperative.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats =
-R"doc(Statistics for the on-the-fly defect-aware circuit design.
-
-Template Args:
-    GateLyt: Gate-level layout type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats = R"doc(Statistics for the on-the-fly defect-aware circuit design.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats_exact_stats = R"doc(The `stats` of the *exact* algorithm.)doc";
 
@@ -16215,9 +16145,6 @@ Args:
     p: The ports of the tile.
     tile: The tile.
 
-Template Args:
-    GateLyt: Gate-level layout type.
-
 Returns:
     The designed gate.
 
@@ -16250,9 +16177,6 @@ implementation.
 Args:
     lyt: Layout that owns the object.
     object: Object to inspect.
-
-Template Args:
-    GateLyt: Gate-level layout type.
 
 Returns:
     Whether the object implements identity, INV, or a supported binary
@@ -16302,10 +16226,6 @@ Args:
                 subsequent search, capped by the enclosing deadline.
     defect_surface: Optional atomic defect surface in case atomic
                     defects are present.
-
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-    Params: Type of the parameter used for the gate library.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
@@ -24584,9 +24504,6 @@ Args:
     lyt: Layout that contains the tile.
     t: Tile whose incoming and outgoing port directions are
        determined.
-
-Template Args:
-    Lyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
     Incoming and outgoing port directions of the tile.
