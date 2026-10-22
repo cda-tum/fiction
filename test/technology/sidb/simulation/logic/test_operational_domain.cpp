@@ -261,7 +261,6 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
 
     SECTION("invalid number of dimensions")
     {
-
         // 0-dimensional
         const operational_domain_params zero_dimensional_params{.sweep_dimensions = {}};
 
@@ -342,7 +341,6 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
 
     SECTION("invalid sweep dimensions")
     {
-
         SECTION("min/max mismatch")
         {
             // 1-dimensional with invalid min/max on 1st dimension

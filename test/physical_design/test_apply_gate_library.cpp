@@ -138,7 +138,6 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
     }
     SECTION("Design SiDB circuit on-the-fly")
     {
-
         SECTION("AND gate can be designed successfully")
         {
             const design_gates_params design_gate_params{
@@ -221,7 +220,6 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
 
     SECTION("Use parameterized gate library")
     {
-
         SECTION("use predefined gate implementation for complex gates (double wire and crossing)")
         {
             const design_gates_params design_gate_params{
@@ -306,7 +304,6 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Use parameterized gate library")
         {
-
             const design_gates_params design_gate_params{
                 .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
                 .canvas                 = {site_at_row(25, 19), site_at_row(32, 25)},
@@ -361,7 +358,6 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Use parameterized gate library")
         {
-
             const design_gates_params design_gate_params{
                 .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
                 .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
@@ -416,7 +412,6 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Use parameterized gate library")
         {
-
             const design_gates_params design_gate_params{
                 .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
                 .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
@@ -476,7 +471,6 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Use parameterized gate library")
         {
-
             const design_gates_params design_gate_params{
                 .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
                 .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
@@ -511,7 +505,6 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Use parameterized gate library")
         {
-
             const design_gates_params design_gate_params{
                 .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
                 .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
@@ -528,7 +521,6 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Use parameterized gate library, reject kinks")
         {
-
             const design_gates_params design_gate_params{
                 .operational_params     = {.sim_params   = simulation_parameters{2, -0.32},
                                            .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
@@ -566,7 +558,6 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
         SECTION("Use parameterized gate library")
         {
-
             const design_gates_params design_gate_params{
                 .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
                 .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},

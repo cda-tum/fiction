@@ -550,7 +550,7 @@ class post_layout_optimization_impl
     /**
      * Wiring reduction parameters.
      */
-    fiction::physical_design::wiring_reduction_params wiring_reduction_params{};
+    fiction::physical_design::wiring_reduction_params wiring_reduction_params;
     /**
      * Wiring reduction stats.
      */
