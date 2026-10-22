@@ -23,6 +23,8 @@
 #include <fiction/physical_design/routing_utils.hpp>
 
 #include <algorithm>
+#include <cstdint>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -294,11 +296,8 @@ TEST_CASE("Candidate labels retain their routing objective", "[generate-edge-int
     for (const auto limited : {false, true})
     {
         /** @brief Enumeration options for the current graph run. */
-        generate_edge_intersection_graph_params params{};
-        if (limited)
-        {
-            params.path_limit = 2;
-        }
+        const generate_edge_intersection_graph_params params{.path_limit =
+                                                                 limited ? std::optional<uint32_t>{2u} : std::nullopt};
         /** @brief Graph statistics used to verify objective labels. */
         generate_edge_intersection_graph_stats st{};
         /** @brief Intersection graph for the current enumeration mode. */

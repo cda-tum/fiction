@@ -1484,11 +1484,11 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
     simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    operational_domain_params op_domain_params{.operational_params = {.sim_params = sim_params}};
     // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
-    op_domain_params.sweep_dimensions = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
-        {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
+    const operational_domain_params op_domain_params{
+        .operational_params = {.sim_params = sim_params},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}}};
 
     // ground truth to compare the contour tracing results against
     const auto grid_search_domain = operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params);
@@ -1565,11 +1565,11 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
     simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    operational_domain_params op_domain_params{.operational_params = {.sim_params = sim_params}};
     // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
-    op_domain_params.sweep_dimensions = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
-        {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
+    const operational_domain_params op_domain_params{
+        .operational_params = {.sim_params = sim_params},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}}};
 
     // ground truth to compare the flood fill results against
     const auto grid_search_domain = operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params);

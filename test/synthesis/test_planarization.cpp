@@ -225,14 +225,18 @@ TEST_CASE("The lookahead budget fallback and the crossing limit are honored", "[
 
     SECTION("a tiny lookahead budget falls back to the cone model")
     {
-        const planarization_params ps{.duplication = {.lookahead_budget = 1}};
+        const planarization_params ps{
+            .duplication = {.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .lookahead_budget = 1}};
 
         const auto result = planarization(ranked, ps);
         check_contract(ntk, result);
     }
     SECTION("a crossing limit of zero duplicates every level")
     {
-        const planarization_params ps{.duplication = {.crossing_gates = {.max_crossings_per_level = 0}}};
+        const planarization_params ps{
+            .duplication = {.strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .crossing_gates = {.max_crossings_per_level = 0}}};
 
         planarization_stats st{};
         const auto          result = planarization(ranked, ps, &st);
@@ -254,13 +258,17 @@ TEST_CASE("Invalid parameters are rejected before any stage runs", "[planarizati
     }
     SECTION("lookahead budget of zero")
     {
-        const planarization_params ps{.duplication = {.lookahead_budget = 0}};
+        const planarization_params ps{
+            .duplication = {.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .lookahead_budget = 0}};
 
         CHECK_THROWS_AS(planarization(ranked, ps), std::invalid_argument);
     }
     SECTION("negative cost weight")
     {
-        const planarization_params ps{.duplication = {.duplication_cost = {.buffer_weight = -1.0}}};
+        const planarization_params ps{
+            .duplication = {.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .duplication_cost = {.buffer_weight = -1.0}}};
 
         CHECK_THROWS_AS(planarization(ranked, ps), std::invalid_argument);
     }

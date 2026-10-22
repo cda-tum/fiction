@@ -871,7 +871,7 @@ TEST_CASE("Path enumeration reaches targets in the crossing layer", "[k-shortest
     REQUIRE_FALSE(shortest.empty());
     const auto all = enumerate_all_paths(layout, objective, {.crossings = true});
     CHECK(all.contains(shortest));
-    CHECK(yen_k_shortest_paths(layout, objective, 10, {{true}}).size() == all.size());
+    CHECK(yen_k_shortest_paths(layout, objective, 10, {.astar_params = {.crossings = true}}).size() == all.size());
 }
 
 TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", "[k-shortest-paths]")

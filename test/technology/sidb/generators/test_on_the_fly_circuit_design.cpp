@@ -126,10 +126,12 @@ TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-cir
     const hexagonal_gate_layout tiling{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
     const sidb::layout          surface{};
 
-    on_the_fly_circuit_design_on_defective_surface_params params{
-        .exact_design_parameters = {.scheme = "Row", .upper_bound_x = 3, .upper_bound_y = 3, .fixed_size = true}};
-    params.exact_design_parameters.timeout = 10'000;
-    auto& gates                            = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
+    on_the_fly_circuit_design_on_defective_surface_params params{.exact_design_parameters = {.scheme        = "Row",
+                                                                                             .upper_bound_x = 3,
+                                                                                             .upper_bound_y = 3,
+                                                                                             .fixed_size    = true,
+                                                                                             .timeout       = 10'000}};
+    auto& gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
 
     SECTION("Expired circuit budget")
     {

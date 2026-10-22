@@ -52,6 +52,7 @@ struct planarization_params
      *
      * The pipeline defaults to the hybrid strategy, which decides per level between duplicating nodes and keeping the
      * crossings for the crossing gates.
+     * @hideinitializer
      */
     node_duplication_planarization_params duplication{
         .strategy = node_duplication_planarization_params::planarization_strategy::HYBRID};

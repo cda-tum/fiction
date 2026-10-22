@@ -219,10 +219,9 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
 
     SECTION("Different seeds produce different results")
     {
-        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM};
+        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM, .seed = 1};
 
         // compute baseline depth using seed = 1
-        ps.seed               = 1;
         const auto base_sub   = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
         const auto base_depth = base_sub.depth();
 
