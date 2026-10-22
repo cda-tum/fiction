@@ -12,6 +12,7 @@
  * @file
  * @brief Enumerates every loop-less path between two coordinates in a layout.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -156,7 +157,7 @@ class enumerate_all_paths_impl
         // if source and target are identical, a path has been found
         if (src == tgt)
         {
-            collection.add(p);
+            collection.push_back(std::move(p));
         }
         else  // destination is not reached yet
         {
