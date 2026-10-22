@@ -255,8 +255,7 @@ def a_star_distance(
         Minimum path length between `source` and `target` in `layout`.
 
     Raises:
-        std::invalid_argument: If source or target lies outside the layout
-                               extent.
+        ValueError: If source or target lies outside the layout extent.
     """
 
 @overload
