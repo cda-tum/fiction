@@ -262,7 +262,9 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
 TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl-layout]")
 {
     cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
-    const std::string     label{"first\r\nsecond\t<&>"};
+    /** @brief XML text, literal entity spelling, and long whitespace names retain every character. */
+    const auto label =
+        GENERATE(std::string{"first\r\nsecond\t<&>"}, std::string{"&amp; \"quoted\" 'name'"}, std::string(4096, ' '));
     layout.set_layout_name(label);
     const auto input = layout.create_pi(label, {0, 0});
     const auto wire  = layout.create_buf(input, {1, 0});
