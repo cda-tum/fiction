@@ -1301,7 +1301,8 @@ class graph_oriented_layout_design_impl
      * @return A vector of tiles representing the possible positions for PIs.
      */
     [[nodiscard]] coord_vec_type get_possible_positions_pis(layouts::cartesian_gate_layout& layout,
-                                                            search_space_graph& ssg, const uint64_t num_expansions)
+                                                            search_space_graph&             ssg,
+                                                            const uint64_t                  num_expansions) const
     {
         uint64_t count_expansions = 0ul;
 
@@ -1440,7 +1441,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type get_possible_positions_pos(const layouts::cartesian_gate_layout&    layout,
                                                             const placement_info&                    place_info,
-                                                            const networks::fanin_container<tec_nt>& fc)
+                                                            const networks::fanin_container<tec_nt>& fc) const
     {
         coord_vec_type possible_positions{};
 
@@ -1489,7 +1490,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type get_possible_positions_single_fanin(layouts::cartesian_gate_layout& layout,
                                                                      const placement_info&           place_info,
-                                                                     const networks::fanin_container<tec_nt>& fc)
+                                                                     const networks::fanin_container<tec_nt>& fc) const
     {
         coord_vec_type possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1556,7 +1557,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type get_possible_positions_double_fanin(layouts::cartesian_gate_layout& layout,
                                                                      const placement_info&           place_info,
-                                                                     const networks::fanin_container<tec_nt>& fc)
+                                                                     const networks::fanin_container<tec_nt>& fc) const
     {
         coord_vec_type possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1659,7 +1660,7 @@ class graph_oriented_layout_design_impl
      * @return A vector of tiles representing the possible positions for the current node.
      */
     [[nodiscard]] coord_vec_type get_possible_positions(layouts::cartesian_gate_layout& layout, search_space_graph& ssg,
-                                                        placement_info& place_info)
+                                                        placement_info& place_info) const
     {
         prepare_constant_outputs(layout, ssg, place_info);
         const auto fc = networks::fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
@@ -1707,7 +1708,7 @@ class graph_oriented_layout_design_impl
      * @param ssg The search space graph.
      */
     [[nodiscard]] bool valid_layout(layouts::cartesian_gate_layout& layout, const search_space_graph& ssg,
-                                    const placement_info& place_info)
+                                    const placement_info& place_info) const
     {
         const auto check_tile = [&](const auto& t)
         {
@@ -1795,7 +1796,7 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the single fanin node.
      */
     void route_single_input_node(const layouts::layout_object_id destination, layouts::cartesian_gate_layout& layout,
-                                 node_dict_type& node2pos, const networks::fanin_container<tec_nt>& fc)
+                                 node_dict_type& node2pos, const networks::fanin_container<tec_nt>& fc) const
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = layout.get_tile(node2pos[pre]);
@@ -1823,7 +1824,7 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the double fanin node.
      */
     void route_double_input_node(const layouts::layout_object_id destination, layouts::cartesian_gate_layout& layout,
-                                 node_dict_type& node2pos, const networks::fanin_container<tec_nt>& fc)
+                                 node_dict_type& node2pos, const networks::fanin_container<tec_nt>& fc) const
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
