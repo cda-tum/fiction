@@ -262,12 +262,13 @@ struct graph_oriented_layout_design_params
     return "";
 }
 /**
- * Streams an effort mode to an output stream.
+ * @brief Streams an effort mode to an output stream.
  *
  * @param os Output stream.
  * @param mode Effort mode to stream.
  * @return Output stream.
  */
+// NOLINTNEXTLINE(bugprone-exception-escape): Preserve the public noexcept contract; stream exceptions terminate.
 inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_design_params::effort_mode mode) noexcept
 {
     return os << to_string(mode);
@@ -307,12 +308,13 @@ inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_de
     return "";
 }
 /**
- * Streams a cost objective to an output stream.
+ * @brief Streams a cost objective to an output stream.
  *
  * @param os Output stream.
  * @param cost Cost objective to stream.
  * @return Output stream.
  */
+// NOLINTNEXTLINE(bugprone-exception-escape): Preserve the public noexcept contract; stream exceptions terminate.
 inline std::ostream& operator<<(std::ostream&                                             os,
                                 const graph_oriented_layout_design_params::cost_objective cost) noexcept
 {
@@ -908,6 +910,10 @@ class graph_oriented_layout_design_impl
                     worker_joiner& operator=(const worker_joiner&) = delete;
                     worker_joiner& operator=(worker_joiner&&)      = delete;
 
+                    /**
+                     * @brief Waits for workers that still own a shared state.
+                     */
+                    // NOLINTNEXTLINE(bugprone-exception-escape): valid() excludes future::wait()'s no_state exception.
                     ~worker_joiner()
                     {
                         for (auto& f : pool)
@@ -2347,7 +2353,7 @@ class graph_oriented_layout_design_impl
         }
 
         return generate_next_positions(possible_positions, layout, ssg);
-    }
+    }  // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks): node_map releases MSVC shared control blocks.
     /**
      * @brief Reports a graph's current candidate without interpreting search depth as completion.
      * @param ssg Search graph with a stable vector index.

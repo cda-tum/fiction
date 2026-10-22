@@ -595,7 +595,9 @@ class hexagonalization_impl
                     hex_layout.move_object(id, middle_pi);
                     for (const auto sink : sinks)
                     {
-                        objectives.push_back({middle_pi, hex_layout.get_tile(sink.object), sink.index});
+                        objectives.push_back({.source      = middle_pi,
+                                              .target      = hex_layout.get_tile(sink.object),
+                                              .input_index = sink.index});
                     }
                     x_max = std::max(middle_pi.x, x_max);
                     y_max = std::max(middle_pi.y, y_max);
@@ -615,7 +617,9 @@ class hexagonalization_impl
                     hex_layout.move_object(id, middle_pi);
                     for (const auto sink : sinks)
                     {
-                        objectives.push_back({middle_pi, hex_layout.get_tile(sink.object), sink.index});
+                        objectives.push_back({.source      = middle_pi,
+                                              .target      = hex_layout.get_tile(sink.object),
+                                              .input_index = sink.index});
                     }
                     x_max = std::max(middle_pi.x, x_max);
                     y_max = std::max(middle_pi.y, y_max);
@@ -695,7 +699,7 @@ class hexagonalization_impl
                     const auto fanin = hex_layout.get_tile(*source);
                     middle_po        = {static_cast<int64_t>(middle_po.x) - 1, middle_po.y, middle_po.z};
                     hex_layout.move_object(id, middle_po);
-                    objectives.push_back({fanin, middle_po, 0});
+                    objectives.push_back({.source = fanin, .target = middle_po, .input_index = 0});
                     x_max = std::max(middle_po.x, x_max);
                     y_max = std::max(middle_po.y, y_max);
                 }
@@ -716,7 +720,7 @@ class hexagonalization_impl
                     const auto fanin = hex_layout.get_tile(*source);
                     middle_po        = {static_cast<int64_t>(middle_po.x) + 1, middle_po.y, middle_po.z};
                     hex_layout.move_object(id, middle_po);
-                    objectives.push_back({fanin, middle_po, 0});
+                    objectives.push_back({.source = fanin, .target = middle_po, .input_index = 0});
                     x_max = std::max(middle_po.x, x_max);
                     y_max = std::max(middle_po.y, y_max);
                 }
