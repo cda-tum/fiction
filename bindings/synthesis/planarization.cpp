@@ -190,21 +190,21 @@ void register_planarization(nb::module_& m)
            const decltype(params{}.seed)&                                           seed,
            const decltype(fiction::synthesis::planarization_params{}.fanout_degree) fanout_degree, stats* statistics)
         {
-            fiction::synthesis::planarization_params ps{};
-            ps.on_progress                                        = on_progress;
-            ps.duplication.strategy                               = strategy;
-            ps.duplication.criterion                              = criterion;
-            ps.duplication.crossing_gates.xor_gates               = xor_gates;
-            ps.duplication.max_swaps                              = max_swaps;
-            ps.duplication.crossing_gates.max_crossings_per_level = max_crossings_per_level;
-            ps.duplication.duplication_cost.node_weight           = node_weight;
-            ps.duplication.duplication_cost.buffer_weight         = buffer_weight;
-            ps.duplication.duplication_cost.depth_growth          = depth_growth;
-            ps.duplication.lookahead_budget                       = lookahead_budget;
-            ps.duplication.max_duplications                       = max_duplications;
-            ps.duplication.po_order                               = po_order;
-            ps.duplication.seed                                   = seed;
-            ps.fanout_degree                                      = fanout_degree;
+            const fiction::synthesis::planarization_params ps{
+                .on_progress   = on_progress,
+                .duplication   = {.strategy         = strategy,
+                                  .po_order         = po_order,
+                                  .seed             = seed,
+                                  .max_swaps        = max_swaps,
+                                  .crossing_gates   = {.xor_gates               = xor_gates,
+                                                       .max_crossings_per_level = max_crossings_per_level},
+                                  .criterion        = criterion,
+                                  .duplication_cost = {.node_weight   = node_weight,
+                                                       .buffer_weight = buffer_weight,
+                                                       .depth_growth  = depth_growth},
+                                  .lookahead_budget = lookahead_budget,
+                                  .max_duplications = max_duplications},
+                .fanout_degree = fanout_degree};
 
             // gates that no output reaches have no level and cannot be ranked, so they are dropped
             const auto cleaned = mockturtle::cleanup_dangling(network);

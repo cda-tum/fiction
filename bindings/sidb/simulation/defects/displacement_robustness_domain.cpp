@@ -24,6 +24,7 @@
 
 #include <cmath>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -137,25 +138,19 @@ void register_displacement_robustness_domain(nb::module_& m)
             {
                 throw nb::value_error("percentage_of_analyzed_displaced_layouts must be between 0 and 1");
             }
-            displacement_robustness_domain_options params{};
-            params.percentage_of_analyzed_displaced_layouts = percentage_of_analyzed_displaced_layouts;
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-            params.analysis_mode           = analysis_mode;
-            params.displacement_variations = displacement_variations;
-
-            if (fixed_sidbs)
-            {
-                params.fixed_sidbs = *fixed_sidbs;
-            }
-            params.dimer_policy = dimer_policy;
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress = on_progress;
+            displacement_robustness_domain_options       defaults{};
+            const displacement_robustness_domain_options params{
+                .analysis_mode                            = analysis_mode,
+                .percentage_of_analyzed_displaced_layouts = percentage_of_analyzed_displaced_layouts,
+                .displacement_variations                  = displacement_variations,
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .fixed_sidbs       = fixed_sidbs ? *fixed_sidbs : std::move(defaults.fixed_sidbs),
+                .dimer_policy      = dimer_policy,
+                .number_of_threads = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress       = on_progress};
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::defects::determine_displacement_robustness_domain(lyt, spec, params,

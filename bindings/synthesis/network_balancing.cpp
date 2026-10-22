@@ -47,11 +47,11 @@ void register_network_balancing(nb::module_& m)
            const decltype(fiction::synthesis::network_balancing_params{}
                               .buffer_constant_outputs)                                 buffer_constant_outputs)
         {
-            fiction::synthesis::network_balancing_params params{};
-            params.on_progress             = on_progress;
-            params.unify_outputs           = unify_outputs;
-            params.buffer_constant_outputs = buffer_constant_outputs;
-            const nb::gil_scoped_release release{};
+            const fiction::synthesis::network_balancing_params params{.unify_outputs = unify_outputs,
+                                                                      .buffer_constant_outputs =
+                                                                          buffer_constant_outputs,
+                                                                      .on_progress = on_progress};
+            const nb::gil_scoped_release                       release{};
             return fiction::synthesis::network_balancing<py_tec_network, py_tec_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
@@ -76,11 +76,11 @@ Args:
            const decltype(fiction::synthesis::network_balancing_params{}
                               .buffer_constant_outputs)                                 buffer_constant_outputs)
         {
-            fiction::synthesis::network_balancing_params params{};
-            params.on_progress             = on_progress;
-            params.unify_outputs           = unify_outputs;
-            params.buffer_constant_outputs = buffer_constant_outputs;
-            const nb::gil_scoped_release release{};
+            const fiction::synthesis::network_balancing_params params{.unify_outputs = unify_outputs,
+                                                                      .buffer_constant_outputs =
+                                                                          buffer_constant_outputs,
+                                                                      .on_progress = on_progress};
+            const nb::gil_scoped_release                       release{};
             return fiction::synthesis::is_balanced<py_tec_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),

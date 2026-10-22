@@ -59,17 +59,14 @@ void register_quicksim(nb::module_& m)
            const decltype(quicksim_options{}.on_progress)&                  on_progress,
            const decltype(quicksim_options{}.on_worker_progress)&           on_worker_progress)
         {
-            quicksim_options params{};
-            params.sim_params      = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.iteration_steps = iteration_steps;
-            params.alpha           = alpha;
-            if (number_threads)
-            {
-                params.number_threads = *number_threads;
-            }
-            params.timeout            = timeout;
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            const quicksim_options params{
+                .sim_params         = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                .iteration_steps    = iteration_steps,
+                .alpha              = alpha,
+                .number_threads     = number_threads ? *number_threads : quicksim_options{}.number_threads,
+                .timeout            = timeout,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::engines::quicksim(lyt, params);
         },

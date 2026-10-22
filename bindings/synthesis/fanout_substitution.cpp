@@ -62,13 +62,12 @@ void register_fanout_substitution(nb::module_& m)
            const decltype(fiction::synthesis::fanout_substitution_params{}.threshold)    threshold,
            const decltype(fiction::synthesis::fanout_substitution_params{}.seed)         seed)
         {
-            fiction::synthesis::fanout_substitution_params params{};
-            params.on_progress = on_progress;
-            params.strategy    = strategy;
-            params.degree      = degree;
-            params.threshold   = threshold;
-            params.seed        = seed;
-            const nb::gil_scoped_release release{};
+            const fiction::synthesis::fanout_substitution_params params{.strategy    = strategy,
+                                                                        .degree      = degree,
+                                                                        .threshold   = threshold,
+                                                                        .seed        = seed,
+                                                                        .on_progress = on_progress};
+            const nb::gil_scoped_release                         release{};
             return fiction::synthesis::fanout_substitution<py_tec_network, py_tec_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
@@ -96,13 +95,12 @@ Args:
            const decltype(fiction::synthesis::fanout_substitution_params{}.threshold)    threshold,
            const decltype(fiction::synthesis::fanout_substitution_params{}.seed)         seed)
         {
-            fiction::synthesis::fanout_substitution_params params{};
-            params.on_progress = on_progress;
-            params.strategy    = strategy;
-            params.degree      = degree;
-            params.threshold   = threshold;
-            params.seed        = seed;
-            const nb::gil_scoped_release release{};
+            const fiction::synthesis::fanout_substitution_params params{.strategy    = strategy,
+                                                                        .degree      = degree,
+                                                                        .threshold   = threshold,
+                                                                        .seed        = seed,
+                                                                        .on_progress = on_progress};
+            const nb::gil_scoped_release                         release{};
             return fiction::synthesis::is_fanout_substituted<py_tec_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),

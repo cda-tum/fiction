@@ -72,11 +72,10 @@ void register_orthogonal(nb::module_& m, const char* signature)
         {
             throw nb::next_overload();
         }
-        orthogonal_physical_design_options parameters{};
-        parameters.number_of_clock_phases = number_of_clock_phases;
-        parameters.layout_arrangement     = layout_arrangement;
-        parameters.on_progress            = on_progress;
-        const nb::gil_scoped_release release{};
+        const orthogonal_physical_design_options parameters{.number_of_clock_phases = number_of_clock_phases,
+                                                            .layout_arrangement     = layout_arrangement,
+                                                            .on_progress            = on_progress};
+        const nb::gil_scoped_release             release{};
         return fiction::physical_design::orthogonal<typename Lyt::coordinate_layout>(network, parameters, statistics);
     };
     if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)

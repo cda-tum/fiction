@@ -62,12 +62,11 @@ void register_color_routing_impl(nb::module_& m)
            const decltype(color_routing_options{}.engine)                                      engine,
            const decltype(color_routing_options{}.partial_sat)                                 partial_sat)
         {
-            color_routing_options params{};
-            params.conduct_partial_routing = conduct_partial_routing;
-            params.crossings               = crossings;
-            params.path_limit              = path_limit;
-            params.engine                  = engine;
-            params.partial_sat             = partial_sat;
+            const color_routing_options params{.conduct_partial_routing = conduct_partial_routing,
+                                               .crossings               = crossings,
+                                               .path_limit              = path_limit,
+                                               .engine                  = engine,
+                                               .partial_sat             = partial_sat};
 
             std::vector<fiction::physical_design::routing_objective> objs{};
             objs.reserve(objectives.size());

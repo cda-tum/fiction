@@ -124,22 +124,22 @@ void register_graph_oriented_layout_design(nb::module_& m)
            fiction::physical_design::graph_oriented_layout_design_stats*                  statistics,
            const std::function<uint64_t(const fiction::layouts::cartesian_gate_layout&)>& custom_cost_objective)
         {
-            graph_oriented_layout_design_options params{};
-            params.timeout                             = timeout;
-            params.num_vertex_expansions               = num_vertex_expansions;
-            params.verbose                             = verbose;
-            params.mode                                = mode;
-            params.cost                                = cost;
-            params.return_first                        = return_first;
-            params.planar                              = planar;
-            params.enable_multithreading               = enable_multithreading;
-            params.seed                                = seed;
-            params.straight_inverters                  = straight_inverters;
-            params.tiles_to_skip_between_pis           = tiles_to_skip_between_pis;
-            params.randomize_tiles_to_skip_between_pis = randomize_tiles_to_skip_between_pis;
-            params.on_progress                         = on_progress;
-            params.on_worker_progress                  = on_worker_progress;
-            const nb::gil_scoped_release release{};
+            graph_oriented_layout_design_options params{.mode                      = mode,
+                                                        .num_vertex_expansions     = num_vertex_expansions,
+                                                        .return_first              = return_first,
+                                                        .timeout                   = timeout,
+                                                        .planar                    = planar,
+                                                        .cost                      = cost,
+                                                        .enable_multithreading     = enable_multithreading,
+                                                        .verbose                   = verbose,
+                                                        .seed                      = seed,
+                                                        .straight_inverters        = straight_inverters,
+                                                        .tiles_to_skip_between_pis = tiles_to_skip_between_pis,
+                                                        .randomize_tiles_to_skip_between_pis =
+                                                            randomize_tiles_to_skip_between_pis,
+                                                        .on_progress        = on_progress,
+                                                        .on_worker_progress = on_worker_progress};
+            const nb::gil_scoped_release         release{};
             return fiction::physical_design::graph_oriented_layout_design(network, std::move(params), statistics,
                                                                           custom_cost_objective);
         },
