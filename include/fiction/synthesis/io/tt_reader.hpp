@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <fstream>
 #include <istream>
