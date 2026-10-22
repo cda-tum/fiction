@@ -184,7 +184,8 @@ try
                                     mockturtle::xag_npn_db_kind::aig_complete>  // the kind of database to use
         const resynthesis_function{};
 
-    const mockturtle::cut_rewriting_params cut_params{.cut_enumeration_ps = {.cut_size = 4}};
+    mockturtle::cut_rewriting_params cut_params{};
+    cut_params.cut_enumeration_ps.cut_size = 4;
 
     // rewrite network cuts using the given re-synthesis function
     ntk = mockturtle::cut_rewriting(ntk, resynthesis_function, cut_params);
