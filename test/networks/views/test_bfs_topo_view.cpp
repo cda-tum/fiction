@@ -166,6 +166,7 @@ TEST_CASE("BFS indices stay contiguous across dead nodes and copies", "[bfs-topo
     REQUIRE(topo.size() == 4);
     topo.update_bfs_topo();
     const auto copy = topo;
+    CHECK(copy.node_to_index(ntk.get_node(removed)) == copy.size());
     copy.foreach_node(
         [&](const auto n, const auto index)
         {

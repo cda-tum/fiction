@@ -243,12 +243,12 @@ TEST_CASE("Rank traversal keeps global indices and stops across levels", "[mutab
         ranked.foreach_gate([&](const auto&, const auto index) { CHECK(index == count++); });
         CHECK(count == 2);
     }
-    SECTION("Stop node traversal at a level boundary")
+    SECTION("Stop node traversal across levels")
     {
         ranked.foreach_node([&](const auto&) { return ++count != 2; });
         CHECK(count == 2);
     }
-    SECTION("Stop gate traversal at a level boundary")
+    SECTION("Stop gate traversal across levels")
     {
         ranked.foreach_gate(
             [&](const auto&, const auto index)
