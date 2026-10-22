@@ -16,6 +16,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
@@ -24,13 +25,67 @@
 
 #include <fmt/format.h>
 
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::qca;
 using namespace fiction::qca::io;
+
+TEST_CASE("QCAD names must fit one text record", "[qcad]")
+{
+    const auto  name        = GENERATE(std::string("a\nb"), std::string("a\rb"), std::string("a\0b", 3));
+    const auto  layout_name = GENERATE(false, true);
+    qca::layout layout{{1, 1}, layout_name ? name : "valid"};
+    layout.assign_cell_type({0, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({0, 0}, layout_name ? "valid" : name);
+
+    std::ostringstream stream{};
+    stream << "sentinel";
+    CHECK_THROWS_AS(write_qca_layout(layout, stream), std::invalid_argument);
+    CHECK(stream.str() == "sentinel");
+
+    const auto filename =
+        std::filesystem::temp_directory_path() / ("fiction-qca-name-" + std::to_string(std::random_device{}()));
+    {
+        std::ofstream original{filename};
+        original << "sentinel";
+    }
+    CHECK_THROWS_AS(write_qca_layout(layout, filename.string()), std::invalid_argument);
+    std::ifstream     original{filename};
+    const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
+    CHECK(contents == "sentinel");
+    original.close();
+    std::filesystem::remove(filename);
+}
+
+TEST_CASE("QCAD preserves representable names and clips cells to the frame", "[qcad]")
+{
+    const std::string name{"a=b\t<>&\xc2\xb5"};
+    qca::layout       layout{{2, 1}, name};
+    layout.assign_cell_type({0, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({0, 0}, name);
+    layout.assign_cell_type({1, 0}, qca::cell_type::CONST_0);
+    std::ostringstream expected{};
+    write_qca_layout(layout, expected);
+
+    layout.assign_cell_name({1, 0}, "ignored\nconstant name");
+    layout.assign_cell_type({-1, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({-1, 0}, "ignored\nnegative cell");
+    layout.assign_cell_type({2, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({2, 0}, "ignored\noutside cell");
+    std::ostringstream actual{};
+    write_qca_layout(layout, actual);
+    CHECK(actual.str() == expected.str());
+    CHECK(actual.str().find("name=" + name + '\n') != std::string::npos);
+    CHECK(actual.str().find("psz=" + name + '\n') != std::string::npos);
+}
 
 TEST_CASE("Write empty QCAD layout", "[qcad]")
 {

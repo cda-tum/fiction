@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -202,9 +203,28 @@ class write_qca_layout_impl
             ps{std::move(p)}
     {}
 
-    /** @brief Writes the QCA layout to the output stream in QCADesigner format. */
+    /**
+     * @brief Validates serialized names and writes the QCA layout in QCADesigner format.
+     * @throws std::invalid_argument If a serialized name contains CR, LF, or a null byte.
+     */
     void run()
     {
+        const auto validate_name = [](const std::string& name)
+        {
+            if (name.find_first_of("\r\n\0", 0, 3) != std::string::npos)
+            {
+                throw std::invalid_argument("QCADesigner names must not contain line breaks or null bytes");
+            }
+        };
+        validate_name(lyt.get_layout_name());
+        lyt.foreach_cell(
+            [&](const auto& c)
+            {
+                if (lyt.is_within_bounds(c) && !qca::is_constant(lyt.get_cell_type(c)))
+                {
+                    validate_name(lyt.get_cell_name(c));
+                }
+            });
 
         write_header();
 
@@ -579,6 +599,8 @@ class write_qca_layout_impl
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.
+ * @throws std::invalid_argument If the layout name or a serialized cell name contains CR, LF, or a null byte.
+ * Names are validated before writing to the stream.
  */
 inline void write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca_layout_params ps = {})
 {
@@ -597,6 +619,7 @@ inline void write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca
  * @param filename The file name to create and write into. Should preferably use the `.qca` extension.
  * @param ps Parameters.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
+ * @throws std::invalid_argument If the layout name or a serialized cell name contains CR, LF, or a null byte.
  */
 inline void write_qca_layout(const qca::layout& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 {
