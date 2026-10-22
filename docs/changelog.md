@@ -350,7 +350,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
   - **Breaking:** FGL writers now emit version 2 with size counts, declared interface order, and numbered input connections. Readers also accept legacy maximum-coordinate sizes; writers reject incomplete or physically invalid layouts before writing.
-  - FGL name escaping now appends text spans instead of repeatedly shifting whitespace-heavy names.
+  - FGL writers now escape whitespace-heavy names in linear time.
 
 - **Breaking:** Restructured `include/fiction/` so that the directory a header lives in tells
   you what the header is about, and introduced nested namespaces mirroring that tree
