@@ -73,11 +73,11 @@ try
                                  "equivalent"};
 
     graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
-    graph_oriented_layout_design_params graph_oriented_layout_design_params{};
-    graph_oriented_layout_design_params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
-    graph_oriented_layout_design_params.verbose      = true;
-    graph_oriented_layout_design_params.return_first = false;
-    graph_oriented_layout_design_params.timeout      = 60000;
+    graph_oriented_layout_design_params graph_oriented_layout_design_params{
+        .mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
+        .return_first = false,
+        .timeout      = 60000,
+        .verbose      = true};
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 

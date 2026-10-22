@@ -184,8 +184,7 @@ try
                                     mockturtle::xag_npn_db_kind::aig_complete>  // the kind of database to use
         const resynthesis_function{};
 
-    mockturtle::cut_rewriting_params cut_params{};
-    cut_params.cut_enumeration_ps.cut_size = 4;
+    const mockturtle::cut_rewriting_params cut_params{.cut_enumeration_ps = {.cut_size = 4}};
 
     // rewrite network cuts using the given re-synthesis function
     ntk = mockturtle::cut_rewriting(ntk, resynthesis_function, cut_params);
@@ -204,10 +203,10 @@ try
     std::cout << "[i] fanout substitution\n";
 
     // set up parameters for fanout substitution
-    fanout_substitution_params fanout_params{};
-    fanout_params.strategy  = fanout_substitution_params::substitution_strategy::BREADTH;
-    fanout_params.degree    = 2;
-    fanout_params.threshold = 1;
+    const fanout_substitution_params fanout_params{.strategy =
+                                                       fanout_substitution_params::substitution_strategy::BREADTH,
+                                                   .degree    = 2,
+                                                   .threshold = 1};
 
     // substitute high-degree output nodes by fanout nodes (converts network into a topology_network)
     auto top_ntk = fanout_substitution<tec_nt>(ntk, fanout_params);
@@ -228,9 +227,8 @@ try
     std::cout << "[i] orthogonal physical design\n";
 
     // set up parameters for orthogonal physical design
-    orthogonal_physical_design_params ortho_params{};
-    ortho_params.number_of_clock_phases = clocking::num_clks::FOUR;
-    orthogonal_physical_design_stats ortho_stats{};
+    const orthogonal_physical_design_params ortho_params{.number_of_clock_phases = clocking::num_clks::FOUR};
+    orthogonal_physical_design_stats        ortho_stats{};
 
     // perform layout generation with a scalable algorithm
     auto ortho_gate_lyt = orthogonal<cartesian_layout>(top_ntk, ortho_params, &ortho_stats);
@@ -263,12 +261,11 @@ try
         std::cout << "[i] SMT-based physical design\n";
 
         // set up parameters for SMT-based physical design
-        exact_physical_design_params exact_params{};
-        exact_params.scheme    = "2DDWave";
-        exact_params.crossings = true;
-        exact_params.border_io = true;
-        exact_params.timeout   = 180000;  // 3min in ms
-        exact_physical_design_stats exact_stats{};
+        const exact_physical_design_params exact_params{.scheme    = "2DDWave",
+                                                        .crossings = true,
+                                                        .border_io = true,
+                                                        .timeout   = 180000};  // 3min in ms
+        exact_physical_design_stats        exact_stats{};
 
         // perform layout generation with an SMT-based exact algorithm
         auto exact_gate_lyt = exact<cartesian_layout>(top_ntk, exact_params, &exact_stats);

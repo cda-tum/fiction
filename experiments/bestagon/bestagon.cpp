@@ -109,8 +109,7 @@ try
         const resynthesis_function{};
 
     // parameters for cut rewriting
-    mockturtle::cut_rewriting_params cut_params{};
-    cut_params.cut_enumeration_ps.cut_size = 4;
+    const mockturtle::cut_rewriting_params cut_params{.cut_enumeration_ps = {.cut_size = 4}};
 
     // instantiate a technology mapping library
     std::stringstream library_stream{};
@@ -130,14 +129,13 @@ try
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
-    exact_physical_design_params exact_params{};
-    exact_params.scheme             = "Row";
-    exact_params.layout_arrangement = arrangement::EVEN_ROW;
-    exact_params.crossings          = true;
-    exact_params.border_io          = true;
-    exact_params.desynchronize      = true;
-    exact_params.timeout            = 3'600'000;  // 1h in ms
-    exact_physical_design_stats exact_stats{};
+    const exact_physical_design_params exact_params{.scheme             = "Row",
+                                                    .layout_arrangement = arrangement::EVEN_ROW,
+                                                    .crossings          = true,
+                                                    .border_io          = true,
+                                                    .desynchronize      = true,
+                                                    .timeout            = 3'600'000};  // 1h in ms
+    exact_physical_design_stats        exact_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
                                                    ~fiction_experiments::clpl & ~fiction_experiments::two_bit_add_maj &

@@ -70,32 +70,20 @@ try
     };
 
     // simulation parameters
-    simulation_parameters sim_params{};
-    sim_params.base     = 2;
-    sim_params.mu_minus = -0.32;
+    const simulation_parameters sim_params{2, -0.32};
 
     // operational domain parameters
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions              = {{.dimension = sweep_parameter::EPSILON_R},
-                                                      {.dimension = sweep_parameter::LAMBDA_TF},
-                                                      {.dimension = sweep_parameter::MU_MINUS}};
-    op_domain_params.sweep_dimensions[0].min       = 1.0;
-    op_domain_params.sweep_dimensions[0].max       = 10.0;
-    op_domain_params.sweep_dimensions[0].step      = 0.05;
-    op_domain_params.sweep_dimensions[1].min       = 1.0;
-    op_domain_params.sweep_dimensions[1].max       = 10.0;
-    op_domain_params.sweep_dimensions[1].step      = 0.05;
-    op_domain_params.sweep_dimensions[2].min       = -0.50;
-    op_domain_params.sweep_dimensions[2].max       = -0.10;
-    op_domain_params.sweep_dimensions[2].step      = 0.0025;
+    const operational_domain_params op_domain_params{
+        .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = 0.05},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.05},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.50, .max = -0.10, .step = 0.0025}}};
 
     // write operational domain parameters
-    write_operational_domain_params write_op_domain_params{};
-    write_op_domain_params.non_operational_tag = "0";
-    write_op_domain_params.operational_tag     = "1";
-    write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+    const write_operational_domain_params write_op_domain_params{
+        .operational_tag     = "1",
+        .non_operational_tag = "0",
+        .writing_mode        = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 

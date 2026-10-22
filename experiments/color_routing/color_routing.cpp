@@ -158,10 +158,9 @@ void smt_sat_complete()
                                                       "equivalent"};
 
     // parameters for SAT-based color routing
-    color_routing_params routing_params{};
-    routing_params.conduct_partial_routing = true;
-    routing_params.crossings               = true;
-    routing_params.engine                  = graph_coloring_engine::SAT;
+    const color_routing_params routing_params{.conduct_partial_routing = true,
+                                              .crossings               = true,
+                                              .engine                  = graph_coloring_engine::SAT};
 
     constexpr const uint64_t bench_select = fiction_experiments::all;
 
@@ -172,12 +171,11 @@ void smt_sat_complete()
         for (const auto& clock : clocking_schemes)
         {
             // parameters for SMT-based physical design
-            exact_physical_design_params exact_params{};
-            exact_params.scheme        = clock;
-            exact_params.crossings     = true;
-            exact_params.border_io     = true;
-            exact_params.desynchronize = true;
-            exact_params.timeout       = 3'600'000;  // 1h in ms
+            const exact_physical_design_params exact_params{.scheme        = clock,
+                                                            .crossings     = true,
+                                                            .border_io     = true,
+                                                            .desynchronize = true,
+                                                            .timeout       = 3'600'000};  // 1h in ms
 
             // perform layout generation with an SMT-based exact algorithm
             auto gate_layout = exact<cartesian_layout>(network, exact_params, &exact_stats);
@@ -195,11 +193,10 @@ void ortho_sat_complete()
     ortho_stats = {};
 
     // parameters for SAT-based color routing
-    color_routing_params routing_params{};
-    routing_params.conduct_partial_routing = true;
-    routing_params.crossings               = true;
-    routing_params.path_limit              = 75;
-    routing_params.engine                  = graph_coloring_engine::SAT;
+    const color_routing_params routing_params{.conduct_partial_routing = true,
+                                              .crossings               = true,
+                                              .path_limit              = 75,
+                                              .engine                  = graph_coloring_engine::SAT};
 
     static color_routing_experiment color_routing_exp{"color_routing_ortho_sat_complete",
                                                       "benchmark",
@@ -242,11 +239,10 @@ void ortho_mcs()
     ortho_stats = {};
 
     // parameters for SAT-based color routing
-    color_routing_params routing_params{};
-    routing_params.conduct_partial_routing = true;
-    routing_params.crossings               = true;
-    routing_params.path_limit              = 75;
-    routing_params.engine                  = graph_coloring_engine::MCS;
+    const color_routing_params routing_params{.conduct_partial_routing = true,
+                                              .crossings               = true,
+                                              .path_limit              = 75,
+                                              .engine                  = graph_coloring_engine::MCS};
 
     static color_routing_experiment color_routing_exp{"color_routing_ortho_mcs",
                                                       "benchmark",

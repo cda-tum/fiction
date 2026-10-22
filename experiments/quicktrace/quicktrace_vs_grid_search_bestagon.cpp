@@ -81,10 +81,9 @@ try
     const auto stray_db = defect{defect_type::DB, -1, 4.1, 1.8};
     // const auto si_vacancy = sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    defect_influence_params params{};
-    params.additional_scanning_area = {100, 100};
-    params.defect                   = stray_db;
-    params.operational_params       = is_op_params;
+    const defect_influence_params params{.defect                   = stray_db,
+                                         .operational_params       = is_op_params,
+                                         .additional_scanning_area = {100, 100}};
 
     std::size_t total_number_of_samples_grid       = 0;
     std::size_t total_number_of_samples_quicktrace = 0;
