@@ -2084,7 +2084,10 @@ class graph_oriented_layout_design_impl
 
         for (const auto& position : possible_positions)
         {
-            auto new_sequence = ssg.current_vertex;
+            /** @brief Candidate history with capacity for the next placement. */
+            coord_vec_type new_sequence{};
+            new_sequence.reserve(ssg.current_vertex.size() + 1);
+            new_sequence.insert(new_sequence.end(), ssg.current_vertex.cbegin(), ssg.current_vertex.cend());
             new_sequence.push_back(position);
 
             const auto remaining_nodes_to_place =
@@ -2142,7 +2145,6 @@ class graph_oriented_layout_design_impl
         placement_info                                        place_info{0ul, 0ul, node2pos, pi2node};
 
         coord_vec_type possible_positions{};
-        possible_positions.reserve(2 * ps.num_vertex_expansions);
 
         if (ssg.current_vertex.empty())
         {
