@@ -112,7 +112,7 @@ class read_fgl_layout_impl
 
         // parse xml file
         tinyxml2::XMLDocument xml_document{};
-        xml_document.Parse(fgl_content.c_str());
+        xml_document.Parse(fgl_content.c_str(), fgl_content.size());
 
         if (xml_document.ErrorID() != 0)
         {
@@ -514,13 +514,6 @@ class read_fgl_layout_impl
                                 throw fgl_parsing_error("Error parsing FGL file: missing source object");
                             }
                             lyt.connect(*source, {id, input});
-                        }
-                    }
-                    for (uint32_t input = 0; input < lyt.input_count(id); ++input)
-                    {
-                        if (!lyt.source({id, input}))
-                        {
-                            throw fgl_parsing_error("Error parsing FGL file: missing input");
                         }
                     }
                 }
