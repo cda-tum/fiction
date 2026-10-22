@@ -22,6 +22,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>         // technology-mapped network type
@@ -170,7 +171,7 @@ try
 
         // perform layout generation with an SMT-based exact algorithm
         const auto gate_layout =
-            exact<hexagonal_gate_layout>(convert_network<tec_nt>(mapped_network), exact_params, &exact_stats);
+            exact<hexagonal_layout>(convert_network<tec_nt>(mapped_network), exact_params, &exact_stats);
 
         if (gate_layout.has_value())
         {

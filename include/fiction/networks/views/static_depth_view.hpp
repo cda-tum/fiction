@@ -22,6 +22,7 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/cost_functions.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -49,17 +50,10 @@ struct depth_view_params
 };
 
 /**
- * Provides `depth` and `level` methods for networks, similar to `mockturtle::static_depth_view`.
- * Unlike the `mockturtle` implementation, this version uses flat hashmaps to store `level` data
- * instead of `mockturtle::node_map`. Additionally, the `add_event` functionality has been removed.
- * As a result, if the underlying network changes, either `on_add` has to be called when adding a node to the network
- * and keep the current depth information or the `update_levels` method must be called to refresh the
- * `static_depth_view` information. These modifications address performance issues encountered with
- * `mockturtle::static_depth_view`.
- *
- * This view computes the level of each node and the overall depth of the network. The `level` and
- * `depth` methods adhere to the network interface. Levels are calculated during construction and
- * can be updated later by invoking the `update_levels` method.
+ * Provides node levels and network depth, stored in vectors indexed by node index.
+ * Call `on_add` after adding a node, or `update_levels` after changing the network, to refresh the stored levels.
+ * Critical-path membership is computed on its first query after an update.
+ * Networks that already supply the depth interface retain their own storage and update behavior.
  *
  * @tparam Ntk The network type.
  * @tparam NodeCostFn Optional cost function applied to nodes. Default is `mockturtle::unit_cost<Ntk>`.
@@ -69,6 +63,13 @@ struct depth_view_params
 template <typename Ntk, typename NodeCostFn = mockturtle::unit_cost<Ntk>,
           bool has_depth_interface =
               mockturtle::has_depth_v<Ntk> && mockturtle::has_level_v<Ntk> && mockturtle::has_update_levels_v<Ntk>>
+    requires(has_depth_interface ||
+             (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+              mockturtle::has_is_complemented_v<Ntk> && mockturtle::has_visited_v<Ntk> &&
+              mockturtle::has_set_visited_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
+              mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_node_to_index_v<Ntk> &&
+              mockturtle::has_foreach_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk> && mockturtle::has_is_ci_v<Ntk> &&
+              mockturtle::has_is_pi_v<Ntk>))
 class static_depth_view
 {};
 
@@ -136,16 +137,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             Ntk(),
             ps(params),
             cost_fn(node_cost_fn)
-    {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented method");
-        static_assert(mockturtle::has_visited_v<Ntk>, "Ntk does not implement the visited method");
-        static_assert(mockturtle::has_set_visited_v<Ntk>, "Ntk does not implement the set_visited method");
-        static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
-        static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-    }
+    {}
 
     /**
      * Constructs an `fiction::static_depth_view` from an existing network.
@@ -163,15 +155,6 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             ps(params),
             cost_fn(node_cost_fn)
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented method");
-        static_assert(mockturtle::has_visited_v<Ntk>, "Ntk does not implement the visited method");
-        static_assert(mockturtle::has_set_visited_v<Ntk>, "Ntk does not implement the set_visited method");
-        static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
-        static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-
         update_levels();
     }
 

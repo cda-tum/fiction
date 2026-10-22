@@ -53,7 +53,7 @@ void register_read_fgl_layout(nb::module_& m, const char* signature)
             throw nb::next_overload();
         }
         const nb::gil_scoped_release release{};
-        return fiction::layouts::io::read_fgl_layout<Lyt>(filename, layout_name);
+        return fiction::layouts::io::read_fgl_layout<typename Lyt::coordinate_layout>(filename, layout_name);
     };
     if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {

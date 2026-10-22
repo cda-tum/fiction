@@ -24,7 +24,6 @@
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <algorithm>
@@ -52,18 +51,14 @@ namespace fiction::physical_design
  * molQCA, and iNML layouts this way.
  *
  * @tparam GateLibrary Gate library whose tile size is used.
- * @tparam GateLyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param gate_lyt Gate-level layout.
  * @return Axis sizes of the grid, including the layer count of `gate_lyt`.
  * @throws std::overflow_error If an extent is outside the signed 32-bit coordinate range.
  */
-template <typename GateLibrary, typename GateLyt>
-[[nodiscard]] layouts::layout_base::extent cell_grid_extent(const GateLyt& gate_lyt)
+template <typename GateLibrary, typename Geometry>
+[[nodiscard]] layouts::layout_base::extent cell_grid_extent(const layouts::gate_layout<Geometry>& gate_lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-        "GateLyt is not a gate-level layout");
-
     if (gate_lyt.width() == 0 || gate_lyt.height() == 0 || gate_lyt.layers() == 0)
     {
         return {};
@@ -71,8 +66,8 @@ template <typename GateLibrary, typename GateLyt>
 
     using cell_t = layouts::layout_base::coordinate;
 
-    const auto rel_to_abs_cell_pos =
-        [](const GateLyt& g, const fiction::layouts::layout_base::coordinate& t, const cell_t& rel)
+    const auto rel_to_abs_cell_pos = [](const layouts::gate_layout<Geometry>&            g,
+                                        const fiction::layouts::layout_base::coordinate& t, const cell_t& rel)
     {
         return layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size()>(g, t,
                                                                                                                    rel);
@@ -137,7 +132,7 @@ class apply_gate_library_impl
         {
             GateLibrary::post_layout_optimization(cell_lyt);
         }
-        if constexpr (has_get_layout_name_v<GateLyt>)
+        if constexpr (requires { gate_lyt.get_layout_name(); })
         {
             cell_lyt.set_layout_name(gate_lyt.get_layout_name());
         }
@@ -322,6 +317,9 @@ class apply_gate_library_impl
  * @return A layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename GateLibrary, typename Geometry>
+    requires requires(const layouts::gate_layout<Geometry>& lyt, const layouts::layout_base::coordinate& t) {
+        GateLibrary::set_up_gate(lyt, t);
+    }
 [[nodiscard]] typename GateLibrary::layout apply_gate_library(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                               utils::progress_callback on_progress = {})
 {
@@ -342,11 +340,13 @@ template <typename GateLibrary, typename Geometry>
  * @return The SiDB layout with the gates and the defects.
  */
 template <typename GateLibrary, typename Geometry>
+    requires std::same_as<typename GateLibrary::layout, sidb::layout> &&
+             requires(const layouts::gate_layout<Geometry>& lyt, const layouts::layout_base::coordinate& t) {
+                 GateLibrary::set_up_gate(lyt, t);
+             }
 [[nodiscard]] sidb::layout apply_gate_library_to_defective_surface(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                                    const sidb::layout& defect_surface)
 {
-    static_assert(std::is_same_v<typename GateLibrary::layout, sidb::layout>, "GateLibrary must produce SiDB layouts");
-
     detail::apply_gate_library_impl<GateLibrary, fiction::layouts::gate_layout<Geometry>> p{
         lyt,
         {},
@@ -373,6 +373,9 @@ template <typename GateLibrary, typename Geometry>
  * @return A layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename GateLibrary, typename Geometry, typename Params>
+    requires requires(const layouts::gate_layout<Geometry>& lyt, const layouts::layout_base::coordinate& t,
+                      const Params&                      params,
+                      const std::optional<sidb::layout>& defects) { GateLibrary::set_up_gate(lyt, t, params, defects); }
 [[nodiscard]] typename GateLibrary::layout
 apply_parameterized_gate_library(const fiction::layouts::gate_layout<Geometry>& lyt, const Params& params)
 {
@@ -395,12 +398,14 @@ apply_parameterized_gate_library(const fiction::layouts::gate_layout<Geometry>& 
  * @return The SiDB layout with the gates and the defects.
  */
 template <typename GateLibrary, typename Geometry, typename Params>
+    requires std::same_as<typename GateLibrary::layout, sidb::layout> &&
+             requires(const layouts::gate_layout<Geometry>& lyt, const layouts::layout_base::coordinate& t,
+                      const Params&                      params,
+                      const std::optional<sidb::layout>& defects) { GateLibrary::set_up_gate(lyt, t, params, defects); }
 [[nodiscard]] sidb::layout
 apply_parameterized_gate_library_to_defective_surface(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                       const Params& params, const sidb::layout& defect_surface)
 {
-    static_assert(std::is_same_v<typename GateLibrary::layout, sidb::layout>, "GateLibrary must produce SiDB layouts");
-
     detail::apply_gate_library_impl<GateLibrary, fiction::layouts::gate_layout<Geometry>> p{
         lyt,
         {},

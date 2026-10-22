@@ -125,12 +125,13 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
 template <typename Lyt, typename Ntk>
 void check_parsing_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
+    const auto layout =
+        orthogonal<typename Lyt::coordinate_layout>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
 
     std::stringstream layout_stream{};
     write_fgl_layout(layout, layout_stream);
 
-    const auto read_layout = read_fgl_layout<Lyt>(layout_stream, layout.get_layout_name());
+    const auto read_layout = read_fgl_layout<typename Lyt::coordinate_layout>(layout_stream, layout.get_layout_name());
 
     compare_written_and_read_layout(layout, read_layout);
 
@@ -145,7 +146,7 @@ void check_parsing_equiv_layout(const Lyt& lyt)
 {
     std::stringstream layout_stream{};
     write_fgl_layout(lyt, layout_stream);
-    const auto read_layout = read_fgl_layout<Lyt>(layout_stream, lyt.get_layout_name());
+    const auto read_layout = read_fgl_layout<typename Lyt::coordinate_layout>(layout_stream, lyt.get_layout_name());
 
     compare_written_and_read_layout(lyt, read_layout);
 
@@ -226,7 +227,7 @@ TEST_CASE("Write empty gate-level layout", "[write-fgl-layout]")
 
     std::stringstream layout_stream{};
     write_fgl_layout(layout, layout_stream);
-    const auto read_layout = read_fgl_layout<cartesian_gate_layout>(layout_stream, "empty");
+    const auto read_layout = read_fgl_layout<cartesian_layout>(layout_stream, "empty");
 
     compare_written_and_read_layout(layout, read_layout);
 }
@@ -243,7 +244,7 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     /** Restored layout and port names. */
-    const auto restored = read_fgl_layout<cartesian_gate_layout>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.get_layout_name() == "  ");
     /** Restored terminals whose names must retain whitespace. */
     const auto restored_input  = restored.find_object({0, 0});
@@ -269,7 +270,7 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
     layout.create_po(wire, label, {2, 0});
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
-    const auto restored = read_fgl_layout<cartesian_gate_layout>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.get_layout_name() == label);
     restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
 }
@@ -281,7 +282,7 @@ TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]"
 
     std::stringstream stream{};
     write_fgl_layout(original, stream);
-    const auto restored = read_fgl_layout<cartesian_gate_layout>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
 
     CHECK(restored.get_clock_number({1, 1, 0}) == 2);
     CHECK(restored.get_clock_number({1, 1, 1}) == 2);
@@ -321,7 +322,7 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
         original.create_pi("a", {0, 0, 0});
         std::stringstream stream{};
         write_fgl_layout(original, stream);
-        const auto restored = read_fgl_layout<TestType>(stream);
+        const auto restored = read_fgl_layout<typename TestType::coordinate_layout>(stream);
         CHECK(restored.num_clocks() == original.num_clocks());
         CHECK(restored.get_clocking_scheme().name() == original.get_clocking_scheme().name());
         CHECK(restored.get_clocking_scheme().is_regular() == original.get_clocking_scheme().is_regular());
@@ -348,7 +349,7 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     CHECK(stream.str().find("<fgl version=\"2\">") != std::string::npos);
-    const auto restored = read_fgl_layout<cartesian_gate_layout>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.width() == 3);
     CHECK(restored.height() == 3);
     CHECK(restored.layers() == 1);
@@ -400,7 +401,7 @@ TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy
 
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
-    auto restored = read_fgl_layout<TestType>(stream);
+    auto restored = read_fgl_layout<typename TestType::coordinate_layout>(stream);
     CHECK(restored.is_obstructed_coordinate({1, 1}));
     CHECK(restored.is_obstructed_coordinate({-1, -2, -3}));
     CHECK(restored.is_obstructed_coordinate({7, 8, 9}));
@@ -432,7 +433,7 @@ TEST_CASE("FGL keeps sparse metadata in a large two-layer extent", "[write-fgl-l
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     CHECK(stream.str().size() < 2000);
-    const auto restored = read_fgl_layout<cartesian_gate_layout>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.width() == 1000000000);
     CHECK(restored.height() == 1000000000);
     CHECK(restored.layers() == 2);

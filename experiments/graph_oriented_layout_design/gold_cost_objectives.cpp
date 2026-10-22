@@ -95,8 +95,8 @@ try
 
             auto network = read_ntk<tec_nt>(benchmark);
 
-            auto gate_layout = graph_oriented_layout_design<cartesian_gate_layout>(
-                network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
+            auto gate_layout = graph_oriented_layout_design(network, graph_oriented_layout_design_params,
+                                                            &graph_oriented_layout_design_stats);
 
             if (gate_layout.has_value())
             {

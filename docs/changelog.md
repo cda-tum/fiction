@@ -152,6 +152,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
   - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
   - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
+  - Path enumeration moves completed results and selected candidates. Completed graph results transfer their owned storage.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
     throw `std::invalid_argument`.
@@ -248,6 +249,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
+    arguments from C++ calls and container declarations.
   - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
     fanins in constant time per node.
   - `networks::views::mutable_rank_view::set_ranks` and `set_all_ranks` throw `std::invalid_argument` or
@@ -322,6 +325,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Clock-number assignment helpers now take concrete Cartesian gate layouts.
+    Experiment parameters, inputs, and output columns are unchanged.
   - Physical-design experiments convert mapped networks before placement with unchanged computations.
   - Gate-layout experiments use canonical types with unchanged computations.
   - The `planarization` experiment keeps duplication parameters immutable.
@@ -451,6 +456,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - **Breaking:** Gate-only APIs now use canonical gate layouts; fixed-geometry entry points are non-templates.
+    Multi-geometry factories take coordinate geometries; nested layouts and unsupported library/geometry pairs fail overload resolution.
+  - Template APIs now declare their type and callback requirements with C++20 `requires` clauses and shared naming concepts.
+    Unsupported arguments fail overload resolution; optional naming operations remain no-ops when unsupported.
   - C++ Python binding helpers now use a `register_` prefix.
   - Python bindings use the `nb` namespace alias for nanobind.
   - The C++ test suite and the experiments now open the namespaces they use, one
@@ -570,6 +579,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 
+  - **Breaking:** Removed the non-network layout and gate-library capability traits and `cell<Lyt>`.
+    Use local `requires` expressions and `layouts::layout_base::coordinate`; network extension traits remain supported.
   - **Breaking:** Removed layout `volume()` and `volume_of`. Use `area() * layers()` to count coordinates.
   - **Breaking:** Layouts now reject more than two layers. Use one ground layer and an optional crossing layer;
     empty layouts remain supported.
@@ -579,7 +590,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
     `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
     `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
-    and `has_is_empty_v`. Use concrete gate-level layout arguments or `is_cell_grid_v`. The unused `is_offset_coord_v`
+    and `has_is_empty_v`. Use concrete gate-level layout arguments or local grid requirements. The unused `is_offset_coord_v`
     and `has_offset_coord_v` are gone as well.
   - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
     `wiring_reduction_layout`.
@@ -587,8 +598,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and `sidb_technology` with their predicates and `cell_mark` enums; the traits `technology`,
     `has_*_technology_v`, `is_cell_level_layout_v`, and `has_post_layout_optimization_v`; the aliases
     `qca_cell_clk_lyt`, `mol_qca_cell_clk_lyt`, `inml_cell_clk_lyt`, `sidb_cell_clk_lyt`, `sidb_cell_clk_lyt_cube`,
-    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts and
-    `is_cell_grid_v`.
+    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts.
   - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
     types of the other technologies.
 - Dependencies:
@@ -653,7 +663,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - A* now restores frontier order when a cheaper path improves a queued coordinate.
+  - A* now restores frontier ordering after a cheaper route reaches a queued coordinate.
+  - Simulated annealing now rejects non-finite temperature bounds with `std::invalid_argument`.
+  - Defect-aware circuit design now propagates unsupported gate-orientation errors.
+  - Simulated annealing now keeps acceptance random state local to each worker thread.
+    Callable and thread-start failures propagate after started workers finish; signed cost differences avoid overflow.
+  - Multi-state simulated annealing now rejects zero instances with `std::invalid_argument`.
+  - Minimum-energy searches now require forward iterators, including iterators without `operator->`,
+    and propagate iterator failures.
   - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
     changing the other inputs' truth-table order.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
@@ -764,6 +781,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Edge-color views now support clearing only node colors and clearing both node and edge colors.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
   - Depth and rank view assignment now preserves wrapped network names and metadata.
@@ -810,6 +828,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
   - Corrected planarization complexity bounds to include weighted-cone traversals.
+  - Corrected the reference for Yen's loopless path algorithm.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
   - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.

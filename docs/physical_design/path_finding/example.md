@@ -18,8 +18,7 @@ The returned path includes both endpoints.
 int main()
 {
     fiction::layouts::cartesian_gate_layout lyt{{5, 5}, fiction::layouts::clocking::twoddwave()};
-    const auto path = fiction::physical_design::path_finding::a_star<
-        fiction::physical_design::layout_coordinate_path>(lyt, {{0, 0}, {2, 2}});
+    const auto path = fiction::physical_design::path_finding::a_star(lyt, {{0, 0}, {2, 2}});
     assert(path.size() == 5);
 }
 ```
