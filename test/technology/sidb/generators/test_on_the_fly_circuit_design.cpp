@@ -23,6 +23,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -138,6 +139,15 @@ TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-cir
         params.timeout = 0;
         CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
                         utils::timeout_error);
+    }
+    SECTION("Unsupported gate orientations reach the caller")
+    {
+        /** @brief Gate-library error reported from gate design. */
+        using orientation_error =
+            fcn::unsupported_gate_orientation_exception<layout_base::coordinate, fcn::port_direction>;
+        gates.on_progress = [](auto, auto, auto) { throw orientation_error{{}, {}}; };
+        CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
+                        orientation_error);
     }
     SECTION("The circuit budget also covers gate design")
     {

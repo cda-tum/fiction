@@ -317,6 +317,9 @@ class apply_gate_library_impl
  * @return A layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename GateLibrary, typename Geometry>
+    requires requires(const layouts::gate_layout<Geometry>& lyt, const layouts::layout_base::coordinate& t) {
+        GateLibrary::set_up_gate(lyt, t);
+    }
 [[nodiscard]] typename GateLibrary::layout apply_gate_library(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                               utils::progress_callback on_progress = {})
 {
@@ -337,7 +340,10 @@ template <typename GateLibrary, typename Geometry>
  * @return The SiDB layout with the gates and the defects.
  */
 template <typename GateLibrary, typename Geometry>
-    requires std::same_as<typename GateLibrary::layout, sidb::layout>
+    requires std::same_as<typename GateLibrary::layout, sidb::layout> &&
+             requires(const layouts::gate_layout<Geometry>& lyt, const layouts::layout_base::coordinate& t) {
+                 GateLibrary::set_up_gate(lyt, t);
+             }
 [[nodiscard]] sidb::layout apply_gate_library_to_defective_surface(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                                    const sidb::layout& defect_surface)
 {
@@ -367,6 +373,9 @@ template <typename GateLibrary, typename Geometry>
  * @return A layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename GateLibrary, typename Geometry, typename Params>
+    requires requires(const layouts::gate_layout<Geometry>& lyt, const layouts::layout_base::coordinate& t,
+                      const Params&                      params,
+                      const std::optional<sidb::layout>& defects) { GateLibrary::set_up_gate(lyt, t, params, defects); }
 [[nodiscard]] typename GateLibrary::layout
 apply_parameterized_gate_library(const fiction::layouts::gate_layout<Geometry>& lyt, const Params& params)
 {
@@ -389,7 +398,10 @@ apply_parameterized_gate_library(const fiction::layouts::gate_layout<Geometry>& 
  * @return The SiDB layout with the gates and the defects.
  */
 template <typename GateLibrary, typename Geometry, typename Params>
-    requires std::same_as<typename GateLibrary::layout, sidb::layout>
+    requires std::same_as<typename GateLibrary::layout, sidb::layout> &&
+             requires(const layouts::gate_layout<Geometry>& lyt, const layouts::layout_base::coordinate& t,
+                      const Params&                      params,
+                      const std::optional<sidb::layout>& defects) { GateLibrary::set_up_gate(lyt, t, params, defects); }
 [[nodiscard]] sidb::layout
 apply_parameterized_gate_library_to_defective_surface(const fiction::layouts::gate_layout<Geometry>& lyt,
                                                       const Params& params, const sidb::layout& defect_surface)

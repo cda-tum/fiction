@@ -451,8 +451,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
-  - **Breaking:** Gate-only APIs now take canonical gate layouts. Fixed-geometry algorithms and gate libraries are non-templates;
-    multi-geometry factories take coordinate geometries as template arguments.
+  - **Breaking:** Gate-only APIs now use canonical gate layouts; fixed-geometry entry points are non-templates.
+    Multi-geometry factories take coordinate geometries; nested layouts and unsupported library/geometry pairs fail overload resolution.
   - Template APIs now declare their type and callback requirements with C++20 `requires` clauses.
     Unsupported arguments fail overload resolution; optional naming operations remain no-ops when unsupported.
   - C++ Python binding helpers now use a `register_` prefix.
@@ -658,6 +658,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Simulated annealing now rejects non-finite temperature bounds with `std::invalid_argument`.
+  - Defect-aware circuit design now propagates unsupported gate-orientation errors.
   - Simulated annealing now keeps acceptance random state local to each worker thread.
     Callable and thread-start failures propagate after started workers finish; signed cost differences avoid overflow.
   - Multi-state simulated annealing now rejects zero instances with `std::invalid_argument`.
@@ -773,7 +775,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
-  - Edge-color views now clear node and edge colors without an ambiguous call.
+  - Edge-color views now support clearing only node colors and clearing both node and edge colors.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
   - Depth and rank view assignment now preserves wrapped network names and metadata.

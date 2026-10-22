@@ -44,7 +44,6 @@
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
 #include "fiction/types.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <optional>
@@ -174,6 +173,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @note A circuit or gate timeout aborts the operation. Only a completed, unsuccessful gate search blacklists a tile.
  * @throws utils::timeout_error If a circuit or gate-design timeout expires.
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
+ * @throws fcn::unsupported_gate_orientation_exception If a gate orientation has no implementation.
  */
 [[nodiscard]] inline layout
 on_the_fly_circuit_design_on_defective_surface(const tec_nt& ntk, const layouts::hexagonal_gate_layout& lattice_tiling,
@@ -240,14 +240,6 @@ on_the_fly_circuit_design_on_defective_surface(const tec_nt& ntk, const layouts:
                 {
                     gate_layout = std::nullopt;
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
-                }
-
-                catch (const fcn::unsupported_gate_orientation_exception<fiction::layouts::layout_base::coordinate,
-                                                                         fcn::port_direction>& e)
-                {
-                    fmt::print(stderr, "[e] Unsupported gate orientation encountered at tile: {} and ports: {}\n",
-                               e.where(), e.which_ports());
-                    break;
                 }
             }
             // P&R was unsuccessful

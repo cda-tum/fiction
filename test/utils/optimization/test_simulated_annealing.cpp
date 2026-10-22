@@ -400,6 +400,30 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
     }
 }
 
+TEST_CASE("Annealing rejects non-finite temperature bounds", "[sim-anneal]")
+{
+    /** @brief Returns a signed state cost. */
+    const auto cost = [](const int state) { return state; };
+    /** @brief Preserves the state. */
+    const auto next = [](const int state) { return state; };
+    /** @brief Starts workers at zero. */
+    const auto initial = [] { return 0; };
+    for (const auto invalid : {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                               -std::numeric_limits<double>::infinity()})
+    {
+        CHECK_THROWS_AS(simulated_annealing(0, invalid, 1.0, 0, cost, geometric_temperature_schedule, next),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(simulated_annealing(0, 2.0, invalid, 0, cost, geometric_temperature_schedule, next),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(
+            multi_simulated_annealing(invalid, 1.0, 0, 1, initial, cost, geometric_temperature_schedule, next),
+            std::invalid_argument);
+        CHECK_THROWS_AS(
+            multi_simulated_annealing(2.0, invalid, 0, 1, initial, cost, geometric_temperature_schedule, next),
+            std::invalid_argument);
+    }
+}
+
 TEST_CASE("Multi-state annealing rejects zero instances", "[sim-anneal]")
 {
     CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 0, schwefel_1d_init_state_generator, schwefel_function_1d,
