@@ -210,8 +210,8 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
 
     SECTION("Fixed seed yields deterministic behavior")
     {
-        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM};
-        ps.seed = 42;
+        const fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM,
+                                            .seed     = 42};
 
         // expect no exceptions and consistent substitution
         substitute(aig, ps, aig.size() + 41);

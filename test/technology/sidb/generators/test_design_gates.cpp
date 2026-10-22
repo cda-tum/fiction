@@ -60,9 +60,7 @@ TEST_CASE("Gate design propagates worker failures", "[design-sidb-gates]")
     invalid.z = 2;
     lyt.assign_defect(invalid, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
 
-    design_gates_params params{};
-    params.canvas                 = {site_at_row(27, 12), site_at_row(28, 12)};
-    params.number_of_canvas_sidbs = 1;
+    design_gates_params params{.canvas = {site_at_row(27, 12), site_at_row(28, 12)}, .number_of_canvas_sidbs = 1};
 
     for (const auto mode :
          {design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
@@ -86,18 +84,17 @@ TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
 {
     const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
 
-    design_gates_params params{};
-
     SECTION("Zero expires immediately")
     {
-        params.operational_params.timeout = 0;
+        const design_gates_params params{.operational_params = {.timeout = 0}};
     }
     SECTION("One positive budget covers setup and every candidate")
     {
-        params.operational_params.timeout = 20;
-        params.canvas                     = {site_at_row(27, 12), site_at_row(28, 13)};
-        params.number_of_canvas_sidbs     = 1;
-        params.on_progress = [](auto, auto, auto) { std::this_thread::sleep_for(std::chrono::milliseconds{25}); };
+        const design_gates_params params{.operational_params     = {.timeout = 20},
+                                         .canvas                 = {site_at_row(27, 12), site_at_row(28, 13)},
+                                         .number_of_canvas_sidbs = 1,
+                                         .on_progress            = [](auto, auto, auto)
+                                         { std::this_thread::sleep_for(std::chrono::milliseconds{25}); }};
     }
 
     for (const auto mode :
@@ -106,8 +103,8 @@ TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
           design_gates_params::design_gates_mode::RANDOM, design_gates_params::design_gates_mode::PRUNING_ONLY})
     {
         CAPTURE(mode);
-        params.design_mode = mode;
-        const auto start   = std::chrono::steady_clock::now();
+        const design_gates_params params{.design_mode = mode};
+        const auto                start = std::chrono::steady_clock::now();
         CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params), utils::timeout_error);
         CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
     }
@@ -774,12 +771,11 @@ TEST_CASE("Gate design propagates worker simulation errors", "[design-sidb-gates
 {
     auto lyt = blueprints::two_input_one_output_skeleton_west_west();
     lyt.assign_defect({100, 100}, defect{defect_type::DB, -1});
-    design_gates_params params{};
-    params.operational_params.sim_engine      = engine::QUICKSIM;
-    params.operational_params.sim_params.base = 2;
-    params.design_mode                        = decltype(params)::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-    params.canvas                             = {{27, 6, 0}, {27, 6, 0}};
-    params.number_of_canvas_sidbs             = 1;
+    const design_gates_params params{
+        .operational_params     = {.sim_params = simulation_parameters{2}, .sim_engine = engine::QUICKSIM},
+        .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .canvas                 = {{27, 6, 0}, {27, 6, 0}},
+        .number_of_canvas_sidbs = 1};
     CHECK_THROWS_AS(design_gates(lyt, std::vector<tt>{create_and_tt()}, params), std::invalid_argument);
 }
 
@@ -827,8 +823,8 @@ TEST_CASE("Gate design reports progress", "[design-sidb-gates]")
                                   .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
         .canvas                 = {{27, 6, 0}, {30, 8, 0}},
         .number_of_canvas_sidbs = 3,
-        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
-    params.on_progress = rec.callback();
+        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED,
+        .on_progress            = rec.callback()};
 
     SECTION("QuickCell")
     {

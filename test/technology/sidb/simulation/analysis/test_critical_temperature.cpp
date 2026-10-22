@@ -53,22 +53,22 @@ using namespace fiction::synthesis;
 TEST_CASE("Critical temperature shares one budget across simulation and analysis",
           "[critical-temperature][application-timeout]")
 {
-    const auto                  lyt = blueprints::siqad_and_gate();
-    critical_temperature_params params{};
-    critical_temperature_stats  stats{};
+    const auto                 lyt = blueprints::siqad_and_gate();
+    critical_temperature_stats stats{};
     stats.num_valid_lyt = 42;
 
     SECTION("Zero budget")
     {
-        params.operational_params.timeout = 0;
+        const critical_temperature_params params{.operational_params = {.timeout = 0}};
         CHECK_THROWS_AS(critical_temperature_gate_based(lyt, {create_and_tt()}, params, &stats), utils::timeout_error);
         CHECK_THROWS_AS(critical_temperature_non_gate_based(lyt, params, &stats), utils::timeout_error);
     }
     SECTION("The enclosing budget is not restarted by simulation")
     {
-        params.operational_params.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{20};
-        params.operational_params.timeout  = 1000;
-        params.on_progress                 = [&](auto, auto, auto)
+        critical_temperature_params params{
+            .operational_params = {.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{20},
+                                   .timeout  = 1000}};
+        params.on_progress = [&](auto, auto, auto)
         { std::this_thread::sleep_until(params.operational_params.deadline); };
         CHECK_THROWS_AS(critical_temperature_non_gate_based(lyt, params, &stats), utils::timeout_error);
     }
@@ -76,15 +76,14 @@ TEST_CASE("Critical temperature shares one budget across simulation and analysis
     {
         layout single_dot{};
         single_dot.assign_sidb({0, 0, 0});
-        params.max_temperature            = 1e12;
-        params.operational_params.timeout = 100;
+        const critical_temperature_params params{.operational_params = {.timeout = 100}, .max_temperature = 1e12};
         CHECK_THROWS_AS(critical_temperature_non_gate_based(single_dot, params, &stats), utils::timeout_error);
     }
 #if (FICTION_ALGLIB_ENABLED)
     SECTION("ClusterComplete rejects finite budgets")
     {
-        params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
-        params.operational_params.timeout    = 1000;
+        const critical_temperature_params params{
+            .operational_params = {.sim_engine = engine::CLUSTERCOMPLETE, .timeout = 1000}};
         CHECK_THROWS_AS(critical_temperature_non_gate_based(lyt, params, &stats), std::invalid_argument);
     }
 #endif  // FICTION_ALGLIB_ENABLED
@@ -95,8 +94,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 {
     layout lyt{};
 
-    critical_temperature_params params{};
-    simulation_parameters       sim_params{2, -0.32, 5.6, 5.0};
+    simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
@@ -107,12 +105,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
         lyt.assign_sidb({6, 1, 0}, dot_tag::OUTPUT);
         lyt.assign_sidb({8, 1, 0}, dot_tag::OUTPUT);
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKSIM;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 0;
-        params.alpha                         = 0.0;
+        const critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKSIM},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 0,
+            .alpha              = 0.0};
 
         const auto ct = critical_temperature_gate_based(lyt, std::vector{create_id_tt()}, params, &critical_stats);
 
@@ -122,12 +120,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
     SECTION("No SiDB")
     {
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 80,
+            .alpha              = 0.7};
 
         const auto ct_qe = critical_temperature_gate_based(lyt, std::vector{tt{}}, params, &critical_stats);
 
@@ -169,12 +167,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 80,
+            .alpha              = 0.7};
 
         const auto ct = critical_temperature_gate_based(lyt, std::vector{create_id_tt()}, params, &critical_stats);
 
@@ -199,12 +197,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
         lyt.assign_sidb({2, 0}, dot_tag::NORMAL);
         lyt.assign_sidb({2, 2}, dot_tag::NORMAL);
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 80,
+            .alpha              = 0.7};
 
         const auto ct_qe = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
@@ -246,12 +244,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         sim_params.mu_minus = -0.28;
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 80,
+            .alpha              = 0.7};
 
         const auto ct_qe = critical_temperature_gate_based(lyt, std::vector{create_and_tt()}, params, &critical_stats);
 
@@ -276,11 +274,14 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         sim_params.mu_minus = -0.28;
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.operational_params.input_bdl_iterator_params.input_bdl_config =
-            bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
-        params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
+        critical_temperature_params params{
+            .operational_params = {
+                .sim_params                = sim_params,
+                .sim_engine                = engine::QUICKEXACT,
+                .input_bdl_iterator_params = {
+                    .bdl_wire_params = {.threshold_bdl_interdistance = 1.5},
+                    .input_bdl_config =
+                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}}};
 
         const auto ct_qe =
             critical_temperature_gate_based(lyt_or_gate, std::vector{create_or_tt()}, params, &critical_stats);
@@ -332,12 +333,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 80,
+            .alpha              = 0.7};
 
         SECTION("Kinks are allowed")
         {
@@ -418,12 +419,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKSIM;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 500;
-        params.alpha                         = 0.6;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKSIM},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 500,
+            .alpha              = 0.6};
 
         const auto ct_qs = critical_temperature_gate_based(lyt, std::vector{create_and_tt()}, params, &critical_stats);
 
@@ -470,12 +471,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
         lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
         lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 80,
+            .alpha              = 0.7};
 
         SECTION("Kinks are allowed")
         {
@@ -528,11 +529,11 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
     {
         const auto crossing_lyt = blueprints::bestagon_crossing();
 
-        params.operational_params.sim_params = sim_params;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{.operational_params = {.sim_params = sim_params},
+                                           .confidence_level   = 0.99,
+                                           .max_temperature    = 350,
+                                           .iteration_steps    = 80,
+                                           .alpha              = 0.7};
 
         const auto ct_qe = critical_temperature_gate_based(crossing_lyt, std::vector{create_crossing_wire_tt()}, params,
                                                            &critical_stats);
@@ -581,12 +582,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         sim_params.mu_minus = -0.25;
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 80,
+            .alpha              = 0.7};
 
         SECTION("Kinks are allowed")
         {
@@ -648,12 +649,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKEXACT;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 350;
-        params.iteration_steps               = 80;
-        params.alpha                         = 0.7;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+            .confidence_level   = 0.99,
+            .max_temperature    = 350,
+            .iteration_steps    = 80,
+            .alpha              = 0.7};
 
         const auto ct_qe = critical_temperature_gate_based(lyt, std::vector{create_id_tt()}, params, &critical_stats);
 
@@ -691,12 +692,12 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
         lyt.assign_sidb({9, 1, 1}, dot_tag::NORMAL);
         lyt.assign_sidb({12, 1, 1}, dot_tag::NORMAL);
 
-        params.operational_params.sim_params = sim_params;
-        params.operational_params.sim_engine = engine::QUICKSIM;
-        params.confidence_level              = 0.99;
-        params.max_temperature               = 750;
-        params.iteration_steps               = 500;
-        params.alpha                         = 0.6;
+        critical_temperature_params params{
+            .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKSIM},
+            .confidence_level   = 0.99,
+            .max_temperature    = 750,
+            .iteration_steps    = 500,
+            .alpha              = 0.6};
 
         const auto ct_qe = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
@@ -728,11 +729,11 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
         for (const auto condition : {is_operational_params::operational_condition::TOLERATE_KINKS,
                                      is_operational_params::operational_condition::REJECT_KINKS})
         {
-            critical_temperature_params params{};
-            params.operational_params.sim_params                                 = simulation_parameters{2, -0.32};
-            params.operational_params.sim_engine                                 = engine::QUICKEXACT;
-            params.operational_params.op_condition                               = condition;
-            params.operational_params.input_bdl_iterator_params.input_bdl_config = input_config;
+            const critical_temperature_params params{
+                .operational_params = {.sim_params                = simulation_parameters{2, -0.32},
+                                       .sim_engine                = engine::QUICKEXACT,
+                                       .input_bdl_iterator_params = {.input_bdl_config = input_config},
+                                       .op_condition              = condition}};
 
             critical_temperature_stats expected_stats{};
 
@@ -851,15 +852,14 @@ TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperat
     lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
-    critical_temperature_params params{};
     const simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
-    params.operational_params.sim_params = sim_params;
-    params.operational_params.sim_engine = engine::QUICKEXACT;
-    params.confidence_level              = 0.99;
-    params.max_temperature               = 350;
+    critical_temperature_params params{
+        .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+        .confidence_level   = 0.99,
+        .max_temperature    = 350};
 
     const auto ct_qe = critical_temperature_gate_based(lyt, create_crossing_wire_tt(), params, &critical_stats);
 
@@ -885,15 +885,14 @@ TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical
 {
     const auto lyt_double_wire_gate = blueprints::bestagon_double_wire();
 
-    critical_temperature_params params{};
     const simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
-    params.operational_params.sim_params = sim_params;
-    params.operational_params.sim_engine = engine::QUICKEXACT;
-    params.confidence_level              = 0.99;
-    params.max_temperature               = 350;
+    critical_temperature_params params{
+        .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+        .confidence_level   = 0.99,
+        .max_temperature    = 350};
 
     SECTION("Kinks are allowed")
     {
@@ -946,15 +945,14 @@ TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[crit
 {
     const auto lyt_half_adder_gate = blueprints::bestagon_ha();
 
-    critical_temperature_params params{};
     const simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
-    params.operational_params.sim_params = sim_params;
-    params.operational_params.sim_engine = engine::QUICKEXACT;
-    params.confidence_level              = 0.99;
-    params.max_temperature               = 350;
+    critical_temperature_params params{
+        .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+        .confidence_level   = 0.99,
+        .max_temperature    = 350};
 
     SECTION("Kinks are allowed")
     {
@@ -1008,10 +1006,9 @@ TEST_CASE("Critical temperature reports progress", "[critical-temperature]")
 {
     progress_recorder rec{};
 
-    critical_temperature_params params{};
-    params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    params.operational_params.sim_engine = engine::QUICKEXACT;
-    params.on_progress                   = rec.callback();
+    const critical_temperature_params params{
+        .operational_params = {.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT},
+        .on_progress        = rec.callback()};
 
     SECTION("gate-based")
     {

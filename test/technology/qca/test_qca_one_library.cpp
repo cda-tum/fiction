@@ -195,10 +195,9 @@ TEST_CASE("QCA ONE rejects primary-input fanout", "[qca-one-library]")
     lyt.assign_clock_number({1, 1}, 1);
     lyt.assign_clock_number({0, 2}, 1);
 
-    std::ostringstream    report{};
-    gate_level_drv_params ps{};
-    ps.out = &report;
-    gate_level_drv_stats st{};
+    std::ostringstream          report{};
+    const gate_level_drv_params ps{.out = &report};
+    gate_level_drv_stats        st{};
     gate_level_drvs(lyt, ps, &st);
     INFO(report.str());
     REQUIRE(st.drvs == 0);

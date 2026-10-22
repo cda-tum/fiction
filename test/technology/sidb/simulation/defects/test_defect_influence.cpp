@@ -63,8 +63,7 @@ TEST_CASE("Defect domains share a budget for operational and ground-state analys
           "[defect-influence][application-timeout]")
 {
     const auto              lyt = blueprints::siqad_and_gate();
-    defect_influence_params params{};
-    params.operational_params.timeout = 0;
+    defect_influence_params params{.operational_params = {.timeout = 0}};
     CHECK_THROWS_AS(defect_influence_grid_search(lyt, {create_and_tt()}, params), utils::timeout_error);
     CHECK_THROWS_AS(defect_influence_random_sampling(lyt, {create_and_tt()}, 0, params), utils::timeout_error);
     CHECK_THROWS_AS(defect_influence_quicktrace(lyt, {create_and_tt()}, 0, params), utils::timeout_error);
@@ -552,11 +551,10 @@ TEST_CASE("Defect influence propagates worker exceptions", "[defect-influence]")
     lyt.assign_sidb({2, 0}, dot_tag::INPUT);
     lyt.assign_sidb({8, 0}, dot_tag::OUTPUT);
     lyt.assign_sidb({10, 0}, dot_tag::OUTPUT);
-    defect_influence_params params{};
-    params.defect                        = defect{defect_type::DB, -1, 5.6, 5.0};
-    params.additional_scanning_area      = {1, 0};
-    params.operational_params.sim_engine = engine::QUICKSIM;
-    params.number_of_threads             = 2;
+    const defect_influence_params params{.defect                   = defect{defect_type::DB, -1, 5.6, 5.0},
+                                         .operational_params       = {.sim_engine = engine::QUICKSIM},
+                                         .additional_scanning_area = {1, 0},
+                                         .number_of_threads        = 2};
 
     CHECK_THROWS_AS(defect_influence_grid_search(lyt, std::vector{create_id_tt()}, params), std::invalid_argument);
 }
@@ -572,8 +570,8 @@ TEST_CASE("Defect influence reports progress", "[defect-influence]")
     defect_influence_params params{.defect                   = defect{defect_type::DB, -1, 5.6, 5.0},
                                    .additional_scanning_area = {2, 2},
                                    .influence_def = defect_influence_params::influence_definition::GROUND_STATE_CHANGE,
-                                   .number_of_threads = 2};
-    params.on_progress = rec.callback();
+                                   .number_of_threads = 2,
+                                   .on_progress       = rec.callback()};
 
     SECTION("grid search")
     {

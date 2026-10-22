@@ -73,9 +73,8 @@ void check_stats(const orthogonal_physical_design_stats& st) noexcept
 template <typename Lyt, typename Ntk>
 void check_ortho_equiv(const Ntk& ntk, const std::optional<arrangement> a = std::nullopt)
 {
-    orthogonal_physical_design_stats  stats{};
-    orthogonal_physical_design_params ps{};
-    ps.layout_arrangement = a;
+    orthogonal_physical_design_stats        stats{};
+    const orthogonal_physical_design_params ps{.layout_arrangement = a};
 
     auto layout = orthogonal<typename Lyt::coordinate_layout>(convert_network<tec_nt>(ntk), ps, &stats);
 
@@ -208,10 +207,9 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
 
     const auto layout = orthogonal<cartesian_layout>(ntk);
     check_eq(ntk, layout);
-    std::ostringstream    report{};
-    gate_level_drv_params params{};
-    params.out = &report;
-    gate_level_drv_stats stats{};
+    std::ostringstream          report{};
+    const gate_level_drv_params params{.out = &report};
+    gate_level_drv_stats        stats{};
     gate_level_drvs(layout, params, &stats);
     CHECK(stats.drvs == 0);
 }
@@ -284,9 +282,8 @@ TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
 {
     const auto ntk = blueprints::mux21_network<technology_network>();
 
-    progress_recorder                 rec{};
-    orthogonal_physical_design_params params{};
-    params.on_progress = rec.callback();
+    progress_recorder                       rec{};
+    const orthogonal_physical_design_params params{.on_progress = rec.callback()};
 
     const auto layout = orthogonal<cartesian_layout>(ntk, params);
 

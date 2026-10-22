@@ -736,7 +736,7 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 {
 
     // enable crossings
-    const yen_k_shortest_paths_params params{a_star_params{true}};
+    const yen_k_shortest_paths_params params{.astar_params = a_star_params{.crossings = true}};
 
     SECTION("Single crossing")
     {

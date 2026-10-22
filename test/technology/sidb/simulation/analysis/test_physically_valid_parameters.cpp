@@ -43,10 +43,9 @@ using namespace fiction::sidb::simulation::logic;
 #if (FICTION_ALGLIB_ENABLED)
 TEST_CASE("Reject unsupported physical-validity simulation engines", "[determine-physically-valid-parameters]")
 {
-    const layout              lyt{};
-    const charge_distribution cd{lyt};
-    operational_domain_params params{};
-    params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
+    const layout                    lyt{};
+    const charge_distribution       cd{lyt};
+    const operational_domain_params params{.operational_params = {.sim_engine = engine::CLUSTERCOMPLETE}};
 
     CHECK_THROWS_AS(physically_valid_parameters(lyt, cd, params), std::invalid_argument);
 }
@@ -83,12 +82,16 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
     charge_distribution cd{lyt};
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
-
-    op_domain_params.sweep_dimensions = {
-        operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R, .min = 4.1, .max = 6.0, .step = 0.1},
-        operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF, .min = 4.1, .max = 6.0, .step = 0.1}};
+    operational_domain_params op_domain_params{
+        .operational_params = {.sim_params = sim_params},
+        .sweep_dimensions   = {operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R,
+                                                              .min       = 4.1,
+                                                              .max       = 6.0,
+                                                              .step      = 0.1},
+                               operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF,
+                                                              .min       = 4.1,
+                                                              .max       = 6.0,
+                                                              .step      = 0.1}}};
 
     SECTION("Using the typical ground state as given CDS")
     {
@@ -162,8 +165,7 @@ TEST_CASE(
 
     charge_distribution cd{bestagon_and};
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
+    operational_domain_params op_domain_params{.operational_params = {.sim_params = sim_params}};
 
     SECTION("Using the ground state of default physical parameters as given CDS, two dimensional sweep")
     {
@@ -294,10 +296,10 @@ TEST_CASE("Physical-validity sweeps report their total", "[determine-physically-
     layout lyt{};
     lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
 
-    progress_recorder         rec{};
-    operational_domain_params params{};
-    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5, .max = 6, .step = 0.5}};
-    params.on_progress      = rec.callback();
+    progress_recorder               rec{};
+    const operational_domain_params params{
+        .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5, .max = 6, .step = 0.5}},
+        .on_progress      = rec.callback()};
 
     const auto domain = physically_valid_parameters(lyt, charge_distribution{lyt}, params);
 

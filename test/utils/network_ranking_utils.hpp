@@ -31,9 +31,7 @@
 template <typename Ntk>
 fiction::networks::views::mutable_rank_view<fiction::networks::technology_network> rank(const Ntk& ntk)
 {
-    fiction::synthesis::network_balancing_params ps{};
-    ps.unify_outputs           = true;
-    ps.buffer_constant_outputs = false;
+    const fiction::synthesis::network_balancing_params ps{.unify_outputs = true, .buffer_constant_outputs = false};
 
     return fiction::networks::views::mutable_rank_view{
         fiction::synthesis::network_balancing<fiction::networks::technology_network>(ntk, ps)};

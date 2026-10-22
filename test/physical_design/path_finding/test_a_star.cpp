@@ -556,7 +556,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
     using cost = unit_cost_functor<uint8_t>;
 
     // enable crossings
-    const a_star_params params{true};
+    const a_star_params params{.crossings = true};
 
     SECTION("Single crossing")
     {

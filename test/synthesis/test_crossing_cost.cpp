@@ -123,8 +123,7 @@ TEST_CASE("Unavoidable crossings are charged one crossing gate each plus the pad
 
     for (const bool xor_gates : {false, true})
     {
-        crossing_gate_planarization_params cg_ps{};
-        cg_ps.xor_gates = xor_gates;
+        const crossing_gate_planarization_params cg_ps{.xor_gates = xor_gates};
 
         auto lower_copy = lower;
 
@@ -144,8 +143,7 @@ TEST_CASE("Levels with more crossings than allowed are not costed", "[crossing-c
     const auto          upper = ranked.get_ranks(1);
     std::vector<node_t> lower = ranked.get_ranks(0);
 
-    crossing_gate_planarization_params cg_ps{};
-    cg_ps.max_crossings_per_level = 0;
+    const crossing_gate_planarization_params cg_ps{.max_crossings_per_level = 0};
 
     const auto result = synthesis::detail::crossing_cost(ranked, upper, lower, 32, cg_ps);
 

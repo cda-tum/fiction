@@ -77,16 +77,14 @@ TEST_CASE("Simple wire connection", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    color_routing_params ps{};
-
     SECTION("MCS")
     {
-        ps.engine = graph_coloring_engine::MCS;
+        const color_routing_params ps{.engine = graph_coloring_engine::MCS};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
     SECTION("SAT")
     {
-        ps.engine = graph_coloring_engine::SAT;
+        const color_routing_params ps{.engine = graph_coloring_engine::SAT};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
 }
@@ -148,16 +146,14 @@ TEST_CASE("Two paths wire connections", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    color_routing_params ps{};
-
     SECTION("MCS")
     {
-        ps.engine = graph_coloring_engine::MCS;
+        const color_routing_params ps{.engine = graph_coloring_engine::MCS};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
     SECTION("SAT")
     {
-        ps.engine = graph_coloring_engine::SAT;
+        const color_routing_params ps{.engine = graph_coloring_engine::SAT};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
 }
@@ -172,16 +168,14 @@ TEST_CASE("Three paths wire connections", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    color_routing_params ps{};
-
     SECTION("MCS")
     {
-        ps.engine = graph_coloring_engine::MCS;
+        const color_routing_params ps{.engine = graph_coloring_engine::MCS};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
     SECTION("SAT")
     {
-        ps.engine = graph_coloring_engine::SAT;
+        const color_routing_params ps{.engine = graph_coloring_engine::SAT};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
 }
@@ -196,16 +190,14 @@ TEST_CASE("Direct gate connections", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    color_routing_params ps{};
-
     SECTION("MCS")
     {
-        ps.engine = graph_coloring_engine::MCS;
+        const color_routing_params ps{.engine = graph_coloring_engine::MCS};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
     SECTION("SAT")
     {
-        ps.engine = graph_coloring_engine::SAT;
+        const color_routing_params ps{.engine = graph_coloring_engine::SAT};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
 }
@@ -221,17 +213,14 @@ TEST_CASE("Partial routing", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    color_routing_params ps{};
-    ps.conduct_partial_routing = true;
-
     SECTION("MCS")
     {
-        ps.engine = graph_coloring_engine::MCS;
+        const color_routing_params ps{.conduct_partial_routing = true, .engine = graph_coloring_engine::MCS};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
     SECTION("SAT")
     {
-        ps.engine = graph_coloring_engine::SAT;
+        const color_routing_params ps{.conduct_partial_routing = true, .engine = graph_coloring_engine::SAT};
         check_color_routing(spec_layout, impl_layout, objectives, ps);
     }
 }
@@ -246,11 +235,9 @@ TEST_CASE("Routing with crossings", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    color_routing_params ps{};
-    ps.crossings = true;
-
     SECTION("Without path limit")
     {
+        color_routing_params ps{.crossings = true};
         SECTION("MCS")
         {
             ps.engine = graph_coloring_engine::MCS;
@@ -264,7 +251,7 @@ TEST_CASE("Routing with crossings", "[color-routing]")
     }
     SECTION("With path limit")
     {
-        ps.path_limit = 2;
+        color_routing_params ps{.crossings = true, .path_limit = 2};
 
         SECTION("MCS")
         {
@@ -291,18 +278,15 @@ TEST_CASE("Routing failure", "[color-routing]")
 
     const std::vector<routing_objective> objectives{{{0, 1}, {1, 3}, 0}, {{1, 0}, {1, 3}, 1}};
 
-    color_routing_params ps{};
-    ps.crossings = true;
-
     SECTION("MCS")
     {
-        ps.engine = graph_coloring_engine::MCS;
+        const color_routing_params ps{.crossings = true, .engine = graph_coloring_engine::MCS};
         // routing should fail
         CHECK(!color_routing(layout, objectives, ps));
     }
     SECTION("SAT")
     {
-        ps.engine = graph_coloring_engine::SAT;
+        const color_routing_params ps{.crossings = true, .engine = graph_coloring_engine::SAT};
         // routing should fail
         CHECK(!color_routing(layout, objectives, ps));
     }
@@ -320,18 +304,15 @@ TEST_CASE("Routing failure 2", "[color-routing]")
 
     const std::vector<routing_objective> objectives{{{0, 1}, {1, 3}, 0}, {{1, 0}, {1, 3}, 1}};
 
-    color_routing_params ps{};
-    ps.crossings = true;
-
     SECTION("MCS")
     {
-        ps.engine = graph_coloring_engine::MCS;
+        const color_routing_params ps{.crossings = true, .engine = graph_coloring_engine::MCS};
         // routing should fail
         CHECK(!color_routing(layout, objectives, ps));
     }
     SECTION("SAT")
     {
-        ps.engine = graph_coloring_engine::SAT;
+        const color_routing_params ps{.crossings = true, .engine = graph_coloring_engine::SAT};
         // routing should fail
         CHECK(!color_routing(layout, objectives, ps));
     }
@@ -347,11 +328,9 @@ TEST_CASE("Routing failure 3", "[color-routing]")
     const auto w2 = layout.create_buf(x2, {1, 1});
     const auto a1 = layout.create_and(w1, w2, {2, 1});
 
-    color_routing_params ps{};
-    ps.crossings = true;
-
     SECTION("Wires without connections")
     {
+        color_routing_params ps{.crossings = true};
         layout.disconnect({a1, 0});
         layout.disconnect({a1, 1});
 
@@ -369,6 +348,7 @@ TEST_CASE("Routing failure 3", "[color-routing]")
     }
     SECTION("Goal node behind wire crossing")
     {
+        color_routing_params ps{.crossings = true};
         layout.disconnect({a1, 0});
 
         const std::vector<routing_objective> objectives{{{0, 1}, {2, 1}, 0}, {{1, 1}, {2, 1}, 1}};

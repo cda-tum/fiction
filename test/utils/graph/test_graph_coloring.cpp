@@ -87,8 +87,7 @@ template <typename Graph>
 void check_sat_coloring_engine(const Graph& graph, const std::size_t expected_chromatic_number,
                                std::vector<typename Graph::vertex_id_type> clique = {})
 {
-    determine_vertex_coloring_sat_params<Graph> sat_params{};
-    sat_params.cliques = {{clique}};
+    determine_vertex_coloring_sat_params<Graph> sat_params{.cliques = {{clique}}};
 
     SECTION("SAT")
     {
