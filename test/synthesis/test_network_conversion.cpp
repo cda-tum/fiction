@@ -40,6 +40,16 @@ using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
 
+/**
+ * @brief Checks whether a source can convert to the named technology network.
+ * @tparam Ntk Source network type.
+ */
+template <typename Ntk>
+concept technology_convertible = requires(const Ntk& ntk) { convert_network<named_technology_network>(ntk); };
+
+static_assert(technology_convertible<mockturtle::aig_network>);
+static_assert(!technology_convertible<int>);
+
 template <typename Ntk>
 void to_x(const Ntk& ntk)
 {

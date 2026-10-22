@@ -27,6 +27,7 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/domain.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
@@ -62,6 +63,13 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 using namespace fiction::utils::math;
+
+/** @brief Tests whether mapped values can form a simulation domain. @tparam Mapped Value types. */
+template <typename... Mapped>
+concept domain_values = requires { typename domain<int, Mapped...>; };
+
+static_assert(domain_values<double>);
+static_assert(!domain_values<>);
 
 /**
  * @brief Checks domain dimensions, sweep bounds, and the requested operational status.

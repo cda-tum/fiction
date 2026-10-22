@@ -53,6 +53,14 @@ using namespace fiction::synthesis;
 using namespace fiction::test;
 using namespace fiction::layouts;
 
+/** @brief Checks whether a geometry can back a gate layout. @tparam Geometry Coordinate geometry. */
+template <typename Geometry>
+concept gate_geometry = requires { typename gate_layout<Geometry>; };
+
+static_assert(gate_geometry<cartesian_layout>);
+static_assert(!gate_geometry<cartesian_gate_layout>);
+static_assert(!gate_geometry<hexagonal_gate_layout>);
+
 TEST_CASE("Canonical gate layouts expose their geometry", "[gate-level-layout]")
 {
     STATIC_CHECK(std::is_same_v<gate_layout<>, cartesian_gate_layout>);

@@ -30,6 +30,8 @@
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/physical_design/wiring_reduction.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -46,7 +48,8 @@ using namespace fiction::physical_design;
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
-    auto layout = orthogonal<Lyt>(ntk, {});
+    auto layout = orthogonal<typename Lyt::coordinate_layout>(
+        fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
     wiring_reduction_stats stats{};
     wiring_reduction(layout, {}, &stats);
@@ -167,7 +170,7 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
     SECTION("Timeout")
     {
-        auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
         wiring_reduction_stats  stats{};
         wiring_reduction_params params{};
@@ -179,7 +182,7 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
     SECTION("Timeout exceeded")
     {
-        auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
         wiring_reduction_stats  stats{};
         wiring_reduction_params params{};
@@ -238,7 +241,7 @@ TEST_CASE("Optimization accepts interior terminals", "[wiring-reduction]")
 TEST_CASE("Wiring reduction reports progress", "[wiring-reduction]")
 {
     const auto ntk    = blueprints::mux21_network<technology_network>();
-    auto       layout = orthogonal<cartesian_gate_layout>(ntk);
+    auto       layout = orthogonal<cartesian_layout>(ntk);
 
     progress_recorder       rec{};
     wiring_reduction_params params{};

@@ -145,20 +145,21 @@ static const char *mkd_doc_fiction_fcn_gate_library =
 R"doc( Base class for various FCN libraries used to map gate-level layouts
  to cell-level ones. Any new gate library can extend `gate_library` if
  it benefits from its features but does not have to. The only
- requirement is that it must be a static class that provides a
+ requirement is that it must provide a public static set_up_gate
+ function for each supported gate-layout geometry, for example:
 
 ```
 embed:rst
 .. code-block:: c++
 
-template <typename GateLyt>
-static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+static gate set_up_gate(const fiction::layouts::cartesian_gate_layout& lyt,
+const fiction::layouts::layout_base::coordinate& t)
 ```
 
 
 
 
- public member function. Additionally, a
+ Additionally, a
 
 ```
 embed:rst
@@ -679,17 +680,19 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R
 
 static const char *mkd_doc_fiction_has_create_dot = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_dimensions = R"doc()doc";
+static const char *mkd_doc_fiction_has_foreach_pi_unranked =
+R"doc(Whether `Ntk` offers `foreach_pi_unranked`, which visits the primary
+inputs in creation order regardless of their rank, as
+`networks::views::mutable_rank_view` does.)doc";
 
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_get_functional_implementations = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_gate_ports = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_layout_name = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_get_real_pi = R"doc()doc";
+
+static const char *mkd_doc_fiction_has_has_level =
+R"doc(Whether `Ntk` offers `has_level`, which tells whether a level is
+stored for a node, as `networks::views::static_depth_view` does for
+nodes that are reachable from an output.)doc";
 
 static const char *mkd_doc_fiction_has_is_and3 = R"doc()doc";
 
@@ -736,8 +739,6 @@ static const char *mkd_doc_fiction_has_is_xor_and = R"doc()doc";
 static const char *mkd_doc_fiction_has_num_real_pis = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_num_virtual_pis = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_set_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_update_ranks = R"doc()doc";
 
@@ -994,9 +995,6 @@ Args:
     lyt: Layout.
     t: Occupied tile.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     Physical connector ports.
 
@@ -1009,11 +1007,11 @@ Args:
     lyt: The layout to check.
     n: Node whose fanins are to be considered.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     `true` iff `n` has an AND, OR, or MAJ fanin node.
+
+Raises:
+    ValueError: If `n` does not identify a live object in `lyt`.
 
 )doc";
 
@@ -1024,11 +1022,11 @@ Args:
     lyt: The layout to check.
     n: Node whose fanouts are to be considered.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     `true` iff `n` has a fanout node as fanout.
+
+Raises:
+    ValueError: If `n` does not identify a live object in `lyt`.
 
 )doc";
 
@@ -1055,9 +1053,6 @@ Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a ToPoliNano gate.
 
-Template Args:
-    GateLyt: Shifted Cartesian gate-level layout type.
-
 Returns:
     ToPoliNano gate representation of `t` including I/Os, rotation,
     etc.
@@ -1072,8 +1067,6 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library_topolinano_library = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_cell_grid = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
@@ -1876,8 +1869,6 @@ The grid has value semantics; copies are independent.
 
 Template Args:
     CellType: Enumeration of the cell types of one technology.)doc";
-
-static const char *mkd_doc_fiction_layouts_cell_grid_2 = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_cell_grid_assign_cell_name =
 R"doc(Assigns a name to a cell. The empty string removes the name.
@@ -2757,7 +2748,8 @@ as specified on each visitor.
 
 Template Args:
     CoordinateLayout: Coordinate geometry used for placement. Defaults
-                      to `cartesian_layout`.)doc";
+                      to `cartesian_layout`. Gate layouts cannot serve
+                      as coordinate geometries.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_adjacent_opposite_tiles =
 R"doc(Returns pairs of opposite adjacent tiles.
@@ -5379,7 +5371,7 @@ Args:
     name: The name to give to the generated layout.
 
 Template Args:
-    Lyt: The layout type to be created from an input.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 )doc";
 
@@ -5400,7 +5392,7 @@ Args:
     is: The input stream to read from.
 
 Template Args:
-    Lyt: The layout type to be used as input.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5414,7 +5406,7 @@ Args:
     name: The name to give to the generated layout.
 
 Template Args:
-    Lyt: The layout type to be created from an input.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 )doc";
 
@@ -5431,7 +5423,7 @@ Args:
     filename: The file name to open and read from.
 
 Template Args:
-    Lyt: The layout type to be used as input.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 )doc";
 
@@ -5504,7 +5496,7 @@ Args:
     on_progress: Receives completed drawing work.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
     Drawer: DOT drawer type.
 
 )doc";
@@ -6134,9 +6126,7 @@ Args:
 Template Args:
     GateSizeX: Horizontal tile size.
     GateSizeY: Vertical tile size.
-    GateLyt: Gate-level layout type.
-    Coordinate: Cell coordinate type, e.g., `layout_base::coordinate`.
-                Hexagonal tiles can yield negative positions.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Absolute cell position in a layout.
@@ -6671,7 +6661,6 @@ Args:
     t: Tile whose port routing is determined.
 
 Template Args:
-    Lyt: Gate-level layout type.
     RespectClocking: Whether to respect the layout clocking while
                      tracing incoming and outgoing signals.
 
@@ -6713,9 +6702,6 @@ Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a molQCA gate.
 
-Template Args:
-    GateLyt: Cartesian gate-level layout type.
-
 Returns:
     molQCA gate representation of `t` including I/Os, rotation, const
     cells, etc.
@@ -6737,6 +6723,22 @@ Args:
 
 Returns:
     A vector of all possible edge paths leading from terminals to `n`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_buffer_chain =
+R"doc(Appends a chain of buffers to a signal.
+
+Args:
+    ntk: Network to extend.
+    sig: Signal to buffer.
+    length: Number of buffers.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    The end of the chain, `sig` itself for a length of zero.
 
 )doc";
 
@@ -6980,6 +6982,27 @@ R"doc(Exception class that can be thrown if some network exceeds a legal
 number of fanins.)doc";
 
 static const char *mkd_doc_fiction_networks_high_degree_fanin_exception_high_degree_fanin_exception = R"doc()doc";
+
+static const char *mkd_doc_fiction_networks_initialize_copy_network_with_virtual_pis =
+R"doc(Creates an empty network of the same type as `src` with copies of its
+constants and primary inputs, virtual primary inputs included, and a
+map from the nodes of `src` to their copies.
+
+Primary inputs are created in the order that `foreach_pi_unranked`
+yields when `Ntk` offers it, so that rank bookkeeping of the copy
+matches `src`.
+
+Args:
+    src: Source network.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    The destination network and the node map from `src` to the
+    destination.
+
+)doc";
 
 static const char *mkd_doc_fiction_networks_interface_matching = R"doc(Complete permutations from the left interface to the right interface.)doc";
 
@@ -7245,19 +7268,16 @@ Args:
 Template Args:
     NtkSrc: Source network type.
     NtkDest: Target network or gate-level layout type.
-    T: Mapping type to identify signals by. Currently,
-       `mockturtle::signal<NtkDest>` and
-       `branching_signal_container<NtkSrc, fanout_size>` are
-       supported.
+    T: Mapping value type: `mockturtle::signal<NtkDest>`,
+       `layouts::layout_object_id`, or
+       `physical_design::branching_signal_container<fanout_size>`.
 
 )doc";
 
 static const char *mkd_doc_fiction_networks_restore_network_name =
-R"doc(Helper function to conveniently assign the name of a source network or
-layout to a target network or layout as they use different function
-names for the same purpose. This function comes in handy when networks
-are translated or layouts are being created from networks that are
-supposed to have the same name.
+R"doc(Transfers the source network or gate-layout name. An unnamed source
+clears a supported destination name. A destination without naming
+support is unchanged.
 
 Args:
     ntk_or_lyt_src: Source network or layout whose name is to be
@@ -7311,7 +7331,8 @@ static const char *mkd_doc_fiction_networks_restore_signal_names_2 =
 R"doc(Same as the other restore_signal_names function but this overload uses
 a `mockturtle::node_map` with a branching_signal_container that is
 specifically used for networks or layouts that allow branches to be
-distinct, e.g., by their position on the layout.
+distinct, e.g., by their position on the layout. Skips branches with
+no mapped layout object.
 
 Args:
     ntk_src: Source logic network whose signal names are to be
@@ -7322,7 +7343,6 @@ Args:
              branching_signal_container.
 
 Template Args:
-    NtkSrc: Source logic network type.
     NtkDest: Target network or gate-level layout type.
     fanout_size: Maximum fanout size in the network.
 
@@ -7442,6 +7462,36 @@ static const char *mkd_doc_fiction_networks_technology_network_create_xor = R"do
 
 static const char *mkd_doc_fiction_networks_technology_network_create_xor3 = R"doc(Creates an XOR3 gate with the supplied signals.)doc";
 
+static const char *mkd_doc_fiction_networks_technology_network_foreach_fanin =
+R"doc(Applies a function to every fanin of a node in constant time per node.
+
+Constants and inputs have no fanins. `klut_network::foreach_fanin`
+tells inputs from gates with `klut_network::is_ci`, which scans all
+inputs.
+
+Args:
+    n: Node whose fanins to visit.
+    fn: Function to apply to each fanin.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_technology_network_foreach_gate =
+R"doc(Applies a function to every gate in constant time per node.
+
+`klut_network::foreach_gate` tests every node with
+`klut_network::is_ci`, which scans all inputs.
+
+Args:
+    fn: Function to apply to each gate.
+
+Template Args:
+    Fn: Functor type.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_technology_network_is_and = R"doc(Returns whether the node implements the AND function.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_is_and3 = R"doc(Returns whether the node implements the AND3 function.)doc";
@@ -7458,6 +7508,22 @@ Args:
 
 Returns:
     `true` iff `n` is a buffer node.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_technology_network_is_ci =
+R"doc(Checks whether a node is a combinational input in constant time.
+
+A node is an input iff it is not a constant and has no fanins, because
+every gate has at least one fanin and `create_node` maps functions
+without fanins to constants. `klut_network::is_ci` scans all inputs
+instead.
+
+Args:
+    n: Node to consider.
+
+Returns:
+    `true` iff `n` is a combinational input.
 
 )doc";
 
@@ -7509,6 +7575,20 @@ static const char *mkd_doc_fiction_networks_technology_network_is_onehot = R"doc
 static const char *mkd_doc_fiction_networks_technology_network_is_or = R"doc(Returns whether the node implements the OR function.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_is_or_and = R"doc(Returns whether the node implements the OR AND function.)doc";
+
+static const char *mkd_doc_fiction_networks_technology_network_is_pi =
+R"doc(Checks whether a node is a primary input in constant time.
+
+Equals `is_ci`, because this network has no further kinds of
+combinational inputs.
+
+Args:
+    n: Node to consider.
+
+Returns:
+    `true` iff `n` is a primary input.
+
+)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_is_po =
 R"doc(Checks whether a node is primary output by considering the signal
@@ -7668,6 +7748,14 @@ Template Args:
 
 static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_clear_colors = R"doc(Remove all assigned colors.)doc";
 
+static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_clear_colors_2 =
+R"doc(Assigns the given color to all nodes and preserves edge colors.
+
+Args:
+    clr: Color to assign to the nodes.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_views_out_of_place_edge_color_view_edge_color =
 R"doc(Returns the assigned color of a given edge.
 
@@ -7747,21 +7835,12 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_networks_views_static_depth_view =
-R"doc(Provides `depth` and `level` methods for networks, similar to
-`mockturtle::static_depth_view`. Unlike the `mockturtle`
-implementation, this version uses flat hashmaps to store `level` data
-instead of `mockturtle::node_map`. Additionally, the `add_event`
-functionality has been removed. As a result, if the underlying network
-changes, either `on_add` has to be called when adding a node to the
-network and keep the current depth information or the `update_levels`
-method must be called to refresh the `static_depth_view` information.
-These modifications address performance issues encountered with
-`mockturtle::static_depth_view`.
-
-This view computes the level of each node and the overall depth of the
-network. The `level` and `depth` methods adhere to the network
-interface. Levels are calculated during construction and can be
-updated later by invoking the `update_levels` method.
+R"doc(Provides node levels and network depth, stored in vectors indexed by
+node index. Call `on_add` after adding a node, or `update_levels`
+after changing the network, to refresh the stored levels. Critical-
+path membership is computed on its first query after an update.
+Networks that already supply the depth interface retain their own
+storage and update behavior.
 
 Template Args:
     Ntk: The network type.
@@ -8173,7 +8252,6 @@ involved that got extended by wire nodes. This container solves that
 issue.
 
 Template Args:
-    Ntk: Logic network type.
     fanout_size: Maximum fanout size possible in the layout and/or the
                  network.)doc";
 
@@ -8223,7 +8301,7 @@ Args:
 
 Template Args:
     GateLibrary: Gate library whose tile size is used.
-    GateLyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Axis sizes of the grid, including the layer count of `gate_lyt`.
@@ -8285,7 +8363,8 @@ several coloring heuristics are available, from which can be chosen
 This function will return `true` if all objectives could be satisfied
 or if the partial routing parameter was set. In the case of `true`
 being returned, all determined paths have been routed in the given
-layout.
+layout. When `ps.path_limit` is zero, no candidate paths are generated
+and endpoint bounds are not checked.
 
 Args:
     lyt: A gate-level layout to route.
@@ -8295,11 +8374,15 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: The gate-level layout type to route.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
-    `true` iff routing was successful, i.e., iff all objectives could
-    be satisfied.
+    `true` iff all objectives are satisfied or partial routing is
+    enabled.
+
+Raises:
+    ValueError: If an objective endpoint lies outside the layout
+                extent when ps.path_limit is absent or nonzero.
 
 )doc";
 
@@ -8517,19 +8600,19 @@ R"doc(Routes objectives, allowing incomplete routing when
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container = R"doc(Stores edge colors for eastward and southward routing.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container = R"doc(Owns the colored traversal and its directional colors.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_east = R"doc(Color for eastward edges.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_east = R"doc(Identifier for eastward edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_ntk = R"doc(Network with routing colors assigned to edges.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_ntk = R"doc(Named traversal with separate node and edge colors.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_null = R"doc(Color for unassigned edges.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_null = R"doc(Identifier for uncolored edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_south = R"doc(Color for southward edges.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_color_south = R"doc(Identifier for southward edges.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_coloring_container = R"doc(Initializes the network and its routing direction colors.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_coloring_container = R"doc(Colors the named technology-network traversal.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_coloring_container_opposite_color = R"doc(Returns the other routing direction color.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_coloring_container_opposite_color = R"doc(Returns the other direction color.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_compare_gate_tiles =
 R"doc(Custom comparison function for sorting tiles based on the sum of their
@@ -8553,9 +8636,6 @@ input when the layout is converted to a hexagonal format.
 Args:
     lyt: The Cartesian gate-level layout containing primary inputs.
 
-Template Args:
-    CartLyt: Type of the Cartesian layout.
-
 Returns:
     The number of primary inputs that are placed to the left of the
     middle primary input.
@@ -8570,9 +8650,6 @@ input when the layout is converted to a hexagonal format.
 
 Args:
     lyt: The Cartesian gate-level layout containing primary inputs.
-
-Template Args:
-    CartLyt: Type of the Cartesian layout.
 
 Returns:
     The number of primary inputs that are placed to the right of the
@@ -8589,9 +8666,6 @@ output when the layout is converted to a hexagonal format.
 Args:
     lyt: The Cartesian gate-level layout containing primary outputs.
 
-Template Args:
-    CartLyt: Type of the Cartesian layout.
-
 Returns:
     The number of primary outputs that are placed to the left of the
     middle primary output.
@@ -8607,18 +8681,27 @@ output when the layout is converted to a hexagonal format.
 Args:
     lyt: The Cartesian gate-level layout containing primary outputs.
 
-Template Args:
-    CartLyt: Type of the Cartesian layout.
-
 Returns:
     The number of primary outputs that are placed to the right of the
     middle primary output.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_connect_and_place = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_connect_and_place =
+R"doc(Routes ordered inputs to a placed two-input gate.
 
-static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_2 = R"doc()doc";
+Template Args:
+    Lyt: Output layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_2 =
+R"doc(Routes one input to a placed unary gate.
+
+Template Args:
+    Lyt: Output layout type.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_create_wiring_reduction_layout =
 R"doc(Create a wiring_reduction_layout suitable for finding excess wiring
@@ -8696,7 +8779,7 @@ outside the frame.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_determine_layout_size = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_determine_layout_size = R"doc(Computes the extent required by colored gates and primary outputs.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_determine_new_coord =
 R"doc(This function calculates the new coordinates of a tile after adjusting
@@ -8718,7 +8801,16 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_east_south_edge_coloring = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_east_south_edge_coloring =
+R"doc(Colors the named traversal for orthogonal placement.
+
+Args:
+    ntk: Topologically ordered named technology network to read.
+
+Returns:
+    Traversal with its own node and edge color storage.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl =
 R"doc(Places and routes a network with SMT constraints.
@@ -9336,7 +9428,8 @@ Returns:
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_node2pos =
 R"doc(Maps nodes to tile positions when creating the layout from the SMT
-model.)doc";
+model. Layout fanout is bounded by max_fanin_size; add a separate
+bound if layouts permit more branches.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_optimize =
 R"doc(Creates and returns a z3::optimize if optimization criteria were set
@@ -9465,10 +9558,11 @@ Args:
     ctxp: The context that is used in all solvers.
     lyt: The empty gate-level layout that is going to contain the
          created layout.
+    ntk: Named technology-network traversal that owns the placement
+         map's node IDs.
     ps: The parameters to respect in the SMT instance generation
         process.
-    ntk: Topologically ordered input network.
-    sbl: Forbidden gate port configurations on layout tiles.
+    sbl: Gate orientations forbidden at each tile.
 
 )doc";
 
@@ -9686,9 +9780,9 @@ R"doc(Given a collection of paths belonging to the same objective, this
 function assigns them unique labels and generates corresponding nodes
 in the edge intersection graph.
 
-Since each path of the same objective objective belongs to a clique in
-the final graph, this function additionally stores their node IDs in
-the statistics.
+Since each path of the same objective belongs to a clique in the final
+graph, this function additionally stores their node IDs in the
+statistics.
 
 Args:
     objective_paths: Collection of paths belonging to the same
@@ -9709,9 +9803,6 @@ path.
 Args:
     other: The other path.
 
-Template Args:
-    Path: Type of other path.
-
 Returns:
     `true` iff this path contains an interior coordinate of the other
     path.
@@ -9725,9 +9816,6 @@ crossings.
 Args:
     other: The other path.
 
-Template Args:
-    Path: Type of other path.
-
 Returns:
     `true` iff this path and the given one are overlapping, i.e.,
     share at least one coordinate segment of size 2.
@@ -9735,6 +9823,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_label = R"doc(Label to identify the path in the edge intersection graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_path_labeled_layout_coordinate_path =
+R"doc(Takes ownership of a coordinate path.
+
+Args:
+    path: Path to label.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_layout = R"doc(Reference to the layout.)doc";
 
@@ -9746,7 +9842,13 @@ static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersec
 
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_pst = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_run = R"doc(Generate the graph. @return Candidate paths and their intersections.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_run =
+R"doc(Builds and transfers the completed intersection graph.
+
+Returns:
+    Graph of candidate paths and their intersections.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_get_offset =
 R"doc(Utility function to calculate the shift that has to be added to any
@@ -9767,10 +9869,6 @@ Args:
     input_mode: Adjust offset based on PIs relocated to the top row.
     output_mode: Adjust offset based on POs relocated to the bottom
                  row.
-
-Template Args:
-    HexLyt: Even-row hexagonal gate-level layout return type.
-    CartLyt: Input Cartesian gate-level layout type.
 
 Returns:
     Signed shift that has to be added to any x-coordinate on the
@@ -9799,16 +9897,8 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Implementation of the graph-oriented layout design algorithm. This
 class handles the initialization and execution of the algorithm.
 
-The specification network is converted to a `technology_network`
-before anything else happens, so this class is templated on the layout
-type only. Carrying the caller's network type through the whole
-implementation would duplicate every member for each network type the
-caller happens to use, without a single line of the body depending on
-it. The conversion lives in the `graph_oriented_layout_design` entry
-point below.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.)doc";
+The algorithm places a named technology network on a Cartesian gate-
+level layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_adjust_layout_size =
 R"doc(Adjusts the layout size based on the last position.
@@ -9895,7 +9985,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Number of constant outputs; every search graph preserves this source
 interface.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_custom_cost_objective = R"doc(Custom cost objective.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_custom_cost_objective = R"doc(Owned custom cost objective.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_expand =
 R"doc(Computes possible expansions and their priorities for the current
@@ -10028,14 +10118,16 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
-R"doc(Constructor for the graph-oriented layout design algorithm.
+R"doc(Initializes graph-oriented layout design with owned options and a cost
+callback.
 
 Args:
     src: The source network to be placed, already converted to a
          `technology_network`.
-    p: The parameters for the graph-enhanced layout search algorithm.
+    p: GOLD parameters transferred into owned invocation storage.
     st: The statistics object to record execution details.
-    custom: The custom layout cost function.
+    custom: Custom layout cost function transferred into owned
+            storage.
 
 )doc";
 
@@ -10176,7 +10268,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters owned by this invocation.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_design_impl_pst = R"doc(Statistics.)doc";
 
@@ -10197,7 +10289,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Places a node with two inputs in the layout and routes it.
 
 Args:
-    position: The tile representing the position for placement.
+    destination: Identity of the placed gate to route.
     layout: The layout in which to place the node.
     node2pos: A dictionary mapping nodes from the network to signals
               in the layout.
@@ -10209,7 +10301,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Places a node with a single input in the layout and routes it.
 
 Args:
-    position: The tile representing the position for placement.
+    destination: Identity of the placed gate to route.
     layout: The layout in which to place the node.
     node2pos: A dictionary mapping nodes from the network to signals
               in the layout.
@@ -10261,12 +10353,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl =
-R"doc(Maps placed objects and ordered ports to a hexagonal layout.
-
-Template Args:
-    HexLyt: Hexagonal destination layout. @tparam CartLyt Cartesian
-            source layout.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl = R"doc(Maps placed objects and ordered ports to a hexagonal layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_hexagonalization_impl =
 R"doc(Initializes a conversion. @param lyt Source layout. @param p
@@ -10286,9 +10373,9 @@ Hexagonal layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_is_east_south_colored = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_is_east_south_colored = R"doc(Checks that fanouts use distinct direction colors.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_is_eastern_po_orientation_available = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_is_eastern_po_orientation_available = R"doc(Checks whether the eastern side can host a primary output.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_nested_vector_hash =
 R"doc(This struct defines a hash function for a nested vector of layout
@@ -10354,12 +10441,8 @@ Args:
 static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl =
 R"doc(Implementation of the orthogonal physical design algorithm.
 
-The specification network is converted to a `technology_network`
-before anything else happens, so this class is templated on the layout
-type only. Carrying the caller's network type through the whole
-implementation would duplicate every member for each network type the
-caller happens to use, without a single line of the body depending on
-it. The conversion lives in the `orthogonal` entry point below.
+The named technology network has normalized fanout. This class
+specializes only the output layout type.
 
 Template Args:
     Lyt: Gate-level layout type.)doc";
@@ -10424,7 +10507,6 @@ Args:
 
 Template Args:
     Lyt: Desired gate-level layout type.
-    Ntk: Network type that acts as specification.
 
 )doc";
 
@@ -10595,14 +10677,19 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_recursively_paint_edges = R"doc()doc";
+static const char *mkd_doc_fiction_physical_design_detail_recursively_paint_edges = R"doc(Paints adjacent edges with alternating direction colors.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_routing_connection_obstructed =
 R"doc(Combines layout connections with explicit search constraints.
 
+Args:
+    lyt: Layout.
+    src: Source.
+    tgt: Target.
+    extra: Search constraints.
+
 Template Args:
-    Lyt: Layout type. @param lyt Layout. @param src Source. @param tgt
-         Target. @param extra Search constraints.
+    Lyt: Layout type.
 
 Returns:
     Whether the directed connection is obstructed.
@@ -10612,9 +10699,13 @@ Returns:
 static const char *mkd_doc_fiction_physical_design_detail_routing_coordinate_obstructed =
 R"doc(Combines layout occupancy with explicit search constraints.
 
+Args:
+    lyt: Layout.
+    c: Position.
+    extra: Search constraints.
+
 Template Args:
-    Lyt: Layout type. @param lyt Layout. @param c Position. @param
-         extra Search constraints.
+    Lyt: Layout type.
 
 Returns:
     Whether the position is obstructed.
@@ -10757,43 +10848,64 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view = R"doc(Immutable network view with optional randomized topological traversal.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view =
+R"doc(Orders named technology-network nodes for GOLD traversal.
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_create_topo_rec = R"doc()doc";
+Template Args:
+    CiToCo: Traverse from primary inputs to outputs when true, or from
+            outputs to inputs otherwise.
+    Randomize: Shuffle traversal choices when true.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate = R"doc(Calls the supplied function for each gate in topological order.)doc";
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_create_topo_rec = R"doc(Visits dependencies before appending a node.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate_reverse =
-R"doc(Calls the supplied function for each gate in reverse topological
-order.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_node = R"doc(Calls the supplied function for each node in topological order.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_index_to_node = R"doc(Returns the node at the supplied topological position.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_node_to_index = R"doc(Returns the node position in the topological order.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_num_gates = R"doc(Returns the number of non-input, non-constant nodes.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_offset = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_rng = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_size = R"doc(Returns the number of nodes in the view.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_order = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view =
-R"doc(Builds a topological order, randomized only when `Randomize` is true.
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate =
+R"doc(Visits gates in traversal order.
 
 Args:
-    ntk: Network to traverse.
-    seed_val: Random seed; ignored when `Randomize` is false, the
-              default.
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
 
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_gate_reverse =
+R"doc(Visits gates in reverse traversal order.
+
+Args:
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_foreach_node =
+R"doc(Visits all nodes in traversal order.
+
+Args:
+    fn: Node callback.
+
+Template Args:
+    Fn: Node callback type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_index_to_node = R"doc(Returns the node at a traversal index.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_node_to_index = R"doc(Returns a node's traversal index.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_num_gates = R"doc(Returns the number of traversed gates.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_offset = R"doc(Returns the number of constant and primary-input traversal entries.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_rng = R"doc(Reproducible traversal shuffle engine.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_size = R"doc(Returns the number of nodes in traversal order.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_order = R"doc(Traversal order for the selected direction and randomization mode.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view = R"doc(Builds the selected traversal with a reproducible shuffle seed.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_update_topo = R"doc(Orders dependencies and includes every declared primary input.)doc";
 
@@ -11053,7 +11165,7 @@ Args:
     stats: Statistics.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     `true` iff `lyt` could be successfully clocked via a valid clock
@@ -11142,22 +11254,21 @@ with a fan-in too large to be handled by the specified clocking
 scheme.
 
 Args:
-    ntk: The network that is to place and route.
+    ntk: Named technology network to place and route.
     ps: Parameters.
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
-    Ntk: Network type that acts as specification.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit if one is found under the given parameters;
-    `std::nullopt`, otherwise.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit if one is found under the given
+    parameters; `std::nullopt`, otherwise.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11262,23 +11373,22 @@ other gates. This is useful if a tile is known to be faulty or if it
 is known to be used for a different purpose.
 
 Args:
-    ntk: The network that is to place and route.
+    ntk: Named technology network to place and route.
     black_list: The black list of tiles and their gate orientations.
     ps: Parameters.
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
-    Ntk: Network type that acts as specification.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit if one is found under the given parameters;
-    `std::nullopt`, otherwise.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit if one is found under the given
+    parameters; `std::nullopt`, otherwise.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11294,7 +11404,7 @@ Args:
     lyt: Layout to inspect.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Routing objectives that preserve logical input numbering.
@@ -11313,7 +11423,8 @@ understood as the non-disjunction of paths, i.e., they share at least
 one coordinate. To generate the paths for the routing objectives, all
 possible paths from source to target in the layout are enumerated
 while taking obstructions into consideration. The given layout must be
-clocked.
+clocked. An explicit zero path limit creates no candidate paths and
+counts each objective as unroutable without checking endpoint bounds.
 
 Args:
     lyt: The layout to generate the edge intersection graph for.
@@ -11322,11 +11433,15 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Lyt: Type of the clocked layout.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     An edge intersection graph of paths satisfying the given routing
     objectives in `lyt`.
+
+Raises:
+    ValueError: If an objective endpoint lies outside the layout
+                extent when ps.path_limit is absent or nonzero.
 
 )doc";
 
@@ -11389,8 +11504,8 @@ Cost Objectives\" by S. Hofmann, M. Walter, and R. Wille in LASCAS
 
 Args:
     ntk: The network to be placed and routed.
-    ps: The parameters for the A* priority routing algorithm. Defaults
-        to an empty parameter set.
+    ps: Parameters for graph-oriented layout design. Defaults to an
+        empty parameter set.
     pst: A pointer to a statistics object to record execution details.
          Defaults to nullptr.
     custom_cost_objective: A custom cost objective that is evaluated
@@ -11399,10 +11514,6 @@ Args:
                            calculated based on the current partial
                            layout and returns an uint64_t that should
                            be minimized.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.
-    Ntk: Network type.
 
 Returns:
     The smallest layout yielded by the graph-oriented layout design
@@ -11606,10 +11717,6 @@ Args:
     params: Parameters.
     stats: Statistics.
 
-Template Args:
-    HexLyt: Even-row hexagonal gate-level layout return type.
-    CartLyt: Input Cartesian gate-level layout type.
-
 Returns:
     Hexagonal representation of the Cartesian layout.
 
@@ -11713,20 +11820,29 @@ Note:
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path = R"doc(A path in a layout defined as an ordered sequence of coordinates.)doc";
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_append =
-R"doc(Appends a coordinate. @param c Coordinate to append. @throws
-MemoryError If storage allocation fails.
+R"doc(Appends a coordinate.
+
+Args:
+    c: Coordinate to append.
+
+Raises:
+    MemoryError: If storage allocation fails.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_source =
-R"doc(Returns the first coordinate, or the origin for an empty path. @return
-Source coordinate.
+R"doc(Returns the first coordinate, or the origin for an empty path.
+
+Returns:
+    Source coordinate.
 
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_target =
-R"doc(Returns the last coordinate, or the origin for an empty path. @return
-Target coordinate.
+R"doc(Returns the last coordinate, or the origin for an empty path.
+
+Returns:
+    Target coordinate.
 
 )doc";
 
@@ -11793,21 +11909,20 @@ May throw a high_degree_fanin_exception if `ntk` contains any node
 with a fan-in larger than 2.
 
 Args:
-    ntk: The network that is to place and route.
+    ntk: Named technology network to place and route.
     ps: Parameters.
     pst: Statistics.
 
 Template Args:
-    Lyt: Desired gate-level layout type.
-    Ntk: Network type that acts as specification.
+    Geometry: Coordinate geometry of the returned gate-level layout.
 
 Returns:
-    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-    circuit.
+    A gate-level layout of type `gate_layout<Geometry>` that
+    implements `ntk` as an FCN circuit.
 
 Raises:
-    ValueError: If `Lyt` is a shifted Cartesian or hexagonal layout
-                and `ps.layout_arrangement` is empty.
+    ValueError: If `gate_layout<Geometry>` is a shifted Cartesian or
+                hexagonal layout and `ps.layout_arrangement` is empty.
 
 )doc";
 
@@ -11838,15 +11953,16 @@ static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_st
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_y_size = R"doc(Layout extent along the y axis.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_collection =
-R"doc(An ordered collection of multiple paths in a layout.
-
-Template Args:
-    Path: Path type.)doc";
+static const char *mkd_doc_fiction_physical_design_path_collection = R"doc(An ordered collection of multiple paths in a layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_collection_add =
-R"doc(Adds a path. @param p Path to add. @throws MemoryError If storage
-allocation fails.
+R"doc(Adds a path.
+
+Args:
+    p: Path to add.
+
+Raises:
+    MemoryError: If storage allocation fails.
 
 )doc";
 
@@ -11897,9 +12013,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
+auto shortest_path = a_star(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
 
@@ -11925,7 +12040,6 @@ Args:
                   the search does not modify them.
 
 Template Args:
-    Path: Type of the returned path.
     Lyt: Type of the layout to perform path finding on.
     Dist: Distance value type to be used in the heuristic estimation
           function.
@@ -11935,6 +12049,9 @@ Template Args:
 Returns:
     The shortest loop-less path in `layout` from `objective.source` to
     `objective.target`.
+
+Raises:
+    ValueError: If either endpoint lies outside the layout extent.
 
 )doc";
 
@@ -11962,17 +12079,24 @@ Template Args:
 Returns:
     Minimum path length between `source` and `target` in `layout`.
 
+Raises:
+    ValueError: If source or target lies outside the layout extent.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_a_star_distance_functor =
-R"doc(A pre-defined distance functor that uses the A* distance.
+R"doc(A pre-defined distance functor that uses the A* distance. Calling this
+functor throws ValueError if source or target lies outside the layout
+extent.
 
 Template Args:
     Lyt: Coordinate layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_a_star_distance_functor_a_star_distance_functor =
-R"doc(Computes distances in the borrowed layout. @param lyt Layout that
-outlives this functor.
+R"doc(Borrows a layout for distance evaluations.
+
+Args:
+    lyt: Layout that outlives this functor.
 
 )doc";
 
@@ -12036,7 +12160,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl = R"doc(Finds a layout path using A* search.)doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl =
+R"doc(Implements A* search.
+
+Template Args:
+    Lyt: Layout type.
+    Dist: Distance value type.
+    Cost: Step cost value type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_a_star_impl =
 R"doc(Initializes the A* search.
@@ -12192,7 +12322,11 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl = R"doc(Enumerates paths between layout coordinates.)doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl =
+R"doc(Implements loop-free path enumeration.
+
+Template Args:
+    Lyt: Layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_collection = R"doc(Collection of all enumerated paths.)doc";
 
@@ -12268,7 +12402,11 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_visited = R"doc(Set of visited coordinates.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl = R"doc(Finds the k shortest paths with Yen's algorithm.)doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl =
+R"doc(Implements Yen's path enumeration.
+
+Template Args:
+    Lyt: Layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_initial_obstructions = R"doc(Caller constraints retained across spur searches.)doc";
 
@@ -12441,9 +12579,8 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
+auto all_paths = enumerate_all_paths(static_cast<cartesian_layout>(layout), {source, target});
 ```
 
 
@@ -12456,12 +12593,14 @@ Args:
                   the search does not modify them.
 
 Template Args:
-    Path: Type of the returned individual paths.
     Lyt: Type of the layout to perform path finding on.
 
 Returns:
     A collection of all unique paths in `layout` from
     `objective.source` to `objective.target`.
+
+Raises:
+    ValueError: If either endpoint lies outside the layout extent.
 
 )doc";
 
@@ -12751,6 +12890,9 @@ the returned path collection will be smaller than :math:`k`.
 This implementation uses the A* algorithm with the Manhattan distance
 function internally.
 
+If k is zero, this function returns an empty collection without
+checking endpoint bounds.
+
 This function automatically detects whether the given layout
 implements a clocking interface (see `gate_layout`) and respects the
 underlying information flow imposed by `layout`'s clocking scheme.
@@ -12779,18 +12921,15 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using path = layout_coordinate_path;
 fiction::layouts::cartesian_gate_layout layout = ...;
-auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
+auto k_paths = yen_k_shortest_paths(static_cast<cartesian_layout>(layout), {source, target}, k);
 ```
 
 
 
 
-The algorithm was originally described in \"An algorithm for finding
-shortest routes from all source nodes to a given destination in
-general networks\" by Jin Y. Yen in Quarterly of Applied Mathematics,
-1970.
+The algorithm is described in \"Finding the K Shortest Loopless Paths
+in a Network\" by Jin Y. Yen in Management Science, 1971.
 
 Args:
     layout: The layout in which the :math:`k` shortest paths are to be
@@ -12802,12 +12941,15 @@ Args:
                   obstructions remain unchanged.
 
 Template Args:
-    Path: Type of the returned individual paths.
     Lyt: Type of the layout to perform path finding on.
 
 Returns:
     A collection of up to :math:`k` shortest loop-less paths in
     `layout` from `objective.source` to `objective.target`.
+
+Raises:
+    ValueError: If k is nonzero and either endpoint lies outside the
+                layout extent.
 
 )doc";
 
@@ -12815,19 +12957,29 @@ static const char *mkd_doc_fiction_physical_design_path_finding_yen_k_shortest_p
 
 static const char *mkd_doc_fiction_physical_design_path_finding_yen_k_shortest_paths_params_astar_params = R"doc(Parameters for the internal A* algorithm.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_set =
-R"doc(A set of multiple paths in a layout.
-
-Template Args:
-    Path: Path type.)doc";
+static const char *mkd_doc_fiction_physical_design_path_set = R"doc(A set of multiple paths in a layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_set_add =
-R"doc(Adds a path. @param p Path to add. @throws MemoryError If storage
-allocation fails.
+R"doc(Adds a path.
+
+Args:
+    p: Path to add.
+
+Raises:
+    MemoryError: If storage allocation fails.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_path_set_contains = R"doc(Returns whether the set contains the supplied path.)doc";
+static const char *mkd_doc_fiction_physical_design_path_set_contains =
+R"doc(Checks membership.
+
+Args:
+    p: Path to find.
+
+Returns:
+    Whether the set contains the path.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_place =
 R"doc(Place 0-input gates.
@@ -12840,7 +12992,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port pointing to the placed gate in `lyt`.
@@ -12859,7 +13010,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port pointing to the placed gate in `lyt`.
@@ -12878,11 +13028,11 @@ Args:
     b: Second incoming signal to the newly placed gate in `lyt`.
     c: Third optional incoming constant value signal to the newly
        placed gate in `lyt`. Might change the gate function when set,
-       e.g., from a MAJ to an AND if `c == false`.
+       e.g., from a MAJ to an AND if `c == false`. If no network fanin
+       is constant, `c` replaces the third input.
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port pointing to the placed gate in `lyt`.
@@ -12903,7 +13053,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port pointing to the placed gate in `lyt`.
@@ -12927,7 +13076,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port of the newly placed gate in `lyt`.
@@ -12953,7 +13101,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Ntk: Logic network type.
 
 Returns:
     Output port of the newly placed gate in `lyt`.
@@ -13082,7 +13229,6 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
-    Path: Coordinate path type.
 
 Raises:
     ValueError: If an endpoint or intermediate placement is
@@ -13130,7 +13276,8 @@ Args:
                                       defects keep SiDBs at.
 
 Template Args:
-    GateLibrary: SiDB gate library type.
+    GateLibrary: SiDB gate library with static implementation and
+                 position or direction port lookup.
     Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
@@ -13613,7 +13760,7 @@ Args:
     t: Occupied tile.
 
 Template Args:
-    Lyt: Gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     Physical connector ports.
@@ -13647,7 +13794,7 @@ Args:
     t: Tile to be realized as a QCA ONE gate.
 
 Template Args:
-    GateLyt: Cartesian gate-level layout type.
+    Geometry: Coordinate geometry of the gate-level layout.
 
 Returns:
     QCA ONE gate representation of `t` including I/Os, rotation, const
@@ -13718,9 +13865,6 @@ and output, const cells etc. are computed additionally.
 Args:
     lyt: Layout that hosts tile `t`.
     t: Tile to be realized as a Bestagon gate.
-
-Template Args:
-    GateLyt: Hexagonal gate-level layout type.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
@@ -14421,9 +14565,6 @@ Args:
             encapsulated in an `on_the_fly_circuit_design_params`
             object.
 
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-
 Returns:
     Layout representing the designed SiDB circuit.
 
@@ -14432,6 +14573,9 @@ Raises:
                 row arrangement.
     fcn::unsupported_gate_type_exception: if any object has an
                                           unsupported function.
+    fcn::unsupported_gate_orientation_exception: if a gate orientation
+                                                 has no
+                                                 implementation.
     unsuccessful_gate_design_error: if a gate cannot be designed.
     utils::timeout_error: if the shared circuit budget or an
                           individual gate budget expires. No partial
@@ -14463,7 +14607,7 @@ Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO
 2024 (https://ieeexplore.ieee.org/abstract/document/10628962).
 
 Args:
-    ntk: The input network to be mapped onto the defective surface.
+    ntk: Named technology network to map onto the defective surface.
     lattice_tiling: The lattice tiling used for the circuit design.
     defective_surface: The defective surface on which the SiDB circuit
                        is designed.
@@ -14471,12 +14615,8 @@ Args:
             encapsulated in an
             `on_the_fly_circuit_design_on_defective_surface_params`
             object.
-    stats: Pointer to a structure for collecting statistics. If
+    stats: Receives statistics after circuit design succeeds. If
            `nullptr`, statistics are discarded.
-
-Template Args:
-    Ntk: The type of the input network.
-    GateLyt: Gate-level layout type.
 
 Returns:
     Layout representing the designed circuit on the defective surface.
@@ -14485,6 +14625,11 @@ Raises:
     utils::timeout_error: If a circuit or gate-design timeout expires.
     ValueError: If the simulation engine does not support the
                 requested gate-design timeout.
+    fcn::unsupported_gate_orientation_exception: If a gate orientation
+                                                 has no
+                                                 implementation.
+    unsuccessful_pr_error: If placement and routing cannot satisfy the
+                           blacklist.
 
 Note:
     A circuit or gate timeout aborts the operation. Only a completed,
@@ -14507,11 +14652,7 @@ R"doc(Total millisecond budget across surface analysis, placement-and-
 routing retries, and gate design. The maximum value means unlimited;
 zero expires immediately. Cancellation is cooperative.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats =
-R"doc(Statistics for the on-the-fly defect-aware circuit design.
-
-Template Args:
-    GateLyt: Gate-level layout type.)doc";
+static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats = R"doc(Statistics for the on-the-fly defect-aware circuit design.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_on_the_fly_circuit_design_on_defective_surface_stats_exact_stats = R"doc(The `stats` of the *exact* algorithm.)doc";
 
@@ -16089,9 +16230,6 @@ Args:
     p: The ports of the tile.
     tile: The tile.
 
-Template Args:
-    GateLyt: Gate-level layout type.
-
 Returns:
     The designed gate.
 
@@ -16124,9 +16262,6 @@ implementation.
 Args:
     lyt: Layout that owns the object.
     object: Object to inspect.
-
-Template Args:
-    GateLyt: Gate-level layout type.
 
 Returns:
     Whether the object implements identity, INV, or a supported binary
@@ -16176,10 +16311,6 @@ Args:
                 subsequent search, capped by the enclosing deadline.
     defect_surface: Optional atomic defect surface in case atomic
                     defects are present.
-
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-    Params: Type of the parameter used for the gate library.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.
@@ -16831,12 +16962,15 @@ R"doc(Computes the minimum energy of a range of charge distributions. If the
 range is empty, positive infinity indicates that no valid energy value
 exists.
 
+Exceptions from iterator operations and energy comparisons propagate
+to the caller.
+
 Args:
     first: Begin of the range to examine.
     last: End of the range to examine.
 
 Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
+    InputIt: Forward iterator over charge distributions.
 
 Returns:
     Value of the minimum energy found in the input range (unit: eV),
@@ -16848,12 +16982,15 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_minimum_energy_distr
 R"doc(Returns an iterator to the charge distribution of minimum energy
 contained in a range. If the range is empty, `last` is returned.
 
+Exceptions from iterator operations and energy comparisons propagate
+to the caller.
+
 Args:
     first: Begin of the range to examine.
     last: End of the range to examine.
 
 Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
+    InputIt: Forward iterator over charge distributions.
 
 Returns:
     Iterator to the minimum energy charge distribution found in the
@@ -18351,7 +18488,7 @@ stored data. All methods of this class are thread-safe.
 
 Template Args:
     Key: The type of the key used to identify entries in the domain.
-    MappedTypes: Value types stored in the tuple.)doc";
+    MappedTypes: Nonempty pack of value types stored in the tuple.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_domain_add_value =
 R"doc(Adds a value to the operational domain. This function is thread-safe
@@ -24453,9 +24590,6 @@ Args:
     t: Tile whose incoming and outgoing port directions are
        determined.
 
-Template Args:
-    Lyt: Pointy-top hexagonal gate-level layout type.
-
 Returns:
     Incoming and outgoing port directions of the tile.
 
@@ -24585,8 +24719,9 @@ Args:
     ntk: The input logic network.
 
 Template Args:
-    NtkDest: Type of the returned logic network.
-    NtkSrc: Type of the input logic network.
+    NtkDest: Logic network with constant, input, output, and Boolean
+             gate creation.
+    NtkSrc: Logic network with node, interface, and fanin traversal.
 
 Returns:
     A logic network of type `NtkDest` that is logically equivalent to
@@ -24851,13 +24986,80 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization =
+R"doc(Planarizes a ranked, balanced logic network by replacing every
+crossing of two edges with a crossing gate that swaps the two signals.
+
+Crossings between two levels are resolved pass by pass; in every pass,
+each remaining crossing whose edges are adjacent receives a crossing
+gate and every other edge a buffer chain of the same depth, so the
+result stays balanced. The rank order of the input is kept.
+
+Crossing gates consist of three XORs when `xor_gates` is set,
+otherwise of AND, OR, and NOT gates, which makes them deeper. The
+result is verified crossing-free before the function returns.
+
+Args:
+    ntk: Source network.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Ntk: Ranked, balanced network type (see `mutable_rank_view`).
+
+Returns:
+    Planar network of the same type that computes the same functions
+    as `ntk`.
+
+Raises:
+    ValueError: If `ntk` is not balanced.
+    std::runtime_error: If two adjacent levels exceed
+                        `max_crossings_per_level` or the result still
+                        contains crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_params = R"doc(Parameters for the crossing gate planarization algorithm.)doc";
+
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_params_max_crossings_per_level =
+R"doc(Adjacent levels with more crossings between them than this are
+rejected, since the number of crossing gates grows with the crossings.
+
+The limit bounds the crossing gates between two levels, not the
+buffers that every pass adds along the other edges between them.)doc";
+
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_params_xor_gates =
+R"doc(Build crossing gates from XOR gates (three XORs, four levels) instead
+of AND, OR, and NOT gates (fourteen levels).)doc";
+
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_stats = R"doc(Statistics of the crossing gate planarization algorithm.)doc";
+
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_stats_num_crossings = R"doc(Number of crossings replaced by crossing gates.)doc";
+
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_stats_report =
+R"doc(Writes the statistics to a stream.
+
+Args:
+    out: Stream to write to.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_crossing_gate_planarization_stats_time_total =
+R"doc(Runtime of the planarization core.
+
+Excludes the final planarity check.)doc";
+
 static const char *mkd_doc_fiction_synthesis_delete_virtual_pis =
 R"doc(Deletes virtual primary inputs (PIs) from a network and remaps all
 signals connected to the virtual PIs back to their corresponding real
 PIs. This ensures compatibility for equivalence checking between
 networks with and without virtual inputs, as the miter requires
 networks to have an identical number of primary inputs. If the network
-does not contain any virtual PIs, it is returned unchanged.
+does not contain any virtual PIs, it is returned unchanged. If virtual
+PIs are removed from a ranked network, call `update_ranks` on the
+result before querying its ranks.
 
 Args:
     ntk: The input network.
@@ -24871,6 +25073,252 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_convert_network_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_cost =
+R"doc(Costs keeping the crossings between an upper level and a lower level.
+
+The lower level is reordered to minimize crossings, then every
+crossing is charged one crossing gate and every edge the buffers that
+pad it to the number of crossing gates on the most crossed edge.
+Crossings are found by sweeping the edges in the order of the upper
+level. The sweep takes time in :math:`O(E \cdot W + C)` for :math:`E`
+edges, a lower level of width :math:`W`, and :math:`C` counted
+crossings.
+
+Args:
+    ntk: Network the nodes belong to.
+    upper: Nodes of the upper level in order; a node can appear
+           several times.
+    lower: Nodes of the lower level; reordered.
+    max_swaps: Maximum number of adjacent swaps of the crossing
+               minimization, see `minimize_crossings`.
+    crossing_gates: Parameters of the crossing gates: their kind sets
+                    the cost, and levels with more crossings than
+                    `max_crossings_per_level` are not costed.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    Cost and crossing count; the cost is infinite above
+    `max_crossings_per_level`, where counting stops.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_cost_result = R"doc(Result of costing the crossings between two adjacent levels.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_cost_result_cost = R"doc(Estimated number of nodes the crossing gates and their padding add.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_cost_result_num_crossings = R"doc(Number of crossings between the two levels.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_depth =
+R"doc(Number of levels one crossing gate spans.
+
+Args:
+    xor_gates: Whether the crossing gate consists of XOR gates.
+
+Returns:
+    Crossing gate depth.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_nodes =
+R"doc(Number of nodes one crossing gate adds.
+
+Args:
+    xor_gates: Whether the crossing gate consists of XOR gates.
+
+Returns:
+    Crossing gate size.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl =
+R"doc(Implementation of the crossing gate planarization algorithm.
+
+Template Args:
+    Ntk: Ranked, balanced network type.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_and_or_xor =
+R"doc(An XOR built from AND, OR, and NOT gates, balanced to six levels:
+:math:`(a \land \lnot(a \land b)) \lor (b \land \lnot(a \land b))`
+with the direct paths of `a` and `b` buffered to the depth of the
+shared term.
+
+Nodes are created from left to right per level, which keeps the XOR
+planar in creation order.
+
+Args:
+    dest: Destination network.
+    a: Left input.
+    b: Right input.
+
+Returns:
+    Output signal of the XOR.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing =
+R"doc(A crossing of two edges.
+
+`level` orders the crossings on the same edge: a crossing of level
+:math:`l` can only be resolved after all crossings of lower levels on
+its edges.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_gate_depth =
+R"doc(Depth of one crossing gate, including the buffers that align the edges
+it is placed on.
+
+Returns:
+    Number of levels a crossing gate occupies.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_gate_planarization_impl =
+R"doc(Creates the implementation.
+
+Args:
+    src: Source network.
+    p: Parameters.
+    st: Statistics.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_left = R"doc(The left edge of the crossing.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_level = R"doc(Resolution level.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_crossing_right = R"doc(The right edge of the crossing.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_detect_crossings =
+R"doc(Finds the crossings between every pair of adjacent levels.
+
+Edges are swept in rank order of their sources; an edge that ends left
+of the end of an earlier edge crosses it. The level of a crossing is
+one more than the highest level already assigned to either edge, so
+that crossings on one edge are resolved in order.
+
+Raises:
+    std::runtime_error: If two adjacent levels have more crossings
+                        than `max_crossings_per_level`.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge = R"doc(An edge between two adjacent levels of the source network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_end =
+R"doc(Current end of every edge in the destination network, once a crossing
+gate or buffer chain was placed on it.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_hash = R"doc(Hash of an edge.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_hash_operator_call =
+R"doc(Combines source and target.
+
+Args:
+    e: Edge.
+
+Returns:
+    Hash value.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_operator_eq = R"doc(Equality of two edges.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_signal =
+R"doc(Signal at the current end of an edge: the end of its last crossing
+gate or buffer chain, or its source.
+
+Args:
+    old2new: Map from source nodes to destination signals.
+    e: Edge.
+
+Returns:
+    Signal in the destination network.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_source = R"doc(Source node.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_edge_target = R"doc(Target node.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_extend_edge =
+R"doc(Extends an edge by a buffer chain of the crossing gate depth.
+
+Args:
+    dest: Destination network.
+    old2new: Map from source nodes to destination signals.
+    e: Edge.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_fanout_ntk = R"doc(Fanout view of the source network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_ntk = R"doc(Source network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_place_crossing_gate =
+R"doc(Places the crossing gate that swaps the signals of two crossing edges.
+
+With :math:`c_0 = a \oplus b`, the left output :math:`a \oplus c_0 =
+b` continues the right edge and the right output :math:`c_0 \oplus b =
+a` continues the left edge, so the left edge ends up right of the
+right edge. The direct paths are buffered to the depth of the crossing
+gate, and nodes are created from left to right per level, which keeps
+the crossing gate planar in creation order.
+
+Args:
+    dest: Destination network.
+    old2new: Map from source nodes to destination signals.
+    c: Crossing to resolve.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_resolve_crossings =
+R"doc(Resolves the crossings of one stage in order of their levels.
+
+Each pass over the edges places one crossing gate per crossing whose
+left edge is next in line and swaps the two edges; every other edge is
+extended by a buffer chain of the crossing gate depth, so that all
+edges of the stage grow by the same number of levels per pass.
+
+Args:
+    dest: Destination network.
+    old2new: Map from source nodes to destination signals.
+    st: Stage whose crossings are resolved; its edge order is
+        rewritten.
+
+Raises:
+    std::runtime_error: If a pass cannot place any crossing.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_run =
+R"doc(Runs the algorithm.
+
+Returns:
+    Planar copy of the source network with crossing gates.
+
+Raises:
+    std::runtime_error: If two adjacent levels have more crossings
+                        than `max_crossings_per_level` allows.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_stage =
+R"doc(Crossings between two adjacent levels and the edges between them in
+rank order of their sources.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_stage_crossings = R"doc(Crossings of the stage.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_stage_edges =
+R"doc(All edges of the stage, sources in rank order, targets in rank order
+per source.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_crossing_gate_planarization_impl_stages = R"doc(Crossings and edges per pair of adjacent levels.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl = R"doc(Copies a network without virtual primary inputs.)doc";
 
@@ -24902,6 +25350,42 @@ static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_ntk 
 static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_ntk_topo = R"doc(Topological view of the input network.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_delete_virtual_pis_impl_run = R"doc(Returns a network copy without virtual primary inputs.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_enumerate_orderings =
+R"doc(Enumerates the H-graph nodes of one slice, i.e., all orderings of the
+given fanins by their first and last element.
+
+A single fanin yields one H-graph node. Delays start at infinity.
+
+Args:
+    root: Node whose fanins are ordered.
+    nodes: Fanins in rank order.
+    orderings: Receives the H-graph nodes of the slice; replaces its
+               content and reuses its storage.
+
+Template Args:
+    Ntk: Network type.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_fanin_positions =
+R"doc(Positions in the lower level of the fanins of a node of the upper
+level.
+
+Args:
+    ntk: Network the nodes belong to.
+    n: Node of the upper level.
+    pos: Position of every node in the lower level, see
+         `level_positions`.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    Positions of the fanins of `n` in fanin order; fanins outside the
+    lower level, such as constants, are skipped.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl = R"doc(Replaces high fanout with fanout trees.)doc";
 
@@ -24991,6 +25475,65 @@ static const char *mkd_doc_fiction_synthesis_detail_fanout_substitution_impl_run
 
 static const char *mkd_doc_fiction_synthesis_detail_get_po_levels = R"doc()doc";
 
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node =
+R"doc(One node of the H-graph used to compute the duplication order of a
+level.
+
+For a node in level :math:`l` of the input network, all orderings of
+its fanins in level :math:`l-1` are enumerated. One H-graph node
+represents one such ordering by its first and last fanin, which decide
+the delay of the ordering. The remaining fanins sit in between; their
+mutual order does not matter for the algorithm.
+
+Template Args:
+    Ntk: Network type.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_delay = R"doc(Delay of the shortest path through the H-graph that ends in this node.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_first_fanin =
+R"doc(Leftmost fanin of the ordering; the one a predecessor ordering can
+share.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_hgraph_node =
+R"doc(Creates an H-graph node.
+
+Args:
+    r: Node whose fanins are ordered.
+    first: Leftmost fanin of the ordering.
+    last: Rightmost fanin of the ordering.
+    delay_value: Initial delay.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_last_fanin =
+R"doc(Rightmost fanin of the ordering; the one a successor ordering can
+share.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_middle_fanins = R"doc(All remaining fanins.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_predecessor =
+R"doc(Index of the predecessor H-graph node on that shortest path, within
+the slice of the previous node.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_root =
+R"doc(Node of the upper level whose fanins are ordered.
+
+A copy id when that node is a duplicate.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_shared_weight =
+R"doc(Sum of the cone weights of the fanins that the shortest path ending
+here places once for two consecutive consumers.
+
+The tie-break among equally short paths prefers the heaviest sum.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_hgraph_node_shares_below =
+R"doc(Whether the shortest path places two different fanins that share a
+fanin in the level below side by side.
+
+These are `first_fanin` and the last fanin of the predecessor. The
+last tie-break prefers such paths, since the two side by side avoid a
+duplication below.)doc";
+
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl = R"doc(Checks whether network paths have balanced depths.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_is_balanced_impl_balanced = R"doc()doc";
@@ -25031,6 +25574,43 @@ static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_r
 
 static const char *mkd_doc_fiction_synthesis_detail_is_fanout_substituted_impl_substituted = R"doc()doc";
 
+static const char *mkd_doc_fiction_synthesis_detail_level_positions =
+R"doc(Positions of the nodes of a level, indexed by node.
+
+Args:
+    ntk: Network the nodes belong to.
+    level: Nodes of the level in order.
+
+Template Args:
+    Ntk: Network type.
+
+Returns:
+    Position per node, the maximum `std::size_t` for nodes not in the
+    level.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_minimize_crossings =
+R"doc(Orders a level by the barycenters of the positions its nodes are used
+from in the upper level, then applies up to `max_swaps` adjacent swaps
+that reduce the crossing count.
+
+A swap of two neighbours only changes the crossings between their own
+edges, so each candidate is evaluated on those edges alone.
+
+Args:
+    ntk: Network the nodes belong to.
+    upper: Nodes of the upper level in order; a node can appear
+           several times.
+    lower: Nodes of the lower level; reordered.
+    max_swaps: Maximum number of adjacent swaps; `0` keeps the
+               barycenter order.
+
+Template Args:
+    Ntk: Network type.
+
+)doc";
+
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl = R"doc(Balances network paths by inserting buffers.)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_network_balancing_impl =
@@ -25051,6 +25631,841 @@ static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_ntk_t
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_ps = R"doc()doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_network_balancing_impl_run = R"doc(Returns a network with paths balanced by inserted buffers.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl =
+R"doc(Implementation of the node duplication planarization algorithm.
+
+Nodes of the source network keep their ids. Every duplicate receives a
+fresh id above `ntk.size()`; `origin()` maps it back to the source
+node. For every node of a level, `fanins_of` records which nodes
+(originals or duplicates) of the level below it connects to, so the
+planar network can be rebuilt without searching.
+
+Template Args:
+    Ntk: Ranked, balanced source network type.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_build_network =
+R"doc(Builds the planar `virtual_pi_network` from the levelized duplication
+order.
+
+Levels are processed from the primary inputs upwards. A repeated
+primary input becomes a virtual primary input; every other repeated
+node becomes a fresh gate with the same function. Fanins are connected
+in the fanin order of the source node, matched by origin against the
+ids recorded in `fanins_of`, and keep their complementation.
+
+Returns:
+    The planar destination network.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_collect_children =
+R"doc(Collects the fanin signals of a node in the destination network, in
+the fanin order of its source node.
+
+Args:
+    n: Source id or copy id of the node.
+    old2new: Signals in the destination network per source id and copy
+             id.
+    dest: Destination network.
+
+Template Args:
+    NtkDest: Destination network type.
+
+Returns:
+    Fanin signals of the new node.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_compute_node_order =
+R"doc(Computes the order of the next level from the H-graph of the current
+level.
+
+The ordering with the least delay in the last slice is chosen and its
+predecessors are followed back to the first slice.
+
+The fanins of each ordering are placed from right to left as they are
+encountered.
+
+Returns:
+    Nodes of the next level in planar order, duplicates as copy ids.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_compute_slice_delays =
+R"doc(Adds one slice to the H-graph of the current level.
+
+A slice holds every ordering of the fanins of `n` as an H-graph node
+(`enumerate_orderings`). The delay of each ordering is the shortest
+path from the first slice of the level: moving to an ordering whose
+first fanin equals the last fanin of the previous ordering costs 1,
+any other move costs 2, and the first slice starts at 1. Every
+shortest path duplicates the same number of nodes but not the same
+nodes: where consecutive consumers share several fanins, only one is
+placed once between them and the others are copied. Ties between equal
+delays are therefore broken in favour of the path whose shared fanins
+have the heaviest cones, so that the copies drag the lightest cones
+along, and then in favour of paths that place two different fanins
+with a common fanin in the level below side by side, which avoids a
+duplication there. The slice is appended to `hgraph`.
+
+Args:
+    n: Node (source id or copy id) whose fanins form the slice.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_cost =
+R"doc(Weighted size of the transitive fanin of a source node, see
+`duplication_cost_model`.
+
+Args:
+    root: Source node.
+    current_level: Level on which the node is duplicated.
+
+Returns:
+    Weighted cone size.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight =
+R"doc(Weighted size of the transitive fanin cone of a source node under
+`duplication_cost_model`, without the depth scaling.
+
+A gate weighs `node_weight`, a chain buffer or inverter
+`buffer_weight`.
+
+Memoized per source node.
+
+Args:
+    root: Source node.
+
+Returns:
+    Weighted cone size.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight_map =
+R"doc(Cone weights of the source nodes and the scratch space that weighs a
+cone.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight_map_stamp = R"doc(Stamp of the cone being weighed, never 0.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight_map_visited = R"doc(Stamp of the cone in which each source node was last visited.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weight_map_weight =
+R"doc(Unscaled cone weight per source node, negative for a node not weighed
+yet.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_cone_weights = R"doc(Unscaled cone weight per source node, filled on demand.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_copies_below =
+R"doc(Counts the nodes the duplication strategy creates below a level, given
+its order, by running it on a copy of the state.
+
+Stops early once the count exceeds `budget`.
+
+Args:
+    level: Nodes of the level, duplicates as copy ids of this instance
+           or as repeated source nodes.
+    budget: Count at which the run is cut off.
+    trace: Receives the levels the run visits, if given.
+
+Returns:
+    Nodes created below the level, or a value above `budget` if cut
+    off.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_copy_origin = R"doc(Source node of every copy id, indexed by `copy id - ntk.size()`.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_crossings_are_cheaper =
+R"doc(Decides whether keeping the crossings of a level beats duplicating it,
+according to the decision criterion.
+
+The `LOOKAHEAD` criterion also records the path the duplication takes
+below the level it chose, so that the next decision, which lies on
+that path, needs no second run.
+
+Args:
+    crossing_gate_cost: Nodes the crossing gates and their padding
+                        add.
+    duplicated: The level as the duplication strategy would build it,
+                duplicates as copy ids.
+    crossed: The level in its crossing-minimized source order.
+    lvl: Level in the source network.
+    copies_on_level: Number of duplicates in `duplicated`.
+
+Returns:
+    `true` iff the crossings are cheaper.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_discard_copies =
+R"doc(Removes the duplicates created since a given count, which belong to a
+level that keeps its crossings.
+
+The nodes of the level above connect to the source nodes of the
+removed duplicates.
+
+Args:
+    copies_before: Number of duplicates to keep.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_duplication_cost =
+R"doc(Cost of the duplicates in a level: every copy beyond the first
+occurrence of a source node costs the weighted size of that node's
+cone.
+
+Args:
+    level: Nodes of the level, duplicates as copy ids.
+    lvl: Level in the source network.
+
+Returns:
+    Duplication cost.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_exceeds_below =
+R"doc(Whether the nodes created below a level exceed a bound.
+
+Reads the answer from the trace of the path the duplication takes
+(`path`) when it visited the level, and runs the duplication strategy
+below the level otherwise.
+
+Args:
+    level: Nodes of the level, duplicates as copy ids.
+    bound: Count to compare with.
+    below: Receives the trace of the nodes below `level`: the part of
+           `path` below it, or the trace of the run.
+
+Returns:
+    `true` iff more than `bound` nodes are created below `level`.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_fanins_of =
+R"doc(For every source id and copy id, the ids of the level below it
+connects to, in placement order.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_hgraph = R"doc(H-graph of the current level, one slice per node of the level.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_hgraph_size =
+R"doc(Number of slices of `hgraph` in use; the slices beyond it keep their
+storage for the next level.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_is_final_level =
+R"doc(Whether a level consists of primary inputs only.
+
+Args:
+    level: Nodes of the level.
+
+Returns:
+    `true` iff every node stands for a primary input.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_keep_crossings =
+R"doc(Decides for the hybrid strategy whether the level just computed keeps
+its crossings instead of its duplicates.
+
+If so, the level uses the source nodes reordered to reduce crossings,
+its duplicates are discarded, and the statistics count the kept
+crossings.
+
+Args:
+    next_level: Level below the current one as the duplication
+                computed it; replaced if crossings are kept.
+    copies_before: Number of duplicates before the computation of
+                   `next_level`.
+
+Returns:
+    `true` iff the level keeps its crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_level_stamp = R"doc(Stamp of the level under construction, never 0.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_levels =
+R"doc(Levelized duplication order, level 0 being the primary outputs;
+duplicates as copy ids.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_make_copy =
+R"doc(Allocates a new copy id for a source node.
+
+Args:
+    n: Source node.
+
+Returns:
+    The copy id.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_next_level_of =
+R"doc(Computes the planar order of the level below a given level.
+
+Builds the H-graph of the level, one slice per node, and follows its
+shortest path.
+
+Duplicates of the level below receive copy ids.
+
+Args:
+    level: Nodes of the current level, source ids or copy ids, in
+           planar order.
+
+Returns:
+    Nodes of the level below in planar order, duplicates as copy ids.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_node_duplication_planarization_impl =
+R"doc(Creates the implementation.
+
+Args:
+    src: Source network.
+    p: Parameters.
+    st: Statistics.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_node_duplication_planarization_impl_2 =
+R"doc(Creates an instance that only counts the duplicates the duplication
+strategy creates.
+
+It shares the cone weights of `parent`, so that every cone is weighed
+once per run, and records neither the planar order of the levels nor
+the fanins that `build_network` needs.
+
+Args:
+    parent: Instance whose network and cone weights are shared.
+    p: Parameters.
+    st: Statistics.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_ntk = R"doc(Source network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_origin =
+R"doc(Maps a node id to the source node it stands for.
+
+Args:
+    n: Source node id or copy id.
+
+Returns:
+    The source node.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_output_level =
+R"doc(Collects the primary outputs that form the first level.
+
+The level holds every non-constant output node once, in rank order, or
+shuffled when the parameters ask for a random output order.
+
+Returns:
+    Nodes of the output level.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_own_cone_weights =
+R"doc(Cone weights of this instance, filled on demand; counting instances
+use their parent's.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_path =
+R"doc(Path the duplication takes below the level of the last decision of the
+`LOOKAHEAD` criterion, as the counting run that chose it visited it;
+empty before the first decision.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_place_fanin =
+R"doc(Places one fanin into the next level, which is built from right to
+left.
+
+If the rightmost node already placed stands for `n`, that copy is
+shared. Otherwise `n` is appended: as the source node itself when it
+has not been placed in this level yet, as a fresh copy when it has.
+
+Args:
+    n: Source node to place.
+    level_rtl: Next level under construction, rightmost node first.
+    fanins: Receives the id (source or copy) that the consumer
+            connects to; ignored by instances that do not record.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_place_ordering =
+R"doc(Places the fanins of one H-graph ordering into the next level and
+records them for the ordering's root.
+
+Args:
+    ordering: H-graph node to place.
+    level_rtl: Next level under construction, rightmost node first.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_placed_in =
+R"doc(Stamp of the level in which each source node was last placed itself,
+indexed by source node; allocated on first use.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_record =
+R"doc(Whether the instance records the order and the fanins of the levels.
+
+Counting instances (see `copies_below`) do not.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run =
+R"doc(Runs the algorithm.
+
+Returns:
+    Planar network with duplicated nodes and virtual primary inputs.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_from =
+R"doc(Runs the duplication strategy from a given level down to the primary
+inputs and counts the nodes it creates.
+
+Args:
+    start: Nodes of the level to start from, duplicates as copy ids of
+           this instance.
+    budget: Count at which the run is cut off.
+    trace: Receives the levels the run visits and the nodes created at
+           each, if given; stays empty for a run longer than
+           `MAX_TRACE_NODES` nodes.
+
+Returns:
+    Nodes created below `start`, or a value above `budget` if cut off.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_trace =
+R"doc(Levels a counting run visited and the nodes it had created at each of
+them.
+
+The count below a level depends on the level's source nodes in their
+order only, so a later query for a level that the run visited reads
+its answer from the trace instead of running again.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_trace_complete =
+R"doc(Whether the run reached the primary inputs; otherwise `created.back()`
+is a lower bound.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_trace_created = R"doc(Nodes the run had created up to and including each level of `levels`.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_run_trace_levels =
+R"doc(Source nodes of every level the run produced, top-down, without the
+level it started from.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_share_fanin =
+R"doc(Whether two source nodes have a fanin in common.
+
+Args:
+    a: First node.
+    b: Second node.
+
+Returns:
+    `true` iff `a` and `b` share at least one fanin.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_slice_fanins = R"doc(Fanins of the node whose slice is being computed, in rank order.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_to_cost =
+R"doc(Rounds a cost to an integer, saturating at the maximum.
+
+Args:
+    cost: Cost.
+
+Returns:
+    Rounded cost.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl =
+R"doc(Implementation of the planar fanout substitution algorithm.
+
+Template Args:
+    Ntk: Ranked network type.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_available_fanouts =
+R"doc(Free outputs of the fanout tree per source node, each padded to the
+depth of the tree, in reverse planar order.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_fanout_node_level =
+R"doc(Level of the fanout node with the given index in a breadth-first
+fanout tree, the root's first node being 0.
+
+Args:
+    index: Creation index of the fanout node.
+
+Returns:
+    Its level in the tree.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_gather_children =
+R"doc(Collects the fanin signals of a node in the destination network,
+taking free fanout slots where needed.
+
+Args:
+    dest: Destination network.
+    n: Source node.
+    old2new: Map from source nodes to destination signals.
+
+Returns:
+    Fanin signals in the destination network.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_generate_fanout_tree =
+R"doc(Builds the breadth-first fanout tree of a node.
+
+Exactly as many outputs as the node has consumers are kept, in
+breadth-first order; each of them is padded with buffers to the depth
+of the tree, so that every consumer connects at the same depth and no
+buffer is left without a consumer. The outputs are stored in
+`available_fanouts` in planar order.
+
+Args:
+    dest: Destination network.
+    n: Source node.
+    root: Signal the tree hangs from.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_is_proper_fanout =
+R"doc(Whether a node already is a fanout node within the degree limit and
+needs no tree.
+
+Args:
+    n: Node.
+
+Returns:
+    `true` iff `n` is a proper fanout node.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_max_tree_depth =
+R"doc(Depth of the deepest fanout tree any node of a level needs.
+
+Args:
+    r: Level.
+
+Returns:
+    Maximum tree depth in the level.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_ntk = R"doc(Source network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_num_fanout_nodes =
+R"doc(Number of fanout nodes a node with the given number of outputs needs.
+
+Args:
+    fanouts: Number of outputs.
+
+Returns:
+    Number of fanout nodes in its tree.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_planar_fanout_substitution_impl =
+R"doc(Creates the implementation.
+
+Args:
+    src: Source network.
+    p: Parameters.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_run =
+R"doc(Runs the algorithm.
+
+Returns:
+    Fanout-substituted copy of the source network with the same ranks
+    and no new crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_substitute =
+R"doc(Pushes a node down by `pad` levels.
+
+With a buffer chain, or with a shorter chain plus its fanout tree so
+that the tree's leaves end up `pad` levels below the node.
+
+Args:
+    dest: Destination network.
+    n: Source node.
+    old2new: Map from source nodes to destination signals; updated for
+             `n`.
+    pad: Depth every node of the level is pushed down by.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_take_fanout =
+R"doc(Returns the signal a consumer of `n` connects to.
+
+`child` itself while it has no output yet, otherwise the next free
+output of the fanout tree of `n`.
+
+Args:
+    dest: Destination network.
+    n: Source node.
+    child: Current destination signal of `n`.
+
+Returns:
+    Signal to connect to.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_fanout_substitution_impl_tree_depth =
+R"doc(Depth of the fanout tree of a node with the given number of outputs.
+
+Args:
+    fanouts: Number of outputs.
+
+Returns:
+    Number of levels the tree adds below the node.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl =
+R"doc(Implementation of the planar rebalancing algorithm.
+
+Template Args:
+    Ntk: Ranked network type.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_append_out_edges =
+R"doc(Appends the outgoing edges of a placed node to the edge list of its
+level, in consumer order.
+
+A primary output of the node is an edge from the node to itself that
+reaches up to the output level.
+
+Args:
+    n: Placed node of the stripped network.
+    stripped: Stripped network with final ranks.
+    consumers: Consumers per stripped node.
+    po_level: Level of the primary outputs in the result.
+    level_edges: Edge list to append to.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_consecutive_fanin_edges =
+R"doc(Checks that the `fanins` edges from position `first` on all lead to
+`target` on this level, i.e., that the node's fanin edges are
+consecutive as in a planar order.
+
+Args:
+    current: Edges of the level.
+    first: Position of the first edge of `target`.
+    fanins: Number of non-constant fanins of `target`; zero is never
+            consecutive.
+    target: Node whose edges are checked.
+
+Returns:
+    `true` iff the edges are consecutive.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge =
+R"doc(An edge of the stripped network while buffers are re-inserted along
+it.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge_buffers = R"doc(Buffers still to insert before the target is reached.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge_source = R"doc(Source node in the stripped network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_edge_target =
+R"doc(Target node in the stripped network.
+
+Equal to `source` for an edge that leads to a primary output.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_fanout_ntk = R"doc(Fanout view of the source network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_insert_buffers =
+R"doc(Re-inserts buffers into the stripped network so that every edge spans
+exactly one level and all primary outputs sit on the top level.
+
+Edges are swept level by level; consecutive edges from the same source
+share one buffer per level, so a fanout splits right above its
+targets. The sweep starts from the primary inputs in their source
+order and appends the edges of every placed node in the consumer order
+of the source network, which reproduces the planar embedding of the
+source and keeps the result planar.
+
+Args:
+    stripped: Stripped network with final ranks.
+    old2new: Map from source nodes to signals of the stripped network.
+
+Returns:
+    Balanced network.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_is_chain_buffer =
+R"doc(Whether a node is a buffer that drives exactly one consumer and can be
+removed.
+
+Args:
+    n: Node of the source network.
+
+Returns:
+    `true` iff `n` is a chain buffer.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_keep_input_order =
+R"doc(Recomputes the ranks of the stripped network and puts its primary
+inputs in the order of the source network.
+
+Only the input order matters for the sweep that re-inserts the
+buffers; the order within the other levels is derived from the
+consumer order of the source network as the sweep goes.
+
+Args:
+    stripped: Stripped network; its ranks are recomputed.
+    old2new: Map from source nodes to destination signals.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_max_po_level =
+R"doc(Level of the highest primary output driver, constants excluded.
+
+Args:
+    net: Ranked network.
+
+Returns:
+    Maximum level among the primary output nodes, 0 if there are none.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_non_constant_fanins =
+R"doc(Number of non-constant fanins of a node.
+
+Args:
+    net: Network.
+    n: Node.
+
+Returns:
+    Number of fanins that are not constants.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_ntk = R"doc(Source network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_ordered_consumers =
+R"doc(Consumers of a node in the source network, ordered by the rank
+position of the node's direct fanouts, with chain buffers skipped.
+
+There is one entry per edge: a gate that reads the node twice appears
+twice, and a consumer equal to the node itself stands for one primary
+output the node drives; direct outputs come first.
+
+Args:
+    n: Node of the source network.
+
+Returns:
+    Consumers of `n` in rank order of the source network.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_output_count = R"doc(Number of primary outputs every source node drives directly.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_place_level =
+R"doc(Places one level of the result.
+
+Edges that span further get a buffer, one per source and level, shared
+by all consecutive edges of that source; a node whose fanin edges all
+end on this level is cloned.
+
+The map from stripped nodes to signals is updated once the level is
+complete, so that every clone reads the signals of the level below.
+
+Args:
+    current: Edges that enter this level, in rank order.
+    stripped: Stripped network with final ranks.
+    consumers: Consumers per stripped node.
+    po_level: Level of the primary outputs in the result.
+    balanced: Network under construction.
+    new2bal: Map from stripped nodes to their signals in `balanced`;
+             updated.
+
+Returns:
+    Edges that enter the next level.
+
+Raises:
+    std::runtime_error: If the fanin edges of a node are not
+                        consecutive, i.e., the input is not planar.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_planar_rebalancing_impl =
+R"doc(Creates the implementation.
+
+Args:
+    src: Source network.
+    p: Parameters.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_reject_constant_gates =
+R"doc(Rejects gates whose fanins are all constants.
+
+The sweep reaches a gate only along edges that start at the primary
+inputs, so such a gate has no level to be placed on; constant
+propagation folds it before rebalancing.
+
+Raises:
+    ValueError: If a gate has only constant fanins.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_remove_buffer_chains =
+R"doc(Copies every node of the source network except chain buffers into
+`stripped`.
+
+A chain buffer maps to the signal of its fanin, so that its consumer
+connects to the node the buffer delayed.
+
+Args:
+    stripped: Destination network; holds the copied primary inputs on
+              entry.
+    old2new: Map from source nodes to destination signals; completed
+             here.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_run =
+R"doc(Runs the algorithm.
+
+Returns:
+    Balanced copy of the source network without redundant buffers,
+    with the same rank order.
+
+Raises:
+    ValueError: If a gate has only constant fanins.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_planar_rebalancing_impl_stripped_consumers =
+R"doc(Collects the consumers of every stripped node in the rank order of the
+source network.
+
+Args:
+    stripped: Stripped network with final ranks.
+    old2new: Map from source nodes to signals of the stripped network.
+
+Returns:
+    Consumers per stripped node.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_rng_state =
 R"doc(A lightweight container that groups together the two objects required
@@ -25329,9 +26744,389 @@ Note:
 
 static const char *mkd_doc_fiction_synthesis_network_balancing_params = R"doc(Parameters for the network balancing algorithm.)doc";
 
+static const char *mkd_doc_fiction_synthesis_network_balancing_params_buffer_constant_outputs =
+R"doc(Whether primary outputs driven by a constant receive a buffer chain
+when unifying outputs.
+
+Placement flows that do not place constants set this to `false`: such
+outputs then stay unbuffered, and `is_balanced` ignores them.)doc";
+
 static const char *mkd_doc_fiction_synthesis_network_balancing_params_on_progress = R"doc(Reports completed work in each bounded phase.)doc";
 
 static const char *mkd_doc_fiction_synthesis_network_balancing_params_unify_outputs = R"doc(Flag to indicate that all output nodes should be in the same rank.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization =
+R"doc(Planarizes a ranked, balanced logic network by duplicating nodes.
+
+The algorithm was originally proposed in \"Fabricatable Interconnect
+and Molecular QCA Circuits\" by A. Chaudhary, D. Z. Chen, X. S. Hu, M.
+T. Niemier, R. Ravichandran, and K. Whitton in IEEE TCAD 2007. It
+solves the node duplication crossing elimination problem level by
+level from the primary outputs to the primary inputs. For each level,
+an H-graph enumerates the fanin orderings of every node; the shortest
+path through it gives an ordering of the level below in which every
+edge can be drawn without a crossing, at the cost of duplicating the
+nodes that would otherwise be crossed. Duplicated primary inputs
+become virtual primary inputs of the result.
+
+Consecutive consumers in a level share one copy of their common fanin,
+so the result is not fanout-substituted; `planar_fanout_substitution`
+restores that property while keeping ranks and planarity.
+
+With the hybrid strategy, the algorithm decides per level whether
+duplicating is cheaper than keeping the crossings and resolving them
+later with `crossing_gate_planarization`: the duplication cost is the
+weighted size of the duplicated cones, the crossing cost the size of
+the crossing gates plus their padding after a crossing minimization of
+the level. Levels that keep their crossings are not duplicated, and
+the result is then not planar.
+
+Duplication can create exponentially many nodes in the depth of the
+network. Both strategies weigh fanin cones to break ties. Each source
+cone is computed at most once; the traversal work is proportional to
+the sum of its nodes and edges over all computed cones, which can be
+quadratic in the source network size for bounded fanin. The hybrid
+strategy also minimizes crossings when a level's duplication
+alternative creates copies. Its `LOOKAHEAD` criterion uses at most two
+counting runs below such levels and reuses recorded counts where
+possible. Counting runs stop at a node-count threshold checked between
+levels. `WEIGHTED_CONE` skips these counting runs. Cone caches and
+visited markers use space linear in the input network size.
+
+The input must be balanced with unified outputs (see
+`network_balancing`), carry ranks (see `mutable_rank_view`), and
+contain no virtual primary inputs (see `delete_virtual_pis`). The
+result is ranked; with the duplication strategy it is crossing-free,
+which the function verifies before it returns.
+
+Args:
+    ntk: Source network.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Ntk: Ranked, balanced source network type.
+
+Returns:
+    `virtual_pi_network` that computes the same functions as `ntk`;
+    planar with the duplication strategy.
+
+Raises:
+    ValueError: If `ntk` is not balanced with unified outputs,
+                contains virtual primary inputs, or has a gate whose
+                fanins are all constants; or if `ps.lookahead_budget`
+                is zero or the duplication cost model has a weight
+                that is negative or not finite or a depth growth that
+                is not positive.
+    std::runtime_error: If more than `max_duplications` nodes were
+                        duplicated, or if the result of the
+                        duplication strategy still contains crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params = R"doc(Parameters for the node duplication planarization algorithm.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_criterion = R"doc(Decision criterion of the hybrid strategy.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_crossing_gates =
+R"doc(Parameters of the `crossing_gate_planarization` that resolves the
+crossings the hybrid strategy keeps.
+
+The hybrid strategy costs the crossing gates by `xor_gates`, and it
+always duplicates a level whose crossings exceed
+`max_crossings_per_level`. `on_progress` has no effect here;
+`planarization` forwards its own callback.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_decision_criterion = R"doc(How the hybrid strategy estimates the cost of duplicating a level.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_decision_criterion_LOOKAHEAD =
+R"doc(The number of nodes that duplicating actually creates.
+
+The copies on the level plus those that running the duplication
+strategy on the levels below creates.
+
+Both options are run, and the second run stops once it exceeds the
+first. Levels whose runs exceed `lookahead_budget` fall back to
+`WEIGHTED_CONE`.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_decision_criterion_WEIGHTED_CONE =
+R"doc(The weighted size of the duplicated cones, see
+`duplication_cost_model`.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost = R"doc(Duplication cost model of the hybrid strategy.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model =
+R"doc(Weights of the duplication cost model of the hybrid strategy's
+`WEIGHTED_CONE` criterion.
+
+The cost of duplicating a node is the weighted size of its transitive
+fanin, since every duplicate drags its whole cone along. A gate weighs
+`node_weight` and a chain buffer or inverter weighs `buffer_weight`.
+The sum is scaled by :math:`\text{depth\_growth}^{d}` for a
+duplication on level :math:`d`, because duplicates on deep levels are
+duplicated again by the decisions below. The weights are in units of
+one crossing gate node. The defaults were determined empirically on
+the benchmark sets. Weights must be finite and non-negative, the
+growth finite and positive.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_buffer_weight = R"doc(Weight of a buffer or inverter chain node.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_depth_growth =
+R"doc(Growth of the duplication cost per level on which the duplication
+happens.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_duplication_cost_model_node_weight = R"doc(Weight of a gate.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_lookahead_budget =
+R"doc(Node-count threshold for the crossing alternative's lookahead; if both
+alternatives exceed it, the decision uses the weighted cone model. The
+duplication alternative may use a comparison-derived threshold.
+
+Counting runs check their threshold between levels and can exceed it
+by the nodes created on one level.
+
+Must be positive.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_max_duplications =
+R"doc(Abort with `std::runtime_error` as soon as more nodes than this are
+duplicated at once.
+
+The duplicates of the result plus those of the level under
+construction, which the hybrid strategy may still discard.
+
+Node duplication can grow exponentially with the depth of the network,
+so the limit is checked at every duplicate. `0` disables the limit,
+which may exhaust the memory on an adverse network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_max_swaps =
+R"doc(Maximum number of adjacent swaps per level that the hybrid strategy
+tries after the barycenter ordering to reduce the crossings it costs.
+
+`0` keeps the barycenter order.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_output_order =
+R"doc(Order in which the primary outputs are placed in the first level
+before the algorithm starts.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_output_order_KEEP_PO_ORDER = R"doc(Keep the primary output order of the input network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_output_order_RANDOM_PO_ORDER =
+R"doc(Shuffle the primary outputs randomly.
+
+Different orders can yield different numbers of duplications.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_planarization_strategy = R"doc(How a level is made crossing-free.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_planarization_strategy_DUPLICATION =
+R"doc(Duplicate nodes on every level.
+
+The result is planar.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_planarization_strategy_HYBRID =
+R"doc(Decide per level whether duplicating nodes or keeping the crossings
+for `crossing_gate_planarization` is cheaper.
+
+The result contains crossings on the levels where crossing gates are
+cheaper.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_po_order = R"doc(Primary output order used to seed the first level.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_seed =
+R"doc(Seed for the random primary output order.
+
+A random seed is drawn when none is given.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_params_strategy =
+R"doc(Planarization strategy.
+
+This is the first member, so that `planarization_params` can select
+the hybrid strategy with a plain default initializer.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats = R"doc(Statistics of the node duplication planarization algorithm.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_num_crossing_levels = R"doc(Number of levels on which the hybrid strategy kept the crossings.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_num_crossings =
+R"doc(Number of crossings the hybrid strategy left for
+`crossing_gate_planarization`.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_num_duplications =
+R"doc(Number of nodes in the planarized network minus the number of nodes in
+the input network.)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_report =
+R"doc(Writes the statistics to a stream.
+
+Args:
+    out: Stream to write to.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_node_duplication_planarization_stats_time_total =
+R"doc(Runtime of the duplication core.
+
+Excludes the final planarity check.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planar_fanout_substitution =
+R"doc(Substitutes high-output degrees in a ranked logic network with trees
+of fanout nodes while keeping the ranks and the planarity of the
+network.
+
+Every node of a level is pushed down by the depth of the deepest
+fanout tree in that level, with buffers for nodes that need no tree or
+a shallower one, so that all edges keep running between adjacent
+levels and the rank order stays the one of the input. The result is
+balanced if the input is.
+
+Virtual primary inputs of the input are kept.
+
+Args:
+    ntk: Ranked input network, balanced with unified outputs.
+    ps: Parameters.
+
+Template Args:
+    Ntk: Ranked network type (see `mutable_rank_view`) that supports
+         `create_buf`.
+
+Returns:
+    A fanout-substituted network of the same type with the same ranks
+    and no new crossings.
+
+Raises:
+    ValueError: If `ps.degree` is below 2 or `ntk` is not balanced
+                with unified outputs.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_planar_fanout_substitution_params = R"doc(Parameters for the planar fanout substitution algorithm.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planar_fanout_substitution_params_degree =
+R"doc(Maximum output degree of each fanout node, at least 2.
+
+Every other node drives exactly one consumer.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planar_fanout_substitution_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planar_rebalancing =
+R"doc(Removes every buffer that drives a single consumer from a ranked,
+planar network and re-inserts buffers on as-soon-as-possible levels.
+
+Every gate and fanout node sits on the lowest level its fanins allow,
+and all primary outputs sit on the level of the deepest one. Buffers
+that lead from one source to several consumers are shared level by
+level, so the fanout splits right above its targets. The depth is the
+smallest the network allows, and the buffer count is the smallest for
+these levels. A gate is never delayed to save buffers, so other
+balanced level assignments can need fewer buffers. The rank order of
+the input is kept, so a planar input yields a planar output; fanout
+nodes with more than one consumer are kept, so a fanout-substituted
+input yields a fanout-substituted output.
+
+This is the post-processing step of `planar_fanout_substitution`,
+which pads every level to a uniform depth.
+
+Args:
+    ntk: Ranked, planar input network.
+    ps: Parameters.
+
+Template Args:
+    Ntk: Ranked network type (see `mutable_rank_view`) that supports
+         `create_buf` and `is_buf`.
+
+Returns:
+    A balanced, planar network with unified outputs.
+
+Raises:
+    ValueError: If a gate has only constant fanins; such a gate cannot
+                be reached from the inputs.
+    std::runtime_error: If the input is not planar.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_planar_rebalancing_params = R"doc(Parameters for the planar rebalancing algorithm.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planar_rebalancing_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization =
+R"doc(Planarizes a balanced, ranked logic network and returns a planar,
+balanced, fanout-substituted network that computes the same functions.
+
+The pipeline runs `node_duplication_planarization` with the chosen
+strategy, resolves the crossings that the hybrid strategy kept with
+`crossing_gate_planarization`, restores fanout nodes with
+`planar_fanout_substitution`, and removes the buffers that this leaves
+behind with `planar_rebalancing`.
+
+Duplicated primary inputs become virtual primary inputs of the result.
+The function checks the result for crossings and for balance with
+unified outputs. The fanout degree is not checked;
+`is_fanout_substituted` does it on request.
+
+Args:
+    ntk: Source network.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Ntk: Ranked, balanced network type (see `mutable_rank_view`)
+         without virtual primary inputs.
+
+Returns:
+    Planar `virtual_pi_network` with unified outputs and fanout nodes
+    of at most `fanout_degree` outputs.
+
+Raises:
+    ValueError: If `ps.fanout_degree` is below 2, or if `ntk` is not
+                balanced with unified outputs, contains virtual
+                primary inputs, or violates another precondition of
+                `node_duplication_planarization`.
+    std::runtime_error: If a stage cannot keep its contract (see the
+                        stages' documentation), or if the result is
+                        not planar or not balanced with unified
+                        outputs after all.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_params = R"doc(Parameters for the planarization pipeline.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_params_duplication =
+R"doc(Parameters of the node duplication stage, including the strategy and
+whether the crossing gates are built from XOR gates.
+
+The pipeline defaults to the hybrid strategy, which decides per level
+between duplicating nodes and keeping the crossings for the crossing
+gates.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_params_fanout_degree =
+R"doc(Maximum output degree of the fanout nodes in the result.
+
+Must be at least 2.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_params_on_progress =
+R"doc(Receives completed work and the phase total of every stage in turn,
+unless `duplication.on_progress` is set.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_stats = R"doc(Statistics of the planarization pipeline.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_stats_crossing_gates =
+R"doc(Statistics of the crossing gate stage; empty if no level kept its
+crossings.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_stats_duplication = R"doc(Statistics of the node duplication stage.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_stats_num_nodes = R"doc(Number of nodes of the result.)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_stats_report =
+R"doc(Writes the statistics to a stream.
+
+Args:
+    out: Stream to write to.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_planarization_stats_time_total = R"doc(Runtime of the whole pipeline.)doc";
 
 static const char *mkd_doc_fiction_synthesis_technology_mapping =
 R"doc(Performs technology mapping on the given network. Technology mapping
@@ -25423,6 +27218,28 @@ Args:
 
 Raises:
     timeout_error: if the deadline has been reached.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_count_crossings =
+R"doc(Counts the edge crossings between every pair of adjacent levels of a
+ranked, balanced network in its current rank order.
+
+In contrast to `mincross` with `optimize = false`, the network is
+neither copied nor reordered.
+
+Args:
+    ntk: The balanced network whose crossings are counted.
+
+Template Args:
+    Ntk: A ranked network type.
+
+Returns:
+    The number of crossings.
+
+Raises:
+    ValueError: If an edge does not connect adjacent levels, i.e., if
+                `ntk` is not balanced.
 
 )doc";
 
@@ -25799,15 +27616,26 @@ Template Args:
     Ntk: Logic network type that models a leveled circuit with rank
          information.)doc";
 
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_build_neighbors =
+R"doc(Collects the non-constant fanins and the fanouts of every node in flat
+arrays, once.
+
+)doc";
+
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_crossings =
-R"doc(Computes the number of crossings between two sets of ranked positions.
+R"doc(Adds the crossings between the edges of two nodes to a pair of
+counters, for both orders of the nodes.
+
+The neighbors of `left` and `right` in an adjacent rank are compared
+by their rank positions.
 
 Args:
-    a: Positions from first set of connections.
-    b: Positions from second set of connections.
-
-Returns:
-    Total number of crossings between the sets.
+    begin: Offsets of the neighbor lists.
+    neighbors: Neighbor lists.
+    left: Index of the left node.
+    right: Index of the right node.
+    kept: Receives the crossings with `left` left of `right`.
+    swapped: Receives the crossings with the nodes swapped.
 
 )doc";
 
@@ -25815,16 +27643,20 @@ static const char *mkd_doc_fiction_utils_graph_mincross_impl_fanout_ntk =
 R"doc(Fanout-augmented view of the network for efficient traversal and
 connectivity queries.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_cross =
-R"doc(Counts the number of edge crossings between fanins of two nodes in the
-previous rank.
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_begin =
+R"doc(Offsets of the fanin lists in `in_nodes`: node `i` has the entries
+`in_begin[i]` to `in_begin[i + 1]`.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_nodes = R"doc(Node indices of the non-constant fanins of all nodes.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_index_of =
+R"doc(Index of a node in the flat arrays.
 
 Args:
-    left: First node.
-    right: Second node.
+    n: Node.
 
 Returns:
-    Number of crossings.
+    Index of `n`.
 
 )doc";
 
@@ -25881,24 +27713,21 @@ state.
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_ntk = R"doc(Logic network being reordered.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_out_cross =
-R"doc(Counts the number of edge crossings between fanouts of two nodes in
-the next rank.
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_out_begin = R"doc(Offsets of the fanout lists in `out_nodes`, like `in_begin`.)doc";
 
-Args:
-    left: First node.
-    right: Second node.
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_out_nodes = R"doc(Node indices of the fanouts of all nodes.)doc";
 
-Returns:
-    Number of crossings.
-
-)doc";
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_positions =
+R"doc(Position within its rank per node index while the transposition sweeps
+run.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_ps = R"doc(Parameters for crossing minimization.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_pst =
 R"doc(Statistics that store the final number of crossings after
 optimization.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_ranks = R"doc(Nodes of every rank while the transposition sweeps run.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_reorder =
 R"doc(Reorders the nodes in a given rank according to computed medians.
@@ -25923,6 +27752,10 @@ static const char *mkd_doc_fiction_utils_graph_mincross_impl_total_crossings = R
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_transpose =
 R"doc(Performs pairwise transpositions within ranks to further reduce
 crossings.
+
+The sweeps run on flat copies of the ranks, the rank positions, and
+the neighbor lists; the ranks of the network are written back at the
+end.
 
 Args:
     order: Sorting heuristic for tie-breaking.
@@ -26487,7 +28320,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_optimization_geometric_temperature_schedule =
-R"doc(A logarithmically decreasing temperature schedule. The temperature is
+R"doc(A geometrically decreasing temperature schedule. The temperature is
 altered by multiplying it with `0.99`.
 
 Args:
@@ -26517,29 +28350,39 @@ states using a provided random state generator. SA as specified above
 is then run on all these random initial states where the best result
 of all generated states is finally returned.
 
-Each initial state runs in its own thread.
+Each initial state runs as an asynchronous task. All callables,
+including the random-state generator, must support concurrent
+invocation. The function waits for all started workers before
+propagating a worker or launch exception.
 
 Args:
     init_temp: The initial temperature.
     final_temp: The final temperature.
     cycles: The number of cycles for each temperature value.
-    instances: The number of random initial states to generate.
+    instances: Positive number of random initial states to generate.
     rand_state: The random state generator function.
     cost: The cost function to minimize.
-    schedule: The temperature schedule.
+    schedule: Temperature schedule that eventually reaches
+              `final_temp`.
     next: The next state function that determines an adjacent state
           given a current one.
 
 Template Args:
-    RandStateFunc: The random state generator function type (specifies
-                   the State type via its return value).
-    CostFunc: The cost function type (specifies the cost value via its
-              return value).
-    TempFunc: The temperature schedule function type.
-    NextFunc: The next state function type.
+    RandStateFunc: Lvalue-invocable generator returning a default-
+                   constructible state.
+    CostFunc: Cost callable accepted by single-state annealing.
+    TempFunc: Temperature schedule returning double and accepting a
+              mutable temperature lvalue.
+    NextFunc: Next-state function returning State and accepting a
+              mutable state lvalue.
 
 Returns:
     A pair of the overall best optimized state and its cost value.
+
+Raises:
+    ValueError: If instances is zero or either temperature bound is
+                not finite.
+    std::system_error: If a worker thread cannot be started.
 
 Note:
     The State type must be default constructible.
@@ -26566,25 +28409,34 @@ This implementation is based on:
 https://codereview.stackexchange.com/questions/70310/simple-simulated-
 annealing-template-in-c11
 
+Exceptions from random initialization, state operations, and callables
+propagate to the caller.
+
 Args:
     init_state: The initial state to optimize.
     init_temp: The initial temperature.
     final_temp: The final temperature.
     cycles: The number of cycles for each temperature value.
     cost: The cost function to minimize.
-    schedule: The temperature schedule.
+    schedule: Temperature schedule that eventually reaches
+              `final_temp`.
     next: The next state function that determines an adjacent state
           given a current one.
 
 Template Args:
-    State: The state type.
-    CostFunc: The cost function type (specifies the cost type via its
-              return value).
-    TempFunc: The temperature schedule function type.
-    NextFunc: The next state function type.
+    State: Copyable state type.
+    CostFunc: Cost function with a signed result for State, also
+              invocable on const and mutable state lvalues.
+    TempFunc: Temperature schedule returning double and accepting a
+              mutable temperature lvalue.
+    NextFunc: Next-state function returning State and accepting a
+              mutable state lvalue.
 
 Returns:
     A pair of the optimized state and its cost value.
+
+Raises:
+    ValueError: If either temperature bound is not finite.
 
 )doc";
 
@@ -27394,6 +29246,27 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_verification_detail_leaves_by_creation_order =
+R"doc(Leaf signals for copying a network such that the primary input created
+i-th receives `pis[i]`.
+
+A ranked network lists its inputs in rank order, so its leaves are
+permuted accordingly; any other network takes `pis` as they are.
+
+Args:
+    ntk: Source network.
+    pis: Signals of the destination's primary inputs in creation
+         order.
+
+Template Args:
+    NtkDest: Destination network type.
+    Ntk: Source network type.
+
+Returns:
+    Leaf signals in the order of `ntk.foreach_pi`.
+
+)doc";
+
 static const char *mkd_doc_fiction_verification_eq_type = R"doc(Equivalence classification for logic and layout throughput.)doc";
 
 static const char *mkd_doc_fiction_verification_eq_type_NO =
@@ -27547,7 +29420,8 @@ two networks differ.
 
 The input networks may have different types. If the two input networks
 have mismatched numbers of primary inputs or outputs, the method
-returns `std::nullopt`.
+returns `std::nullopt`. Primary inputs are paired by creation order,
+also for ranked networks that list them in rank order.
 
 Args:
     ntk1_in: The first input network.
@@ -27555,8 +29429,8 @@ Args:
 
 Template Args:
     NtkDest: The type of the resulting network.
-    NtkSource1: The type of the first input network.
-    NtkSource2: The type of the second input network.
+    NtkSrc1: Type of the first input network with interface counts.
+    NtkSrc2: Type of the second input network with interface counts.
 
 Returns:
     An `optional` containing the virtual miter network if successful,
@@ -27621,7 +29495,29 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
+static const char *mkd_doc_mockturtle_detail_foreach_element_if_transform =
+R"doc(Applies a transform and callback to elements that satisfy a predicate.
+A false callback result stops traversal.
+
+Args:
+    begin: First source element.
+    end: End of the source range.
+    pred: Selection predicate.
+    transform: Element transform.
+    fn: Callback for transformed elements.
+    counter_offset: First callback index.
+
+Template Args:
+    Iterator: Iterator over the source elements.
+    ElementType: Transformed element type passed to the callback.
+    Pred: Predicate selecting source elements.
+    Transform: Transform applied to selected elements.
+    Fn: Void or Boolean callback, optionally accepting an index.
+
+Returns:
+    Iterator after the last visited source element.
+
+)doc";
 
 static const char *mkd_doc_mockturtle_edge =
 R"doc(Representation of an edge between two network nodes.

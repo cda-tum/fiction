@@ -75,6 +75,64 @@ class technology_network : public mockturtle::klut_network
 #pragma region Primary I / O and functions
 
     /**
+     * @brief Checks whether a node is a combinational input in constant time.
+     *
+     * A node is an input iff it is not a constant and has no fanins, because every gate has at least one fanin and
+     * `create_node` maps functions without fanins to constants. `klut_network::is_ci` scans all inputs instead.
+     *
+     * @param n Node to consider.
+     * @return `true` iff `n` is a combinational input.
+     */
+    [[nodiscard]] bool is_ci(const node& n) const noexcept
+    {
+        return n > 1 && n < _storage->nodes.size() && _storage->nodes[n].children.empty();
+    }
+    /**
+     * @brief Checks whether a node is a primary input in constant time.
+     *
+     * Equals `is_ci`, because this network has no further kinds of combinational inputs.
+     *
+     * @param n Node to consider.
+     * @return `true` iff `n` is a primary input.
+     */
+    [[nodiscard]] bool is_pi(const node& n) const noexcept
+    {
+        return is_ci(n);
+    }
+    /**
+     * @brief Applies a function to every gate in constant time per node.
+     *
+     * `klut_network::foreach_gate` tests every node with `klut_network::is_ci`, which scans all inputs.
+     *
+     * @tparam Fn Functor type.
+     * @param fn Function to apply to each gate.
+     */
+    template <typename Fn>
+    void foreach_gate(Fn&& fn) const
+    {
+        auto r = mockturtle::range<uint64_t>(2u, _storage->nodes.size());  // start at 2 to skip the constants
+        mockturtle::detail::foreach_element_if(
+            r.begin(), r.end(), [this](const auto n) { return !is_ci(n); }, std::forward<Fn>(fn));
+    }
+    /**
+     * @brief Applies a function to every fanin of a node in constant time per node.
+     *
+     * Constants and inputs have no fanins. `klut_network::foreach_fanin` tells inputs from gates with
+     * `klut_network::is_ci`, which scans all inputs.
+     *
+     * @tparam Fn Functor type.
+     * @param n Node whose fanins to visit.
+     * @param fn Function to apply to each fanin.
+     */
+    template <typename Fn>
+    void foreach_fanin(const node& n, Fn&& fn) const
+    {
+        const auto& children = _storage->nodes[n].children;
+
+        mockturtle::detail::foreach_element_transform<decltype(children.begin()), uint32_t>(
+            children.begin(), children.end(), [](const auto f) { return f.index; }, std::forward<Fn>(fn));
+    }
+    /**
      * Checks whether a node is primary output by considering the signal pointing to it. This is possible because this
      * network does not use complemented signals.
      *

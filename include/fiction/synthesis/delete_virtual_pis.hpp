@@ -18,6 +18,7 @@
 #pragma once
 
 #include "fiction/networks/name_utils.hpp"
+#include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -127,7 +128,15 @@ class delete_virtual_pis_impl
         ntk.foreach_po(
             [this, &ntk_dest, &old2new](const auto& po)
             {
-                const auto tgt_signal = old2new[ntk.get_node(po)];
+                auto po_node = ntk.get_node(po);
+
+                // a primary output can be driven by a virtual primary input directly
+                if (ntk.is_virtual_pi(po_node))
+                {
+                    po_node = ntk.get_real_pi(po_node);
+                }
+
+                const auto tgt_signal = old2new[po_node];
                 const auto tgt_po     = ntk.is_complemented(po) ? ntk_dest.create_not(tgt_signal) : tgt_signal;
 
                 ntk_dest.create_po(tgt_po);
@@ -186,7 +195,7 @@ class delete_virtual_pis_impl
                     if (src.is_real_pi(n))
                     {
                         old2new[n] = dest.create_pi();
-                        dest.on_add(old2new[n]);
+                        dest.on_add(dest.get_node(old2new[n]));
                     }
                 });
         }
@@ -198,10 +207,6 @@ class delete_virtual_pis_impl
                     if (src.is_real_pi(n))
                     {
                         old2new[n] = dest.create_pi();
-                        if constexpr (mockturtle::has_rank_position_v<Ntk>)
-                        {
-                            dest.on_add(old2new[n]);
-                        }
                     }
                 });
         }
@@ -216,27 +221,21 @@ class delete_virtual_pis_impl
  * corresponding real PIs. This ensures compatibility for equivalence checking between networks with and without virtual
  * inputs, as the miter requires networks to have an identical number of primary inputs. If the network does not contain
  * any virtual PIs, it is returned unchanged.
+ * If virtual PIs are removed from a ranked network, call `update_ranks` on the result before querying its ranks.
  *
  * @tparam Ntk The type of network.
  * @param ntk The input network.
  * @return The resulting network after virtual primary inputs are deleted.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+             mockturtle::has_is_complemented_v<Ntk> && mockturtle::has_foreach_pi_v<Ntk> &&
+             mockturtle::has_foreach_gate_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
+             mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_constant_v<Ntk> &&
+             mockturtle::has_create_pi_v<Ntk> && mockturtle::has_create_po_v<Ntk> &&
+             mockturtle::has_create_not_v<Ntk> && fiction::is_virtual_network_type_v<Ntk>
 Ntk delete_virtual_pis(const Ntk& ntk) noexcept
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
-    static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented function");
-    static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi function");
-    static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po function");
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant function");
-    static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi function");
-    static_assert(mockturtle::has_create_po_v<Ntk>, "Ntk does not implement the create_po function");
-    static_assert(mockturtle::has_create_not_v<Ntk>, "Ntk does not implement the create_not function");
-    static_assert(fiction::is_virtual_network_type_v<Ntk>, "Ntk is not a virtual network type");
-
     assert(ntk.is_combinational() && "Network has to be combinational");
 
     // return the network if it does not have virtual PIs

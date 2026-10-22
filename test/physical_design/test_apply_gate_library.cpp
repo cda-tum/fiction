@@ -59,6 +59,38 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 
+/** @brief Checks static library application without instantiating its body. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept bestagon_mappable = requires(const Lyt& lyt) { apply_gate_library<bestagon_library>(lyt); };
+
+/** @brief Checks static library application on a defective surface. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept defective_bestagon_mappable = requires(const Lyt& lyt, const sidb::layout& surface) {
+    apply_gate_library_to_defective_surface<bestagon_library>(lyt, surface);
+};
+
+/** @brief Checks parameterized library application. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept on_the_fly_mappable = requires(const Lyt& lyt, const on_the_fly_gate_library_params& params) {
+    apply_parameterized_gate_library<on_the_fly_gate_library>(lyt, params);
+};
+
+/** @brief Checks parameterized library application on a defective surface. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept defective_on_the_fly_mappable =
+    requires(const Lyt& lyt, const on_the_fly_gate_library_params& params, const sidb::layout& surface) {
+        apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(lyt, params, surface);
+    };
+
+static_assert(bestagon_mappable<hexagonal_gate_layout>);
+static_assert(!bestagon_mappable<cartesian_gate_layout>);
+static_assert(defective_bestagon_mappable<hexagonal_gate_layout>);
+static_assert(!defective_bestagon_mappable<cartesian_gate_layout>);
+static_assert(on_the_fly_mappable<hexagonal_gate_layout>);
+static_assert(!on_the_fly_mappable<cartesian_gate_layout>);
+static_assert(defective_on_the_fly_mappable<hexagonal_gate_layout>);
+static_assert(!defective_on_the_fly_mappable<cartesian_gate_layout>);
+
 namespace
 {
 void check_equivalence(const sidb::layout& layout_designed, const std::string& path_layout_correct)

@@ -19,13 +19,15 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
-#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
-#include <fiction/physical_design/hexagonalization.hpp>      // layout conversion to hexagonal gird
-#include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
+#include <fiction/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
+#include <fiction/physical_design/hexagonalization.hpp>    // layout conversion to hexagonal gird
+#include <fiction/physical_design/orthogonal.hpp>          // scalable heuristic for physical design of FCN layouts
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
 #include <fiction/technology/sidb/layout.hpp>                // SiDB layouts
+#include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
@@ -53,6 +55,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
@@ -156,13 +159,13 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_layout = orthogonal<cartesian_gate_layout>(mapped_network, {}, &orthogonal_stats);
+        const auto gate_layout = orthogonal<cartesian_layout>(convert_network<named_technology_network>(mapped_network),
+                                                              {}, &orthogonal_stats);
 
         // compute critical path and throughput
         const auto cp_tp = critical_path_length_and_throughput(gate_layout);
 
-        const auto hex_layout = hexagonalization<hexagonal_gate_layout, cartesian_gate_layout>(
-            gate_layout, hexagonalization_params, &hexagonalization_stats);
+        const auto hex_layout = hexagonalization(gate_layout, hexagonalization_params, &hexagonalization_stats);
 
         // check equivalence
         equivalence_checking_stats eq_stats{};

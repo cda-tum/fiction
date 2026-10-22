@@ -28,7 +28,6 @@
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <sstream>
@@ -41,11 +40,11 @@ using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::verification;
 
+static_assert(std::is_pointer_v<decltype(&topolinano_library::set_up_gate)>);
+
 TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 {
     CHECK(std::is_same_v<topolinano_library::layout, inml::layout>);
-    CHECK(!has_get_functional_implementations_v<topolinano_library>);
-    CHECK(!has_get_gate_ports_v<topolinano_library>);
 }
 
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")

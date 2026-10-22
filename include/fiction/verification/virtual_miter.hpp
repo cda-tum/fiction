@@ -21,9 +21,14 @@
 
 #include <fiction/synthesis/delete_virtual_pis.hpp>
 
+// NOLINTNEXTLINE(misc-include-cleaner): Provides cleanup_dangling for argument-dependent lookup.
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/node_map.hpp>
 
 #include <algorithm>
+#include <cstddef>
+#include <iterator>
 #include <optional>
 #include <vector>
 
@@ -62,6 +67,39 @@ Ntk handle_virtual_pis(const Ntk& network)
     }
 }
 
+/**
+ * @brief Leaf signals for copying a network such that the primary input created i-th receives `pis[i]`.
+ *
+ * A ranked network lists its inputs in rank order, so its leaves are permuted accordingly; any other network takes
+ * `pis` as they are.
+ *
+ * @tparam NtkDest Destination network type.
+ * @tparam Ntk Source network type.
+ * @param ntk Source network.
+ * @param pis Signals of the destination's primary inputs in creation order.
+ * @return Leaf signals in the order of `ntk.foreach_pi`.
+ */
+template <typename NtkDest, typename Ntk>
+[[nodiscard]] std::vector<mockturtle::signal<NtkDest>>
+leaves_by_creation_order(const Ntk& ntk, const std::vector<mockturtle::signal<NtkDest>>& pis)
+{
+    if constexpr (has_foreach_pi_unranked_v<Ntk>)
+    {
+        mockturtle::node_map<std::size_t, Ntk> creation_index{ntk};
+        ntk.foreach_pi_unranked([&creation_index](const auto& n, const auto i) { creation_index[n] = i; });
+
+        std::vector<mockturtle::signal<NtkDest>> leaves{};
+        leaves.reserve(pis.size());
+        ntk.foreach_pi([&pis, &creation_index, &leaves](const auto& n) { leaves.push_back(pis[creation_index[n]]); });
+
+        return leaves;
+    }
+    else
+    {
+        return pis;
+    }
+}
+
 }  // namespace detail
 
 /**
@@ -75,10 +113,11 @@ Ntk handle_virtual_pis(const Ntk& network)
  *
  * The input networks may have different types. If the two input networks have mismatched numbers of primary inputs or
  * outputs, the method returns `std::nullopt`.
+ * Primary inputs are paired by creation order, also for ranked networks that list them in rank order.
  *
  * @tparam NtkDest The type of the resulting network.
- * @tparam NtkSource1 The type of the first input network.
- * @tparam NtkSource2 The type of the second input network.
+ * @tparam NtkSrc1 Type of the first input network with interface counts.
+ * @tparam NtkSrc2 Type of the second input network with interface counts.
  * @param ntk1_in The first input network.
  * @param ntk2_in The second input network.
  * @return An `optional` containing the virtual miter network if successful, or `std::nullopt` if the networks are
@@ -86,21 +125,14 @@ Ntk handle_virtual_pis(const Ntk& network)
  */
 
 template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
-[[nodiscard]] std::optional<NtkDest> virtual_miter(const NtkSrc1& ntk1_in, const NtkSrc2& ntk2_in) noexcept
+    requires mockturtle::is_network_type_v<NtkSrc1> && mockturtle::is_network_type_v<NtkSrc2> &&
+             mockturtle::is_network_type_v<NtkDest> && mockturtle::has_num_pis_v<NtkSrc1> &&
+             mockturtle::has_num_pos_v<NtkSrc1> && mockturtle::has_num_pis_v<NtkSrc2> &&
+             mockturtle::has_num_pos_v<NtkSrc2> && mockturtle::has_create_pi_v<NtkDest> &&
+             mockturtle::has_create_po_v<NtkDest> && mockturtle::has_create_xor_v<NtkDest> &&
+             mockturtle::has_create_nary_or_v<NtkDest>
+[[nodiscard]] std::optional<NtkDest> virtual_miter(const NtkSrc1& ntk1_in, const NtkSrc2& ntk2_in)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc1>, "NtkSource1 is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkSrc2>, "NtkSource2 is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
-
-    static_assert(mockturtle::has_num_pis_v<NtkSrc1>, "NtkSource1 does not implement the num_pis method");
-    static_assert(mockturtle::has_num_pos_v<NtkSrc1>, "NtkSource1 does not implement the num_pos method");
-    static_assert(mockturtle::has_num_pis_v<NtkSrc2>, "NtkSource2 does not implement the num_pis method");
-    static_assert(mockturtle::has_num_pos_v<NtkSrc2>, "NtkSource2 does not implement the num_pos method");
-    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method");
-    static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po method");
-    static_assert(mockturtle::has_create_xor_v<NtkDest>, "NtkDest does not implement the create_xor method");
-    static_assert(mockturtle::has_create_nary_or_v<NtkDest>, "NtkDest does not implement the create_nary_or method");
-
     // handle (delete and remap) virtual primary inputs
     const NtkSrc1 ntk1 = detail::handle_virtual_pis(ntk1_in);
     const NtkSrc2 ntk2 = detail::handle_virtual_pis(ntk2_in);
@@ -120,9 +152,12 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
         pis.push_back(dest.create_pi());
     }
 
-    // copy networks
-    const auto pos1 = cleanup_dangling(ntk1, dest, pis.cbegin(), pis.cend());
-    const auto pos2 = cleanup_dangling(ntk2, dest, pis.cbegin(), pis.cend());
+    // copy networks, pairing the primary inputs by creation order
+    const auto leaves1 = detail::leaves_by_creation_order<NtkDest>(ntk1, pis);
+    const auto leaves2 = detail::leaves_by_creation_order<NtkDest>(ntk2, pis);
+
+    const auto pos1 = cleanup_dangling(ntk1, dest, leaves1.cbegin(), leaves1.cend());
+    const auto pos2 = cleanup_dangling(ntk2, dest, leaves2.cbegin(), leaves2.cend());
 
     if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk1)>)
     {

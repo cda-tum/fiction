@@ -112,8 +112,7 @@ void register_exact(nb::module_& m, const char* signature)
         parameters.on_progress              = on_progress;
         parameters.on_worker_progress       = on_worker_progress;
         const nb::gil_scoped_release release{};
-        return fiction::physical_design::exact<Lyt, fiction::networks::named_technology_network>(network, parameters,
-                                                                                                 statistics);
+        return fiction::physical_design::exact<typename Lyt::coordinate_layout>(network, parameters, statistics);
     };
     if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {

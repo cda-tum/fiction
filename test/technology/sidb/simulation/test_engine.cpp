@@ -23,6 +23,15 @@
 using namespace fiction;
 using namespace fiction::sidb::simulation;
 
+/** @brief Tests simulation-engine name API availability. @tparam Engine Engine type. */
+template <typename Engine>
+concept named_engine = requires(const Engine& value) { engine_name(value); };
+
+static_assert(named_engine<engine>);
+static_assert(named_engine<exact_engine>);
+static_assert(named_engine<heuristic_engine>);
+static_assert(!named_engine<int>);
+
 TEST_CASE("Look up SiDB simulation engines by case-insensitive name", "[sidb-simulation-engine]")
 {
     CHECK(get_engine("eXgS") == engine::EXGS);

@@ -4,6 +4,17 @@ Physical design maps logic networks to FCN layouts through placement, routing,
 and clock assignment. Gate libraries map gate-level layouts to technology cells;
 layout transformations and optimization refine the resulting designs.
 
+Physical design consumes `fiction::networks::named_technology_network`, a named `technology_network`. Convert other network types before
+placement; the conversion preserves network, primary-input, and primary-output names.
+
+```cpp
+const auto specification = fiction::synthesis::convert_network<fiction::networks::named_technology_network>(source);
+const auto layout = fiction::physical_design::orthogonal<fiction::layouts::cartesian_layout>(specification);
+```
+
+`orthogonal` and `exact` normalize fanout for the selected layout and clocking scheme. GOLD removes dangling gates
+while preparing its search networks.
+
 ```{toctree}
 :maxdepth: 1
 

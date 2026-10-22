@@ -29,6 +29,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -159,4 +160,49 @@ TEST_CASE("Adder", "[mincross]")
     p.optimize = true;
     ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 2);
+}
+
+TEST_CASE("Counting crossings agrees with mincross without optimization", "[mincross]")
+{
+    for (const auto& tec :
+         {blueprints::full_adder_network<technology_network>(), blueprints::mux21_network<technology_network>(),
+          blueprints::maj4_network<technology_network>()})
+    {
+        const auto tec_r = mutable_rank_view(network_balancing<technology_network>(tec));
+
+        mincross_stats  st{};
+        mincross_params p{};
+        p.optimize = false;
+
+        static_cast<void>(mincross(tec_r, p, &st));
+
+        CHECK(count_crossings(tec_r) == st.num_crossings);
+    }
+}
+
+TEST_CASE("Counting crossings of a planar network", "[mincross]")
+{
+    mockturtle::aig_network aig;
+
+    const auto x1 = aig.create_pi();
+    const auto x2 = aig.create_pi();
+    const auto x3 = aig.create_pi();
+    aig.create_po(aig.create_and(x1, x2));
+    aig.create_po(aig.create_and(x2, x3));
+
+    auto aig_r = mutable_rank_view(aig);
+
+    // the creation order of the gates puts them in the order of their inputs
+    CHECK(count_crossings(aig_r) == 0);
+
+    aig_r.set_ranks(1, {aig_r.get_node(aig.po_at(1)), aig_r.get_node(aig.po_at(0))});
+
+    CHECK(count_crossings(aig_r) == 3);
+}
+
+TEST_CASE("Counting crossings rejects unbalanced networks", "[mincross]")
+{
+    const auto tec = blueprints::unbalanced_and_inv_network<technology_network>();
+
+    CHECK_THROWS_AS(count_crossings(mutable_rank_view(tec)), std::invalid_argument);
 }

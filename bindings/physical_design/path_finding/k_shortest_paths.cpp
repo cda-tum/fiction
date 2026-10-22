@@ -23,7 +23,6 @@
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
-#include <fiction/physical_design/routing_utils.hpp>
 
 #include <cstdint>
 #include <optional>
@@ -71,8 +70,8 @@ void register_yen_k_shortest_paths_impl(nb::module_& m)
             const auto obstructions       = supplied_obstructions.value_or(fiction::layouts::obstructions{});
             params.astar_params.crossings = crossings;
 
-            const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<
-                fiction::physical_design::layout_coordinate_path, Lyt>(lyt, {source, target}, k, params, obstructions);
+            const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<Lyt>(
+                lyt, {source, target}, k, params, obstructions);
 
             std::vector<std::vector<fiction::layouts::layout_base::coordinate>> paths{};
             paths.reserve(k_paths.size());
@@ -89,7 +88,8 @@ void register_yen_k_shortest_paths_impl(nb::module_& m)
         nb::arg("obstructions") = nb::none(), nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Find up to k shortest loop-free paths from source to target.
 The keyword options select obstructions and crossing constraints.
-Raises ValueError when source or target lies outside the layout extent.
+If k is zero, returns an empty list without checking endpoint bounds.
+Raises ValueError when k is nonzero and source or target lies outside the layout extent.
 
 Args:
     obstructions: Coordinates and connections to avoid; None supplies no additional obstructions.
