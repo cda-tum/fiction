@@ -780,9 +780,8 @@ TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-
                 layout.foreach_fanin(id, [&](const auto source, const auto index)
                                      { connections.emplace_back(position, index, layout.get_tile(source)); });
             });
-        std::sort(objects.begin(), objects.end(),
-                  [](const auto& a, const auto& b) { return std::get<0>(a) < std::get<0>(b); });
-        std::sort(connections.begin(), connections.end());
+        std::ranges::sort(objects, [](const auto& a, const auto& b) { return std::get<0>(a) < std::get<0>(b); });
+        std::ranges::sort(connections);
         return std::tuple{layout.width(),     layout.height(),        layout.layers(),
                           std::move(objects), std::move(connections), std::move(terminals)};
     };
