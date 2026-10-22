@@ -48,6 +48,7 @@ void check_statistics_with_lower_bound_chromatic_number(const determine_vertex_c
     CHECK(pst.color_frequency > 0);
 }
 
+/** @brief Checks each SAT search tactic against the expected chromatic number. @tparam Graph Graph type. */
 template <typename Graph>
 void check_sat_search_tactics(const Graph& graph, const std::size_t expected_chromatic_number,
                               determine_vertex_coloring_sat_params<Graph> sat_params)
@@ -58,8 +59,10 @@ void check_sat_search_tactics(const Graph& graph, const std::size_t expected_chr
     {
         sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_ASCENDING;
 
-        const auto coloring =
-            determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
+        const auto coloring = determine_vertex_coloring(
+            graph,
+            {.engine = graph_coloring_engine::SAT, .sat_params = sat_params, .verify_coloring_after_computation = true},
+            &pst);
 
         check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
@@ -67,8 +70,10 @@ void check_sat_search_tactics(const Graph& graph, const std::size_t expected_chr
     {
         sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::LINEARLY_DESCENDING;
 
-        const auto coloring =
-            determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
+        const auto coloring = determine_vertex_coloring(
+            graph,
+            {.engine = graph_coloring_engine::SAT, .sat_params = sat_params, .verify_coloring_after_computation = true},
+            &pst);
 
         check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
@@ -76,8 +81,10 @@ void check_sat_search_tactics(const Graph& graph, const std::size_t expected_chr
     {
         sat_params.sat_search_tactic = graph_coloring_sat_search_tactic::BINARY_SEARCH;
 
-        const auto coloring =
-            determine_vertex_coloring(graph, {graph_coloring_engine::SAT, sat_params, {}, true}, &pst);
+        const auto coloring = determine_vertex_coloring(
+            graph,
+            {.engine = graph_coloring_engine::SAT, .sat_params = sat_params, .verify_coloring_after_computation = true},
+            &pst);
 
         check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
@@ -132,6 +139,7 @@ void check_sat_coloring_engine(const Graph& graph, const std::size_t expected_ch
     }
 }
 
+/** @brief Checks each heuristic coloring engine against the expected chromatic number. @tparam Graph Graph type. */
 template <typename Graph>
 void check_brian_crites_engine(const Graph& graph, const std::size_t expected_chromatic_number)
 {
@@ -139,27 +147,34 @@ void check_brian_crites_engine(const Graph& graph, const std::size_t expected_ch
 
     SECTION("MCS")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::MCS, {}, {}, true}, &pst);
+        const auto coloring = determine_vertex_coloring(
+            graph, {.engine = graph_coloring_engine::MCS, .verify_coloring_after_computation = true}, &pst);
 
         check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
     SECTION("DSATUR")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::DSATUR, {}, {}, true}, &pst);
+        const auto coloring = determine_vertex_coloring(
+            graph, {.engine = graph_coloring_engine::DSATUR, .verify_coloring_after_computation = true}, &pst);
 
         check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
     SECTION("LmXRLF")
     {
-        const auto coloring = determine_vertex_coloring(graph, {graph_coloring_engine::LMXRLF, {}, {}, true}, &pst);
+        const auto coloring = determine_vertex_coloring(
+            graph, {.engine = graph_coloring_engine::LMXRLF, .verify_coloring_after_computation = true}, &pst);
 
         // randomized, could be non-optimal
         check_statistics_with_lower_bound_chromatic_number(pst, expected_chromatic_number);
     }
     SECTION("TabuCol")
     {
-        const auto coloring = determine_vertex_coloring(
-            graph, {graph_coloring_engine::TABUCOL, {}, {expected_chromatic_number}, true}, &pst);
+        const auto coloring =
+            determine_vertex_coloring(graph,
+                                      {.engine           = graph_coloring_engine::TABUCOL,
+                                       .heuristic_params = {.k_color_value = expected_chromatic_number},
+                                       .verify_coloring_after_computation = true},
+                                      &pst);
 
         check_statistics_with_exact_chromatic_number(pst, expected_chromatic_number);
     }
