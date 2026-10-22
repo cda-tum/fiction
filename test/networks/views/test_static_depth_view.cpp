@@ -278,6 +278,29 @@ TEST_CASE("Critical paths include complemented register-input edges", "[static-d
     CHECK(depth_ntk.is_on_critical_path(ntk.get_node(input)));
 }
 
+TEST_CASE("Added nodes include existing complemented output edges in depth", "[static-depth-view]")
+{
+    mockturtle::sequential<mockturtle::aig_network> ntk{};
+    const auto                                      a = ntk.create_pi();
+    const auto                                      b = ntk.create_pi();
+    ntk.create_po(a);
+    static_depth_view depth_ntk{ntk, {}, depth_view_params{.count_complements = true}};
+    REQUIRE(depth_ntk.is_on_critical_path(depth_ntk.get_node(a)));
+    const auto gate = depth_ntk.create_and(a, b);
+    SECTION("Primary output")
+    {
+        depth_ntk.create_po(!gate);
+    }
+    SECTION("Register input")
+    {
+        depth_ntk.create_ro();
+        depth_ntk.create_ri(!gate);
+    }
+    depth_ntk.on_add(depth_ntk.get_node(gate));
+    CHECK(depth_ntk.depth() == 2);
+    CHECK(depth_ntk.is_on_critical_path(depth_ntk.get_node(gate)));
+}
+
 TEST_CASE("The critical path follows the levels after an update and survives a copy", "[static-depth-view]")
 {
     static_depth_view<technology_network> tec_d;
