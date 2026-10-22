@@ -2744,7 +2744,8 @@ as specified on each visitor.
 
 Template Args:
     CoordinateLayout: Coordinate geometry used for placement. Defaults
-                      to `cartesian_layout`.)doc";
+                      to `cartesian_layout`. Gate layouts cannot serve
+                      as coordinate geometries.)doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_adjacent_opposite_tiles =
 R"doc(Returns pairs of opposite adjacent tiles.
@@ -14545,6 +14546,9 @@ Raises:
     utils::timeout_error: If a circuit or gate-design timeout expires.
     ValueError: If the simulation engine does not support the
                 requested gate-design timeout.
+    fcn::unsupported_gate_orientation_exception: If a gate orientation
+                                                 has no
+                                                 implementation.
 
 Note:
     A circuit or gate timeout aborts the operation. Only a completed,
@@ -28277,7 +28281,8 @@ Args:
     instances: Positive number of random initial states to generate.
     rand_state: The random state generator function.
     cost: The cost function to minimize.
-    schedule: The temperature schedule.
+    schedule: Temperature schedule that eventually reaches
+              `final_temp`.
     next: The next state function that determines an adjacent state
           given a current one.
 
@@ -28294,7 +28299,8 @@ Returns:
     A pair of the overall best optimized state and its cost value.
 
 Raises:
-    ValueError: If instances is zero.
+    ValueError: If instances is zero or either temperature bound is
+                not finite.
     std::system_error: If a worker thread cannot be started.
 
 Note:
@@ -28331,7 +28337,8 @@ Args:
     final_temp: The final temperature.
     cycles: The number of cycles for each temperature value.
     cost: The cost function to minimize.
-    schedule: The temperature schedule.
+    schedule: Temperature schedule that eventually reaches
+              `final_temp`.
     next: The next state function that determines an adjacent state
           given a current one.
 
@@ -28346,6 +28353,9 @@ Template Args:
 
 Returns:
     A pair of the optimized state and its cost value.
+
+Raises:
+    ValueError: If either temperature bound is not finite.
 
 )doc";
 
