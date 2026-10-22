@@ -25,6 +25,8 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
 #include <fiction/types.hpp>
@@ -130,7 +132,7 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 
-    operational_domain_params op_domain_params{
+    const operational_domain_params op_domain_params{
         .operational_params = {.sim_params = sim_params,
                                .input_bdl_iterator_params =
                                    {.bdl_wire_params = {.threshold_bdl_interdistance = 1.5},

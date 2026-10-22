@@ -21,7 +21,10 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#ifdef NDEBUG
 #include "utils/blueprints/layout_blueprints.hpp"
+#endif
+
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>

@@ -34,6 +34,7 @@
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/types.hpp>
 
+#include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>

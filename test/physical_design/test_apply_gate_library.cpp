@@ -40,6 +40,7 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/types.hpp>
 
+#include <fmt/format.h>
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
