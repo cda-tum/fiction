@@ -37,9 +37,6 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 
-/** @brief Placed Cartesian objects used by extraction tests. */
-using extraction_layout = gate_layout<cartesian_layout>;
-
 TEMPLATE_TEST_CASE("Extraction accepts explicitly placed constant functions", "[extract-layout-network]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
@@ -136,8 +133,8 @@ TEMPLATE_TEST_CASE("Extraction validates only dependencies of primary outputs", 
 
 TEST_CASE("Extraction traverses a million wires without recursive stack growth", "[extract-layout-network]")
 {
-    extraction_layout lyt{};
-    auto              wire = lyt.create_pi("a", {0, 0});
+    cartesian_gate_layout lyt{};
+    auto                  wire = lyt.create_pi("a", {0, 0});
     for (uint32_t index = 1; index <= 1'000'000; ++index)
     {
         wire = lyt.create_buf(wire, {index, 0});

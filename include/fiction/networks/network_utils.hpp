@@ -12,13 +12,16 @@
  * @file
  * @brief Edge type for mockturtle networks plus fanin, fanout, and edge iteration helpers.
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #pragma once
 
+#include "fiction/traits.hpp"
 #include "fiction/utils/stl/hash.hpp"
 
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/node_map.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -27,6 +30,7 @@
 #include <functional>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace mockturtle
@@ -39,7 +43,10 @@ namespace mockturtle
 template <typename Ntk>
 struct edge
 {
-    const node<Ntk> source, target;
+    /** @brief Source node of the directed edge. */
+    const node<Ntk> source;
+    /** @brief Target node of the directed edge. */
+    const node<Ntk> target;
     /**
      * Equality operator.
      *
@@ -60,6 +67,7 @@ namespace std
 template <typename Ntk>
 struct hash<mockturtle::edge<Ntk>>
 {
+    /** @brief Returns a hash of the supplied value. */
     std::size_t operator()(const mockturtle::edge<Ntk>& e) const noexcept
     {
         std::size_t h = 0;
@@ -81,14 +89,12 @@ namespace fiction::networks
  * @param fn Function object to apply to each edge in `ntk`.
  */
 template <typename Ntk, typename Fn>
+    requires mockturtle::has_foreach_node_v<Ntk> && mockturtle::has_foreach_fanin_v<Ntk> &&
+             mockturtle::has_get_node_v<Ntk>
 // fn is captured by two nested lambdas, so it cannot be forwarded
 // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 void foreach_edge(const Ntk& ntk, Fn&& fn)
 {
-    static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node function.");
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function.");
-
     ntk.foreach_node(
         [&ntk, &fn](const mockturtle::node<Ntk>& n)
         {
@@ -111,12 +117,11 @@ void foreach_edge(const Ntk& ntk, Fn&& fn)
  * @param fn Function object to apply to each outgoing edge of `n` in `ntk`.
  */
 template <typename Ntk, typename Fn>
+    requires mockturtle::has_foreach_fanout_v<Ntk>
 // fn is invoked once per outgoing edge, so it cannot be forwarded
 // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
 {
-    static_assert(mockturtle::has_foreach_fanout_v<Ntk>, "Ntk does not implement the foreach_fanout function.");
-
     ntk.foreach_fanout(n,
                        [&fn, &n](const mockturtle::node<Ntk>& fon)
                        {
@@ -135,13 +140,11 @@ void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
  * @param fn Function object to apply to each incoming edge of `n` in `ntk`.
  */
 template <typename Ntk, typename Fn>
+    requires mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_node_v<Ntk>
 // fn is invoked once per incoming edge, so it cannot be forwarded
 // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 void foreach_incoming_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
 {
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function.");
-
     ntk.foreach_fanin(n,
                       [&ntk, &fn, &n](const mockturtle::signal<Ntk>& fi)
                       {
@@ -159,10 +162,9 @@ void foreach_incoming_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
  * @return A vector of all outgoing nodes directly adjacent to `n` in `ntk`.
  */
 template <typename Ntk>
+    requires mockturtle::has_foreach_fanout_v<Ntk>
 std::vector<mockturtle::node<Ntk>> fanouts(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
-    static_assert(mockturtle::has_foreach_fanout_v<Ntk>, "Ntk does not implement the foreach_fanout function.");
-
     std::vector<mockturtle::node<Ntk>> fos{};
 
     ntk.foreach_fanout(n, [&fos](const auto& fon) { fos.push_back(fon); });
@@ -199,12 +201,10 @@ struct fanin_container
  * @return A container of all incoming nodes directly adjacent to `n` in `ntk`.
  */
 template <typename Ntk>
+    requires mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+             mockturtle::has_is_constant_v<Ntk>
 fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function.");
-    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function.");
-
     fanin_container<Ntk> fc{};
 
     ntk.foreach_fanin(n,
@@ -232,12 +232,10 @@ fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noex
  * @return Number of constant fanins to `n` in `ntk`.
  */
 template <typename Ntk>
+    requires mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+             mockturtle::has_is_constant_v<Ntk>
 uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function.");
-    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function.");
-
     uint32_t num_const_fi{0};
 
     ntk.foreach_fanin(n,
@@ -269,12 +267,11 @@ class high_degree_fanin_exception : public std::invalid_argument
  * @return `true` iff any node in `ntk` exceeds `threshold` fanins.
  */
 template <typename Ntk>
+    requires mockturtle::has_foreach_node_v<Ntk> && mockturtle::has_is_constant_v<Ntk> &&
+             mockturtle::has_fanin_size_v<Ntk> && mockturtle::has_foreach_fanin_v<Ntk> &&
+             mockturtle::has_get_node_v<Ntk>
 bool has_high_degree_fanin_nodes(const Ntk& ntk, const uint32_t threshold = 2) noexcept
 {
-    static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node function.");
-    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function.");
-    static_assert(mockturtle::has_fanin_size_v<Ntk>, "Ntk does not implement the fanin_size function.");
-
     bool result = false;
 
     ntk.foreach_node(
@@ -316,12 +313,10 @@ struct fanin_edge_container
  * @return A container of all incoming edges `(fanin, n)` in `ntk`.
  */
 template <typename Ntk>
+    requires mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+             mockturtle::has_is_constant_v<Ntk>
 fanin_edge_container<Ntk> fanin_edges(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function.");
-    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function.");
-
     fanin_edge_container<Ntk> fec{};
 
     ntk.foreach_fanin(n,
@@ -344,13 +339,10 @@ fanin_edge_container<Ntk> fanin_edges(const Ntk& ntk, const mockturtle::node<Ntk
  * @return `true` iff any of `n`'s fanins are primary inputs.
  */
 template <typename Ntk>
+    requires mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+             mockturtle::has_is_constant_v<Ntk> && mockturtle::has_is_pi_v<Ntk>
 bool has_incoming_primary_input(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function.");
-    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function.");
-    static_assert(mockturtle::has_is_pi_v<Ntk>, "Ntk does not implement the is_pi function.");
-
     bool in_pi = false;
 
     ntk.foreach_fanin(n,
@@ -380,15 +372,15 @@ using edge_path = std::vector<mockturtle::edge<Ntk>>;
  *
  * Each node without predecessors is considered a terminal and a path is defined as a sequence of edges.
  *
+ * @param ntk Network containing the node.
  * @param n Node whose paths are desired.
- * @return A vector of all possible edge paths leading from terminals to `v`.
+ * @return A vector of all possible edge paths leading from terminals to `n`.
  */
 template <typename Ntk>
+    requires mockturtle::has_is_constant_v<Ntk> && mockturtle::has_fanin_size_v<Ntk> &&
+             mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_node_v<Ntk>
 std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
-    static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant function.");
-    static_assert(mockturtle::has_fanin_size_v<Ntk>, "Ntk does not implement the fanin_size function.");
-
     if (ntk.fanin_size(n) == 0u)
     {
         // this creates an empty path for each PI to built upon recursively; very important!
@@ -427,13 +419,11 @@ std::vector<edge_path<Ntk>> all_incoming_edge_paths(const Ntk& ntk, const mocktu
  * level is stored.
  */
 template <typename Ntk>
+    requires mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+             mockturtle::has_foreach_po_v<Ntk> && mockturtle::has_node_to_index_v<Ntk> &&
+             mockturtle::has_foreach_fanout_v<Ntk>
 std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
 {
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function.");
-    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po function.");
-    static_assert(mockturtle::has_node_to_index_v<Ntk>, "Ntk does not implement the node_to_index function.");
-
     // vector of all inverse levels by node index
     std::vector<uint32_t> inv_levels(ntk.size(), uint32_t{0});
     // vector to store a discovered flag to not visit nodes twice
@@ -480,6 +470,81 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
     ntk.foreach_po([&ntk, &inv_jdfs](const auto& po) { inv_jdfs(ntk.get_node(po)); });
 
     return inv_levels;
+}
+
+/**
+ * @brief Appends a chain of buffers to a signal.
+ *
+ * @tparam Ntk Network type.
+ * @param ntk Network to extend.
+ * @param sig Signal to buffer.
+ * @param length Number of buffers.
+ * @return The end of the chain, `sig` itself for a length of zero.
+ */
+template <typename Ntk>
+[[nodiscard]] mockturtle::signal<Ntk> buffer_chain(Ntk& ntk, mockturtle::signal<Ntk> sig, const uint32_t length)
+{
+    static_assert(mockturtle::has_create_buf_v<Ntk>, "Ntk does not implement the create_buf method");
+
+    for (uint32_t i = 0; i < length; ++i)
+    {
+        sig = ntk.create_buf(sig);
+    }
+
+    return sig;
+}
+
+/**
+ * @brief Creates an empty network of the same type as `src` with copies of its constants and primary inputs, virtual
+ * primary inputs included, and a map from the nodes of `src` to their copies.
+ *
+ * Primary inputs are created in the order that `foreach_pi_unranked` yields when `Ntk` offers it, so that rank
+ * bookkeeping of the copy matches `src`.
+ *
+ * @tparam Ntk Network type.
+ * @param src Source network.
+ * @return The destination network and the node map from `src` to the destination.
+ */
+template <typename Ntk>
+[[nodiscard]] std::pair<Ntk, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>>
+initialize_copy_network_with_virtual_pis(const Ntk& src)
+{
+    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant method");
+    static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi method");
+
+    mockturtle::node_map<mockturtle::signal<Ntk>, Ntk> old2new{src};
+    Ntk                                                dest{};
+
+    old2new[src.get_constant(false)] = dest.get_constant(false);
+    if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
+    {
+        old2new[src.get_constant(true)] = dest.get_constant(true);
+    }
+
+    const auto copy_pi = [&](const auto& n)
+    {
+        if constexpr (has_is_real_pi_v<Ntk>)
+        {
+            if (!src.is_real_pi(n))
+            {
+                old2new[n] = dest.create_virtual_pi(old2new[src.get_real_pi(n)]);
+                return;
+            }
+        }
+        old2new[n] = dest.create_pi();
+    };
+
+    if constexpr (has_foreach_pi_unranked_v<Ntk>)
+    {
+        src.foreach_pi_unranked(copy_pi);
+    }
+    else
+    {
+        src.foreach_pi(copy_pi);
+    }
+
+    return {std::move(dest), std::move(old2new)};
 }
 
 }  // namespace fiction::networks

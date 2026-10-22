@@ -19,6 +19,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 
 #include <sstream>
@@ -76,9 +77,9 @@ void register_orthogonal(nb::module_& m, const char* signature)
         parameters.layout_arrangement     = layout_arrangement;
         parameters.on_progress            = on_progress;
         const nb::gil_scoped_release release{};
-        return fiction::physical_design::orthogonal<Lyt, py_tec_network>(network, parameters, statistics);
+        return fiction::physical_design::orthogonal<typename Lyt::coordinate_layout>(network, parameters, statistics);
     };
-    if constexpr (std::is_same_v<Lyt, py_cartesian_gate_layout>)
+    if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {
         m.def("orthogonal", design, nb::arg("network"), nb::kw_only(), nb::arg("layout_type") = nb::type<Lyt>(),
               nb::arg("statistics")             = nullptr,
@@ -146,13 +147,13 @@ void register_orthogonal(nb::module_& m)
         .def_ro("num_crossings", &fiction::physical_design::orthogonal_physical_design_stats::num_crossings,
                 DOC(fiction_physical_design_orthogonal_physical_design_stats_num_crossings));
 
-    detail::register_orthogonal<py_cartesian_gate_layout>(
+    detail::register_orthogonal<fiction::layouts::cartesian_gate_layout>(
         m, "def orthogonal(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
            "type[mnt.pyfiction.layouts.cartesian_gate_layout] = mnt.pyfiction.layouts.cartesian_gate_layout, "
            "statistics: orthogonal_stats | None = None, number_of_clock_phases: num_clks = ..., layout_arrangement: "
            "mnt.pyfiction.layouts.arrangement | None = ..., on_progress: Callable[[str, int, int], None] | None = ...) "
            "-> mnt.pyfiction.layouts.cartesian_gate_layout");
-    detail::register_orthogonal<py_hexagonal_gate_layout>(
+    detail::register_orthogonal<fiction::layouts::hexagonal_gate_layout>(
         m,
         "def orthogonal(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
         "type[mnt.pyfiction.layouts.hexagonal_gate_layout], statistics: orthogonal_stats | None = None, "

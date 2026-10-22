@@ -21,11 +21,14 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
-#include <fiction/physical_design/apply_gate_library.hpp>       // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                    // SMT-based physical design of FCN layouts
-#include <fiction/physical_design/surface_analysis.hpp>         // SiDB surface analysis
+#include <fiction/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/surface_analysis.hpp>    // SiDB surface analysis
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>     // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                      // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>         // a pre-defined SiDB gate library
@@ -79,8 +82,6 @@ using namespace fiction::verification;
 int main()
 try
 {
-    using gate_lyt = hex_gate_clk_lyt;
-
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
@@ -140,7 +141,7 @@ try
         read_surface_defects("../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
 
     const auto lattice_tiling =
-        gate_lyt{arrangement::EVEN_ROW, {12, 31}};  // our surface data is 12 x 31 Bestagon tiles
+        hexagonal_gate_layout{arrangement::EVEN_ROW, {12, 31}};  // our surface data is 12 x 31 Bestagon tiles
     const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
@@ -186,7 +187,8 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_layout = exact_with_blacklist<gate_lyt>(mapped_network, black_list, exact_params, &exact_stats);
+        const auto gate_layout = exact_with_blacklist<hexagonal_layout>(convert_network<tec_nt>(mapped_network),
+                                                                        black_list, exact_params, &exact_stats);
 
         if (gate_layout.has_value())
         {

@@ -27,7 +27,6 @@
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <cstdint>
@@ -40,18 +39,16 @@ using namespace fiction::physical_design;
 using namespace fiction::verification;
 using namespace fiction::qca;
 
+static_assert(std::is_pointer_v<decltype(&qca_one_library::set_up_gate<cartesian_layout>)>);
+
 TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 {
     CHECK(std::is_same_v<qca_one_library::layout, qca::layout>);
-    CHECK(!has_get_functional_implementations_v<qca_one_library>);
-    CHECK(!has_get_gate_ports_v<qca_one_library>);
 }
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    auto layout = blueprints::or_not_gate_layout<gate_layout>();
+    auto layout = blueprints::or_not_gate_layout<cartesian_gate_layout>();
 
     // clang-format off
 
@@ -94,9 +91,7 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 
 TEST_CASE("Setting up wires", "[qca-one-library]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    auto layout = blueprints::crossing_layout<gate_layout>();
+    auto layout = blueprints::crossing_layout<cartesian_gate_layout>();
 
     // clang-format off
 
@@ -145,9 +140,7 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
 
 TEST_CASE("Setting up fanouts", "[qca-one-library]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    auto layout = blueprints::fanout_layout<gate_layout>();
+    auto layout = blueprints::fanout_layout<cartesian_gate_layout>();
 
     // clang-format off
 

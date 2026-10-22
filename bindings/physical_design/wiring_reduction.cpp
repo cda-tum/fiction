@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): defines the nanobind coordinate type casters
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/wiring_reduction.hpp>
 
 #include <sstream>
@@ -85,7 +86,7 @@ void register_wiring_reduction(nb::module_& m)
 
     m.def(
         "wiring_reduction",
-        [](py_cartesian_gate_layout& layout, const decltype(wiring_reduction_options{}.timeout) timeout,
+        [](fiction::layouts::cartesian_gate_layout& layout, const decltype(wiring_reduction_options{}.timeout) timeout,
            const decltype(wiring_reduction_options{}.on_progress)& on_progress,
            fiction::physical_design::wiring_reduction_stats*       statistics)
         {

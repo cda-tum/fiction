@@ -78,7 +78,7 @@ class energy_distribution
      * Returns the nth state (energy + degeneracy) in the energy distribution.
      *
      * @param state_index The index of the state to be retrieved.
-     * @return Energy state. If the index is out of range, `std::nullopt` is returned instead.
+     * @return Energy state, or `std::nullopt` (`None` in Python) if the index is out of range.
      */
     [[nodiscard]] std::optional<energy_state> get_nth_state(const uint64_t state_index) const noexcept
     {
@@ -97,8 +97,7 @@ class energy_distribution
      * Returns the degeneracy value (number of states) with the given energy value.
      *
      * @param energy The energy value whose degeneracy is requested.
-     * @return The degeneracy of the given energy. If the energy value is not found, `std::nullopt` is
-     * returned instead.
+     * @return The degeneracy of the given energy, or `std::nullopt` (`None` in Python) if the energy is not found.
      */
     [[nodiscard]] std::optional<uint64_t> degeneracy(const double energy) const noexcept
     {

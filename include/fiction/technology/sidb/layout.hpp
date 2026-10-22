@@ -308,7 +308,7 @@ class layout
      * The index of a site in `sidbs()`.
      *
      * @param s Site.
-     * @return Index of `s`, or `std::nullopt` if `s` holds no SiDB.
+     * @return Index of `s`, or `std::nullopt` (`None` in Python) if `s` holds no SiDB.
      */
     [[nodiscard]] std::optional<std::size_t> index_of(const lattice_site& s) const noexcept
     {

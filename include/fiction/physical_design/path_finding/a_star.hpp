@@ -54,7 +54,13 @@ struct a_star_params
 namespace detail
 {
 
-template <typename Path, typename Lyt, typename Dist, typename Cost>
+/**
+ * @brief Implements A* search.
+ * @tparam Lyt Layout type.
+ * @tparam Dist Distance value type.
+ * @tparam Cost Step cost value type.
+ */
+template <typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {
   public:
@@ -84,7 +90,7 @@ class a_star_impl
      *
      * @return The shortest path in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] Path run()
+    [[nodiscard]] layout_coordinate_path run()
     {
         if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
         {
@@ -257,6 +263,7 @@ class a_star_impl
             {
                 // update its f-value
                 it->f = f;
+                std::ranges::make_heap(open_list, std::greater<>{});
             }
             else
             {
@@ -328,9 +335,10 @@ class a_star_impl
      *
      * @return The shortest path connecting source and target.
      */
-    [[nodiscard]] Path reconstruct_path() const
+    [[nodiscard]] layout_coordinate_path reconstruct_path() const
     {
-        Path path{};
+        /** @brief Coordinate path reconstructed from the predecessor map. */
+        layout_coordinate_path path{};
 
         // iterate backwards over the found connections and add them to the path
         for (auto current = objective.target; current != objective.source; current = came_from.at(current))
@@ -370,10 +378,8 @@ class a_star_impl
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_layout<cartesian_layout>;
- * using path = layout_coordinate_path;
- * clk_lyt layout = ...;
- * auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
+ * fiction::layouts::cartesian_gate_layout layout = ...;
+ * auto shortest_path = a_star(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
  *
  * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils
@@ -381,7 +387,6 @@ class a_star_impl
  *
  * This implementation is based on the pseudocode from https://en.wikipedia.org/wiki/A_star_search_algorithm.
  *
- * @tparam Path Type of the returned path.
  * @tparam Lyt Type of the layout to perform path finding on.
  * @tparam Dist Distance value type to be used in the heuristic estimation function.
  * @tparam Cost Cost value type to be used when determining moving cost between coordinates.
@@ -392,15 +397,17 @@ class a_star_impl
  * @param params Parameters.
  * @param obstructions Additional coordinate and connection constraints; the search does not modify them.
  * @return The shortest loop-less path in `layout` from `objective.source` to `objective.target`.
+ * @throws std::invalid_argument If either endpoint lies outside the layout extent.
  */
-template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
+template <typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
     requires std::derived_from<Lyt, fiction::layouts::layout_base>
-[[nodiscard]] Path a_star(const Lyt& layout, const routing_objective& objective,
-                          const distance_functor<Dist>& dist_fn = manhattan_distance_functor(),
-                          const cost_functor<Cost>&     cost_fn = unit_cost_functor<uint8_t>(),
-                          const a_star_params& params = {}, const layouts::obstructions& obstructions = {})
+[[nodiscard]] layout_coordinate_path a_star(const Lyt& layout, const routing_objective& objective,
+                                            const distance_functor<Dist>& dist_fn      = manhattan_distance_functor(),
+                                            const cost_functor<Cost>&     cost_fn      = unit_cost_functor<uint8_t>(),
+                                            const a_star_params&          params       = {},
+                                            const layouts::obstructions&  obstructions = {})
 {
-    return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
+    return detail::a_star_impl<Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
 }
 /**
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
@@ -408,7 +415,7 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * of A*.
  *
  * If no path between `source` and `target` exists in `layout`, the returned distance is
- * `std::numeric_limits<uint64_t>::max()`.
+ * 18,446,744,073,709,551,615 (2^64 - 1) (`std::numeric_limits<uint64_t>::max()` in C++).
  *
  * @tparam Lyt Coordinate layout type.
  * @param layout The layout in which the distance between `source` and `target` is to be determined.
@@ -416,6 +423,7 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * @param target Target coordinate.
  * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return Minimum path length between `source` and `target` in `layout`.
+ * @throws std::invalid_argument If source or target lies outside the layout extent.
  */
 template <typename Lyt>
     requires std::derived_from<Lyt, fiction::layouts::layout_base>
@@ -423,9 +431,8 @@ template <typename Lyt>
                                        const fiction::layouts::layout_base::coordinate& target,
                                        const layouts::obstructions&                     obstructions = {})
 {
-    const auto path_length = a_star<layout_coordinate_path>(layout, {source, target}, manhattan_distance_functor(),
-                                                            unit_cost_functor<>(), {}, obstructions)
-                                 .size();
+    const auto path_length =
+        a_star(layout, {source, target}, manhattan_distance_functor(), unit_cost_functor<>(), {}, obstructions).size();
 
     if (path_length == 0ul)
     {
@@ -436,6 +443,7 @@ template <typename Lyt>
 }
 /**
  * A pre-defined distance functor that uses the A* distance.
+ * Calling this functor throws std::invalid_argument if source or target lies outside the layout extent.
  *
  * @tparam Lyt Coordinate layout type.
  */
@@ -443,7 +451,10 @@ template <typename Lyt>
 class a_star_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    /** @brief Computes distances in the borrowed layout. @param lyt Layout that outlives this functor. */
+    /**
+     * @brief Borrows a layout for distance evaluations.
+     * @param lyt Layout that outlives this functor.
+     */
     explicit a_star_distance_functor(const Lyt& lyt) :
             distance_functor<uint64_t>(
                 [&lyt](const layouts::layout_base::coordinate& source, const layouts::layout_base::coordinate& target)

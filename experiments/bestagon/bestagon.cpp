@@ -21,11 +21,14 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
-#include <fiction/networks/technology_network.hpp>           // technology-mapped network type
-#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
+#include <fiction/networks/technology_network.hpp>         // technology-mapped network type
+#include <fiction/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
@@ -72,8 +75,6 @@ using namespace fiction::verification;
 int main()
 try
 {
-    using gate_lyt = hex_gate_clk_lyt;
-
     const std::string layouts_folder = fmt::format("{}/bestagon/layouts", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
@@ -169,7 +170,8 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_layout = exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
+        const auto gate_layout =
+            exact<hexagonal_layout>(convert_network<tec_nt>(mapped_network), exact_params, &exact_stats);
 
         if (gate_layout.has_value())
         {

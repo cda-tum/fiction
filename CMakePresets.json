@@ -67,7 +67,7 @@
     {
       "name": "tests-full",
       "displayName": "Tests (full)",
-      "description": "Test-only build with all optional components enabled (Z3 must be installed manually, see the docs)",
+      "description": "Tests and experiments with all optional components enabled (Z3 must be installed manually, see the docs)",
       "inherits": "tests-slim",
       "cacheVariables": {
         "FICTION_EXPERIMENTS": "ON",

@@ -15,9 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
-
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 
 #include <string_view>
@@ -55,12 +53,30 @@ void register_read_fgl_layout(nb::module_& m, const char* signature)
             throw nb::next_overload();
         }
         const nb::gil_scoped_release release{};
-        return fiction::layouts::io::read_fgl_layout<Lyt>(filename, layout_name);
+        return fiction::layouts::io::read_fgl_layout<typename Lyt::coordinate_layout>(filename, layout_name);
     };
-    if constexpr (std::is_same_v<Lyt, py_cartesian_gate_layout>)
+    if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {
         m.def("read_fgl_layout", read, nb::arg("filename"), nb::arg("layout_name") = "", nb::kw_only(),
-              nb::arg("layout_type") = nb::type<Lyt>(), nb::sig(signature), DOC(fiction_layouts_io_read_fgl_layout_3));
+              nb::arg("layout_type") = nb::type<Lyt>(), nb::sig(signature),
+              R"doc(Reads a gate-level layout from an FGL file.
+
+Supports legacy maximum-index extents and version-2 extent counts, declared interface order, and manual obstructions.
+Version 2 requires a complete, acyclic, physically valid layout.
+
+Args:
+    filename: Input file path.
+    layout_name: Initial layout name, overridden by a name stored in the file. Defaults to an empty string.
+    layout_type: Registered gate layout class. Defaults to cartesian_gate_layout.
+
+Returns:
+    A new layout of the selected layout_type.
+
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or incompatible with the selected layout type.
+    RuntimeError: If the file cannot be opened.
+    TypeError: If layout_type is not a registered gate layout class.
+)doc");
     }
     else
     {
@@ -80,15 +96,15 @@ void register_read_fgl_layout(nb::module_& m)
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    detail::register_read_fgl_layout<py_cartesian_gate_layout>(
+    detail::register_read_fgl_layout<fiction::layouts::cartesian_gate_layout>(
         m, "def read_fgl_layout(filename: str, layout_name: str = \"\", *, layout_type: "
            "type[mnt.pyfiction.layouts.cartesian_gate_layout] = mnt.pyfiction.layouts.cartesian_gate_layout) -> "
            "mnt.pyfiction.layouts.cartesian_gate_layout");
-    detail::register_read_fgl_layout<py_shifted_cartesian_gate_layout>(
+    detail::register_read_fgl_layout<fiction::layouts::shifted_cartesian_gate_layout>(
         m, "def read_fgl_layout(filename: str, layout_name: str = \"\", *, layout_type: "
            "type[mnt.pyfiction.layouts.shifted_cartesian_gate_layout]) -> "
            "mnt.pyfiction.layouts.shifted_cartesian_gate_layout");
-    detail::register_read_fgl_layout<py_hexagonal_gate_layout>(
+    detail::register_read_fgl_layout<fiction::layouts::hexagonal_gate_layout>(
         m, "def read_fgl_layout(filename: str, layout_name: str = \"\", *, layout_type: "
            "type[mnt.pyfiction.layouts.hexagonal_gate_layout]) -> mnt.pyfiction.layouts.hexagonal_gate_layout");
     m.def(

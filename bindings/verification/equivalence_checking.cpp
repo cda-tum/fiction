@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
 
 #include <nanobind/nanobind.h>
@@ -62,7 +63,10 @@ void register_equivalence_checking_impl(nb::module_& m)
             return stats.eq;
         },
         nb::arg("specification"), nb::arg("implementation"), nb::arg("statistics") = nullptr,
-        DOC(fiction_verification_equivalence_checking), nb::call_guard<nb::gil_scoped_release>());
+        parameter_doc(DOC(fiction_verification_equivalence_checking),
+                      {{"spec", "specification"}, {"impl", "implementation"}, {"pst", "statistics"}})
+            .c_str(),
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 /**
@@ -74,9 +78,9 @@ template <typename Spec>
 void register_equivalence_checking_for(nb::module_& m)
 {
     register_equivalence_checking_impl<Spec, py_tec_network>(m);
-    register_equivalence_checking_impl<Spec, py_cartesian_gate_layout>(m);
-    register_equivalence_checking_impl<Spec, py_shifted_cartesian_gate_layout>(m);
-    register_equivalence_checking_impl<Spec, py_hexagonal_gate_layout>(m);
+    register_equivalence_checking_impl<Spec, fiction::layouts::cartesian_gate_layout>(m);
+    register_equivalence_checking_impl<Spec, fiction::layouts::shifted_cartesian_gate_layout>(m);
+    register_equivalence_checking_impl<Spec, fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace detail
@@ -121,9 +125,9 @@ void register_equivalence_checking(nb::module_& m)
         ;
 
     detail::register_equivalence_checking_for<py_tec_network>(m);
-    detail::register_equivalence_checking_for<py_cartesian_gate_layout>(m);
-    detail::register_equivalence_checking_for<py_shifted_cartesian_gate_layout>(m);
-    detail::register_equivalence_checking_for<py_hexagonal_gate_layout>(m);
+    detail::register_equivalence_checking_for<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_equivalence_checking_for<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_equivalence_checking_for<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

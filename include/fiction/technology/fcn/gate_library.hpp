@@ -42,8 +42,10 @@ template <typename CoordinateType>
 class unsupported_gate_type_exception : public std::exception
 {
   public:
+    /** @brief Records the coordinate of an unsupported gate. */
     explicit unsupported_gate_type_exception(const CoordinateType& c) noexcept : std::exception(), coord{c} {}
 
+    /** @brief Returns the coordinate of the unsupported gate. */
     [[nodiscard]] CoordinateType where() const noexcept
     {
         return coord;
@@ -66,6 +68,7 @@ template <typename CoordinateType, typename PortType>
 class unsupported_gate_orientation_exception : public std::exception
 {
   public:
+    /** @brief Records a gate coordinate and unsupported port orientation. */
     unsupported_gate_orientation_exception(const CoordinateType& c, const port_list<PortType>& p) noexcept :
             std::exception(),
             coord{c},
@@ -104,17 +107,17 @@ class unsupported_gate_orientation_exception : public std::exception
 /**
  * Base class for various FCN libraries used to map gate-level layouts to cell-level ones. Any new gate library can
  * extend `gate_library` if it benefits from its features but does not have to. The only requirement is that it must
- * be a static class that provides a
+ * provide a public static set_up_gate function for each supported gate-layout geometry, for example:
  *
    \verbatim embed:rst
    .. code-block:: c++
 
-      template <typename GateLyt>
-      static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+      static gate set_up_gate(const fiction::layouts::cartesian_gate_layout& lyt,
+                              const fiction::layouts::layout_base::coordinate& t)
 
    \endverbatim
  *
- * public member function. Additionally, a
+ * Additionally, a
  *
    \verbatim embed:rst
    .. code-block:: c++

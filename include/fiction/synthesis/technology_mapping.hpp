@@ -23,6 +23,7 @@
 #include "fiction/types.hpp"
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/emap.hpp>
 #include <mockturtle/io/genlib_reader.hpp>
@@ -46,12 +47,14 @@ namespace fiction::synthesis
 class missing_required_gates_exception final : public std::logic_error
 {
   public:
+    /** @brief Reports the network type and gates missing from the technology library. */
     explicit missing_required_gates_exception(const std::string& network_type, const std::string& missing_gates) :
             std::logic_error(fmt::format("Technology library is missing required gates for {} networks: {}",
                                          network_type, missing_gates))
     {}
 };
 
+/** @brief Parameters for technology mapping. */
 struct technology_mapping_params
 {
     /**
@@ -298,10 +301,12 @@ struct technology_mapping_stats
 namespace detail
 {
 
+/** @brief Maps a network into a technology network. */
 template <typename Ntk>
 class technology_mapping_impl
 {
   public:
+    /** @brief Stores the source network, mapping parameters, and statistics. */
     // NOLINTNEXTLINE(modernize-pass-by-value)
     technology_mapping_impl(const Ntk& src, const technology_mapping_params& ps, technology_mapping_stats& st) :
             ntk{src},
@@ -309,6 +314,7 @@ class technology_mapping_impl
             stats{st}
     {}
 
+    /** @brief Returns the source network mapped to the supplied technology library. */
     [[nodiscard]] tec_nt run() const
     {
         // Validate that the library contains required gates for the base network type
@@ -634,11 +640,10 @@ class technology_mapping_impl
  *         network type (e.g., AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ).
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk>
 [[nodiscard]] tec_nt technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
                                         technology_mapping_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-
     technology_mapping_stats        st{};
     detail::technology_mapping_impl p{ntk, params, st};
 
