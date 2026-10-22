@@ -149,8 +149,8 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
 
                 est.emplace_back(energy, state_type::ACCEPTED);
 
-                logic::is_operational_params params{};
-                params.op_condition = logic::is_operational_params::operational_condition::REJECT_KINKS;
+                const logic::is_operational_params params{
+                    .op_condition = logic::is_operational_params::operational_condition::REJECT_KINKS};
 
                 const auto op_status =
                     logic::verify_logic_match(lyt, cd, params, spec, input_index, input_bdl_wires, output_bdl_wires);

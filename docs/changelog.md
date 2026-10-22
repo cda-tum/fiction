@@ -233,6 +233,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
+- Code quality:
+
+  - Parameter configurations now use C++20 designated initializers and `const` where possible.
+
 - Continuous integration:
   - Read the Docs now builds on Ubuntu 26.04.
   - Replaced Ubuntu 22.04 and GCC 11 CI coverage with Ubuntu 26.04, GCC 15, and Clang 22.
@@ -323,6 +327,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Parameter configurations now use designated initializers with unchanged inputs and computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
   - Physical-design experiments convert mapped networks before placement with unchanged computations.

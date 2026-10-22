@@ -1257,8 +1257,7 @@ class graph_oriented_layout_design_impl
             using dist = physical_design::path_finding::twoddwave_distance_functor;
             using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
 
-            physical_design::path_finding::a_star_params a_star_crossing_params{};
-            a_star_crossing_params.crossings = !ps.planar;
+            const physical_design::path_finding::a_star_params a_star_crossing_params{.crossings = !ps.planar};
 
             auto path = physical_design::path_finding::a_star(layout, {.source = src, .target = dest}, dist(), cost(),
                                                               a_star_crossing_params);
@@ -2480,9 +2479,10 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        synthesis::fanout_substitution_params params{};
-        params.strategy = synthesis::fanout_substitution_params::substitution_strategy::BREADTH;
-        const mockturtle::fanout_view network_substituted_breadth{synthesis::fanout_substitution<tec_nt>(ntk, params)};
+        const synthesis::fanout_substitution_params breadth_params{
+            .strategy = synthesis::fanout_substitution_params::substitution_strategy::BREADTH};
+        const mockturtle::fanout_view network_substituted_breadth{
+            synthesis::fanout_substitution<tec_nt>(ntk, breadth_params)};
 
         const topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth, seed};
 
@@ -2501,9 +2501,10 @@ class graph_oriented_layout_design_impl
         // further network and nodes initialization for high-, highest-, and maximum-effort
         if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY)
         {
-            params.strategy = synthesis::fanout_substitution_params::substitution_strategy::DEPTH;
+            const synthesis::fanout_substitution_params depth_params{
+                .strategy = synthesis::fanout_substitution_params::substitution_strategy::DEPTH};
             const mockturtle::fanout_view network_substituted_depth{
-                synthesis::fanout_substitution<tec_nt>(ntk, params)};
+                synthesis::fanout_substitution<tec_nt>(ntk, depth_params)};
 
             const topo_view_ci_to_co network_breadth_ci_to_co{network_substituted_breadth, seed};
             const topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth, seed};
@@ -2546,10 +2547,11 @@ class graph_oriented_layout_design_impl
 
                 if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
                 {
-                    params.strategy = synthesis::fanout_substitution_params::substitution_strategy::RANDOM;
-                    params.seed     = seed;
+                    const synthesis::fanout_substitution_params random_params{
+                        .strategy = synthesis::fanout_substitution_params::substitution_strategy::RANDOM,
+                        .seed     = seed};
                     const mockturtle::fanout_view network_substituted_random{
-                        synthesis::fanout_substitution<tec_nt>(ntk, params)};
+                        synthesis::fanout_substitution<tec_nt>(ntk, random_params)};
 
                     const topo_view_co_to_ci_random network_co_to_ci_random{network_substituted_random, seed};
                     const topo_view_ci_to_co_random network_ci_to_co_random{network_substituted_random, seed};

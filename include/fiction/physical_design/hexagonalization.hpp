@@ -625,7 +625,7 @@ class hexagonalization_impl
                 layouts::obstructions search_obstructions{};
 
                 const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
-                const physical_design::path_finding::a_star_params params_astar{crossings};
+                const physical_design::path_finding::a_star_params params_astar{.crossings = crossings};
                 using dist = physical_design::path_finding::manhattan_distance_functor;
                 using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
 
@@ -726,7 +726,7 @@ class hexagonalization_impl
 
                 const auto crossings =
                     ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
-                const physical_design::path_finding::a_star_params params_astar{crossings};
+                const physical_design::path_finding::a_star_params params_astar{.crossings = crossings};
                 using dist = physical_design::path_finding::manhattan_distance_functor;
                 using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
 
