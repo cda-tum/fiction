@@ -760,6 +760,17 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-level-layout]
     CHECK_FALSE(lyt.source({gate, 3}).has_value());
     CHECK(lyt.source({gate, 4}) == pis[4]);
     CHECK_THROWS_AS(lyt.source({gate, 5}), std::out_of_range);
+    /** @brief Sources and their declared indices across a disconnected input port. */
+    std::vector<layout_object_id> fanins{};
+    std::vector<uint32_t>         input_indices{};
+    lyt.foreach_fanin(gate,
+                      [&](const auto source, const auto index)
+                      {
+                          fanins.push_back(source);
+                          input_indices.push_back(index);
+                      });
+    CHECK_THAT(fanins, RangeEquals(std::array{pis[0], pis[1], pis[2], pis[4]}));
+    CHECK_THAT(input_indices, RangeEquals(std::array{0u, 1u, 2u, 4u}));
 
     lyt.connect(pis[0], {gate, 3});
     CHECK(lyt.fanout_size(pis[0]) == 2);

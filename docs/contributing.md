@@ -226,7 +226,7 @@ demonstrate these choices using real contracts:
 | Typed fixture and independent sections | Object identity; copies isolating geometry, terminals, and connectivity |
 | Named table rows and diagnostics | Elementary truth tables; clocked neighbor degrees |
 | Complete unordered collections | Iteration over clocking zones; five-input objects and their sinks |
-| Ordered collections after sorting | Object iteration through sparse storage and ownership changes |
+| Ordered collections | Five-input source ports; sorted observations of sparse object iteration |
 | Compile-time assertions | Canonical layout aliases; borrowed clocking references; move exception specifications |
 | Fatal prerequisites and exception checks | Geometry clone and assignment failures |
 | Bounded fault sweeps and platform skips | Failed creation and name assignment |
