@@ -799,6 +799,7 @@ TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-
         params.seed                                = 7;
         params.timeout                             = 60000;
         params.return_first                        = true;
+        params.enable_multithreading               = false;
         params.randomize_tiles_to_skip_between_pis = randomize_spacing;
         params.tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0;
         /** @brief Reference result for this input and seed. */
