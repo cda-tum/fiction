@@ -31,7 +31,7 @@
 #include <fiction/utils/graph/mincross.hpp>
 #include <fiction/verification/virtual_miter.hpp>
 
-#include <fmt/format.h>
+#include <fmt/base.h>
 #include <kitty/partial_truth_table.hpp>
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -49,6 +49,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::networks;

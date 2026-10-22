@@ -15,8 +15,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "fiction_experiments.hpp"
-
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -36,6 +34,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::sidb::io;

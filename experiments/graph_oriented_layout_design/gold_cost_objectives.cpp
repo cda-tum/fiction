@@ -25,7 +25,7 @@
 #include <fiction/types.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
 
-#include <fmt/format.h>
+#include <fmt/base.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
@@ -36,6 +36,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;

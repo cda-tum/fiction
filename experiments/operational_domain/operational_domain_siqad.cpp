@@ -15,8 +15,6 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include "fiction_experiments.hpp"  // experiment class
-
 #include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
@@ -36,6 +34,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::sidb::io;

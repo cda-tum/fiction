@@ -28,7 +28,7 @@
 #include <fiction/utils/graph/graph_coloring.hpp>
 #include <fiction/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
 
-#include <fmt/format.h>  // output formatting
+#include <fmt/base.h>
 #include <lorina/common.hpp>
 #include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
 #include <mockturtle/utils/stopwatch.hpp>
@@ -40,6 +40,8 @@
 #include <exception>
 #include <stdexcept>
 #include <string>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;

@@ -37,6 +37,7 @@
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
+#include <fmt/base.h>
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/common.hpp>                                   // parser return codes
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
@@ -60,6 +61,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::fcn;

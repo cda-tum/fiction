@@ -17,8 +17,6 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#include "fiction_experiments.hpp"
-
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
@@ -38,6 +36,7 @@
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
@@ -50,6 +49,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::sidb;

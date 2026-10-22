@@ -26,7 +26,7 @@
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
-#include <fmt/format.h>  // output formatting
+#include <fmt/base.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
@@ -35,6 +35,8 @@
 #include <exception>
 #include <sstream>
 #include <string>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;
