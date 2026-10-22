@@ -78,11 +78,7 @@ namespace fiction::sidb::model
     const auto log_coefficient =
         std::log(model::K_E) + std::log(model::ELEMENTARY_CHARGE) + std::log(1e9) - std::log(params.epsilon_r);
     const auto log_potential = std::log(potential);
-    /**
-     * @brief Tests whether the screened potential exceeds the requested potential.
-     * @param distance Distance in nm.
-     * @return Whether the distance lies below the inverse.
-     */
+    // Tests whether the distance lies below the inverse.
     const auto below_inverse = [&](const double distance) noexcept
     {
         const auto screening          = std::exp(-distance / params.lambda_tf);

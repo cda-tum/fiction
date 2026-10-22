@@ -20,6 +20,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
@@ -30,7 +31,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <lorina/common.hpp>
@@ -73,8 +73,6 @@ using namespace fiction::synthesis;
 int main()
 try
 {
-    using gate_lyt = hex_gate_clk_lyt;
-
     design_gates_params design_gate_params{};
     design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
@@ -118,7 +116,7 @@ try
             }
         });
 
-    const auto lattice_tiling = gate_lyt{arrangement::EVEN_ROW, {12, 31}};
+    const auto lattice_tiling = hexagonal_gate_layout{arrangement::EVEN_ROW, {12, 31}};
 
     experiments::experiment<std::string, double, uint64_t, bool, uint64_t> sidb_circuits_with_defects{
         "sidb_circuits_with_defects", "benchmark", "runtime", "number of aspect ratios", "equivalent", "#SiDBs"};
@@ -174,7 +172,7 @@ try
 
         params.sidb_on_the_fly_gate_library_parameters.design_gate_params = design_gate_params;
 
-        on_the_fly_circuit_design_on_defective_surface_stats<gate_lyt> st{};
+        on_the_fly_circuit_design_on_defective_surface_stats st{};
 
         try
         {

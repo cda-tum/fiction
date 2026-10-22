@@ -16,8 +16,9 @@
 
 #include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate tuple input signatures.
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
 #include <algorithm>
@@ -62,7 +63,7 @@ void register_routing_utils(nb::module_& m)
             fiction::physical_design::route_path(lyt, converted_path, destination);
         },
         nb::arg("layout"), nb::arg("path"), nb::arg("destination"), nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_physical_design_route_path));
+        parameter_doc(DOC(fiction_physical_design_route_path), {{"lyt", "layout"}}).c_str());
 
     m.def(
         "extract_routing_objectives",
@@ -82,7 +83,19 @@ void register_routing_utils(nb::module_& m)
             return converted_objectives;
         },
         nb::arg("layout"), nb::call_guard<nb::gil_scoped_release>(),
-        DOC(fiction_physical_design_extract_routing_objectives));
+        R"doc(Return connections between retained gates, fanouts, and terminals.
+Intermediate single-sink wires are followed through declared topology. Missing
+inputs produce no objective; disconnected input slots keep their indices.
+
+Args:
+    layout: Gate-level layout to inspect.
+
+Returns:
+    A list of (source, target, input_index) tuples with endpoint coordinates and the destination input index.
+
+Raises:
+    ValueError: An intermediate wire chain contains a cycle.
+)doc");
 
     m.def(
         "clear_routing", [](Lyt& lyt) { fiction::physical_design::clear_routing(lyt); }, nb::arg("lyt"),
@@ -96,9 +109,9 @@ void register_routing_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_routing_utils<py_cartesian_gate_layout>(m);
-    detail::register_routing_utils<py_shifted_cartesian_gate_layout>(m);
-    detail::register_routing_utils<py_hexagonal_gate_layout>(m);
+    detail::register_routing_utils<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_routing_utils<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_routing_utils<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

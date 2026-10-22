@@ -267,9 +267,9 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
  * @param filename The filename where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
- * @throws std::ofstream::failure if the file could not be opened.
  * @throws std::invalid_argument if the number of dimensions in the operational domain is 0 or greater than 3. Three is
  * the number of enumerators of `sweep_parameter`, so a fourth dimension could only repeat one of them.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <typename OpDomain>
 void write_operational_domain(const OpDomain& opdom, const std::string_view& filename,

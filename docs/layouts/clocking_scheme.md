@@ -13,6 +13,13 @@ $(x, y)$ of a gate-level or tile-clocked cell-level layout by repeating a rectan
 as pre-defined schemes from the literature. Schemes can be copied, assigned, and compared, and individual clock numbers
 can be overridden.
 
+## Scheme Types
+
+```{doxygenclass} fiction::layouts::clocking::unsupported_scheme_exception
+:members:
+:undoc-members:
+```
+
 ```{doxygenclass} fiction::layouts::clocking::scheme
 :members:
 ```
@@ -22,7 +29,9 @@ can be overridden.
 
 The {doc}`hexagonal_layout` page documents the `arrangement` type.
 
-## Pre-defined schemes
+(pre-defined-schemes)=
+
+## Pre-Defined Schemes
 
 ### Open
 
@@ -144,7 +153,7 @@ The {doc}`hexagonal_layout` page documents the `arrangement` type.
 
 ```
 
-## Utility functions
+## Utility Functions
 
 ```{doxygenfunction} fiction::layouts::clocking::is_linear
 
@@ -152,4 +161,42 @@ The {doc}`hexagonal_layout` page documents the `arrangement` type.
 
 ```{doxygenfunction} fiction::layouts::clocking::get_scheme
 
+```
+
+## Scheme Names
+
+```{doxygenvariable} fiction::layouts::clocking::OPEN_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::COLUMNAR_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::ROW_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::TWODDWAVE_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::TWODDWAVE_HEX_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::USE_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::RES_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::ESR_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::CFE_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::RIPPLE_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::SRS_NAME
+```
+
+```{doxygenvariable} fiction::layouts::clocking::BANCS_NAME
 ```

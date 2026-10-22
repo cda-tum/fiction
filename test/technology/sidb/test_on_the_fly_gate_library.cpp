@@ -24,12 +24,12 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
 #include <kitty/constructors.hpp>
@@ -47,6 +47,8 @@ using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::synthesis;
 
+static_assert(std::is_pointer_v<decltype(&on_the_fly_gate_library::set_up_gate)>);
+
 TEST_CASE("Parameterized gate library traits", "[parameterized-gate-library]")
 {
     CHECK(std::is_same_v<on_the_fly_gate_library::layout, sidb::layout>);
@@ -56,9 +58,9 @@ TEST_CASE("On-the-fly SiDB gate mapping rejects column arrangements", "[paramete
 {
     const auto a = GENERATE(arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    hex_gate_clk_lyt gate_layout{a, {1, 3}, clocking::twoddwave()};
-    const auto       input = gate_layout.create_pi("x", {0, 0});
-    const auto       wire  = gate_layout.create_buf(input, {0, 1});
+    hexagonal_gate_layout gate_layout{a, {1, 3}, clocking::twoddwave()};
+    const auto            input = gate_layout.create_pi("x", {0, 0});
+    const auto            wire  = gate_layout.create_buf(input, {0, 1});
     gate_layout.create_po(wire, "y", {0, 2});
 
     CHECK_THROWS_AS(on_the_fly_gate_library::set_up_gate(gate_layout, {0, 1}, on_the_fly_gate_library_params{}),
@@ -70,11 +72,11 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
     for (const bool crossing : std::array{false, true})
     {
         CAPTURE(crossing);
-        hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
-        const auto       input1 = gate_layout.create_pi("input1", {0, 0});
-        const auto       input2 = gate_layout.create_pi("input2", {1, 0});
-        const auto       wire1  = gate_layout.create_buf(input1, {1, 1, 0});
-        const auto       wire2  = gate_layout.create_buf(input2, {1, 1, 1});
+        hexagonal_gate_layout gate_layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+        const auto            input1 = gate_layout.create_pi("input1", {0, 0});
+        const auto            input2 = gate_layout.create_pi("input2", {1, 0});
+        const auto            wire1  = gate_layout.create_buf(input1, {1, 1, 0});
+        const auto            wire2  = gate_layout.create_buf(input2, {1, 1, 1});
         gate_layout.create_po(wire1, "output1", {crossing ? 1u : 0u, 2, 0});
         gate_layout.create_po(wire2, "output2", {crossing ? 0u : 1u, 2, 0});
 
@@ -109,10 +111,10 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
     {
         for (const bool with_defects : std::array{false, true})
         {
-            hex_gate_clk_lyt gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
-            const auto       input1 = gate_layout.create_pi("input1", {0, 0});
-            const auto       input2 = gate_layout.create_pi("input2", {1, 0});
-            const auto       gate   = gate_layout.create_gate({input1, input2}, function, {1, 1});
+            hexagonal_gate_layout gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
+            const auto            input1 = gate_layout.create_pi("input1", {0, 0});
+            const auto            input2 = gate_layout.create_pi("input2", {1, 0});
+            const auto            gate   = gate_layout.create_gate({input1, input2}, function, {1, 1});
             gate_layout.create_po(gate, "output", {0, 2});
 
             on_the_fly_gate_library_params params{};

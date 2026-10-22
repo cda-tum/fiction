@@ -2,17 +2,13 @@
 
 # molQCA
 
+The molecular QCA module represents molecular cell layouts and provides the
+SIM(7) gate library. Layout I/O exports these circuits for visualization.
+
 ```{toctree}
 :maxdepth: 1
 
 io/io
 layout
-```
-
-## SIM(7) Library
-
-**Header:** `fiction/technology/mol_qca/sim7_mol_library.hpp`
-
-```{doxygenclass} fiction::mol_qca::sim7_mol_library
-:members:
+sim7_mol_library
 ```

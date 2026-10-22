@@ -41,24 +41,19 @@ def area(
     vspace: float = 25.0,
 ) -> float:
     """
-    Computes real-world area requirements in nm² of a given cell-level
-    layout. For this purpose, each cell position in the layout is assigned
-    a vertical and horizontal size. Additionally, a spacing between cell
-    positions in horizontal and vertical direction is taken into account.
+    Return the area of the layout's Cartesian extent in square nanometers.
+    Every cell position contributes its cell dimensions, including empty positions.
+    Neighboring positions contribute their horizontal and vertical spacing.
 
     Args:
-        lyt: The layout whose area is desired.
-        ps: Area parameters.
-        pst: Area statistics.
-
-    Template Args:
-        Lyt: Layout type with a Cartesian extent, e.g., `qca::layout`,
-             `mol_qca::layout`, or `inml::layout`.
-        Dims: Layout type whose cell dimensions `ps` holds; `Lyt` by
-              default.
+        layout: QCA, molQCA, or iNML layout to measure.
+        width: Cell width in nm; defaults to the layout type's CELL_WIDTH.
+        height: Cell height in nm; defaults to the layout type's CELL_HEIGHT.
+        hspace: Horizontal spacing in nm; defaults to the layout type's CELL_HSPACE.
+        vspace: Vertical spacing in nm; defaults to the layout type's CELL_VSPACE.
 
     Returns:
-        Area requirements in nm².
+        The area as a float in square nanometers.
     """
 
 @overload
@@ -70,17 +65,18 @@ def area(
     vspace: float = 0.384,
 ) -> float:
     """
-    Computes real-world area requirements in nm² of the bounding box of a
-    given SiDB layout. The bounding box covers the layout's SiDBs and
-    defects; every column and every single-SiDB row inside it is assigned
-    a horizontal and vertical size, and a spacing between neighboring
-    columns and rows is taken into account. An empty layout has no area.
+    Return the SiDB layout's bounding-box area in square nanometers.
+    The bounding box covers SiDBs and defects. Every column and single-SiDB row
+    contributes its dimensions and the spacing between neighboring columns and rows.
+    An empty layout has zero area.
 
     Args:
-        lyt: The SiDB layout whose area is desired.
-        ps: Area parameters.
-        pst: Area statistics.
+        layout: SiDB layout to measure.
+        width: Column width in nm; defaults to the layout type's CELL_WIDTH.
+        height: Row height in nm; defaults to the layout type's CELL_HEIGHT.
+        hspace: Horizontal spacing in nm; defaults to the layout type's CELL_HSPACE.
+        vspace: Vertical spacing in nm; defaults to the layout type's CELL_VSPACE.
 
     Returns:
-        Area requirements in nm².
+        The area as a float in square nanometers.
     """

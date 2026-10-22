@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/synthesis/network_balancing.hpp"
+#include "fiction/synthesis/network_balancing.hpp"  // NOLINT(misc-include-cleaner): is_balanced is used in debug assertions.
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/fanout_view.hpp>
@@ -27,7 +27,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::utils::graph
@@ -102,6 +104,7 @@ template <typename Ntk>
 class mincross_impl
 {
   public:
+    /** @brief Network node type. */
     using node = typename Ntk::node;
 
     /**
@@ -268,74 +271,74 @@ class mincross_impl
             r0,
             [this, &r0, &r1](auto const& n)
             {
-                std::vector<uint32_t> positions{};
+                std::vector<uint32_t> neighbor_positions{};
                 if (r1 > r0)
                 {
                     // Go forward: fanouts
-                    positions.reserve(fanout_ntk.fanout_size(n));
+                    neighbor_positions.reserve(fanout_ntk.fanout_size(n));
                     fanout_ntk.foreach_fanout(n,
-                                              [this, &r1, &positions](auto const& fo)
+                                              [this, &r1, &neighbor_positions](auto const& fo)
                                               {
                                                   if (fanout_ntk.level(fo) == r1)
                                                   {
-                                                      positions.push_back(fanout_ntk.rank_position(fo));
+                                                      neighbor_positions.push_back(fanout_ntk.rank_position(fo));
                                                   }
                                               });
                 }
                 else
                 {
                     // Go backward: fanins
-                    positions.reserve(fanout_ntk.fanin_size(n));
+                    neighbor_positions.reserve(fanout_ntk.fanin_size(n));
                     fanout_ntk.foreach_fanin(n,
-                                             [this, &r1, &positions](auto const& fi)
+                                             [this, &r1, &neighbor_positions](auto const& fi)
                                              {
                                                  const auto src = fanout_ntk.get_node(fi);
                                                  if (fanout_ntk.level(src) == r1 && !fanout_ntk.is_constant(src))
                                                  {
-                                                     positions.push_back(fanout_ntk.rank_position(src));
+                                                     neighbor_positions.push_back(fanout_ntk.rank_position(src));
                                                  }
                                              });
                 }
 
-                if (positions.empty())
+                if (neighbor_positions.empty())
                 {
                     median_map[n] = -1;  // No connections
                     return;
                 }
 
-                std::ranges::sort(positions);
+                std::ranges::sort(neighbor_positions);
 
-                if (positions.size() == 1)
+                if (neighbor_positions.size() == 1)
                 {
-                    median_map[n] = positions[0];
+                    median_map[n] = neighbor_positions[0];
                 }
-                else if (positions.size() == 2)
+                else if (neighbor_positions.size() == 2)
                 {
-                    median_map[n] = (positions[0] + positions[1]) / 2.0;
+                    median_map[n] = (neighbor_positions[0] + neighbor_positions[1]) / 2.0;
                 }
                 else
                 {
-                    const std::size_t j = positions.size();
+                    const std::size_t j = neighbor_positions.size();
                     if (j % 2 == 1)
                     {
-                        median_map[n] = positions[j / 2];
+                        median_map[n] = neighbor_positions[j / 2];
                     }
                     else
                     {
                         // Weighted median
                         const std::size_t rm    = j / 2;
                         const std::size_t lm    = rm - 1;
-                        const uint32_t    lspan = positions[lm] - positions.front();
-                        const uint32_t    rspan = positions.back() - positions[rm];
+                        const uint32_t    lspan = neighbor_positions[lm] - neighbor_positions.front();
+                        const uint32_t    rspan = neighbor_positions.back() - neighbor_positions[rm];
 
                         if (lspan == rspan)
                         {
-                            median_map[n] = (positions[lm] + positions[rm]) / 2.0;
+                            median_map[n] = (neighbor_positions[lm] + neighbor_positions[rm]) / 2.0;
                         }
                         else
                         {
-                            const double w = (positions[lm] * static_cast<double>(rspan)) +
-                                             (positions[rm] * static_cast<double>(lspan));
+                            const double w = (neighbor_positions[lm] * static_cast<double>(rspan)) +
+                                             (neighbor_positions[rm] * static_cast<double>(lspan));
                             median_map[n]  = w / (lspan + rspan);
                         }
                     }
@@ -379,12 +382,28 @@ class mincross_impl
     }
 
     /**
-     * Performs pairwise transpositions within ranks to further reduce crossings.
+     * @brief Performs pairwise transpositions within ranks to further reduce crossings.
+     *
+     * The sweeps run on flat copies of the ranks, the rank positions, and the neighbor lists; the ranks of the network
+     * are written back at the end.
      *
      * @param order Sorting heuristic for tie-breaking.
      */
     void transpose(const median_sorting order)
     {
+        build_neighbors();
+
+        ranks = fanout_ntk.get_all_ranks();
+
+        positions.assign(fanout_ntk.size(), 0);
+        for (const auto& rank : ranks)
+        {
+            for (std::size_t i = 0; i < rank.size(); ++i)
+            {
+                positions[index_of(rank[i])] = static_cast<uint32_t>(i);
+            }
+        }
+
         std::vector<uint8_t> candidate(fanout_ntk.depth() + 1, 1);
         uint32_t             delta          = 0;
         uint32_t             max_iterations = 0;
@@ -415,6 +434,8 @@ class mincross_impl
                 break;
             }
         }
+
+        fanout_ntk.set_all_ranks(ranks);
     }
 
     /**
@@ -426,41 +447,40 @@ class mincross_impl
      */
     uint32_t transpose_step(const uint32_t r, const median_sorting order)
     {
-        auto rank = fanout_ntk.get_ranks(r);
+        // the pairs of the pass are taken from the order at its start
+        const auto rank = ranks[r];
 
         if (rank.size() <= 1)
         {
             return 0;
         }
 
+        const bool has_fanins  = r > 0;
+        const bool has_fanouts = r + 1 < fanout_ntk.depth();
+
         uint32_t rv = 0;
 
         for (uint32_t i = 0; i < rank.size() - 1; ++i)
         {
-            auto const& v = rank[i];
-            auto const& w = rank[i + 1];
-
-            // Ensure v comes before w
-            assert(fanout_ntk.rank_position(v) < fanout_ntk.rank_position(w) &&
-                   "invalid ranks: nodes must be ordered in ascending rank_position");
+            const auto v = index_of(rank[i]);
+            const auto w = index_of(rank[i + 1]);
 
             uint32_t c0 = 0, c1 = 0;
 
-            if (r > 0)
+            if (has_fanins)
             {
-                c0 += in_cross(v, w);
-                c1 += in_cross(w, v);
+                count_crossings(in_begin, in_nodes, v, w, c0, c1);
             }
 
-            if (r + 1 < fanout_ntk.depth())
+            if (has_fanouts)
             {
-                c0 += out_cross(v, w);
-                c1 += out_cross(w, v);
+                count_crossings(out_begin, out_nodes, v, w, c0, c1);
             }
 
             if (c1 < c0 || (c0 > 0 && order == median_sorting::DESCENDING && c1 == c0))
             {
-                fanout_ntk.swap(v, w);  // Perform the swap in the rank
+                std::swap(ranks[r][positions[v]], ranks[r][positions[w]]);
+                std::swap(positions[v], positions[w]);
                 rv += (c0 - c1);
             }
         }
@@ -469,87 +489,83 @@ class mincross_impl
     }
 
     /**
-     * Counts the number of edge crossings between fanins of two nodes in the previous rank.
+     * @brief Index of a node in the flat arrays.
      *
-     * @param left First node.
-     * @param right Second node.
-     * @return Number of crossings.
+     *
+     * @param n Node.
+     * @return Index of `n`.
      */
-    uint32_t in_cross(const node& left, const node& right)
+    [[nodiscard]] std::size_t index_of(const node& n) const
     {
-        std::vector<uint32_t> left_sources{};
-        left_sources.reserve(fanout_ntk.fanin_size(left));
-        std::vector<uint32_t> right_sources{};
-        right_sources.reserve(fanout_ntk.fanin_size(right));
-
-        fanout_ntk.foreach_fanin(left,
-                                 [this, &left_sources](auto const& f)
-                                 {
-                                     const auto src = fanout_ntk.get_node(f);
-                                     if (fanout_ntk.is_constant(src))
-                                     {
-                                         return;
-                                     }
-                                     left_sources.push_back(fanout_ntk.rank_position(src));
-                                 });
-
-        fanout_ntk.foreach_fanin(right,
-                                 [this, &right_sources](auto const& f)
-                                 {
-                                     const auto src = fanout_ntk.get_node(f);
-                                     if (fanout_ntk.is_constant(src))
-                                     {
-                                         return;
-                                     }
-                                     right_sources.push_back(fanout_ntk.rank_position(src));
-                                 });
-
-        return count_crossings(left_sources, right_sources);
+        return static_cast<std::size_t>(fanout_ntk.node_to_index(n));
     }
 
     /**
-     * Counts the number of edge crossings between fanouts of two nodes in the next rank.
-     *
-     * @param left First node.
-     * @param right Second node.
-     * @return Number of crossings.
+     * @brief Collects the non-constant fanins and the fanouts of every node in flat arrays, once.
      */
-    uint32_t out_cross(const node& left, const node& right)
+    void build_neighbors()
     {
-        std::vector<uint32_t> left_targets{};
-        left_targets.reserve(fanout_ntk.fanout_size(left));
-        fanout_ntk.foreach_fanout(left, [this, &left_targets](auto const& tgt)
-                                  { left_targets.push_back(fanout_ntk.rank_position(tgt)); });
-
-        std::vector<uint32_t> right_targets{};
-        right_targets.reserve(fanout_ntk.fanout_size(right));
-        fanout_ntk.foreach_fanout(right, [this, &right_targets](auto const& tgt)
-                                  { right_targets.push_back(fanout_ntk.rank_position(tgt)); });
-
-        return count_crossings(left_targets, right_targets);
-    }
-
-    /**
-     * Computes the number of crossings between two sets of ranked positions.
-     *
-     * @param a Positions from first set of connections.
-     * @param b Positions from second set of connections.
-     * @return Total number of crossings between the sets.
-     */
-    uint32_t count_crossings(const std::vector<uint32_t>& a, const std::vector<uint32_t>& b)
-    {
-        uint32_t count = 0;
-        for (const auto x : a)
+        if (!in_begin.empty())
         {
-            for (const auto y : b)
+            return;
+        }
+
+        const auto size = static_cast<std::size_t>(fanout_ntk.size());
+
+        in_begin.assign(size + 1, 0);
+        out_begin.assign(size + 1, 0);
+
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            const node n = fanout_ntk.index_to_node(static_cast<uint32_t>(i));
+
+            if (!fanout_ntk.is_constant(n))
             {
-                if (x > y)
-                {
-                    ++count;
-                }
+                fanout_ntk.foreach_fanin(n,
+                                         [this](auto const& f)
+                                         {
+                                             const auto src = fanout_ntk.get_node(f);
+                                             if (!fanout_ntk.is_constant(src))
+                                             {
+                                                 in_nodes.push_back(static_cast<uint32_t>(index_of(src)));
+                                             }
+                                         });
+                fanout_ntk.foreach_fanout(n, [this](auto const& tgt)
+                                          { out_nodes.push_back(static_cast<uint32_t>(index_of(tgt))); });
+            }
+
+            in_begin[i + 1]  = static_cast<uint32_t>(in_nodes.size());
+            out_begin[i + 1] = static_cast<uint32_t>(out_nodes.size());
+        }
+    }
+
+    /**
+     * @brief Adds the crossings between the edges of two nodes to a pair of counters, for both orders of the nodes.
+     *
+     * The neighbors of `left` and `right` in an adjacent rank are compared by their rank positions.
+     *
+     * @param begin Offsets of the neighbor lists.
+     * @param neighbors Neighbor lists.
+     * @param left Index of the left node.
+     * @param right Index of the right node.
+     * @param kept Receives the crossings with `left` left of `right`.
+     * @param swapped Receives the crossings with the nodes swapped.
+     */
+    void count_crossings(const std::vector<uint32_t>& begin, const std::vector<uint32_t>& neighbors,
+                         const std::size_t left, const std::size_t right, uint32_t& kept, uint32_t& swapped) const
+    {
+        for (auto a = begin[left]; a < begin[left + 1]; ++a)
+        {
+            const auto x = positions[neighbors[a]];
+
+            for (auto b = begin[right]; b < begin[right + 1]; ++b)
+            {
+                const auto y = positions[neighbors[b]];
+
+                kept += static_cast<uint32_t>(x > y);
+                swapped += static_cast<uint32_t>(x < y);
             }
         }
-        return count;
     }
 
     /**
@@ -608,6 +624,30 @@ class mincross_impl
      */
     uint64_t total_crossings = std::numeric_limits<uint64_t>::max();
     /**
+     * @brief Nodes of every rank while the transposition sweeps run.
+     */
+    std::vector<std::vector<node>> ranks{};
+    /**
+     * @brief Position within its rank per node index while the transposition sweeps run.
+     */
+    std::vector<uint32_t> positions{};
+    /**
+     * @brief Offsets of the fanin lists in `in_nodes`: node `i` has the entries `in_begin[i]` to `in_begin[i + 1]`.
+     */
+    std::vector<uint32_t> in_begin{};
+    /**
+     * @brief Node indices of the non-constant fanins of all nodes.
+     */
+    std::vector<uint32_t> in_nodes{};
+    /**
+     * @brief Offsets of the fanout lists in `out_nodes`, like `in_begin`.
+     */
+    std::vector<uint32_t> out_begin{};
+    /**
+     * @brief Node indices of the fanouts of all nodes.
+     */
+    std::vector<uint32_t> out_nodes{};
+    /**
      * Stores median values used to sort nodes within ranks during optimization.
      */
     std::unordered_map<node, double> median_map;
@@ -638,11 +678,9 @@ class mincross_impl
  * @return A copy of the input network with reordered ranks to reduce edge crossings.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_rank_position_v<Ntk>
 Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-    static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position function");
-
     assert(fiction::synthesis::is_balanced(ntk) &&
            "Networks have to be balanced for level-by-level crossing minimization");
 
@@ -657,6 +695,91 @@ Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nul
     }
 
     return result;
+}
+
+/**
+ * @brief Counts the edge crossings between every pair of adjacent levels of a ranked, balanced network in its current
+ * rank order.
+ *
+ * In contrast to `mincross` with `optimize = false`, the network is neither copied nor reordered.
+ *
+ * @tparam Ntk A ranked network type.
+ * @param ntk The balanced network whose crossings are counted.
+ * @return The number of crossings.
+ * @throws std::invalid_argument If an edge does not connect adjacent levels, i.e., if `ntk` is not balanced.
+ */
+template <typename Ntk>
+[[nodiscard]] uint64_t count_crossings(const Ntk& ntk)
+{
+    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+    static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position function");
+    static_assert(mockturtle::has_level_v<Ntk>, "Ntk does not implement the level function");
+
+    uint64_t crossings = 0;
+
+    for (uint32_t r = 0; r < ntk.depth(); ++r)
+    {
+        // positions in level `r + 1` that every node of level `r` drives, one entry per edge
+        std::vector<std::vector<uint32_t>> targets(ntk.rank_width(r));
+
+        ntk.foreach_node_in_rank(r + 1,
+                                 [&ntk, &targets, r](const auto& t)
+                                 {
+                                     ntk.foreach_fanin(t,
+                                                       [&ntk, &targets, r, pos = ntk.rank_position(t)](const auto& f)
+                                                       {
+                                                           const auto s = ntk.get_node(f);
+
+                                                           if (ntk.is_constant(s))
+                                                           {
+                                                               return;
+                                                           }
+
+                                                           if (ntk.level(s) != r)
+                                                           {
+                                                               throw std::invalid_argument(
+                                                                   "An edge does not connect adjacent levels");
+                                                           }
+
+                                                           targets[ntk.rank_position(s)].push_back(pos);
+                                                       });
+                                 });
+
+        // sweep the sources from left to right; an edge that ends left of an earlier edge's end crosses it. A Fenwick
+        // tree over the target positions counts the earlier edges that end right of a position.
+        const auto width = static_cast<std::size_t>(ntk.rank_width(r + 1));
+
+        std::vector<uint64_t> fenwick(width + 1, 0);
+        uint64_t              swept = 0;
+
+        for (const auto& edges : targets)
+        {
+            for (const auto pos : edges)
+            {
+                uint64_t not_right = 0;
+
+                for (auto i = static_cast<std::size_t>(pos) + 1; i > 0; i -= i & (~i + 1))
+                {
+                    not_right += fenwick[i];
+                }
+
+                crossings += swept - not_right;
+            }
+
+            // edges of one source do not cross each other, so they are counted once all of them are queried
+            for (const auto pos : edges)
+            {
+                for (auto i = static_cast<std::size_t>(pos) + 1; i <= width; i += i & (~i + 1))
+                {
+                    ++fenwick[i];
+                }
+
+                ++swept;
+            }
+        }
+    }
+
+    return crossings;
 }
 
 }  // namespace fiction::utils::graph

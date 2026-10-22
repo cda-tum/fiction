@@ -18,6 +18,11 @@ If you use an algorithm or gate library, please also cite its corresponding pape
 - {ref}`Scalable physical design <ortho>` (`ortho`):
   {cite:p}`walter2019ortho`
 
+- {ref}`Planarization <planarization>` (`planarization`):
+  {cite:p}`nano_2026_3`
+
+  [Planarization experiment scripts](https://github.com/cda-tum/fiction/tree/main/experiments/planarization)
+
 - {ref}`Equivalence checking <equiv>` (`equiv`):
   {cite:p}`walter2020equiv`
 

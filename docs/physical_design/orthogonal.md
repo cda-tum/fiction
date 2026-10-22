@@ -3,8 +3,8 @@
 # Scalable Orthogonal Physical Design
 
 Utilizes approximations to the graph-theoretical problem of _Orthogonal Graph Drawing_ to generate FCN gate-level
-layouts from logic network specifications. This approach is scalable but requires that the input network is restricted
-to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked and has a large area overhead.
+layouts from named technology networks. Gates may have at most two nonconstant fanins; fanout normalization produces
+a 3-graph. The output layout is 2DDWave-clocked and has a large area overhead.
 
 ::::{tab-set}
 :sync-group: language
@@ -22,7 +22,7 @@ to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
+```{doxygenfunction} fiction::physical_design::orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
 
 ```
 
@@ -36,6 +36,13 @@ Use keyword-only `layout_type` to select `cartesian_gate_layout` (the default) o
 layouts raise `TypeError`. Hexagonal layouts require `layout_arrangement`.
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.physical_design.num_clks
+   :members:
+
+.. autoclass:: mnt.pyfiction.physical_design.orthogonal_stats
+   :members:
+   :undoc-members:
+
 .. autofunction:: mnt.pyfiction.physical_design.orthogonal
 ```
 

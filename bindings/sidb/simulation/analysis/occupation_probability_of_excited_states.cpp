@@ -42,7 +42,9 @@ void register_occupation_probability_of_excited_states(nb::module_& m)
 {
     m.def("occupation_probability_gate_based", &fiction::sidb::simulation::analysis::occupation_probability_gate_based,
           nb::call_guard<nb::gil_scoped_release>(), nb::arg("energy_and_state_type"), nb::arg("temperature"),
-          DOC(fiction_sidb_simulation_analysis_occupation_probability_gate_based));
+          parameter_doc(DOC(fiction_sidb_simulation_analysis_occupation_probability_gate_based),
+                        {{"est", "energy_and_state_type"}})
+              .c_str());
 
     m.def("occupation_probability_non_gate_based",
           &fiction::sidb::simulation::analysis::occupation_probability_non_gate_based,
