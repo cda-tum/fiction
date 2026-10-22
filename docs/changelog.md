@@ -824,6 +824,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Timing documentation now states the throughput formula and input hold time in clock cycles.
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
   - Corrected planarization complexity bounds to include weighted-cone traversals.
   - Corrected the reference for Yen's loopless path algorithm.
