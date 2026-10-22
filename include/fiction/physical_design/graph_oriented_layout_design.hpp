@@ -2073,7 +2073,7 @@ class graph_oriented_layout_design_impl
     generate_next_positions(const coord_vec_type& possible_positions, Lyt& layout, const search_space_graph& ssg)
     {
         std::vector<std::pair<coord_vec_type, double>> next_positions;
-        next_positions.reserve(2 * ps.num_vertex_expansions);
+        next_positions.reserve(possible_positions.size());
         const auto node_count = static_cast<double>(ssg.nodes_to_place.size());
         /** Built-in objectives are invariant while candidate positions are ranked. */
         const double layout_cost = !possible_positions.empty() &&
