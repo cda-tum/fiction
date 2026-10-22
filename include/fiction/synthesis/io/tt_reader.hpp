@@ -19,10 +19,10 @@
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <algorithm>
 #include <bit>
 #include <cstdint>
 #include <fstream>
-#include <iostream>
 #include <istream>
 #include <iterator>
 #include <optional>
@@ -45,7 +45,7 @@ class tt_reader
 {
   public:
     /**
-     * Standard constructor. Reads the given stream into a vector of lines.
+     * Standard constructor. Reads the given stream into a vector of tokens.
      *
      * @param stream Stream to parse.
      */
@@ -54,7 +54,7 @@ class tt_reader
         read(stream);
     }
     /**
-     * Standard constructor. Reads the given file into a vector of lines.
+     * Standard constructor. Reads the given file into a vector of tokens.
      *
      * @param filename File to parse.
      */
@@ -88,7 +88,9 @@ class tt_reader
         /** @brief Hexadecimal digits without the prefix. */
         const auto table = elements[pos].substr(2u);
         if (!std::has_single_bit(table.size()) ||
-            table.find_first_not_of("0123456789abcdefABCDEF") != std::string::npos)
+            !std::ranges::all_of(
+                table, [](const char c)
+                { return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); }))
         {
             throw std::invalid_argument("truth tables require a power-of-two number of hexadecimal digits");
         }
@@ -103,7 +105,6 @@ class tt_reader
         TT tt{num_vars};
         kitty::create_from_hex_string(tt, table);
 
-        // TODO change pos to an iterator
         pos += 2;
 
         return tt;
@@ -117,10 +118,8 @@ class tt_reader
      */
     void read(std::istream& in_stream)
     {
-        // read the file into a vector of strings
         elements = std::vector<std::string>{std::istream_iterator<std::string>{in_stream},
                                             std::istream_iterator<std::string>{}};
-        // TODO fill the vector with an std::copy_if instead. increase a counter and only copy if counter is even
     }
     /**
      * Contains the hexadecimal truth tables and their Boolean expressions in string representation. The two are
