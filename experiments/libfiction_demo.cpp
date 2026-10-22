@@ -16,6 +16,7 @@
 
 #if (FICTION_Z3_SOLVER)
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>  // clocking schemes
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts

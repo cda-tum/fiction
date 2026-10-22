@@ -19,6 +19,7 @@
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -27,8 +28,6 @@
 
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
-
-#include <concepts>
 
 using namespace fiction;
 using namespace fiction::layouts;

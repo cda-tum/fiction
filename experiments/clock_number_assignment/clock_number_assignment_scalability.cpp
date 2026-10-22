@@ -16,6 +16,7 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>          // custom reader for folders of networks
 #include <fiction/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
@@ -33,7 +34,6 @@
 #include <mockturtle/utils/stopwatch.hpp>     // time measurements
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
 
-#include <concepts>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>

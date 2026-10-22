@@ -22,6 +22,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>         // technology-mapped network type

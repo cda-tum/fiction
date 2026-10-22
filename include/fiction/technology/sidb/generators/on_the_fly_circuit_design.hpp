@@ -20,8 +20,6 @@
 
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
-#include "fiction/layouts/layout_base.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/physical_design/apply_gate_library.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
@@ -39,7 +37,6 @@
 
 #include "fiction/physical_design/exact.hpp"
 #include "fiction/physical_design/surface_analysis.hpp"
-#include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
 #include "fiction/types.hpp"

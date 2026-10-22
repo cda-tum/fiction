@@ -42,7 +42,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <iostream>
 #include <optional>

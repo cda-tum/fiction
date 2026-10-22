@@ -20,11 +20,14 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 
 #include <fmt/format.h>
 #include <tinyxml2.h>

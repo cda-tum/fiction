@@ -19,7 +19,7 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/physical_design/color_routing.hpp>  // routing based on graph coloring
 #include <fiction/physical_design/exact.hpp>          // SMT-based physical design of FCN layouts
 #include <fiction/physical_design/orthogonal.hpp>     // OGD-based physical design of FCN layouts

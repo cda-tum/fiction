@@ -20,7 +20,6 @@
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>

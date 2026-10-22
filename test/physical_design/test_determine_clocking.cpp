@@ -36,7 +36,6 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <concepts>
 #include <cstddef>
 #include <new>
 #include <stdexcept>

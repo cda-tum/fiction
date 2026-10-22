@@ -24,7 +24,6 @@
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/network_utils.hpp>
