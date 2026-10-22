@@ -69,7 +69,7 @@ TEST_CASE("Benchmark A* routing callers", "[benchmark]")
         return result;
     };
     REQUIRE(equivalence_checking(network, optimize_layout()) != eq_type::NO);
-    BENCHMARK("post_layout_optimization: parity, eight relocations")
+    BENCHMARK("post_layout_optimization: parity, max_gate_relocations=8")
     {
         return optimize_layout();
     };
