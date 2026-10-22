@@ -215,6 +215,11 @@ class sqd_reader
         buffer << is.rdbuf();
         const std::string sqd_content{buffer.str()};
 
+        if (sqd_content.find('\0') != std::string::npos)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: embedded NUL byte");
+        }
+
         tinyxml2::XMLDocument xml_document{};
         xml_document.Parse(sqd_content.c_str());
 
@@ -228,6 +233,11 @@ class sqd_reader
         if (siqad_root == nullptr)
         {
             throw sqd_parsing_error("Error parsing SQD file: no root element 'siqad'");
+        }
+
+        if (xml_document.RootElement() != siqad_root || siqad_root->NextSiblingElement() != nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: multiple root elements");
         }
 
         const auto* const layers_element = siqad_root->FirstChildElement("layers");
@@ -496,6 +506,7 @@ class sqd_reader
  * and surface defects are placed at the `(n, m, l)` lattice coordinates the file names.
  * Explicit geometry must contain finite vectors and two basis sites. Without geometry, the reader accepts the two
  * predefined reconstruction names and defaults to H-Si(100)-2x1 when the name is absent.
+ * The input must have a single `siqad` root and contain no NUL bytes.
  *
  * @param is The input stream to read from.
  * @param name The name to give to the layout.
@@ -519,7 +530,7 @@ class sqd_reader
  */
 [[nodiscard]] inline layout read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{std::string{filename}, std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in | std::ifstream::binary};
 
     if (!is.is_open())
     {

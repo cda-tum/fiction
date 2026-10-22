@@ -20,9 +20,12 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <initializer_list>
+#include <random>
 #include <sstream>
+#include <string>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -102,4 +105,25 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
 
         CHECK_THROWS_AS(read_surface_defects("/this/file/does/not/exist.txt"), std::ifstream::failure);
     }
+}
+
+TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-defects]")
+{
+    /** @brief Two recognized rows separated by a Windows text-mode end-of-file byte. */
+    const auto surface = std::string{"[1]"} + char{26} + "[2]";
+    /** @brief Stream establishes the existing row-extraction contract. */
+    std::istringstream stream{surface};
+    /** @brief Expected defects after parsing the complete input. */
+    const auto expected = read_surface_defects(stream);
+    REQUIRE(expected.num_defects() == 2);
+    /** @brief File containing the same bytes as the stream. */
+    const auto filename =
+        std::filesystem::temp_directory_path() / ("fiction-surface-input-" + std::to_string(std::random_device{}()));
+    {
+        /** @brief Binary output preserves the separator. */
+        std::ofstream output{filename, std::ios::binary};
+        output << surface;
+    }
+    CHECK(read_surface_defects(filename.string()) == expected);
+    std::filesystem::remove(filename);
 }

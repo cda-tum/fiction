@@ -235,7 +235,7 @@ class surface_defects_reader
  */
 [[nodiscard]] inline layout read_surface_defects(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{std::string{filename}, std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in | std::ifstream::binary};
 
     if (!is.is_open())
     {

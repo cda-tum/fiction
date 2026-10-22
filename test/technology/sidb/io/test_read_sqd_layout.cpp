@@ -24,7 +24,9 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 
+#include <filesystem>
 #include <fstream>
+#include <random>
 #include <sstream>
 #include <string>
 #include <unordered_set>
@@ -1203,4 +1205,33 @@ TEST_CASE("SQD coordinates consume complete numeric attributes", "[sqd]")
                               R"(<layer type="DB"><dbdot><latcoord n=" 1 " m=" 2 " l=" 1 "/>)"
                               "</dbdot></layer></design></siqad>"};
     CHECK(read_sqd_layout(stream).sidbs() == std::vector<lattice_site>{{1, 2, 1}});
+}
+
+TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
+{
+    /** @brief Minimal valid SQD document. */
+    const std::string xml{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design/></siqad>"};
+    for (const auto& malformed : {xml + '\0' + "<invalid>", xml + "<other/>", "<other/>" + xml, xml + xml})
+    {
+        /** @brief Stream whose valid SQD portion must not hide other input. */
+        std::istringstream stream{malformed};
+        CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
+    }
+    /** @brief Comments and whitespace outside the root remain valid XML. */
+    std::istringstream valid{"<?xml version=\"1.0\"?><!-- before -->\n" + xml + "\n<!-- after -->"};
+    CHECK(read_sqd_layout(valid).is_empty());
+
+    for (const auto control : {char{0}, char{26}})
+    {
+        /** @brief Temporary SQD file containing the complete byte sequence. */
+        const auto filename =
+            std::filesystem::temp_directory_path() / ("fiction-sqd-input-" + std::to_string(std::random_device{}()));
+        {
+            /** @brief Binary output preserves control bytes. */
+            std::ofstream output{filename, std::ios::binary};
+            output << xml << control << "<invalid>";
+        }
+        CHECK_THROWS_AS(read_sqd_layout(filename.string()), sqd_parsing_error);
+        std::filesystem::remove(filename);
+    }
 }
