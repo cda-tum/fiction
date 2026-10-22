@@ -783,6 +783,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
   - Depth and rank view assignment now preserves wrapped network names and metadata.
+  - Breadth-first topological views now visit gates with repeated fanins.
+  - Depth views now refresh critical paths after explicit updates and count complemented output edges.
+  - Rank traversal now keeps callback indices and early termination across levels.
   - `networks::views::mutable_rank_view::update_ranks` resets `width()`.
   - Clocking-state moves now avoid synchronization-map allocations on Windows.
   - Gate-layout name-presence queries now report empty names consistently after failed assignment.

@@ -232,8 +232,8 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
         fanout_ntk.foreach_node(
             [&](auto n)
             {
-                unvisited_fanin_count[n] = 0;
-                fanout_ntk.foreach_fanin(n, [&](const auto& /*f*/) { ++unvisited_fanin_count[n]; });
+                // Count the same fanout entries consumed below; fanout views can collapse repeated fanins.
+                fanout_ntk.foreach_fanout(n, [&](const auto& child) { ++unvisited_fanin_count[child]; });
             });
 
         fanout_ntk.foreach_ci(

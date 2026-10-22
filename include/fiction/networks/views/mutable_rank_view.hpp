@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -440,10 +441,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
-        for (uint32_t l = 0; l < ranks.size(); ++l)
-        {
-            foreach_node_in_rank(l, std::forward<Fn>(fn));
-        }
+        const auto nodes = std::views::join(ranks);
+        mockturtle::detail::foreach_element(nodes.begin(), nodes.end(), std::forward<Fn>(fn));
     }
 
     /**
@@ -475,10 +474,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
-        for (uint32_t l = 0; l < ranks.size(); ++l)
-        {
-            foreach_gate_in_rank(l, std::forward<Fn>(fn));
-        }
+        const auto nodes = std::views::join(ranks);
+        mockturtle::detail::foreach_element_if(
+            nodes.begin(), nodes.end(), [this](const auto& n) { return !this->is_ci(n); }, std::forward<Fn>(fn));
     }
 
     /**

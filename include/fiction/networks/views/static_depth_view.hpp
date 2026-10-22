@@ -318,7 +318,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void set_level(node const& n, uint32_t level)
     {
-        level_slot(n) = level;
+        level_slot(n)   = level;
+        crit_path_valid = false;
     }
 
     /**
@@ -326,7 +327,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void set_depth(const uint32_t level)
     {
-        ntk_depth = level;
+        ntk_depth       = level;
+        crit_path_valid = false;
     }
 
     /**
@@ -359,8 +361,9 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                 }
                                 level = std::max(level, clevel);
                             });
-        level_slot(n) = this->is_pi(n) ? level : level + cost_fn(*this, n);
-        ntk_depth     = std::max(ntk_depth, level + cost_fn(*this, n));
+        level_slot(n)   = this->is_pi(n) ? level : level + cost_fn(*this, n);
+        ntk_depth       = std::max(ntk_depth, level + cost_fn(*this, n));
+        crit_path_valid = false;
     }
 
   private:
@@ -466,7 +469,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             [&](auto const& f)
             {
                 const auto n = this->get_node(f);
-                if (levels[this->node_to_index(n)] == ntk_depth)
+                if (levels[this->node_to_index(n)] + (ps.count_complements && this->is_complemented(f)) == ntk_depth)
                 {
                     set_critical_path(n);
                 }
@@ -478,7 +481,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                 [&](auto const& f)
                 {
                     const auto n = this->get_node(f);
-                    if (levels[this->node_to_index(n)] == ntk_depth)
+                    if (levels[this->node_to_index(n)] + (ps.count_complements && this->is_complemented(f)) ==
+                        ntk_depth)
                     {
                         set_critical_path(n);
                     }

@@ -23,6 +23,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <mockturtle/networks/sequential.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/traits.hpp>
@@ -210,6 +211,70 @@ TEST_CASE("Compute critical path information", "[static-depth-view]")
     CHECK(depth_aig.is_on_critical_path(aig.get_node(f2)));
     CHECK(!depth_aig.is_on_critical_path(aig.get_node(f3)));
     CHECK(depth_aig.is_on_critical_path(aig.get_node(f)));
+}
+
+TEST_CASE("Critical paths include complemented output edges", "[static-depth-view]")
+{
+    mockturtle::aig_network aig{};
+    const auto              a          = aig.create_pi();
+    const auto              b          = aig.create_pi();
+    const auto              c          = aig.create_pi();
+    const auto              short_gate = aig.create_and(a, b);
+    const auto              long_gate  = aig.create_and(short_gate, c);
+    aig.create_po(!short_gate);
+    aig.create_po(long_gate);
+
+    const static_depth_view depth_aig{aig, {}, depth_view_params{.count_complements = true}};
+    CHECK(depth_aig.depth() == 2);
+    CHECK(depth_aig.is_on_critical_path(aig.get_node(short_gate)));
+    CHECK(depth_aig.is_on_critical_path(aig.get_node(long_gate)));
+
+    mockturtle::aig_network complemented{};
+    const auto              input = complemented.create_pi();
+    complemented.create_po(!input);
+    const static_depth_view depth_complemented{complemented, {}, depth_view_params{.count_complements = true}};
+    CHECK(depth_complemented.depth() == 1);
+    CHECK(depth_complemented.is_on_critical_path(complemented.get_node(input)));
+}
+
+TEST_CASE("Critical paths follow explicit level and depth updates", "[static-depth-view]")
+{
+    mockturtle::aig_network aig{};
+    const auto              a    = aig.create_pi();
+    const auto              b    = aig.create_pi();
+    const auto              gate = aig.create_and(a, b);
+    aig.create_po(gate);
+    static_depth_view depth_aig{aig};
+    REQUIRE(depth_aig.is_on_critical_path(aig.get_node(a)));
+
+    SECTION("Level update")
+    {
+        depth_aig.set_level(aig.get_node(gate), 2);
+        CHECK_FALSE(depth_aig.is_on_critical_path(aig.get_node(gate)));
+    }
+    SECTION("Depth update")
+    {
+        depth_aig.set_depth(2);
+        CHECK_FALSE(depth_aig.is_on_critical_path(aig.get_node(gate)));
+    }
+    SECTION("Added node")
+    {
+        const auto next = depth_aig.create_and(gate, a);
+        depth_aig.create_po(next);
+        depth_aig.on_add(depth_aig.get_node(next));
+        CHECK(depth_aig.depth() == 2);
+        CHECK(depth_aig.is_on_critical_path(depth_aig.get_node(next)));
+    }
+}
+
+TEST_CASE("Critical paths include complemented register-input edges", "[static-depth-view]")
+{
+    mockturtle::sequential<mockturtle::aig_network> ntk{};
+    const auto                                      input = ntk.create_ro();
+    ntk.create_ri(!input);
+    const static_depth_view depth_ntk{ntk, {}, depth_view_params{.count_complements = true}};
+    CHECK(depth_ntk.depth() == 1);
+    CHECK(depth_ntk.is_on_critical_path(ntk.get_node(input)));
 }
 
 TEST_CASE("The critical path follows the levels after an update and survives a copy", "[static-depth-view]")

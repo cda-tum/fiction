@@ -222,6 +222,44 @@ TEST_CASE("Foreach", "[mutable-rank-view]")
     CHECK(node_vector.size() == tec_r.num_gates());
 }
 
+TEST_CASE("Rank traversal keeps global indices and stops across levels", "[mutable-rank-view]")
+{
+    technology_network ntk{};
+    const auto         a  = ntk.create_pi();
+    const auto         b  = ntk.create_pi();
+    const auto         g1 = ntk.create_and(a, b);
+    const auto         g2 = ntk.create_not(g1);
+    ntk.create_po(g2);
+    const mutable_rank_view ranked{ntk};
+
+    uint32_t count{0};
+    SECTION("Node indices")
+    {
+        ranked.foreach_node([&](const auto&, const auto index) { CHECK(index == count++); });
+        CHECK(count == 4);
+    }
+    SECTION("Gate indices")
+    {
+        ranked.foreach_gate([&](const auto&, const auto index) { CHECK(index == count++); });
+        CHECK(count == 2);
+    }
+    SECTION("Stop node traversal at a level boundary")
+    {
+        ranked.foreach_node([&](const auto&) { return ++count != 2; });
+        CHECK(count == 2);
+    }
+    SECTION("Stop gate traversal at a level boundary")
+    {
+        ranked.foreach_gate(
+            [&](const auto&, const auto index)
+            {
+                CHECK(index == count++);
+                return false;
+            });
+        CHECK(count == 1);
+    }
+}
+
 TEST_CASE("Construct mutable_rank_view with given rank order", "[mutable-rank-view]")
 {
     technology_network tec{};
