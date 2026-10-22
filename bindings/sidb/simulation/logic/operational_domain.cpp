@@ -106,7 +106,7 @@ inline void register_operational_domain_functions(nb::module_& m)
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};
@@ -193,7 +193,7 @@ Args:
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};
@@ -281,7 +281,7 @@ Args:
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};
@@ -367,7 +367,7 @@ Args:
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};
@@ -454,7 +454,7 @@ Args:
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};
@@ -542,7 +542,7 @@ Args:
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};
@@ -632,7 +632,7 @@ Args:
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};
@@ -722,7 +722,7 @@ Args:
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};

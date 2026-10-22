@@ -90,7 +90,7 @@ void register_physically_valid_parameters(nb::module_& m)
                 .operational_params = {.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
                                        .sim_engine = sim_engine,
                                        .timeout    = timeout},
-                .sweep_dimensions   = sweep_dimensions ? *sweep_dimensions : std::move(defaults.sweep_dimensions),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
                 .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress        = on_progress,
                 .on_worker_progress = on_worker_progress};

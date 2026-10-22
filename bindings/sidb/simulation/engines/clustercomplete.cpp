@@ -83,7 +83,7 @@ void register_clustercomplete(nb::module_& m)
             const clustercomplete_options params{
                 .sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
                 .local_external_potential =
-                    local_external_potential ? *local_external_potential : std::move(defaults.local_external_potential),
+                    local_external_potential.value_or(std::move(defaults.local_external_potential)),
                 .global_potential = global_potential,
                 .validity_witness_partitioning_max_cluster_size_gss =
                     validity_witness_partitioning_max_cluster_size_gss,

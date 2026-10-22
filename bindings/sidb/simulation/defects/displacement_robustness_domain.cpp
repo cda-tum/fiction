@@ -147,7 +147,7 @@ void register_displacement_robustness_domain(nb::module_& m)
                     make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
                                                 threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                                 input_bdl_config, op_condition, strategy_to_analyze_operational_status),
-                .fixed_sidbs       = fixed_sidbs ? *fixed_sidbs : std::move(defaults.fixed_sidbs),
+                .fixed_sidbs       = fixed_sidbs.value_or(std::move(defaults.fixed_sidbs)),
                 .dimer_policy      = dimer_policy,
                 .number_of_threads = number_of_threads ? *number_of_threads : defaults.number_of_threads,
                 .on_progress       = on_progress};

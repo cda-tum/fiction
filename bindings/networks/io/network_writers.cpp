@@ -55,7 +55,7 @@ void register_network_writers(nb::module_& m)
         {
             // the readers only take the module named `top`, which mockturtle's writer replaces with the
             // network name unless told otherwise
-            const mockturtle::write_verilog_params params{.module_name = "top"};
+            const mockturtle::write_verilog_params params{.module_name = "top", .input_names = {}, .output_names = {}};
 
             if constexpr (std::is_same_v<Ntk, py_tec_network>)
             {

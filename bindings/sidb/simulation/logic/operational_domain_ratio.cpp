@@ -95,7 +95,7 @@ void register_operational_domain_ratio(nb::module_& m)
                         minimum_distance, maximum_distance, input_bdl_config, op_condition,
                         strategy_to_analyze_operational_status),
                     .sweep_dimensions =
-                        sweep_dimensions ? *sweep_dimensions : std::move(defaults.op_domain_params.sweep_dimensions),
+                        sweep_dimensions.value_or(std::move(defaults.op_domain_params.sweep_dimensions)),
                     .number_of_threads =
                         number_of_threads ? *number_of_threads : defaults.op_domain_params.number_of_threads,
                     .on_progress        = on_progress,
