@@ -1234,6 +1234,38 @@ TEST_CASE("FGL rejects embedded NUL bytes without replacing the target", "[read-
     CHECK(target.num_pis() == 1);
 }
 
+TEST_CASE("FGL rejects multiple root elements without replacing the target", "[read-fgl-layout]")
+{
+    /** @brief Legacy or version-2 document without an XML declaration. */
+    auto document = fgl_with_topology("cartesian");
+    if (GENERATE(false, true))
+    {
+        std::stringstream output{};
+        write_fgl_layout(cartesian_gate_layout{{1, 1, 1}, clocking::twoddwave(), "replacement"}, output);
+        document = output.str();
+    }
+    document = document.substr(document.find("<fgl"));
+    /** @brief A foreign root or a second valid FGL root. */
+    const auto            sibling = GENERATE_COPY(std::string{"<other/>"}, document);
+    const auto            before  = GENERATE(false, true);
+    std::stringstream     stream{before ? sibling + document : document + sibling};
+    cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), "kept"};
+    target.create_pi("kept", {0, 0, 0});
+
+    CHECK_THROWS_AS(read_fgl_layout(target, stream), fgl_parsing_error);
+    CHECK(target.get_layout_name() == "kept");
+    CHECK(target.num_pis() == 1);
+}
+
+TEST_CASE("FGL accepts comments around its root", "[read-fgl-layout]")
+{
+    const auto        document = fgl_with_topology("cartesian");
+    std::stringstream stream{"<?xml version=\"1.0\"?>\n<!-- before -->\n" + document.substr(document.find("<fgl")) +
+                             "\n<!-- after -->\n"};
+
+    CHECK(read_fgl_layout<cartesian_layout>(stream).get_layout_name() == "Test");
+}
+
 TEST_CASE("FGL file readers reject malformed suffixes without replacing the target", "[read-fgl-layout]")
 {
     /** @brief Bytes that can terminate C strings or Windows text-mode input. */

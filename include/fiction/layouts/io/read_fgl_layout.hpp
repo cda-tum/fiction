@@ -120,9 +120,9 @@ class read_fgl_layout_impl
         }
 
         auto* const fgl_root = xml_document.FirstChildElement("fgl");
-        if (fgl_root == nullptr)
+        if (fgl_root == nullptr || fgl_root != xml_document.RootElement() || fgl_root->NextSiblingElement() != nullptr)
         {
-            throw fgl_parsing_error("Error parsing FGL file: no root element 'fgl'");
+            throw fgl_parsing_error("Error parsing FGL file: expected exactly one root element 'fgl'");
         }
 
         const auto* version     = fgl_root->Attribute("version");
