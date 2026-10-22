@@ -1678,8 +1678,8 @@ template <typename Lyt, typename Ntk>
     requires std::derived_from<Lyt, layouts::cartesian_layout> &&
              std::same_as<typename Lyt::object_id, layouts::layout_object_id> &&
              std::derived_from<Ntk, networks::technology_network> && mockturtle::has_depth_v<Ntk> &&
-             mockturtle::has_rank_position_v<Ntk> && mockturtle::has_at_rank_position_v<Ntk> &&
-             mockturtle::has_foreach_node_in_rank_v<Ntk>
+             mockturtle::has_level_v<Ntk> && mockturtle::has_rank_position_v<Ntk> &&
+             mockturtle::has_at_rank_position_v<Ntk> && mockturtle::has_foreach_node_in_rank_v<Ntk>
 [[nodiscard]] Lyt plane(const Ntk& ntk, const plane_params& ps = {}, plane_stats* pst = nullptr)
 {
     if (ntk.num_pis() == 0)
@@ -1708,16 +1708,27 @@ template <typename Lyt, typename Ntk>
         throw std::invalid_argument("A node drives more than two fanouts; substitute fanouts before placement");
     }
 
-    // a gate that keeps a single non-constant fanin next to a constant one has no placement; propagate constants first
+    // a gate that keeps a single non-constant fanin next to a constant one has no placement; propagate constants first.
+    // A fanin below the previous level has no wire on the previous diagonal: the placement reads every predecessor
+    // from the diagonal before the gate's own.
     bool constant_gate = false;
+    bool unbalanced    = false;
     ntk.foreach_gate(
-        [&ntk, &constant_gate](const auto& n)
+        [&ntk, &constant_gate, &unbalanced](const auto& n)
         {
             const auto fc = networks::fanins(ntk, n);
 
             if (fc.constant_fanin.has_value() && fc.fanin_nodes.size() == 1)
             {
                 constant_gate = true;
+            }
+
+            for (const auto& fi : fc.fanin_nodes)
+            {
+                if (ntk.level(fi) + 1 != ntk.level(n))
+                {
+                    unbalanced = true;
+                }
             }
         });
 
@@ -1726,6 +1737,11 @@ template <typename Lyt, typename Ntk>
         throw std::invalid_argument(
             "A gate has a constant fanin besides a single non-constant one; propagate constants "
             "before placement");
+    }
+
+    if (unbalanced)
+    {
+        throw std::invalid_argument("The network is not balanced; every fanin must sit on the previous level");
     }
 
     if (const auto crossings = utils::graph::count_crossings(ntk); crossings != 0)

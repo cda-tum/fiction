@@ -323,6 +323,20 @@ TEST_CASE("Invalid inputs are rejected", "[plane]")
 
         CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
     }
+    SECTION("an unbalanced network")
+    {
+        // the third input skips a level
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        const auto x3 = tec.create_pi();
+        tec.create_po(tec.create_and(tec.create_and(x1, x2), x3));
+
+        const mutable_rank_view ranked{tec};
+
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
+    }
 }
 
 TEST_CASE("Shared wires and routing conflicts", "[plane]")
