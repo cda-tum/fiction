@@ -32,6 +32,9 @@
 #include <fmt/format.h>
 #include <tinyxml2.h>
 
+#include <filesystem>
+#include <fstream>
+#include <random>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -1214,6 +1217,46 @@ TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layou
     CHECK(layout.get_layout_name() == "original");
     CHECK(layout.num_pis() == 1);
     CHECK(layout.get_input_name(0) == "kept");
+}
+
+TEST_CASE("FGL rejects embedded NUL bytes without replacing the target", "[read-fgl-layout]")
+{
+    /** @brief A valid document followed by a forbidden XML byte and unread data. */
+    const auto xml = fgl_with_topology("cartesian") + '\0' + "<invalid>";
+    /** @brief Existing layout preserved when the complete input is malformed. */
+    cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), "kept"};
+    target.create_pi("input", {0, 0});
+    /** @brief Input whose valid prefix must not hide the malformed suffix. */
+    std::stringstream stream{xml};
+    CHECK_THROWS_AS(read_fgl_layout(target, stream), fgl_parsing_error);
+    CHECK(target.get_layout_name() == "kept");
+    CHECK(target.get_extent() == layout_base::extent{2, 1, 1});
+    CHECK(target.num_pis() == 1);
+}
+
+TEST_CASE("FGL file readers reject malformed suffixes without replacing the target", "[read-fgl-layout]")
+{
+    /** @brief Bytes that can terminate C strings or Windows text-mode input. */
+    const auto control = GENERATE(char{0}, char{26});
+    /** @brief Complete file content whose prefix alone is a valid layout. */
+    const auto xml = fgl_with_topology("cartesian") + control + "<invalid>";
+    /** @brief Temporary file shared by the two filename overloads. */
+    const auto filename =
+        std::filesystem::temp_directory_path() / ("fiction-fgl-input-" + std::to_string(std::random_device{}()));
+    {
+        /** @brief Binary output preserves every malformed input byte. */
+        std::ofstream output{filename, std::ios::binary};
+        output << xml;
+    }
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(filename.string()), fgl_parsing_error);
+    /** @brief Existing destination preserved after file validation fails. */
+    cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), "kept"};
+    target.create_pi("input", {0, 0});
+    CHECK_THROWS_AS(read_fgl_layout(target, filename.string()), fgl_parsing_error);
+    CHECK(target.get_layout_name() == "kept");
+    CHECK(target.get_extent() == layout_base::extent{2, 1, 1});
+    CHECK(target.num_pis() == 1);
+    std::filesystem::remove(filename);
 }
 
 TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-layout]")

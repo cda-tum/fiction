@@ -105,6 +105,11 @@ class read_fgl_layout_impl
         buffer << is.rdbuf();
         const std::string fgl_content{buffer.str()};
 
+        if (fgl_content.find('\0') != std::string::npos)
+        {
+            throw fgl_parsing_error("Error parsing FGL file: embedded NUL byte");
+        }
+
         // parse xml file
         tinyxml2::XMLDocument xml_document{};
         xml_document.Parse(fgl_content.c_str());
@@ -777,7 +782,7 @@ template <typename Geometry>
 [[nodiscard]] layouts::gate_layout<Geometry> read_fgl_layout(const std::string_view& filename,
                                                              const std::string_view& name = "")
 {
-    std::ifstream is{std::string{filename}, std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in | std::ifstream::binary};
 
     if (!is.is_open())
     {
@@ -800,7 +805,7 @@ template <typename Geometry>
 template <typename Geometry>
 void read_fgl_layout(layouts::gate_layout<Geometry>& lyt, const std::string_view& filename)
 {
-    std::ifstream is{std::string{filename}, std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in | std::ifstream::binary};
 
     if (!is.is_open())
     {
