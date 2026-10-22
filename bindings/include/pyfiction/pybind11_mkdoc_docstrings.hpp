@@ -14497,6 +14497,9 @@ Raises:
                 row arrangement.
     fcn::unsupported_gate_type_exception: if any object has an
                                           unsupported function.
+    fcn::unsupported_gate_orientation_exception: if a gate orientation
+                                                 has no
+                                                 implementation.
     unsuccessful_gate_design_error: if a gate cannot be designed.
     utils::timeout_error: if the shared circuit budget or an
                           individual gate budget expires. No partial
@@ -14536,7 +14539,7 @@ Args:
             encapsulated in an
             `on_the_fly_circuit_design_on_defective_surface_params`
             object.
-    stats: Pointer to a structure for collecting statistics. If
+    stats: Receives statistics after circuit design succeeds. If
            `nullptr`, statistics are discarded.
 
 Returns:
@@ -14549,6 +14552,8 @@ Raises:
     fcn::unsupported_gate_orientation_exception: If a gate orientation
                                                  has no
                                                  implementation.
+    unsuccessful_pr_error: If placement and routing cannot satisfy the
+                           blacklist.
 
 Note:
     A circuit or gate timeout aborts the operation. Only a completed,
