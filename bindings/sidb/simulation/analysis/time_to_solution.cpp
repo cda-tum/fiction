@@ -111,11 +111,13 @@ void register_time_to_solution(nb::module_& m)
            fiction::sidb::simulation::analysis::time_to_solution_stats*     ps)
         {
             validate_confidence_level(confidence_level);
+            // MSVC 19.44 crashes when the fallback constructs QuickSim options inside the initializer.
+            const quicksim_options defaults{};
             const quicksim_options qs_params{
                 .sim_params         = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
                 .iteration_steps    = iteration_steps,
                 .alpha              = alpha,
-                .number_threads     = number_threads ? *number_threads : quicksim_options{}.number_threads,
+                .number_threads     = number_threads ? *number_threads : defaults.number_threads,
                 .timeout            = quicksim_timeout,
                 .on_progress        = quicksim_on_progress,
                 .on_worker_progress = on_worker_progress};

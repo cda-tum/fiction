@@ -59,14 +59,16 @@ void register_quicksim(nb::module_& m)
            const decltype(quicksim_options{}.on_progress)&                  on_progress,
            const decltype(quicksim_options{}.on_worker_progress)&           on_worker_progress)
         {
-            const quicksim_options params{
-                .sim_params         = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
-                .iteration_steps    = iteration_steps,
-                .alpha              = alpha,
-                .number_threads     = number_threads ? *number_threads : quicksim_options{}.number_threads,
-                .timeout            = timeout,
-                .on_progress        = on_progress,
-                .on_worker_progress = on_worker_progress};
+            // MSVC 19.44 crashes when the fallback constructs QuickSim options inside the initializer.
+            const quicksim_options       defaults{};
+            const quicksim_options       params{.sim_params =
+                                              make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                                                .iteration_steps = iteration_steps,
+                                                .alpha           = alpha,
+                                                .number_threads = number_threads ? *number_threads : defaults.number_threads,
+                                                .timeout            = timeout,
+                                                .on_progress        = on_progress,
+                                                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::engines::quicksim(lyt, params);
         },
