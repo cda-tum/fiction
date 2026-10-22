@@ -10691,6 +10691,10 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_placement_ntk =
+R"doc(Named technology network over the storage of `ntk`, the form that
+`place` reads gate functions from.)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl_plane_impl =
 R"doc(Creates the implementation.
 
@@ -13291,8 +13295,8 @@ Args:
 
 Template Args:
     Lyt: Cartesian gate-level layout type.
-    Ntk: Ranked network type with levels and rank positions (see
-         `mutable_rank_view`); the result of
+    Ntk: Ranked technology network type with levels and rank positions
+         (see `mutable_rank_view`); the result of
          `synthesis::planarization` is one.
 
 Returns:
