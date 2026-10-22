@@ -19,6 +19,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -106,13 +107,13 @@ inline std::vector<uint32_t> match_interface_names(const std::vector<std::string
 {
     /** @brief Name occurrence count and its last interface index. */
     using occurrence = std::pair<uint32_t, uint32_t>;
-    std::unordered_map<std::string, occurrence> left_names{}, right_names{};
+    std::unordered_map<std::string_view, occurrence> left_names{}, right_names{};
     for (uint32_t i{}; i < left.size(); ++i)
     {
         ++left_names[left[i]].first;
-        left_names[left[i]].second = i;
-        ++right_names[right[i]].first;
-        right_names[right[i]].second = i;
+        auto& right_name = right_names[right[i]];
+        ++right_name.first;
+        right_name.second = i;
     }
     constexpr auto        unmatched = std::numeric_limits<uint32_t>::max();
     std::vector<uint32_t> permutation(left.size(), unmatched);

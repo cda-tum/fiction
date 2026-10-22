@@ -33,8 +33,10 @@ using namespace fiction::networks;
 TEST_CASE("Unnamed interfaces match in declared order and unequal sizes fail", "[interface-matching]")
 {
     mockturtle::klut_network left{}, right{};
-    const auto               a = left.create_pi();
-    const auto               b = right.create_pi();
+    CHECK(match_interfaces(left, right).inputs.empty());
+    CHECK(match_interfaces(left, right).outputs.empty());
+    const auto a = left.create_pi();
+    const auto b = right.create_pi();
     left.create_po(a);
     right.create_po(b);
     CHECK(match_interfaces(left, right).inputs == std::vector<uint32_t>{0});
@@ -76,4 +78,24 @@ TEST_CASE("Interface matching uses unique names before positional remainders", "
     const auto match = match_interfaces(lyt, ntk);
     CHECK(match.inputs == std::vector<uint32_t>{3, 0, 2, 4, 5, 1});
     CHECK(match.outputs == std::vector<uint32_t>{3, 0, 2, 4, 5, 1});
+}
+
+TEST_CASE("Interface matching compares complete names and keeps input and output orders separate",
+          "[interface-matching]")
+{
+    const auto                                       prefix = std::string(128, 'x') + '\0';
+    const auto                                       first  = prefix + "first";
+    const auto                                       second = prefix + "second";
+    mockturtle::names_view<mockturtle::klut_network> left{}, right{};
+    const auto                                       a = left.create_pi(first);
+    const auto                                       b = left.create_pi(second);
+    left.create_po(a, first);
+    left.create_po(b, second);
+    const auto rb = right.create_pi(second);
+    const auto ra = right.create_pi(first);
+    right.create_po(ra, first);
+    right.create_po(rb, second);
+    const auto match = match_interfaces(left, right);
+    CHECK(match.inputs == std::vector<uint32_t>{1, 0});
+    CHECK(match.outputs == std::vector<uint32_t>{0, 1});
 }
