@@ -216,7 +216,6 @@ void restore_output_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 {
     if constexpr (detail::output_names_enabled<NtkSrc, NtkDest>)
     {
-
         ntk_src.foreach_po(
             [&ntk_src, &ntk_dest]([[maybe_unused]] const auto& po, const auto i)
             {
@@ -360,8 +359,8 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
  *
  * @tparam NtkSrc Source network type.
  * @tparam NtkDest Target network or gate-level layout type.
- * @tparam T Mapping type to identify signals by. Currently, `mockturtle::signal<NtkDest>` and
- * `branching_signal_container<fanout_size>` are supported.
+ * @tparam T Mapping value type: `mockturtle::signal<NtkDest>`, `layouts::layout_object_id`, or
+ * `physical_design::branching_signal_container<fanout_size>`.
  * @param ntk_src Source logic network whose signal names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose signal names are to be assigned `ntk_src`'s names.
  * @param old2new Mapping of signals from `ntk_src` to `ntk_dest` using a signal identifier.
