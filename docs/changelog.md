@@ -84,7 +84,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     most 8000 nodes through node duplication and through the planarization pipeline, and checks every result by SAT
     or, above 50000 nodes, by random simulation
   - `plane` planarizes the same benchmarks, places and routes them with PLANE, and checks every layout for crossings
-    and for equivalence by SAT or, above 200000 nodes, by random simulation
+    and for equivalence by SAT or, above 200000 nodes, by random simulation; layouts above 1000000 gates are only
+    checked for crossings and reported as unchecked
 
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and

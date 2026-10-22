@@ -38,6 +38,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <optional>
 #include <span>
 #include <sstream>
 #include <string>
@@ -65,8 +66,8 @@ constexpr uint32_t MAX_BALANCED_NODES = 8000;
  */
 constexpr uint32_t MAX_NODES_FOR_SAT = 200000;
 /**
- * Layouts above this many nodes are not checked for equivalence: the simulation of such a layout needs several
- * gigabytes. They are still checked for crossings and the diagonal invariant.
+ * Layouts above this many gates are not checked for equivalence: the simulation of such a layout needs several
+ * gigabytes. They are still checked for crossings and the diagonal invariant, and the table reports them as unchecked.
  */
 constexpr uint32_t MAX_NODES_FOR_EQUIVALENCE = 1000000;
 /**
@@ -88,17 +89,18 @@ tec_nt read_network(const std::string& name)
 
 /**
  * Compares the layout with the planar network it was built from. Both have the same inputs in the same order (the
- * layout creates its inputs in the input order of the network), so a plain miter suffices.
+ * layout creates its inputs in the input order of the network), so a plain miter suffices. Returns `std::nullopt` for
+ * a layout above `MAX_NODES_FOR_EQUIVALENCE` gates, which is not checked.
  */
 template <typename Ntk, typename Lyt>
-std::pair<bool, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
+std::pair<std::optional<bool>, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
 {
-    const auto extracted = extract_layout_network(lyt);
-
-    if (extracted.size() > MAX_NODES_FOR_EQUIVALENCE)
+    if (lyt.num_gates() > MAX_NODES_FOR_EQUIVALENCE)
     {
-        return {true, "skipped"};
+        return {std::nullopt, "skipped"};
     }
+
+    const auto extracted = extract_layout_network(lyt);
 
     if (extracted.size() > MAX_NODES_FOR_SAT)
     {
@@ -126,7 +128,9 @@ std::pair<bool, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
  *
  * @param argc The number of command-line arguments.
  * @param argv An array of C-style strings containing the command-line arguments.
- * @return `EXIT_SUCCESS` if every benchmark was placed and verified, `EXIT_FAILURE` otherwise.
+ * @return `EXIT_SUCCESS` if every benchmark was placed, is crossing-free, and passed every equivalence check that ran,
+ * `EXIT_FAILURE` otherwise. Layouts above 1000000 gates are only checked for crossings; the table shows them as
+ * unchecked and the summary line counts them.
  *
  * Command-line Options:
  *   <filter>      Runs only the benchmarks whose name contains the given text; "" runs all of them.
@@ -167,7 +171,7 @@ try
     }
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, double, uint64_t, uint64_t, uint64_t, uint64_t,
-                            uint64_t, double, bool, std::string, double, std::string>
+                            uint64_t, double, std::string, std::string, double, std::string>
         plane_exp{"plane",      "benchmark", "balanced nodes",  "planar nodes", "virtual PIs", "planarization (s)",
                   "layout x",   "layout y",  "gates",           "wires",        "crossings",   "plane (s)",
                   "equivalent", "method",    "equivalence (s)", "error"};
@@ -176,7 +180,8 @@ try
     const auto iwls93     = fiction_experiments::iwls93_benchmarks();
     benchmarks.insert(benchmarks.end(), iwls93.cbegin(), iwls93.cend());
 
-    uint32_t failures = 0;
+    uint32_t failures  = 0;
+    uint32_t unchecked = 0;
 
     for (const auto& benchmark : benchmarks)
     {
@@ -214,8 +219,8 @@ try
             fmt::print("[i]   placing and routing {} planar nodes\n", planar.size());
             plane_stats                       l_st{};
             std::string                       error{};
-            uint64_t                          crossings  = 0;
-            bool                              equivalent = false;
+            uint64_t                          crossings = 0;
+            std::optional<bool>               equivalent{false};
             std::string                       method{"-"};
             mockturtle::stopwatch<>::duration eq_time{};
 
@@ -236,14 +241,25 @@ try
                 error = e.what();
             }
 
-            if (!error.empty() || crossings != 0 || !equivalent)
+            if (!error.empty() || crossings != 0 || !equivalent.value_or(true))
             {
                 ++failures;
             }
 
+            if (!equivalent.has_value())
+            {
+                ++unchecked;
+            }
+
+            std::string equivalent_cell{"unchecked"};
+            if (equivalent.has_value())
+            {
+                equivalent_cell = *equivalent ? "yes" : "no";
+            }
+
             plane_exp(benchmark, balanced.size(), planar.size(), planar.num_virtual_pis(),
                       mockturtle::to_seconds(p_st.time_total), l_st.x_size, l_st.y_size, l_st.num_gates, l_st.num_wires,
-                      crossings, mockturtle::to_seconds(l_st.time_total), equivalent, method,
+                      crossings, mockturtle::to_seconds(l_st.time_total), equivalent_cell, method,
                       mockturtle::to_seconds(eq_time), error);
             plane_exp.save();
             plane_exp.table();
@@ -256,6 +272,12 @@ try
     }
 
     fmt::print("[i] {} benchmark(s) with failures\n", failures);
+
+    if (unchecked != 0)
+    {
+        fmt::print("[w] {} layout(s) above {} gates were only checked for crossings\n", unchecked,
+                   MAX_NODES_FOR_EQUIVALENCE);
+    }
 
     return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
