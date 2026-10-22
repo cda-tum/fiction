@@ -12,6 +12,7 @@
  * @file
  * @brief Yen's algorithm for the k shortest loop-less paths in a layout.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -251,8 +252,8 @@ class yen_k_shortest_paths_impl
  * auto k_paths = yen_k_shortest_paths(static_cast<cartesian_layout>(layout), {source, target}, k);
  * @endcode
  *
- * The algorithm was originally described in \"An algorithm for finding shortest routes from all source nodes to a given
- * destination in general networks\" by Jin Y. Yen in Quarterly of Applied Mathematics, 1970.
+ * The algorithm is described in \"Finding the K Shortest Loopless Paths in a Network\" by Jin Y. Yen in
+ * Management Science, 1971.
  *
  * @tparam Lyt Type of the layout to perform path finding on.
  * @param layout The layout in which the \f$k\f$ shortest paths are to be found.

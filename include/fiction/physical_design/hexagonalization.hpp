@@ -13,6 +13,7 @@
  * @brief Maps a Cartesian gate-level layout onto a hexagonal one.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #pragma once
@@ -151,8 +152,6 @@ namespace detail
 /**
  * Utility function to transform a Cartesian tile into a hexagonal one.
  *
- * @tparam CartLyt Cartesian source layout type.
- * @tparam HexLyt Hexagonal destination layout type.
  * @param cartesian_tile Tile on the Cartesian grid.
  * @param cartesian_layout_height Height of the Cartesian layout.
  * @return corresponding tile on the hexagonal grid.
