@@ -102,15 +102,20 @@ namespace fiction::layouts
  *
  * Objects have stable identities independent of their coordinates. Connections describe declared topology;
  * physical validation checks adjacency, clocking, and geometry separately. Copies own independent state.
+ * Operations that require an existing object throw `std::invalid_argument` if an identity does not identify a live
+ * object in this layout. This includes removed objects, mismatched generations, and out-of-range slots.
+ * `contains` tests whether an identity identifies a live object without throwing.
  * A sink is a destination input port driven by a source object's output. One destination object may
  * receive the same source at several input indices; each connected input port is a distinct sink.
  * Visitors may edit coordinates, names, and capabilities. Object and terminal visitors must not create
  * or remove objects, change terminal order, or replace the layout during traversal. Connection visitors
  * must also preserve the traversed input or sink connections, as specified on each visitor.
  * @tparam CoordinateLayout Coordinate geometry used for placement. Defaults to `cartesian_layout`.
+ * Gate layouts cannot serve as coordinate geometries.
  */
 template <typename CoordinateLayout = cartesian_layout>
-    requires std::derived_from<CoordinateLayout, layout_base>
+    requires std::derived_from<CoordinateLayout, layout_base> &&
+             (!requires { typename CoordinateLayout::coordinate_layout; })
 class gate_layout : public CoordinateLayout
 {
   public:
@@ -130,6 +135,8 @@ class gate_layout : public CoordinateLayout
     using object_id = layout_object_id;
     /** @brief Ordered destination endpoint. */
     using input_port = layout_input_port;
+    /** @brief Coordinate geometry used for placement. */
+    using coordinate_layout = CoordinateLayout;
     /** @brief Concrete layout type. */
     using base_type = gate_layout;
 
@@ -384,7 +391,13 @@ class gate_layout : public CoordinateLayout
         const auto it = occupancy.find(t);
         return it == occupancy.end() ? std::nullopt : std::optional{identity(it->second)};
     }
-    /** @brief Returns the object's coordinate. @throws std::invalid_argument If the identity is stale. */
+    /**
+     * @brief Returns the object's coordinate.
+     *
+     * @param id Object identity.
+     * @return Coordinate of the object.
+     * @throws std::invalid_argument If the identity does not identify a live object in this layout.
+     */
     [[nodiscard]] tile get_tile(const object_id id) const
     {
         return checked_object(id).position;
@@ -459,7 +472,10 @@ class gate_layout : public CoordinateLayout
         crossing_count  = crossing_count - before + crossing_contribution(t, object.kind);
         return id;
     }
-    /** @brief Removes an object and disconnects all inputs and sinks. Stale identities reject. */
+    /**
+     * @brief Removes an object and disconnects all inputs and sinks.
+     * @throws std::invalid_argument If the identity does not identify a live object in this layout.
+     */
     void remove(const object_id id)
     {
         auto& object = checked_object(id);
@@ -1382,7 +1398,11 @@ class gate_layout : public CoordinateLayout
         return clocking_state.get_synchronization_element(cz);
     }
 
-    /** @brief Counts zones with a nonzero Hold-phase extension. @return Synchronization element count. */
+    /**
+     * @brief Counts zones with a nonzero Hold-phase extension.
+     *
+     * @return Synchronization element count.
+     */
     [[nodiscard]] uint32_t num_se() const
     {
         return clocking_state.num_se();

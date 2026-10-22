@@ -1,24 +1,13 @@
 # iNML
 
+The iNML module represents nanomagnet layouts and maps logic gates with the
+ToPoliNano gate library. It also provides MagCAD magnet counts and layout I/O.
+
 ```{toctree}
 :maxdepth: 1
 
 io/io
 layout
-```
-
-## iNML ToPoliNano Library
-
-**Header:** `fiction/technology/inml/topolinano_library.hpp`
-
-```{doxygenclass} fiction::inml::topolinano_library
-:members:
-```
-
-## MagCAD Magnet Count
-
-**Header:** `fiction/technology/inml/magcad_magnet_count.hpp`
-
-```{doxygenfunction} fiction::inml::magcad_magnet_count
-
+topolinano_library
+magcad_magnet_count
 ```

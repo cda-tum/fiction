@@ -20,7 +20,6 @@
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
 
-#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <memory>
@@ -50,13 +49,18 @@ class virtual_pi_network : public Ntk
 {
   public:
     // name is part of a SFINAE detection idiom used across fiction::traits and cannot be renamed to satisfy
+    /** @brief Marks a network that supports virtual primary inputs. */
     // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_virtual_network_type = true;
 
+    /** @brief Underlying network storage type. */
     using storage = typename Ntk::storage;
-    using node    = typename Ntk::node;
-    using signal  = typename Ntk::signal;
+    /** @brief Network node type. */
+    using node = typename Ntk::node;
+    /** @brief Network signal type. */
+    using signal = typename Ntk::signal;
 
+    /** @brief Stores virtual primary input nodes. */
     struct virtual_storage
     {
         /**
@@ -69,6 +73,7 @@ class virtual_pi_network : public Ntk
         phmap::parallel_flat_hash_map<node, node> map_virtual_to_real_pi{};
     };
 
+    /** @brief Shared virtual primary input storage. */
     using v_strg = std::shared_ptr<virtual_storage>;
 
     /**
@@ -120,7 +125,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] bool is_virtual_pi(node const& n) const
     {
-        return std::ranges::find(v_storage->virtual_inputs, n) != v_storage->virtual_inputs.cend();
+        return v_storage->map_virtual_to_real_pi.contains(n);
     }
 
     /**
@@ -161,7 +166,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] bool is_virtual_ci(node const& n) const
     {
-        return std::ranges::find(v_storage->virtual_inputs, n) != v_storage->virtual_inputs.cend();
+        return v_storage->map_virtual_to_real_pi.contains(n);
     }
 
     /**

@@ -65,10 +65,14 @@ void register_shifted_cartesian_layout(nb::module_& m, const char* name)
     // Keep the GIL for constant-time geometry access and mutation; releasing it costs more than these operations.
     nb::class_<Lyt>(m, name, SHIFTED_CARTESIAN_LAYOUT_DOC)
         .def(nb::init<fiction::layouts::arrangement>(), nb::arg("arrangement"),
-             extent_doc(DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout)).c_str())
+             parameter_doc(DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout),
+                           {{"size", "extent"}, {"a", "arrangement"}})
+                 .c_str())
         .def(nb::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), nb::arg("arrangement"),
              nb::arg("extent"),
-             extent_doc(DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout)).c_str())
+             parameter_doc(DOC(fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout),
+                           {{"size", "extent"}, {"a", "arrangement"}})
+                 .c_str())
         .def(
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
@@ -94,7 +98,8 @@ void register_shifted_cartesian_layout(nb::module_& m, const char* name)
             "area", [](const Lyt& lyt) { return lyt.area(); }, DOC(fiction_layouts_cartesian_layout_area))
         .def(
             "resize", [](Lyt& lyt, const fiction::layouts::layout_base::extent& extent) { lyt.resize(extent); },
-            nb::arg("extent"), extent_doc(DOC(fiction_layouts_cartesian_layout_resize)).c_str())
+            nb::arg("extent"),
+            parameter_doc(DOC(fiction_layouts_cartesian_layout_resize), {{"size", "extent"}}).c_str())
         .def(
             "north", [](const Lyt& lyt, const fiction::layouts::layout_base::coordinate& c) { return lyt.north(c); },
             nb::arg("c"), DOC(fiction_layouts_cartesian_layout_north))

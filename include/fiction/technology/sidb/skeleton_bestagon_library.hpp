@@ -20,15 +20,12 @@
 
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/gate_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 
-#include <concepts>
 #include <stdexcept>
 
 namespace fiction::sidb
@@ -124,22 +121,18 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
     /**
      * @brief Determines the port directions of a given tile.
      *
-     * @tparam Lyt Pointy-top hexagonal gate-level layout type.
      * @param lyt Layout that contains the tile.
      * @param t Tile whose incoming and outgoing port directions are determined.
      * @return Incoming and outgoing port directions of the tile.
      * @throws std::invalid_argument if `lyt` shifts columns instead of rows.
      */
-    template <typename Lyt>
-        requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; } &&
-                 std::derived_from<Lyt, layouts::hexagonal_layout> &&
-                 (!std::derived_from<Lyt, layouts::shifted_cartesian_layout>)
     [[nodiscard]] static fcn::port_list<fcn::port_direction>
-    determine_port_routing(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+    determine_port_routing(const layouts::hexagonal_gate_layout&            lyt,
+                           const fiction::layouts::layout_base::coordinate& t)
     {
         if (!layouts::is_row_arrangement(lyt.get_arrangement()))
         {
-            throw std::invalid_argument("GateLyt must be a pointy-top hexagonal layout");
+            throw std::invalid_argument("A pointy-top hexagonal layout is required");
         }
 
         if (!lyt.find_object(t))

@@ -8,7 +8,7 @@
 
 """Truth tables and logic network transformations."""
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Callable
 from typing import Literal, overload
@@ -370,6 +370,7 @@ def network_balancing(
     *,
     on_progress: Callable[[str, int, int], None] | None = None,
     unify_outputs: bool = False,
+    buffer_constant_outputs: bool = True,
 ) -> mnt.pyfiction.networks.technology_network:
     """
     Insert identity nodes to balance network paths.
@@ -379,6 +380,8 @@ def network_balancing(
     Args:
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         unify_outputs: Flag to indicate that all output nodes should be in the same rank.
+        buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
+            set to False for flows that do not place constants, which then also ignore them in the check.
     """
 
 def is_balanced(
@@ -386,6 +389,7 @@ def is_balanced(
     *,
     on_progress: Callable[[str, int, int], None] | None = None,
     unify_outputs: bool = False,
+    buffer_constant_outputs: bool = True,
 ) -> bool:
     """
     Check whether network paths are balanced.
@@ -394,6 +398,8 @@ def is_balanced(
     Args:
         on_progress: Callback receiving (task, completed, total); None disables progress reporting.
         unify_outputs: Flag to indicate that all output nodes should be in the same rank.
+        buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
+            set to False for flows that do not place constants, which then also ignore them in the check.
     """
 
 class missing_required_gates_exception(RuntimeError): ...
@@ -414,9 +420,9 @@ class mapper_stats:
     @property
     def multioutput_gates(self) -> int: ...
     @property
-    def time_multioutput(self) -> datetime.timedelta: ...
+    def time_multioutput(self) -> dt.timedelta: ...
     @property
-    def time_total(self) -> datetime.timedelta: ...
+    def time_total(self) -> dt.timedelta: ...
     @property
     def round_stats(self) -> list[str]: ...
 
@@ -611,26 +617,19 @@ def convert_network(
     target: Literal[network_target.TEC] = ...,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Converts a logic network into an equivalent one of another type.
-    Thereby, this function is very similar to
-    `mockturtle::cleanup_dangling`. However, it supports real buffer nodes
-    used for fanouts and path balancing in fiction.
+    Convert a logic network to the selected network type.
+    Real buffer nodes used for fanouts and path balancing are supported. Converting
+    to the input network's type returns a copy with dangling nodes removed.
 
     Args:
-        ntk: The input logic network.
-
-    Template Args:
-        NtkDest: Logic network with constant, input, output, and Boolean
-                 gate creation.
-        NtkSrc: Logic network with node, interface, and fanin traversal.
+        network: Input logic network.
+        target: Network type to produce: TEC, AIG, XAG, or MIG. Defaults to network_target.TEC.
 
     Returns:
-        A logic network of type `NtkDest` that is logically equivalent to
-        `ntk`.
+        A logically equivalent network of the selected type.
 
-    Note:
-        If `NtkDest` and `NtkSrc` are of the same type, this function
-        returns `ntk` cleaned using `mockturtle::cleanup_dangling`.
+    Raises:
+        ValueError: A gate has neither a supported implementation nor a truth table.
     """
 
 @overload
@@ -670,3 +669,147 @@ def convert_network(
     | mnt.pyfiction.networks.xag_network
     | mnt.pyfiction.networks.mig_network
 ): ...
+
+class planarization_strategy(enum.Enum):
+    """How a level is made crossing-free."""
+
+    DUPLICATION = 0
+    """
+    Duplicate nodes on every level.
+
+    The result is planar.
+    """
+
+    HYBRID = 1
+    """
+    Decide per level whether duplicating nodes or keeping the crossings
+    for `crossing_gate_planarization` is cheaper.
+
+    The result contains crossings on the levels where crossing gates are
+    cheaper.
+    """
+
+class decision_criterion(enum.Enum):
+    """How the hybrid strategy estimates the cost of duplicating a level."""
+
+    WEIGHTED_CONE = 0
+    """
+    The weighted size of the duplicated cones, see
+    `duplication_cost_model`.
+    """
+
+    LOOKAHEAD = 1
+    """
+    The number of nodes that duplicating actually creates.
+
+    The copies on the level plus those that running the duplication
+    strategy on the levels below creates.
+
+    Both options are run, and the second run stops once it exceeds the
+    first. Levels whose runs exceed `lookahead_budget` fall back to
+    `WEIGHTED_CONE`.
+    """
+
+class output_order(enum.Enum):
+    """
+    Order in which the primary outputs are placed in the first level
+    before the algorithm starts.
+    """
+
+    KEEP_PO_ORDER = 0
+    """Keep the primary output order of the input network."""
+
+    RANDOM_PO_ORDER = 1
+    """
+    Shuffle the primary outputs randomly.
+
+    Different orders can yield different numbers of duplications.
+    """
+
+class planarization_stats:
+    """Statistics of the planarization pipeline."""
+
+    def __init__(self) -> None:
+        """Default constructor."""
+
+    @property
+    def time_total(self) -> dt.timedelta:
+        """Runtime of the whole pipeline."""
+
+    @property
+    def num_duplications(self) -> int:
+        """
+        Number of nodes in the planarized network minus the number of nodes in
+        the input network.
+        """
+
+    @property
+    def num_crossing_levels(self) -> int:
+        """Number of levels on which the hybrid strategy kept the crossings."""
+
+    @property
+    def num_crossings(self) -> int:
+        """Number of crossings replaced by crossing gates."""
+
+    @property
+    def num_nodes(self) -> int:
+        """Number of nodes of the result."""
+
+def planarization(
+    network: mnt.pyfiction.networks.technology_network,
+    *,
+    on_progress: Callable[[str, int, int], None] | None = None,
+    strategy: planarization_strategy = ...,
+    criterion: decision_criterion = ...,
+    xor_gates: bool = True,
+    max_swaps: int = 32,
+    max_crossings_per_level: int = 1000,
+    node_weight: float = 2.0,
+    buffer_weight: float = 0.5,
+    depth_growth: float = 1.02,
+    lookahead_budget: int = 1000000,
+    max_duplications: int = 2000000,
+    po_order: output_order = ...,
+    seed: int | None = None,
+    fanout_degree: int = 2,
+    statistics: planarization_stats | None = None,
+) -> tuple[mnt.pyfiction.networks.technology_network, list[int]]:
+    """
+    Planarizes a balanced technology network with unified outputs: node duplication with the chosen
+    strategy, crossing gates for the levels the hybrid strategy left crossed, planar fanout substitution, and planar
+    rebalancing. See `network_balancing` for the precondition. Gates that no output reaches are dropped. The function
+    checks the result for crossings and for balance with unified outputs; `is_fanout_substituted` checks its fanout degree.
+
+    Args:
+        network: Balanced technology network with unified outputs.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+        strategy: Planarization strategy: duplicate every level, or decide per level (hybrid).
+        criterion: How the hybrid strategy estimates the cost of duplicating a level.
+        xor_gates: Whether the crossing gates consist of XOR gates, which are smaller and shallower than the
+            AND-OR-NOT crossing gates.
+        max_swaps: Maximum number of adjacent swaps per level that the hybrid strategy tries to reduce crossings.
+        max_crossings_per_level: Levels with more crossings are always duplicated; the crossing gates reject such levels.
+        node_weight: Weight of a gate in the duplication cost model of the hybrid strategy.
+        buffer_weight: Weight of a buffer or inverter chain node in the duplication cost model.
+        depth_growth: Growth of the duplication cost per level in the duplication cost model.
+        lookahead_budget: Nodes a lookahead may create before it is cut off; must be positive.
+        max_duplications: Abort once more than this many nodes are duplicated at once; 0 lifts the limit.
+        po_order: Primary output order used to seed the first level.
+        seed: Seed of the random primary output order; None draws a random seed.
+        fanout_degree: Maximum output degree of the fanout nodes in the result; at least 2.
+        statistics: Statistics object filled by the pipeline; None discards statistics.
+
+    Returns:
+        A pair of the planar, balanced, fanout-substituted network in rank order and, for every input of that
+        network, the index of the input of `network` it stands for. A duplicated input appears several times; tie
+        those inputs together when simulating or checking equivalence.
+
+    Raises:
+        ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if
+            `fanout_degree` is below 2, or if the duplication options are invalid (a lookahead budget of zero, a
+            negative or non-finite cost weight).
+        RuntimeError: If more than `max_duplications` nodes were duplicated, if two adjacent
+            levels have more than `max_crossings_per_level` crossings, or if a stage cannot keep its contract.
+            `max_duplications = 0` lifts the limit, and node duplication can grow exponentially with the depth of the
+            network.
+    """

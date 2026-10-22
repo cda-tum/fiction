@@ -109,6 +109,7 @@ struct rng_state
     explicit rng_state(const uint32_t seed) noexcept : gen{seed} {}
 };
 
+/** @brief Replaces high fanout with fanout trees. */
 template <typename NtkDest, typename NtkSrc>
 class fanout_substitution_impl
 {
@@ -129,6 +130,7 @@ class fanout_substitution_impl
         }
     }
 
+    /** @brief Returns a network with fanouts replaced by fanout trees. */
     NtkDest run()
     {
         // initialize a network copy
@@ -395,6 +397,7 @@ class fanout_substitution_impl
     }
 };
 
+/** @brief Checks whether fanouts satisfy the substitution constraints. */
 template <typename Ntk>
 class is_fanout_substituted_impl
 {
@@ -406,6 +409,7 @@ class is_fanout_substituted_impl
      */
     is_fanout_substituted_impl(const Ntk& src, fanout_substitution_params p) : ntk{src}, ps{std::move(p)} {}
 
+    /** @brief Returns whether the network satisfies fanout substitution constraints. */
     bool run()
     {
         ntk.foreach_node(

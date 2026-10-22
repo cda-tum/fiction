@@ -61,7 +61,7 @@ void register_mol_qca_layout(nb::module_& m)
 
     cls.def(nb::init<>())
         .def(nb::init<const layout::extent&, std::string>(), nb::arg("extent"), nb::arg("layout_name") = "",
-             extent_doc(DOC(fiction_mol_qca_layout_layout)).c_str());
+             parameter_doc(DOC(fiction_mol_qca_layout_layout), {{"size", "extent"}, {"name", "layout_name"}}).c_str());
 
     detail::register_cell_grid(cls);
 

@@ -39,9 +39,9 @@ class coordinate:
         coordinate_y, coordinate_z).
 
         Args:
-            coordinate_x: x position.
-            coordinate_y: y position.
-            coordinate_z: z position.
+            x: x position.
+            y: y position.
+            z: z position.
 
         Template Args:
             X: Type of x.
@@ -49,8 +49,7 @@ class coordinate:
             Z: Type of z.
 
         Raises:
-            std::overflow_error: If an axis is outside the signed 32-bit
-                                 range.
+            OverflowError: If an axis is outside the signed 32-bit range.
         """
 
     @overload
@@ -254,8 +253,8 @@ class cartesian_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two.
         """
 
     def coord(self, x: int, y: int, z: int = 0) -> coordinate:
@@ -277,8 +276,7 @@ class cartesian_layout:
             A coordinate in the layout of type `coordinate`.
 
         Raises:
-            std::overflow_error: If an axis is outside the signed 32-bit
-                                 range.
+            OverflowError: If an axis is outside the signed 32-bit range.
 
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
@@ -316,9 +314,9 @@ class cartesian_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two. The dimensions
-                               remain unchanged.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two. The dimensions remain
+                        unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -779,9 +777,13 @@ class cartesian_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
+        Tests whether the geometry contains a coordinate.
+
         Args:
-            c: Coordinate. @return Whether the geometry contains the
-               coordinate.
+            c: Coordinate.
+
+        Returns:
+            Whether the geometry contains the coordinate.
         """
 
     def coordinates(
@@ -878,12 +880,12 @@ class shifted_cartesian_layout:
         extent is empty.
 
         Args:
-            a: Arrangement of shifted rows or columns.
+            arrangement: Arrangement of shifted rows or columns.
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -913,8 +915,7 @@ class shifted_cartesian_layout:
             A coordinate in the layout of type `coordinate`.
 
         Raises:
-            std::overflow_error: If an axis is outside the signed 32-bit
-                                 range.
+            OverflowError: If an axis is outside the signed 32-bit range.
 
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
@@ -952,9 +953,9 @@ class shifted_cartesian_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two. The dimensions
-                               remain unchanged.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two. The dimensions remain
+                        unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -1415,9 +1416,13 @@ class shifted_cartesian_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
+        Tests whether the geometry contains a coordinate.
+
         Args:
-            c: Coordinate. @return Whether the geometry contains the
-               coordinate.
+            c: Coordinate.
+
+        Returns:
+            Whether the geometry contains the coordinate.
         """
 
     def coordinates(
@@ -1523,12 +1528,12 @@ class hexagonal_layout:
         extent is empty.
 
         Args:
-            a: Arrangement of shifted rows or columns.
+            arrangement: Arrangement of shifted rows or columns.
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two.
         """
 
     def get_arrangement(self) -> arrangement:
@@ -1558,8 +1563,7 @@ class hexagonal_layout:
             A coordinate in the layout of type `coordinate`.
 
         Raises:
-            std::overflow_error: If an axis is outside the signed 32-bit
-                                 range.
+            OverflowError: If an axis is outside the signed 32-bit range.
 
         Note:
             This function is equivalent to calling `coordinate(x, y, z)`.
@@ -1597,9 +1601,9 @@ class hexagonal_layout:
             extent: Axis sizes.
 
         Raises:
-            std::invalid_argument: If a size exceeds the coordinate domain.
-            std::out_of_range: If the layer count exceeds two. The dimensions
-                               remain unchanged.
+            ValueError: If a size exceeds the coordinate domain.
+            IndexError: If the layer count exceeds two. The dimensions remain
+                        unchanged.
         """
 
     def north(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> coordinate | None:
@@ -2060,9 +2064,13 @@ class hexagonal_layout:
 
     def is_within_bounds(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
         """
+        Tests whether the geometry contains a coordinate.
+
         Args:
-            c: Coordinate. @return Whether the geometry contains the
-               coordinate.
+            c: Coordinate.
+
+        Returns:
+            Whether the geometry contains the coordinate.
         """
 
     def coordinates(
@@ -2164,18 +2172,23 @@ class cartesian_gate_layout(cartesian_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. A sink is a destination input port driven by a source object's
-    output. One destination object may receive the same source at several
-    input indices; each connected input port is a distinct sink. Visitors
-    may edit coordinates, names, and capabilities. Object and terminal
-    visitors must not create or remove objects, change terminal order, or
-    replace the layout during traversal. Connection visitors must also
-    preserve the traversed input or sink connections, as specified on each
-    visitor.
+    state. Operations that require an existing object throw `ValueError`
+    if an identity does not identify a live object in this layout. This
+    includes removed objects, mismatched generations, and out-of-range
+    slots. `contains` tests whether an identity identifies a live object
+    without throwing. A sink is a destination input port driven by a
+    source object's output. One destination object may receive the same
+    source at several input indices; each connected input port is a
+    distinct sink. Visitors may edit coordinates, names, and capabilities.
+    Object and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement. Defaults
-                          to `cartesian_layout`.
+                          to `cartesian_layout`. Gate layouts cannot serve
+                          as coordinate geometries.
     """
 
     @overload
@@ -2697,8 +2710,17 @@ class cartesian_gate_layout(cartesian_layout):
 
     def get_tile(self, object: layout_object_id) -> coordinate:
         """
-        Returns the object's coordinate. @throws std::invalid_argument If the
-        identity is stale.
+        Returns the object's coordinate.
+
+        Args:
+            object: Object identity.
+
+        Returns:
+            Coordinate of the object.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -2718,8 +2740,11 @@ class cartesian_gate_layout(cartesian_layout):
 
     def remove(self, object: layout_object_id) -> None:
         """
-        Removes an object and disconnects all inputs and sinks. Stale
-        identities reject.
+        Removes an object and disconnects all inputs and sinks.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def move_object(
@@ -3102,9 +3127,9 @@ class cartesian_gate_layout(cartesian_layout):
         Assigns a synchronization element to the provided clock zone.
 
         Args:
-            cz: Clock zone to turn into a synchronization element.
-            se: Number of full clock cycles to extend `cz`'s Hold phase by. If
-                this value is 0, `cz` is turned back into a normal clock zone.
+            coordinate: Clock zone to turn into a synchronization element.
+            delay: Number of full clock cycles to extend `coordinate`'s Hold phase by. If
+                this value is 0, `coordinate` is turned back into a normal clock zone.
         """
 
     def is_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -3112,28 +3137,30 @@ class cartesian_gate_layout(cartesian_layout):
         Check whether the provided clock zone is a synchronization element.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
-            `true` iff `cz` is a synchronization element.
+            `true` iff `coordinate` is a synchronization element.
         """
 
     def get_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
-        Returns the Hold phase extension in clock cycles of clock zone `cz`.
+        Returns the Hold phase extension in clock cycles of clock zone `coordinate`.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
             Synchronization element value, i.e., Hold phase extension, of
-            clock zone `cz`.
+            clock zone `coordinate`.
         """
 
     def num_se(self) -> int:
         """
-        Counts zones with a nonzero Hold-phase extension. @return
-        Synchronization element count.
+        Counts zones with a nonzero Hold-phase extension.
+
+        Returns:
+            Synchronization element count.
         """
 
 class shifted_cartesian_gate_layout(shifted_cartesian_layout):
@@ -3143,18 +3170,23 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. A sink is a destination input port driven by a source object's
-    output. One destination object may receive the same source at several
-    input indices; each connected input port is a distinct sink. Visitors
-    may edit coordinates, names, and capabilities. Object and terminal
-    visitors must not create or remove objects, change terminal order, or
-    replace the layout during traversal. Connection visitors must also
-    preserve the traversed input or sink connections, as specified on each
-    visitor.
+    state. Operations that require an existing object throw `ValueError`
+    if an identity does not identify a live object in this layout. This
+    includes removed objects, mismatched generations, and out-of-range
+    slots. `contains` tests whether an identity identifies a live object
+    without throwing. A sink is a destination input port driven by a
+    source object's output. One destination object may receive the same
+    source at several input indices; each connected input port is a
+    distinct sink. Visitors may edit coordinates, names, and capabilities.
+    Object and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement. Defaults
-                          to `cartesian_layout`.
+                          to `cartesian_layout`. Gate layouts cannot serve
+                          as coordinate geometries.
     """
 
     @overload
@@ -3677,8 +3709,17 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     def get_tile(self, object: layout_object_id) -> coordinate:
         """
-        Returns the object's coordinate. @throws std::invalid_argument If the
-        identity is stale.
+        Returns the object's coordinate.
+
+        Args:
+            object: Object identity.
+
+        Returns:
+            Coordinate of the object.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -3698,8 +3739,11 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
 
     def remove(self, object: layout_object_id) -> None:
         """
-        Removes an object and disconnects all inputs and sinks. Stale
-        identities reject.
+        Removes an object and disconnects all inputs and sinks.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def move_object(
@@ -4082,9 +4126,9 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         Assigns a synchronization element to the provided clock zone.
 
         Args:
-            cz: Clock zone to turn into a synchronization element.
-            se: Number of full clock cycles to extend `cz`'s Hold phase by. If
-                this value is 0, `cz` is turned back into a normal clock zone.
+            coordinate: Clock zone to turn into a synchronization element.
+            delay: Number of full clock cycles to extend `coordinate`'s Hold phase by. If
+                this value is 0, `coordinate` is turned back into a normal clock zone.
         """
 
     def is_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -4092,28 +4136,30 @@ class shifted_cartesian_gate_layout(shifted_cartesian_layout):
         Check whether the provided clock zone is a synchronization element.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
-            `true` iff `cz` is a synchronization element.
+            `true` iff `coordinate` is a synchronization element.
         """
 
     def get_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
-        Returns the Hold phase extension in clock cycles of clock zone `cz`.
+        Returns the Hold phase extension in clock cycles of clock zone `coordinate`.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
             Synchronization element value, i.e., Hold phase extension, of
-            clock zone `cz`.
+            clock zone `coordinate`.
         """
 
     def num_se(self) -> int:
         """
-        Counts zones with a nonzero Hold-phase extension. @return
-        Synchronization element count.
+        Counts zones with a nonzero Hold-phase extension.
+
+        Returns:
+            Synchronization element count.
         """
 
 class hexagonal_gate_layout(hexagonal_layout):
@@ -4123,18 +4169,23 @@ class hexagonal_gate_layout(hexagonal_layout):
     Objects have stable identities independent of their coordinates.
     Connections describe declared topology; physical validation checks
     adjacency, clocking, and geometry separately. Copies own independent
-    state. A sink is a destination input port driven by a source object's
-    output. One destination object may receive the same source at several
-    input indices; each connected input port is a distinct sink. Visitors
-    may edit coordinates, names, and capabilities. Object and terminal
-    visitors must not create or remove objects, change terminal order, or
-    replace the layout during traversal. Connection visitors must also
-    preserve the traversed input or sink connections, as specified on each
-    visitor.
+    state. Operations that require an existing object throw `ValueError`
+    if an identity does not identify a live object in this layout. This
+    includes removed objects, mismatched generations, and out-of-range
+    slots. `contains` tests whether an identity identifies a live object
+    without throwing. A sink is a destination input port driven by a
+    source object's output. One destination object may receive the same
+    source at several input indices; each connected input port is a
+    distinct sink. Visitors may edit coordinates, names, and capabilities.
+    Object and terminal visitors must not create or remove objects, change
+    terminal order, or replace the layout during traversal. Connection
+    visitors must also preserve the traversed input or sink connections,
+    as specified on each visitor.
 
     Template Args:
         CoordinateLayout: Coordinate geometry used for placement. Defaults
-                          to `cartesian_layout`.
+                          to `cartesian_layout`. Gate layouts cannot serve
+                          as coordinate geometries.
     """
 
     @overload
@@ -4657,8 +4708,17 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     def get_tile(self, object: layout_object_id) -> coordinate:
         """
-        Returns the object's coordinate. @throws std::invalid_argument If the
-        identity is stale.
+        Returns the object's coordinate.
+
+        Args:
+            object: Object identity.
+
+        Returns:
+            Coordinate of the object.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def source(self, input: layout_input_port) -> layout_object_id | None:
@@ -4678,8 +4738,11 @@ class hexagonal_gate_layout(hexagonal_layout):
 
     def remove(self, object: layout_object_id) -> None:
         """
-        Removes an object and disconnects all inputs and sinks. Stale
-        identities reject.
+        Removes an object and disconnects all inputs and sinks.
+
+        Raises:
+            ValueError: If the identity does not identify a live object in
+                        this layout.
         """
 
     def move_object(
@@ -5062,9 +5125,9 @@ class hexagonal_gate_layout(hexagonal_layout):
         Assigns a synchronization element to the provided clock zone.
 
         Args:
-            cz: Clock zone to turn into a synchronization element.
-            se: Number of full clock cycles to extend `cz`'s Hold phase by. If
-                this value is 0, `cz` is turned back into a normal clock zone.
+            coordinate: Clock zone to turn into a synchronization element.
+            delay: Number of full clock cycles to extend `coordinate`'s Hold phase by. If
+                this value is 0, `coordinate` is turned back into a normal clock zone.
         """
 
     def is_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -5072,28 +5135,30 @@ class hexagonal_gate_layout(hexagonal_layout):
         Check whether the provided clock zone is a synchronization element.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
-            `true` iff `cz` is a synchronization element.
+            `true` iff `coordinate` is a synchronization element.
         """
 
     def get_synchronization_element(self, coordinate: coordinate | tuple[int, int] | tuple[int, int, int]) -> int:
         """
-        Returns the Hold phase extension in clock cycles of clock zone `cz`.
+        Returns the Hold phase extension in clock cycles of clock zone `coordinate`.
 
         Args:
-            cz: Clock zone to check.
+            coordinate: Clock zone to check.
 
         Returns:
             Synchronization element value, i.e., Hold phase extension, of
-            clock zone `cz`.
+            clock zone `coordinate`.
         """
 
     def num_se(self) -> int:
         """
-        Counts zones with a nonzero Hold-phase extension. @return
-        Synchronization element count.
+        Counts zones with a nonzero Hold-phase extension.
+
+        Returns:
+            Synchronization element count.
         """
 
 class obstructions:
@@ -5119,7 +5184,7 @@ class obstructions:
             c: Coordinate to obstruct.
 
         Raises:
-            std::bad_alloc: If allocation fails.
+            MemoryError: If allocation fails.
         """
 
     def obstruct_connection(
@@ -5136,7 +5201,7 @@ class obstructions:
             tgt: Target coordinate.
 
         Raises:
-            std::bad_alloc: If allocation fails.
+            MemoryError: If allocation fails.
 
         Note:
             Coordinates marked this way will not be crossed with wires by path
@@ -5265,8 +5330,8 @@ def normalize_layout_coordinates(lyt: mnt.pyfiction.inml.inml_layout) -> mnt.pyf
         Normalized copy of `lyt`.
 
     Raises:
-        std::invalid_argument: If the normalized extent exceeds the signed
-                               coordinate domain.
+        ValueError: If the normalized extent exceeds the signed coordinate
+                    domain.
     """
 
 def random_coordinate(

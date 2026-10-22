@@ -25,7 +25,6 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -64,6 +63,7 @@ struct generate_edge_intersection_graph_params
     std::optional<uint32_t> path_limit = std::nullopt;
 };
 
+/** @brief Statistics for edge intersection graph generation. */
 struct generate_edge_intersection_graph_stats
 {
     /**
@@ -84,10 +84,10 @@ struct generate_edge_intersection_graph_stats
      * @brief Routing objective index for each vertex ID.
      */
     std::vector<std::size_t> objective_indices{};
-    /**
-     * Stores the size of the generated edge intersection graph.
-     */
-    std::size_t num_vertices, num_edges;
+    /** @brief Number of vertices in the intersection graph. */
+    std::size_t num_vertices;
+    /** @brief Number of edges in the intersection graph. */
+    std::size_t num_edges;
 };
 
 namespace detail
@@ -342,7 +342,7 @@ class generate_edge_intersection_graph_impl
  * An explicit zero path limit creates no candidate paths and counts each objective as unroutable without checking
  * endpoint bounds.
  *
- * @tparam Lyt Type of the clocked layout.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The layout to generate the edge intersection graph for.
  * @param objectives Source coordinates and indexed destination inputs.
  * @param ps Parameters.
@@ -351,16 +351,15 @@ class generate_edge_intersection_graph_impl
  * @throws std::invalid_argument If an objective endpoint lies outside the layout extent when ps.path_limit is absent
  * or nonzero.
  */
-template <typename Lyt>
-    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
-edge_intersection_graph generate_edge_intersection_graph(const Lyt&                              lyt,
+template <typename Geometry>
+edge_intersection_graph generate_edge_intersection_graph(const layouts::gate_layout<Geometry>&   lyt,
                                                          const std::vector<routing_objective>&   objectives,
                                                          generate_edge_intersection_graph_params ps  = {},
                                                          generate_edge_intersection_graph_stats* pst = nullptr)
 {
     generate_edge_intersection_graph_stats st{};
 
-    detail::generate_edge_intersection_graph_impl<Lyt> p{lyt, objectives, ps, st};
+    detail::generate_edge_intersection_graph_impl<layouts::gate_layout<Geometry>> p{lyt, objectives, ps, st};
 
     /** @brief Completed intersection graph retained while statistics are copied. */
     auto result = p.run();

@@ -97,10 +97,10 @@ def twoddwave_distance(
         2DDWave distance between `source` and `target`.
 
     Note:
-        To represent :math:`\\infty`,
-        `std::numeric_limits<uint32_t>::max()` is returned for distances
-        of infinite length. We are using `uint32_t` to prevent overflows
-        when adding distances in the default `uint64_t` number range.
+        Infinite distances return 4,294,967,295 (2^32 - 1)
+        (`std::numeric_limits<uint32_t>::max()` in C++). This 32-bit
+        sentinel prevents overflows when adding distances in the default
+        64-bit unsigned number range.
     """
 
 def chebyshev_distance(
@@ -237,7 +237,8 @@ def a_star_distance(
     the polynomial complexity of A*.
 
     If no path between `source` and `target` exists in `layout`, the
-    returned distance is `std::numeric_limits<uint64_t>::max()`.
+    returned distance is 18,446,744,073,709,551,615 (2^64 - 1)
+    (`std::numeric_limits<uint64_t>::max()` in C++).
 
     Args:
         layout: The layout in which the distance between `source` and

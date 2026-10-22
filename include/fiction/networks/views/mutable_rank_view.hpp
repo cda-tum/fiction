@@ -26,13 +26,15 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
 namespace fiction::networks::views
 {
 /**
- * @class mutable_rank_view. Extends the mockturtle::rank_view
+ * @brief Extends the network rank interface with mutable ranks.
  *
  * Provides a view with node ranks for given networks. It adds functionalities to modify ranks. Most importantly, the
  * new `init_ranks()` function allows an array of nodes to be provided, which sets the levels and ranks of the nodes in
@@ -59,7 +61,8 @@ template <class Ntk, bool has_rank_interface =
     requires requires { typename static_depth_view<Ntk>; } &&
              (has_rank_interface || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_node_v<Ntk> &&
                                      mockturtle::has_get_node_v<Ntk> && mockturtle::has_num_pis_v<Ntk> &&
-                                     mockturtle::has_is_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk>))
+                                     mockturtle::has_is_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk> &&
+                                     mockturtle::has_size_v<Ntk> && mockturtle::has_node_to_index_v<Ntk>))
 class mutable_rank_view
 {};
 
@@ -74,13 +77,14 @@ template <class Ntk>
 class mutable_rank_view<Ntk, true> : public fiction::networks::views::static_depth_view<Ntk>
 {
   public:
+    /** @brief Constructs a rank view of the supplied network. */
     explicit mutable_rank_view(const Ntk& ntk) : fiction::networks::views::static_depth_view<Ntk>(ntk) {}
 };
 
 /**
  * @class mutable_rank_view<Ntk, false>
  *
- * If no rank_interface exists, inherits from mockturtle::static_depth_view<Ntk> and initializes ranks for the network.
+ * If no rank interface exists, inherits from `static_depth_view<Ntk>` and initializes the network ranks.
  *
  * @tparam Ntk The network type.
  */
@@ -88,21 +92,22 @@ template <class Ntk>
 class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_depth_view<Ntk>
 {
   public:
+    /** @brief Marks the topological node iteration order. */
     // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_topologically_sorted = true;
-    using storage                                 = typename Ntk::storage;
-    using node                                    = typename Ntk::node;
-    using signal                                  = typename Ntk::signal;
+    /** @brief Underlying network storage type. */
+    using storage = typename Ntk::storage;
+    /** @brief Network node type. */
+    using node = typename Ntk::node;
+    /** @brief Network signal type. */
+    using signal = typename Ntk::signal;
 
     /**
      * Default constructor for `mutable_rank_view`.
      * Initializes an empty `mutable_rank_view` object, sets up base class properties,
      * and ensures that the network type (Ntk) satisfies required interface methods.
      */
-    explicit mutable_rank_view() : fiction::networks::views::static_depth_view<Ntk>(), ranks{}, max_rank_width{0}
-    {
-        rank_pos.rehash(this->size());
-    }
+    explicit mutable_rank_view() : fiction::networks::views::static_depth_view<Ntk>(), ranks{}, max_rank_width{0} {}
 
     /**
      * Constructs an `mutable_rank_view` from an existing network.
@@ -111,13 +116,14 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * interface methods.
      *
      * @param ntk A reference to the network object.
+     * @throws std::invalid_argument If the network has a gate that no output reaches (see `init_ranks`).
      */
     explicit mutable_rank_view(const Ntk& ntk) :
             fiction::networks::views::static_depth_view<Ntk>{ntk},
             ranks{this->depth() + 1},
             max_rank_width{0}
     {
-        rank_pos.rehash(this->size());
+        rank_pos.assign(this->size(), NO_RANK);
 
         init_ranks();
     }
@@ -126,14 +132,14 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Constructs an `mutable_rank_view` from an existing network and a specific initial rank configuration.
      *
      * @param ntk Reference to the network.
-     * @param ranks A vector of vectors specifying initial ranks for the nodes within the network.
+     * @param init_ranks_vec A vector of vectors specifying initial ranks for the nodes within the network.
      */
     explicit mutable_rank_view(const Ntk& ntk, const std::vector<std::vector<node>>& init_ranks_vec) :
             fiction::networks::views::static_depth_view<Ntk>{ntk},
             ranks{this->depth() + 1},
             max_rank_width{0}
     {
-        rank_pos.rehash(this->size());
+        rank_pos.assign(this->size(), NO_RANK);
 
         init_ranks(init_ranks_vec);
     }
@@ -167,10 +173,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         // call assignment operator of `static_depth_view`
         static_depth_view<Ntk>::operator=(other);
 
-        /* update the base class */
-        this->_storage = other._storage;
-        this->_events  = other._events;
-
         /* copy */
         rank_pos       = other.rank_pos;
         ranks          = other.ranks;
@@ -181,19 +183,16 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 
     /**
      * Move constructor for `mutable_rank_view`.
-     *
-     * @param other The `mutable_rank_view` object to move from.
      */
-    mutable_rank_view(mutable_rank_view&&) noexcept = default;
+    mutable_rank_view(mutable_rank_view&&) = default;
 
     /**
      * Move assignment operator for `mutable_rank_view`.
      * Transfers ownership of resources from another `mutable_rank_view` object.
      *
-     * @param other The `mutable_rank_view` object to move from.
      * @return A reference to this object after assignment.
      */
-    mutable_rank_view& operator=(mutable_rank_view&&) noexcept = default;
+    mutable_rank_view& operator=(mutable_rank_view&&) = default;
 
     /**
      * Destructor for `mutable_rank_view`.
@@ -201,23 +200,31 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     ~mutable_rank_view() = default;
 
     /**
-     * Returns the rank position of a node.
+     * @brief Returns the rank position of a node.
      *
      * @param n Node to get the rank position of.
      * @return Rank position of node `n`.
+     * @throws std::out_of_range If `n` has no rank, which is the case for a node added after the last `update_ranks`.
      */
-    uint32_t rank_position(const node& n) const noexcept
+    uint32_t rank_position(const node& n) const
     {
         assert(!this->is_constant(n) && "node must not be constant");
 
-        return rank_pos.at(n);
+        const auto pos = position_of(n);
+
+        if (pos == NO_RANK)
+        {
+            throw std::out_of_range("node has no rank");
+        }
+
+        return pos;
     }
 
     /**
      * Verifies the validity of ranks and rank positions within the `mutable_rank_view` context.
      * The view is valid, if the level of each node stored in the `ranks` array corresponds to the
      * `static_depth_view::level()` and if the ranks saved in the `ranks` array are equivalent to the ranks in the
-     * `rank_pos` hashmap.
+     * `rank_pos` array.
      *
      * @return A boolean indicating whether the ranks and rank positions are valid (true) or not (false).
      */
@@ -235,7 +242,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
                     return false;
                 }
                 // Check if the rank_pos is not in ascending order
-                if (rank_pos.at(n) != expected_rank_pos)
+                if (position_of(n) != expected_rank_pos)
                 {
                     return false;
                 }
@@ -246,36 +253,61 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     }
 
     /**
-     * Sets the associated rank positions for nodes in a specific level, given the order of `nodes`.
+     * @brief Sets the associated rank positions for nodes in a specific level, given the order of `nodes`.
      *
      * @param level Level at which to replace nodes.
      * @param nodes The new node order to be set at the given level.
+     * @throws std::out_of_range If the network has no such level.
+     * @throws std::invalid_argument If `nodes` is not a permutation of the nodes in the level.
      */
     void set_ranks(const uint32_t level, const std::vector<node>& nodes)
     {
+        if (level >= ranks.size())
+        {
+            throw std::out_of_range("mutable_rank_view: the network has no such level");
+        }
+
         auto& rank = ranks[level];
 
-        // check that the `rank` contains all nodes from `nodes`
-        assert(rank.size() == nodes.size());
-        auto sort_rank  = rank;
-        auto sort_nodes = nodes;
-        std::ranges::sort(sort_rank);
-        std::ranges::sort(sort_nodes);
-        assert(sort_rank == sort_nodes);
+        // `nodes` is a permutation of `rank` iff it has the size of `rank` and lists distinct members of it
+        bool permutation = nodes.size() == rank.size();
+
+        std::vector<bool> listed(rank.size(), false);
+
+        for (auto it = nodes.cbegin(); permutation && it != nodes.cend(); ++it)
+        {
+            const auto pos = position_of(*it);
+
+            permutation = pos < rank.size() && rank[pos] == *it && !listed[pos];
+
+            if (permutation)
+            {
+                listed[pos] = true;
+            }
+        }
+
+        if (!permutation)
+        {
+            throw std::invalid_argument("mutable_rank_view: the nodes are not a permutation of the nodes in the level");
+        }
 
         // assign new ranks
         rank = nodes;
-        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
+        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { position_slot(n) = i++; });
     }
 
     /**
-     * Sets the associated rank positions for all nodes in the network.
+     * @brief Sets the associated rank positions for all nodes in the network.
      *
      * @param new_ranks A vector of vectors specifying the new node order for each level.
+     * @throws std::invalid_argument If `new_ranks` does not hold one permutation of the nodes per level.
      */
     void set_all_ranks(const std::vector<std::vector<node>>& new_ranks)
     {
-        assert(new_ranks.size() == ranks.size());
+        if (new_ranks.size() != ranks.size())
+        {
+            throw std::invalid_argument("mutable_rank_view: the number of levels differs from the network's");
+        }
 
         for (uint32_t level = 0; level < new_ranks.size(); ++level)
         {
@@ -354,8 +386,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     {
         assert(this->level(n1) == this->level(n2) && "nodes must be in the same rank");
 
-        auto& pos1 = rank_pos[n1];
-        auto& pos2 = rank_pos[n2];
+        auto& pos1 = position_slot(n1);
+        auto& pos2 = position_slot(n2);
 
         std::swap(ranks[this->level(n1)][pos1], ranks[this->level(n2)][pos2]);
         std::swap(pos1, pos2);
@@ -377,7 +409,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         auto& rank = ranks[level];
 
         std::ranges::sort(rank, cmp);
-        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
+        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { position_slot(n) = i++; });
     }
 
     /**
@@ -464,7 +496,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         pis.reserve(this->num_pis());
 
         fiction::networks::views::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
-        std::ranges::sort(pis, [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
+        std::ranges::sort(pis,
+                          [this](auto const& n1, auto const& n2) { return rank_position(n1) < rank_position(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
 
@@ -517,34 +550,29 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         pis.reserve(this->num_pis());
 
         fiction::networks::views::static_depth_view<Ntk>::foreach_ci([&pis](auto const& pi) { pis.push_back(pi); });
-        std::ranges::sort(pis, [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
+        std::ranges::sort(pis,
+                          [this](auto const& n1, auto const& n2) { return rank_position(n1) < rank_position(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
     /**
-     * Overrides the base class method to also call the add_event on create_pi().
+     * @brief Recomputes levels and ranks.
      *
-     * @return Newly created PI signal.
-     */
-    signal create_pi()
-    {
-        auto const n = fiction::networks::views::static_depth_view<Ntk>::create_pi();
-        return n;
-    }
-
-    /**
-     * Update the ranks in the `mutable_rank_view`.
+     * Ranks start in node index order per level. After an exception the view holds no valid ranks until
+     * `update_ranks` succeeds.
+     *
+     * @throws std::invalid_argument If the network has a gate that no output reaches.
      */
     void update_ranks()
     {
         this->update_levels();
-        rank_pos.clear();
-        rank_pos.rehash(this->size());
+        max_rank_width = 0;
+        rank_pos.assign(this->size(), NO_RANK);
         ranks.clear();
         ranks.resize(this->depth() + 1);
         init_ranks();
     }
 
-    /*
+    /**
      * Add a node to the `mutable_rank_view` and update its rank.
      *
      * @param n Node added to the `mutable_rank_view`.
@@ -558,16 +586,18 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
             // add sufficient ranks to store the new node
             ranks.insert(ranks.end(), this->level(n) - ranks.size() + 1, {});
         }
-        rank_pos.rehash(this->size());
-
         insert_in_rank(n);
     }
 
   private:
     /**
-     * Hashmap assigning ranks to nodes.
+     * @brief Marks a node without a rank position.
      */
-    phmap::flat_hash_map<node, uint32_t> rank_pos;
+    static constexpr uint32_t NO_RANK = std::numeric_limits<uint32_t>::max();
+    /**
+     * @brief Rank position per node index; `NO_RANK` for a node without one.
+     */
+    std::vector<uint32_t> rank_pos;
     /**
      * The nodes stored in an rank array.
      */
@@ -578,33 +608,77 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     uint32_t max_rank_width;
 
     /**
+     * @brief Rank position of a node, `NO_RANK` if it has none.
+     *
+     * @param n Node to look up.
+     * @return Position of `n` within its rank.
+     */
+    [[nodiscard]] uint32_t position_of(const node& n) const noexcept
+    {
+        const auto i = static_cast<std::size_t>(this->node_to_index(n));
+
+        return i < rank_pos.size() ? rank_pos[i] : NO_RANK;
+    }
+    /**
+     * @brief Rank position slot of a node; grows the storage for a node added after the last update.
+     *
+     * @param n Node to look up.
+     * @return Reference to the position of `n`.
+     */
+    uint32_t& position_slot(const node& n)
+    {
+        const auto i = static_cast<std::size_t>(this->node_to_index(n));
+
+        if (i >= rank_pos.size())
+        {
+            rank_pos.resize(i + 1, NO_RANK);
+        }
+
+        return rank_pos[i];
+    }
+    /**
      * Inserts a node into the rank and updates the rank position, ranks, and max rank width accordingly.
      *
      * @param n The node to insert into the rank.
      */
     void insert_in_rank(const node& n)
     {
-        auto& rank  = ranks[this->level(n)];
-        rank_pos[n] = static_cast<uint32_t>(rank.size());
+        auto& rank       = ranks[this->level(n)];
+        position_slot(n) = static_cast<uint32_t>(rank.size());
         rank.push_back(n);
         max_rank_width = std::max(max_rank_width, static_cast<uint32_t>(rank.size()));
     }
 
     /**
-     * Initializes the ranks for the given network. It traverses the nodes in the network using a depth-first search and
-     * inserts each non-constant node into the rank.
+     * @brief Initializes the ranks for the given network.
      *
-     * This function is noexcept.
+     * It traverses the nodes in the network in index order and inserts each non-constant node into the rank of its
+     * level, so that every non-constant node, including an input that drives nothing, has a rank afterwards.
+     *
+     * A gate that no output reaches has no level and would have no rank either. Such a network is rejected: the view
+     * keeps the invariant that every non-constant node is ranked, and callers remove dead gates beforehand with
+     * `mockturtle::cleanup_dangling`.
+     *
+     * @throws std::invalid_argument If the network has a gate that no output reaches.
      */
-    void init_ranks() noexcept
+    void init_ranks()
     {
         fiction::networks::views::static_depth_view<Ntk>::foreach_node(
             [this](auto const& n)
             {
-                if (!this->is_constant(n))
+                if (this->is_constant(n))
                 {
-                    insert_in_rank(n);
+                    return;
                 }
+
+                if (!this->has_level(n))
+                {
+                    throw std::invalid_argument(
+                        "mutable_rank_view: the network has a gate that no output reaches; remove dangling gates "
+                        "first, e.g., with mockturtle::cleanup_dangling");
+                }
+
+                insert_in_rank(n);
             });
     }
 
@@ -617,8 +691,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     void insert_in_rank(const node& n, std::size_t rank_level)
     {
         assert(rank_level < ranks.size());
-        auto& rank  = ranks[rank_level];
-        rank_pos[n] = static_cast<uint32_t>(rank.size());
+        auto& rank       = ranks[rank_level];
+        position_slot(n) = static_cast<uint32_t>(rank.size());
         rank.push_back(n);
         max_rank_width = std::max(max_rank_width, static_cast<uint32_t>(rank.size()));
     }

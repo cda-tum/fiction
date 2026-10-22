@@ -1,111 +1,15 @@
-# Simulation Engines
+(simulation-engines)=
 
-(quicksim)=
+# Engines
 
-## Heuristic Ground State Simulation
+Simulation engines search for physically valid SiDB charge configurations and ground states.
+Heuristic and exhaustive engines offer different accuracy and runtime tradeoffs.
 
-::::{tab-set}
-:sync-group: language
+```{toctree}
+:maxdepth: 1
 
-:::{tab-item} C++
-:sync: cpp
-
-**Header:** `fiction/technology/sidb/simulation/engines/quicksim.hpp`
-
-```{doxygenstruct} fiction::sidb::simulation::engines::quicksim_params
-:members:
-```
-
-```{doxygenfunction} fiction::sidb::simulation::engines::quicksim(const layout& lyt, const quicksim_params& ps = quicksim_params{})
-
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autofunction:: mnt.pyfiction.sidb.simulation.engines.quicksim
-```
-
-:::
-
-::::
-
-## Exhaustive Ground State Simulation
-
-::::{tab-set}
-:sync-group: language
-
-:::{tab-item} C++
-:sync: cpp
-
-(quickexact)=
-
-**Header:** `fiction/technology/sidb/simulation/engines/quickexact.hpp`
-
-```{doxygenstruct} fiction::sidb::simulation::engines::quickexact_params
-:members:
-```
-
-```{doxygenfunction} fiction::sidb::simulation::engines::quickexact(const layout& lyt, const quickexact_params& params = {})
-
-```
-
-(clustercomplete)=
-
-**Header:** `fiction/technology/sidb/simulation/engines/clustercomplete.hpp`
-
-```{doxygenstruct} fiction::sidb::simulation::engines::clustercomplete_params
-:members:
-```
-
-```{doxygenfunction} fiction::sidb::simulation::engines::clustercomplete(const layout& lyt, const clustercomplete_params& params = {})
-
-```
-
-**Header:** `fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp`
-
-```{doxygenfunction} fiction::sidb::simulation::engines::exhaustive_ground_state_simulation
-
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autoclass:: mnt.pyfiction.sidb.simulation.engines.automatic_base_number_detection
-   :members:
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.engines.quickexact
-
-.. autoclass:: mnt.pyfiction.sidb.simulation.engines.ground_state_space_reporting
-   :members:
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.engines.clustercomplete
-
-.. autofunction:: mnt.pyfiction.sidb.simulation.engines.exhaustive_ground_state_simulation
-```
-
-:::
-
-::::
-
-(ground_state_space)=
-
-## Ground State Space Construction
-
-**Header:** `fiction/technology/sidb/simulation/engines/ground_state_space.hpp`
-
-```{doxygenstruct} fiction::sidb::simulation::engines::ground_state_space_results
-:members:
-```
-
-```{doxygenfunction} fiction::sidb::simulation::engines::ground_state_space(const potential_landscape& land, const ground_state_space_params& params = {})
-```
-
-```{doxygenfunction} fiction::sidb::simulation::engines::ground_state_space(const layout& lyt, const ground_state_space_params& params = {})
+quicksim
+exhaustive
+ground_state_space
+example
 ```

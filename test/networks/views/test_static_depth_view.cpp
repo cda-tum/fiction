@@ -27,8 +27,12 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/cost_functions.hpp>
+#include <mockturtle/views/depth_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
+#include <cstdint>
 #include <memory>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -41,9 +45,54 @@ using namespace fiction::networks::views;
 template <typename Ntk>
 concept depth_viewable = requires { typename static_depth_view<Ntk>; };
 
+/** @brief Network without indexed node storage access. */
+struct depth_without_node_index : mockturtle::aig_network
+{
+    /** @brief Disables node indexing. @param n Node to inspect. */
+    [[nodiscard]] uint32_t node_to_index(const node& n) const = delete;
+};
+
+/** @brief Network without combinational-input traversal. */
+struct depth_without_ci_traversal : mockturtle::aig_network
+{
+    /** @brief Disables input traversal. @tparam Fn Callback type. */
+    template <typename Fn>
+    void foreach_ci(Fn&&) const = delete;
+};
+
+static_assert(!depth_viewable<depth_without_node_index>);
+static_assert(!depth_viewable<depth_without_ci_traversal>);
 static_assert(depth_viewable<mockturtle::aig_network>);
 static_assert(!depth_viewable<int>);
 static_assert(requires(const static_depth_view<mockturtle::aig_network>& ntk) { static_depth_view{ntk}; });
+
+TEST_CASE("Depth view assignment preserves network names", "[static-depth-view]")
+{
+    static_depth_view<mockturtle::names_view<technology_network>> source{};
+    const auto                                                    input = source.create_pi();
+    source.create_po(input);
+    source.set_network_name("source");
+    source.set_name(input, "input");
+    source.set_output_name(0, "output");
+    source.update_levels();
+
+    decltype(source) dest{};
+    SECTION("Copy assignment")
+    {
+        dest = source;
+    }
+    SECTION("Move assignment")
+    {
+        dest = std::move(source);
+    }
+
+    CHECK(dest.get_network_name() == "source");
+    CHECK(dest.get_name(dest.pi_at(0)) == "input");
+    CHECK(dest.get_output_name(0) == "output");
+    CHECK(dest.num_pis() == 1);
+    CHECK(dest.num_pos() == 1);
+    CHECK(dest.depth() == 0);
+}
 
 template <typename Ntk>
 void test_depth_view()
@@ -163,6 +212,46 @@ TEST_CASE("Compute critical path information", "[static-depth-view]")
     CHECK(depth_aig.is_on_critical_path(aig.get_node(f)));
 }
 
+TEST_CASE("The critical path follows the levels after an update and survives a copy", "[static-depth-view]")
+{
+    static_depth_view<technology_network> tec_d;
+
+    const auto x1 = tec_d.create_pi();
+    const auto x2 = tec_d.create_pi();
+    const auto x3 = tec_d.create_pi();
+    const auto g1 = tec_d.create_and(x1, x2);
+    tec_d.create_po(g1);
+    tec_d.update_levels();
+
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(g1)));
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(x1)));
+    CHECK(!tec_d.is_on_critical_path(tec_d.get_node(x3)));
+
+    // a deeper output extends the critical path; the input that joins late stays off it
+    const auto g2 = tec_d.create_not(tec_d.create_and(g1, x3));
+    tec_d.create_po(g2);
+    tec_d.update_levels();
+
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(g2)));
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(g1)));
+    CHECK(tec_d.is_on_critical_path(tec_d.get_node(x1)));
+    CHECK(!tec_d.is_on_critical_path(tec_d.get_node(x3)));
+
+    // a copy keeps the answers, whether the path was computed before the copy or not
+    const auto computed_copy = tec_d;
+
+    tec_d.update_levels();
+
+    const auto pending_copy = tec_d;
+
+    for (const auto& copy : {computed_copy, pending_copy})
+    {
+        CHECK(copy.is_on_critical_path(copy.get_node(g2)));
+        CHECK(copy.is_on_critical_path(copy.get_node(x1)));
+        CHECK(!copy.is_on_critical_path(copy.get_node(x3)));
+    }
+}
+
 TEST_CASE("Compute levels during node construction", "[static-depth-view]")
 {
     static_depth_view<mockturtle::xag_network> dxag;
@@ -232,4 +321,68 @@ TEST_CASE("Compute levels during node construction after move assignment", "[sta
     dxag.update_levels();
 
     CHECK(dxag.depth() == 3u);
+}
+
+TEST_CASE("Dangling nodes have no level", "[static-depth-view]")
+{
+    mockturtle::aig_network aig;
+    const auto              a  = aig.create_pi();
+    const auto              b  = aig.create_pi();
+    const auto              f1 = aig.create_nand(a, b);
+    const auto              f2 = aig.create_nand(a, f1);
+    aig.create_po(f2);
+
+    const static_depth_view depth_aig{aig};
+
+    CHECK(depth_aig.has_level(aig.get_node(a)));
+    CHECK(depth_aig.has_level(aig.get_node(f1)));
+    CHECK(depth_aig.has_level(aig.get_node(f2)));
+
+    // networks share their storage on copy; clone to keep `aig` untouched
+    auto       dangling_aig = aig.clone();
+    const auto f3           = dangling_aig.create_nand(b, f1);
+
+    const static_depth_view depth_dangling{dangling_aig};
+
+    CHECK(depth_dangling.has_level(dangling_aig.get_node(f2)));
+    CHECK(!depth_dangling.has_level(dangling_aig.get_node(f3)));
+    CHECK(depth_dangling.depth() == 2);
+
+    // a depth view over a depth view passes the question through instead of claiming a level for every node
+    // (the template argument is spelled out, since class template argument deduction would pick the copy)
+    const static_depth_view<static_depth_view<mockturtle::aig_network>> nested{depth_dangling};
+
+    CHECK(nested.has_level(dangling_aig.get_node(f2)));
+    CHECK(!nested.has_level(dangling_aig.get_node(f3)));
+
+    // a depth view over mockturtle's depth view answers true, since that view keeps levels for every node
+    const static_depth_view over_mockturtle{mockturtle::depth_view{aig}};
+
+    CHECK(over_mockturtle.has_level(aig.get_node(f2)));
+}
+
+TEST_CASE("Primary inputs without fanout have level 0", "[static-depth-view]")
+{
+    mockturtle::aig_network aig;
+    const auto              a      = aig.create_pi();
+    const auto              unused = aig.create_pi();
+    const auto              b      = aig.create_pi();
+    const auto              f      = aig.create_and(a, b);
+    aig.create_po(f);
+
+    const static_depth_view depth_aig{aig};
+
+    // an input that drives nothing is not reached from any output but belongs to the interface; it sits on level 0
+    CHECK(depth_aig.has_level(aig.get_node(unused)));
+    CHECK(depth_aig.level(aig.get_node(unused)) == 0);
+    CHECK(depth_aig.level(aig.get_node(f)) == 1);
+    CHECK(depth_aig.depth() == 1);
+    CHECK(!depth_aig.is_on_critical_path(aig.get_node(unused)));
+
+    // the same holds after recomputing the levels
+    static_depth_view updated{aig};
+    updated.update_levels();
+
+    CHECK(updated.has_level(aig.get_node(unused)));
+    CHECK(updated.level(aig.get_node(unused)) == 0);
 }

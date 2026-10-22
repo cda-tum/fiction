@@ -414,7 +414,7 @@ template <typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
  * of A*.
  *
  * If no path between `source` and `target` exists in `layout`, the returned distance is
- * `std::numeric_limits<uint64_t>::max()`.
+ * 18,446,744,073,709,551,615 (2^64 - 1) (`std::numeric_limits<uint64_t>::max()` in C++).
  *
  * @tparam Lyt Coordinate layout type.
  * @param layout The layout in which the distance between `source` and `target` is to be determined.

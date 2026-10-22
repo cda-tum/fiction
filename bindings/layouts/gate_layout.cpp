@@ -336,7 +336,8 @@ void register_gate_layout(nb::module_& m, const std::string& topology)
         .def("input_count", &GateLyt::input_count, nb::arg("object"), DOC(fiction_layouts_gate_layout_input_count))
         .def("find_object", &GateLyt::find_object, nb::arg("t"), DOC(fiction_layouts_gate_layout_find_object))
         .def("contains", &GateLyt::contains, nb::arg("object"), DOC(fiction_layouts_gate_layout_contains))
-        .def("get_tile", &GateLyt::get_tile, nb::arg("object"), DOC(fiction_layouts_gate_layout_get_tile))
+        .def("get_tile", &GateLyt::get_tile, nb::arg("object"),
+             parameter_doc(DOC(fiction_layouts_gate_layout_get_tile), {{"id", "object"}}).c_str())
         .def("source", &GateLyt::source, nb::arg("input"), DOC(fiction_layouts_gate_layout_source))
         .def("connect", &GateLyt::connect, nb::arg("source"), nb::arg("input"),
              DOC(fiction_layouts_gate_layout_connect))
@@ -588,11 +589,15 @@ void register_gate_layout(nb::module_& m, const std::string& topology)
             "Returns a string representation of the layout.", nb::call_guard<nb::gil_scoped_release>())
 
         .def("assign_synchronization_element", &GateLyt::assign_synchronization_element, nb::arg("coordinate"),
-             nb::arg("delay"), DOC(fiction_layouts_gate_layout_assign_synchronization_element))
+             nb::arg("delay"),
+             parameter_doc(DOC(fiction_layouts_gate_layout_assign_synchronization_element),
+                           {{"cz", "coordinate"}, {"se", "delay"}})
+                 .c_str())
         .def("is_synchronization_element", &GateLyt::is_synchronization_element, nb::arg("coordinate"),
-             DOC(fiction_layouts_gate_layout_is_synchronization_element))
-        .def("get_synchronization_element", &GateLyt::get_synchronization_element, nb::arg("coordinate"),
-             DOC(fiction_layouts_gate_layout_get_synchronization_element))
+             parameter_doc(DOC(fiction_layouts_gate_layout_is_synchronization_element), {{"cz", "coordinate"}}).c_str())
+        .def(
+            "get_synchronization_element", &GateLyt::get_synchronization_element, nb::arg("coordinate"),
+            parameter_doc(DOC(fiction_layouts_gate_layout_get_synchronization_element), {{"cz", "coordinate"}}).c_str())
         .def("num_se", &GateLyt::num_se, DOC(fiction_layouts_gate_layout_num_se));
 }
 

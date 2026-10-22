@@ -48,7 +48,7 @@ void register_sidb_simulation_engine_name_impl(nb::module_& m)
     m.def(
         "sidb_simulation_engine_name",
         [](const EngineType& engine) -> std::string_view { return fiction::sidb::simulation::engine_name(engine); },
-        nb::arg("engine"), DOC(fiction_sidb_simulation_engine_name));
+        nb::arg("engine"), parameter_doc(DOC(fiction_sidb_simulation_engine_name), {{"eng", "engine"}}).c_str());
 }
 
 }  // namespace detail

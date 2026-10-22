@@ -69,7 +69,10 @@ void register_coordinate(nb::module_& m)
             [](nb::pointer_and_handle<fiction::layouts::layout_base::coordinate> self, const int64_t x, const int64_t y,
                const int64_t z)
             { std::construct_at(self.p, coordinate_axis(x), coordinate_axis(y), coordinate_axis(z)); },
-            nb::arg("x"), nb::arg("y"), nb::arg("z") = 0, DOC(fiction_layouts_layout_base_coordinate_coordinate_2))
+            nb::arg("x"), nb::arg("y"), nb::arg("z") = 0,
+            parameter_doc(DOC(fiction_layouts_layout_base_coordinate_coordinate_2),
+                          {{"coordinate_x", "x"}, {"coordinate_y", "y"}, {"coordinate_z", "z"}})
+                .c_str())
         .def(nb::init<const fiction::layouts::layout_base::coordinate>(), nb::arg("c"),
              nb::sig("def __init__(self, c: mnt.pyfiction.layouts.coordinate) -> None"))
         .def(
@@ -180,7 +183,8 @@ void register_coordinate(nb::module_& m)
 void register_coordinate_utility(nb::module_& m)
 {
     // Keep the GIL for the constant-time extent calculation.
-    m.def("area", &fiction::layouts::area_of, nb::arg("extent"), extent_doc(DOC(fiction_layouts_area_of)).c_str());
+    m.def("area", &fiction::layouts::area_of, nb::arg("extent"),
+          parameter_doc(DOC(fiction_layouts_area_of), {{"size", "extent"}}).c_str());
 }
 
 }  // namespace pyfiction

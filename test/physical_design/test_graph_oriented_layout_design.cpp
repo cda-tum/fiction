@@ -24,7 +24,6 @@
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/network_utils.hpp>
@@ -63,7 +62,7 @@ using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
 
-static_assert(std::same_as<decltype(&graph_oriented_layout_design<cartesian_gate_layout>),
+static_assert(std::same_as<decltype(&graph_oriented_layout_design),
                            std::optional<cartesian_gate_layout> (*)(
                                const tec_nt&, graph_oriented_layout_design_params, graph_oriented_layout_design_stats*,
                                std::function<uint64_t(const cartesian_gate_layout&)>)>);
@@ -82,11 +81,10 @@ const T& required_value(const std::optional<T>& optional)
 
 /**
  * @brief Checks logic equivalence and removal of placement-search obstructions.
- * @tparam Lyt Gate layout type.
  * @tparam Ntk Network type.
  * @param ntk Network to place and route.
  */
-template <typename Lyt, typename Ntk>
+template <typename Ntk>
 void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
 {
     graph_oriented_layout_design_stats  stats{};
@@ -94,8 +92,7 @@ void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
     params.timeout      = 100000;
     params.return_first = true;
 
-    const auto layout =
-        graph_oriented_layout_design<Lyt>(fiction::synthesis::convert_network<tec_nt>(ntk), params, &stats);
+    const auto layout = graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params, &stats);
     REQUIRE(layout.has_value());
 
     check_eq(ntk, required_value(layout));
@@ -104,31 +101,29 @@ void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
                               { CHECK(result.is_obstructed_coordinate(c) == !result.is_empty_tile(c)); });
 }
 
-template <typename Lyt>
+/** @brief Checks GOLD equivalence across the network blueprints. */
 void check_graph_oriented_layout_design_equiv_all()
 {
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::and_or_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::half_adder_network<mockturtle::mig_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::mux21_network<mockturtle::xag_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(
-        blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::inverter_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::clpl<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(
-        blueprints::one_to_five_path_difference_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::maj1_network<mockturtle::aig_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::maj4_network<mockturtle::aig_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::and_or_network<technology_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::half_adder_network<mockturtle::mig_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::full_adder_network<technology_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::mux21_network<mockturtle::xag_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::se_coloring_corner_case_network<technology_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::inverter_network<technology_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::clpl<technology_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::one_to_five_path_difference_network<technology_network>());
+    check_graph_oriented_layout_design_equiv(blueprints::nand_xnor_network<technology_network>());
 }
 
 TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-oriented-layout-design]")
 {
     SECTION("Cartesian layouts")
     {
-        check_graph_oriented_layout_design_equiv_all<cartesian_gate_layout>();
+        check_graph_oriented_layout_design_equiv_all();
     }
 }
 
@@ -141,8 +136,8 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
         params.timeout      = 100000;
         params.return_first = true;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(
-            fiction::synthesis::convert_network<tec_nt>(ntk), params, &stats);
+        const auto layout =
+            graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params, &stats);
         REQUIRE(layout.has_value());
 
         CHECK_NOTHROW(apply_gate_library<qca_one_library>(required_value(layout)));
@@ -163,7 +158,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -174,7 +169,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.timeout = 100000;
         params.verbose = true;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -184,7 +179,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.mode    = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
         params.verbose = false;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -193,7 +188,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -202,7 +197,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -212,7 +207,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
         params.seed = 12345;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -222,7 +217,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.mode                  = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
         params.num_vertex_expansions = 8;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -237,7 +232,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
              {blueprints::mux21_network<technology_network>(), blueprints::inverter_network<technology_network>(),
               blueprints::parity_network<technology_network>()})
         {
-            const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(network, params, &stats);
+            const auto layout = graph_oriented_layout_design(network, params, &stats);
             REQUIRE(layout.has_value());
             const auto& checked_layout = required_value(layout);
             check_eq(network, checked_layout);
@@ -268,7 +263,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     {
         params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -278,7 +273,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.mode    = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
         params.timeout = 0;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         CHECK(!layout.has_value());
     }
 
@@ -288,7 +283,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.timeout = 100000;
         params.planar  = true;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         const auto& checked_layout = required_value(layout);
         check_eq(ntk, checked_layout);
@@ -302,7 +297,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.randomize_tiles_to_skip_between_pis = true;
         params.seed                                = 42;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -314,7 +309,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.randomize_tiles_to_skip_between_pis = true;
         params.seed                                = 42;
 
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -332,7 +327,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
     SECTION("Highest-effort mode with multithreading")
     {
         params.mode       = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -344,7 +339,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
         params.tiles_to_skip_between_pis           = 3;
         params.mode                                = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
         params.return_first                        = true;
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout                          = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -353,7 +348,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
     {
         params.mode       = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
         params.seed       = 12345;
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
     }
@@ -379,7 +374,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
     for (const auto& cost : cost_objectives)
     {
         params.cost       = cost;
-        const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+        const auto layout = graph_oriented_layout_design(ntk, params, &stats);
 
         REQUIRE(layout.has_value());
         check_eq(ntk, required_value(layout));
@@ -402,7 +397,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
         {
             params.tiles_to_skip_between_pis = skip;
 
-            const auto layout_opt = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats);
+            const auto layout_opt = graph_oriented_layout_design(ntk, params, &stats);
             REQUIRE(layout_opt.has_value());
             const auto& lyt = required_value(layout_opt);
             check_eq(ntk, lyt);
@@ -464,7 +459,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
         return (layout.num_wires() * 2) + layout.num_crossings();
     };
 
-    const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats, custom_cost_objective);
+    const auto layout = graph_oriented_layout_design(ntk, params, &stats, custom_cost_objective);
 
     REQUIRE(layout.has_value());
     check_eq(ntk, required_value(layout));
@@ -475,8 +470,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     params.mode           = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
     custom_cost_evaluated = false;
 
-    const auto layout_high_effort =
-        graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats, custom_cost_objective);
+    const auto layout_high_effort = graph_oriented_layout_design(ntk, params, &stats, custom_cost_objective);
 
     REQUIRE(layout_high_effort.has_value());
     check_eq(ntk, required_value(layout_high_effort));
@@ -488,7 +482,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
     custom_cost_evaluated = false;
 
     /** @brief Maximum-effort placement result for the custom cost objective. */
-    const auto layout_maximum_effort = graph_oriented_layout_design<cartesian_gate_layout>(
+    const auto layout_maximum_effort = graph_oriented_layout_design(
         ntk, params, &stats, std::function<uint64_t(const cartesian_gate_layout&)>{custom_cost_objective});
 
     REQUIRE(layout_maximum_effort.has_value());
@@ -507,8 +501,7 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
     params.timeout      = 100000;
     params.return_first = true;
 
-    const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(
-        fiction::synthesis::convert_network<tec_nt>(maj), params, &stats);
+    const auto layout = graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(maj), params, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -533,8 +526,7 @@ TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 
     const graph_oriented_layout_design_params params{};
 
-    CHECK_THROWS_AS(graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats),
-                    high_degree_fanin_exception);
+    CHECK_THROWS_AS(graph_oriented_layout_design(ntk, params, &stats), high_degree_fanin_exception);
 }
 
 TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout-design]")
@@ -548,7 +540,7 @@ TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout
     params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
     params.return_first = true;
 
-    CHECK_THROWS_AS(graph_oriented_layout_design<cartesian_gate_layout>(ntk, params, &stats), std::invalid_argument);
+    CHECK_THROWS_AS(graph_oriented_layout_design(ntk, params, &stats), std::invalid_argument);
 }
 
 TEST_CASE("PI spacing outside of its range is rejected", "[graph-oriented-layout-design]")
@@ -562,7 +554,7 @@ TEST_CASE("PI spacing outside of its range is rejected", "[graph-oriented-layout
     {
         params.tiles_to_skip_between_pis = skip;
 
-        CHECK_THROWS_AS(graph_oriented_layout_design<cartesian_gate_layout>(ntk, params), std::invalid_argument);
+        CHECK_THROWS_AS(graph_oriented_layout_design(ntk, params), std::invalid_argument);
     }
 }
 
@@ -570,28 +562,27 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
 {
     const auto ntk = blueprints::mux21_network<technology_network>();
 
-    const auto layouts =
-        std::async(std::launch::async,
-                   [&ntk]
-                   {
-                       graph_oriented_layout_design_params params{};
-                       params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-                       params.return_first = true;
-                       params.seed         = 42;
+    const auto layouts = std::async(std::launch::async,
+                                    [&ntk]
+                                    {
+                                        graph_oriented_layout_design_params params{};
+                                        params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+                                        params.return_first = true;
+                                        params.seed         = 42;
 
-                       const auto zero_reference = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
-                       params.randomize_tiles_to_skip_between_pis = true;
-                       params.tiles_to_skip_between_pis           = 3;
-                       const auto first_seeded = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
-                       params.tiles_to_skip_between_pis = 0;
-                       params.seed                      = 7;
-                       const auto zero_after = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
-                       params.tiles_to_skip_between_pis = 3;
-                       params.seed                      = 42;
-                       const auto repeated_seeded = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
-                       return std::array{zero_reference, first_seeded, zero_after, repeated_seeded};
-                   })
-            .get();
+                                        const auto zero_reference = graph_oriented_layout_design(ntk, params);
+                                        params.randomize_tiles_to_skip_between_pis = true;
+                                        params.tiles_to_skip_between_pis           = 3;
+                                        const auto first_seeded          = graph_oriented_layout_design(ntk, params);
+                                        params.tiles_to_skip_between_pis = 0;
+                                        params.seed                      = 7;
+                                        const auto zero_after            = graph_oriented_layout_design(ntk, params);
+                                        params.tiles_to_skip_between_pis = 3;
+                                        params.seed                      = 42;
+                                        const auto repeated_seeded       = graph_oriented_layout_design(ntk, params);
+                                        return std::array{zero_reference, first_seeded, zero_after, repeated_seeded};
+                                    })
+                             .get();
 
     for (const auto& lyt : layouts)
     {
@@ -632,7 +623,7 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
         params.enable_multithreading = true;
     }
 
-    const auto layout = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+    const auto layout = graph_oriented_layout_design(ntk, params);
 
     CHECK(static_cast<bool>(params.on_progress));
     REQUIRE(layout.has_value());
@@ -661,7 +652,7 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
-    const auto result            = graph_oriented_layout_design<gate_layout<cartesian_layout>>(ntk, params);
+    const auto result            = graph_oriented_layout_design(ntk, params);
     REQUIRE(result.has_value());
     const auto& layout = required_value(result);
     CHECK(layout.num_pis() == 3);
@@ -685,14 +676,14 @@ TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks 
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
-    const auto empty_result      = graph_oriented_layout_design<gate_layout<cartesian_layout>>(empty, params);
+    const auto empty_result      = graph_oriented_layout_design(empty, params);
     REQUIRE(empty_result.has_value());
     CHECK(required_value(empty_result).is_empty());
     CHECK(required_value(empty_result).area() == 0);
     mockturtle::names_view<technology_network> ntk{};
     ntk.create_po(ntk.get_constant(false), "zero");
     ntk.create_po(ntk.get_constant(true), "one");
-    const auto result = graph_oriented_layout_design<gate_layout<cartesian_layout>>(ntk, params);
+    const auto result = graph_oriented_layout_design(ntk, params);
     REQUIRE(result.has_value());
     CHECK(required_value(result).num_pis() == 0);
     CHECK(required_value(result).num_pos() == 2);
@@ -713,7 +704,7 @@ TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-orient
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
-    const auto result            = graph_oriented_layout_design<gate_layout<cartesian_layout>>(ntk, params);
+    const auto result            = graph_oriented_layout_design(ntk, params);
     REQUIRE(result.has_value());
     CHECK(required_value(result).get_output_name(0) == "input_copy");
     CHECK(required_value(result).get_output_name(1) == "one");
@@ -738,7 +729,7 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     CHECK(ntk.get_output_name(0) == "result");
     graph_oriented_layout_design_params ps{};
     ps.return_first   = true;
-    const auto result = graph_oriented_layout_design<cartesian_gate_layout>(ntk, ps);
+    const auto result = graph_oriented_layout_design(ntk, ps);
     REQUIRE(result.has_value());
     const auto& lyt = required_value(result);
     CHECK(lyt.get_layout_name() == "named_spec");

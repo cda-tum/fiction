@@ -1,4 +1,4 @@
-# Gate-level Layout
+# Gate-Level Layout
 
 `gate_layout<CoordinateLayout>` places Boolean gates and wires on a coordinate layout.
 The layout owns its clocking scheme, synchronization delays, and persistent obstructions.
@@ -39,6 +39,8 @@ checks validate adjacency, clocking, and frame membership separately. Algorithms
 in declared order and visits only output dependency cones. A missing input or cycle in an output
 cone raises an error. Unused PIs and disconnected logic outside those cones do not prevent extraction.
 
+## Layout and Object Types
+
 ::::{tab-set}
 :sync-group: language
 
@@ -47,8 +49,25 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 
 **Header:** `fiction/layouts/gate_layout.hpp`
 
+```{doxygenstruct} fiction::layouts::layout_object_id
+:members:
+```
+
+```{doxygenstruct} fiction::layouts::layout_input_port
+:members:
+```
+
 ```{doxygenclass} fiction::layouts::gate_layout
 :members:
+```
+
+```{doxygentypedef} fiction::layouts::cartesian_gate_layout
+```
+
+```{doxygentypedef} fiction::layouts::hexagonal_gate_layout
+```
+
+```{doxygentypedef} fiction::layouts::shifted_cartesian_gate_layout
 ```
 
 :::
@@ -57,6 +76,12 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.layouts.layout_object_id
+   :members:
+
+.. autoclass:: mnt.pyfiction.layouts.layout_input_port
+   :members:
+
 .. autoclass:: mnt.pyfiction.layouts.cartesian_gate_layout
    :members:
 
@@ -71,7 +96,9 @@ cone raises an error. Unused PIs and disconnected logic outside those cones do n
 
 ::::
 
-## Construction and capabilities
+(construction-and-capabilities)=
+
+## Construction and Capabilities
 
 ::::{tab-set}
 :sync-group: language

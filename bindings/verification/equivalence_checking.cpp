@@ -63,7 +63,10 @@ void register_equivalence_checking_impl(nb::module_& m)
             return stats.eq;
         },
         nb::arg("specification"), nb::arg("implementation"), nb::arg("statistics") = nullptr,
-        DOC(fiction_verification_equivalence_checking), nb::call_guard<nb::gil_scoped_release>());
+        parameter_doc(DOC(fiction_verification_equivalence_checking),
+                      {{"spec", "specification"}, {"impl", "implementation"}, {"pst", "statistics"}})
+            .c_str(),
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 /**

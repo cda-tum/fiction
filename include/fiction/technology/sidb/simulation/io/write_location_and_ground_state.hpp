@@ -130,7 +130,7 @@ inline void write_location_and_ground_state(const sidb::simulation::result& sim_
  *
  * @param sim_result Result to write.
  * @param filename File to write into.
- * @throws std::ofstream::failure if the file cannot be opened.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_location_and_ground_state(const sidb::simulation::result& sim_result,
                                             const std::string_view&         filename)

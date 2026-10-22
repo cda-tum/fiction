@@ -14,8 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
@@ -64,21 +62,24 @@ void draw(const Lyt& lyt, const std::string_view& filename, const fiction::utils
     if constexpr (std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
-                                                                                                    on_progress);
+            typename Lyt::coordinate_layout,
+            fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
+                                                                                               on_progress);
     }
     else if constexpr (std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(
-            lyt, filename, {}, on_progress);
+            typename Lyt::coordinate_layout,
+            fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename,
+                                                                                                       {}, on_progress);
     }
     else if constexpr ((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
                         !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
-                                                                                                    on_progress);
+            typename Lyt::coordinate_layout,
+            fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
+                                                                                               on_progress);
     }
 }
 
@@ -113,7 +114,19 @@ void register_write_dot_layout(nb::module_& m)
             }
         },
         nb::arg("layout"), nb::arg("filename"), nb::arg("clock_colors") = false, nb::arg("indexes") = false,
-        nb::arg("on_progress").none() = nb::none(), DOC(fiction_layouts_io_write_dot_layout),
+        nb::arg("on_progress").none() = nb::none(),
+        R"doc(Writes a gate-level layout to a DOT file. Terminal names use quoted DOT strings.
+
+Args:
+    layout: Gate-level layout to draw.
+    filename: Output file path.
+    clock_colors: Color tiles by clock number instead of gate type. Defaults to False.
+    indexes: Label tiles with object indices. Defaults to False.
+    on_progress: Receives completed drawing work. Defaults to None.
+
+Raises:
+    RuntimeError: If the output file cannot be created or written.
+)doc",
         nb::call_guard<nb::gil_scoped_release>());
 }
 

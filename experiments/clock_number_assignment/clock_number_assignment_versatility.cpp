@@ -16,6 +16,7 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>          // custom reader for layouts
 #include <fiction/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
@@ -24,7 +25,6 @@
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // time measurements
 
-#include <concepts>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -40,13 +40,10 @@ using namespace fiction::verification;
 
 /**
  * @brief Assigns clock zero to every tile in the declared frame.
- * @tparam Lyt Gate-level layout type.
  * @param lyt Layout whose clock numbers are cleared.
  * @throws std::bad_alloc If an override cannot be allocated.
  */
-template <typename Lyt>
-    requires requires { requires std::same_as<typename Lyt::object_id, layout_object_id>; }
-void remove_clocking(Lyt& lyt)
+void remove_clocking(cartesian_gate_layout& lyt)
 {
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
@@ -85,7 +82,7 @@ try
                 const auto benchmark = path.stem().string();
 
                 // read layout from file
-                auto original_layout = read_fgl_layout<cartesian_gate_layout>(path.string(), benchmark);
+                auto original_layout = read_fgl_layout<cartesian_layout>(path.string(), benchmark);
 
                 fmt::print("[i] processing {}\n", benchmark);
 

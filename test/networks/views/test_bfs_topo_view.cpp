@@ -48,6 +48,15 @@ struct sorted_pass_through
     static constexpr bool is_topologically_sorted = true;
 };
 
+/** @brief Unsorted network without combinational-input traversal. */
+struct bfs_without_ci_traversal : mockturtle::aig_network
+{
+    /** @brief Disables input traversal. @tparam Fn Callback type. */
+    template <typename Fn>
+    void foreach_ci(Fn&&) const = delete;
+};
+
+static_assert(!bfs_viewable<bfs_without_ci_traversal>);
 static_assert(bfs_viewable<mockturtle::aig_network>);
 static_assert(!bfs_viewable<int>);
 static_assert(requires(const sorted_pass_through& ntk) { bfs_topo_view{ntk}; });

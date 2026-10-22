@@ -106,6 +106,7 @@ inline constexpr const char* PIN =
 
 }  // namespace qll
 
+/** @brief Writes an FCN layout in QLL format. */
 template <typename Lyt>
 class write_qll_layout_impl
 {
@@ -125,6 +126,7 @@ class write_qll_layout_impl
             on_progress{std::move(callback)}
     {}
 
+    /** @brief Writes the FCN layout to the output stream in QLL format. */
     void run()
     {
         if (std::is_same_v<Lyt, inml::layout> && !has_border_io_pins())
@@ -490,6 +492,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback
  * @param filename The file name to create and write into. Should preferably use the `.qll` extension.
  * @param on_progress Receives completed serialization work.
  * @throws std::invalid_argument if an iNML layout has no I/O pins or they are not routed to the layout's borders.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <qll_layout Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename, utils::progress_callback on_progress = {})

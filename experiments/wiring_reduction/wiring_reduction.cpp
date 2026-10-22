@@ -19,6 +19,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>  // bounding box
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>                        // read networks from files
 #include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
@@ -101,7 +102,7 @@ try
         const auto benchmark_network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto       gate_layout = orthogonal<cartesian_gate_layout>(benchmark_network, {}, &orthogonal_stats);
+        auto       gate_layout = orthogonal<cartesian_layout>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy = gate_layout.clone();
 
         auto num_wires = gate_layout.num_wires();

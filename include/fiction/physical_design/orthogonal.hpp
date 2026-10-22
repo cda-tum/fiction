@@ -42,7 +42,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <iostream>
 #include <optional>
@@ -73,11 +72,16 @@ struct orthogonal_physical_design_params
     utils::progress_callback on_progress{};
 };
 
+/** @brief Statistics for orthogonal physical design. */
 struct orthogonal_physical_design_stats
 {
+    /** @brief Total algorithm runtime. */
     mockturtle::stopwatch<>::duration time_total{0};
 
-    uint64_t x_size{0ull}, y_size{0ull};
+    /** @brief Layout extent along the x axis. */
+    uint64_t x_size{0ull};
+    /** @brief Layout extent along the y axis. */
+    uint64_t y_size{0ull};
     /** @brief Number of logic gates, excluding primary inputs and outputs. */
     uint64_t num_gates{0ull};
     /** @brief Number of physical wires, excluding primary inputs and outputs. */
@@ -85,6 +89,7 @@ struct orthogonal_physical_design_stats
     /** @brief Number of crossing-layer wires above occupied ground-layer tiles. */
     uint64_t num_crossings{0ull};
 
+    /** @brief Writes the collected statistics to the output stream. */
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
@@ -240,7 +245,7 @@ inline bool is_east_south_colored(
 }
 
 /** @brief Checks whether the eastern side can host a primary output. */
-inline uint32_t is_eastern_po_orientation_available(const coloring_container& ctn, const tec_nt::node& n) noexcept
+inline bool is_eastern_po_orientation_available(const coloring_container& ctn, const tec_nt::node& n) noexcept
 {
     bool eastern_side_available = true;
 
@@ -256,7 +261,7 @@ inline uint32_t is_eastern_po_orientation_available(const coloring_container& ct
                                      return false;
                                  });
 
-    return static_cast<uint32_t>(eastern_side_available);
+    return eastern_side_available;
 }
 
 /** @brief Computes the extent required by colored gates and primary outputs. */
@@ -354,7 +359,10 @@ typename Lyt::object_id wire_south(Lyt& lyt, const fiction::layouts::layout_base
     return a;
 }
 
-/** @brief Routes ordered inputs to a placed two-input gate. @tparam Lyt Output layout type. */
+/**
+ * @brief Routes ordered inputs to a placed two-input gate.
+ * @tparam Lyt Output layout type.
+ */
 template <typename Lyt>
 typename Lyt::object_id
 connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const tec_nt& ntk,
@@ -371,7 +379,10 @@ connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, 
     return reversed ? place(lyt, t, ntk, n, west, north, c) : place(lyt, t, ntk, n, north, west, c);
 }
 
-/** @brief Routes one input to a placed unary gate. @tparam Lyt Output layout type. */
+/**
+ * @brief Routes one input to a placed unary gate.
+ * @tparam Lyt Output layout type.
+ */
 template <typename Lyt>
 typename Lyt::object_id connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
                                           const tec_nt& ntk, const tec_nt::node& n,
@@ -512,6 +523,7 @@ class orthogonal_impl
         // compute a coloring
         const auto ctn = east_south_edge_coloring(ntk);
 
+        // Use source node IDs and include nodes outside the topological traversal when sizing the map.
         mockturtle::node_map<typename Lyt::object_id, tec_nt> node2pos{static_cast<const tec_nt&>(ctn.color_ntk)};
 
         // find multi-output nodes
@@ -740,20 +752,19 @@ class orthogonal_impl
  *
  * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
  *
- * @tparam Lyt Desired gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the returned gate-level layout.
  * @param ntk Named technology network to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
- * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `ps.layout_arrangement` is
- * empty.
+ * @return A gate-level layout of type `gate_layout<Geometry>` that implements `ntk` as an FCN circuit.
+ * @throws std::invalid_argument If `gate_layout<Geometry>` is a shifted Cartesian or hexagonal layout and
+ * `ps.layout_arrangement` is empty.
  */
-template <typename Lyt>
-    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
-Lyt orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {},
-               orthogonal_physical_design_stats* pst = nullptr)
+template <typename Geometry>
+layouts::gate_layout<Geometry> orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {},
+                                          orthogonal_physical_design_stats* pst = nullptr)
 {
-    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
+    layouts::require_arrangement<layouts::gate_layout<Geometry>>(ps.layout_arrangement);
 
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, 2))
@@ -761,8 +772,9 @@ Lyt orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {},
         throw networks::high_degree_fanin_exception();
     }
 
-    orthogonal_physical_design_stats st{};
-    detail::orthogonal_impl<Lyt>     p{synthesis::fanout_substitution<tec_nt>(ntk), ps, st};
+    orthogonal_physical_design_stats                        st{};
+    detail::orthogonal_impl<layouts::gate_layout<Geometry>> p{synthesis::fanout_substitution<tec_nt>(ntk),
+                                                              std::move(ps), st};
 
     auto result = p.run();
 

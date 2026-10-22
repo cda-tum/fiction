@@ -222,7 +222,7 @@ class path_set : public std::set<layout_coordinate_path>
  * the wire segment coming from `src` were also horizontal and ran from west to east, the cross-over would be
  * prohibited.
  *
- * @Note This function can be called on layout types other than gate-level layouts, but will then always return
+ * @note This function can be called on layout types other than gate-level layouts, but will then always return
  * `false`. This is helpful for general routing in, e.g., clocked layouts.
  *
  * @tparam Lyt Layout type.
@@ -398,14 +398,13 @@ void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const layout_coord
  *
  * Intermediate single-sink wires are followed through declared topology. Missing inputs produce no objective;
  * disconnected input slots keep their indices. Cycles of intermediate wires reject.
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to inspect.
  * @return Routing objectives that preserve logical input numbering.
  * @throws std::invalid_argument If an intermediate wire chain contains a cycle.
  */
-template <typename Lyt>
-    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
-std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
+template <typename Geometry>
+std::vector<routing_objective> extract_routing_objectives(const layouts::gate_layout<Geometry>& lyt)
 {
     const auto intermediate = [&lyt](const auto id) { return lyt.is_wire(id) && !lyt.is_fanout(id); };
     std::vector<routing_objective> objectives{};
@@ -419,8 +418,8 @@ std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
             lyt.foreach_fanin(id,
                               [&](const auto port, const auto input)
                               {
-                                  auto                                        source = port;
-                                  std::unordered_set<typename Lyt::object_id> visited{};
+                                  auto                                          source = port;
+                                  std::unordered_set<layouts::layout_object_id> visited{};
                                   while (intermediate(source))
                                   {
                                       if (!visited.insert(source).second)

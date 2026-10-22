@@ -27,7 +27,6 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -377,7 +376,7 @@ class determine_clocking_impl
  * Nanotechnologies\" by M. Walter, J. Drewniok, and R. Wille in IEEE NANO 2024
  * (https://ieeexplore.ieee.org/abstract/document/10628908).
  *
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The gate-level layout to assign clock numbers to.
  * @param params Parameters.
  * @param stats Statistics.
@@ -385,13 +384,12 @@ class determine_clocking_impl
  * @throws std::invalid_argument If placement or declared connections violate the required topology.
  * @throws std::bad_alloc If allocation fails.
  */
-template <typename Lyt>
-    requires requires { requires std::same_as<typename Lyt::object_id, layouts::layout_object_id>; }
-bool determine_clocking(Lyt& lyt, const determine_clocking_params& params = {},
+template <typename Geometry>
+bool determine_clocking(layouts::gate_layout<Geometry>& lyt, const determine_clocking_params& params = {},
                         determine_clocking_stats* stats = nullptr)
 {
-    determine_clocking_stats             st{};
-    detail::determine_clocking_impl<Lyt> p{lyt, params, st};
+    determine_clocking_stats                                        st{};
+    detail::determine_clocking_impl<layouts::gate_layout<Geometry>> p{lyt, params, st};
 
     const auto result = p.run();
 

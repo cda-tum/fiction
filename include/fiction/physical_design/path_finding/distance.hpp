@@ -103,8 +103,8 @@ namespace fiction::physical_design::path_finding
  *
  * Thereby, \f$s \leq t\f$ iff \f$x_1 \leq x_2\f$ and \f$y_1 \leq y_2\f$.
  *
- * @note To represent \f$\infty\f$, `std::numeric_limits<uint32_t>::max()` is returned for distances of infinite
- * length. We are using `uint32_t` to prevent overflows when adding distances in the default `uint64_t` number range.
+ * @note Infinite distances return 4,294,967,295 (2^32 - 1) (`std::numeric_limits<uint32_t>::max()` in C++).
+ * This 32-bit sentinel prevents overflows when adding distances in the default 64-bit unsigned number range.
  *
  * @param source Source coordinate.
  * @param target Target coordinate.

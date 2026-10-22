@@ -35,6 +35,7 @@
 #include <optional>
 #include <random>
 #include <stdexcept>
+#include <utility>
 
 namespace fiction::layouts
 {
@@ -107,9 +108,7 @@ template <typename Lyt>
  *
  * @tparam GateSizeX Horizontal tile size.
  * @tparam GateSizeY Vertical tile size.
- * @tparam GateLyt Gate-level layout type.
- * @tparam Coordinate Cell coordinate type, e.g., `layout_base::coordinate`. Hexagonal tiles can yield negative
- * positions.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param gate_lyt The gate-level layout whose tiles are to be considered.
  * @param t Tile within gate_lyt.
  * @param relative_c Relative cell position within t.
@@ -117,15 +116,16 @@ template <typename Lyt>
  * @throws std::invalid_argument If the relative cell lies outside the tile.
  * @throws std::overflow_error If the absolute cell is outside the signed 32-bit coordinate range.
  */
-template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coordinate>
-    requires requires { requires std::same_as<typename GateLyt::object_id, layout_object_id>; } &&
-             (std::derived_from<GateLyt, cartesian_layout> || std::derived_from<GateLyt, shifted_cartesian_layout> ||
-              std::derived_from<GateLyt, hexagonal_layout>)
-[[nodiscard]] Coordinate relative_to_absolute_cell_position(const GateLyt&                                   gate_lyt,
-                                                            const fiction::layouts::layout_base::coordinate& t,
-                                                            const Coordinate&                                relative_c)
+template <uint16_t GateSizeX, uint16_t GateSizeY, typename Geometry>
+    requires(std::derived_from<Geometry, cartesian_layout> || std::derived_from<Geometry, shifted_cartesian_layout> ||
+             std::derived_from<Geometry, hexagonal_layout>)
+[[nodiscard]] layout_base::coordinate
+relative_to_absolute_cell_position(const gate_layout<Geometry>&                     gate_lyt,
+                                   const fiction::layouts::layout_base::coordinate& t,
+                                   const layout_base::coordinate&                   relative_c)
 {
-    if (relative_c.x < 0 || relative_c.x >= GateSizeX || relative_c.y < 0 || relative_c.y >= GateSizeY)
+    if (relative_c.x < 0 || std::cmp_greater_equal(relative_c.x, GateSizeX) || relative_c.y < 0 ||
+        std::cmp_greater_equal(relative_c.y, GateSizeY))
     {
         throw std::invalid_argument("The relative cell must be within the bounds of a single tile");
     }
@@ -133,17 +133,17 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
     int64_t x = static_cast<int64_t>(t.x) * GateSizeX;
     int64_t y = static_cast<int64_t>(t.y) * GateSizeY;
 
-    if constexpr (std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout> ||
-                  (std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>))
+    if constexpr (std::derived_from<Geometry, fiction::layouts::shifted_cartesian_layout> ||
+                  (std::derived_from<Geometry, fiction::layouts::hexagonal_layout> &&
+                   !std::derived_from<Geometry, fiction::layouts::shifted_cartesian_layout>))
     {
         // hexagons nest into each other, so their tiles are 3/4 as far apart perpendicular to the shift
-        constexpr auto step_x = (std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                                 !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>) ?
+        constexpr auto step_x = (std::derived_from<Geometry, fiction::layouts::hexagonal_layout> &&
+                                 !std::derived_from<Geometry, fiction::layouts::shifted_cartesian_layout>) ?
                                     GateSizeX * 3 / 4 :
                                     GateSizeX;
-        constexpr auto step_y = (std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                                 !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>) ?
+        constexpr auto step_y = (std::derived_from<Geometry, fiction::layouts::hexagonal_layout> &&
+                                 !std::derived_from<Geometry, fiction::layouts::shifted_cartesian_layout>) ?
                                     GateSizeY * 3 / 4 :
                                     GateSizeY;
 
@@ -172,7 +172,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Coo
         }
     }
 
-    return Coordinate{x + relative_c.x, y + relative_c.y, t.z};
+    return layout_base::coordinate{x + relative_c.x, y + relative_c.y, t.z};
 }
 
 /**

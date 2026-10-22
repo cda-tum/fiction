@@ -1,0 +1,38 @@
+{% extends "furo/page.html" %} {% block footer %}
+<div class="acknowledgements">
+  <p>
+    The Munich Nanotech Toolkit has been supported by the Bavarian State
+    Ministry for Science and Arts through the Distinguished Professorship
+    Program.
+  </p>
+  <div class="acknowledgements-logos">
+    <a
+      href="https://www.tum.de/en/"
+      aria-label="Technical University of Munich"
+    >
+      <img
+        class="only-light"
+        src="https://raw.githubusercontent.com/munich-quantum-toolkit/.github/refs/heads/main/docs/_static/logo-tum-light.svg"
+        width="140"
+        alt="TUM logo"
+      />
+      <img
+        class="only-dark"
+        src="https://raw.githubusercontent.com/munich-quantum-toolkit/.github/refs/heads/main/docs/_static/logo-tum-dark.svg"
+        width="140"
+        alt="TUM logo"
+      />
+    </a>
+    <a
+      href="https://www.stmwk.bayern.de/"
+      aria-label="Bavarian State Ministry for Science and Arts"
+    >
+      <img
+        src="https://raw.githubusercontent.com/munich-quantum-toolkit/.github/refs/heads/main/docs/_static/logo-bavaria.svg"
+        width="80"
+        alt="Coat of Arms of Bavaria"
+      />
+    </a>
+  </div>
+</div>
+{{ super() }} {% endblock footer %}

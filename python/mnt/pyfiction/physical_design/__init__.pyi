@@ -8,7 +8,7 @@
 
 """Placement and routing of logic networks into gate-level layouts."""
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Callable, Sequence
 from typing import overload
@@ -37,11 +37,17 @@ class exact_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta: ...
+    def time_total(self) -> dt.timedelta:
+        """Total algorithm runtime."""
+
     @property
-    def x_size(self) -> int: ...
+    def x_size(self) -> int:
+        """Layout extent along the x axis."""
+
     @property
-    def y_size(self) -> int: ...
+    def y_size(self) -> int:
+        """Layout extent along the y axis."""
+
     @property
     def num_gates(self) -> int:
         """Number of logic gates, excluding primary inputs and outputs."""
@@ -55,7 +61,8 @@ class exact_stats:
         """Number of crossing-layer wires above occupied ground-layer tiles."""
 
     @property
-    def num_aspect_ratios(self) -> int: ...
+    def num_aspect_ratios(self) -> int:
+        """Number of examined aspect ratios."""
 
 @overload
 def exact(
@@ -206,15 +213,23 @@ class num_clks(enum.Enum):
     """Four clocks."""
 
 class orthogonal_stats:
+    """Statistics for orthogonal physical design."""
+
     def __init__(self) -> None:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta: ...
+    def time_total(self) -> dt.timedelta:
+        """Total algorithm runtime."""
+
     @property
-    def x_size(self) -> int: ...
+    def x_size(self) -> int:
+        """Layout extent along the x axis."""
+
     @property
-    def y_size(self) -> int: ...
+    def y_size(self) -> int:
+        """Layout extent along the y axis."""
+
     @property
     def num_gates(self) -> int:
         """Number of logic gates, excluding primary inputs and outputs."""
@@ -367,7 +382,7 @@ class graph_oriented_layout_design_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of the graph-oriented layout design process."""
 
     @property
@@ -438,74 +453,46 @@ def apply_qca_one_library(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout, on_progress: Callable[[str, int, int], None] | None = None
 ) -> mnt.pyfiction.qca.qca_layout:
     """
-    Applies a gate library to a given gate-level layout and, thereby,
-    creates and returns the layout type the library produces, e.g.,
-    `qca::layout` for `qca::qca_one_library` or `sidb::layout` for
-    `sidb::bestagon_library`. The gate library type should provide all
-    functions specified in `fcn::gate_library`. It is, thus, easiest to
-    extend `fcn::gate_library` to implement a new gate library.
-
-    A cell grid spans the gate-level layout; if it has tile-based
-    clocking, its clock zones are the library's tiles and follow the gate-
-    level clocking, and, if it has synchronization elements, each clock
-    zone receives the synchronization delay of its gate tile. The delay
-    therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their objects. An
-    SiDB layout lies on the H-Si(100)-2x1 lattice.
-
-    May pass through, and thereby throw, an
-    `unsupported_gate_type_exception` or an
-    `unsupported_gate_orientation_exception`.
+    Apply the selected gate library to produce a cell-level layout.
+    The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+    follow the gate-level clocking. Supported synchronization elements apply each
+    gate tile's delay to its entire clock zone, including cells added later. molQCA
+    cell types carry the clock phases defined by the gate library. Input and output
+    cells retain their object names. The Bestagon library produces an SiDB layout
+    on the H-Si(100)-2x1 lattice.
 
     Args:
-        lyt: The gate-level layout.
-        on_progress: Optional callback reporting completed object
-                     mappings.
-
-    Template Args:
-        GateLibrary: Type of the gate library to apply.
-        Geometry: Coordinate geometry of the gate-level layout.
+        layout: Gate-level layout to map.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 
     Returns:
-        A layout that implements `lyt`'s gate types with building blocks
-        defined in `GateLibrary`.
+        The QCA, molQCA, iNML, or SiDB layout produced by the selected library.
+
+    Raises:
+        ValueError: The library cannot implement a gate type or orientation; the message names its tile.
     """
 
 def apply_sim7_mol_library(
     layout: mnt.pyfiction.layouts.cartesian_gate_layout, on_progress: Callable[[str, int, int], None] | None = None
 ) -> mnt.pyfiction.mol_qca.mol_qca_layout:
     """
-    Applies a gate library to a given gate-level layout and, thereby,
-    creates and returns the layout type the library produces, e.g.,
-    `qca::layout` for `qca::qca_one_library` or `sidb::layout` for
-    `sidb::bestagon_library`. The gate library type should provide all
-    functions specified in `fcn::gate_library`. It is, thus, easiest to
-    extend `fcn::gate_library` to implement a new gate library.
-
-    A cell grid spans the gate-level layout; if it has tile-based
-    clocking, its clock zones are the library's tiles and follow the gate-
-    level clocking, and, if it has synchronization elements, each clock
-    zone receives the synchronization delay of its gate tile. The delay
-    therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their objects. An
-    SiDB layout lies on the H-Si(100)-2x1 lattice.
-
-    May pass through, and thereby throw, an
-    `unsupported_gate_type_exception` or an
-    `unsupported_gate_orientation_exception`.
+    Apply the selected gate library to produce a cell-level layout.
+    The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+    follow the gate-level clocking. Supported synchronization elements apply each
+    gate tile's delay to its entire clock zone, including cells added later. molQCA
+    cell types carry the clock phases defined by the gate library. Input and output
+    cells retain their object names. The Bestagon library produces an SiDB layout
+    on the H-Si(100)-2x1 lattice.
 
     Args:
-        lyt: The gate-level layout.
-        on_progress: Optional callback reporting completed object
-                     mappings.
-
-    Template Args:
-        GateLibrary: Type of the gate library to apply.
-        Geometry: Coordinate geometry of the gate-level layout.
+        layout: Gate-level layout to map.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 
     Returns:
-        A layout that implements `lyt`'s gate types with building blocks
-        defined in `GateLibrary`.
+        The QCA, molQCA, iNML, or SiDB layout produced by the selected library.
+
+    Raises:
+        ValueError: The library cannot implement a gate type or orientation; the message names its tile.
     """
 
 def apply_topolinano_library(
@@ -513,74 +500,46 @@ def apply_topolinano_library(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.inml.inml_layout:
     """
-    Applies a gate library to a given gate-level layout and, thereby,
-    creates and returns the layout type the library produces, e.g.,
-    `qca::layout` for `qca::qca_one_library` or `sidb::layout` for
-    `sidb::bestagon_library`. The gate library type should provide all
-    functions specified in `fcn::gate_library`. It is, thus, easiest to
-    extend `fcn::gate_library` to implement a new gate library.
-
-    A cell grid spans the gate-level layout; if it has tile-based
-    clocking, its clock zones are the library's tiles and follow the gate-
-    level clocking, and, if it has synchronization elements, each clock
-    zone receives the synchronization delay of its gate tile. The delay
-    therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their objects. An
-    SiDB layout lies on the H-Si(100)-2x1 lattice.
-
-    May pass through, and thereby throw, an
-    `unsupported_gate_type_exception` or an
-    `unsupported_gate_orientation_exception`.
+    Apply the selected gate library to produce a cell-level layout.
+    The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+    follow the gate-level clocking. Supported synchronization elements apply each
+    gate tile's delay to its entire clock zone, including cells added later. molQCA
+    cell types carry the clock phases defined by the gate library. Input and output
+    cells retain their object names. The Bestagon library produces an SiDB layout
+    on the H-Si(100)-2x1 lattice.
 
     Args:
-        lyt: The gate-level layout.
-        on_progress: Optional callback reporting completed object
-                     mappings.
-
-    Template Args:
-        GateLibrary: Type of the gate library to apply.
-        Geometry: Coordinate geometry of the gate-level layout.
+        layout: Gate-level layout to map.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 
     Returns:
-        A layout that implements `lyt`'s gate types with building blocks
-        defined in `GateLibrary`.
+        The QCA, molQCA, iNML, or SiDB layout produced by the selected library.
+
+    Raises:
+        ValueError: The library cannot implement a gate type or orientation; the message names its tile.
     """
 
 def apply_bestagon_library(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout, on_progress: Callable[[str, int, int], None] | None = None
 ) -> mnt.pyfiction.sidb.sidb_layout:
     """
-    Applies a gate library to a given gate-level layout and, thereby,
-    creates and returns the layout type the library produces, e.g.,
-    `qca::layout` for `qca::qca_one_library` or `sidb::layout` for
-    `sidb::bestagon_library`. The gate library type should provide all
-    functions specified in `fcn::gate_library`. It is, thus, easiest to
-    extend `fcn::gate_library` to implement a new gate library.
-
-    A cell grid spans the gate-level layout; if it has tile-based
-    clocking, its clock zones are the library's tiles and follow the gate-
-    level clocking, and, if it has synchronization elements, each clock
-    zone receives the synchronization delay of its gate tile. The delay
-    therefore also covers cells that are added to the zone later, e.g.,
-    via cells. Input and output cells carry the names of their objects. An
-    SiDB layout lies on the H-Si(100)-2x1 lattice.
-
-    May pass through, and thereby throw, an
-    `unsupported_gate_type_exception` or an
-    `unsupported_gate_orientation_exception`.
+    Apply the selected gate library to produce a cell-level layout.
+    The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+    follow the gate-level clocking. Supported synchronization elements apply each
+    gate tile's delay to its entire clock zone, including cells added later. molQCA
+    cell types carry the clock phases defined by the gate library. Input and output
+    cells retain their object names. The Bestagon library produces an SiDB layout
+    on the H-Si(100)-2x1 lattice.
 
     Args:
-        lyt: The gate-level layout.
-        on_progress: Optional callback reporting completed object
-                     mappings.
-
-    Template Args:
-        GateLibrary: Type of the gate library to apply.
-        Geometry: Coordinate geometry of the gate-level layout.
+        layout: Gate-level layout to map.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
 
     Returns:
-        A layout that implements `lyt`'s gate types with building blocks
-        defined in `GateLibrary`.
+        The QCA, molQCA, iNML, or SiDB layout produced by the selected library.
+
+    Raises:
+        ValueError: The library cannot implement a gate type or orientation; the message names its tile.
     """
 
 class graph_coloring_engine(enum.Enum):
@@ -718,7 +677,7 @@ class hexagonalization_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of the hexagonalization process."""
 
     @property
@@ -772,7 +731,7 @@ class post_layout_optimization_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of the post-layout optimization process."""
 
     @property
@@ -843,7 +802,7 @@ class wiring_reduction_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """Runtime of the wiring reduction process."""
 
     @property
@@ -970,7 +929,7 @@ def route_path(
     mutation. A failed allocation removes newly created wires.
 
     Args:
-        lyt: Layout to edit.
+        layout: Layout to edit.
         path: Path containing at least its occupied source and target
               coordinates.
         destination: Ordered destination input.
@@ -979,9 +938,9 @@ def route_path(
         Geometry: Coordinate geometry of the gate-level layout.
 
     Raises:
-        std::invalid_argument: If an endpoint or intermediate placement is
-                               unavailable.
-        std::out_of_range: If the destination input index is invalid.
+        ValueError: If an endpoint or intermediate placement is
+                    unavailable.
+        IndexError: If the destination input index is invalid.
     """
 
 @overload
@@ -997,25 +956,18 @@ def extract_routing_objectives(
     layout: mnt.pyfiction.layouts.hexagonal_gate_layout,
 ) -> list[tuple[mnt.pyfiction.layouts.coordinate, mnt.pyfiction.layouts.coordinate, int]]:
     """
-    Extracts connections between retained gates, fanouts, and terminals
-    with destination input indices.
-
-    Intermediate single-sink wires are followed through declared topology.
-    Missing inputs produce no objective; disconnected input slots keep
-    their indices. Cycles of intermediate wires reject.
+    Return connections between retained gates, fanouts, and terminals.
+    Intermediate single-sink wires are followed through declared topology. Missing
+    inputs produce no objective; disconnected input slots keep their indices.
 
     Args:
-        lyt: Layout to inspect.
-
-    Template Args:
-        Lyt: Gate-level layout type.
+        layout: Gate-level layout to inspect.
 
     Returns:
-        Routing objectives that preserve logical input numbering.
+        A list of (source, target, input_index) tuples with endpoint coordinates and the destination input index.
 
     Raises:
-        std::invalid_argument: If an intermediate wire chain contains a
-                               cycle.
+        ValueError: An intermediate wire chain contains a cycle.
     """
 
 @overload

@@ -14,8 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-
 #include <fiction/technology/fcn/area.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
@@ -84,10 +82,41 @@ void register_area(nb::module_& m, const char* doc)
  */
 void register_area(nb::module_& m)
 {
-    detail::register_area<fiction::qca::layout>(m, DOC(fiction_fcn_area));
-    detail::register_area<fiction::mol_qca::layout>(m, DOC(fiction_fcn_area));
-    detail::register_area<fiction::inml::layout>(m, DOC(fiction_fcn_area));
-    detail::register_area<fiction::sidb::layout>(m, DOC(fiction_fcn_area_3));
+    /** @brief Area documentation for layouts with a Cartesian extent. */
+    constexpr auto cell_grid_doc = R"doc(Return the area of the layout's Cartesian extent in square nanometers.
+Every cell position contributes its cell dimensions, including empty positions.
+Neighboring positions contribute their horizontal and vertical spacing.
+
+Args:
+    layout: QCA, molQCA, or iNML layout to measure.
+    width: Cell width in nm; defaults to the layout type's CELL_WIDTH.
+    height: Cell height in nm; defaults to the layout type's CELL_HEIGHT.
+    hspace: Horizontal spacing in nm; defaults to the layout type's CELL_HSPACE.
+    vspace: Vertical spacing in nm; defaults to the layout type's CELL_VSPACE.
+
+Returns:
+    The area as a float in square nanometers.
+)doc";
+    /** @brief Area documentation for the occupied SiDB bounding box. */
+    constexpr auto sidb_doc = R"doc(Return the SiDB layout's bounding-box area in square nanometers.
+The bounding box covers SiDBs and defects. Every column and single-SiDB row
+contributes its dimensions and the spacing between neighboring columns and rows.
+An empty layout has zero area.
+
+Args:
+    layout: SiDB layout to measure.
+    width: Column width in nm; defaults to the layout type's CELL_WIDTH.
+    height: Row height in nm; defaults to the layout type's CELL_HEIGHT.
+    hspace: Horizontal spacing in nm; defaults to the layout type's CELL_HSPACE.
+    vspace: Vertical spacing in nm; defaults to the layout type's CELL_VSPACE.
+
+Returns:
+    The area as a float in square nanometers.
+)doc";
+    detail::register_area<fiction::qca::layout>(m, cell_grid_doc);
+    detail::register_area<fiction::mol_qca::layout>(m, cell_grid_doc);
+    detail::register_area<fiction::inml::layout>(m, cell_grid_doc);
+    detail::register_area<fiction::sidb::layout>(m, sidb_doc);
 }
 
 }  // namespace pyfiction

@@ -29,6 +29,8 @@
 #include <cmath>
 #include <forward_list>
 #include <iterator>
+#include <ranges>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -51,6 +53,8 @@ static_assert(minimum_distribution_range<std::forward_list<charge_distribution>:
 static_assert(minimum_energy_range<std::forward_list<charge_distribution>::const_iterator>);
 static_assert(!minimum_distribution_range<std::istream_iterator<charge_distribution>>);
 static_assert(!minimum_energy_range<std::istream_iterator<charge_distribution>>);
+static_assert(!minimum_distribution_range<const int*>);
+static_assert(!minimum_energy_range<const int*>);
 
 TEST_CASE("Test minimum energy function", "[minimum-energy]")
 {
@@ -105,8 +109,28 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         CHECK_THAT(minimum_energy(all_cds.cbegin(), all_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(minimum_energy_distribution(all_cds.cbegin(), all_cds.cend())->same_charge_states(second));
 
+        const auto transformed = all_cds | std::views::transform([](const auto& cd) -> const auto& { return cd; });
+        CHECK_THAT(minimum_energy(transformed.begin(), transformed.end()), Catch::Matchers::WithinAbs(0.0, 0.00001));
+
+        /** @brief Forward transform range that produces charge-distribution values. */
+        const auto values = all_cds | std::views::transform([](const auto& cd) { return cd; });
+        CHECK_THAT(minimum_energy(values.begin(), values.end()), Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK((*minimum_energy_distribution(values.begin(), values.end())).same_charge_states(second));
+
         const std::forward_list<charge_distribution> forward_cds{all_cds.front(), all_cds.back()};
         CHECK_THAT(minimum_energy(forward_cds.cbegin(), forward_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(minimum_energy_distribution(forward_cds.cbegin(), forward_cds.cend())->same_charge_states(second));
     }
+}
+
+TEST_CASE("Minimum energy propagates forward-view failures", "[minimum-energy]")
+{
+    const layout                           lyt{};
+    const std::vector<charge_distribution> distributions{charge_distribution{lyt}, charge_distribution{lyt}};
+    /** @brief Reports a failure while reading a valid forward range. */
+    const auto failing =
+        distributions | std::views::transform([](const charge_distribution&) -> const charge_distribution&
+                                              { throw std::runtime_error("iterator failed"); });
+    CHECK_THROWS_AS(minimum_energy_distribution(failing.begin(), failing.end()), std::runtime_error);
+    CHECK_THROWS_AS(minimum_energy(failing.begin(), failing.end()), std::runtime_error);
 }

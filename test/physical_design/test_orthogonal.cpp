@@ -26,6 +26,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
@@ -57,7 +58,7 @@ using namespace fiction::qca;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
 
-static_assert(std::same_as<decltype(&orthogonal<cartesian_gate_layout>),
+static_assert(std::same_as<decltype(&orthogonal<cartesian_layout>),
                            cartesian_gate_layout (*)(const tec_nt&, orthogonal_physical_design_params,
                                                      orthogonal_physical_design_stats*)>);
 
@@ -76,7 +77,7 @@ void check_ortho_equiv(const Ntk& ntk, const std::optional<arrangement> a = std:
     orthogonal_physical_design_params ps{};
     ps.layout_arrangement = a;
 
-    auto layout = orthogonal<Lyt>(convert_network<tec_nt>(ntk), ps, &stats);
+    auto layout = orthogonal<typename Lyt::coordinate_layout>(convert_network<tec_nt>(ntk), ps, &stats);
 
     check_stats(stats);
     check_eq(ntk, layout);
@@ -160,7 +161,7 @@ TEST_CASE("Orthogonal physical design of a network without primary inputs", "[or
     tec_nt ntk{};
     ntk.create_po(ntk.get_constant(false));
 
-    const auto lyt = orthogonal<cartesian_gate_layout>(ntk);
+    const auto lyt = orthogonal<cartesian_layout>(ntk);
     CHECK(lyt.num_pis() == 0);
     CHECK(lyt.num_pos() == 1);
     check_eq(ntk, extract_layout_network(lyt));
@@ -205,7 +206,7 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
     }
     ntk.create_po(output);
 
-    const auto layout = orthogonal<gate_layout<cartesian_layout>>(ntk);
+    const auto layout = orthogonal<cartesian_layout>(ntk);
     check_eq(ntk, layout);
     std::ostringstream    report{};
     gate_level_drv_params params{};
@@ -222,7 +223,7 @@ TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogo
     const auto b      = ntk.create_pi();
     const auto unused = ntk.create_pi();
     ntk.create_po(ntk.create_lt(b, a));
-    const auto lyt = orthogonal<cartesian_gate_layout>(ntk);
+    const auto lyt = orthogonal<cartesian_layout>(ntk);
     CHECK(lyt.num_pis() == 3);
     CHECK(lyt.is_pi(lyt.pi_at(2)));
     const auto extracted = extract_layout_network(lyt);
@@ -236,7 +237,7 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
     maj.set_network_name("maj");
 
-    const auto layout = orthogonal<cartesian_gate_layout>(convert_network<tec_nt>(maj));
+    const auto layout = orthogonal<cartesian_layout>(convert_network<tec_nt>(maj));
 
     // network name
     CHECK(layout.get_layout_name() == "maj");
@@ -252,7 +253,7 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 
 TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layouts", "[orthogonal]")
 {
-    CHECK_THROWS_AS(orthogonal<hexagonal_gate_layout>(blueprints::and_or_network<technology_network>()),
+    CHECK_THROWS_AS(orthogonal<hexagonal_layout>(blueprints::and_or_network<technology_network>()),
                     std::invalid_argument);
 }
 
@@ -262,7 +263,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
     {
         orthogonal_physical_design_stats stats{};
 
-        auto layout = orthogonal<cartesian_gate_layout>(convert_network<tec_nt>(ntk), {}, &stats);
+        auto layout = orthogonal<cartesian_layout>(convert_network<tec_nt>(ntk), {}, &stats);
 
         CHECK_NOTHROW(apply_gate_library<qca_one_library>(layout));
     };
@@ -287,7 +288,7 @@ TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
     orthogonal_physical_design_params params{};
     params.on_progress = rec.callback();
 
-    const auto layout = orthogonal<cartesian_gate_layout>(ntk, params);
+    const auto layout = orthogonal<cartesian_layout>(ntk, params);
 
     check_eq(ntk, layout);
 
@@ -308,7 +309,7 @@ TEMPLATE_TEST_CASE("Named specification conversion for orthogonal", "[physical-n
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
     CHECK(ntk.get_output_name(0) == "result");
-    const auto lyt = orthogonal<cartesian_gate_layout>(ntk);
+    const auto lyt = orthogonal<cartesian_layout>(ntk);
     CHECK(lyt.get_layout_name() == "named_spec");
     CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
     CHECK(lyt.get_name(lyt.pi_at(1)) == "right");
@@ -319,7 +320,7 @@ TEMPLATE_TEST_CASE("Named specification conversion for orthogonal", "[physical-n
     CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
     CHECK(extracted.get_output_name(0) == "result");
     check_eq(source, extracted);
-    const auto roundtrip = orthogonal<cartesian_gate_layout>(convert_network<tec_nt>(extracted));
+    const auto roundtrip = orthogonal<cartesian_layout>(convert_network<tec_nt>(extracted));
     CHECK(roundtrip.get_layout_name() == "named_spec");
     CHECK(roundtrip.get_name(roundtrip.pi_at(0)) == "left");
     CHECK(roundtrip.get_name(roundtrip.pi_at(1)) == "right");

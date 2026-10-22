@@ -47,12 +47,14 @@ namespace fiction::synthesis
 class missing_required_gates_exception final : public std::logic_error
 {
   public:
+    /** @brief Reports the network type and gates missing from the technology library. */
     explicit missing_required_gates_exception(const std::string& network_type, const std::string& missing_gates) :
             std::logic_error(fmt::format("Technology library is missing required gates for {} networks: {}",
                                          network_type, missing_gates))
     {}
 };
 
+/** @brief Parameters for technology mapping. */
 struct technology_mapping_params
 {
     /**
@@ -299,10 +301,12 @@ struct technology_mapping_stats
 namespace detail
 {
 
+/** @brief Maps a network into a technology network. */
 template <typename Ntk>
 class technology_mapping_impl
 {
   public:
+    /** @brief Stores the source network, mapping parameters, and statistics. */
     // NOLINTNEXTLINE(modernize-pass-by-value)
     technology_mapping_impl(const Ntk& src, const technology_mapping_params& ps, technology_mapping_stats& st) :
             ntk{src},
@@ -310,6 +314,7 @@ class technology_mapping_impl
             stats{st}
     {}
 
+    /** @brief Returns the source network mapped to the supplied technology library. */
     [[nodiscard]] tec_nt run() const
     {
         // Validate that the library contains required gates for the base network type

@@ -17,16 +17,13 @@ from importlib.metadata import metadata
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from sphinx import addnodes
-from sphinx_markdown_builder.translator import MarkdownTranslator
-
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
 
 sys.path.insert(0, str(Path(__file__).parent / "_ext"))
 
 project = "fiction"
-copyright = "2018-2023: Marcel Walter. 2023-present: Chair for Design Automation, Technical University of Munich (TUM)"
+copyright = "2018-2023: Marcel Walter. 2023-present: Chair for Design Automation, TUM"
 author = "Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien, Willem Lambooy"
 package_metadata = metadata("mnt-pyfiction")
 release = package_metadata["Version"].split("+")[0]
@@ -39,6 +36,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinx_llm.txt",
+    "llm_markdown",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
@@ -71,6 +69,8 @@ modindex_common_prefix = ["mnt.pyfiction."]
 napoleon_numpy_docstring = False
 napoleon_custom_sections = [("Template Args", "params_style")]
 intersphinx_mapping = {
+    "kitty": ("https://libkitty.readthedocs.io/en/stable/", None),
+    "mockturtle": ("https://mockturtle.readthedocs.io/en/stable/", None),
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
@@ -80,8 +80,14 @@ copybutton_prompt_is_regexp = True
 copybutton_line_continuation_character = "\\"
 
 html_theme = "furo"
+templates_path = ["_templates"]
 html_static_path = ["_static"]
-html_css_files = ["custom.css"]
+html_css_files = [
+    "custom.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
+]
 html_js_files = ["tabs.js"]
 pygments_style = "colorful"
 pygments_dark_style = "monokai"
@@ -93,8 +99,18 @@ html_theme_options = {
     "source_directory": "docs/",
     "navigation_with_keys": True,
     "footer_icons": [
-        {"name": "GitHub", "url": "https://github.com/cda-tum/fiction", "html": "GitHub", "class": ""},
-        {"name": "PyPI", "url": "https://pypi.org/project/mnt-pyfiction/", "html": "PyPI", "class": ""},
+        {
+            "name": "GitHub",
+            "url": "https://github.com/cda-tum/fiction",
+            "html": "",
+            "class": "fa-brands fa-solid fa-github fa-2x",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/mnt-pyfiction/",
+            "html": "",
+            "class": "fa-brands fa-solid fa-python fa-2x",
+        },
     ],
 }
 
@@ -115,10 +131,5 @@ def normalize_llms_sitemap(app: Sphinx, exception: Exception | None) -> None:
 
 
 def setup(app: Sphinx) -> None:
-    """Render inline C++ types in Markdown and normalize the exported sitemap."""
-    app.add_node(
-        addnodes.desc_inline,
-        override=True,
-        **{"llms-markdown": (MarkdownTranslator.visit_literal, MarkdownTranslator.depart_literal)},
-    )
+    """Normalize the sitemap after sphinx-llm finishes exporting pages."""
     app.connect("build-finished", normalize_llms_sitemap, priority=900)
