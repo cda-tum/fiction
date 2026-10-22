@@ -662,6 +662,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - A* now restores frontier ordering after a cheaper route reaches a queued coordinate.
   - Simulated annealing now rejects non-finite temperature bounds with `std::invalid_argument`.
   - Defect-aware circuit design now propagates unsupported gate-orientation errors.
   - Simulated annealing now keeps acceptance random state local to each worker thread.

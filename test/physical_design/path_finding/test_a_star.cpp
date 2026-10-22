@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/physical_design/path_finding/a_star.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI Codex
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -26,6 +27,8 @@
 #include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
@@ -34,6 +37,41 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::physical_design::path_finding;
+
+TEST_CASE("A* preserves priority after improving a queued coordinate", "[A*]")
+{
+    /** @brief Six-tile geometry with two competing routes. */
+    const cartesian_layout layout{{2, 3}};
+    /** @brief Eastbound costs for each row. */
+    const std::array<uint32_t, 3> east{17, 25, 22};
+    /** @brief Southbound costs for the first two rows. */
+    const std::array<uint32_t, 4> south{14, 2, 2, 15};
+    /** @brief Directed costs; reverse steps cost 30. */
+    const cost_functor<uint32_t> cost{[&](const auto& source, const auto& target)
+                                      {
+                                          if (target.x > source.x)
+                                          {
+                                              return east[static_cast<std::size_t>(source.y)];
+                                          }
+                                          if (target.y > source.y)
+                                          {
+                                              return south[static_cast<std::size_t>(2 * source.y + source.x)];
+                                          }
+                                          return uint32_t{30};
+                                      }};
+    /** @brief Admissible heuristic for the weighted search. */
+    const distance_functor<uint32_t> zero{[](const auto&, const auto&) { return uint32_t{0}; }};
+    /** @brief Minimum-cost route, whose edge costs sum to 34. */
+    const auto path = a_star(layout, {{0, 0}, {1, 2}}, zero, cost);
+    /** @brief Accumulated cost of the returned route. */
+    uint32_t total_cost{};
+    REQUIRE_FALSE(path.empty());
+    for (std::size_t i = 1; i < path.size(); ++i)
+    {
+        total_cost += cost(path[i - 1], path[i]);
+    }
+    CHECK(total_cost == 34);
+}
 
 TEST_CASE("A* on 2x2 layouts", "[A*]")
 {
