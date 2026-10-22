@@ -453,7 +453,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** Gate-only APIs now use canonical gate layouts; fixed-geometry entry points are non-templates.
     Multi-geometry factories take coordinate geometries; nested layouts and unsupported library/geometry pairs fail overload resolution.
-  - Template APIs now declare their type and callback requirements with C++20 `requires` clauses.
+  - Template APIs now declare their type and callback requirements with C++20 `requires` clauses and shared naming concepts.
     Unsupported arguments fail overload resolution; optional naming operations remain no-ops when unsupported.
   - C++ Python binding helpers now use a `register_` prefix.
   - Python bindings use the `nb` namespace alias for nanobind.

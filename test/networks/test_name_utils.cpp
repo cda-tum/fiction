@@ -91,11 +91,25 @@ struct layout_without_input_name_query : cartesian_gate_layout
     [[nodiscard]] bool has_name(object_id id) const = delete;
 };
 
-/** @brief Checks source input-name restoration. @tparam Src Source layout type. */
-template <typename Src>
-concept source_input_names_transferable = requires(const Src& src, tec_nt& dest) { restore_input_names(src, dest); };
+/** @brief Named input source without input traversal. */
+struct input_source_without_traversal : mockturtle::names_view<mockturtle::aig_network>
+{
+    /** @brief Disables input traversal. @tparam Fn Input callback type. */
+    template <typename Fn>
+    void foreach_pi(Fn&&) const = delete;
+};
+
+/**
+ * @brief Checks source input-name restoration.
+ * @tparam Src Source network or layout type.
+ * @tparam Dest Destination network or layout type.
+ */
+template <typename Src, typename Dest = tec_nt>
+concept source_input_names_transferable = requires(const Src& src, Dest& dest) { restore_input_names(src, dest); };
 
 static_assert(!source_input_names_transferable<layout_without_input_name_query>);
+static_assert(!source_input_names_transferable<input_source_without_traversal>);
+static_assert(source_input_names_transferable<input_source_without_traversal, mockturtle::aig_network>);
 
 /** @brief Native layout without an input-name setter. */
 struct layout_without_input_names : cartesian_gate_layout
