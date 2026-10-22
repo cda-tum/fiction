@@ -653,6 +653,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - A* now restores frontier order when a cheaper path improves a queued coordinate.
   - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
     changing the other inputs' truth-table order.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
