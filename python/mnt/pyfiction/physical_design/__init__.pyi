@@ -288,6 +288,64 @@ def orthogonal(
     on_progress: Callable[[str, int, int], None] | None = ...,
 ) -> mnt.pyfiction.layouts.cartesian_gate_layout | mnt.pyfiction.layouts.hexagonal_gate_layout: ...
 
+class plane_stats:
+    """Statistics of the planar placement and routing."""
+
+    def __init__(self) -> None:
+        """Default constructor."""
+
+    @property
+    def time_total(self) -> dt.timedelta:
+        """Runtime of placement and routing."""
+
+    @property
+    def x_size(self) -> int:
+        """Layout width."""
+
+    @property
+    def y_size(self) -> int:
+        """Layout height."""
+
+    @property
+    def num_gates(self) -> int:
+        """Number of gates."""
+
+    @property
+    def num_wires(self) -> int:
+        """Number of wires."""
+
+    @property
+    def num_crossings(self) -> int:
+        """Number of crossings; zero for every layout this algorithm returns."""
+
+def plane(
+    network: mnt.pyfiction.networks.technology_network,
+    *,
+    statistics: plane_stats | None = None,
+    number_of_clock_phases: num_clks = ...,
+    on_progress: Callable[[str, int, int], None] | None = ...,
+) -> mnt.pyfiction.layouts.cartesian_gate_layout:
+    """
+    Place and route a planar technology network without wire crossings (PLANE).
+    The network is the first element of the pair that `planarization` returns: its node order is the planar rank order,
+    which the layout preserves. Every level is placed on one anti-diagonal of a 2DDWave-clocked Cartesian gate layout.
+
+    Args:
+        network: Planar, balanced, fanout-substituted technology network from `planarization`.
+        statistics: Statistics object filled by the algorithm; None discards statistics.
+        number_of_clock_phases: Number of clock phases of the 2DDWave clocking. 3 and 4 are supported.
+        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+
+    Returns:
+        A crossing-free Cartesian gate layout that implements `network`.
+
+    Raises:
+        ValueError: If a gate of `network` is reached by no output, if `network` has no primary inputs, if a node drives
+            more than two fanouts, if a gate has a constant fanin next to a single non-constant one, if `network` is not
+            balanced, or if its node order has crossings.
+        high_degree_fanin_exception: If a node has more than two non-constant fanins.
+    """
+
 class gold_effort_mode(enum.Enum):
     """
     The `effort_mode` enum defines different levels of computational

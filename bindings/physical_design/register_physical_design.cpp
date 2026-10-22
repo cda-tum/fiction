@@ -12,6 +12,7 @@
  * @file
  * @brief Entry point of the `mnt.pyfiction.physical_design` extension module.
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #include "pyfiction/submodule.hpp"
@@ -41,6 +42,11 @@ void register_exact(nb::module_& m);
  * @param m Python module.
  */
 void register_orthogonal(nb::module_& m);
+/**
+ * @brief Binds PLANE helpers.
+ * @param m Python module.
+ */
+void register_plane(nb::module_& m);
 /**
  * @brief Binds graph oriented layout design helpers.
  * @param m Python module.
@@ -126,6 +132,7 @@ NB_MODULE(physical_design, m)
 
     pyfiction::register_exact(m);
     pyfiction::register_orthogonal(m);
+    pyfiction::register_plane(m);
     pyfiction::register_graph_oriented_layout_design(m);
     pyfiction::register_apply_gate_library(m);
     pyfiction::register_color_routing(m);
