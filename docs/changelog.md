@@ -151,6 +151,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
   - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
   - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
+  - Path enumeration moves completed results and selected candidates. Completed graph results transfer their owned storage.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
     throw `std::invalid_argument`.
@@ -246,6 +247,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
+    arguments from C++ calls and container declarations.
   - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
     fanins in constant time per node.
   - `networks::views::mutable_rank_view::set_ranks` and `set_all_ranks` throw `std::invalid_argument` or
@@ -658,6 +661,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - A* now restores frontier ordering after a cheaper route reaches a queued coordinate.
   - Simulated annealing now rejects non-finite temperature bounds with `std::invalid_argument`.
   - Defect-aware circuit design now propagates unsupported gate-orientation errors.
   - Simulated annealing now keeps acceptance random state local to each worker thread.
@@ -822,6 +826,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
   - Corrected planarization complexity bounds to include weighted-cone traversals.
+  - Corrected the reference for Yen's loopless path algorithm.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
   - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.

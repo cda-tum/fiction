@@ -1260,8 +1260,8 @@ class graph_oriented_layout_design_impl
             physical_design::path_finding::a_star_params a_star_crossing_params{};
             a_star_crossing_params.crossings = !ps.planar;
 
-            auto path = physical_design::path_finding::a_star<layout_coordinate_path>(
-                layout, {.source = src, .target = dest}, dist(), cost(), a_star_crossing_params);
+            auto path = physical_design::path_finding::a_star(layout, {.source = src, .target = dest}, dist(), cost(),
+                                                              a_star_crossing_params);
 
             if (path.size() < 2)
             {
