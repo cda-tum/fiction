@@ -200,11 +200,11 @@ class a_star_impl
     /**
      * Stores the g-cost for each coordinate c, i.e., the length of the shortest path from source to c found so far.
      */
-    phmap::parallel_flat_hash_map<fiction::layouts::layout_base::coordinate, g_f_type> g_values{};
+    phmap::flat_hash_map<fiction::layouts::layout_base::coordinate, g_f_type> g_values{};
     /**
      * Tracks the origin of each coordinate to recreate the path.
      */
-    phmap::parallel_flat_hash_map<fiction::layouts::layout_base::coordinate, fiction::layouts::layout_base::coordinate>
+    phmap::flat_hash_map<fiction::layouts::layout_base::coordinate, fiction::layouts::layout_base::coordinate>
         came_from{};
     /**
      * Fetches and pops the coordinate with the lowest f-value from the open list priority queue.
