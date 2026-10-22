@@ -236,6 +236,13 @@ inline constexpr std::size_t NUM_FANOUT_CONNECTIONS = 4u;
 struct placement_rule
 {
     /**
+     * @brief Creates a rule.
+     *
+     * @param d Orientation of the node.
+     * @param n New routing lines the node needs.
+     */
+    constexpr placement_rule(const orientation d, const uint64_t n) noexcept : direction{d}, new_lines{n} {}
+    /**
      * @brief Orientation of the node.
      */
     orientation direction;
@@ -689,8 +696,8 @@ template <typename Ntk, typename Lyt>
 compute_level_variables(const Ntk& ntk, const Lyt& lyt,
                         const mockturtle::node_map<typename Lyt::object_id, Ntk>& node2pos, const uint32_t lvl)
 {
-    level_variables vars{std::vector<orientation>(ntk.rank_width(lvl), orientation::EAST),
-                         std::vector<uint64_t>(ntk.rank_width(lvl), 0)};
+    level_variables vars{.orientations = std::vector<orientation>(ntk.rank_width(lvl), orientation::EAST),
+                         .new_lines    = std::vector<uint64_t>(ntk.rank_width(lvl), 0)};
 
     ntk.foreach_node_in_rank(lvl,
                              [&ntk, &lyt, &node2pos, lvl, &vars](const auto& n, const auto i)
@@ -938,7 +945,7 @@ template <typename Ntk, typename Lyt>
 
     const auto width = new_lines.size();
 
-    level_wiring wiring{std::vector<uint64_t>(width, 0), std::vector<uint64_t>(width, 0)};
+    level_wiring wiring{.x = std::vector<uint64_t>(width, 0), .y = std::vector<uint64_t>(width, 0)};
     auto&        x = wiring.x;
     auto&        y = wiring.y;
 
@@ -1509,7 +1516,8 @@ class plane_impl
             {
                 if (const auto drv = ntk.get_node(po); !ntk.is_constant(drv))
                 {
-                    outputs.push_back({ntk.rank_position(drv), static_cast<uint32_t>(i), drv});
+                    outputs.push_back(
+                        {.rank = ntk.rank_position(drv), .index = static_cast<uint32_t>(i), .driver = drv});
                 }
             });
         std::ranges::sort(outputs, {}, [](const output_slot& slot) { return std::pair{slot.rank, slot.index}; });
