@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 #include <iterator>
 
@@ -29,6 +28,9 @@ namespace fiction::utils::math
  * The `gray_code_iterator` class provides an iterator for generating Gray code representations
  * for a range of decimal numbers. It starts from a specified number and produces Gray codes
  * for consecutive decimal numbers using bitwise XOR operations. Position arithmetic wraps modulo 2^64.
+ * Dereferencing returns a value. C++20 ranges support constant-time random access; legacy iterator algorithms
+ * use the input category because the iterator does not refer to stored sequence elements.
+ * Iterator ranges must not wrap, and distances must fit in `int64_t`.
  */
 class gray_code_iterator
 {
@@ -41,20 +43,15 @@ class gray_code_iterator
      *
      * @param start The starting decimal number for the iterator.
      */
-    explicit constexpr gray_code_iterator(const uint64_t start) noexcept :
-            current_iteration{start},
-            current_gray_code{start}
-    {
-        binary_to_gray();
-    };
+    explicit constexpr gray_code_iterator(const uint64_t start = 0) noexcept : current_iteration{start} {}
     /**
-     * Dereference operator. Returns a reference to the Gray code of the current iteration.
+     * Dereference operator. Returns the Gray code of the current iteration.
      *
-     * @return Reference to the current Gray code.
+     * @return Current Gray code.
      */
-    [[nodiscard]] constexpr const uint64_t& operator*() const noexcept
+    [[nodiscard]] constexpr uint64_t operator*() const noexcept
     {
-        return current_gray_code;
+        return current_iteration ^ (current_iteration >> 1u);
     }
     /**
      * Prefix increment operator. Sets the number and the corresponding Gray code.
@@ -64,7 +61,6 @@ class gray_code_iterator
     constexpr gray_code_iterator& operator++() noexcept
     {
         ++current_iteration;
-        binary_to_gray();
 
         return *this;
     }
@@ -76,7 +72,7 @@ class gray_code_iterator
      */
     [[nodiscard]] constexpr bool operator==(const gray_code_iterator& other) const noexcept
     {
-        return (current_gray_code == other.current_gray_code);
+        return current_iteration == other.current_iteration;
     }
     /**
      * Inequality comparison operator. Compares the current iterator with another iterator.
@@ -107,6 +103,24 @@ class gray_code_iterator
     [[nodiscard]] constexpr bool operator<=(const gray_code_iterator& other) const noexcept
     {
         return current_iteration <= other.current_iteration;
+    }
+    /**
+     * @brief Compares iterator positions.
+     * @param other Iterator to compare with.
+     * @return Whether this position is greater than the other position.
+     */
+    [[nodiscard]] constexpr bool operator>(const gray_code_iterator& other) const noexcept
+    {
+        return other < *this;
+    }
+    /**
+     * @brief Compares iterator positions.
+     * @param other Iterator to compare with.
+     * @return Whether this position is greater than or equal to the other position.
+     */
+    [[nodiscard]] constexpr bool operator>=(const gray_code_iterator& other) const noexcept
+    {
+        return other <= *this;
     }
     /**
      * Subtraction operator to calculate the difference between two gray_code_iterators.
@@ -150,6 +164,17 @@ class gray_code_iterator
         return result;
     }
     /**
+     * @brief Advances an iterator by the given offset.
+     * @param offset Number of positions to advance.
+     * @param it Starting iterator.
+     * @return Iterator at the offset position.
+     */
+    [[nodiscard]] friend constexpr gray_code_iterator operator+(const int64_t             offset,
+                                                                const gray_code_iterator& it) noexcept
+    {
+        return it + offset;
+    }
+    /**
      * Addition assignment operator. Iterator is increased by given number.
      *
      * @param m The amount of Gray codes to skip.
@@ -158,7 +183,6 @@ class gray_code_iterator
     constexpr gray_code_iterator& operator+=(const int64_t m) noexcept
     {
         current_iteration += static_cast<uint64_t>(m);
-        binary_to_gray();
 
         return *this;
     }
@@ -185,8 +209,6 @@ class gray_code_iterator
     {
         --current_iteration;
 
-        binary_to_gray();
-
         return *this;
     }
     /**
@@ -212,8 +234,6 @@ class gray_code_iterator
     {
         current_iteration -= static_cast<uint64_t>(m);
 
-        binary_to_gray();
-
         return *this;
     }
     /**
@@ -224,7 +244,6 @@ class gray_code_iterator
     constexpr gray_code_iterator& operator=(const uint64_t m) noexcept
     {
         current_iteration = m;
-        binary_to_gray();
         return *this;
     }
     /**
@@ -233,12 +252,9 @@ class gray_code_iterator
      * @param index The offset from the current position.
      * @return The Gray code at the specified position.
      */
-    constexpr uint64_t operator[](std::size_t index) const noexcept
+    constexpr uint64_t operator[](const int64_t index) const noexcept
     {
-        /** Decimal position at the requested offset. */
-        uint64_t result{current_iteration + index};
-        result ^= (result >> 1u);
-        return result;
+        return *(*this + index);
     }
     /**
      * Equality operator. Compares the current number with the given integer.
@@ -306,23 +322,6 @@ class gray_code_iterator
      * Current number (i.e., current iteration number).
      */
     uint64_t current_iteration;
-    /**
-     * Current Gray Code.
-     */
-    uint64_t current_gray_code;
-    /**
-     * Converts the current decimal number into its corresponding Gray code representation.
-     *
-     * This function operates on the current decimal number and produces its Gray code
-     * representation using the bitwise XOR operation. Gray code is a binary numeral system
-     * in which two successive values differ in only one bit.
-     *
-     * The result is stored in the 'current_gray_code' variable.
-     */
-    constexpr void binary_to_gray() noexcept
-    {
-        current_gray_code = current_iteration ^ (current_iteration >> 1u);
-    }
 };
 
 }  // namespace fiction::utils::math
@@ -333,10 +332,16 @@ namespace std
 template <>
 struct iterator_traits<fiction::utils::math::gray_code_iterator>
 {
-    /** @brief Iterator traversal category. */
-    using iterator_category = std::random_access_iterator_tag;
+    /** @brief C++20 iterator traversal concept. */
+    using iterator_concept = std::random_access_iterator_tag;
+    /** @brief Legacy traversal category for generated values. */
+    using iterator_category = std::input_iterator_tag;
     /** @brief Value produced by dereferencing the iterator. */
     using value_type = uint64_t;
+    /** @brief Value returned by dereferencing the iterator. */
+    using reference = uint64_t;
+    /** @brief No pointer into stored sequence elements is available. */
+    using pointer = void;
     /** @brief Signed type for iterator distances. */
     using difference_type = int64_t;
 };

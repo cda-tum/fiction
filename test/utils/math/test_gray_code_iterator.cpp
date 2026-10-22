@@ -17,6 +17,7 @@
 
 #include <fiction/utils/math/gray_code_iterator.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <iterator>
@@ -48,7 +49,8 @@ TEST_CASE("Gray-code indexing follows the current position", "[gray-code-iterato
     copy = it;
     CHECK(copy == it);
     CHECK(copy[0] == *it);
-    STATIC_REQUIRE(std::is_same_v<decltype(*it), const uint64_t&>);
+    STATIC_REQUIRE(std::is_same_v<decltype(*it), uint64_t>);
+    STATIC_REQUIRE(std::random_access_iterator<gray_code_iterator>);
 }
 
 TEST_CASE("Gray-code arithmetic covers 64-bit positions", "[gray-code-iterator]")
@@ -57,14 +59,21 @@ TEST_CASE("Gray-code arithmetic covers 64-bit positions", "[gray-code-iterator]"
     constexpr uint64_t boundary{uint64_t{1} << 63};
     STATIC_REQUIRE(gray_code_iterator{boundary} - gray_code_iterator{boundary - 1} == 1);
     STATIC_REQUIRE(gray_code_iterator{boundary - 1} - gray_code_iterator{boundary} == -1);
-    /** Offset wider than int used by standard iterator advancement. */
+    /** Offset wider than int used by C++20 iterator advancement. */
     constexpr int64_t offset{int64_t{1} << 32};
     /** Iterator used for forward and backward arithmetic. */
     gray_code_iterator it{3};
-    std::advance(it, offset);
+    std::ranges::advance(it, offset);
     CHECK(it == static_cast<uint64_t>(offset + 3));
     CHECK(it - offset == gray_code_iterator{3});
     CHECK(gray_code_iterator{3} + offset == it);
+    CHECK(offset + gray_code_iterator{3} == it);
+    CHECK(it[-1] == *(it - 1));
+    CHECK(it > gray_code_iterator{3});
+    CHECK(it >= gray_code_iterator{3});
+    std::ranges::advance(it, -offset);
+    CHECK(it == 3);
+    it += offset;
     it -= offset;
     CHECK(it == 3);
     it += -2;
@@ -81,4 +90,16 @@ TEST_CASE("Gray-code arithmetic covers 64-bit positions", "[gray-code-iterator]"
     CHECK(it == std::numeric_limits<uint64_t>::max());
     ++it;
     CHECK(it == 0);
+}
+
+TEST_CASE("Gray-code values work with standard copying algorithms", "[gray-code-iterator]")
+{
+    /** Values copied from a generated sequence. */
+    std::array<uint64_t, 4> values{};
+    std::copy(gray_code_iterator{}, gray_code_iterator{4}, values.begin());
+    CHECK(values == std::array<uint64_t, 4>{0, 1, 3, 2});
+    /** Legacy input advancement remains available for forward steps. */
+    gray_code_iterator it{};
+    std::advance(it, 3);
+    CHECK(it == 3);
 }

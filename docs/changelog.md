@@ -248,6 +248,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Gray-code iterators now satisfy C++20 random access and return values; replace `auto&` bindings
+    with `auto`. Use `std::ranges::advance` for constant-time forward/backward movement; legacy `std::advance`
+    supports forward steps only.
   - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
     arguments from C++ calls and container declarations.
   - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
