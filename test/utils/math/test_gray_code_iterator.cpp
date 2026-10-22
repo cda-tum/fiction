@@ -68,11 +68,13 @@ TEST_CASE("Gray-code arithmetic covers 64-bit positions", "[gray-code-iterator]"
     CHECK(it - offset == gray_code_iterator{3});
     CHECK(gray_code_iterator{3} + offset == it);
     CHECK(offset + gray_code_iterator{3} == it);
-    CHECK(it[-1] == *(it - 1));
+    CHECK(std::ranges::distance(gray_code_iterator{3}, it) == offset);
+    CHECK(std::ranges::distance(it, gray_code_iterator{3}) == -offset);
     CHECK(it > gray_code_iterator{3});
     CHECK(it >= gray_code_iterator{3});
     std::ranges::advance(it, -offset);
     CHECK(it == 3);
+    CHECK(it[-1] == 3);
     it += offset;
     it -= offset;
     CHECK(it == 3);

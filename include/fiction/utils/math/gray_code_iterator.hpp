@@ -41,7 +41,7 @@ class gray_code_iterator
      * Constructs a `gray_code_iterator` that generates Gray codes for decimal numbers
      * starting from the given `start` number.
      *
-     * @param start The starting decimal number for the iterator.
+     * @param start The starting decimal number for the iterator, zero by default.
      */
     explicit constexpr gray_code_iterator(const uint64_t start = 0) noexcept : current_iteration{start} {}
     /**
@@ -54,7 +54,7 @@ class gray_code_iterator
         return current_iteration ^ (current_iteration >> 1u);
     }
     /**
-     * Prefix increment operator. Sets the number and the corresponding Gray code.
+     * Prefix increment operator. Advances to the next position.
      *
      * @return Reference to `this`.
      */
@@ -150,7 +150,7 @@ class gray_code_iterator
         return result;
     }
     /**
-     * Addition operator. Computes the Gray code of the current iterator plus the given integer.
+     * Addition operator. Returns an iterator advanced by the given offset.
      *
      * @param m The amount of Gray codes to skip.
      * @return Iterator of the current iterator plus the given integer.
@@ -187,7 +187,7 @@ class gray_code_iterator
         return *this;
     }
     /**
-     * Subtraction operator. Computes the Gray code of the current iterator minus the given integer.
+     * Subtraction operator. Returns an iterator moved back by the given offset.
      *
      * @param m The amount of Gray codes to skip.
      * @return Iterator of the current iterator minus the given integer.
