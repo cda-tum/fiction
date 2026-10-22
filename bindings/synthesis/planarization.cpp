@@ -15,7 +15,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>

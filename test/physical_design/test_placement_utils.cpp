@@ -24,7 +24,6 @@
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -39,10 +38,10 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Placement reduces a constant input without changing variable order", "[placement-utils]")
 {
-    named_technology_network   ntk{};
-    const auto                 a = ntk.create_pi();
-    const auto                 b = ntk.create_pi();
-    kitty::dynamic_truth_table function{3};
+    named_technology_network ntk{};
+    const auto               a = ntk.create_pi();
+    const auto               b = ntk.create_pi();
+    truth_table              function{3};
     kitty::create_from_expression(function, "(a!c)");
     const auto gate = ntk.create_node({a, ntk.get_constant(true), b}, function);
 
@@ -103,11 +102,11 @@ TEST_CASE("Placement maps retain named-view node IDs", "[placement-utils]")
 
 TEST_CASE("Placement reduces an explicit third constant", "[placement-utils]")
 {
-    named_technology_network   ntk{};
-    const auto                 a = ntk.create_pi();
-    const auto                 b = ntk.create_pi();
-    const auto                 c = ntk.create_pi();
-    kitty::dynamic_truth_table function{3};
+    named_technology_network ntk{};
+    const auto               a = ntk.create_pi();
+    const auto               b = ntk.create_pi();
+    const auto               c = ntk.create_pi();
+    truth_table              function{3};
     kitty::create_from_expression(function, "(a!c)");
     const auto gate = ntk.create_node({a, b, c}, function);
 
@@ -117,7 +116,7 @@ TEST_CASE("Placement reduces an explicit third constant", "[placement-utils]")
     const auto                    placed = place(lyt, {1, 1}, ntk, ntk.get_node(gate), left, right, false);
     CHECK(lyt.source({placed, 0}) == left);
     CHECK(lyt.source({placed, 1}) == right);
-    kitty::dynamic_truth_table expected{2};
+    truth_table expected{2};
     kitty::create_from_expression(expected, "a");
     CHECK(lyt.object_function(placed) == expected);
 }
@@ -133,7 +132,7 @@ TEST_CASE("Mapped placement preserves three ordered inputs", "[placement-utils]"
     /** @brief Third source signal. */
     const auto c = ntk.create_pi("c");
     /** @brief Multiplexer truth table with three distinct variable roles. */
-    kitty::dynamic_truth_table function{3};
+    truth_table function{3};
     kitty::create_from_hex_string(function, "ca");
     /** @brief Source function to place through the node map. */
     const auto gate = ntk.create_node({a, b, c}, function);
@@ -190,7 +189,7 @@ TEST_CASE("Two-input placement validates constant reduction", "[placement-utils]
         /** @brief Fourth input of the unsupported reduction. */
         const auto d = ntk.create_pi();
         /** @brief Four-variable function outside the three-input reduction contract. */
-        kitty::dynamic_truth_table function{4};
+        truth_table function{4};
         kitty::create_from_hex_string(function, "9acd");
         /** @brief Function whose constant reduction still has too many variables. */
         const auto gate = ntk.create_node({a, b, c, d}, function);
