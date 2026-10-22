@@ -21,6 +21,7 @@
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/color_routing.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/utils/graph/graph_coloring.hpp>

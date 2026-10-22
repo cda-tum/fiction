@@ -46,22 +46,23 @@ TEST_CASE("A* preserves priority after improving a queued coordinate", "[A*]")
     /** @brief Southbound costs for the first two rows. */
     const std::array<uint32_t, 4> south{14, 2, 2, 15};
     /** @brief Directed costs; reverse steps cost 30. */
-    const cost_functor<uint32_t> cost{[&](const auto& source, const auto& target)
-                                      {
-                                          if (target.x > source.x)
-                                          {
-                                              return east[static_cast<std::size_t>(source.y)];
-                                          }
-                                          if (target.y > source.y)
-                                          {
-                                              return south[static_cast<std::size_t>(2 * source.y + source.x)];
-                                          }
-                                          return uint32_t{30};
-                                      }};
+    const cost_functor<uint32_t> cost{
+        [&](const auto& source, const auto& target)
+        {
+            if (target.x > source.x)
+            {
+                return east.at(static_cast<std::size_t>(source.y));
+            }
+            if (target.y > source.y)
+            {
+                return south.at((2 * static_cast<std::size_t>(source.y)) + static_cast<std::size_t>(source.x));
+            }
+            return uint32_t{30};
+        }};
     /** @brief Admissible heuristic for the weighted search. */
     const distance_functor<uint32_t> zero{[](const auto&, const auto&) { return uint32_t{0}; }};
     /** @brief Minimum-cost route, whose edge costs sum to 34. */
-    const auto path = a_star(layout, {{0, 0}, {1, 2}}, zero, cost);
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {1, 2}}, zero, cost);
     /** @brief Accumulated cost of the returned route. */
     uint32_t total_cost{};
     REQUIRE_FALSE(path.empty());
