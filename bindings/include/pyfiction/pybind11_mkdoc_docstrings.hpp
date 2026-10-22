@@ -7270,9 +7270,9 @@ Args:
 Template Args:
     NtkSrc: Source network type.
     NtkDest: Target network or gate-level layout type.
-    T: Mapping type to identify signals by. Currently,
-       `mockturtle::signal<NtkDest>` and
-       `branching_signal_container<fanout_size>` are supported.
+    T: Mapping value type: `mockturtle::signal<NtkDest>`,
+       `layouts::layout_object_id`, or
+       `physical_design::branching_signal_container<fanout_size>`.
 
 )doc";
 
