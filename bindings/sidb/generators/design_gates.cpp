@@ -18,9 +18,10 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
 
-#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <sstream>
 #include <vector>
@@ -92,7 +93,7 @@ void register_design_gates(nb::module_& m)
     m.def(
         "design_sidb_gates",
         // NOLINTNEXTLINE(performance-unnecessary-value-param): Copy Python inputs before releasing the GIL.
-        [](const layout skeleton, const std::vector<fiction::synthesis::truth_table> spec,
+        [](const layout skeleton, const std::vector<kitty::dynamic_truth_table> spec,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,

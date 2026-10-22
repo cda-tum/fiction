@@ -18,7 +18,6 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
@@ -29,6 +28,7 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
@@ -68,28 +68,28 @@ try
                        "#Lp3",                     // uint64_t
                        "#Lp3/N [%]"};              // double
 
-    const auto truth_tables_and_names = std::array<std::pair<std::vector<truth_table>, std::string>, 22>{
-        {{std::vector<truth_table>{create_not_tt()}, "inv_1i_top_1o_right"},
-         {std::vector<truth_table>{create_id_tt()}, "wire_1i_top_1o_right"},
-         {std::vector<truth_table>{create_not_tt()}, "inv_1i_top_1o_down"},
-         {std::vector<truth_table>{create_id_tt()}, "wire_1i_top_1o_down"},
-         {std::vector<truth_table>{create_not_tt()}, "inv_1i_left_1o_right"},
-         {std::vector<truth_table>{create_id_tt()}, "wire_1i_left_1o_right"},
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<kitty::dynamic_truth_table>, std::string>, 22>{
+        {{std::vector<kitty::dynamic_truth_table>{create_not_tt()}, "inv_1i_top_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_id_tt()}, "wire_1i_top_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_not_tt()}, "inv_1i_top_1o_down"},
+         {std::vector<kitty::dynamic_truth_table>{create_id_tt()}, "wire_1i_top_1o_down"},
+         {std::vector<kitty::dynamic_truth_table>{create_not_tt()}, "inv_1i_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_id_tt()}, "wire_1i_left_1o_right"},
          {create_fan_out_tt(), "fo2_1i_top_2o_left_right"},
          {create_fan_out_tt(), "fo2_1i_top_2o_right_down"},
-         {std::vector<truth_table>{create_and_tt()}, "and_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_nand_tt()}, "nand_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_or_tt()}, "or_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_nor_tt()}, "nor_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_xor_tt()}, "xor_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_xnor_tt()}, "xnor_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_lt_tt()}, "lt_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_gt_tt()}, "gt_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_le_tt()}, "le_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_ge_tt()}, "ge_2i_top_left_1o_right"},
-         {std::vector<truth_table>{create_crossing_wire_tt()}, "cx_2i_top_left_2o_down_right"},
-         {std::vector<truth_table>{create_half_adder_tt()}, "ha_2i_top_left_2o_down_right"},
-         {std::vector<truth_table>{create_double_wire_tt()}, "hourglass_2i_top_left_2o_down_right"}}};
+         {std::vector<kitty::dynamic_truth_table>{create_and_tt()}, "and_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_nand_tt()}, "nand_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_or_tt()}, "or_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, "nor_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_xor_tt()}, "xor_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}, "xnor_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_lt_tt()}, "lt_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_gt_tt()}, "gt_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_le_tt()}, "le_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_ge_tt()}, "ge_2i_top_left_1o_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_crossing_wire_tt()}, "cx_2i_top_left_2o_down_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_half_adder_tt()}, "ha_2i_top_left_2o_down_right"},
+         {std::vector<kitty::dynamic_truth_table>{create_double_wire_tt()}, "hourglass_2i_top_left_2o_down_right"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/rectangular_skeletons/", EXPERIMENTS_PATH);
 

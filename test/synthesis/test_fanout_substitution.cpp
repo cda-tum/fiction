@@ -27,6 +27,7 @@
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 
@@ -147,11 +148,11 @@ TEST_CASE("Consistent fanout substitution after balancing", "[fanout-substitutio
 
 TEST_CASE("Repeated inputs respect fanout degrees below the source threshold", "[fanout-substitution]")
 {
-    using strategy            = fanout_substitution_params::substitution_strategy;
-    const auto         choice = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
-    technology_network original{};
-    const auto         a = original.create_pi();
-    truth_table        parity{5};
+    using strategy                    = fanout_substitution_params::substitution_strategy;
+    const auto                 choice = GENERATE(strategy::DEPTH, strategy::BREADTH, strategy::RANDOM);
+    technology_network         original{};
+    const auto                 a = original.create_pi();
+    kitty::dynamic_truth_table parity{5};
     kitty::create_from_hex_string(parity, "96696996");
     original.create_po(original.create_node({a, a, a, a, a}, parity));
     const fanout_substitution_params ps{.strategy = choice, .degree = 2, .threshold = 3, .seed = 42};

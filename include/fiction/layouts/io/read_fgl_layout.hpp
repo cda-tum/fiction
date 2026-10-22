@@ -25,10 +25,10 @@
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/synthesis/types.hpp"
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <tinyxml2.h>
 
 #include <algorithm>
@@ -478,7 +478,7 @@ class read_fgl_layout_impl
                                 throw fgl_parsing_error("Error parsing FGL file: truth table exceeds its arity");
                             }
                         }
-                        fiction::synthesis::truth_table function{arity};
+                        kitty::dynamic_truth_table function{arity};
                         kitty::create_from_hex_string(function, hex);
                         port = lyt.create_gate({}, function, gate.loc);
                     }

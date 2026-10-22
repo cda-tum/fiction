@@ -25,6 +25,7 @@
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <array>
@@ -40,7 +41,6 @@
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::io;
-using namespace fiction::synthesis;
 
 TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_xag_network, named_mig_network,
                    named_technology_network)
@@ -110,12 +110,13 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
     network.foreach_pi(
         [&](const auto pi, const auto index)
         { CHECK(network.get_name(network.make_signal(pi)) == std::array{"a", "b", "unused"}.at(index)); });
-    const auto       actual = mockturtle::simulate<truth_table>(network, mockturtle::default_simulator<truth_table>{3});
+    const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{3});
     const std::array functions{"00", "ff", "55", "66", "44", "aa"};
     const std::array names{"zero", "one", "inverted", "xor", "lut", "copy"};
     for (std::size_t index{}; index < functions.size(); ++index)
     {
-        truth_table expected{3};
+        kitty::dynamic_truth_table expected{3};
         kitty::create_from_hex_string(expected, functions.at(index));
         CHECK(actual.at(index) == expected);
         CHECK(network.get_output_name(static_cast<uint32_t>(index)) == names.at(index));

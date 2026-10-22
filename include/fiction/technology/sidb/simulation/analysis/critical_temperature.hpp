@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
@@ -41,6 +40,7 @@
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -211,7 +211,7 @@ class critical_temperature_impl
      *
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
-    void gate_based_simulation(const std::vector<fiction::synthesis::truth_table>& spec)
+    void gate_based_simulation(const std::vector<kitty::dynamic_truth_table>& spec)
     {
         utils::check_deadline(params.operational_params.deadline);
         const mockturtle::stopwatch stop{stats.time_total};
@@ -644,10 +644,9 @@ class critical_temperature_impl
  * @param pst Statistics.
  * @return The critical temperature (unit: K).
  */
-inline double critical_temperature_gate_based(const layout&                                       lyt,
-                                              const std::vector<fiction::synthesis::truth_table>& spec,
-                                              const critical_temperature_params&                  params = {},
-                                              critical_temperature_stats*                         pst    = nullptr)
+inline double critical_temperature_gate_based(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+                                              const critical_temperature_params& params = {},
+                                              critical_temperature_stats*        pst    = nullptr)
 {
 
     assert(!spec.empty());
@@ -693,13 +692,13 @@ inline double critical_temperature_gate_based(const layout&                     
  * @throws std::invalid_argument if `spec` is empty, if the number of input pattern layouts does not match the number
  * of input combinations of `spec`, or if the number of output BDL pairs does not match the number of truth tables.
  */
-inline double critical_temperature_gate_based(const std::vector<layout>&                          input_pattern_layouts,
-                                              const std::vector<fiction::synthesis::truth_table>& spec,
-                                              const critical_temperature_params&                  params,
-                                              const std::vector<logic::bdl_pair>&                 output_bdl_pairs,
-                                              const std::vector<logic::bdl_wire>&                 input_bdl_wires,
-                                              const std::vector<logic::bdl_wire>&                 output_bdl_wires,
-                                              critical_temperature_stats*                         pst = nullptr)
+inline double critical_temperature_gate_based(const std::vector<layout>&                     input_pattern_layouts,
+                                              const std::vector<kitty::dynamic_truth_table>& spec,
+                                              const critical_temperature_params&             params,
+                                              const std::vector<logic::bdl_pair>&            output_bdl_pairs,
+                                              const std::vector<logic::bdl_wire>&            input_bdl_wires,
+                                              const std::vector<logic::bdl_wire>&            output_bdl_wires,
+                                              critical_temperature_stats*                    pst = nullptr)
 {
 
     // unlike the other overload, this one indexes caller-supplied containers, so a wrong size is an out-of-bounds

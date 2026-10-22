@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -42,6 +41,7 @@
 
 #include <btree.h>
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>  // IWYU pragma: keep, defines the container behind the parallel_flat_hash_set_m alias
 #include <phmap_fwd_decl.h>
@@ -553,7 +553,7 @@ class operational_domain_impl
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(const layout& source_layout, const std::vector<fiction::synthesis::truth_table>& tt,
+    operational_domain_impl(const layout& source_layout, const std::vector<kitty::dynamic_truth_table>& tt,
                             const operational_domain_params& ps, operational_domain_stats& st) :
             sidb_layout{source_layout},
             truth_table{tt},
@@ -597,7 +597,7 @@ class operational_domain_impl
     operational_domain_impl(const layout& source_layout, const operational_domain_params& ps,
                             operational_domain_stats& st) :
             sidb_layout{source_layout},
-            truth_table{std::vector<fiction::synthesis::truth_table>{}},
+            truth_table{std::vector<kitty::dynamic_truth_table>{}},
             params{checked_parameters(ps)},
             stats{st},
             num_dimensions{params.sweep_dimensions.size()}
@@ -1430,7 +1430,7 @@ class operational_domain_impl
     /**
      * The logical specification of the layout.
      */
-    const std::vector<fiction::synthesis::truth_table> truth_table;
+    const std::vector<kitty::dynamic_truth_table> truth_table;
     /**
      * The parameters for the operational domain computation.
      */
@@ -2364,7 +2364,7 @@ class operational_domain_impl
  * dimensions is accepted.
  */
 [[nodiscard]] inline operational_domain
-operational_domain_grid_search(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+operational_domain_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 {
     // this may throw an `std::invalid_argument` exception
@@ -2405,7 +2405,7 @@ operational_domain_grid_search(const layout& lyt, const std::vector<fiction::syn
  * dimensions is accepted.
  */
 [[nodiscard]] inline operational_domain
-operational_domain_random_sampling(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                    const std::size_t samples, const operational_domain_params& params = {},
                                    operational_domain_stats* stats = nullptr)
 {
@@ -2458,7 +2458,7 @@ operational_domain_random_sampling(const layout& lyt, const std::vector<fiction:
  * any number.
  */
 [[nodiscard]] inline operational_domain
-operational_domain_flood_fill(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                               const std::size_t samples, const operational_domain_params& params = {},
                               operational_domain_stats* stats = nullptr)
 {
@@ -2510,7 +2510,7 @@ operational_domain_flood_fill(const layout& lyt, const std::vector<fiction::synt
  * any number.
  */
 [[nodiscard]] inline operational_domain
-operational_domain_contour_tracing(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+operational_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                    const std::size_t samples, const operational_domain_params& params = {},
                                    operational_domain_stats* stats = nullptr)
 {
@@ -2552,7 +2552,7 @@ operational_domain_contour_tracing(const layout& lyt, const std::vector<fiction:
  * dimensions is accepted.
  */
 [[nodiscard]] inline critical_temperature_domain
-critical_temperature_domain_grid_search(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                         const operational_domain_params& params = {},
                                         operational_domain_stats*        stats  = nullptr)
 {
@@ -2594,7 +2594,7 @@ critical_temperature_domain_grid_search(const layout& lyt, const std::vector<fic
  * dimensions is accepted.
  */
 [[nodiscard]] inline critical_temperature_domain
-critical_temperature_domain_random_sampling(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+critical_temperature_domain_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                             const std::size_t samples, const operational_domain_params& params = {},
                                             operational_domain_stats* stats = nullptr)
 {
@@ -2643,7 +2643,7 @@ critical_temperature_domain_random_sampling(const layout& lyt, const std::vector
  * any number.
  */
 [[nodiscard]] inline critical_temperature_domain
-critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                        const std::size_t samples, const operational_domain_params& params = {},
                                        operational_domain_stats* stats = nullptr)
 {
@@ -2695,7 +2695,7 @@ critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<fict
  * any number.
  */
 [[nodiscard]] inline critical_temperature_domain
-critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                             const std::size_t samples, const operational_domain_params& params = {},
                                             operational_domain_stats* stats = nullptr)
 {

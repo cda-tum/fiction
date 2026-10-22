@@ -50,8 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
-  - `fiction/synthesis/types.hpp` now provides `synthesis::truth_table` without network headers;
-    `fiction/types.hpp` still exports it.
   - `networks::initialize_copy_network_with_virtual_pis` copies the constants and inputs of a network, virtual
     inputs included
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
@@ -251,7 +249,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** Network presets replace `*_nt` with `networks::named_aig_network`,
     `named_xag_network`, `named_mig_network`, and `named_technology_network`.
-    `synthesis::truth_table` replaces `fiction::tt`; Python names stay unchanged.
+    `kitty::dynamic_truth_table` replaces `fiction::tt`; Python names stay unchanged.
   - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
     arguments from C++ calls and container declarations.
   - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
@@ -328,8 +326,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
-  - Experiments use canonical network and truth-table types. Truth-table-only experiments include
-    `fiction/synthesis/types.hpp`; their computations remain unchanged.
+  - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
   - Physical-design experiments convert mapped networks before placement with unchanged computations.

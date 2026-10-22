@@ -26,6 +26,7 @@
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -244,8 +245,8 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
             {
                 inputs.push_back(source.create_pi(std::string(1, static_cast<char>('a' + index))));
             }
-            truth_table      expected{variables};
-            const std::array words{function};
+            kitty::dynamic_truth_table expected{variables};
+            const std::array           words{function};
             kitty::create_from_words(expected, words.begin(), words.end());
             const auto output = source.create_node(inputs, expected);
             source.create_po(output, "f");
@@ -258,8 +259,8 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
                 CHECK(converted.get_output_name(0) == "f");
                 CHECK(converted.get_output_name(1) == "g");
                 CHECK(converted.get_output_name(2) == "one");
-                const auto actual =
-                    mockturtle::simulate<truth_table>(converted, mockturtle::default_simulator<truth_table>{variables});
+                const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
+                    converted, mockturtle::default_simulator<kitty::dynamic_truth_table>{variables});
                 REQUIRE(actual.size() == 3u);
                 CHECK(actual[0] == expected);
                 CHECK(actual[1] == ~expected);

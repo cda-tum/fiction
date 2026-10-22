@@ -19,12 +19,12 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
 
-#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <cstddef>
 #include <optional>
@@ -76,7 +76,7 @@ inline void register_operational_domain_functions(nb::module_& m)
 
     m.def(
         "operational_domain_grid_search",
-        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -169,7 +169,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_random_sampling",
-        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -263,7 +263,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_flood_fill",
-        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -355,7 +355,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_contour_tracing",
-        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -449,7 +449,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_grid_search",
-        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -543,7 +543,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_random_sampling",
-        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -639,7 +639,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_flood_fill",
-        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -735,7 +735,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_contour_tracing",
-        [](const layout& lyt, const std::vector<fiction::synthesis::truth_table>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,

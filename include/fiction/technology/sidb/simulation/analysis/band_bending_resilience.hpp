@@ -18,11 +18,12 @@
 
 #pragma once
 
-#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/utils/execution_timeout.hpp"
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -60,9 +61,9 @@ struct band_bending_resilience_params
  * @return The minimum potential difference over all input patterns, or infinity if the input wires cannot represent
  * the specification or no charge transition exists.
  */
-[[nodiscard]] inline double band_bending_resilience(const layout&                                       lyt,
-                                                    const std::vector<fiction::synthesis::truth_table>& spec,
-                                                    const band_bending_resilience_params&               params = {},
+[[nodiscard]] inline double band_bending_resilience(const layout&                                  lyt,
+                                                    const std::vector<kitty::dynamic_truth_table>& spec,
+                                                    const band_bending_resilience_params&          params = {},
                                                     const std::optional<transition_type> transition_type = std::nullopt)
 {
     auto population_params     = params.assess_population_stability_params;

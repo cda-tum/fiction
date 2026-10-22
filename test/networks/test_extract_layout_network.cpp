@@ -23,9 +23,9 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
-#include <fiction/synthesis/types.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
@@ -36,13 +36,12 @@
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
-using namespace fiction::synthesis;
 
 TEMPLATE_TEST_CASE("Extraction accepts explicitly placed constant functions", "[extract-layout-network]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto        lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {});
-    truth_table function{0};
+    auto                       lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {});
+    kitty::dynamic_truth_table function{0};
     kitty::create_from_hex_string(function, "1");
     const auto constant = lyt.create_gate({}, function, {0, 0});
     lyt.create_po(constant, "one", {1, 0});
@@ -57,10 +56,10 @@ TEMPLATE_TEST_CASE("Extraction preserves interface order and truth-table argumen
 {
     auto lyt = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {1, 1});
     lyt.set_layout_name("ordered");
-    const auto  unused = lyt.create_pi("unused", {10, 0});
-    const auto  a      = lyt.create_pi("a", {0, 0});
-    const auto  b      = lyt.create_pi("b", {7, 0});
-    truth_table function{2};
+    const auto                 unused = lyt.create_pi("unused", {10, 0});
+    const auto                 a      = lyt.create_pi("a", {0, 0});
+    const auto                 b      = lyt.create_pi("b", {7, 0});
+    kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "4");  // !a & b
     const auto gate = lyt.create_gate({a, b}, function, {20, 0});
     lyt.set_name(gate, "gate");
@@ -79,8 +78,8 @@ TEMPLATE_TEST_CASE("Extraction preserves interface order and truth-table argumen
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(2))) == "unused");
     CHECK(ntk.get_output_name(0) == "pass");
     CHECK(ntk.get_output_name(1) == "result");
-    const auto tables =
-        mockturtle::simulate<truth_table>(ntk, mockturtle::default_simulator<truth_table>{ntk.num_pis()});
+    const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
+        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{ntk.num_pis()});
     CHECK(kitty::to_hex(tables[0]) == "cc");
     CHECK(kitty::to_hex(tables[1]) == "22");
 }
@@ -91,8 +90,8 @@ TEMPLATE_TEST_CASE("Extraction follows connections across allocation order and r
     auto       lyt     = blueprints::make_layout<gate_layout<TestType>>(arrangement::EVEN_ROW, {});
     const auto removed = lyt.create_pi("removed", {0, 0});
     lyt.remove(removed);
-    const auto  po = lyt.create_po("result", {0, 0});
-    truth_table function{2};
+    const auto                 po = lyt.create_po("result", {0, 0});
+    kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "4");  // !a & b
     const auto gate = lyt.create_gate({}, function, {1, 0});
     const auto b    = lyt.create_pi("b", {2, 0});
@@ -102,8 +101,8 @@ TEMPLATE_TEST_CASE("Extraction follows connections across allocation order and r
     lyt.connect(gate, {po, 0});
     const auto ntk = extract_layout_network(lyt);
     REQUIRE(ntk.num_pis() == 2);
-    const auto tables =
-        mockturtle::simulate<truth_table>(ntk, mockturtle::default_simulator<truth_table>{ntk.num_pis()});
+    const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
+        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{ntk.num_pis()});
     CHECK(kitty::to_hex(tables[0]) == "2");
 }
 
@@ -114,7 +113,7 @@ TEMPLATE_TEST_CASE("Extraction validates only dependencies of primary outputs", 
     const auto a     = lyt.create_pi("a", {0, 0});
     const auto cycle = lyt.create_buf({1, 0});
     lyt.connect(cycle, {cycle, 0});
-    truth_table function{2};
+    kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
     const auto gate = lyt.create_gate({a}, function, {2, 0});
     lyt.disconnect({gate, 0});

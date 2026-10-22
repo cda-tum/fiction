@@ -20,6 +20,7 @@
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <cassert>
@@ -77,9 +78,9 @@ void register_logic_simulation_impl(nb::module_& m, const std::string& type_name
                 return (ntk);
             }
         }();
-        const auto tables = mockturtle::simulate<fiction::synthesis::truth_table>(
+        const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             network,
-            mockturtle::default_simulator<fiction::synthesis::truth_table>{static_cast<unsigned>(network.num_pis())});
+            mockturtle::default_simulator<kitty::dynamic_truth_table>{static_cast<unsigned>(network.num_pis())});
         std::vector<std::pair<std::string, std::vector<bool>>> result{};
         result.reserve(ntk.num_pos());
         ntk.foreach_po(

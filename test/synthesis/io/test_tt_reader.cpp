@@ -17,9 +17,9 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/synthesis/io/tt_reader.hpp>
-#include <fiction/synthesis/types.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 
 #include <sstream>
@@ -39,14 +39,14 @@ TEST_CASE("Read truth tables", "[tt-reader]")
 
     std::stringstream stream{std::string{file}};
 
-    tt_reader<truth_table> reader{stream};
+    tt_reader<kitty::dynamic_truth_table> reader{stream};
 
     const auto check = [&reader](const auto num_vars, const std::string& hex)
     {
         auto read_tt = reader.next();
         REQUIRE(read_tt.has_value());
 
-        truth_table test_tt{num_vars};
+        kitty::dynamic_truth_table test_tt{num_vars};
         kitty::create_from_hex_string(test_tt, hex);
         CHECK(kitty::equal(*read_tt, test_tt));
     };

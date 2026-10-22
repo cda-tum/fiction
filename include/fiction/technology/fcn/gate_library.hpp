@@ -17,10 +17,10 @@
 
 #pragma once
 
-#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
 
+#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
 
 #include <algorithm>
@@ -183,8 +183,8 @@ class gate_library
     /**
      * Maps truth tables to respective FCN gate implementations.
      */
-    using gate_functions = std::unordered_map<fiction::synthesis::truth_table, std::vector<gate>,
-                                              kitty::hash<fiction::synthesis::truth_table>>;
+    using gate_functions =
+        std::unordered_map<kitty::dynamic_truth_table, std::vector<gate>, kitty::hash<kitty::dynamic_truth_table>>;
     /**
      * Maps FCN gate implementations to respective port lists indicating their possible orientations.
      */

@@ -17,12 +17,13 @@
 
 #pragma once
 
-#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -49,7 +50,7 @@ namespace fiction::sidb::simulation::logic
  */
 [[nodiscard]] inline operational_status
 verify_logic_match(const layout& lyt, const charge_distribution& cd, const is_operational_params& params,
-                   const std::vector<fiction::synthesis::truth_table>& spec, const uint64_t input_pattern,
+                   const std::vector<kitty::dynamic_truth_table>& spec, const uint64_t input_pattern,
                    const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires)
 {
     assert(!spec.empty());

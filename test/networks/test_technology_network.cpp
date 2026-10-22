@@ -20,10 +20,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/synthesis/types.hpp>
 #include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 #include <kitty/operators.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -35,7 +35,6 @@
 
 using namespace fiction;
 using namespace fiction::networks;
-using namespace fiction::synthesis;
 
 TEST_CASE("create and use constants in a technology network", "[technology-network]")
 {
@@ -431,7 +430,7 @@ TEST_CASE("compute functions from AND and NOT gates in technology networks", "[t
     const auto f1 = tec.create_not(a);
     const auto f2 = tec.create_and(a, b);
 
-    std::vector<truth_table> xs;
+    std::vector<kitty::dynamic_truth_table> xs;
     xs.emplace_back(3u);
     xs.emplace_back(3u);
     kitty::create_nth_var(xs[0], 0);
@@ -449,13 +448,13 @@ TEST_CASE("create nodes and compute a function in a technology network", "[techn
     technology_network tec{};
 
     CHECK(mockturtle::has_create_node_v<technology_network>);
-    CHECK(mockturtle::has_compute_v<technology_network, truth_table>);
+    CHECK(mockturtle::has_compute_v<technology_network, kitty::dynamic_truth_table>);
 
     const auto a = tec.create_pi();
     const auto b = tec.create_pi();
     const auto c = tec.create_pi();
 
-    truth_table tt_maj(3u), tt_xor(3u), tt_const0(0u);
+    kitty::dynamic_truth_table tt_maj(3u), tt_xor(3u), tt_const0(0u);
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_xor, "96");
 
@@ -471,7 +470,7 @@ TEST_CASE("create nodes and compute a function in a technology network", "[techn
 
     CHECK(tec.size() == 7);
 
-    std::vector<truth_table> xs;
+    std::vector<kitty::dynamic_truth_table> xs;
     xs.emplace_back(3u);
     xs.emplace_back(3u);
     xs.emplace_back(3u);
@@ -491,13 +490,13 @@ TEST_CASE("create fanouts and nodes and compute a function in a technology netwo
     technology_network tec{};
 
     CHECK(mockturtle::has_create_node_v<technology_network>);
-    CHECK(mockturtle::has_compute_v<technology_network, truth_table>);
+    CHECK(mockturtle::has_compute_v<technology_network, kitty::dynamic_truth_table>);
 
     const auto a = tec.create_pi();
     const auto b = tec.create_pi();
     const auto c = tec.create_pi();
 
-    truth_table tt_maj(3u), tt_xor(3u);
+    kitty::dynamic_truth_table tt_maj(3u), tt_xor(3u);
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_xor, "96");
 
@@ -507,7 +506,7 @@ TEST_CASE("create fanouts and nodes and compute a function in a technology netwo
     const auto maj_n = tec.create_node({foa, fob, foc}, tt_maj);
     const auto xor_n = tec.create_node({foa, fob, foc}, tt_xor);
 
-    std::vector<truth_table> xs;
+    std::vector<kitty::dynamic_truth_table> xs;
     xs.emplace_back(3u);
     xs.emplace_back(3u);
     xs.emplace_back(3u);
@@ -530,7 +529,7 @@ TEST_CASE("hash nodes in technology network", "[technology-network]")
     const auto b = tec.create_pi();
     const auto c = tec.create_pi();
 
-    truth_table tt_maj(3u), tt_xor(3u);
+    kitty::dynamic_truth_table tt_maj(3u), tt_xor(3u);
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_xor, "96");
 
@@ -553,7 +552,7 @@ TEST_CASE("substitute node by another", "[technology-network]")
     const auto a  = tec.create_pi();
     const auto b  = tec.create_pi();
 
-    truth_table tt_nand(2u), tt_le(2u), tt_ge(2u), tt_or(2u);
+    kitty::dynamic_truth_table tt_nand(2u), tt_le(2u), tt_ge(2u), tt_or(2u);
     kitty::create_from_hex_string(tt_nand, "7");
     kitty::create_from_hex_string(tt_le, "2");
     kitty::create_from_hex_string(tt_ge, "4");

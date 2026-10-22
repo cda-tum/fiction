@@ -24,7 +24,6 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
@@ -35,6 +34,8 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <array>
 #include <barrier>
@@ -90,7 +91,7 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
 
     SECTION("empty specification")
     {
-        CHECK_THROWS_AS(defect_influence_grid_search(layout{}, std::vector<truth_table>{}, params),
+        CHECK_THROWS_AS(defect_influence_grid_search(layout{}, std::vector<kitty::dynamic_truth_table>{}, params),
                         std::invalid_argument);
     }
 
@@ -205,8 +206,8 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
     {
         params.additional_scanning_area = {20, 20};
         defect_influence_stats stats{};
-        const auto             defect_influence_domain =
-            defect_influence_grid_search(cube_lyt, std::vector<truth_table>{create_and_tt()}, params, 3, &stats);
+        const auto             defect_influence_domain = defect_influence_grid_search(
+            cube_lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params, 3, &stats);
         CHECK_THAT(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance,
                    Catch::Matchers::WithinAbs(5.81097444496187787, ERROR_MARGIN));
         CHECK(stats.num_evaluated_defect_positions == 676);
@@ -219,8 +220,8 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
     {
         params.additional_scanning_area = {20, 20};
         defect_influence_stats stats{};
-        const auto             defect_influence_domain =
-            defect_influence_random_sampling(cube_lyt, std::vector<truth_table>{create_and_tt()}, 100, params, &stats);
+        const auto             defect_influence_domain = defect_influence_random_sampling(
+            cube_lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 100, params, &stats);
         CHECK(!defect_influence_domain.empty());
         CHECK(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance <=
               6.21261176961831474);
@@ -242,7 +243,7 @@ TEST_CASE("Tests for determining the defect influence distance for an AND gate w
             .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         const auto defect_influence_vacancy =
-            defect_influence_grid_search(lyt_cube, std::vector<truth_table>{create_and_tt()}, params);
+            defect_influence_grid_search(lyt_cube, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         const auto clearance_result_vacancy = calculate_defect_clearance(lyt_cube, defect_influence_vacancy);
 
         CHECK(clearance_result_vacancy.defect_position == site_at_row(18, 17));
@@ -255,8 +256,8 @@ TEST_CASE("Tests for determining the defect influence distance for an AND gate w
         {
             params.additional_scanning_area = {20, 20};
             defect_influence_stats stats{};
-            const auto             defect_influence_domain =
-                defect_influence_grid_search(lyt_cube, std::vector<truth_table>{create_and_tt()}, params, 1, &stats);
+            const auto             defect_influence_domain = defect_influence_grid_search(
+                lyt_cube, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params, 1, &stats);
             const auto defect_clearance = calculate_defect_clearance(lyt_cube, defect_influence_domain);
             CHECK_THAT(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance,
                        Catch::Matchers::WithinAbs(3.16654512047436443, ERROR_MARGIN));
@@ -272,7 +273,7 @@ TEST_CASE("Tests for determining the defect influence distance for an AND gate w
             params.additional_scanning_area = {20, 20};
             defect_influence_stats stats{};
             const auto             defect_influence_domain = defect_influence_random_sampling(
-                lyt_cube, std::vector<truth_table>{create_and_tt()}, 100, params, &stats);
+                lyt_cube, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 100, params, &stats);
             CHECK(!defect_influence_domain.empty());
             CHECK(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance <=
                   3.16654512047436443);
@@ -283,8 +284,8 @@ TEST_CASE("Tests for determining the defect influence distance for an AND gate w
             // 3.16654512047436443 nm is the exact value.
             params.additional_scanning_area = {20, 20};
             defect_influence_stats stats{};
-            const auto             defect_influence_domain =
-                defect_influence_quicktrace(lyt_cube, std::vector<truth_table>{create_and_tt()}, 20, params, &stats);
+            const auto             defect_influence_domain = defect_influence_quicktrace(
+                lyt_cube, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 20, params, &stats);
             CHECK_THAT(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance,
                        Catch::Matchers::WithinAbs(3.16654512047436443, ERROR_MARGIN));
         }
@@ -330,7 +331,7 @@ TEST_CASE("Tests for determining the defect influence distance for an AND gate w
             .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         const auto defect_influence_arsenic = defect_influence_grid_search(
-            lyt_cube, std::vector<truth_table>{create_and_tt()}, defect_operational_arsenic_params);
+            lyt_cube, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, defect_operational_arsenic_params);
         const auto clearance_result_arsenic = calculate_defect_clearance(lyt_cube, defect_influence_arsenic);
 
         CHECK((((clearance_result_arsenic.defect_position == site_at_row(17, 12))) ||

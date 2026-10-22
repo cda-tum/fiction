@@ -32,6 +32,7 @@
 #include <fiction/types.hpp>
 
 #include <bill/sat/interface/common.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -205,7 +206,7 @@ TEST_CASE("Clock determination uses explicit constants and logical input ports",
     cartesian_gate_layout lyt{{3, 1}, clocking::open()};
     SECTION("Placed constant without PIs")
     {
-        const auto constant = lyt.create_gate({}, truth_table{0}, {0, 0});
+        const auto constant = lyt.create_gate({}, kitty::dynamic_truth_table{0}, {0, 0});
         lyt.create_po(constant, "zero", {1, 0});
     }
     SECTION("Duplicate source input ports")

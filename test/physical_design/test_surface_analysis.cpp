@@ -85,7 +85,7 @@ class dummy_gate_library : public gate_library<sidb::layout, 3, 3>
 };
 
 template <typename TTMap>
-static bool contains_tt(const TTMap& m, const truth_table& elem) noexcept
+static bool contains_tt(const TTMap& m, const kitty::dynamic_truth_table& elem) noexcept
 {
     return m.count(elem) > 0;
 }

@@ -34,6 +34,7 @@
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/types.hpp>
 
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -663,9 +664,10 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     CHECK(layout.get_name(layout.pi_at(2)) == "b");
     CHECK(layout.get_output_name(0) == "less");
     CHECK(layout.get_layout_name() == "ordered");
-    const mockturtle::default_simulator<truth_table> simulator{3};
-    const auto                                       extracted = extract_layout_network(layout);
-    CHECK(mockturtle::simulate<truth_table>(extracted, simulator) == mockturtle::simulate<truth_table>(ntk, simulator));
+    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{3};
+    const auto                                                      extracted = extract_layout_network(layout);
+    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extracted, simulator) ==
+          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
     layout.foreach_object([&](const auto id) { CHECK(layout.is_within_bounds(layout.get_tile(id))); });
 }
 
@@ -689,9 +691,9 @@ TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks 
     CHECK(required_value(result).num_pis() == 0);
     CHECK(required_value(result).num_pos() == 2);
     CHECK(required_value(result).num_gates() == 2);
-    const mockturtle::default_simulator<truth_table> simulator{0};
-    CHECK(mockturtle::simulate<truth_table>(extract_layout_network(required_value(result)), simulator) ==
-          mockturtle::simulate<truth_table>(ntk, simulator));
+    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{0};
+    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extract_layout_network(required_value(result)), simulator) ==
+          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
 }
 
 TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-oriented-layout-design]")
@@ -710,9 +712,9 @@ TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-orient
     CHECK(required_value(result).get_output_name(0) == "input_copy");
     CHECK(required_value(result).get_output_name(1) == "one");
     CHECK(required_value(result).get_output_name(2) == "zero");
-    const mockturtle::default_simulator<truth_table> simulator{1};
-    CHECK(mockturtle::simulate<truth_table>(extract_layout_network(required_value(result)), simulator) ==
-          mockturtle::simulate<truth_table>(ntk, simulator));
+    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{1};
+    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extract_layout_network(required_value(result)), simulator) ==
+          mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
 }
 
 TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_design", "[physical-network]",

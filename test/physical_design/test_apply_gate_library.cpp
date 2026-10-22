@@ -28,7 +28,6 @@
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/mol_qca/sim7_mol_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
@@ -41,6 +40,7 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -117,7 +117,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 {
     hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
 
-    truth_table function{2};
+    kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
     layout.create_gate({}, function, {1, 2});
 
@@ -158,7 +158,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 bestagon_and,
                 fmt::format("{}/resources/on_the_fly_gate_library/single_tile_layout/AND_gate.sqd", TEST_PATH));
 
-            CHECK(is_operational(bestagon_and, std::vector<truth_table>{create_and_tt()},
+            CHECK(is_operational(bestagon_and, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                  design_gate_params.operational_params)
                       .first == operational_status::OPERATIONAL);
 
@@ -179,7 +179,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 CHECK(bestagon_and_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
                 CHECK(bestagon_and_with_defects.get_defect(site_at_row(45, 55)).type == defect_type::DB);
 
-                CHECK(is_operational(bestagon_and_with_defects, std::vector<truth_table>{create_and_tt()},
+                CHECK(is_operational(bestagon_and_with_defects,
+                                     std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                      design_gate_params.operational_params)
                           .first == operational_status::OPERATIONAL);
 

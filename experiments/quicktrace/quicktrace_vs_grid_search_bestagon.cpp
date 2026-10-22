@@ -16,7 +16,6 @@
  */
 
 #include "fiction/synthesis/truth_tables.hpp"
-#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/io/write_sqd_layout.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
@@ -28,6 +27,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <array>
 #include <cstdint>
@@ -63,17 +63,17 @@ try
     static const std::string bestagon_folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
     static const std::string plot_folder     = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<truth_table>>, 10> gates = {
-        std::make_pair("and", std::vector<truth_table>{create_and_tt()}),
-        std::make_pair("nand", std::vector<truth_table>{create_nand_tt()}),
-        std::make_pair("or", std::vector<truth_table>{create_or_tt()}),
-        std::make_pair("nor", std::vector<truth_table>{create_nor_tt()}),
-        std::make_pair("xor", std::vector<truth_table>{create_xor_tt()}),
-        std::make_pair("xnor", std::vector<truth_table>{create_xnor_tt()}),
-        std::make_pair("wire", std::vector<truth_table>{create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<truth_table>{create_id_tt()}),
-        std::make_pair("inv", std::vector<truth_table>{create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<truth_table>{create_not_tt()})};
+    static const std::array<std::pair<std::string, std::vector<kitty::dynamic_truth_table>>, 10> gates = {
+        std::make_pair("and", std::vector<kitty::dynamic_truth_table>{create_and_tt()}),
+        std::make_pair("nand", std::vector<kitty::dynamic_truth_table>{create_nand_tt()}),
+        std::make_pair("or", std::vector<kitty::dynamic_truth_table>{create_or_tt()}),
+        std::make_pair("nor", std::vector<kitty::dynamic_truth_table>{create_nor_tt()}),
+        std::make_pair("xor", std::vector<kitty::dynamic_truth_table>{create_xor_tt()}),
+        std::make_pair("xnor", std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}),
+        std::make_pair("wire", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("inv", std::vector<kitty::dynamic_truth_table>{create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<kitty::dynamic_truth_table>{create_not_tt()})};
 
     const is_operational_params is_op_params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5.0}};
 

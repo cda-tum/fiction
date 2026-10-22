@@ -37,6 +37,7 @@
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -1902,7 +1903,7 @@ class graph_oriented_layout_design_impl
             {
                 throw std::invalid_argument("A zero-input GOLD node must be a constant output");
             }
-            fiction::synthesis::truth_table function{0};
+            kitty::dynamic_truth_table function{0};
             if (*fc.constant_fanin)
             {
                 kitty::set_bit(function, 0);

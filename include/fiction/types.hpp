@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Preset network and truth-table types that instantiate the algorithms.
+ * @brief Preset network types that instantiate the algorithms.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
@@ -19,7 +19,6 @@
 #pragma once
 
 #include "fiction/networks/technology_network.hpp"
-#include "fiction/synthesis/types.hpp"
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>

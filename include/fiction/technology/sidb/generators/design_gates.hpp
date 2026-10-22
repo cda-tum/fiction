@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/synthesis/types.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -31,6 +30,7 @@
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -187,7 +187,7 @@ class design_gates_impl
      * @throws std::invalid_argument if the input wire count differs from the specification.
      */
     // NOLINTBEGIN(modernize-pass-by-value): Passing the large stored snapshots by value adds a copy.
-    design_gates_impl(const layout& skeleton, const std::vector<fiction::synthesis::truth_table>& spec,
+    design_gates_impl(const layout& skeleton, const std::vector<kitty::dynamic_truth_table>& spec,
                       const design_gates_params& ps, design_gates_stats& st) :
             skeleton_layout{skeleton},
             truth_table{spec},
@@ -473,7 +473,7 @@ class design_gates_impl
     /**
      * The Boolean function(s).
      */
-    const std::vector<fiction::synthesis::truth_table> truth_table;
+    const std::vector<kitty::dynamic_truth_table> truth_table;
     /**
      * Parameters.
      */
@@ -733,10 +733,10 @@ class design_gates_impl
  * @throws std::invalid_argument if `spec` is empty or the input wire count differs from the specification.
  * @throws utils::timeout_error if the gate-design deadline is reached.
  */
-[[nodiscard]] inline std::vector<layout> design_gates(const layout&                                       skeleton,
-                                                      const std::vector<fiction::synthesis::truth_table>& spec,
-                                                      const design_gates_params&                          params = {},
-                                                      design_gates_stats* stats = nullptr)
+[[nodiscard]] inline std::vector<layout> design_gates(const layout&                                  skeleton,
+                                                      const std::vector<kitty::dynamic_truth_table>& spec,
+                                                      const design_gates_params&                     params = {},
+                                                      design_gates_stats*                            stats  = nullptr)
 {
     const auto timed_params = simulation::logic::detail::checked_parameters(params);
     if (spec.empty())

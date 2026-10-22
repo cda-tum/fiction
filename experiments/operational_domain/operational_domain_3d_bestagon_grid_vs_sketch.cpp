@@ -17,15 +17,15 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/synthesis/truth_tables.hpp>                       // truth tables helper functions
-#include <fiction/synthesis/types.hpp>                              // pre-defined types suitable for the FCN domain
-#include <fiction/technology/sidb/io/read_sqd_layout.hpp>           // reader for SiDB layouts
-#include <fiction/technology/sidb/model/simulation_parameters.hpp>  // SiDB simulation parameters
-#include <fiction/technology/sidb/simulation/engine.hpp>            // SiDB simulation engines
+#include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
+#include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
 
-#include <fmt/format.h>                    // output formatting
+#include <fmt/format.h>  // output formatting
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>  // stopwatch for time measurement
 
 #include <array>
@@ -105,17 +105,17 @@ try
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
-    const auto truth_tables_and_names = std::array<std::pair<std::vector<truth_table>, std::string>, 14>{
-        {{std::vector<truth_table>{create_id_tt()}, "wire"},
-         {std::vector<truth_table>{create_id_tt()}, "wire_diag"},
-         {std::vector<truth_table>{create_not_tt()}, "inv"},
-         {std::vector<truth_table>{create_not_tt()}, "inv_diag"},
-         {std::vector<truth_table>{create_and_tt()}, "and"},
-         {std::vector<truth_table>{create_nand_tt()}, "nand"},
-         {std::vector<truth_table>{create_or_tt()}, "or"},
-         {std::vector<truth_table>{create_nor_tt()}, "nor"},
-         {std::vector<truth_table>{create_xor_tt()}, "xor"},
-         {std::vector<truth_table>{create_xnor_tt()}, "xnor"},
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<kitty::dynamic_truth_table>, std::string>, 14>{
+        {{std::vector<kitty::dynamic_truth_table>{create_id_tt()}, "wire"},
+         {std::vector<kitty::dynamic_truth_table>{create_id_tt()}, "wire_diag"},
+         {std::vector<kitty::dynamic_truth_table>{create_not_tt()}, "inv"},
+         {std::vector<kitty::dynamic_truth_table>{create_not_tt()}, "inv_diag"},
+         {std::vector<kitty::dynamic_truth_table>{create_and_tt()}, "and"},
+         {std::vector<kitty::dynamic_truth_table>{create_nand_tt()}, "nand"},
+         {std::vector<kitty::dynamic_truth_table>{create_or_tt()}, "or"},
+         {std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, "nor"},
+         {std::vector<kitty::dynamic_truth_table>{create_xor_tt()}, "xor"},
+         {std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}, "xnor"},
          {create_fan_out_tt(), "fo2"},
          {create_crossing_wire_tt(), "cx"},
          {create_half_adder_tt(), "ha"},

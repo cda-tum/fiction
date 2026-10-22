@@ -23,13 +23,13 @@
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <concepts>
 
@@ -162,7 +162,7 @@ xor_maj_gate_layout(const fiction::layouts::arrangement layout_arrangement = fic
     const auto b = layout.create_pi("b", {2, 0});
     const auto c = layout.create_pi("c", {3, 1});
 
-    fiction::synthesis::truth_table tt_maj(3u), tt_xor(2u);
+    kitty::dynamic_truth_table tt_maj(3u), tt_xor(2u);
     kitty::create_from_hex_string(tt_maj, "e8");
     kitty::create_from_hex_string(tt_xor, "6");
 
@@ -380,7 +380,7 @@ GateLyt single_input_tautology_gate_layout(
 
     const auto x1 = layout.create_pi("x1", {0, 0});
 
-    fiction::synthesis::truth_table tt_t(1u);
+    kitty::dynamic_truth_table tt_t(1u);
     kitty::create_from_hex_string(tt_t, "3");
 
     const auto n = layout.create_gate({x1}, tt_t, {1, 0});
@@ -409,7 +409,7 @@ tautology_gate_layout(const fiction::layouts::arrangement layout_arrangement = f
     const auto x1 = layout.create_pi("x1", {1, 0});
     const auto x2 = layout.create_pi("x2", {0, 1});
 
-    fiction::synthesis::truth_table tt_t(2u);
+    kitty::dynamic_truth_table tt_t(2u);
     kitty::create_from_hex_string(tt_t, "F");
 
     const auto n_xor = layout.create_gate({x1, x2}, tt_t, {1, 1});
@@ -439,7 +439,7 @@ GateLyt res_tautology_gate_layout(
     const auto x2 = layout.create_pi("x2", {1, 0});
     const auto x3 = layout.create_pi("x3", {2, 1});
 
-    fiction::synthesis::truth_table tt_t(3u);
+    kitty::dynamic_truth_table tt_t(3u);
     kitty::create_from_hex_string(tt_t, "FF");
 
     const auto n = layout.create_gate({x1, x2, x3}, tt_t, {1, 1});
@@ -477,7 +477,7 @@ GateLyt open_tautology_gate_layout(
     const auto x3 = layout.create_pi("x3", {0, 2});
     const auto x4 = layout.create_pi("x4", {1, 2});
 
-    fiction::synthesis::truth_table tt_t(4u);
+    kitty::dynamic_truth_table tt_t(4u);
     kitty::create_from_hex_string(tt_t, "FFFF");
 
     const auto n = layout.create_gate({x1, x2, x3, x4}, tt_t, {1, 1});

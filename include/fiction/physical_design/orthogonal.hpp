@@ -32,6 +32,7 @@
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -479,7 +480,7 @@ void place_outputs(
             {
                 const auto y = layout.height();
                 layout.resize({std::max(layout.width(), uint32_t{2}), static_cast<uint64_t>(y) + 1, layout.layers()});
-                fiction::synthesis::truth_table function{0};
+                kitty::dynamic_truth_table function{0};
                 if (ctn.color_ntk.constant_value(po))
                 {
                     kitty::set_bit(function, 0);

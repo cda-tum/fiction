@@ -28,7 +28,6 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
-#include <fiction/synthesis/types.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -42,6 +41,7 @@
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <any>
@@ -57,7 +57,6 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::engines;
-using namespace fiction::synthesis;
 using namespace fiction::utils::math;
 
 TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]")
@@ -1447,7 +1446,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 {
     hexagonal_gate_layout gate_lyt{arrangement::EVEN_ROW, {3, 3}};
     /** @brief NAND function with two declared input slots. */
-    truth_table nand_function{2};
+    kitty::dynamic_truth_table nand_function{2};
     kitty::create_from_hex_string(nand_function, "7");
     gate_lyt.create_gate({}, nand_function, {0, 0});
     gate_lyt.create_gate({}, nand_function, {2, 2});

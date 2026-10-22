@@ -25,9 +25,9 @@
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
 #include <fiction/networks/io/dot_drawers.hpp>
-#include <fiction/synthesis/types.hpp>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
@@ -52,7 +52,6 @@ using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::layouts::io;
 using namespace fiction::networks::io;
-using namespace fiction::synthesis;
 
 namespace
 {
@@ -977,7 +976,7 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
 TEST_CASE("Draw object identities and constants", "[dot-drawers]")
 {
     cartesian_gate_layout layout{{2, 1}};
-    const auto            constant = layout.create_gate({}, truth_table{0}, {0, 0});
+    const auto            constant = layout.create_gate({}, kitty::dynamic_truth_table{0}, {0, 0});
     const auto            wire     = layout.create_buf(constant, {1, 0});
     const gate_layout_cartesian_drawer<cartesian_gate_layout, false, true> drawer{};
     CHECK(drawer.tile_label(layout, {0, 0}) == fmt::format("{}:{}: 0", constant.index, constant.generation));

@@ -40,6 +40,7 @@
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 
 #include <array>
@@ -343,7 +344,7 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     const auto            po    = layout.create_po(gate, "f", {2, 1, 0});
     layout.set_output_order(std::array{po, other});
     layout.set_input_order(std::array{a, b});
-    truth_table constant{0};
+    kitty::dynamic_truth_table constant{0};
     kitty::create_from_hex_string(constant, "1");
     layout.create_gate({}, constant, {0, 0, 0});
     std::stringstream stream{};
