@@ -80,7 +80,7 @@ TEST_CASE("Invalid truth-table records", "[tt-reader]")
 TEST_CASE("Truth-table digit counts and hexadecimal case", "[tt-reader]")
 {
     const auto hex =
-        GENERATE(std::string{"F"}, std::string{"e8"}, std::string{"AbCd"}, std::string{"0123456789ABCDEF"});
+        GENERATE(std::string{"f"}, std::string{"e8"}, std::string{"AbCd"}, std::string{"0123456789ABCDEF"});
     const auto        prefix = GENERATE("0x", "0X");
     std::stringstream stream{prefix + hex + " expression"};
     tt_reader<>       reader{stream};
