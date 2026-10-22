@@ -152,27 +152,31 @@ inline constexpr const char* CHARGE_1      = "1.602176e-19";
 inline constexpr const char* CHARGE_8      = "8.010882e-20";
 inline constexpr const char* NEGATIVE_SPIN = "-319472243083548083355648.000000";
 
-inline constexpr const int   COLOR_MAX       = 65535;
-inline constexpr const int   COLOR_HALF      = 32768;
-inline constexpr const int   COLOR_MIN       = 0;
-inline constexpr const int   CELL_DISTANCE   = 20;
-inline constexpr const int   X_Y_OFFSET      = 100;
-inline constexpr const float CELL_SIZE       = 18.0f;
-inline constexpr const float DOT_SIZE        = 5.0f;
-inline constexpr const float LABEL_Y_OFFSET  = 21.5f;
-inline constexpr const float BB_X_OFFSET     = 9.0f;
-inline constexpr const float BB_Y_OFFSET     = 33.0f;
-inline constexpr const float BB_CX_OFFSET    = 4.0f;
-inline constexpr const float BB_CY_OFFSET    = 23.0f;
-inline constexpr const float CHARACTER_WIDTH = 10.0f;
+inline constexpr const int COLOR_MAX     = 65535;
+inline constexpr const int COLOR_HALF    = 32768;
+inline constexpr const int COLOR_MIN     = 0;
+inline constexpr const int CELL_DISTANCE = 20;
+inline constexpr const int X_Y_OFFSET    = 100;
+/** @brief Cell edge length in QCADesigner coordinates. */
+inline constexpr const double CELL_SIZE = 18.0;
+inline constexpr const float  DOT_SIZE  = 5.0f;
+/** @brief Vertical offset of a cell label. */
+inline constexpr const double LABEL_Y_OFFSET = 21.5;
+/** @brief Horizontal offset of the label bounding box. */
+inline constexpr const double BB_X_OFFSET = 9.0;
+/** @brief Vertical offset of the label bounding box. */
+inline constexpr const double BB_Y_OFFSET     = 33.0;
+inline constexpr const float  BB_CX_OFFSET    = 4.0f;
+inline constexpr const float  BB_CY_OFFSET    = 23.0f;
+inline constexpr const float  CHARACTER_WIDTH = 10.0f;
 
 /** @brief Position of a QCADesigner cell. */
 struct cell_pos
 {
     /** @brief Horizontal cell coordinate in QCADesigner output. */
-    float x;
+    double x;
     /** @brief Vertical cell coordinate in QCADesigner output. */
-    float y;
+    double y;
 };
 
 /** @brief RGB color used in QCADesigner output. */
@@ -409,6 +413,11 @@ class write_qca_layout_impl
         }
     }
 
+    /**
+     * @brief Writes the four quantum dots and their charge values around a cell center.
+     * @param c Cell whose quantum dots are serialized.
+     * @param pos Cell center in QCADesigner coordinates.
+     */
     void write_quantum_dots(const qca::layout::cell& c, const qcad::cell_pos pos)
     {
         const auto cell_type = lyt.get_cell_type(c);
@@ -425,8 +434,8 @@ class write_qca_layout_impl
                 // open dot
                 os << qcad::OPEN_CELL_DOT;
 
-                os << qcad::X_POS << std::to_string(pos.x + ((qcad::CELL_SIZE / 4.0f) * static_cast<float>(i))) << '\n';
-                os << qcad::Y_POS << std::to_string(pos.y + ((qcad::CELL_SIZE / 4.0f) * static_cast<float>(j))) << '\n';
+                os << qcad::X_POS << std::to_string(pos.x + ((qcad::CELL_SIZE / 4.0) * static_cast<double>(i))) << '\n';
+                os << qcad::Y_POS << std::to_string(pos.y + ((qcad::CELL_SIZE / 4.0) * static_cast<double>(j))) << '\n';
                 os << qcad::DIAMETER << qcad::DOT_SIZE << '\n';
 
                 // determine charge
@@ -510,6 +519,11 @@ class write_qca_layout_impl
         }
     };
 
+    /**
+     * @brief Writes a cell and its quantum dots in QCADesigner coordinates.
+     * @param c Cell to serialize.
+     * @param save_via_cells Whether to collect vertical cells for the next inter-layer via layer.
+     */
     void write_cell(const qca::layout::cell& c, const bool save_via_cells)
     {
         // open cell
@@ -518,9 +532,8 @@ class write_qca_layout_impl
         os << qcad::OPEN_QCAD_DESIGN_OBJECT;
 
         // calculate cell position
-        const qcad::cell_pos pos{
-            .x = static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
-            .y = static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
+        const qcad::cell_pos pos{.x = static_cast<double>(c.x) * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET,
+                                 .y = static_cast<double>(c.y) * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';
@@ -531,8 +544,8 @@ class write_qca_layout_impl
         const auto color = write_cell_colors(c);
 
         // write cell bounding box
-        os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - (qcad::CELL_SIZE / 2.0f)) << '\n';
-        os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - (qcad::CELL_SIZE / 2.0f)) << '\n';
+        os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - (qcad::CELL_SIZE / 2.0)) << '\n';
+        os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - (qcad::CELL_SIZE / 2.0)) << '\n';
         os << qcad::BOUNDING_BOX_CX << qcad::CELL_SIZE << '\n';
         os << qcad::BOUNDING_BOX_CY << qcad::CELL_SIZE << '\n';
 

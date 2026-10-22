@@ -1516,3 +1516,14 @@ TEST_CASE("Write wire crossing", "[qcad]")
         CHECK(layout_stream.str() == qcad_layout);
     }
 }
+
+TEST_CASE("QCAD retains quantum-dot offsets at large coordinates", "[write-qca-layout]")
+{
+    qca::layout layout{{1000001, 1}};
+    layout.assign_cell_type({1000000, 0}, qca::cell_type::NORMAL);
+    std::ostringstream stream{};
+    write_qca_layout(layout, stream);
+    CHECK(stream.str().find("x=20000100.000000\n") != std::string::npos);
+    CHECK(stream.str().find("x=20000104.500000\n") != std::string::npos);
+    CHECK(stream.str().find("x=20000095.500000\n") != std::string::npos);
+}
